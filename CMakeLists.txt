@@ -17,7 +17,7 @@ include(cmake/variables.cmake)
 
 add_library(
     NUTC24_lib OBJECT
-    source/lib.cpp
+    src/lib.cpp
 )
 
 target_include_directories(
@@ -33,7 +33,7 @@ target_link_libraries(NUTC24_lib PRIVATE fmt::fmt)
 
 # ---- Declare executable ----
 
-add_executable(NUTC24_exe source/main.cpp)
+add_executable(NUTC24_exe src/main.cpp)
 add_executable(NUTC24::exe ALIAS NUTC24_exe)
 
 set_property(TARGET NUTC24_exe PROPERTY OUTPUT_NAME NUTC24)

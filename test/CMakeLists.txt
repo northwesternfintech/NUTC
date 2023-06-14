@@ -11,7 +11,7 @@ include(Catch)
 
 # ---- Tests ----
 
-add_executable(NUTC24_test source/NUTC24_test.cpp)
+add_executable(NUTC24_test src/NUTC24_test.cpp)
 target_link_libraries(
     NUTC24_test PRIVATE
     NUTC24_lib
