@@ -2,7 +2,4 @@
 
 #include <fmt/core.h>
 
-library::library()
-    : name {fmt::format("{}", "NUTC24")}
-{
-}
+library::library() : name{fmt::format("{}", "NUTC24")} {}

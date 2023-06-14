@@ -4,3 +4,7 @@ LINKS_NAVBAR1 = [
     (None, 'pages', [(None, 'about')]),
     (None, 'namespaces', []),
 ]
+
+# Include all directories, files and namespaces in the documentation
+# Disable to include only explicitly documented objects
+SHOW_UNDOCUMENTED = True
