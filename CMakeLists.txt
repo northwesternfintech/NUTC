@@ -18,6 +18,7 @@ include(cmake/variables.cmake)
 add_library(
     NUTC24_lib OBJECT
     src/lib.cpp
+    src/logging.cpp
 )
 
 target_include_directories(
@@ -28,8 +29,13 @@ target_include_directories(
 
 target_compile_features(NUTC24_lib PUBLIC cxx_std_20)
 
+# Fmt
 find_package(fmt REQUIRED)
 target_link_libraries(NUTC24_lib PRIVATE fmt::fmt)
+
+# quill
+find_package(quill REQUIRED)
+target_link_libraries(NUTC24_lib PRIVATE quill::quill)
 
 # ---- Declare executable ----
 
@@ -41,6 +47,9 @@ set_property(TARGET NUTC24_exe PROPERTY OUTPUT_NAME NUTC24)
 target_compile_features(NUTC24_exe PRIVATE cxx_std_20)
 
 target_link_libraries(NUTC24_exe PRIVATE NUTC24_lib)
+
+# quill
+target_link_libraries(NUTC24_exe PRIVATE quill::quill)
 
 # ---- Install rules ----
 
