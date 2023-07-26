@@ -9,7 +9,7 @@
 2. Install dependencies
 - `mkdir build && cd build`
 - `conan install .. -s build_type=Debug -b missing -pr cpp20 -pr:b cpp20`
-3. Setup CMakeUserPresets.json
+3. Change `CMakeUserPresets.json` the following:
 ```
 {
   "version": 2,
