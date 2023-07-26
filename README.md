@@ -6,7 +6,7 @@ General idea is we want to build a robust, fast and reliable exchange with easy 
 
 # Building and installing
 
-See the [BUILDING](BUILDING.md) document.
+See the [ACTUAL-BUILDING](ACTUAL-BUILDING.md) document.
 
 # Contributing
 
