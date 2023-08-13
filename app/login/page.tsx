@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Logo from "@/app/assets/logo.png";
-import GoogleLogin from "./google/page";
+import GoogleLogin from "./auth/google/page";
 export default function Login() {
   return (
     <>

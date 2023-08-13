@@ -1,12 +1,14 @@
 "use client";
 
 import { createContext, ReactNode, useContext } from "react";
-import { firebaseApp } from "@/app/firebase/config";
+import { database, storage, app } from "@/app/firebase/config";
 import { GoogleAuthProvider } from "firebase/auth";
 
-export default interface FirebaseContextType {
+interface FirebaseContextType {
   app: any;
   provider: any;
+  database: any;
+  storage: any;
 }
 
 const FirebaseContext = createContext<FirebaseContextType | undefined>(
@@ -28,10 +30,10 @@ interface FirebaseProviderProps {
 export const FirebaseProvider: React.FC<FirebaseProviderProps> = (
   { children },
 ) => {
-  const app = firebaseApp;
   const provider = new GoogleAuthProvider();
+  provider.addScope("https://www.googleapis.com/auth/userinfo.profile");
   return (
-    <FirebaseContext.Provider value={{ app, provider }}>
+    <FirebaseContext.Provider value={{ app, provider, database, storage }}>
       {children}
     </FirebaseContext.Provider>
   );
