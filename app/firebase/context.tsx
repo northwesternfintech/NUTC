@@ -2,9 +2,11 @@
 
 import { createContext, ReactNode, useContext } from "react";
 import { firebaseApp } from "@/app/firebase/config";
+import { GoogleAuthProvider } from "firebase/auth";
 
 export default interface FirebaseContextType {
   app: any;
+  provider: any;
 }
 
 const FirebaseContext = createContext<FirebaseContextType | undefined>(
@@ -27,8 +29,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = (
   { children },
 ) => {
   const app = firebaseApp;
+  const provider = new GoogleAuthProvider();
   return (
-    <FirebaseContext.Provider value={{ app }}>
+    <FirebaseContext.Provider value={{ app, provider }}>
       {children}
     </FirebaseContext.Provider>
   );
