@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Logo from "@/app/assets/logo.png";
 export default function Login() {
   return (
     <>
@@ -6,7 +7,7 @@ export default function Login() {
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <Image
             className="mx-auto h-10 w-auto"
-            src={require("@/app/assets/logo.png")}
+            src={Logo}
             alt="Your Company"
           />
           <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-white">
