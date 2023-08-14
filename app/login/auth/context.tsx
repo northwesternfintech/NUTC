@@ -7,7 +7,7 @@ export interface UserInfoType {
   displayName: string;
   photoURL: string;
   email: string;
-  emailVerified: boolean;
+  hasCompletedReg: boolean;
 }
 
 interface UserType {

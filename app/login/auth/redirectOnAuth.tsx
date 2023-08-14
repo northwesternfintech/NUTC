@@ -1,15 +1,19 @@
 "use client";
 import { useUserInfo } from "@/app/login/auth/context";
 import { useEffect } from "react";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 
 export default function RedirectOnAuth() {
   const { user } = useUserInfo();
   const router = useRouter();
   useEffect(() => {
-    if (user?.uid) {
-      router.push("/dash");
+    if (user) {
+      if (user?.hasCompletedReg) {
+        router.push("/dash");
+      } else {
+        router.push("/registration");
+      }
     }
   }, [user]);
-  return (<></>);
+  return <></>;
 }
