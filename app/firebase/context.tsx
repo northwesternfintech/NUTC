@@ -2,11 +2,12 @@
 
 import { createContext, ReactNode, useContext } from "react";
 import { database, storage, app } from "@/app/firebase/config";
-import { GoogleAuthProvider } from "firebase/auth";
+import { GoogleAuthProvider, GithubAuthProvider } from "firebase/auth";
 
 interface FirebaseContextType {
   app: any;
-  provider: any;
+  googleProvider: any;
+  githubProvider: any;
   database: any;
   storage: any;
 }
@@ -30,10 +31,11 @@ interface FirebaseProviderProps {
 export const FirebaseProvider: React.FC<FirebaseProviderProps> = (
   { children },
 ) => {
-  const provider = new GoogleAuthProvider();
-  provider.addScope("https://www.googleapis.com/auth/userinfo.profile");
+  const googleProvider = new GoogleAuthProvider();
+  const githubProvider = new GithubAuthProvider();
+  googleProvider.addScope("https://www.googleapis.com/auth/userinfo.profile");
   return (
-    <FirebaseContext.Provider value={{ app, provider, database, storage }}>
+    <FirebaseContext.Provider value={{ app, githubProvider, googleProvider, database, storage }}>
       {children}
     </FirebaseContext.Provider>
   );

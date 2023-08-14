@@ -3,10 +3,10 @@ import { getAuth, signInWithPopup } from "firebase/auth";
 import { useFirebase } from "@/app/firebase/context";
 
 export default function GoogleLogin() {
-  const { provider } = useFirebase();
+  const { googleProvider } = useFirebase();
   return (
     <button
-      onClick={() => signinPopup(provider) }
+      onClick={() => signinPopup(googleProvider) }
       className="transitions-color duration-300 ease-in-out hover:bg-gray-400 flex w-full items-center justify-center gap-3 rounded-md bg-[#FFFFFF] px-3 py-1.5 text-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFFFFF]"
     >
       <svg
@@ -22,7 +22,7 @@ export default function GoogleLogin() {
   );
 }
 
-async function signinPopup(
+export async function signinPopup(
   provider: any,
 ) {
   const auth = getAuth();
