@@ -2,7 +2,7 @@
 
 import { createContext, ReactNode, useState, useContext } from "react";
 
-interface UserInfoType {
+export interface UserInfoType {
   uid: string;
   displayName: string;
   photoURL: string;
