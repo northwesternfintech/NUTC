@@ -1,15 +1,12 @@
 "use client";
 import { getAuth, signInWithPopup } from "firebase/auth";
 import { useFirebase } from "@/app/firebase/context";
-import { UserInfoType, useUserInfo } from "@/app/login/auth/context";
-import { child, get, ref } from "firebase/database";
 
 export default function GoogleLogin() {
-  const { database, provider } = useFirebase();
-  const { setUser } = useUserInfo();
+  const { provider } = useFirebase();
   return (
     <button
-      onClick={() => signinPopup(provider, setUser, database)}
+      onClick={() => signinPopup(provider) }
       className="transitions-color duration-300 ease-in-out hover:bg-gray-400 flex w-full items-center justify-center gap-3 rounded-md bg-[#FFFFFF] px-3 py-1.5 text-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFFFFF]"
     >
       <svg
@@ -25,46 +22,19 @@ export default function GoogleLogin() {
   );
 }
 
-function signinPopup(
+async function signinPopup(
   provider: any,
-  setUser: (user: UserInfoType) => void,
-  database: any,
 ) {
   const auth = getAuth();
-  signInWithPopup(auth, provider)
-    .then(async (result) => {
-      // const credential = GoogleAuthProvider.credentialFromResult(result);
-      // const token = credential.accessToken;
-      const user = result.user;
-      const uid = user.uid;
-      const snapshot = await get(child(ref(database), `users/${uid}`));
-      if (!snapshot.exists()) {
-        //create new user
-        const newUser: UserInfoType = {
-          uid: uid,
-          displayName: user.displayName || "",
-          photoURL: user.photoURL || "",
-          email: user.email || "",
-          hasCompletedReg: false,
-        };
-        setUser(newUser);
-      } else {
-        const dbUser = snapshot.val();
-        const newUser: UserInfoType = {
-          uid: uid,
-          displayName: dbUser.displayName || "",
-          photoURL: dbUser.photoURL || "",
-          email: dbUser.email || user.email || "",
-          hasCompletedReg: dbUser.hasCompletedReg || false,
-        };
-        setUser(newUser);
-      }
-      // setUser(newUser);
-    }).catch((error) => {
-      // const errorCode = error.code;
-      const errorMessage = error.message;
-      console.error("Login error: " + errorMessage);
-      // const email = error.customData.email;
-      // const credential = GoogleAuthProvider.credentialFromError(error);
-    });
+  signInWithPopup(auth, provider).then((_: any) => {
+    // const credential = GoogleAuthProvider.credentialFromResult(result);
+    // const token = credential.accessToken;
+    // setUser(newUser);
+  }).catch((error: any) => {
+    // const errorCode = error.code;
+    const errorMessage = error.message;
+    console.error("Login error: " + errorMessage);
+    // const email = error.customData.email;
+    // const credential = GoogleAuthProvider.credentialFromError(error);
+  });
 }
