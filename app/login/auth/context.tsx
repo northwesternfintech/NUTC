@@ -1,12 +1,17 @@
 "use client";
 
-import { createContext, ReactNode, useState, useContext } from "react";
+import { createContext, ReactNode, useContext, useState } from "react";
 
 export interface UserInfoType {
   uid: string;
-  displayName: string;
+  username: string;
+  about: string;
   photoURL: string;
+  resumeURL: string;
+  firstName: string;
+  lastName: string;
   email: string;
+  school: string;
   hasCompletedReg: boolean;
 }
 

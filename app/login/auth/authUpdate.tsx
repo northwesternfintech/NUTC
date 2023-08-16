@@ -21,20 +21,30 @@ export default function AuthUpdate() {
         //create new user
         const newUser: UserInfoType = {
           uid: uid,
-          displayName: user.displayName || "",
+          username: "",
+          about: "",
           photoURL: user.photoURL || "",
+          resumeURL: "",
+          firstName: "",
+          lastName: "",
           email: user.email || "",
+          school: "",
           hasCompletedReg: false,
         };
         setUser(newUser);
       } else {
-        const dbUser = snapshot.val();
+        const dbUser: UserInfoType = snapshot.val();
         const newUser: UserInfoType = {
           uid: uid,
-          displayName: dbUser.displayName || user.displayName || "",
+          username: dbUser.username || "",
+          about: dbUser.about || "",
           photoURL: dbUser.photoURL || user.photoURL || "",
+          resumeURL: dbUser.resumeURL || "",
+          firstName: dbUser.firstName || "",
+          lastName: dbUser.lastName || "",
           email: dbUser.email || user.email || "",
-          hasCompletedReg: dbUser.hasCompletedReg || false,
+          school: dbUser.school || "",
+          hasCompletedReg: false,
         };
         setUser(newUser);
       }

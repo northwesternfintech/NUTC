@@ -1,10 +1,39 @@
+"use client";
 import { PhotoIcon, UserCircleIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
-import EmailComponent from "./components/email";
+import writeNewUser from "@/src2/functions/register";
+import { useState } from "react";
+import { UserInfoType, useUserInfo } from "../login/auth/context";
+import { useFirebase } from "../firebase/context";
 
 export default function Registration() {
+  const {database} = useFirebase();
+  const userInfo = useUserInfo();
+  const defaultUser: UserInfoType = {
+    uid: userInfo?.user?.uid || "-1",
+    username: "",
+    about: "",
+    photoURL: "",
+    resumeURL: "",
+    firstName: "",
+    lastName: "",
+    email: userInfo?.user?.email || "unknown@gmail.com",
+    school: "",
+    hasCompletedReg: true, //will be after this
+  };
+
+  const [currUser, setCurrUser] = useState(defaultUser);
+  const handleInputChange = (e: any) => {
+    const { name, value } = e.target;
+    //@ts-ignore
+    setCurrUser((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
   return (
-    <form>
+    <div>
       <div className="space-y-12">
         <div className="border-y border-white/10 pb-12 pt-12">
           <h2 className="text-base font-semibold leading-7 text-white">
@@ -35,6 +64,8 @@ export default function Registration() {
                     autoComplete="username"
                     className="flex-1 border-0 bg-transparent py-1.5 pl-1 text-white focus:ring-0 sm:text-sm sm:leading-6"
                     placeholder="shxiv"
+                    value={currUser.username}
+                    onChange={handleInputChange}
                   />
                 </div>
               </div>
@@ -54,6 +85,8 @@ export default function Registration() {
                   rows={3}
                   className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
                   defaultValue={""}
+                  value={currUser.about}
+                  onChange={handleInputChange}
                 />
               </div>
               <p className="mt-3 text-sm leading-6 text-gray-400">
@@ -142,6 +175,8 @@ export default function Registration() {
                   name="first-name"
                   id="first-name"
                   autoComplete="given-name"
+                  value={currUser.firstName}
+                  onChange={handleInputChange}
                   className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
                 />
               </div>
@@ -160,12 +195,33 @@ export default function Registration() {
                   name="last-name"
                   id="last-name"
                   autoComplete="family-name"
+                  value={currUser.lastName}
+                  onChange={handleInputChange}
                   className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
                 />
               </div>
             </div>
 
-            <EmailComponent />
+            <div className="sm:col-span-4">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium leading-6 text-white"
+              >
+                Email address
+              </label>
+              <div className="mt-2">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={currUser.email}
+                  onChange={handleInputChange}
+                  defaultValue={userInfo.user?.email || ""}
+                  readOnly={userInfo.user?.email !== undefined}
+                  className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
 
             <div className="sm:col-span-3">
               <label
@@ -178,6 +234,8 @@ export default function Registration() {
                 <select
                   id="school"
                   name="school"
+                  value={currUser.school}
+                  onChange={handleInputChange}
                   className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6 [&_*]:text-black"
                 >
                   <option>Northwestern</option>
@@ -281,11 +339,12 @@ export default function Registration() {
         </Link>
         <button
           type="submit"
+          onClick={() => writeNewUser(database, currUser)}
           className="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
         >
           Finish Registration
         </button>
       </div>
-    </form>
+    </div>
   );
 }
