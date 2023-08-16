@@ -22,7 +22,7 @@ export default function GoogleLogin() {
   );
 }
 
-export async function signinPopup(
+async function signinPopup(
   provider: any,
 ) {
   const auth = getAuth();

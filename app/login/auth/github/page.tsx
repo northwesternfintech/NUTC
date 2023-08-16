@@ -1,6 +1,6 @@
 'use client';
+import { getAuth, signInWithPopup } from "firebase/auth";
 import { useFirebase } from "@/app/firebase/context";
-import {signinPopup} from "@/app/login/auth/google/page";
 export default function GithubLogin() {
   const { githubProvider } = useFirebase();
   return (
@@ -24,3 +24,21 @@ export default function GithubLogin() {
     </button>
   );
 }
+
+async function signinPopup(
+  provider: any,
+) {
+  const auth = getAuth();
+  signInWithPopup(auth, provider).then((_: any) => {
+    // const credential = GoogleAuthProvider.credentialFromResult(result);
+    // const token = credential.accessToken;
+    // setUser(newUser);
+  }).catch((error: any) => {
+    // const errorCode = error.code;
+    const errorMessage = error.message;
+    console.error("Login error: " + errorMessage);
+    // const email = error.customData.email;
+    // const credential = GoogleAuthProvider.credentialFromError(error);
+  });
+}
+

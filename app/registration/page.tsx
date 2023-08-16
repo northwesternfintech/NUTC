@@ -1,8 +1,8 @@
 import { PhotoIcon, UserCircleIcon } from "@heroicons/react/24/solid";
-import { useUserInfo } from "../login/auth/context";
+import Link from "next/link";
+import EmailComponent from "./components/email";
 
 export default function Registration() {
-  const isClient = typeof window!=='undefined';
   return (
     <form>
       <div className="space-y-12">
@@ -87,7 +87,7 @@ export default function Registration() {
                 htmlFor="cover-photo"
                 className="block text-sm font-medium leading-6 text-white"
               >
-                Cover photo
+                Resume
               </label>
               <div className="mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10">
                 <div className="text-center">
@@ -111,7 +111,7 @@ export default function Registration() {
                     <p className="pl-1">or drag and drop</p>
                   </div>
                   <p className="text-xs leading-5 text-gray-400">
-                    PNG, JPG, GIF up to 10MB
+                    PDF up to 10MB
                   </p>
                 </div>
               </div>
@@ -165,115 +165,25 @@ export default function Registration() {
               </div>
             </div>
 
-            <div className="sm:col-span-4">
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium leading-6 text-white"
-              >
-                Email address
-              </label>
-              <div className="mt-2">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  defaultValue={isClient && useUserInfo()?.user?.email || ""}
-                  readOnly={isClient && useUserInfo()?.user?.email!==undefined}
-                  className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 sm:text-sm sm:leading-6"
-                />
-              </div>
-            </div>
+            <EmailComponent />
 
             <div className="sm:col-span-3">
               <label
-                htmlFor="country"
+                htmlFor="school"
                 className="block text-sm font-medium leading-6 text-white"
               >
-                Country
+                School
               </label>
               <div className="mt-2">
                 <select
-                  id="country"
-                  name="country"
-                  autoComplete="country-name"
+                  id="school"
+                  name="school"
                   className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6 [&_*]:text-black"
                 >
-                  <option>United States</option>
-                  <option>Canada</option>
-                  <option>Mexico</option>
+                  <option>Northwestern</option>
+                  <option>UChicago</option>
+                  <option>Other</option>
                 </select>
-              </div>
-            </div>
-
-            <div className="col-span-full">
-              <label
-                htmlFor="street-address"
-                className="block text-sm font-medium leading-6 text-white"
-              >
-                Street address
-              </label>
-              <div className="mt-2">
-                <input
-                  type="text"
-                  name="street-address"
-                  id="street-address"
-                  autoComplete="street-address"
-                  className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-2 sm:col-start-1">
-              <label
-                htmlFor="city"
-                className="block text-sm font-medium leading-6 text-white"
-              >
-                City
-              </label>
-              <div className="mt-2">
-                <input
-                  type="text"
-                  name="city"
-                  id="city"
-                  autoComplete="address-level2"
-                  className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-2">
-              <label
-                htmlFor="region"
-                className="block text-sm font-medium leading-6 text-white"
-              >
-                State / Province
-              </label>
-              <div className="mt-2">
-                <input
-                  type="text"
-                  name="region"
-                  id="region"
-                  autoComplete="address-level1"
-                  className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-2">
-              <label
-                htmlFor="postal-code"
-                className="block text-sm font-medium leading-6 text-white"
-              >
-                ZIP / Postal code
-              </label>
-              <div className="mt-2">
-                <input
-                  type="text"
-                  name="postal-code"
-                  id="postal-code"
-                  autoComplete="postal-code"
-                  className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
-                />
               </div>
             </div>
           </div>
@@ -284,8 +194,8 @@ export default function Registration() {
             Notifications
           </h2>
           <p className="mt-1 text-sm leading-6 text-gray-400">
-            We'll always let you know about important changes, but you pick what
-            else you want to hear about.
+            We&#39;ll always let you know about important updates, but you pick
+            what else you want to hear about.
           </p>
 
           <div className="mt-10 space-y-10">
@@ -297,114 +207,63 @@ export default function Registration() {
                 <div className="relative flex gap-x-3">
                   <div className="flex h-6 items-center">
                     <input
-                      id="comments"
-                      name="comments"
+                      id="test-runs"
+                      name="test-runs"
                       type="checkbox"
                       className="h-4 w-4 rounded border-white/10 bg-white/5 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-gray-900"
                     />
                   </div>
                   <div className="text-sm leading-6">
                     <label
-                      htmlFor="comments"
+                      htmlFor="test-runs"
                       className="font-medium text-white"
                     >
-                      Comments
+                      Test Runs
                     </label>
                     <p className="text-gray-400">
-                      Get notified when someones posts a comment on a posting.
+                      Get notified when your script passes or fails linting
                     </p>
                   </div>
                 </div>
                 <div className="relative flex gap-x-3">
                   <div className="flex h-6 items-center">
                     <input
-                      id="candidates"
-                      name="candidates"
+                      id="results"
+                      name="results"
                       type="checkbox"
                       className="h-4 w-4 rounded border-white/10 bg-white/5 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-gray-900"
                     />
                   </div>
                   <div className="text-sm leading-6">
                     <label
-                      htmlFor="candidates"
+                      htmlFor="results"
                       className="font-medium text-white"
                     >
-                      Candidates
+                      Results
                     </label>
                     <p className="text-gray-400">
-                      Get notified when a candidate applies for a job.
+                      Get notified when results are announced
                     </p>
                   </div>
                 </div>
                 <div className="relative flex gap-x-3">
                   <div className="flex h-6 items-center">
                     <input
-                      id="offers"
-                      name="offers"
+                      id="news"
+                      name="news"
                       type="checkbox"
                       className="h-4 w-4 rounded border-white/10 bg-white/5 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-gray-900"
                     />
                   </div>
                   <div className="text-sm leading-6">
-                    <label htmlFor="offers" className="font-medium text-white">
-                      Offers
+                    <label htmlFor="news" className="font-medium text-white">
+                      News
                     </label>
                     <p className="text-gray-400">
-                      Get notified when a candidate accepts or rejects an offer.
+                      Get notified regarding new events and announcements for
+                      NUFT
                     </p>
                   </div>
-                </div>
-              </div>
-            </fieldset>
-            <fieldset>
-              <legend className="text-sm font-semibold leading-6 text-white">
-                Push Notifications
-              </legend>
-              <p className="mt-1 text-sm leading-6 text-gray-400">
-                These are delivered via SMS to your mobile phone.
-              </p>
-              <div className="mt-6 space-y-6">
-                <div className="flex items-center gap-x-3">
-                  <input
-                    id="push-everything"
-                    name="push-notifications"
-                    type="radio"
-                    className="h-4 w-4 border-white/10 bg-white/5 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-gray-900"
-                  />
-                  <label
-                    htmlFor="push-everything"
-                    className="block text-sm font-medium leading-6 text-white"
-                  >
-                    Everything
-                  </label>
-                </div>
-                <div className="flex items-center gap-x-3">
-                  <input
-                    id="push-email"
-                    name="push-notifications"
-                    type="radio"
-                    className="h-4 w-4 border-white/10 bg-white/5 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-gray-900"
-                  />
-                  <label
-                    htmlFor="push-email"
-                    className="block text-sm font-medium leading-6 text-white"
-                  >
-                    Same as email
-                  </label>
-                </div>
-                <div className="flex items-center gap-x-3">
-                  <input
-                    id="push-nothing"
-                    name="push-notifications"
-                    type="radio"
-                    className="h-4 w-4 border-white/10 bg-white/5 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-gray-900"
-                  />
-                  <label
-                    htmlFor="push-nothing"
-                    className="block text-sm font-medium leading-6 text-white"
-                  >
-                    No push notifications
-                  </label>
                 </div>
               </div>
             </fieldset>
@@ -413,17 +272,18 @@ export default function Registration() {
       </div>
 
       <div className="mt-6 flex items-center justify-end gap-x-6">
-        <button
+        <Link
+          href="/"
           type="button"
           className="text-sm font-semibold leading-6 text-white"
         >
           Cancel
-        </button>
+        </Link>
         <button
           type="submit"
           className="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
         >
-          Save
+          Finish Registration
         </button>
       </div>
     </form>
