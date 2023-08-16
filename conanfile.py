@@ -11,6 +11,7 @@ class Recipe(ConanFile):
     def requirements(self):
         self.requires("fmt/10.1.0")
         self.requires("quill/2.9.2")
+        self.requires("rabbitmq-c/0.13.0")
 
     def build_requirements(self):
         self.test_requires("gtest/1.13.0")

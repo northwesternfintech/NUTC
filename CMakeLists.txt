@@ -37,6 +37,10 @@ target_link_libraries(NUTC24_lib PRIVATE fmt::fmt)
 find_package(quill REQUIRED)
 target_link_libraries(NUTC24_lib PRIVATE quill::quill)
 
+# rabbitmq
+find_package(rabbitmq-c REQUIRED)
+target_link_libraries(NUTC24_lib PRIVATE rabbitmq::rabbitmq-static)
+
 # ---- Declare executable ----
 
 add_executable(NUTC24_exe src/main.cpp)
@@ -50,6 +54,10 @@ target_link_libraries(NUTC24_exe PRIVATE NUTC24_lib)
 
 # quill
 target_link_libraries(NUTC24_exe PRIVATE quill::quill)
+
+# rabbitmq
+find_package(rabbitmq-c REQUIRED)
+target_link_libraries(NUTC24_exe PRIVATE rabbitmq::rabbitmq-static)
 
 # ---- Install rules ----
 

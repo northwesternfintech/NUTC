@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <string>
+#include <rabbitmq-c/amqp.h>
+#include <rabbitmq-c/framing.h>
 
 int
 main()
