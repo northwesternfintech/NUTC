@@ -2,27 +2,35 @@
 import { PhotoIcon, UserCircleIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import writeNewUser from "@/src2/functions/register";
-import { useState } from "react";
-import { UserInfoType, useUserInfo } from "../login/auth/context";
-import { useFirebase } from "../firebase/context";
+import { useEffect, useState } from "react";
+import { UserInfoType, useUserInfo } from "@/app/login/auth/context";
+import { useFirebase } from "@/app/firebase/context";
 
 export default function Registration() {
-  const {database} = useFirebase();
+  const { database } = useFirebase();
   const userInfo = useUserInfo();
   const defaultUser: UserInfoType = {
-    uid: userInfo?.user?.uid || "-1",
+    uid: userInfo.user?.uid || "-1",
     username: "",
     about: "",
     photoURL: "",
     resumeURL: "",
     firstName: "",
     lastName: "",
-    email: userInfo?.user?.email || "unknown@gmail.com",
+    email: "",
     school: "",
     hasCompletedReg: true, //will be after this
   };
 
   const [currUser, setCurrUser] = useState(defaultUser);
+
+  useEffect(() => {
+    var currU = {...currUser};
+    if (!userInfo.user?.email) return;
+    currU.email = userInfo.user?.email || "";
+    setCurrUser(currU);
+  }, [userInfo]);
+
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
     //@ts-ignore
@@ -216,8 +224,7 @@ export default function Registration() {
                   type="email"
                   value={currUser.email}
                   onChange={handleInputChange}
-                  defaultValue={userInfo.user?.email || ""}
-                  readOnly={userInfo.user?.email !== undefined}
+                  readOnly={currUser.email !== undefined}
                   className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 sm:text-sm sm:leading-6"
                 />
               </div>
