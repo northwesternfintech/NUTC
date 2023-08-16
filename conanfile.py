@@ -13,4 +13,4 @@ class Recipe(ConanFile):
         self.requires("quill/2.9.2")
 
     def build_requirements(self):
-        self.test_requires("catch2/3.3.1")
+        self.test_requires("gtest/1.13.0")

@@ -6,8 +6,8 @@ project(NUTC24Tests LANGUAGES CXX)
 
 # ---- Dependencies ----
 
-find_package(Catch2 REQUIRED)
-include(Catch)
+find_package(GTest REQUIRED)
+include(GoogleTest)
 
 # ---- Tests ----
 
@@ -15,11 +15,11 @@ add_executable(NUTC24_test src/NUTC24_test.cpp)
 target_link_libraries(
     NUTC24_test PRIVATE
     NUTC24_lib
-    Catch2::Catch2WithMain
+    GTest::gtest_main
 )
 target_compile_features(NUTC24_test PRIVATE cxx_std_20)
 
-catch_discover_tests(NUTC24_test)
+gtest_discover_tests(NUTC24_test)
 
 # ---- End-of-file commands ----
 
