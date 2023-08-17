@@ -35,7 +35,7 @@ main()
 
     log_e(kafka, "Test Error!");
 
-  nutc::client::spawn_all_clients();
+    nutc::client::spawn_all_clients();
 
     return 0;
 }
