@@ -112,7 +112,8 @@ initializeConnection(amqp_connection_state_t& conn)
     }
 }
 
-void closeConnection(amqp_connection_state_t& conn)
+void
+closeConnection(amqp_connection_state_t& conn)
 {
     amqp_channel_close(conn, 1, AMQP_REPLY_SUCCESS);
     amqp_connection_close(conn, AMQP_REPLY_SUCCESS);
