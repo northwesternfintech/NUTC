@@ -8,8 +8,31 @@ void
 spawn_all_clients()
 {
     std::string endpoint = std::string(FIREBASE_URL) + std::string("users.json");
-    std::string res = nutc::client::firebase_request("GET", endpoint);
-    std::cout << res << std::endl;
-};
+    glz::json_t res = nutc::client::firebase_request("GET", endpoint);
+    glz::json_t::object_t users = res.get<glz::json_t::object_t>();
+
+    std::cout << "Starting exchange with " << users.size() << " users" << std::endl;
+    for (auto& [uid, user] : users) {
+        std::cout << "Spawning client: " << uid << std::endl;
+        spawn_client(uid);
+    };
+}
+
+void
+spawn_client(const std::string& uid)
+{
+    pid_t pid = fork();
+    if (pid == 0) {
+        char* args[] = {(char*)"exchange_client", (char*)uid.c_str(), NULL};
+        execvp(args[0], args);
+
+        std::cerr << "Failed to execute exchange_client\n";
+        exit(1);
+    }
+    else if (pid < 0) {
+        std::cerr << "Failed to fork\n";
+        exit(1);
+    }
+}
 } // namespace client
 } // namespace nutc

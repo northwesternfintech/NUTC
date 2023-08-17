@@ -10,7 +10,7 @@ write_callback(void* contents, size_t size, size_t nmemb, void* userp)
     return size * nmemb;
 }
 
-std::string
+glz::json_t
 firebase_request(
     const std::string& method, const std::string& url, const std::string& data
 )
@@ -44,7 +44,11 @@ firebase_request(
 
         curl_easy_cleanup(curl);
     }
-    return readBuffer;
+    std::cout << readBuffer << std::endl;
+
+    glz::json_t json{};
+    glz::read_json(json, readBuffer);
+    return json;
 }
 } // namespace client
 } // namespace nutc
