@@ -19,6 +19,7 @@ add_library(
     NUTC24_lib OBJECT
     src/lib.cpp
     src/logging.cpp
+src/client/fetching.cpp
 )
 
 target_include_directories(
@@ -41,6 +42,10 @@ target_link_libraries(NUTC24_lib PRIVATE quill::quill)
 find_package(rabbitmq-c REQUIRED)
 target_link_libraries(NUTC24_lib PRIVATE rabbitmq::rabbitmq-static)
 
+# libcurl
+find_package(CURL REQUIRED)
+target_link_libraries(NUTC24_lib PRIVATE CURL::libcurl)
+
 # ---- Declare executable ----
 
 add_executable(NUTC24_exe src/main.cpp)
@@ -58,6 +63,10 @@ target_link_libraries(NUTC24_exe PRIVATE quill::quill)
 # rabbitmq
 find_package(rabbitmq-c REQUIRED)
 target_link_libraries(NUTC24_exe PRIVATE rabbitmq::rabbitmq-static)
+
+# curl
+find_package(CURL REQUIRED)
+target_link_libraries(NUTC24_exe PRIVATE CURL::libcurl)
 
 # ---- Install rules ----
 

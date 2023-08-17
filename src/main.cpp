@@ -1,10 +1,10 @@
+#include "config.h"
 #include "lib.hpp"
 #include "logging.hpp"
+#include "client/client.hpp"
 
 #include <iostream>
 #include <string>
-#include <rabbitmq-c/amqp.h>
-#include <rabbitmq-c/framing.h>
 
 int
 main()
@@ -34,5 +34,8 @@ main()
     log_bt(kafka, "bt2");
 
     log_e(kafka, "Test Error!");
+
+  std::string res = nutc::client::firebase_request("PUT", "127.0.0.1:9000/testing.json", "{\"message\": \"Hello, Firebase!\"}");
+  std::cout << res << std::endl;
     return 0;
 }
