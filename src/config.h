@@ -8,5 +8,5 @@
 #define LOG_BACKUP_COUNT   5
 
 // firebase
-// #define FIREBASE_URL "https://nutc-web-default-rtdb.firebaseio.com/"
-#define FIREBASE_URL "http://127.0.0.1:4000/database/"
+#define FIREBASE_URL "https://nutc-web-default-rtdb.firebaseio.com/"
+// #define FIREBASE_URL "127.0.0.1:9000"

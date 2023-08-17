@@ -35,8 +35,9 @@ main()
 
     log_e(kafka, "Test Error!");
 
+  std::string endpoint = std::string(FIREBASE_URL)+std::string("/testing.json");
     std::string res = nutc::client::firebase_request(
-        "PUT", "127.0.0.1:9000/testing.json", "{\"message\": \"Hello, Firebase!\"}"
+        "PUT",endpoint, "{\"message\": \"Hello, Firebase!\"}"
     );
     std::cout << res << std::endl;
     return 0;
