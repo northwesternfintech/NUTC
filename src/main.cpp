@@ -2,9 +2,12 @@
 #include "config.h"
 #include "lib.hpp"
 #include "logging.hpp"
+#include "rabbitmq/rabbitmq.hpp"
 
 #include <iostream>
 #include <string>
+
+#include <rabbitmq-c/amqp.h>
 
 int
 main()
@@ -35,7 +38,20 @@ main()
 
     log_e(kafka, "Test Error!");
 
-    nutc::client::spawn_all_clients();
+    amqp_connection_state_t conn;
+
+    nutc::rabbitmq::initializeConnection(conn);
+    if (!nutc::rabbitmq::publishMessage(
+            conn, "test", "Hello from nutc::rabbitmq::publishMessage!"
+        )) {
+        log_e(rabbitmq, "Failed to publish message");
+    }
+
+    std::string mess = nutc::rabbitmq::consumeMessage(conn, "test");
+    log_i(rabbitmq, "Received message: {}", mess);
+    nutc::rabbitmq::closeConnection(conn);
+
+    // nutc::client::spawn_all_clients();
 
     return 0;
 }
