@@ -1,5 +1,7 @@
 #pragma once
 
+#include "fetching.hpp"
+
 namespace nutc {
 namespace client {
 
@@ -10,5 +12,5 @@ void spawn_client(const std::string& uid);
 // submitted algo, etc) So client should verify each uid is valid
 void spawn_all_clients();
 
-} // namespace spawning
+} // namespace client
 } // namespace nutc

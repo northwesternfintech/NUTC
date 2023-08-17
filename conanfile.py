@@ -13,6 +13,7 @@ class Recipe(ConanFile):
         self.requires("quill/2.9.2")
         self.requires("rabbitmq-c/0.13.0")
         self.requires("libcurl/8.2.1")
+        self.requires("glaze/1.3.5")
 
     def build_requirements(self):
         self.test_requires("gtest/1.13.0")

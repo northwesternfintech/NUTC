@@ -20,6 +20,7 @@ add_library(
     src/lib.cpp
     src/logging.cpp
 src/client/fetching.cpp
+src/client/spawning.cpp
 )
 
 target_include_directories(
@@ -46,6 +47,10 @@ target_link_libraries(NUTC24_lib PRIVATE rabbitmq::rabbitmq-static)
 find_package(CURL REQUIRED)
 target_link_libraries(NUTC24_lib PRIVATE CURL::libcurl)
 
+# glaze
+find_package(glaze REQUIRED)
+target_link_libraries(NUTC24_lib PRIVATE glaze::glaze)
+
 # ---- Declare executable ----
 
 add_executable(NUTC24_exe src/main.cpp)
@@ -67,6 +72,10 @@ target_link_libraries(NUTC24_exe PRIVATE rabbitmq::rabbitmq-static)
 # curl
 find_package(CURL REQUIRED)
 target_link_libraries(NUTC24_exe PRIVATE CURL::libcurl)
+
+# glaze
+find_package(glaze REQUIRED)
+target_link_libraries(NUTC24_exe PRIVATE glaze::glaze)
 
 # ---- Install rules ----
 
