@@ -1,6 +1,7 @@
 #include <curl/curl.h>
-#include <string>
+
 #include <iostream>
+#include <string>
 
 namespace nutc {
 namespace client {

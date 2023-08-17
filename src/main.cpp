@@ -1,7 +1,7 @@
+#include "client/client.hpp"
 #include "config.h"
 #include "lib.hpp"
 #include "logging.hpp"
-#include "client/client.hpp"
 
 #include <iostream>
 #include <string>
@@ -35,7 +35,9 @@ main()
 
     log_e(kafka, "Test Error!");
 
-  std::string res = nutc::client::firebase_request("PUT", "127.0.0.1:9000/testing.json", "{\"message\": \"Hello, Firebase!\"}");
-  std::cout << res << std::endl;
+    std::string res = nutc::client::firebase_request(
+        "PUT", "127.0.0.1:9000/testing.json", "{\"message\": \"Hello, Firebase!\"}"
+    );
+    std::cout << res << std::endl;
     return 0;
 }

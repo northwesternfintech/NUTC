@@ -1,5 +1,5 @@
-//Handles spawning in clients
+// Handles spawning in clients
 #pragma once
 
-#include "spawning.hpp"
 #include "fetching.hpp"
+#include "spawning.hpp"
