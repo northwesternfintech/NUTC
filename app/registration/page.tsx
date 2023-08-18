@@ -1,10 +1,16 @@
 "use client";
 import { PhotoIcon, UserCircleIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
-import writeNewUser from "@/src2/functions/register";
 import { useEffect, useState } from "react";
 import { UserInfoType, useUserInfo } from "@/app/login/auth/context";
 import { useFirebase } from "@/app/firebase/context";
+import { ref, update } from "firebase/database";
+
+
+function writeNewUser(database: any, user: UserInfoType) {
+  update(ref(database, "users/" + user.uid), user);
+}
+
 
 export default function Registration() {
   const { database } = useFirebase();
@@ -72,7 +78,7 @@ export default function Registration() {
                     autoComplete="username"
                     className="flex-1 border-0 bg-transparent py-1.5 pl-1 text-white focus:ring-0 sm:text-sm sm:leading-6"
                     placeholder="shxiv"
-                    value={currUser.username}
+                    defaultValue={currUser.username}
                     onChange={handleInputChange}
                   />
                 </div>
@@ -92,8 +98,7 @@ export default function Registration() {
                   name="about"
                   rows={3}
                   className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
-                  defaultValue={""}
-                  value={currUser.about}
+                  defaultValue={currUser.about}
                   onChange={handleInputChange}
                 />
               </div>
@@ -183,7 +188,7 @@ export default function Registration() {
                   name="first-name"
                   id="first-name"
                   autoComplete="given-name"
-                  value={currUser.firstName}
+                  defaultValue={currUser.firstName}
                   onChange={handleInputChange}
                   className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
                 />
@@ -223,8 +228,7 @@ export default function Registration() {
                   name="email"
                   type="email"
                   value={currUser.email}
-                  onChange={handleInputChange}
-                  readOnly={currUser.email !== undefined}
+                  readOnly={true}
                   className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 sm:text-sm sm:leading-6"
                 />
               </div>
@@ -241,7 +245,7 @@ export default function Registration() {
                 <select
                   id="school"
                   name="school"
-                  value={currUser.school}
+                  defaultValue={currUser.school}
                   onChange={handleInputChange}
                   className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6 [&_*]:text-black"
                 >

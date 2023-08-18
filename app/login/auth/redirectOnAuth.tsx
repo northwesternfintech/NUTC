@@ -13,6 +13,8 @@ export default function RedirectOnAuth() {
       } else {
         router.push("/registration");
       }
+    } else {
+      router.push("/login");
     }
   }, [user]);
 
