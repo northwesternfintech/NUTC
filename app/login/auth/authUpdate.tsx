@@ -30,6 +30,7 @@ export default function AuthUpdate() {
           email: user.email || "",
           school: "",
           hasCompletedReg: false,
+          isApprovedApplicant: false,
         };
         setUser(newUser);
       } else {
@@ -45,6 +46,7 @@ export default function AuthUpdate() {
           email: dbUser.email || user.email || "",
           school: dbUser.school || "",
           hasCompletedReg: true,
+          isApprovedApplicant: dbUser.isApprovedApplicant || false,
         };
         setUser(newUser);
       }

@@ -9,7 +9,11 @@ export default function RedirectOnAuth() {
   useEffect(() => {
     if (user) {
       if (user?.hasCompletedReg) {
-        router.push("/dash");
+        if(user?.isApprovedApplicant) {
+          router.push("/dash");
+        } else {
+          router.push("/app-submitted");
+        }
       } else {
         router.push("/registration");
       }

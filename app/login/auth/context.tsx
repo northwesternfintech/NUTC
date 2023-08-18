@@ -13,6 +13,7 @@ export interface UserInfoType {
   email: string;
   school: string;
   hasCompletedReg: boolean;
+  isApprovedApplicant: boolean;
 }
 
 interface UserType {
