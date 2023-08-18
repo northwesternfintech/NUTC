@@ -55,7 +55,7 @@ export const emailApplication = functions.https.onCall(
     );
     const mailOptions = {
       from: "noreply@nutc.site",
-      to: "nuft@northwestern.edu",
+      to: "nuft@u.northwestern.edu",
       // to: "steveewald2025@u.northwestern.edu",
       subject: "[ACTION REQUIRED] NUTC Application Submitted",
       html: emailText,
