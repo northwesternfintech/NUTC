@@ -21,6 +21,16 @@
 import * as functions from "firebase-functions";
 import * as crypto from "crypto";
 import * as admin from "firebase-admin";
+import * as nodemailer from "nodemailer";
+
+let transporter = nodemailer.createTransport({
+  host: "smtp-relay.sendinblue.com",
+  port: 587,
+  auth: {
+    user: functions.config().sendinblue.user,
+    pass: functions.config().sendinblue.password,
+  },
+});
 
 admin.initializeApp({
   credential: admin.credential.applicationDefault(),
@@ -29,7 +39,7 @@ admin.initializeApp({
 
 export const emailApplication = functions.https.onCall(
   async (data, context) => {
-    if(!context) {
+    if (!context) {
       throw new functions.https.HttpsError(
         "unauthenticated",
         "what lol",
@@ -52,15 +62,16 @@ async function generateApprovalLink(uid: any) {
   const token: string = crypto.randomBytes(16).toString("hex");
   const ref = admin.database().ref("approvalTokens").child(token);
   await ref.set(uid);
+  // const region = "https://us-central1-nutc-web.cloudfunctions.net";
+  const region = "http://127.0.0.1:5001/nutc-web/us-central1";
 
-  const link: string =
-    `https://us-central1-nutc-web.cloudfunctions.net/approveApplicant?token=${token}`;
+  const link: string = `${region}/approveApplicant?token=${token}`;
+  console.log("Applicant approval link generated: " + link);
   return link;
 }
 
 export const approveApplicant = functions.https.onRequest(async (req, res) => {
-  //@ts-ignore
-  const token: string = req.query.token;
+  const token: string = req.query.token as string;
   const ref = admin.database().ref("approvalTokens").child(token);
   const uid_to_approve = await ref.once("value");
   if (!uid_to_approve.exists()) {
@@ -72,5 +83,17 @@ export const approveApplicant = functions.https.onRequest(async (req, res) => {
     "isApprovedApplicant",
   );
   await newref.set(true);
-  res.send("Applicant approved successfully");
+  const mailOptions = {
+    from: "steveewald2025@u.northwestern.edu",
+    to: "stevenewald6@gmail.com",
+    subject: "NUTC Application Approved",
+    html: "<p>Your application has been approved!</p>",
+  };
+  await transporter.sendMail(mailOptions, (errno: any, _: any) => {
+    if (errno) {
+      res.status(400).send(errno.toString());
+    } else {
+      res.send("Approved " + mailOptions.to + " successfully");
+    }
+  });
 });
