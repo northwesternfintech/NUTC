@@ -41,6 +41,7 @@ export const emailApplication = functions.https.onCall(
     const firstName = userInfo.firstName;
     const lastName = userInfo.lastName;
     const school = userInfo.school;
+    const resumeURL = userInfo.resumeURL;
     const emailText = studentHasApplied(
       firstName,
       lastName,
@@ -48,6 +49,7 @@ export const emailApplication = functions.https.onCall(
       about,
       userName,
       school,
+      resumeURL,
       approvalLink,
       rejectionLink,
     );
