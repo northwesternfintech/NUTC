@@ -4,9 +4,32 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { UserInfoType, useUserInfo } from "@/app/login/auth/context";
 import { useFirebase } from "@/app/firebase/context";
-import { ref, update } from "firebase/database";
-import { useRouter } from "next/navigation";
+import { push, ref, update } from "firebase/database";
+import { getDownloadURL, ref as sRef, uploadBytes } from "firebase/storage";
 import Swal from "sweetalert2";
+
+async function uploadResume(
+  database: any,
+  storage: any,
+  uid: string,
+  file: File,
+) {
+  const fileId = push(ref(database)).key;
+  const storageRef = sRef(storage);
+  const fileType = file.type.split("/")[1];
+  const resumeRef = sRef(
+    storageRef,
+    `resumes/${uid}/${fileId}.${fileType}`,
+  );
+  try {
+    const snapshot = await uploadBytes(resumeRef, file);
+    const downloadURL = await getDownloadURL(snapshot.ref);
+    return downloadURL;
+  } catch (e) {
+    console.log(e);
+    return "-1";
+  }
+}
 
 async function writeNewUser(
   functions: any,
@@ -15,12 +38,12 @@ async function writeNewUser(
 ) {
   //iterate over fields in user
   user.photoURL = "test";
-  user.resumeURL = "test2";
   for (const [key, value] of Object.entries(user)) {
     if (!value) {
       Swal.fire({
         title: "Please fill out all fields",
         icon: "warning",
+        text: "Missing field: " + key,
         toast: true,
         position: "top-end",
         showConfirmButton: false,
@@ -40,9 +63,68 @@ async function writeNewUser(
 }
 
 export default function Registration() {
-  const router = useRouter();
+  const handleResumeChange = async (e: any) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      if (selectedFile.type !== "application/pdf") {
+        Swal.fire({
+          title: "Please upload a PDF",
+          icon: "warning",
+          toast: true,
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 4000,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.addEventListener("mouseenter", Swal.stopTimer);
+            toast.addEventListener("mouseleave", Swal.resumeTimer);
+          },
+        });
+      } else {
+        const downloadLink: string = await uploadResume(
+          database,
+          storage,
+          currUser.uid,
+          selectedFile,
+        );
+        if (downloadLink !== "-1") {
+          setCurrUser((prevState) => ({
+            ...prevState,
+            resumeURL: downloadLink,
+          }));
+          Swal.fire({
+            title: "Resume uploaded!",
+            icon: "success",
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 4000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+              toast.addEventListener("mouseenter", Swal.stopTimer);
+              toast.addEventListener("mouseleave", Swal.resumeTimer);
+            },
+          });
+        } else {
+          Swal.fire({
+            title: "Resume upload failed",
+            icon: "error",
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 4000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+              toast.addEventListener("mouseenter", Swal.stopTimer);
+              toast.addEventListener("mouseleave", Swal.resumeTimer);
+            },
+          });
+        }
+      }
+    }
+  };
 
-  const { database, functions } = useFirebase();
+  const { database, storage, functions } = useFirebase();
   const userInfo = useUserInfo();
   const defaultUser: UserInfoType = {
     uid: userInfo.user?.uid || "-1",
@@ -58,6 +140,7 @@ export default function Registration() {
   };
 
   const [currUser, setCurrUser] = useState(defaultUser);
+  const [resume, setResume] = useState<File | null>(null);
 
   useEffect(() => {
     var currU = { ...currUser };
@@ -181,6 +264,7 @@ export default function Registration() {
                         id="file-upload"
                         name="file-upload"
                         type="file"
+                        onChange={handleResumeChange}
                         className="sr-only"
                       />
                     </label>
@@ -382,8 +466,7 @@ export default function Registration() {
           type="submit"
           onClick={async () => {
             if (await writeNewUser(functions, database, currUser)) {
-              currUser.hasCompletedReg = true;
-              setCurrUser(currUser);
+              userInfo.setUser(currUser);
             }
           }}
           className="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
