@@ -44,7 +44,7 @@ export default function AuthUpdate() {
           lastName: dbUser.lastName || "",
           email: dbUser.email || user.email || "",
           school: dbUser.school || "",
-          hasCompletedReg: false,
+          hasCompletedReg: true,
         };
         setUser(newUser);
       }
