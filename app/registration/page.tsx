@@ -7,7 +7,12 @@ import { useFirebase } from "@/app/firebase/context";
 import { ref, update } from "firebase/database";
 import { useRouter } from "next/navigation";
 
-function writeNewUser(router: any, database: any, user: UserInfoType) {
+async function writeNewUser(
+  router: any,
+  functions: any,
+  database: any,
+  user: UserInfoType,
+) {
   //iterate over fields in user
   user.photoURL = "test";
   user.resumeURL = "test2";
@@ -18,14 +23,16 @@ function writeNewUser(router: any, database: any, user: UserInfoType) {
       return;
     }
   }
-  update(ref(database, "users/" + user.uid), user);
-  router.push("/dash");
+  await update(ref(database, "users/" + user.uid), user);
+  const emailLink = await functions.httpsCallable("emailApplication")();
+  console.log(emailLink);
+  // router.push("/dash");
 }
 
 export default function Registration() {
   const router = useRouter();
 
-  const { database } = useFirebase();
+  const { database, functions } = useFirebase();
   const userInfo = useUserInfo();
   const defaultUser: UserInfoType = {
     uid: userInfo.user?.uid || "-1",
@@ -363,7 +370,7 @@ export default function Registration() {
         </Link>
         <button
           type="submit"
-          onClick={() => writeNewUser(router, database, currUser)}
+          onClick={() => writeNewUser(router, functions, database, currUser)}
           className="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
         >
           Finish Registration

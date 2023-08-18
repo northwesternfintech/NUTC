@@ -1,8 +1,8 @@
 "use client";
 
 import { createContext, ReactNode, useContext } from "react";
-import { database, storage, app } from "@/app/firebase/config";
-import { GoogleAuthProvider, GithubAuthProvider } from "firebase/auth";
+import { app, database, functions, storage } from "@/app/firebase/config";
+import { GithubAuthProvider, GoogleAuthProvider } from "firebase/auth";
 
 interface FirebaseContextType {
   app: any;
@@ -10,6 +10,7 @@ interface FirebaseContextType {
   githubProvider: any;
   database: any;
   storage: any;
+  functions: any;
 }
 
 const FirebaseContext = createContext<FirebaseContextType | undefined>(
@@ -35,7 +36,16 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = (
   const githubProvider = new GithubAuthProvider();
   googleProvider.addScope("https://www.googleapis.com/auth/userinfo.profile");
   return (
-    <FirebaseContext.Provider value={{ app, githubProvider, googleProvider, database, storage }}>
+    <FirebaseContext.Provider
+      value={{
+        app,
+        githubProvider,
+        googleProvider,
+        database,
+        storage,
+        functions,
+      }}
+    >
       {children}
     </FirebaseContext.Provider>
   );

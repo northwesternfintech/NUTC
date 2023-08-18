@@ -1,6 +1,6 @@
-'use client';
-import { getDatabase, connectDatabaseEmulator } from "firebase/database";
-import { getStorage, connectStorageEmulator } from "firebase/storage";
+"use client";
+import { connectDatabaseEmulator, getDatabase } from "firebase/database";
+import { connectStorageEmulator, getStorage } from "firebase/storage";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "firebase/compat/functions";
@@ -12,11 +12,12 @@ const firebaseConfig = {
   projectId: "nutc-web",
   storageBucket: "nutc-web.appspot.com",
   messagingSenderId: "690190717923",
-  appId: "1:690190717923:web:bbab373b3199cdbba606d6"
+  appId: "1:690190717923:web:bbab373b3199cdbba606d6",
 };
 
 var database: any;
 var storage: any;
+var functions: any;
 const app = firebase.initializeApp(firebaseConfig);
 
 const isLocalhost = () => {
@@ -30,15 +31,20 @@ if (isLocalhost()) {
   connectStorageEmulator(storage, "localhost", 9199);
   firebase.functions().useEmulator("localhost", 5001);
   firebase.auth().useEmulator("http://localhost:9099");
-  if (typeof sessionStorage != 'undefined' && !sessionStorage.getItem("givenWarning")) {
+  functions = firebase.functions();
+  if (
+    typeof sessionStorage != "undefined" &&
+    !sessionStorage.getItem("givenWarning")
+  ) {
     alert(
-      "Initializing in emulator mode. If you aren't a developer, contact support@nuft_getdomain.com immediately."
+      "Initializing in emulator mode. If you aren't a developer, contact support@nuft_getdomain.com immediately.",
     );
     sessionStorage.setItem("givenWarning", "true");
   }
 } else {
   storage = getStorage(app);
   database = getDatabase(app);
+  functions = firebase.functions();
 }
 
-export { database, storage, app };
+export { app, database, functions, storage };

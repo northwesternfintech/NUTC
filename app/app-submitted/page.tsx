@@ -14,7 +14,7 @@ export default function AppSubmitted() {
             Application Submitted
           </h1>
           <p className="mt-4 text-base text-white/70 sm:mt-6">
-            We'll get back to you within three business days
+            We&#39;ll get back to you within three business days
           </p>
           <div className="mt-10 flex justify-center">
             <Link href="/" className="text-sm font-semibold leading-7 text-white">
