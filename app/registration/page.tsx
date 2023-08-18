@@ -8,11 +8,9 @@ import { ref, update } from "firebase/database";
 import { useRouter } from "next/navigation";
 
 async function writeNewUser(
-  router: any,
   functions: any,
   database: any,
   user: UserInfoType,
-  setCurrUser: any,
 ) {
   //iterate over fields in user
   user.photoURL = "test";
@@ -21,15 +19,12 @@ async function writeNewUser(
     if (!value) {
       alert("BAD");
       alert(key);
-      return;
+      return false;
     }
   }
   await update(ref(database, "users/" + user.uid), user);
-  const emailLink = await functions.httpsCallable("emailApplication")();
-  setCurrUser(currUser);
-  if (emailLink) {
-    router.push("/app-submitted");
-  }
+  await functions.httpsCallable("emailApplication")();
+  return true;
 }
 
 export default function Registration() {
@@ -373,7 +368,12 @@ export default function Registration() {
         </Link>
         <button
           type="submit"
-          onClick={() => writeNewUser(router, functions, database, currUser, setCurrUser)}
+          onClick={async () => {
+            if (await writeNewUser(functions, database, currUser)) {
+              currUser.hasCompletedReg = true;
+              setCurrUser(currUser);
+            }
+          }}
           className="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
         >
           Finish Registration
