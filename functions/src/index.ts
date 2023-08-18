@@ -55,7 +55,8 @@ export const emailApplication = functions.https.onCall(
     );
     const mailOptions = {
       from: "noreply@nutc.site",
-      to: "steveewald2025@u.northwestern.edu",
+      to: "nuft@northwestern.edu",
+      // to: "steveewald2025@u.northwestern.edu",
       subject: "[ACTION REQUIRED] NUTC Application Submitted",
       html: emailText,
     };
@@ -75,8 +76,8 @@ async function generateApprovalLink(uid: any) {
   const token: string = crypto.randomBytes(16).toString("hex");
   const ref = admin.database().ref("approvalTokens").child(token);
   await ref.set(uid);
-  // const region = "https://us-central1-nutc-web.cloudfunctions.net";
-  const region = "http://127.0.0.1:5001/nutc-web/us-central1";
+  const region = "https://us-central1-nutc-web.cloudfunctions.net";
+  // const region = "http://127.0.0.1:5001/nutc-web/us-central1";
 
   const link = `${region}/approveApplicant?token=${token}`;
   console.log("Approval: " + link);
@@ -87,8 +88,8 @@ async function generateRejectionLink(uid: any) {
   const token: string = crypto.randomBytes(16).toString("hex");
   const ref = admin.database().ref("rejectionTokens").child(token);
   await ref.set(uid);
-  // const region = "https://us-central1-nutc-web.cloudfunctions.net";
-  const region = "http://127.0.0.1:5001/nutc-web/us-central1";
+  const region = "https://us-central1-nutc-web.cloudfunctions.net";
+  // const region = "http://127.0.0.1:5001/nutc-web/us-central1";
 
   const link = `${region}/rejectApplicant?token=${token}`;
   console.log("Rejection: " + link);
