@@ -1,23 +1,4 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * import {onCall} from "firebase-functions/v2/https";
- * import {onDocumentWritten} from "firebase-functions/v2/firestore";
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
-
-// import {onRequest} from "firebase-functions/v2/https";
-// import * as logger from "firebase-functions/logger";
-
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
-
-// export const helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
-
+import { emailToApplicant } from "./emails";
 import * as functions from "firebase-functions";
 import * as crypto from "crypto";
 import * as admin from "firebase-admin";
@@ -82,14 +63,18 @@ export const approveApplicant = functions.https.onRequest(async (req, res) => {
   const newref = admin.database().ref("users").child(uid).child(
     "isApprovedApplicant",
   );
+  const emailpromise = await admin.database().ref("users").child(uid).child("email").once("value");
+  const email = emailpromise.val();
+  const namePromise = await admin.database().ref("users").child(uid).child("firstName").once("value");
+  const name = namePromise.val();
   await newref.set(true);
   const mailOptions = {
-    from: "steveewald2025@u.northwestern.edu",
-    to: "stevenewald6@gmail.com",
+    from: "noreply@nutc.site",
+    to: email,
     subject: "NUTC Application Approved",
-    html: "<p>Your application has been approved!</p>",
+    html: emailToApplicant(name)
   };
-  await transporter.sendMail(mailOptions, (errno: any, _: any) => {
+  transporter.sendMail(mailOptions, (errno: any, _: any) => {
     if (errno) {
       res.status(400).send(errno.toString());
     } else {
