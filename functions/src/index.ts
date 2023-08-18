@@ -8,7 +8,7 @@ import * as crypto from "crypto";
 import * as admin from "firebase-admin";
 import * as nodemailer from "nodemailer";
 
-let transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransport({
   host: "smtp-relay.sendinblue.com",
   port: 587,
   auth: {
@@ -76,7 +76,7 @@ async function generateApprovalLink(uid: any) {
   // const region = "https://us-central1-nutc-web.cloudfunctions.net";
   const region = "http://127.0.0.1:5001/nutc-web/us-central1";
 
-  const link: string = `${region}/approveApplicant?token=${token}`;
+  const link = `${region}/approveApplicant?token=${token}`;
   console.log("Approval: " + link);
   return link;
 }
@@ -88,7 +88,7 @@ async function generateRejectionLink(uid: any) {
   // const region = "https://us-central1-nutc-web.cloudfunctions.net";
   const region = "http://127.0.0.1:5001/nutc-web/us-central1";
 
-  const link: string = `${region}/rejectApplicant?token=${token}`;
+  const link = `${region}/rejectApplicant?token=${token}`;
   console.log("Rejection: " + link);
   return link;
 }

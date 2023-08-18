@@ -6,6 +6,7 @@ import { UserInfoType, useUserInfo } from "@/app/login/auth/context";
 import { useFirebase } from "@/app/firebase/context";
 import { ref, update } from "firebase/database";
 import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 
 async function writeNewUser(
   functions: any,
@@ -17,8 +18,19 @@ async function writeNewUser(
   user.resumeURL = "test2";
   for (const [key, value] of Object.entries(user)) {
     if (!value) {
-      alert("BAD");
-      alert(key);
+      Swal.fire({
+        title: "Please fill out all fields",
+        icon: "warning",
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener("mouseenter", Swal.stopTimer);
+          toast.addEventListener("mouseleave", Swal.resumeTimer);
+        },
+      });
       return false;
     }
   }
