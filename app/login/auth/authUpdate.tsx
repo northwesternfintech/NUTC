@@ -31,6 +31,7 @@ export default function AuthUpdate() {
           school: "",
           hasCompletedReg: false,
           isApprovedApplicant: false,
+          isRejectedApplicant: false,
         };
         setUser(newUser);
       } else {
@@ -47,6 +48,7 @@ export default function AuthUpdate() {
           school: dbUser.school || "",
           hasCompletedReg: true,
           isApprovedApplicant: dbUser.isApprovedApplicant || false,
+          isRejectedApplicant: dbUser.isRejectedApplicant || false,
         };
         setUser(newUser);
       }

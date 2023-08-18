@@ -11,6 +11,8 @@ export default function RedirectOnAuth() {
       if (user?.hasCompletedReg) {
         if(user?.isApprovedApplicant) {
           router.push("/dash");
+        } else if (user?.isRejectedApplicant) {
+          router.push("/app-rejected");
         } else {
           router.push("/app-submitted");
         }

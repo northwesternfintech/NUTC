@@ -1,4 +1,8 @@
-import { emailToApplicant } from "./emails";
+import {
+  approvalEmailToApplicant,
+  rejectionEmailToApplicant,
+  studentHasApplied,
+} from "./emails";
 import * as functions from "firebase-functions";
 import * as crypto from "crypto";
 import * as admin from "firebase-admin";
@@ -20,12 +24,6 @@ admin.initializeApp({
 
 export const emailApplication = functions.https.onCall(
   async (data, context) => {
-    if (!context) {
-      throw new functions.https.HttpsError(
-        "unauthenticated",
-        "what lol",
-      );
-    }
     if (!context.auth) {
       throw new functions.https.HttpsError(
         "unauthenticated",
@@ -33,9 +31,41 @@ export const emailApplication = functions.https.onCall(
       );
     }
     const uid = context.auth.uid;
-    const link = generateApprovalLink(uid);
-    console.log(link);
-    return link;
+    const approvalLink = await generateApprovalLink(uid);
+    const rejectionLink = await generateRejectionLink(uid);
+    const userInfo =
+      (await admin.database().ref("users").child(uid).once("value")).val();
+    const userName = userInfo.username;
+    const about = userInfo.about;
+    const email = userInfo.email;
+    const firstName = userInfo.firstName;
+    const lastName = userInfo.lastName;
+    const school = userInfo.school;
+    const emailText = studentHasApplied(
+      firstName,
+      lastName,
+      email,
+      about,
+      userName,
+      school,
+      approvalLink,
+      rejectionLink,
+    );
+    const mailOptions = {
+      from: "noreply@nutc.site",
+      to: "steveewald2025@u.northwestern.edu",
+      subject: "[ACTION REQUIRED] NUTC Application Submitted",
+      html: emailText,
+    };
+    transporter.sendMail(mailOptions, (errno: any, _: any) => {
+      if (errno) {
+        throw new functions.https.HttpsError(
+          "internal",
+          errno.toString(),
+        );
+      }
+    });
+    return true;
   },
 );
 
@@ -47,7 +77,19 @@ async function generateApprovalLink(uid: any) {
   const region = "http://127.0.0.1:5001/nutc-web/us-central1";
 
   const link: string = `${region}/approveApplicant?token=${token}`;
-  console.log("Applicant approval link generated: " + link);
+  console.log("Approval: " + link);
+  return link;
+}
+
+async function generateRejectionLink(uid: any) {
+  const token: string = crypto.randomBytes(16).toString("hex");
+  const ref = admin.database().ref("rejectionTokens").child(token);
+  await ref.set(uid);
+  // const region = "https://us-central1-nutc-web.cloudfunctions.net";
+  const region = "http://127.0.0.1:5001/nutc-web/us-central1";
+
+  const link: string = `${region}/rejectApplicant?token=${token}`;
+  console.log("Rejection: " + link);
   return link;
 }
 
@@ -63,22 +105,62 @@ export const approveApplicant = functions.https.onRequest(async (req, res) => {
   const newref = admin.database().ref("users").child(uid).child(
     "isApprovedApplicant",
   );
-  const emailpromise = await admin.database().ref("users").child(uid).child("email").once("value");
+  const emailpromise = await admin.database().ref("users").child(uid).child(
+    "email",
+  ).once("value");
   const email = emailpromise.val();
-  const namePromise = await admin.database().ref("users").child(uid).child("firstName").once("value");
+  const namePromise = await admin.database().ref("users").child(uid).child(
+    "firstName",
+  ).once("value");
   const name = namePromise.val();
   await newref.set(true);
   const mailOptions = {
     from: "noreply@nutc.site",
     to: email,
-    subject: "NUTC Application Approved",
-    html: emailToApplicant(name)
+    subject: "[ACTION REQUIRED] NUTC Application Approved",
+    html: approvalEmailToApplicant(name),
   };
   transporter.sendMail(mailOptions, (errno: any, _: any) => {
     if (errno) {
       res.status(400).send(errno.toString());
     } else {
       res.send("Approved " + mailOptions.to + " successfully");
+    }
+  });
+});
+
+export const rejectApplicant = functions.https.onRequest(async (req, res) => {
+  const token: string = req.query.token as string;
+  const ref = admin.database().ref("rejectionTokens").child(token);
+  const uid_to_approve = await ref.once("value");
+  if (!uid_to_approve.exists()) {
+    res.status(400).send("Invalid token");
+    return;
+  }
+  const uid: string = uid_to_approve.val();
+  const newref = admin.database().ref("users").child(uid).child(
+    "isRejectedApplicant",
+  );
+  const emailpromise = await admin.database().ref("users").child(uid).child(
+    "email",
+  ).once("value");
+  const email = emailpromise.val();
+  const namePromise = await admin.database().ref("users").child(uid).child(
+    "firstName",
+  ).once("value");
+  const name = namePromise.val();
+  await newref.set(true);
+  const mailOptions = {
+    from: "noreply@nutc.site",
+    to: email,
+    subject: "NUTC Application Update",
+    html: rejectionEmailToApplicant(name),
+  };
+  transporter.sendMail(mailOptions, (errno: any, _: any) => {
+    if (errno) {
+      res.status(400).send(errno.toString());
+    } else {
+      res.send("Rejected " + mailOptions.to + " successfully");
     }
   });
 });

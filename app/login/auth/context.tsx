@@ -14,6 +14,7 @@ export interface UserInfoType {
   school: string;
   hasCompletedReg: boolean;
   isApprovedApplicant?: boolean;
+  isRejectedApplicant?: boolean;
 }
 
 interface UserType {
