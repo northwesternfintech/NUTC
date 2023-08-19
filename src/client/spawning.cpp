@@ -23,7 +23,7 @@ spawn_client(const std::string& uid)
 {
     pid_t pid = fork();
     if (pid == 0) {
-        char* args[] = {(char*)"NUTC-client", (char*)uid.c_str(), NULL};
+        const char* args[] = {"NUTC-client", uid.c_str(), nullptr};
         execvp(args[0], args);
 
         std::cerr << "Failed to execute NUTC-client\n";
