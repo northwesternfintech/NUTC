@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
+include(FetchContent)
 include(cmake/prelude.cmake)
 
 project(
@@ -13,23 +14,42 @@ project(
 include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
 
+configure_file(src/config.h.in config.h)
+
+# ---- Load Dependencies ----
+
+# Conan
+find_package(fmt REQUIRED)       # String formatting
+find_package(quill REQUIRED)     # Logging
+
+find_package(argparse REQUIRED)  # Argument parsing
+
+# Git version tracking
+FetchContent_Declare(cmake_git_version_tracking
+  GIT_REPOSITORY https://github.com/andrew-hardin/cmake-git-version-tracking.git
+  GIT_TAG 9b5fc5088b4089ff2adc20d607976b9923e3d737
+)
+FetchContent_MakeAvailable(cmake_git_version_tracking)
+
 # ---- Declare library ----
 
 add_library(
     NUTC-client_lib OBJECT
-    src/lib.cpp
+    # Utils
+    src/logging.cpp
 )
 
 target_include_directories(
     NUTC-client_lib ${warning_guard}
     PUBLIC
     "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/>"
 )
 
 target_compile_features(NUTC-client_lib PUBLIC cxx_std_20)
 
-find_package(fmt REQUIRED)
 target_link_libraries(NUTC-client_lib PRIVATE fmt::fmt)
+target_link_libraries(NUTC-client_lib PRIVATE quill::quill)
 
 # ---- Declare executable ----
 
@@ -41,6 +61,11 @@ set_property(TARGET NUTC-client_exe PROPERTY OUTPUT_NAME NUTC-client)
 target_compile_features(NUTC-client_exe PRIVATE cxx_std_20)
 
 target_link_libraries(NUTC-client_exe PRIVATE NUTC-client_lib)
+target_link_libraries(NUTC-client_exe PRIVATE fmt::fmt)
+target_link_libraries(NUTC-client_exe PRIVATE quill::quill)
+
+target_link_libraries(NUTC-client_exe PRIVATE argparse::argparse)
+target_link_libraries(NUTC-client_exe PRIVATE cmake_git_version_tracking)
 
 # ---- Install rules ----
 
