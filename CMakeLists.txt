@@ -17,13 +17,13 @@ include(cmake/variables.cmake)
 
 add_library(
     NUTC-client_lib OBJECT
-    source/lib.cpp
+    src/lib.cpp
 )
 
 target_include_directories(
     NUTC-client_lib ${warning_guard}
     PUBLIC
-    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/source>"
+    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
 )
 
 target_compile_features(NUTC-client_lib PUBLIC cxx_std_20)
@@ -33,7 +33,7 @@ target_link_libraries(NUTC-client_lib PRIVATE fmt::fmt)
 
 # ---- Declare executable ----
 
-add_executable(NUTC-client_exe source/main.cpp)
+add_executable(NUTC-client_exe src/main.cpp)
 add_executable(NUTC-client::exe ALIAS NUTC-client_exe)
 
 set_property(TARGET NUTC-client_exe PROPERTY OUTPUT_NAME NUTC-client)
