@@ -40,7 +40,10 @@ main()
 
     amqp_connection_state_t conn;
 
-    nutc::rabbitmq::initializeConnection(conn);
+    if (!nutc::rabbitmq::initializeConnection(conn)) {
+        log_e(rabbitmq, "Failed to initialize connection");
+        return 1;
+    }
     if (!nutc::rabbitmq::publishMessage(
             conn, "test", "Hello from nutc::rabbitmq::publishMessage!"
         )) {

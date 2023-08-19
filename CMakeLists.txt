@@ -19,8 +19,9 @@ add_library(
     NUTC24_lib OBJECT
     src/lib.cpp
     src/logging.cpp
-src/client/fetching.cpp
-src/client/spawning.cpp
+    src/client/fetching.cpp
+    src/client/spawning.cpp
+    src/rabbitmq/rabbitmq.cpp
 )
 
 target_include_directories(
