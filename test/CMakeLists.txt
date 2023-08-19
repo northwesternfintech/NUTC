@@ -6,20 +6,20 @@ project(NUTC-clientTests LANGUAGES CXX)
 
 # ---- Dependencies ----
 
-find_package(Catch2 REQUIRED)
-include(Catch)
+find_package(GTest REQUIRED)
+include(GoogleTest)
 
 # ---- Tests ----
 
-add_executable(NUTC-client_test source/NUTC-client_test.cpp)
+add_executable(NUTC-client_test src/NUTC-client_test.cpp)
 target_link_libraries(
     NUTC-client_test PRIVATE
     NUTC-client_lib
-    Catch2::Catch2WithMain
+    GTest::gtest_main
 )
 target_compile_features(NUTC-client_test PRIVATE cxx_std_20)
 
-catch_discover_tests(NUTC-client_test)
+gtest_discover_tests(NUTC-client_test)
 
 # ---- End-of-file commands ----
 
