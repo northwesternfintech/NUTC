@@ -7,12 +7,17 @@
 #include <string>
 #include <tuple>
 
-static std::tuple<uint8_t>
+static std::tuple<uint8_t, std::string>
 process_arguments(int argc, const char** argv)
 {
     argparse::ArgumentParser program(
         "NUTC Client", VERSION, argparse::default_arguments::help
     );
+
+    program.add_argument("-U", "--uid")
+        .help("set the user ID")
+        .action([](const auto& value) { return std::string(value); })
+        .required();
 
     program.add_argument("-V", "--version")
         .help("prints version information and exits")
@@ -41,7 +46,7 @@ process_arguments(int argc, const char** argv)
         exit(1); // NOLINT(concurrency-*)
     }
 
-    return std::make_tuple(verbosity);
+    return std::make_tuple(verbosity, program.get<std::string>("--uid"));
 }
 
 static void
@@ -62,7 +67,7 @@ int
 main(int argc, const char** argv)
 {
     // Parse args
-    auto [verbosity] = process_arguments(argc, argv);
+    auto [verbosity, uid] = process_arguments(argc, argv);
 
     // Start logging and print build info
     nutc::logging::init(verbosity);
