@@ -8,7 +8,10 @@ namespace client {
 static size_t
 write_callback(void* contents, size_t size, size_t nmemb, void* userp)
 {
-    ((std::string*)userp)->append((char*)contents, size * nmemb);
+    auto* str = reinterpret_cast<std::string*>(userp);
+    auto* data = static_cast<char*>(contents);
+
+    str->append(data, size * nmemb);
     return size * nmemb;
 }
 

@@ -76,7 +76,6 @@ get_main_logger()
 
 // Create loggers here for every category
 CREATE_LOG_CATEGORY(kafka);
-CREATE_LOG_CATEGORY(rabbitmq);
 CREATE_LOG_CATEGORY(firebase_fetching);
 CREATE_LOG_CATEGORY(client_spawning);
 CREATE_LOG_CATEGORY(rabbitmq);
