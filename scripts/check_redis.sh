@@ -5,6 +5,7 @@ if ! docker ps | grep -q nutc-redis-server; then
     echo "Starting Redis container..."
     docker run -d --name nutc-redis-server -p 6379:6379 redis:latest
     echo "Redis container started."
+    sleep 2
 else
     echo "Redis container is already running."
 fi

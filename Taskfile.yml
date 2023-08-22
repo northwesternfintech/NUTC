@@ -16,9 +16,10 @@ tasks:
     cmds:
       - cmake --preset=dev
 
-  check-and-start-redis:
+  check-and-start-services:
     cmds:
       - ./scripts/check_redis.sh
+      - ./scripts/check_rabbitmq.sh
 
   build:
     dir: '{{.USER_WORKING_DIR}}'
@@ -31,7 +32,7 @@ tasks:
     dir: '{{.USER_WORKING_DIR}}'
     cmds:
       - task: build
-      - task: check-and-start-redis
+      - task: check-and-start-services
       - ./build/dev/{{.NAME}}
 
   run-v:

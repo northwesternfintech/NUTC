@@ -100,7 +100,7 @@ consumeMessage(amqp_connection_state_t& conn, const std::string& queueName)
 bool
 initializeConnection(amqp_connection_state_t& conn)
 {
-    if (!connectToRabbitMQ(conn, "localhost", 5672, "guest", "guest")) {
+    if (!connectToRabbitMQ(conn, "localhost", 5672, "NUFT", "ADMIN")) {
         return false;
     }
     amqp_channel_open(conn, 1);
