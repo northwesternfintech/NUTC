@@ -1,5 +1,7 @@
 #include "fetching.hpp"
 
+#include "logging.hpp"
+
 namespace nutc {
 namespace client {
 
@@ -38,15 +40,21 @@ firebase_request(
 
         res = curl_easy_perform(curl);
         if (res != CURLE_OK) {
-            std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res)
-                      << std::endl;
+            log_e(
+                firebase_fetching, "curl_easy_perform() failed: {}",
+                curl_easy_strerror(res)
+            );
         }
 
         curl_easy_cleanup(curl);
     }
 
     glz::json_t json{};
-    glz::read_json(json, readBuffer);
+    auto error = glz::read_json(json, readBuffer);
+    if (error) {
+        std::string descriptive_error = glz::format_error(error, readBuffer);
+        log_e(firebase_fetching, "glz::read_json() failed: {}", descriptive_error);
+    }
     return json;
 }
 } // namespace client

@@ -12,9 +12,9 @@ spawn_all_clients()
     glz::json_t res = nutc::client::firebase_request("GET", endpoint);
     glz::json_t::object_t users = res.get<glz::json_t::object_t>();
 
-    log_i(firebase_fetching, "Starting exchange with {} users", users.size());
+    log_i(client_spawning, "Starting exchange with {} users", users.size());
     for (auto& [uid, user] : users) {
-        log_i(firebase_fetching, "Spawning client: {}", uid);
+        log_i(client_spawning, "Spawning client: {}", uid);
         spawn_client(uid);
     };
 }
@@ -32,12 +32,12 @@ spawn_client(const std::string& uid)
         c_args.push_back(nullptr);
         execvp(c_args[0], &c_args[0]);
 
-        log_e(firebase_fetching, "Failed to execute NUTC-client");
+        log_e(client_spawning, "Failed to execute NUTC-client");
 
         exit(1);
     }
     else if (pid < 0) {
-        log_e(firebase_fetching, "Failed to fork");
+        log_e(client_spawning, "Failed to fork");
         exit(1);
     }
 }
