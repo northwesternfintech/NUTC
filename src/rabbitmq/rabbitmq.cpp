@@ -1,5 +1,7 @@
 #include "rabbitmq.hpp"
 
+#include "logging.hpp"
+
 namespace nutc {
 namespace rabbitmq {
 bool
@@ -12,13 +14,13 @@ connectToRabbitMQ(
     amqp_socket_t* socket = amqp_tcp_socket_new(conn);
 
     if (!socket) {
-        std::cerr << "Cannot create TCP socket" << std::endl;
+        log_e(rabbitmq, "Cannot create TCP socket");
         return false;
     }
 
     int status = amqp_socket_open(socket, hostname.c_str(), port);
     if (status) {
-        std::cerr << "Cannot open socket" << std::endl;
+        log_e(rabbitmq, "Cannot open socket");
         return false;
     }
 
@@ -27,7 +29,7 @@ connectToRabbitMQ(
         password.c_str()
     );
     if (reply.reply_type != AMQP_RESPONSE_NORMAL) {
-        std::cerr << "Login failed" << std::endl;
+        log_e(rabbitmq, "Login failed");
         return false;
     }
 
@@ -46,7 +48,7 @@ publishMessage(
 
     amqp_rpc_reply_t res = amqp_get_rpc_reply(conn);
     if (res.reply_type != AMQP_RESPONSE_NORMAL) {
-        std::cerr << "Failed to declare queue." << std::endl;
+        log_e(rabbitmq, "Failed to declare queue.");
         return false;
     }
 
@@ -57,7 +59,7 @@ publishMessage(
 
     res = amqp_get_rpc_reply(conn);
     if (res.reply_type != AMQP_RESPONSE_NORMAL) {
-        std::cerr << "Failed to publish message." << std::endl;
+        log_e(rabbitmq, "Failed to publish message.");
         return false;
     }
 
@@ -75,7 +77,7 @@ consumeMessage(amqp_connection_state_t& conn, const std::string& queueName)
 
     amqp_rpc_reply_t res = amqp_get_rpc_reply(conn);
     if (res.reply_type != AMQP_RESPONSE_NORMAL) {
-        std::cerr << "Failed to consume message." << std::endl;
+        log_e(rabbitmq, "Failed to consume message.");
         return "";
     }
 
@@ -84,7 +86,7 @@ consumeMessage(amqp_connection_state_t& conn, const std::string& queueName)
     res = amqp_consume_message(conn, &envelope, NULL, 0);
 
     if (res.reply_type != AMQP_RESPONSE_NORMAL) {
-        std::cerr << "Failed to retrieve message." << std::endl;
+        log_e(rabbitmq, "Failed to consume message.");
         return "";
     }
 
@@ -104,7 +106,7 @@ initializeConnection(amqp_connection_state_t& conn)
     amqp_channel_open(conn, 1);
     amqp_rpc_reply_t res = amqp_get_rpc_reply(conn);
     if (res.reply_type != AMQP_RESPONSE_NORMAL) {
-        std::cerr << "Failed to open channel." << std::endl;
+        log_e(rabbitmq, "Failed to open channel.");
         return false;
     }
     return true;
