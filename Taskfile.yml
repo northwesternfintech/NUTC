@@ -16,6 +16,10 @@ tasks:
     cmds:
       - cmake --preset=dev
 
+  check-and-start-redis:
+    cmds:
+      - ./scripts/check_redis.sh
+
   build:
     dir: '{{.USER_WORKING_DIR}}'
     preconditions:
@@ -27,6 +31,7 @@ tasks:
     dir: '{{.USER_WORKING_DIR}}'
     cmds:
       - task: build
+      - task: check-and-start-redis
       - ./build/dev/{{.NAME}}
 
   run-v:
