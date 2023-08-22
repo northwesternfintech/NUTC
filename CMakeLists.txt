@@ -23,6 +23,9 @@ find_package(fmt REQUIRED)       # String formatting
 find_package(quill REQUIRED)     # Logging
 
 find_package(argparse REQUIRED)  # Argument parsing
+find_package(rabbitmq-c REQUIRED)
+find_package(CURL REQUIRED)
+find_package(glaze REQUIRED)
 
 # Git version tracking
 FetchContent_Declare(cmake_git_version_tracking
@@ -50,6 +53,10 @@ target_compile_features(NUTC-client_lib PUBLIC cxx_std_20)
 
 target_link_libraries(NUTC-client_lib PRIVATE fmt::fmt)
 target_link_libraries(NUTC-client_lib PRIVATE quill::quill)
+target_link_libraries(NUTC-client_lib PRIVATE rabbitmq::rabbitmq-static)
+target_link_libraries(NUTC-client_lib PRIVATE CURL::libcurl)
+target_link_libraries(NUTC-client_lib PRIVATE glaze::glaze)
+
 
 # ---- Declare executable ----
 
@@ -66,6 +73,10 @@ target_link_libraries(NUTC-client_exe PRIVATE quill::quill)
 
 target_link_libraries(NUTC-client_exe PRIVATE argparse::argparse)
 target_link_libraries(NUTC-client_exe PRIVATE cmake_git_version_tracking)
+target_link_libraries(NUTC-client_exe PRIVATE rabbitmq::rabbitmq-static)
+target_link_libraries(NUTC-client_exe PRIVATE CURL::libcurl)
+target_link_libraries(NUTC-client_exe PRIVATE glaze::glaze)
+
 
 # ---- Install rules ----
 
