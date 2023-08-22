@@ -77,6 +77,7 @@ get_main_logger()
 // Create loggers here for every category
 CREATE_LOG_CATEGORY(kafka);
 CREATE_LOG_CATEGORY(rabbitmq);
+CREATE_LOG_CATEGORY(firebase_fetching);
 
 #undef CREATE_LOG_CATEGORY
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)

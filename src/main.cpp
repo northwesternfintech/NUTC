@@ -54,7 +54,7 @@ main()
     log_i(rabbitmq, "Received message: {}", mess);
     nutc::rabbitmq::closeConnection(conn);
 
-    // nutc::client::spawn_all_clients();
+    nutc::client::spawn_all_clients();
 
     return 0;
 }

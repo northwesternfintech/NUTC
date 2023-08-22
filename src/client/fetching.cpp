@@ -44,7 +44,6 @@ firebase_request(
 
         curl_easy_cleanup(curl);
     }
-    std::cout << readBuffer << std::endl;
 
     glz::json_t json{};
     glz::read_json(json, readBuffer);
