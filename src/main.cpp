@@ -13,13 +13,14 @@ int
 main()
 {
     auto const lib = library{};
+    nutc::logging::init(quill::LogLevel::TraceL3);
+
     /*
        auto const message = "Hello from " + lib.name + "!";
        std::cout << message << '\n';
 
        // Start logging
        // TODO(nino): verbosity switch
-       nutc::logging::init(quill::LogLevel::TraceL3);
 
        log_t3(main, "This is a log trace l3 example {}", 1);
        log_t2(main, "This is a log trace l2 example {} {}", 2, 2.3f);
