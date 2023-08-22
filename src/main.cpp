@@ -1,4 +1,5 @@
 #include "common.hpp"
+#include "firebase/firebase.hpp"
 #include "git.h"
 #include "rabbitmq/rabbitmq.hpp"
 
@@ -84,6 +85,11 @@ main(int argc, const char** argv)
     log_i(rabbitmq, "Connection established");
 
     nutc::rabbitmq::closeConnection(conn);
+    glz::json_t user_info = nutc::client::get_user_info(uid);
+
+    std::string pretty_user_info;
+    glz::write<glz::opts{.prettify = true}>(user_info, pretty_user_info);
+    log_i(firebase, "User info: {}", pretty_user_info);
 
     return 0;
 }

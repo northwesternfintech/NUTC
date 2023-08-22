@@ -22,6 +22,9 @@
 #define LOG_FILE_SIZE      (1024 * 1024 / 2) // 512 KB
 #define LOG_BACKUP_COUNT   5
 
+#define FIREBASE_URL "https://nutc-web-default-rtdb.firebaseio.com/"
+
+
 /**
  * If we are in debug mode.
  *

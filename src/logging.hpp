@@ -95,6 +95,7 @@ CREATE_LOG_CATEGORY(redis);
 CREATE_LOG_CATEGORY(web);
 CREATE_LOG_CATEGORY(libcurl);
 CREATE_LOG_CATEGORY(rabbitmq);
+CREATE_LOG_CATEGORY(firebase);
 
 #undef CREATE_LOG_CATEGORY
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
