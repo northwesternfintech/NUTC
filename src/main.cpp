@@ -1,5 +1,6 @@
 #include "common.hpp"
 #include "git.h"
+#include "rabbitmq/rabbitmq.hpp"
 
 #include <argparse/argparse.hpp>
 
@@ -72,6 +73,17 @@ main(int argc, const char** argv)
     // Start logging and print build info
     nutc::logging::init(verbosity);
     log_build_info();
+
+    amqp_connection_state_t conn;
+
+    if (!nutc::rabbitmq::initializeConnection(conn)) {
+        log_e(rabbitmq, "Failed to initialize connection");
+        return 1;
+    }
+
+    log_i(rabbitmq, "Connection established");
+
+    nutc::rabbitmq::closeConnection(conn);
 
     return 0;
 }

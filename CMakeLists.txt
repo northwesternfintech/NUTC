@@ -38,6 +38,7 @@ FetchContent_MakeAvailable(cmake_git_version_tracking)
 
 add_library(
     NUTC-client_lib OBJECT
+    src/rabbitmq/rabbitmq.cpp
     # Utils
     src/logging.cpp
 )
