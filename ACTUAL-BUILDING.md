@@ -3,8 +3,11 @@
 ## Dependencies
 1. Conan
 - `pip install conan`
+- `dnf install cmake`
+- `dnf install go-task`
+- `dnf install perl`
 - `conan profile detect`
-- Copy .conan2/default to .conan2/cpp20 
+- Copy `.conan2/profiles/default` to `.conan2/profiles/cpp20` 
 - Change gnu17 to gnu20 
 2. Install dependencies
 - `mkdir build && cd build`
@@ -47,9 +50,9 @@
   ]
 }
 ```
-4. `cmake --preset=dev`
+4. `go-task init`
 
 
 ## Building
-`cmake --build --preset=dev`
+`go-task build`
 
