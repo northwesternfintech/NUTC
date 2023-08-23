@@ -1,4 +1,7 @@
+"use client";
 import RedirectOnAuth from "@/app/login/auth/redirectOnAuth";
+import Dash from "./dash";
+
 export default function DashLayout({
   children,
 }: {
@@ -7,7 +10,7 @@ export default function DashLayout({
   return (
     <section className="h-screen bg-gray-900">
       <RedirectOnAuth />
-      {children}
+      {Dash(children)}
     </section>
   );
 }
