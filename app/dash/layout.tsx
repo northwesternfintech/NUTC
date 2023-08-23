@@ -1,6 +1,6 @@
 "use client";
 import RedirectOnAuth from "@/app/login/auth/redirectOnAuth";
-import Dash from "./dash";
+import Dash from "@/app/dash/dash";
 
 export default function DashLayout({
   children,

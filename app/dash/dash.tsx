@@ -7,18 +7,18 @@ import Image from "next/image";
 import {
   ArrowTrendingUpIcon,
   Bars3Icon,
-  HomeIcon,
   UserGroupIcon,
+  ArrowUpTrayIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 
 const navigation = [
-  { name: "Dashboard", href: "/dash", icon: HomeIcon, activeName: "/dash" },
+  { name: "Submissions", href: "/dash", icon: ArrowTrendingUpIcon, activeName: "/dash" },
   {
-    name: "Submissions",
+    name: "Upload Algorithm",
     href: "/dash/submissions",
-    icon: ArrowTrendingUpIcon,
+    icon: ArrowUpTrayIcon,
     activeName: "/dash/submissions",
   },
   {
@@ -283,7 +283,7 @@ export default function Dash(content: React.ReactNode) {
           </a>
         </div>
 
-        <main className="lg:pl-72">
+        <main className="bg-gray-900 lg:pl-72">
           <div>{content}</div>
         </main>
       </div>
