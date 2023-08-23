@@ -29,9 +29,15 @@ const navigation = [
   },
 ];
 const submissions = [
-  { id: 1, name: "Strategy 1", href: "#", initial: "1", current: false },
-  { id: 2, name: "Strategy 2", href: "#", initial: "2", current: false },
-  { id: 3, name: ":Shxiv:", href: "#", initial: "3", current: false },
+  {
+    id: 1,
+    name: "new-experimental-algo",
+    href: "#",
+    initial: "1",
+    current: false,
+  },
+  { id: 2, name: "RL-buggy-test", href: "#", initial: "2", current: false },
+  { id: 3, name: "DL-test-4", href: "#", initial: "2", current: false },
 ];
 
 function classNames(...classes: any) {
@@ -124,7 +130,7 @@ export default function Dash(content: React.ReactNode) {
                                     item.activeName === currentPage
                                       ? "bg-gray-800 text-white"
                                       : "text-gray-400 hover:text-white hover:bg-gray-800",
-                                    "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+                                    "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold",
                                   )}
                                 >
                                   <item.icon
@@ -150,7 +156,7 @@ export default function Dash(content: React.ReactNode) {
                                     team.current
                                       ? "bg-gray-800 text-white"
                                       : "text-gray-400 hover:text-white hover:bg-gray-800",
-                                    "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+                                    "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold",
                                   )}
                                 >
                                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium text-gray-400 group-hover:text-white">
@@ -173,7 +179,10 @@ export default function Dash(content: React.ReactNode) {
 
         {/* static sidebar for desktop */}
         <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-          <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6">
+          <div
+            className="flex grow flex-col gap-y-5 overflow-y-auto px-6"
+            style={{ backgroundColor: "rgb(14,19,31)" }}
+          >
             <div className="flex h-16 shrink-0 items-center">
               <Image
                 height="32"
@@ -195,7 +204,7 @@ export default function Dash(content: React.ReactNode) {
                             item.activeName === currentPage
                               ? "bg-gray-800 text-white"
                               : "text-gray-400 hover:text-white hover:bg-gray-800",
-                            "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+                            "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold",
                           )}
                         >
                           <item.icon
@@ -221,7 +230,7 @@ export default function Dash(content: React.ReactNode) {
                             team.current
                               ? "bg-gray-800 text-white"
                               : "text-gray-400 hover:text-white hover:bg-gray-800",
-                            "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+                            "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold",
                           )}
                         >
                           <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium text-gray-400 group-hover:text-white">
@@ -274,8 +283,8 @@ export default function Dash(content: React.ReactNode) {
           </a>
         </div>
 
-        <main className="py-10 lg:pl-72">
-          <div className="px-4 sm:px-6 lg:px-8">{content}</div>
+        <main className="lg:pl-72">
+          <div>{content}</div>
         </main>
       </div>
     </>
