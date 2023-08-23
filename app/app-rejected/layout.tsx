@@ -6,7 +6,7 @@ export default function AppRejectedLayout({
 }) {
   return (
     <section className="h-screen bg-gray-900">
-      <RedirectOnAuth />
+      <RedirectOnAuth page="app-rejected" />
       {children}
     </section>
   );

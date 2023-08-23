@@ -3,6 +3,7 @@
 import { createContext, ReactNode, useContext, useState } from "react";
 
 export interface UserInfoType {
+  isFilledFromDB: boolean;
   uid: string;
   username: string;
   about: string;

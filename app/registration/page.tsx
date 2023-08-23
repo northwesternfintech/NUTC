@@ -121,6 +121,7 @@ export default function Registration() {
   const userInfo = useUserInfo();
   const defaultUser: UserInfoType = {
     uid: userInfo.user?.uid || "-1",
+    isFilledFromDB: false,
     username: "",
     about: "",
     photoURL: "",
@@ -133,7 +134,6 @@ export default function Registration() {
   };
 
   const [currUser, setCurrUser] = useState(defaultUser);
-  const [resume, setResume] = useState<File | null>(null);
 
   useEffect(() => {
     var currU = { ...currUser };

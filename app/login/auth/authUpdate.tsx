@@ -10,24 +10,28 @@ export default function AuthUpdate() {
   const { database } = useFirebase();
   const auth = getAuth();
 
-  const { setUser } = useUserInfo();
+  const { setUser, user } = useUserInfo();
 
   useEffect(() => {
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) return;
-      const uid = user.uid;
+    onAuthStateChanged(auth, async (authUser) => {
+      if (user) return;
+      if (!authUser) return;
+
+      const uid = authUser.uid;
       const snapshot = await get(child(ref(database), `users/${uid}`));
+      localStorage.setItem("isLoggedIn", "true");
       if (!snapshot.exists()) {
         //create new user
         const newUser: UserInfoType = {
           uid: uid,
+          isFilledFromDB: true,
           username: "",
           about: "",
-          photoURL: user.photoURL || "",
+          photoURL: authUser.photoURL || "",
           resumeURL: "",
           firstName: "",
           lastName: "",
-          email: user.email || "",
+          email: authUser.email || "",
           school: "",
           hasCompletedReg: false,
           isApprovedApplicant: false,
@@ -39,12 +43,13 @@ export default function AuthUpdate() {
         const newUser: UserInfoType = {
           uid: uid,
           username: dbUser.username || "",
+          isFilledFromDB: true,
           about: dbUser.about || "",
-          photoURL: dbUser.photoURL || user.photoURL || "",
+          photoURL: dbUser.photoURL || authUser.photoURL || "",
           resumeURL: dbUser.resumeURL || "",
           firstName: dbUser.firstName || "",
           lastName: dbUser.lastName || "",
-          email: dbUser.email || user.email || "",
+          email: dbUser.email || authUser.email || "",
           school: dbUser.school || "",
           hasCompletedReg: true,
           isApprovedApplicant: dbUser.isApprovedApplicant || false,

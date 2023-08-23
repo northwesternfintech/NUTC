@@ -9,7 +9,7 @@ export default function DashLayout({
 }) {
   return (
     <section className="h-screen bg-gray-900">
-      <RedirectOnAuth />
+      <RedirectOnAuth page="dash" />
       {Dash(children)}
     </section>
   );
