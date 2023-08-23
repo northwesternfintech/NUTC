@@ -12,15 +12,12 @@ async function uploadResume(
   database: any,
   storage: any,
   uid: string,
-  file: File,
+  file: File
 ) {
   const fileId = push(ref(database)).key;
   const storageRef = sRef(storage);
   const fileType = file.type.split("/")[1];
-  const resumeRef = sRef(
-    storageRef,
-    `resumes/${uid}/${fileId}.${fileType}`,
-  );
+  const resumeRef = sRef(storageRef, `resumes/${uid}/${fileId}.${fileType}`);
   try {
     const snapshot = await uploadBytes(resumeRef, file);
     const downloadURL = await getDownloadURL(snapshot.ref);
@@ -31,11 +28,7 @@ async function uploadResume(
   }
 }
 
-async function writeNewUser(
-  functions: any,
-  database: any,
-  user: UserInfoType,
-) {
+async function writeNewUser(functions: any, database: any, user: UserInfoType) {
   //iterate over fields in user
   user.photoURL = "test";
   for (const [key, value] of Object.entries(user)) {
@@ -85,7 +78,7 @@ export default function Registration() {
           database,
           storage,
           currUser.uid,
-          selectedFile,
+          selectedFile
         );
         if (downloadLink !== "-1") {
           setCurrUser((prevState) => ({
@@ -418,10 +411,7 @@ export default function Registration() {
                     />
                   </div>
                   <div className="text-sm leading-6">
-                    <label
-                      htmlFor="results"
-                      className="font-medium text-white"
-                    >
+                    <label htmlFor="results" className="font-medium text-white">
                       Results
                     </label>
                     <p className="text-gray-400">

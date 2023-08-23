@@ -6,7 +6,7 @@ export default function GoogleLogin() {
   const { googleProvider } = useFirebase();
   return (
     <button
-      onClick={() => signinPopup(googleProvider) }
+      onClick={() => signinPopup(googleProvider)}
       className="transitions-color duration-300 ease-in-out hover:bg-gray-400 flex w-full items-center justify-center gap-3 rounded-md bg-[#FFFFFF] px-3 py-1.5 text-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFFFFF]"
     >
       <svg
@@ -22,19 +22,19 @@ export default function GoogleLogin() {
   );
 }
 
-async function signinPopup(
-  provider: any,
-) {
+async function signinPopup(provider: any) {
   const auth = getAuth();
-  signInWithPopup(auth, provider).then((_: any) => {
-    // const credential = GoogleAuthProvider.credentialFromResult(result);
-    // const token = credential.accessToken;
-    // setUser(newUser);
-  }).catch((error: any) => {
-    // const errorCode = error.code;
-    const errorMessage = error.message;
-    console.error("Login error: " + errorMessage);
-    // const email = error.customData.email;
-    // const credential = GoogleAuthProvider.credentialFromError(error);
-  });
+  signInWithPopup(auth, provider)
+    .then((_: any) => {
+      // const credential = GoogleAuthProvider.credentialFromResult(result);
+      // const token = credential.accessToken;
+      // setUser(newUser);
+    })
+    .catch((error: any) => {
+      // const errorCode = error.code;
+      const errorMessage = error.message;
+      console.error("Login error: " + errorMessage);
+      // const email = error.customData.email;
+      // const credential = GoogleAuthProvider.credentialFromError(error);
+    });
 }

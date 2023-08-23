@@ -22,9 +22,7 @@ interface UserType {
   setUser: (user: UserInfoType) => void;
 }
 
-const UserInfoContext = createContext<UserType | undefined>(
-  undefined,
-);
+const UserInfoContext = createContext<UserType | undefined>(undefined);
 
 export const useUserInfo = () => {
   const context = useContext(UserInfoContext);
@@ -38,9 +36,7 @@ interface UserInfoProps {
   children: ReactNode;
 }
 
-export const UserInfoProvider: React.FC<UserInfoProps> = (
-  { children },
-) => {
+export const UserInfoProvider: React.FC<UserInfoProps> = ({ children }) => {
   const [user, setUser] = useState<UserInfoType | undefined>(undefined);
   return (
     <UserInfoContext.Provider value={{ user, setUser }}>

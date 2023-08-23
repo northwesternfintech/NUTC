@@ -14,7 +14,7 @@ interface FirebaseContextType {
 }
 
 const FirebaseContext = createContext<FirebaseContextType | undefined>(
-  undefined,
+  undefined
 );
 
 export const useFirebase = () => {
@@ -29,9 +29,9 @@ interface FirebaseProviderProps {
   children: ReactNode;
 }
 
-export const FirebaseProvider: React.FC<FirebaseProviderProps> = (
-  { children },
-) => {
+export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
+  children,
+}) => {
   const googleProvider = new GoogleAuthProvider();
   const githubProvider = new GithubAuthProvider();
   googleProvider.addScope("https://www.googleapis.com/auth/userinfo.profile");

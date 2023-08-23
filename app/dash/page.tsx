@@ -1,39 +1,43 @@
 "use client";
-import { Fragment, useState } from 'react'
-import { Dialog, Transition } from '@headlessui/react'
-import Logo from "@/app/assets/logo.png"
-import Image from "next/image"
+import { Fragment, useState } from "react";
+import { Dialog, Transition } from "@headlessui/react";
+import Logo from "@/app/assets/logo.png";
+import Image from "next/image";
 import {
   Bars3Icon,
   UserGroupIcon,
   ArrowTrendingUpIcon,
   HomeIcon,
   XMarkIcon,
-} from '@heroicons/react/24/outline'
+} from "@heroicons/react/24/outline";
 
 const navigation = [
-  { name: 'Dashboard', href: '#', icon: HomeIcon, current: true },
-  { name: 'Leaderboard', href: '#', icon: ArrowTrendingUpIcon, current: false },
-  { name: 'Team Profile', href: '#', icon: UserGroupIcon, current: false },
-]
+  { name: "Dashboard", href: "#", icon: HomeIcon, current: true },
+  { name: "Leaderboard", href: "#", icon: ArrowTrendingUpIcon, current: false },
+  { name: "Team Profile", href: "#", icon: UserGroupIcon, current: false },
+];
 const submissions = [
-  { id: 1, name: 'Strategy 1', href: '#', initial: '1', current: false },
-  { id: 2, name: 'Strategy 2', href: '#', initial: '2', current: false },
-  { id: 3, name: ':Shxiv:', href: '#', initial: '3', current: false },
-]
+  { id: 1, name: "Strategy 1", href: "#", initial: "1", current: false },
+  { id: 2, name: "Strategy 2", href: "#", initial: "2", current: false },
+  { id: 3, name: ":Shxiv:", href: "#", initial: "3", current: false },
+];
 
-function classNames(...classes:any) {
-  return classes.filter(Boolean).join(' ')
+function classNames(...classes: any) {
+  return classes.filter(Boolean).join(" ");
 }
 
 export default function Example() {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <>
       <div>
         <Transition.Root show={sidebarOpen} as={Fragment}>
-          <Dialog as="div" className="relative z-50 lg:hidden" onClose={setSidebarOpen}>
+          <Dialog
+            as="div"
+            className="relative z-50 lg:hidden"
+            onClose={setSidebarOpen}
+          >
             <Transition.Child
               as={Fragment}
               enter="transition-opacity ease-linear duration-300"
@@ -67,9 +71,16 @@ export default function Example() {
                     leaveTo="opacity-0"
                   >
                     <div className="absolute left-full top-0 flex w-16 justify-center pt-5">
-                      <button type="button" className="-m-2.5 p-2.5" onClick={() => setSidebarOpen(false)}>
+                      <button
+                        type="button"
+                        className="-m-2.5 p-2.5"
+                        onClick={() => setSidebarOpen(false)}
+                      >
                         <span className="sr-only">Close sidebar</span>
-                        <XMarkIcon className="h-6 w-6 text-white" aria-hidden="true" />
+                        <XMarkIcon
+                          className="h-6 w-6 text-white"
+                          aria-hidden="true"
+                        />
                       </button>
                     </div>
                   </Transition.Child>
@@ -93,12 +104,15 @@ export default function Example() {
                                   href={item.href}
                                   className={classNames(
                                     item.current
-                                      ? 'bg-gray-800 text-white'
-                                      : 'text-gray-400 hover:text-white hover:bg-gray-800',
-                                    'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                                      ? "bg-gray-800 text-white"
+                                      : "text-gray-400 hover:text-white hover:bg-gray-800",
+                                    "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
                                   )}
                                 >
-                                  <item.icon className="h-6 w-6 shrink-0" aria-hidden="true" />
+                                  <item.icon
+                                    className="h-6 w-6 shrink-0"
+                                    aria-hidden="true"
+                                  />
                                   {item.name}
                                 </a>
                               </li>
@@ -106,7 +120,9 @@ export default function Example() {
                           </ul>
                         </li>
                         <li>
-                          <div className="text-xs font-semibold leading-6 text-gray-400">Your submissions</div>
+                          <div className="text-xs font-semibold leading-6 text-gray-400">
+                            Your submissions
+                          </div>
                           <ul role="list" className="-mx-2 mt-2 space-y-1">
                             {submissions.map((team) => (
                               <li key={team.name}>
@@ -114,9 +130,9 @@ export default function Example() {
                                   href={team.href}
                                   className={classNames(
                                     team.current
-                                      ? 'bg-gray-800 text-white'
-                                      : 'text-gray-400 hover:text-white hover:bg-gray-800',
-                                    'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                                      ? "bg-gray-800 text-white"
+                                      : "text-gray-400 hover:text-white hover:bg-gray-800",
+                                    "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
                                   )}
                                 >
                                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium text-gray-400 group-hover:text-white">
@@ -159,12 +175,15 @@ export default function Example() {
                           href={item.href}
                           className={classNames(
                             item.current
-                              ? 'bg-gray-800 text-white'
-                              : 'text-gray-400 hover:text-white hover:bg-gray-800',
-                            'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                              ? "bg-gray-800 text-white"
+                              : "text-gray-400 hover:text-white hover:bg-gray-800",
+                            "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
                           )}
                         >
-                          <item.icon className="h-6 w-6 shrink-0" aria-hidden="true" />
+                          <item.icon
+                            className="h-6 w-6 shrink-0"
+                            aria-hidden="true"
+                          />
                           {item.name}
                         </a>
                       </li>
@@ -172,7 +191,9 @@ export default function Example() {
                   </ul>
                 </li>
                 <li>
-                  <div className="text-xs font-semibold leading-6 text-gray-400">Your submissions</div>
+                  <div className="text-xs font-semibold leading-6 text-gray-400">
+                    Your submissions
+                  </div>
                   <ul role="list" className="-mx-2 mt-2 space-y-1">
                     {submissions.map((team) => (
                       <li key={team.name}>
@@ -180,9 +201,9 @@ export default function Example() {
                           href={team.href}
                           className={classNames(
                             team.current
-                              ? 'bg-gray-800 text-white'
-                              : 'text-gray-400 hover:text-white hover:bg-gray-800',
-                            'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                              ? "bg-gray-800 text-white"
+                              : "text-gray-400 hover:text-white hover:bg-gray-800",
+                            "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
                           )}
                         >
                           <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium text-gray-400 group-hover:text-white">
@@ -214,11 +235,17 @@ export default function Example() {
         </div>
 
         <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-gray-900 px-4 py-4 shadow-sm sm:px-6 lg:hidden">
-          <button type="button" className="-m-2.5 p-2.5 text-gray-400 lg:hidden" onClick={() => setSidebarOpen(true)}>
+          <button
+            type="button"
+            className="-m-2.5 p-2.5 text-gray-400 lg:hidden"
+            onClick={() => setSidebarOpen(true)}
+          >
             <span className="sr-only">Open sidebar</span>
             <Bars3Icon className="h-6 w-6" aria-hidden="true" />
           </button>
-          <div className="flex-1 text-sm font-semibold leading-6 text-white">Dashboard</div>
+          <div className="flex-1 text-sm font-semibold leading-6 text-white">
+            Dashboard
+          </div>
           <a href="#">
             <span className="sr-only">Your profile</span>
             <img
@@ -234,6 +261,5 @@ export default function Example() {
         </main>
       </div>
     </>
-  )
+  );
 }
-

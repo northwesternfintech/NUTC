@@ -1,11 +1,11 @@
-'use client';
+"use client";
 import { getAuth, signInWithPopup } from "firebase/auth";
 import { useFirebase } from "@/app/firebase/context";
 export default function GithubLogin() {
   const { githubProvider } = useFirebase();
   return (
     <button
-      onClick={() => signinPopup(githubProvider) }
+      onClick={() => signinPopup(githubProvider)}
       className="flex w-full items-center justify-center gap-3 rounded-md hover:bg-gray-700 transitions-color duration-300 bg-[#24292F] px-3 py-1.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#24292F]"
     >
       <svg
@@ -25,20 +25,19 @@ export default function GithubLogin() {
   );
 }
 
-async function signinPopup(
-  provider: any,
-) {
+async function signinPopup(provider: any) {
   const auth = getAuth();
-  signInWithPopup(auth, provider).then((_: any) => {
-    // const credential = GoogleAuthProvider.credentialFromResult(result);
-    // const token = credential.accessToken;
-    // setUser(newUser);
-  }).catch((error: any) => {
-    // const errorCode = error.code;
-    const errorMessage = error.message;
-    console.error("Login error: " + errorMessage);
-    // const email = error.customData.email;
-    // const credential = GoogleAuthProvider.credentialFromError(error);
-  });
+  signInWithPopup(auth, provider)
+    .then((_: any) => {
+      // const credential = GoogleAuthProvider.credentialFromResult(result);
+      // const token = credential.accessToken;
+      // setUser(newUser);
+    })
+    .catch((error: any) => {
+      // const errorCode = error.code;
+      const errorMessage = error.message;
+      console.error("Login error: " + errorMessage);
+      // const email = error.customData.email;
+      // const credential = GoogleAuthProvider.credentialFromError(error);
+    });
 }
-

@@ -21,7 +21,7 @@ var functions: any;
 const app = firebase.initializeApp(firebaseConfig);
 
 const isLocalhost = () => {
-  return (process && process.env.NODE_ENV === "development");
+  return process && process.env.NODE_ENV === "development";
 };
 
 if (isLocalhost()) {
@@ -37,7 +37,7 @@ if (isLocalhost()) {
     !sessionStorage.getItem("givenWarning")
   ) {
     alert(
-      "Initializing in emulator mode. If you aren't a developer, contact support@nuft_getdomain.com immediately.",
+      "Initializing in emulator mode. If you aren't a developer, contact support@nuft_getdomain.com immediately."
     );
     sessionStorage.setItem("givenWarning", "true");
   }

@@ -80,7 +80,7 @@ export default function Example() {
                     }}
                     ref={cancelButtonRef}
                   >
-                   Return to main site 
+                    Return to main site
                   </button>
                 </div>
               </Dialog.Panel>
