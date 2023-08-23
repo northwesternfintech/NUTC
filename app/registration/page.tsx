@@ -32,7 +32,7 @@ async function writeNewUser(functions: any, database: any, user: UserInfoType) {
   //iterate over fields in user
   user.photoURL = "test";
   for (const [key, value] of Object.entries(user)) {
-    if (!(key==="isFilledFromDB") && !value) {
+    if (!(key === "isFilledFromDB") && !value) {
       Swal.fire({
         title: "Please fill out all fields",
         icon: "warning",

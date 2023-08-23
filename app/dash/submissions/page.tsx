@@ -1,6 +1,27 @@
+"use client";
 import { PaperClipIcon } from "@heroicons/react/24/solid";
+import { useState } from "react";
+import AlgorithmType from "@/app/dash/algoType";
 
 export default function Submission() {
+  const defaultAlgo: AlgorithmType = {
+    lintResults: "pending",
+    uploadDate: "",
+    filePath: "",
+    name: "",
+    description: "",
+  };
+
+  const handleInputChange = (e: any) => {
+    const { name, value } = e.target;
+    //@ts-ignore
+    setAlgo((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const [algo, setAlgo] = useState(defaultAlgo);
   return (
     <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8">
       <div className="mx-auto max-w-2xl">
@@ -17,7 +38,7 @@ export default function Submission() {
             <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
               <div className="sm:col-span-4">
                 <label
-                  htmlFor="algo-name"
+                  htmlFor="name"
                   className="block text-sm font-medium leading-6 text-white"
                 >
                   Algorithm Name
@@ -26,8 +47,9 @@ export default function Submission() {
                   <div className="flex rounded-md bg-white/5 ring-1 ring-inset ring-white/10 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500">
                     <input
                       type="text"
-                      name="algorithm-name"
-                      id="algorithm-name"
+                      name="name"
+                      id="name"
+                      onChange={handleInputChange}
                       className="flex-1 border-0 bg-transparent py-1.5 text-white focus:ring-0 sm:text-sm sm:leading-6"
                     />
                   </div>
@@ -36,16 +58,17 @@ export default function Submission() {
 
               <div className="col-span-full">
                 <label
-                  htmlFor="about"
+                  htmlFor="description"
                   className="block text-sm font-medium leading-6 text-white"
                 >
                   Description
                 </label>
                 <div className="mt-2">
                   <textarea
-                    id="about"
-                    name="about"
+                    id="description"
+                    name="description"
                     rows={3}
+                    onChange={handleInputChange}
                     className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
                     defaultValue={""}
                   />

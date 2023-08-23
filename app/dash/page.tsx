@@ -1,17 +1,17 @@
 "use client";
 import { Fragment } from "react";
 import { Menu, Transition } from "@headlessui/react";
-const statuses:any = {
+const statuses: any = {
   pending: "text-yellow-500 bg-yellow-100/10",
   finished: "text-green-400 bg-green-400/10",
   error: "text-rose-400 bg-rose-400/10",
 };
-const environments:any = {
+const environments: any = {
   Results: "text-indigo-400 bg-indigo-400/10 ring-indigo-400/20",
   Pending: "text-gray-400 bg-gray-400/10 ring-gray-400/20",
   "Lint Output": "text-rose-400 bg-rose-400/10 ring-rose-400/30",
 };
-const deployments:any = [
+const deployments: any = [
   {
     id: 1,
     href: "#",
@@ -148,7 +148,7 @@ export default function Dashboard() {
                       href="#"
                       className={classNames(
                         active ? "bg-gray-50" : "",
-                        "block px-3 py-1 text-sm leading-6 text-gray-900",
+                        "block px-3 py-1 text-sm leading-6 text-gray-900"
                       )}
                     >
                       Name
@@ -161,7 +161,7 @@ export default function Dashboard() {
                       href="#"
                       className={classNames(
                         active ? "bg-gray-50" : "",
-                        "block px-3 py-1 text-sm leading-6 text-gray-900",
+                        "block px-3 py-1 text-sm leading-6 text-gray-900"
                       )}
                     >
                       Date updated
@@ -174,7 +174,7 @@ export default function Dashboard() {
                       href="#"
                       className={classNames(
                         active ? "bg-gray-50" : "",
-                        "block px-3 py-1 text-sm leading-6 text-gray-900",
+                        "block px-3 py-1 text-sm leading-6 text-gray-900"
                       )}
                     >
                       Environment
@@ -188,7 +188,7 @@ export default function Dashboard() {
 
         {/* Deployment list */}
         <ul role="list" className="divide-y divide-white/5">
-          {deployments.map((deployment:any) => (
+          {deployments.map((deployment: any) => (
             <li
               key={deployment.id}
               className="relative flex items-center space-x-4 px-4 py-4 sm:px-6 lg:px-8"
@@ -198,7 +198,7 @@ export default function Dashboard() {
                   <div
                     className={classNames(
                       statuses[deployment.status],
-                      "flex-none rounded-full p-1",
+                      "flex-none rounded-full p-1"
                     )}
                   >
                     <div className="h-2 w-2 rounded-full bg-current" />
@@ -228,7 +228,7 @@ export default function Dashboard() {
               <div
                 className={classNames(
                   environments[deployment.environment],
-                  "rounded-full flex-none py-1 px-2 text-xs font-medium ring-1 ring-inset",
+                  "rounded-full flex-none py-1 px-2 text-xs font-medium ring-1 ring-inset"
                 )}
               >
                 {deployment.environment}
