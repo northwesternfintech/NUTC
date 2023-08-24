@@ -2,6 +2,31 @@
 import { PaperClipIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import AlgorithmType from "@/app/dash/algoType";
+import Swal from "sweetalert2";
+import { push, ref, update } from "firebase/database";
+import { getDownloadURL, ref as sRef, uploadBytes } from "firebase/storage";
+import { useFirebase } from "@/app/firebase/context";
+import { useUserInfo } from "@/app/login/auth/context";
+
+async function uploadAlgo(
+  database: any,
+  storage: any,
+  uid: string,
+  file: File
+) {
+  const fileId = push(ref(database)).key;
+  const storageRef = sRef(storage);
+  const fileType = file.type.split("/")[1];
+  const resumeRef = sRef(storageRef, `algos/${uid}/${fileId}.${fileType}`);
+  try {
+    const snapshot = await uploadBytes(resumeRef, file);
+    const downloadURL = await getDownloadURL(snapshot.ref);
+    return downloadURL;
+  } catch (e) {
+    console.log(e);
+    return "-1";
+  }
+}
 
 export default function Submission() {
   const defaultAlgo: AlgorithmType = {
@@ -19,6 +44,73 @@ export default function Submission() {
       ...prevState,
       [name]: value,
     }));
+  };
+
+  const userInfo = useUserInfo();
+  const { database, storage, functions } = useFirebase();
+
+  const handleAlgoChange = async (e: any) => {
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) {
+      return;
+    }
+    const fileName = selectedFile.name;
+    const fileExtension = fileName.split(".").pop().toLowerCase();
+    if (fileExtension !== "py" && fileExtension !== "cpp") {
+      Swal.fire({
+        title: "Please upload a Python or C++ file",
+        icon: "error",
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener("mouseenter", Swal.stopTimer);
+          toast.addEventListener("mouseleave", Swal.resumeTimer);
+        },
+      });
+      return;
+    }
+    const downloadLink: string = await uploadAlgo(
+      database,
+      storage,
+      userInfo?.user?.uid || "unknown",
+      selectedFile
+    );
+    if (downloadLink !== "-1") {
+      setAlgo((prevState) => ({
+        ...prevState,
+        resumeURL: downloadLink,
+      }));
+      Swal.fire({
+        title: "Resume uploaded!",
+        icon: "success",
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener("mouseenter", Swal.stopTimer);
+          toast.addEventListener("mouseleave", Swal.resumeTimer);
+        },
+      });
+    } else {
+      Swal.fire({
+        title: "Resume upload failed",
+        icon: "error",
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener("mouseenter", Swal.stopTimer);
+          toast.addEventListener("mouseleave", Swal.resumeTimer);
+        },
+      });
+    }
   };
 
   const [algo, setAlgo] = useState(defaultAlgo);
@@ -100,6 +192,7 @@ export default function Submission() {
                         <input
                           id="file-upload"
                           name="file-upload"
+                          onChange={handleAlgoChange}
                           type="file"
                           className="sr-only"
                         />
