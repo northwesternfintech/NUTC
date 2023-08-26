@@ -15,26 +15,28 @@ async function uploadAlgo(
   file: File,
 ) {
   const fileRef = push(ref(database, `users/${uid}/algos`));
-  const fileIdKey: string = fileRef.key || "-1"; //bad practice
+  if(!fileRef) {
+    return { downloadURL: "", fileIdKey: "", fileRef: "" };
+  }
+  const fileIdKey: string = `${uid}/${fileRef.key}` || ""; //bad practice
   const storageRef = sRef(storage);
   const fileType = file.type.split("/")[1];
-  const algoRef = sRef(storageRef, `algos/${uid}/${fileIdKey}.${fileType}`);
+  const algoRef = sRef(storageRef, `algos/${fileIdKey}.${fileType}`);
   try {
     const snapshot = await uploadBytes(algoRef, file);
     const downloadURL = await getDownloadURL(snapshot.ref); //in theory, we should be saving the ID, rather than URL. this is easier.
     return { downloadURL, fileIdKey, fileRef };
   } catch (e) {
     console.log(e);
-    return { downloadURL: "-1", fileIdKey: "-1", fileRef: "-1" };
+    return { downloadURL: "", fileIdKey: "", fileRef: "" };
   }
 }
 
 async function writeNewAlgo(
-  database: any,
   algo: AlgorithmType,
   algoRef: any,
 ) {
-  if (algo.downloadURL === "" || algo.downloadURL === "-1") {
+  if (algo.downloadURL === "") {
     Swal.fire({
       title: "Please fill out all fields",
       icon: "warning",
@@ -109,7 +111,7 @@ export default function Submission() {
       userInfo?.user?.uid || "unknown",
       selectedFile,
     );
-    if (downloadLink.downloadURL !== "-1") {
+    if (downloadLink.downloadURL !== "") {
       setAlgo((prevState) => ({
         ...prevState,
         downloadURL: downloadLink.downloadURL,
@@ -244,7 +246,7 @@ export default function Submission() {
 
           <button
             type="submit"
-            onClick={() => writeNewAlgo(database, algo, algoRef)}
+            onClick={() => writeNewAlgo(algo, algoRef)}
             className="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
           >
             Submit
