@@ -7,6 +7,7 @@ import { child, push, ref, set } from "firebase/database";
 import { getDownloadURL, ref as sRef, uploadBytes } from "firebase/storage";
 import { useFirebase } from "@/app/firebase/context";
 import { useUserInfo } from "@/app/login/auth/context";
+import { useRouter } from "next/navigation";
 
 async function uploadAlgo(
   database: any,
@@ -15,7 +16,7 @@ async function uploadAlgo(
   file: File,
 ) {
   const fileRef = push(ref(database, `users/${uid}/algos`));
-  if(!fileRef) {
+  if (!fileRef) {
     return { downloadURL: "", fileIdKey: "", fileRef: "" };
   }
   const fileIdKey: string = `${uid}/${fileRef.key}` || ""; //bad practice
@@ -61,6 +62,7 @@ async function writeNewAlgo(
 }
 
 export default function Submission() {
+  const router = useRouter();
   const defaultAlgo: AlgorithmType = {
     lintResults: "pending",
     uploadDate: "",
@@ -246,7 +248,18 @@ export default function Submission() {
 
           <button
             type="submit"
-            onClick={() => writeNewAlgo(algo, algoRef)}
+            onClick={async () => {
+              await writeNewAlgo(algo, algoRef);
+              Swal.fire({
+                title: "Algorithm submitted!",
+                icon: "success",
+                timer: 2000,
+                timerProgressBar: true,
+                willClose: () => {
+                  router.push("/dash");
+                },
+              });
+            }}
             className="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
           >
             Submit
