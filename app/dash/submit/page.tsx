@@ -3,7 +3,7 @@ import { PaperClipIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import AlgorithmType from "@/app/dash/algoType";
 import Swal from "sweetalert2";
-import { push, ref, update } from "firebase/database";
+import { child, push, ref, set } from "firebase/database";
 import { getDownloadURL, ref as sRef, uploadBytes } from "firebase/storage";
 import { useFirebase } from "@/app/firebase/context";
 import { useUserInfo } from "@/app/login/auth/context";
@@ -12,27 +12,58 @@ async function uploadAlgo(
   database: any,
   storage: any,
   uid: string,
-  file: File
+  file: File,
 ) {
-  const fileId = push(ref(database)).key;
+  const fileRef = push(ref(database, `users/${uid}/algos`));
+  const fileIdKey: string = fileRef.key || "-1"; //bad practice
   const storageRef = sRef(storage);
   const fileType = file.type.split("/")[1];
-  const resumeRef = sRef(storageRef, `algos/${uid}/${fileId}.${fileType}`);
+  const algoRef = sRef(storageRef, `algos/${uid}/${fileIdKey}.${fileType}`);
   try {
-    const snapshot = await uploadBytes(resumeRef, file);
-    const downloadURL = await getDownloadURL(snapshot.ref);
-    return downloadURL;
+    const snapshot = await uploadBytes(algoRef, file);
+    const downloadURL = await getDownloadURL(snapshot.ref); //in theory, we should be saving the ID, rather than URL. this is easier.
+    return { downloadURL, fileIdKey, fileRef };
   } catch (e) {
     console.log(e);
-    return "-1";
+    return { downloadURL: "-1", fileIdKey: "-1", fileRef: "-1" };
   }
+}
+
+async function writeNewAlgo(
+  database: any,
+  algo: AlgorithmType,
+  algoRef: any,
+) {
+  if (algo.downloadURL === "" || algo.downloadURL === "-1") {
+    Swal.fire({
+      title: "Please fill out all fields",
+      icon: "warning",
+      toast: true,
+      position: "top-end",
+      showConfirmButton: false,
+      timer: 4000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener("mouseenter", Swal.stopTimer);
+        toast.addEventListener("mouseleave", Swal.resumeTimer);
+      },
+    });
+    return false;
+  }
+  algo.lintResults = "pending";
+  algo.uploadDate = new Date().toISOString();
+  await set(algoRef, algo);
+  // await functions.httpsCallable("emailApplication")();
+  // above should be lint function
+  return true;
 }
 
 export default function Submission() {
   const defaultAlgo: AlgorithmType = {
     lintResults: "pending",
     uploadDate: "",
-    filePath: "",
+    downloadURL: "",
+    fileIdKey: "",
     name: "",
     description: "",
   };
@@ -72,19 +103,21 @@ export default function Submission() {
       });
       return;
     }
-    const downloadLink: string = await uploadAlgo(
+    const downloadLink = await uploadAlgo(
       database,
       storage,
       userInfo?.user?.uid || "unknown",
-      selectedFile
+      selectedFile,
     );
-    if (downloadLink !== "-1") {
+    if (downloadLink.downloadURL !== "-1") {
       setAlgo((prevState) => ({
         ...prevState,
-        resumeURL: downloadLink,
+        downloadURL: downloadLink.downloadURL,
+        fileIdKey: downloadLink.fileIdKey,
       }));
+      setAlgoRef(downloadLink.fileRef);
       Swal.fire({
-        title: "Resume uploaded!",
+        title: "Algorithm uploaded!",
         icon: "success",
         toast: true,
         position: "top-end",
@@ -98,7 +131,7 @@ export default function Submission() {
       });
     } else {
       Swal.fire({
-        title: "Resume upload failed",
+        title: "Algorithm upload failed",
         icon: "error",
         toast: true,
         position: "top-end",
@@ -114,6 +147,7 @@ export default function Submission() {
   };
 
   const [algo, setAlgo] = useState(defaultAlgo);
+  const [algoRef, setAlgoRef]: any = useState(null);
   return (
     <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8">
       <div className="mx-auto max-w-2xl">
@@ -210,6 +244,7 @@ export default function Submission() {
 
           <button
             type="submit"
+            onClick={() => writeNewAlgo(database, algo, algoRef)}
             className="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
           >
             Submit

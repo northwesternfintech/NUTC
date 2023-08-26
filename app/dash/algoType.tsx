@@ -1,7 +1,8 @@
 export default interface AlgorithmType {
   lintResults: string;
   uploadDate: string;
-  filePath: string;
+  downloadURL: string;
+  fileIdKey: string;
   name: string;
   description: string;
 }

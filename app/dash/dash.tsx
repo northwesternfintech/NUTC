@@ -22,9 +22,9 @@ const navigation = [
   },
   {
     name: "Upload Algorithm",
-    href: "/dash/submissions",
+    href: "/dash/submit",
     icon: ArrowUpTrayIcon,
-    activeName: "/dash/submissions",
+    activeName: "/dash/submit",
   },
   {
     name: "Team Profile",
