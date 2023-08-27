@@ -6,8 +6,7 @@ import Swal from "sweetalert2";
 import { child, push, ref, set } from "firebase/database";
 import { getDownloadURL, ref as sRef, uploadBytes } from "firebase/storage";
 import { useFirebase } from "@/app/firebase/context";
-import { useUserInfo } from "@/app/login/auth/context";
-import { useRouter } from "next/navigation";
+import { UserInfoType, useUserInfo } from "@/app/login/auth/context";
 
 async function uploadAlgo(
   database: any,
@@ -36,6 +35,8 @@ async function uploadAlgo(
 async function writeNewAlgo(
   algo: AlgorithmType,
   algoRef: any,
+  user: UserInfoType,
+  setUser: any,
 ) {
   if (algo.downloadURL === "") {
     Swal.fire({
@@ -55,6 +56,7 @@ async function writeNewAlgo(
   }
   algo.lintResults = "pending";
   algo.uploadDate = new Date().toISOString();
+
   await set(algoRef, algo);
   // await functions.httpsCallable("emailApplication")();
   // above should be lint function
@@ -62,7 +64,6 @@ async function writeNewAlgo(
 }
 
 export default function Submission() {
-  const router = useRouter();
   const defaultAlgo: AlgorithmType = {
     lintResults: "pending",
     uploadDate: "",
@@ -249,14 +250,15 @@ export default function Submission() {
           <button
             type="submit"
             onClick={async () => {
-              if (await writeNewAlgo(algo, algoRef)) {
+              //@ts-ignore
+              if (await writeNewAlgo(algo, algoRef, userInfo.user, userInfo.setUser)) {
                 Swal.fire({
                   title: "Algorithm submitted!",
                   icon: "success",
                   timer: 2000,
                   timerProgressBar: true,
                   willClose: () => {
-                    router.push("/dash");
+                    window.location.reload();
                   },
                 });
               }
