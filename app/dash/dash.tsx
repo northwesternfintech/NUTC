@@ -57,7 +57,7 @@ export default function Dash(content: React.ReactNode) {
   const pathName = usePathname();
 
   //array of AlgorithmType
-  const [submissions, setSubmissions] = useState([]);
+  const [submissions, setSubmissions]:any = useState([]);
 
   useEffect(() => {
     setCurrentPage(pathName);
@@ -70,14 +70,16 @@ export default function Dash(content: React.ReactNode) {
     if (!algos) {
       return;
     }
+    var i = 1; //not proud of this
     for (const [key, value] of Object.entries(algos)) {
       tmpSubmissions.push({
         id: key,
         name: value.name,
         href: `/dash/submissions/${key}`,
-        initial: "1",
+        initial: String(i),
         current: false,
       });
+      i++;
     }
     if (tmpSubmissions) {
       tmpSubmissions[0].current = true;
@@ -180,7 +182,7 @@ export default function Dash(content: React.ReactNode) {
                             Your submissions
                           </div>
                           <ul role="list" className="-mx-2 mt-2 space-y-1">
-                            {submissions.map((team) => (
+                            {submissions.map((team:any) => (
                               <li key={team.name}>
                                 <a
                                   href={team.href}
@@ -254,7 +256,7 @@ export default function Dash(content: React.ReactNode) {
                     Your submissions
                   </div>
                   <ul role="list" className="-mx-2 mt-2 space-y-1">
-                    {submissions.map((team) => (
+                    {submissions.map((team:any) => (
                       <li key={team.name}>
                         <a
                           href={team.href}
