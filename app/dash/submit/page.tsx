@@ -249,16 +249,17 @@ export default function Submission() {
           <button
             type="submit"
             onClick={async () => {
-              await writeNewAlgo(algo, algoRef);
-              Swal.fire({
-                title: "Algorithm submitted!",
-                icon: "success",
-                timer: 2000,
-                timerProgressBar: true,
-                willClose: () => {
-                  router.push("/dash");
-                },
-              });
+              if (await writeNewAlgo(algo, algoRef)) {
+                Swal.fire({
+                  title: "Algorithm submitted!",
+                  icon: "success",
+                  timer: 2000,
+                  timerProgressBar: true,
+                  willClose: () => {
+                    router.push("/dash");
+                  },
+                });
+              }
             }}
             className="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
           >
