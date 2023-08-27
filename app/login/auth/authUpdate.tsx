@@ -5,6 +5,7 @@ import { child, get, ref } from "firebase/database";
 import { UserInfoType, useUserInfo } from "@/app/login/auth/context";
 import { onAuthStateChanged } from "firebase/auth";
 import { getAuth } from "firebase/auth";
+import AlgorithmType from "@/app/dash/algoType";
 
 export default function AuthUpdate() {
   const { database } = useFirebase();
@@ -40,6 +41,17 @@ export default function AuthUpdate() {
         setUser(newUser);
       } else {
         const dbUser: UserInfoType = snapshot.val();
+        const entries = Object.entries(dbUser.algos || {});
+        const sortedEntries = entries.sort((a, b) => {
+          const dateA: any = new Date(a[1].uploadDate);
+          const dateB: any = new Date(b[1].uploadDate);
+          return dateB - dateA;
+        });
+        var map: any = new Map();
+        sortedEntries.forEach((entry) => {
+          map[entry[0]] = entry[1];
+        });
+
         const newUser: UserInfoType = {
           uid: uid,
           username: dbUser.username || "",
@@ -54,7 +66,7 @@ export default function AuthUpdate() {
           hasCompletedReg: true,
           isApprovedApplicant: dbUser.isApprovedApplicant || false,
           isRejectedApplicant: dbUser.isRejectedApplicant || false,
-          algos: dbUser.algos || undefined,
+          algos: map || undefined,
         };
         setUser(newUser);
       }
