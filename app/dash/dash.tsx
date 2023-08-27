@@ -4,12 +4,12 @@ import Link from "next/link";
 import { Dialog, Transition } from "@headlessui/react";
 import Logo from "@/app/assets/logo.png";
 import Image from "next/image";
-import {useUserInfo} from "@/app/login/auth/context";
+import { useUserInfo } from "@/app/login/auth/context";
 import {
   ArrowTrendingUpIcon,
+  ArrowUpTrayIcon,
   Bars3Icon,
   UserGroupIcon,
-  ArrowUpTrayIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
@@ -65,9 +65,9 @@ export default function Dash(content: React.ReactNode) {
 
   useEffect(() => {
     const algos = user?.algos;
-    const tmpSubmissions:any = [];
+    const tmpSubmissions: any = [];
     //iterate over values
-    if(!algos) {
+    if (!algos) {
       return;
     }
     for (const [key, value] of Object.entries(algos)) {
@@ -77,13 +77,13 @@ export default function Dash(content: React.ReactNode) {
         href: `/dash/submissions/${key}`,
         initial: "1",
         current: false,
-        });
+      });
     }
-    if(tmpSubmissions) {
-      tmpSubmissions[0].current=true;
+    if (tmpSubmissions) {
+      tmpSubmissions[0].current = true;
       setSubmissions(tmpSubmissions);
     }
-  }, [user])
+  }, [user]);
 
   return (
     <>
@@ -162,7 +162,7 @@ export default function Dash(content: React.ReactNode) {
                                     item.activeName === currentPage
                                       ? "bg-gray-800 text-white"
                                       : "text-gray-400 hover:text-white hover:bg-gray-800",
-                                    "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+                                    "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold",
                                   )}
                                 >
                                   <item.icon
@@ -188,7 +188,7 @@ export default function Dash(content: React.ReactNode) {
                                     team.current
                                       ? "bg-gray-800 text-white"
                                       : "text-gray-400 hover:text-white hover:bg-gray-800",
-                                    "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+                                    "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold",
                                   )}
                                 >
                                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium text-gray-400 group-hover:text-white">
@@ -236,7 +236,7 @@ export default function Dash(content: React.ReactNode) {
                             item.activeName === currentPage
                               ? "bg-gray-800 text-white"
                               : "text-gray-400 hover:text-white hover:bg-gray-800",
-                            "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+                            "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold",
                           )}
                         >
                           <item.icon
@@ -262,7 +262,7 @@ export default function Dash(content: React.ReactNode) {
                             team.current
                               ? "bg-gray-800 text-white"
                               : "text-gray-400 hover:text-white hover:bg-gray-800",
-                            "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+                            "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold",
                           )}
                         >
                           <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium text-gray-400 group-hover:text-white">
