@@ -1,5 +1,5 @@
 "use client";
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Menu, Transition } from "@headlessui/react";
 const statuses: any = {
   pending: "text-yellow-500 bg-yellow-100/10",
@@ -88,11 +88,38 @@ import {
   ChevronUpDownIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/20/solid";
+import { useUserInfo } from "../login/auth/context";
+import AlgorithmType from "./algoType";
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
 }
 export default function Dashboard() {
+  const [algos, setAlgos] = useState<AlgorithmType[]>([]);
+  const { user } = useUserInfo();
+
+  useEffect(() => {
+    const algos = user?.algos;
+    if (!algos) {
+      return;
+    }
+    var tmpAlgos: any = [];
+    for (const [key, value] of Object.entries(algos)) {
+      const test: AlgorithmType = value;
+      tmpAlgos.push({
+        id: key,
+        href: `/dash/submissions/${key}`,
+        projectName: value.name,
+        teamName: value.name,
+        status: test.lintResults,
+        statusText: test.lintResults,
+        description: test.description,
+        environment: test.lintResults,
+      });
+    }
+    setAlgos(tmpAlgos);
+  }, [user]);
+
   return (
     <div>
       <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-6 border-b border-white/5 bg-gray-900 px-4 shadow-sm sm:px-6 lg:px-8">
@@ -148,7 +175,7 @@ export default function Dashboard() {
                       href="#"
                       className={classNames(
                         active ? "bg-gray-50" : "",
-                        "block px-3 py-1 text-sm leading-6 text-gray-900"
+                        "block px-3 py-1 text-sm leading-6 text-gray-900",
                       )}
                     >
                       Name
@@ -161,7 +188,7 @@ export default function Dashboard() {
                       href="#"
                       className={classNames(
                         active ? "bg-gray-50" : "",
-                        "block px-3 py-1 text-sm leading-6 text-gray-900"
+                        "block px-3 py-1 text-sm leading-6 text-gray-900",
                       )}
                     >
                       Date updated
@@ -174,7 +201,7 @@ export default function Dashboard() {
                       href="#"
                       className={classNames(
                         active ? "bg-gray-50" : "",
-                        "block px-3 py-1 text-sm leading-6 text-gray-900"
+                        "block px-3 py-1 text-sm leading-6 text-gray-900",
                       )}
                     >
                       Environment
@@ -188,7 +215,7 @@ export default function Dashboard() {
 
         {/* Deployment list */}
         <ul role="list" className="divide-y divide-white/5">
-          {deployments.map((deployment: any) => (
+          {algos.map((deployment: any) => (
             <li
               key={deployment.id}
               className="relative flex items-center space-x-4 px-4 py-4 sm:px-6 lg:px-8"
@@ -198,7 +225,7 @@ export default function Dashboard() {
                   <div
                     className={classNames(
                       statuses[deployment.status],
-                      "flex-none rounded-full p-1"
+                      "flex-none rounded-full p-1",
                     )}
                   >
                     <div className="h-2 w-2 rounded-full bg-current" />
@@ -228,7 +255,7 @@ export default function Dashboard() {
               <div
                 className={classNames(
                   environments[deployment.environment],
-                  "rounded-full flex-none py-1 px-2 text-xs font-medium ring-1 ring-inset"
+                  "rounded-full flex-none py-1 px-2 text-xs font-medium ring-1 ring-inset",
                 )}
               >
                 {deployment.environment}
