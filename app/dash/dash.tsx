@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Dialog, Transition } from "@headlessui/react";
 import Logo from "@/app/assets/logo.png";
 import Image from "next/image";
+import {useUserInfo} from "@/app/login/auth/context";
 import {
   ArrowTrendingUpIcon,
   Bars3Icon,
@@ -33,7 +34,7 @@ const navigation = [
     activeName: "team-profile",
   },
 ];
-const submissions = [
+const submissions2 = [
   {
     id: 1,
     name: "new-experimental-algo",
@@ -52,11 +53,37 @@ function classNames(...classes: any) {
 export default function Dash(content: React.ReactNode) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState("");
+  const { user } = useUserInfo();
   const pathName = usePathname();
+
+  //array of AlgorithmType
+  const [submissions, setSubmissions] = useState([]);
 
   useEffect(() => {
     setCurrentPage(pathName);
   }, [pathName]);
+
+  useEffect(() => {
+    const algos = user?.algos;
+    const tmpSubmissions:any = [];
+    //iterate over values
+    if(!algos) {
+      return;
+    }
+    for (const [key, value] of Object.entries(algos)) {
+      tmpSubmissions.push({
+        id: key,
+        name: value.name,
+        href: `/dash/submissions/${key}`,
+        initial: "1",
+        current: false,
+        });
+    }
+    if(tmpSubmissions) {
+      tmpSubmissions[0].current=true;
+      setSubmissions(tmpSubmissions);
+    }
+  }, [user])
 
   return (
     <>
