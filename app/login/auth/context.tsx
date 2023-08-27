@@ -1,5 +1,6 @@
 "use client";
 
+import AlgorithmType from "@/app/dash/algoType";
 import { createContext, ReactNode, useContext, useState } from "react";
 
 export interface UserInfoType {
@@ -16,6 +17,7 @@ export interface UserInfoType {
   hasCompletedReg: boolean;
   isApprovedApplicant?: boolean;
   isRejectedApplicant?: boolean;
+  algos?: Map<string, AlgorithmType>;
 }
 
 interface UserType {

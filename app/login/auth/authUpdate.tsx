@@ -54,6 +54,7 @@ export default function AuthUpdate() {
           hasCompletedReg: true,
           isApprovedApplicant: dbUser.isApprovedApplicant || false,
           isRejectedApplicant: dbUser.isRejectedApplicant || false,
+          algos: dbUser.algos || undefined,
         };
         setUser(newUser);
       }
