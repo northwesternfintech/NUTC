@@ -81,7 +81,7 @@ export default function Dash(content: React.ReactNode) {
       });
       i++;
     }
-    if (tmpSubmissions) {
+    if (tmpSubmissions.length>0) {
       tmpSubmissions[0].current = true;
       setSubmissions(tmpSubmissions);
     }
