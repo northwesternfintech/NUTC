@@ -1,7 +1,8 @@
 #include "common.hpp"
-#include "firebase/firebase.hpp"
 #include "git.h"
 #include "rabbitmq/rabbitmq.hpp"
+#include "firebase/firebase.hpp"
+#include "pywrapper/pywrapper.hpp"
 
 #include <argparse/argparse.hpp>
 

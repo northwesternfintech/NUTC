@@ -26,6 +26,8 @@ find_package(argparse REQUIRED)  # Argument parsing
 find_package(rabbitmq-c REQUIRED)
 find_package(CURL REQUIRED)
 find_package(glaze REQUIRED)
+find_package(Python COMPONENTS Interpreter Development REQUIRED)
+find_package(pybind11 REQUIRED)
 
 # Git version tracking
 FetchContent_Declare(cmake_git_version_tracking
@@ -58,6 +60,7 @@ target_link_libraries(NUTC-client_lib PRIVATE quill::quill)
 target_link_libraries(NUTC-client_lib PRIVATE rabbitmq::rabbitmq-static)
 target_link_libraries(NUTC-client_lib PRIVATE CURL::libcurl)
 target_link_libraries(NUTC-client_lib PRIVATE glaze::glaze)
+target_link_libraries(NUTC-client_lib PRIVATE pybind11::pybind11)
 
 
 # ---- Declare executable ----
@@ -78,6 +81,7 @@ target_link_libraries(NUTC-client_exe PRIVATE cmake_git_version_tracking)
 target_link_libraries(NUTC-client_exe PRIVATE rabbitmq::rabbitmq-static)
 target_link_libraries(NUTC-client_exe PRIVATE CURL::libcurl)
 target_link_libraries(NUTC-client_exe PRIVATE glaze::glaze)
+target_link_libraries(NUTC-client_exe PRIVATE pybind11::pybind11)
 
 
 # ---- Install rules ----
