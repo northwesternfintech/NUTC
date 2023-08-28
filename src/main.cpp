@@ -13,7 +13,6 @@ int
 main()
 {
     auto const lib = library{};
-    nutc::logging::init(quill::LogLevel::TraceL3);
 
     nutc::rabbitmq::RabbitMQ conn;
 
@@ -23,6 +22,7 @@ main()
     }
 
     nutc::client::spawn_all_clients();
+    nutc::logging::init(quill::LogLevel::TraceL3);
 
     std::string mess = conn.consumeMessage();
     log_i(rabbitmq, "Received message: {}", mess);
