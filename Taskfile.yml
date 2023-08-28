@@ -35,7 +35,7 @@ tasks:
     dir: '{{.USER_WORKING_DIR}}'
     cmds:
       - task: build
-      - ./build/dev/{{.NAME}} -U placeholder
+      - ./build/dev/{{.NAME}} -U nsogZsFY6LVgnvC615TrbJ2XjXR2
 
   run-v:
     env:

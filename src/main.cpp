@@ -75,6 +75,8 @@ main(int argc, const char** argv)
     nutc::logging::init(verbosity);
     log_build_info();
 
+    log_i(main, "Starting NUTC Client for UID {}", uid);
+
     amqp_connection_state_t conn;
 
     if (!nutc::rabbitmq::initializeConnection(conn)) {
@@ -89,7 +91,7 @@ main(int argc, const char** argv)
 
     std::string pretty_user_info;
     glz::write<glz::opts{.prettify = true}>(user_info, pretty_user_info);
-    log_i(firebase, "User info: {}", pretty_user_info);
+    log_i(firebase, "User info: {}", pretty_user_info); // for debugging
 
     return 0;
 }
