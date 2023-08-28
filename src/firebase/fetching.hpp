@@ -19,5 +19,7 @@ glz::json_t firebase_request(
 
 glz::json_t get_user_info(const std::string& uid);
 
+void get_most_recent_algo(const std::string& uid);
+
 } // namespace client
 } // namespace nutc

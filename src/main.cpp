@@ -91,7 +91,8 @@ main(int argc, const char** argv)
 
     std::string pretty_user_info;
     glz::write<glz::opts{.prettify = true}>(user_info, pretty_user_info);
-    log_i(firebase, "User info: {}", pretty_user_info); // for debugging
+    // log_i(firebase, "User info: {}", pretty_user_info); // for debugging
+    nutc::client::get_most_recent_algo(uid);
 
     return 0;
 }
