@@ -9,7 +9,7 @@ elif docker ps -a | grep -q nutc-rabbitmq-server; then
     echo "Starting the existing 'nutc-rabbitmq-server' container..."
     docker start nutc-rabbitmq-server
     echo "'nutc-rabbitmq-server' container started."
-    sleep 2
+    sleep 5
 else
     echo "Starting RabbitMQ container..."
     docker run -d \
@@ -20,5 +20,5 @@ else
         -e RABBITMQ_DEFAULT_PASS=$PASSWORD \
         rabbitmq:management
     echo "RabbitMQ container started with username: $USERNAME and password: $PASSWORD."
-    sleep 2
+    sleep 5
 fi
