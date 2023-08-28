@@ -1,24 +1,32 @@
 #pragma once
 
+#include "market_order.hpp"
+
+#include <iostream>
+#include <string>
+
 #include <rabbitmq-c/amqp.h>
 #include <rabbitmq-c/tcp_socket.h>
 
-#include <string>
-#include <iostream>
-
 namespace nutc {
 namespace rabbitmq {
-bool connectToRabbitMQ(
-    amqp_connection_state_t& conn, const std::string& hostname, int port,
-    const std::string& username, const std::string& password
-);
 
-bool publishMessage(
-    amqp_connection_state_t& conn, const std::string& queueName,
-    const std::string& message
-);
+class RabbitMQ {
+public:
+    bool initializeConnection();
+    std::string consumeMarketOrder();
+    void closeConnection();
 
-std::string consumeMessage(amqp_connection_state_t& conn, const std::string& queueName);
+private:
+    amqp_connection_state_t conn;
+    bool publishMessage(const std::string& queueName, const std::string& message);
+    bool connectToRabbitMQ(
+        const std::string& hostname, int port, const std::string& username,
+        const std::string& password
+    );
+
+    std::string consumeMessage(const std::string& queueName);
+};
 
 bool initializeConnection(amqp_connection_state_t& conn);
 
