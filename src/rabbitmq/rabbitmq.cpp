@@ -125,16 +125,26 @@ RabbitMQ::initializeConnection(const std::string& queueName)
         return false;
     }
 
+    if (!initializeQueue(queueName)) {
+        return false;
+    }
+
+    return true;
+}
+
+bool
+RabbitMQ::initializeQueue(const std::string& queueName)
+{
     amqp_queue_declare(
         conn, 1, amqp_cstring_bytes(queueName.c_str()), 0, 0, 0, 1, amqp_empty_table
     );
-    log_d(rabbitmq, "Declared queue: {}", queueName);
 
-    res = amqp_get_rpc_reply(conn);
+    amqp_rpc_reply_t res = amqp_get_rpc_reply(conn);
     if (res.reply_type != AMQP_RESPONSE_NORMAL) {
         log_e(rabbitmq, "Failed to declare queue.");
         return false;
     }
+    log_d(rabbitmq, "Declared queue: {}", queueName);
 
     return true;
 }

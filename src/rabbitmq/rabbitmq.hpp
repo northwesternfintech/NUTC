@@ -1,6 +1,6 @@
 #pragma once
 
-#include "market_order.hpp"
+#include "glz_templates.hpp"
 
 #include <iostream>
 #include <string>
@@ -20,6 +20,7 @@ public:
 private:
     amqp_connection_state_t conn;
     bool publishMessage(const std::string& queueName, const std::string& message);
+    bool initializeQueue(const std::string& queueName);
     bool connectToRabbitMQ(
         const std::string& hostname,
         int port,
