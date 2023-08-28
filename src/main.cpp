@@ -1,8 +1,8 @@
 #include "common.hpp"
-#include "git.h"
-#include "rabbitmq/rabbitmq.hpp"
 #include "firebase/firebase.hpp"
+#include "git.h"
 #include "pywrapper/pywrapper.hpp"
+#include "rabbitmq/rabbitmq.hpp"
 
 #include <argparse/argparse.hpp>
 
@@ -99,6 +99,16 @@ main(int argc, const char** argv)
         conn.closeConnection();
         return 0;
     }
+    std::function<bool(const std::string&, int, bool, const std::string&)> func =
+        std::bind(
+            &nutc::rabbitmq::RabbitMQ::publishMarketOrder,
+            &conn,
+            std::placeholders::_1,
+            std::placeholders::_2,
+            true,
+            "market"
+        );
+    nutc::pywrapper::init(func);
     conn.closeConnection();
     return 0;
 }

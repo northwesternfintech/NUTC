@@ -54,13 +54,8 @@ RabbitMQ::publishMarketOrder(
     order.quantity = quantity;
     order.side = side;
     order.type = type;
-    return publishMarketOrder(order);
-}
-
-bool
-RabbitMQ::publishMarketOrder(const MarketOrder& order)
-{
     std::string message = glz::write_json(order);
+
     log_i(rabbitmq, "Publishing order: {}", message);
     return publishMessage("market_order", message);
 }
