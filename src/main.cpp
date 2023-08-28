@@ -75,40 +75,16 @@ main(int argc, const char** argv)
     // Start logging and print build info
     nutc::logging::init(verbosity);
     log_build_info();
-
     log_i(main, "Starting NUTC Client for UID {}", uid);
 
-    nutc::rabbitmq::RabbitMQ conn;
+    nutc::rabbitmq::RabbitMQ conn(uid);
 
-    if (!conn.initializeConnection(uid)) {
-        log_e(rabbitmq, "Failed to initialize connection");
-        conn.publishInit(uid, false);
-        return 1;
-    }
-
-    log_i(rabbitmq, "Connection established");
-
-    glz::json_t user_info = nutc::client::get_user_info(uid);
-
-    std::string pretty_user_info;
-    glz::write<glz::opts{.prettify = true}>(user_info, pretty_user_info);
-    // log_i(firebase, "User info: {}", pretty_user_info); // for debugging
     bool hasAlgo = nutc::client::get_most_recent_algo(uid);
-    conn.publishInit(uid, true);
     if (!hasAlgo) {
         conn.closeConnection();
         return 0;
     }
-    std::function<bool(const std::string&, int, bool, const std::string&)> func =
-        std::bind(
-            &nutc::rabbitmq::RabbitMQ::publishMarketOrder,
-            &conn,
-            std::placeholders::_1,
-            std::placeholders::_2,
-            true,
-            "market"
-        );
-    nutc::pywrapper::init(func);
+    nutc::pywrapper::init(conn.getMarketFunc());
     conn.closeConnection();
     return 0;
 }

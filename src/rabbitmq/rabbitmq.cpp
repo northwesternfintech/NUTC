@@ -137,7 +137,33 @@ RabbitMQ::initializeConnection(const std::string& queueName)
         return false;
     }
 
+    log_i(rabbitmq, "Connection established");
+
     return true;
+}
+
+RabbitMQ::RabbitMQ(const std::string& uid)
+{
+    if (!initializeConnection(uid)) {
+        log_c(rabbitmq, "Failed to initialize connection to RabbitMQ");
+        // attempt to say we didn't init correctly
+        publishInit(uid, false);
+        exit(1);
+    }
+    publishInit(uid, false);
+}
+
+std::function<bool(const std::string&, int, bool, const std::string&)>
+RabbitMQ::getMarketFunc()
+{
+    return std::bind(
+        &RabbitMQ::publishMarketOrder,
+        this,
+        std::placeholders::_1,
+        std::placeholders::_2,
+        std::placeholders::_3,
+        std::placeholders::_4
+    );
 }
 
 bool

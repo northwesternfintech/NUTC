@@ -42,6 +42,7 @@ add_library(
     NUTC-client_lib OBJECT
     src/rabbitmq/rabbitmq.cpp
     src/firebase/fetching.cpp
+    src/pywrapper/runtime.cpp
     # Utils
     src/logging.cpp
 )
@@ -61,6 +62,7 @@ target_link_libraries(NUTC-client_lib PRIVATE rabbitmq::rabbitmq-static)
 target_link_libraries(NUTC-client_lib PRIVATE CURL::libcurl)
 target_link_libraries(NUTC-client_lib PRIVATE glaze::glaze)
 target_link_libraries(NUTC-client_lib PRIVATE pybind11::pybind11)
+target_link_libraries(NUTC-client_lib PRIVATE Python::Python)
 
 
 # ---- Declare executable ----
@@ -82,6 +84,7 @@ target_link_libraries(NUTC-client_exe PRIVATE rabbitmq::rabbitmq-static)
 target_link_libraries(NUTC-client_exe PRIVATE CURL::libcurl)
 target_link_libraries(NUTC-client_exe PRIVATE glaze::glaze)
 target_link_libraries(NUTC-client_exe PRIVATE pybind11::pybind11)
+target_link_libraries(NUTC-client_exe PRIVATE Python::Python)
 
 
 # ---- Install rules ----
