@@ -79,7 +79,7 @@ main(int argc, const char** argv)
 
     nutc::rabbitmq::RabbitMQ conn;
 
-    if (!conn.initializeConnection()) {
+    if (!conn.initializeConnection(uid)) {
         log_e(rabbitmq, "Failed to initialize connection");
         return 1;
     }

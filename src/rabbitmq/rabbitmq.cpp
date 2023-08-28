@@ -55,16 +55,6 @@ RabbitMQ::publishMarketOrder(const MarketOrder& order)
 bool
 RabbitMQ::publishMessage(const std::string& queueName, const std::string& message)
 {
-    amqp_queue_declare(
-        conn, 1, amqp_cstring_bytes(queueName.c_str()), 0, 0, 0, 1, amqp_empty_table
-    );
-
-    amqp_rpc_reply_t res = amqp_get_rpc_reply(conn);
-    if (res.reply_type != AMQP_RESPONSE_NORMAL) {
-        log_e(rabbitmq, "Failed to declare queue.");
-        return false;
-    }
-
     amqp_basic_publish(
         conn,
         1,
@@ -76,7 +66,7 @@ RabbitMQ::publishMessage(const std::string& queueName, const std::string& messag
         amqp_cstring_bytes(message.c_str())
     );
 
-    res = amqp_get_rpc_reply(conn);
+    amqp_rpc_reply_t res = amqp_get_rpc_reply(conn);
     if (res.reply_type != AMQP_RESPONSE_NORMAL) {
         log_e(rabbitmq, "Failed to publish message.");
         return false;
@@ -123,7 +113,7 @@ RabbitMQ::consumeMessage(const std::string& queueName)
 }
 
 bool
-RabbitMQ::initializeConnection()
+RabbitMQ::initializeConnection(const std::string& queueName)
 {
     if (!connectToRabbitMQ("localhost", 5672, "NUFT", "ADMIN")) {
         return false;
@@ -134,6 +124,18 @@ RabbitMQ::initializeConnection()
         log_e(rabbitmq, "Failed to open channel.");
         return false;
     }
+
+    amqp_queue_declare(
+        conn, 1, amqp_cstring_bytes(queueName.c_str()), 0, 0, 0, 1, amqp_empty_table
+    );
+    log_d(rabbitmq, "Declared queue: {}", queueName);
+
+    res = amqp_get_rpc_reply(conn);
+    if (res.reply_type != AMQP_RESPONSE_NORMAL) {
+        log_e(rabbitmq, "Failed to declare queue.");
+        return false;
+    }
+
     return true;
 }
 

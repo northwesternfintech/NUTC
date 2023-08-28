@@ -13,7 +13,7 @@ namespace rabbitmq {
 
 class RabbitMQ {
 public:
-    bool initializeConnection();
+    bool initializeConnection(const std::string& queueName);
     bool publishMarketOrder(const MarketOrder& order);
     void closeConnection();
 
