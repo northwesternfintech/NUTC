@@ -10,7 +10,7 @@ print_algo_info(const glz::json_t& algo, const std::string& algo_id)
     log_i(firebase, "Description: {}", algo["description"].get<std::string>());
     log_i(firebase, "Upload date: {}", algo["uploadDate"].get<std::string>());
     log_d(firebase, "Downloading at url {}", algo["downloadURL"].get<std::string>());
-  log_i(firebase, "Algo id: {}", algo_id);
+    log_i(firebase, "Algo id: {}", algo_id);
 }
 
 glz::json_t
@@ -56,21 +56,22 @@ storage_request(const std::string& firebase_url)
     return readBuffer;
 }
 
-void
+bool
 get_most_recent_algo(const std::string& uid)
 {
     glz::json_t user_info = get_user_info(uid);
     // if not has "algos"
     if (!user_info.contains("algos") || !user_info.contains("latestAlgoId")) {
         log_e(firebase, "User has no algos");
-        exit(1);
+        return false;
     }
     std::string latestAlgoId = user_info["latestAlgoId"].get<std::string>();
     glz::json_t algo_info = user_info["algos"][latestAlgoId];
     std::string downloadURL = algo_info["downloadURL"].get<std::string>();
     print_algo_info(algo_info, latestAlgoId);
     std::string algo_file = storage_request(downloadURL);
-  log_i(firebase, "{}", algo_file);
+    log_i(firebase, "{}", algo_file);
+    return true;
 }
 
 glz::json_t

@@ -81,19 +81,20 @@ main(int argc, const char** argv)
 
     if (!conn.initializeConnection(uid)) {
         log_e(rabbitmq, "Failed to initialize connection");
+        conn.publishInit(uid, false);
         return 1;
     }
 
     log_i(rabbitmq, "Connection established");
-    conn.publishInit(uid, true);
 
-    conn.closeConnection();
     glz::json_t user_info = nutc::client::get_user_info(uid);
 
     std::string pretty_user_info;
     glz::write<glz::opts{.prettify = true}>(user_info, pretty_user_info);
     // log_i(firebase, "User info: {}", pretty_user_info); // for debugging
-    nutc::client::get_most_recent_algo(uid);
+    bool ready = nutc::client::get_most_recent_algo(uid);
+    conn.publishInit(uid, ready);
 
+    conn.closeConnection();
     return 0;
 }

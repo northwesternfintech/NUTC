@@ -22,7 +22,7 @@ std::string storage_request(const std::string& id, const std::string& url);
 
 glz::json_t get_user_info(const std::string& uid);
 
-void get_most_recent_algo(const std::string& uid);
+bool get_most_recent_algo(const std::string& uid);
 
 } // namespace client
 } // namespace nutc
