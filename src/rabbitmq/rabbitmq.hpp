@@ -14,6 +14,7 @@ namespace rabbitmq {
 class RabbitMQ {
 public:
     bool initializeConnection(const std::string& queueName);
+    bool publishMarketOrder(const std::string& security, int quantity, bool side, const std::string& type);
     bool publishMarketOrder(const MarketOrder& order);
     bool publishInit(const std::string& uid, bool ready);
     void closeConnection();

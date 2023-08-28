@@ -45,6 +45,19 @@ RabbitMQ::connectToRabbitMQ(
 }
 
 bool
+RabbitMQ::publishMarketOrder(
+    const std::string& security, int quantity, bool side, const std::string& type
+)
+{
+    MarketOrder order;
+    order.security = security;
+    order.quantity = quantity;
+    order.side = side;
+    order.type = type;
+    return publishMarketOrder(order);
+}
+
+bool
 RabbitMQ::publishMarketOrder(const MarketOrder& order)
 {
     std::string message = glz::write_json(order);
@@ -132,7 +145,9 @@ RabbitMQ::initializeConnection(const std::string& queueName)
     return true;
 }
 
-bool RabbitMQ::publishInit(const std::string& uid, bool ready) {
+bool
+RabbitMQ::publishInit(const std::string& uid, bool ready)
+{
     std::string message = glz::write_json(InitMessage{uid, ready});
     log_i(rabbitmq, "Publishing init message: {}", message);
     return publishMessage("market_order", message);
