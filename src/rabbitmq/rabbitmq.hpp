@@ -28,9 +28,5 @@ private:
     std::string consumeMessage(const std::string& queueName);
 };
 
-bool initializeConnection(amqp_connection_state_t& conn);
-
-void closeConnection(amqp_connection_state_t& conn);
-
 } // namespace rabbitmq
 } // namespace nutc
