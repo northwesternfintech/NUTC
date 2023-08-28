@@ -13,18 +13,10 @@ create_api_module(std::function<bool(const std::string&, int, bool, const std::s
         "nutc_api", "NUTC Exchange API", new py::module::module_def
     );
     m.def("publish_market_order", publish_market_order);
-    // m.add_object("__loader__", py::module_::import("imp").attr("NullImporter"));
-    // m.attr("__package__") = py::none();
-    // m.attr("__spec__") = py::none();
-    // m.attr("__file__") = py::none();
 
     py::module_ sys = py::module_::import("sys");
     py::dict sys_modules = sys.attr("modules").cast<py::dict>();
     sys_modules["nutc_api"] = m;
-    // py::module::import("sys").attr("modules")["nutc_api"] = m;
-
-    // py::finalize_interpreter();
-    // py::initialize_interpreter();
 
     py::exec(R"(import nutc_api)");
     py::exec(R"(
