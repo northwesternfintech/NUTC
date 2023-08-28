@@ -37,9 +37,8 @@ RabbitMQ::connectToRabbitMQ(
 }
 
 bool
-RabbitMQ::initializeConsumeMO()
+RabbitMQ::initializeQueue(const std::string& queueName)
 {
-    // declare the queue
     amqp_queue_declare(
         conn, 1, amqp_cstring_bytes("market_order"), 0, 0, 0, 1, amqp_empty_table
     );
@@ -49,16 +48,23 @@ RabbitMQ::initializeConsumeMO()
         log_e(rabbitmq, "Failed to declare queue.");
         return false;
     }
+    log_i(rabbitmq, "Declared queue: {}", queueName);
+    return true;
+}
 
+bool
+RabbitMQ::initializeConsumeMO()
+{
+    initializeQueue("market_order");
     amqp_basic_consume(
         conn, 1, amqp_cstring_bytes("market_order"), amqp_empty_bytes, 0, 1, 0,
         amqp_empty_table
     );
 
-    res = amqp_get_rpc_reply(conn);
+    amqp_rpc_reply_t res = amqp_get_rpc_reply(conn);
     if (res.reply_type != AMQP_RESPONSE_NORMAL) {
         log_e(rabbitmq, "Failed to consume message.");
-        return false; 
+        return false;
     }
 
     return true;
