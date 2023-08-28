@@ -94,7 +94,7 @@ RabbitMQ::publishMessage(const std::string& queueName, const std::string& messag
 
 // Blocking
 std::string
-RabbitMQ::consumeMessage()
+RabbitMQ::consumeMessageAsString()
 {
     amqp_envelope_t envelope;
     amqp_maybe_release_buffers(conn);
@@ -110,6 +110,49 @@ RabbitMQ::consumeMessage()
     );
     amqp_destroy_envelope(&envelope);
     return message;
+}
+
+std::variant<InitMessage, MarketOrder, RMQError>
+RabbitMQ::consumeMessage()
+{
+    std::string buf = consumeMessageAsString();
+    if (buf == "") {
+        return RMQError{"Failed to consume message."};
+    }
+
+    std::variant<InitMessage, MarketOrder, RMQError> data{};
+    auto err = glz::read_json(data, buf);
+    if (err) {
+        std::string error = glz::format_error(err, buf);
+        return RMQError{error};
+    }
+    return data;
+}
+
+void
+RabbitMQ::wait_for_clients(int num_clients)
+{
+    for (int i = 0; i < num_clients; i++) {
+        std::variant<InitMessage, MarketOrder, RMQError> data = consumeMessage();
+        if (std::holds_alternative<RMQError>(data)) {
+            std::string error = std::get<RMQError>(data).message;
+            log_e(rabbitmq, "Failed to consume message with error {}.", error);
+            return;
+        }
+        else if (std::holds_alternative<MarketOrder>(data)) {
+            log_i(
+                rabbitmq,
+                "Received market order before initialization complete. Ignoring..."
+            );
+            continue;
+        }
+        InitMessage init = std::get<InitMessage>(data);
+        log_i(
+            rabbitmq, "Received init message from client {} with status {}",
+            init.client_uid, init.ready ? "ready" : "not ready"
+        );
+    }
+    log_i(rabbitmq, "All clients ready. Starting exchange");
 }
 
 bool

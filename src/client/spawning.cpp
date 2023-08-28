@@ -5,7 +5,7 @@
 
 namespace nutc {
 namespace client {
-void
+int
 spawn_all_clients()
 {
     std::string endpoint = std::string(FIREBASE_URL) + std::string("users.json");
@@ -13,10 +13,13 @@ spawn_all_clients()
     glz::json_t::object_t users = res.get<glz::json_t::object_t>();
 
     log_i(client_spawning, "Starting exchange with {} users", users.size());
+    int clients = 0;
     for (auto& [uid, user] : users) {
         log_i(client_spawning, "Spawning client: {}", uid);
         spawn_client(uid);
+        clients++;
     };
+    return clients;
 }
 
 void
@@ -25,9 +28,9 @@ spawn_client(const std::string& uid)
     pid_t pid = fork();
     if (pid == 0) {
         std::vector<std::string> args = {"NUTC-client", "-U", uid};
-        
+
         std::vector<char*> c_args;
-        for (auto& arg : args) 
+        for (auto& arg : args)
             c_args.push_back(arg.data());
         c_args.push_back(nullptr);
 
