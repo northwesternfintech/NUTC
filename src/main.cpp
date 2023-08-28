@@ -30,6 +30,7 @@ main()
     };
 
     conn.wait_for_clients(num_clients);
+    conn.consumeMessage();
     conn.closeConnection();
 
     return 0;
