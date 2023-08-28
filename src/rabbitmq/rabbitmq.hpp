@@ -15,6 +15,7 @@ class RabbitMQ {
 public:
     bool initializeConnection(const std::string& queueName);
     bool publishMarketOrder(const MarketOrder& order);
+    bool publishInit(const std::string& uid, bool ready);
     void closeConnection();
 
 private:

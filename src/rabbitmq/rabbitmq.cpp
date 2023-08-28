@@ -132,6 +132,12 @@ RabbitMQ::initializeConnection(const std::string& queueName)
     return true;
 }
 
+bool RabbitMQ::publishInit(const std::string& uid, bool ready) {
+    std::string message = glz::write_json(InitMessage{uid, ready});
+    log_i(rabbitmq, "Publishing init message: {}", message);
+    return publishMessage("market_order", message);
+}
+
 bool
 RabbitMQ::initializeQueue(const std::string& queueName)
 {
