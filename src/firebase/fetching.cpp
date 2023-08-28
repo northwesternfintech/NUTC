@@ -12,7 +12,6 @@ print_algo_info(const glz::json_t& algo)
     log_d(firebase, "Downloading at url {}", algo["downloadURL"].get<std::string>());
 }
 
-
 void
 get_most_recent_algo(const std::string& uid)
 {
@@ -26,7 +25,6 @@ get_most_recent_algo(const std::string& uid)
     glz::json_t algo_info = user_info["algos"][latestAlgoId];
     print_algo_info(algo_info);
 }
-
 
 glz::json_t
 get_user_info(const std::string& uid)
