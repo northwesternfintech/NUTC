@@ -62,7 +62,7 @@ get_most_recent_algo(const std::string& uid)
     glz::json_t user_info = get_user_info(uid);
     // if not has "algos"
     if (!user_info.contains("algos") || !user_info.contains("latestAlgoId")) {
-        log_e(firebase, "User has no algos");
+        log_w(firebase, "User {} has no algos. Will not participate in simulation.", uid);
         return false;
     }
     std::string latestAlgoId = user_info["latestAlgoId"].get<std::string>();

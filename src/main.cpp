@@ -92,9 +92,12 @@ main(int argc, const char** argv)
     std::string pretty_user_info;
     glz::write<glz::opts{.prettify = true}>(user_info, pretty_user_info);
     // log_i(firebase, "User info: {}", pretty_user_info); // for debugging
-    bool ready = nutc::client::get_most_recent_algo(uid);
-    conn.publishInit(uid, ready);
-
+    bool hasAlgo = nutc::client::get_most_recent_algo(uid);
+    conn.publishInit(uid, true);
+    if (!hasAlgo) {
+        conn.closeConnection();
+        return 0;
+    }
     conn.closeConnection();
     return 0;
 }
