@@ -18,6 +18,7 @@ export interface UserInfoType {
   isApprovedApplicant?: boolean;
   isRejectedApplicant?: boolean;
   algos?: Map<string, AlgorithmType>;
+  latestAlgoId?: string;
 }
 
 interface UserType {

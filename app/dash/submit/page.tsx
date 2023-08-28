@@ -3,7 +3,7 @@ import { PaperClipIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import AlgorithmType from "@/app/dash/algoType";
 import Swal from "sweetalert2";
-import { child, push, ref, set } from "firebase/database";
+import { child, push, ref, set, update } from "firebase/database";
 import { getDownloadURL, ref as sRef, uploadBytes } from "firebase/storage";
 import { useFirebase } from "@/app/firebase/context";
 import { UserInfoType, useUserInfo } from "@/app/login/auth/context";
@@ -35,8 +35,8 @@ async function uploadAlgo(
 async function writeNewAlgo(
   algo: AlgorithmType,
   algoRef: any,
-  user: UserInfoType,
-  setUser: any,
+  database: any,
+  uid: string
 ) {
   if (algo.downloadURL === "") {
     Swal.fire({
@@ -58,6 +58,7 @@ async function writeNewAlgo(
   algo.uploadDate = new Date().toISOString();
 
   await set(algoRef, algo);
+  await set(ref(database, `users/${uid}/latestAlgoId`), algoRef.key);
   // await functions.httpsCallable("emailApplication")();
   // above should be lint function
   return true;
@@ -251,7 +252,7 @@ export default function Submission() {
             type="submit"
             onClick={async () => {
               //@ts-ignore
-              if (await writeNewAlgo(algo, algoRef, userInfo.user, userInfo.setUser)) {
+              if (await writeNewAlgo(algo, algoRef, database, userInfo?.user?.uid)) {
                 Swal.fire({
                   title: "Algorithm submitted!",
                   icon: "success",
