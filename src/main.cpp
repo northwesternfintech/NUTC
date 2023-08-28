@@ -15,18 +15,18 @@ main()
     auto const lib = library{};
     nutc::logging::init(quill::LogLevel::TraceL3);
 
-  nutc::rabbitmq::RabbitMQ conn;
+    nutc::rabbitmq::RabbitMQ conn;
 
     if (!conn.initializeConnection()) {
         log_e(rabbitmq, "Failed to initialize connection");
         return 1;
     }
 
-    std::string mess = conn.consumeMarketOrder();
+    nutc::client::spawn_all_clients();
+
+    std::string mess = conn.consumeMessage();
     log_i(rabbitmq, "Received message: {}", mess);
     conn.closeConnection();
-
-    nutc::client::spawn_all_clients();
 
     return 0;
 }

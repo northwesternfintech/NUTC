@@ -14,18 +14,17 @@ namespace rabbitmq {
 class RabbitMQ {
 public:
     bool initializeConnection();
-    std::string consumeMarketOrder();
     void closeConnection();
+    std::string consumeMessage();
 
 private:
     amqp_connection_state_t conn;
     bool publishMessage(const std::string& queueName, const std::string& message);
+    bool initializeConsumeMO();
     bool connectToRabbitMQ(
         const std::string& hostname, int port, const std::string& username,
         const std::string& password
     );
-
-    std::string consumeMessage(const std::string& queueName);
 };
 
 } // namespace rabbitmq
