@@ -6,8 +6,10 @@ namespace nutc {
 namespace rabbitmq {
 bool
 RabbitMQ::connectToRabbitMQ(
-    const std::string& hostname, int port,
-    const std::string& username, const std::string& password
+    const std::string& hostname,
+    int port,
+    const std::string& username,
+    const std::string& password
 )
 {
     conn = amqp_new_connection();
@@ -25,7 +27,13 @@ RabbitMQ::connectToRabbitMQ(
     }
 
     amqp_rpc_reply_t reply = amqp_login(
-        conn, "/", 0, 131072, 0, AMQP_SASL_METHOD_PLAIN, username.c_str(),
+        conn,
+        "/",
+        0,
+        131072,
+        0,
+        AMQP_SASL_METHOD_PLAIN,
+        username.c_str(),
         password.c_str()
     );
     if (reply.reply_type != AMQP_RESPONSE_NORMAL) {
@@ -37,10 +45,7 @@ RabbitMQ::connectToRabbitMQ(
 }
 
 bool
-RabbitMQ::publishMessage(
-    const std::string& queueName,
-    const std::string& message
-)
+RabbitMQ::publishMessage(const std::string& queueName, const std::string& message)
 {
     amqp_queue_declare(
         conn, 1, amqp_cstring_bytes(queueName.c_str()), 0, 0, 0, 1, amqp_empty_table
@@ -53,8 +58,14 @@ RabbitMQ::publishMessage(
     }
 
     amqp_basic_publish(
-        conn, 1, amqp_cstring_bytes(""), amqp_cstring_bytes(queueName.c_str()), 0, 0,
-        NULL, amqp_cstring_bytes(message.c_str())
+        conn,
+        1,
+        amqp_cstring_bytes(""),
+        amqp_cstring_bytes(queueName.c_str()),
+        0,
+        0,
+        NULL,
+        amqp_cstring_bytes(message.c_str())
     );
 
     res = amqp_get_rpc_reply(conn);
@@ -71,7 +82,13 @@ std::string
 RabbitMQ::consumeMessage(const std::string& queueName)
 {
     amqp_basic_consume(
-        conn, 1, amqp_cstring_bytes(queueName.c_str()), amqp_empty_bytes, 0, 1, 0,
+        conn,
+        1,
+        amqp_cstring_bytes(queueName.c_str()),
+        amqp_empty_bytes,
+        0,
+        1,
+        0,
         amqp_empty_table
     );
 

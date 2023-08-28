@@ -77,7 +77,7 @@ main(int argc, const char** argv)
 
     log_i(main, "Starting NUTC Client for UID {}", uid);
 
-  nutc::rabbitmq::RabbitMQ conn;
+    nutc::rabbitmq::RabbitMQ conn;
 
     if (!conn.initializeConnection()) {
         log_e(rabbitmq, "Failed to initialize connection");
