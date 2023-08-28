@@ -1,5 +1,7 @@
 #pragma once
 
+#include "market_order.hpp"
+
 #include <rabbitmq-c/amqp.h>
 #include <rabbitmq-c/tcp_socket.h>
 
