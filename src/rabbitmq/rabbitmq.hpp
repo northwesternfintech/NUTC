@@ -21,7 +21,7 @@ private:
     amqp_connection_state_t conn;
     bool publishMessage(const std::string& queueName, const std::string& message);
     bool initializeQueue(const std::string& queueName);
-    bool initializeConsumeMO();
+    bool initializeConsume(const std::string& queueName);
     bool connectToRabbitMQ(
         const std::string& hostname, int port, const std::string& username,
         const std::string& password

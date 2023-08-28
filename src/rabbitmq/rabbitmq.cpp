@@ -53,11 +53,10 @@ RabbitMQ::initializeQueue(const std::string& queueName)
 }
 
 bool
-RabbitMQ::initializeConsumeMO()
+RabbitMQ::initializeConsume(const std::string& queueName)
 {
-    initializeQueue("market_order");
     amqp_basic_consume(
-        conn, 1, amqp_cstring_bytes("market_order"), amqp_empty_bytes, 0, 1, 0,
+        conn, 1, amqp_cstring_bytes(queueName.c_str()), amqp_empty_bytes, 0, 1, 0,
         amqp_empty_table
     );
 
@@ -125,7 +124,8 @@ RabbitMQ::initializeConnection()
         log_e(rabbitmq, "Failed to open channel.");
         return false;
     }
-    initializeConsumeMO();
+    initializeQueue("market_order");
+    initializeConsume("market_order");
     return true;
 }
 

@@ -5,6 +5,11 @@
 namespace nutc {
 namespace rabbitmq {
 
+struct InitMessage {
+    std::string client_uid;
+    bool ready;
+};
+
 struct MarketOrder {
     std::string security;
     int quantity;
@@ -18,13 +23,14 @@ template <>
 struct glz::meta<nutc::rabbitmq::MarketOrder> {
     using T = nutc::rabbitmq::MarketOrder;
     static constexpr auto value = object(
-        "security",
-        &T::security,
-        "quantity",
-        &T::quantity,
-        "side",
-        &T::side,
-        "type",
+        "security", &T::security, "quantity", &T::quantity, "side", &T::side, "type",
         &T::type
     );
+};
+
+template <>
+struct glz::meta<nutc::rabbitmq::InitMessage> {
+    using T = nutc::rabbitmq::InitMessage;
+    static constexpr auto value =
+        object("client_uid", &T::client_uid, "ready", &T::ready);
 };
