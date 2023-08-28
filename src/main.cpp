@@ -77,16 +77,16 @@ main(int argc, const char** argv)
 
     log_i(main, "Starting NUTC Client for UID {}", uid);
 
-    amqp_connection_state_t conn;
+  nutc::rabbitmq::RabbitMQ conn;
 
-    if (!nutc::rabbitmq::initializeConnection(conn)) {
+    if (!conn.initializeConnection()) {
         log_e(rabbitmq, "Failed to initialize connection");
         return 1;
     }
 
     log_i(rabbitmq, "Connection established");
 
-    nutc::rabbitmq::closeConnection(conn);
+    conn.closeConnection();
     glz::json_t user_info = nutc::client::get_user_info(uid);
 
     std::string pretty_user_info;

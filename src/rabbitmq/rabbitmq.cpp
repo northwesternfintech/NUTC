@@ -5,8 +5,8 @@
 namespace nutc {
 namespace rabbitmq {
 bool
-connectToRabbitMQ(
-    amqp_connection_state_t& conn, const std::string& hostname, int port,
+RabbitMQ::connectToRabbitMQ(
+    const std::string& hostname, int port,
     const std::string& username, const std::string& password
 )
 {
@@ -37,8 +37,8 @@ connectToRabbitMQ(
 }
 
 bool
-publishMessage(
-    amqp_connection_state_t& conn, const std::string& queueName,
+RabbitMQ::publishMessage(
+    const std::string& queueName,
     const std::string& message
 )
 {
@@ -68,7 +68,7 @@ publishMessage(
 
 // Blocking
 std::string
-consumeMessage(amqp_connection_state_t& conn, const std::string& queueName)
+RabbitMQ::consumeMessage(const std::string& queueName)
 {
     amqp_basic_consume(
         conn, 1, amqp_cstring_bytes(queueName.c_str()), amqp_empty_bytes, 0, 1, 0,
@@ -98,9 +98,9 @@ consumeMessage(amqp_connection_state_t& conn, const std::string& queueName)
 }
 
 bool
-initializeConnection(amqp_connection_state_t& conn)
+RabbitMQ::initializeConnection()
 {
-    if (!connectToRabbitMQ(conn, "localhost", 5672, "NUFT", "ADMIN")) {
+    if (!connectToRabbitMQ("localhost", 5672, "NUFT", "ADMIN")) {
         return false;
     }
     amqp_channel_open(conn, 1);
@@ -113,7 +113,7 @@ initializeConnection(amqp_connection_state_t& conn)
 }
 
 void
-closeConnection(amqp_connection_state_t& conn)
+RabbitMQ::closeConnection()
 {
     amqp_channel_close(conn, 1, AMQP_REPLY_SUCCESS);
     amqp_connection_close(conn, AMQP_REPLY_SUCCESS);
