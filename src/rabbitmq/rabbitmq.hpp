@@ -14,6 +14,7 @@ namespace rabbitmq {
 class RabbitMQ {
 public:
     bool initializeConnection();
+    bool publishMarketOrder(const MarketOrder& order);
     void closeConnection();
 
 private:

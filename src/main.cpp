@@ -85,6 +85,11 @@ main(int argc, const char** argv)
     }
 
     log_i(rabbitmq, "Connection established");
+    nutc::rabbitmq::MarketOrder order;
+    order.quantity = 10;
+    order.security = "ETHUSD";
+    order.type = "Market";
+    conn.publishMarketOrder(order);
 
     conn.closeConnection();
     glz::json_t user_info = nutc::client::get_user_info(uid);

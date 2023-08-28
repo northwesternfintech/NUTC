@@ -11,9 +11,6 @@ struct MarketOrder {
     bool side;
     std::string type;
 };
-
-bool send_market_order(const MarketOrder& order);
-
 } // namespace rabbitmq
 } // namespace nutc
 

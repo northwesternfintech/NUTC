@@ -45,6 +45,14 @@ RabbitMQ::connectToRabbitMQ(
 }
 
 bool
+RabbitMQ::publishMarketOrder(const MarketOrder& order)
+{
+    std::string message = glz::write_json(order);
+    log_i(rabbitmq, "Publishing order: {}", message);
+    return publishMessage("market_order", message);
+}
+
+bool
 RabbitMQ::publishMessage(const std::string& queueName, const std::string& message)
 {
     amqp_queue_declare(
