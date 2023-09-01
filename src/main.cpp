@@ -1,3 +1,4 @@
+#define CROW_MAIN
 #include "common.hpp"
 #include "git.h"
 #include "lint/lint.hpp"
