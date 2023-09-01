@@ -1,6 +1,6 @@
-# NUTC-client
+# NUTC-linter
 
-This is the NUTC-client project.
+This is the NUTC-linter project.
 
 # Building and installing
 
