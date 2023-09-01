@@ -38,7 +38,7 @@ async function writeNewAlgo(
   database: any,
   uid: string
 ) {
-  if (algo.downloadURL === "") {
+  if (algo.downloadURL === "" || algo.description === "" || algo.name === "") {
     Swal.fire({
       title: "Please fill out all fields",
       icon: "warning",
