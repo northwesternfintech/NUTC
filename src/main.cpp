@@ -3,6 +3,7 @@
 #include "git.h"
 #include "mock_api/mock_api.hpp"
 #include "pywrapper/pywrapper.hpp"
+#include "server/server.hpp"
 
 #include <argparse/argparse.hpp>
 #include <pybind11/pybind11.h>
@@ -16,7 +17,7 @@ static std::tuple<uint8_t, std::string, std::string>
 process_arguments(int argc, const char** argv)
 {
     argparse::ArgumentParser program(
-        "NUTC Linter", VERSION, argparse::default_arguments::help
+        "NUTC Linter", NUTC_VERSION, argparse::default_arguments::help
     );
 
     program.add_argument("--uid")
@@ -41,7 +42,7 @@ process_arguments(int argc, const char** argv)
     program.add_argument("-V", "--version")
         .help("prints version information and exits")
         .action([&](const auto& /* unused */) {
-            fmt::println("NUTC Linter v{}", VERSION);
+            fmt::println("NUTC Linter v{}", NUTC_VERSION);
             exit(0); // NOLINT(concurrency-*)
         })
         .default_value(false)

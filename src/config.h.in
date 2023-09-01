@@ -9,7 +9,7 @@
 #define VERSION_MINOR @NUTC-client_VERSION_MINOR@
 #define VERSION_PATCH @NUTC-client_VERSION_PATCH@
 
-#define VERSION "@NUTC-client_VERSION@"
+#define NUTC_VERSION "@NUTC-client_VERSION@"
 /* clang-format on */
 /* NOLINTEND */
 
