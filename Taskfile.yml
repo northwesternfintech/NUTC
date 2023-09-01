@@ -27,7 +27,7 @@ tasks:
     dir: '{{.USER_WORKING_DIR}}'
     cmds:
       - task: build
-      - ./build/dev/{{.NAME}} -U nsogzsFY6LVgnvC615TrbJ2XjXR2
+      - ./build/dev/{{.NAME}} --uid "nsogzsFY6LVgnvC615TrbJ2XjXR2" --algo_id " NctlqykyJdbxjkljRZi"
 
   run-v:
     env:

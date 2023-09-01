@@ -8,9 +8,10 @@
 
 namespace nutc {
 namespace pywrapper {
-std::optional<std::string>
+bool
 create_api_module(std::function<bool(const std::string&, int, bool, const std::string&)>
                       publish_market_order);
+std::optional<std::string> import_py_code(const std::string& code);
 
 std::optional<std::string> run_py_code(const std::string& code);
 } // namespace pywrapper

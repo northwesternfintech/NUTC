@@ -7,20 +7,35 @@
 #include <argparse/argparse.hpp>
 #include <pybind11/pybind11.h>
 
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <tuple>
 
-static std::tuple<uint8_t, std::string>
+static std::tuple<uint8_t, std::string, std::string>
 process_arguments(int argc, const char** argv)
 {
     argparse::ArgumentParser program(
         "NUTC Linter", VERSION, argparse::default_arguments::help
     );
 
-    program.add_argument("-U", "--uid")
-        .help("set the user ID")
-        .action([](const auto& value) { return std::string(value); })
+    program.add_argument("--uid")
+        .help("Set the user ID. Any spaces will be converted to dashes")
+        .action([](const auto& value) {
+            std::string uid = std::string(value);
+            std::replace(uid.begin(), uid.end(), ' ', '-');
+            return uid;
+        })
+        .required();
+
+    program.add_argument("--algo_id")
+        .help("Set the algorithm ID of the given user. Any spaces will be converted to "
+              "dashes")
+        .action([](const auto& value) {
+            std::string id = std::string(value);
+            std::replace(id.begin(), id.end(), ' ', '-');
+            return id;
+        })
         .required();
 
     program.add_argument("-V", "--version")
@@ -50,7 +65,11 @@ process_arguments(int argc, const char** argv)
         exit(1); // NOLINT(concurrency-*)
     }
 
-    return std::make_tuple(verbosity, program.get<std::string>("--uid"));
+    return std::make_tuple(
+        verbosity,
+        program.get<std::string>("--uid"),
+        program.get<std::string>("--algo_id")
+    );
 }
 
 static void
@@ -71,26 +90,30 @@ int
 main(int argc, const char** argv)
 {
     // Parse args
-    auto [verbosity, uid] = process_arguments(argc, argv);
+    auto [verbosity, uid, algo_id] = process_arguments(argc, argv);
 
     // Start logging and print build info
     nutc::logging::init(verbosity);
     log_build_info();
-    log_i(main, "Starting NUTC Client for UID {}", uid);
+    log_i(main, "Starting NUTC Linter for UID {} and algorithm ID {}", uid, algo_id);
 
-  std::optional<std::string> algoCode = nutc::client::get_most_recent_algo(uid);
+    std::optional<std::string> algoCode = nutc::client::get_most_recent_algo(uid);
     if (!algoCode.has_value()) {
         return 0;
     }
 
     pybind11::scoped_interpreter guard{};
-    std::optional<std::string> e =
-        nutc::pywrapper::create_api_module(nutc::mock_api::getMarketFunc());
-  if(e.has_value()){
-    log_e(main, "Failed to create API module: {}", e.value());
-    return 1;
-  }
-  nutc::pywrapper::run_py_code(algoCode.value());
+    bool e = nutc::pywrapper::create_api_module(nutc::mock_api::getMarketFunc());
+    if (!e) {
+        log_e(main, "Failed to create API module");
+        return 1;
+    }
+
+    std::optional<std::string> err = nutc::pywrapper::import_py_code(algoCode.value());
+    if (err.has_value()) {
+        log_e(main, "{}", err.value());
+        return 1;
+    }
 
     return 0;
 }
