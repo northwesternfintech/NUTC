@@ -1,9 +1,11 @@
 #include "common.hpp"
 #include "firebase/firebase.hpp"
 #include "git.h"
+#include "mock_api/mock_api.hpp"
 #include "pywrapper/pywrapper.hpp"
 
 #include <argparse/argparse.hpp>
+#include <pybind11/pybind11.h>
 
 #include <iostream>
 #include <string>
@@ -13,7 +15,7 @@ static std::tuple<uint8_t, std::string>
 process_arguments(int argc, const char** argv)
 {
     argparse::ArgumentParser program(
-        "NUTC Client", VERSION, argparse::default_arguments::help
+        "NUTC Linter", VERSION, argparse::default_arguments::help
     );
 
     program.add_argument("-U", "--uid")
@@ -24,7 +26,7 @@ process_arguments(int argc, const char** argv)
     program.add_argument("-V", "--version")
         .help("prints version information and exits")
         .action([&](const auto& /* unused */) {
-            fmt::println("NUTC Client v{}", VERSION);
+            fmt::println("NUTC Linter v{}", VERSION);
             exit(0); // NOLINT(concurrency-*)
         })
         .default_value(false)
@@ -54,7 +56,7 @@ process_arguments(int argc, const char** argv)
 static void
 log_build_info()
 {
-    log_i(main, "NUTC Client: Interface to the NUFT Trading Competition");
+    log_i(main, "NUTC Linter: Linter for NUTC user-submitted algorithms");
 
     // Git info
     log_i(main, "Built from {} on {}", git_Describe(), git_Branch());
@@ -76,10 +78,18 @@ main(int argc, const char** argv)
     log_build_info();
     log_i(main, "Starting NUTC Client for UID {}", uid);
 
-
     bool hasAlgo = nutc::client::get_most_recent_algo(uid);
     if (!hasAlgo) {
         return 0;
     }
+
+    pybind11::scoped_interpreter guard{};
+    std::optional<std::string> e =
+        nutc::pywrapper::create_api_module(nutc::mock_api::getMarketFunc());
+  if(e.has_value()){
+    log_e(main, "Failed to create API module: {}", e.value());
+    return 1;
+  }
+
     return 0;
 }

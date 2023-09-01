@@ -41,6 +41,7 @@ add_library(
     NUTC-client_lib OBJECT
     src/firebase/fetching.cpp
     src/pywrapper/runtime.cpp
+    src/mock_api/mock_api.cpp
     # Utils
     src/logging.cpp
 )
