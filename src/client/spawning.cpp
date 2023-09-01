@@ -16,7 +16,9 @@ spawn_all_clients()
     int clients = 0;
     for (auto& [uid, user] : users) {
         log_i(client_spawning, "Spawning client: {}", uid);
-        spawn_client(uid);
+        std::string quote_uid = std::string(uid);
+        std::replace(quote_uid.begin(), quote_uid.end(), '-', ' ');
+        spawn_client(quote_uid);
         clients++;
     };
     return clients;
@@ -27,7 +29,7 @@ spawn_client(const std::string& uid)
 {
     pid_t pid = fork();
     if (pid == 0) {
-        std::vector<std::string> args = {"NUTC-client", "-U", uid};
+        std::vector<std::string> args = {"NUTC-client", "--uid", uid};
 
         std::vector<char*> c_args;
         for (auto& arg : args)
