@@ -16,6 +16,7 @@ class Recipe(ConanFile):
         self.requires("pybind11/2.10.4")
 
         self.requires("argparse/2.9")  # argument parsing
+        self.requires("crowcpp-crow/1.0+5")
 
     def build_requirements(self):
         self.test_requires("gtest/1.14.0")
