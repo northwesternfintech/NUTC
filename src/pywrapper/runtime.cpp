@@ -27,23 +27,30 @@ create_api_module(std::function<bool(const std::string&, int, bool, const std::s
     } catch (const std::exception& e) {
         return fmt::format("Failed to create API module: {}", e.what());
     }
+
     try {
         py::object main_module = py::module_::import("__main__");
         py::dict main_dict = main_module.attr("__dict__");
-        py::object on_order_update = main_dict["on_order_update"];
-        py::object on_trade_update = main_dict["on_trade_update"];
-        py::object on_orderbook_update = main_dict["on_orderbook_update"];
-        py::object on_account_update = main_dict["on_account_update"];
+        // py::object on_order_update = main_dict["on_order_update"];
+        // py::object on_trade_update = main_dict["on_trade_update"];
+        // py::object on_orderbook_update = main_dict["on_orderbook_update"];
+        // py::object on_account_update = main_dict["on_account_update"];
     } catch (py::error_already_set& e) {
         return fmt::format("Failed to import callback functions: {}", e.what());
     }
     return std::nullopt;
 }
 
-void
+std::optional<std::string>
 run_py_code(const std::string& code)
 {
-    py::exec(code);
+    try {
+        py::exec(code);
+    } catch (const std::exception& e) {
+        return fmt::format("Failed to run code: {}", e.what());
+    }
+    return std::nullopt;
 }
+
 } // namespace pywrapper
 } // namespace nutc

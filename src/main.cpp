@@ -78,8 +78,8 @@ main(int argc, const char** argv)
     log_build_info();
     log_i(main, "Starting NUTC Client for UID {}", uid);
 
-    bool hasAlgo = nutc::client::get_most_recent_algo(uid);
-    if (!hasAlgo) {
+  std::optional<std::string> algoCode = nutc::client::get_most_recent_algo(uid);
+    if (!algoCode.has_value()) {
         return 0;
     }
 
@@ -90,6 +90,7 @@ main(int argc, const char** argv)
     log_e(main, "Failed to create API module: {}", e.value());
     return 1;
   }
+  nutc::pywrapper::run_py_code(algoCode.value());
 
     return 0;
 }
