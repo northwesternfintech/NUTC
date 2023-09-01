@@ -1,43 +1,21 @@
 #include "common.hpp"
-#include "firebase/firebase.hpp"
 #include "git.h"
-#include "mock_api/mock_api.hpp"
-#include "pywrapper/pywrapper.hpp"
-#include "server/server.hpp"
+#include "lint/lint.hpp"
 
 #include <argparse/argparse.hpp>
-#include <pybind11/pybind11.h>
+#include <crow/app.h>
 
 #include <algorithm>
 #include <iostream>
 #include <string>
 #include <tuple>
 
-static std::tuple<uint8_t, std::string, std::string>
+static std::tuple<uint8_t>
 process_arguments(int argc, const char** argv)
 {
     argparse::ArgumentParser program(
         "NUTC Linter", NUTC_VERSION, argparse::default_arguments::help
     );
-
-    program.add_argument("--uid")
-        .help("Set the user ID. Any spaces will be converted to dashes")
-        .action([](const auto& value) {
-            std::string uid = std::string(value);
-            std::replace(uid.begin(), uid.end(), ' ', '-');
-            return uid;
-        })
-        .required();
-
-    program.add_argument("--algo_id")
-        .help("Set the algorithm ID of the given user. Any spaces will be converted to "
-              "dashes")
-        .action([](const auto& value) {
-            std::string id = std::string(value);
-            std::replace(id.begin(), id.end(), ' ', '-');
-            return id;
-        })
-        .required();
 
     program.add_argument("-V", "--version")
         .help("prints version information and exits")
@@ -66,11 +44,7 @@ process_arguments(int argc, const char** argv)
         exit(1); // NOLINT(concurrency-*)
     }
 
-    return std::make_tuple(
-        verbosity,
-        program.get<std::string>("--uid"),
-        program.get<std::string>("--algo_id")
-    );
+    return std::make_tuple(verbosity);
 }
 
 static void
@@ -91,42 +65,33 @@ int
 main(int argc, const char** argv)
 {
     // Parse args
-    auto [verbosity, uid, algo_id] = process_arguments(argc, argv);
+    auto [verbosity] = process_arguments(argc, argv);
 
     // Start logging and print build info
     nutc::logging::init(verbosity);
     log_build_info();
-    log_i(main, "Starting NUTC Linter for UID {} and algorithm ID {}", uid, algo_id);
+    log_i(main, "Starting NUTC Linter");
 
-    std::optional<std::string> algoCode = nutc::client::get_most_recent_algo(uid);
-    if (!algoCode.has_value()) {
-        return 0;
-    }
+    crow::SimpleApp app;
 
-    pybind11::scoped_interpreter guard{};
-    bool e = nutc::pywrapper::create_api_module(nutc::mock_api::getMarketFunc());
-    if (!e) {
-        log_e(main, "Failed to create API module");
-        return 1;
-    }
+    CROW_ROUTE(app, "/")
+    ([&](const crow::request& req) {
+        if (!req.url_params.get("uid")) {
+            log_e(main, "No uid provided");
+            return crow::response(400);
+        };
+        if (!req.url_params.get("algo_id")) {
+            log_e(main, "No algo_id provided");
+            return crow::response(400);
+        }
+        std::string uid = req.url_params.get("uid");
+        std::string algo_id = req.url_params.get("algo_id");
+        log_i(main, "Linting algo_id: {} for user: {}", algo_id, uid);
+        std::string response = nutc::lint::lint(uid, algo_id);
+        return crow::response(response);
+    });
 
-    std::optional<std::string> err = nutc::pywrapper::import_py_code(algoCode.value());
-    if (err.has_value()) {
-        log_e(main, "{}", err.value());
-        return 1;
-    }
-
-    err = nutc::pywrapper::run_initialization();
-    if (err.has_value()) {
-        log_e(main, "{}", err.value());
-        return 1;
-    }
-
-    err = nutc::pywrapper::trigger_callbacks();
-    if (err.has_value()) {
-        log_e(main, "{}", err.value());
-        return 1;
-    }
+    app.port(8080).run();
 
     return 0;
 }

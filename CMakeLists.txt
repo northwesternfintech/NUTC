@@ -43,7 +43,7 @@ add_library(
     src/firebase/fetching.cpp
     src/pywrapper/runtime.cpp
     src/mock_api/mock_api.cpp
-    src/server/server.cpp
+    src/lint/lint.cpp
     # Utils
     src/logging.cpp
 )
