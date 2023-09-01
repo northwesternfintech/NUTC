@@ -115,5 +115,17 @@ main(int argc, const char** argv)
         return 1;
     }
 
+    err = nutc::pywrapper::run_initialization();
+    if (err.has_value()) {
+        log_e(main, "{}", err.value());
+        return 1;
+    }
+
+    err = nutc::pywrapper::trigger_callbacks();
+    if (err.has_value()) {
+        log_e(main, "{}", err.value());
+        return 1;
+    }
+
     return 0;
 }

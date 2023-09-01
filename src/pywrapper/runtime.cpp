@@ -21,7 +21,7 @@ create_api_module(std::function<bool(const std::string&, int, bool, const std::s
 
         py::exec(R"(import nutc_api)");
         py::exec(R"(
-        def publish_market_order(symbol, quantity, is_buy, client_order_id):
+        def place_market_order(symbol, quantity, is_buy, client_order_id):
             nutc_api.publish_market_order(symbol, quantity, is_buy, client_order_id)
     )");
     } catch (const std::exception& e) {
@@ -33,6 +33,7 @@ create_api_module(std::function<bool(const std::string&, int, bool, const std::s
 std::optional<std::string>
 import_py_code(const std::string& code)
 {
+    log_i(mock_runtime, "Importing algorithm code into python interpreter");
     try {
         py::exec(code);
     } catch (const std::exception& e) {
@@ -53,12 +54,42 @@ import_py_code(const std::string& code)
 }
 
 std::optional<std::string>
-run_py_code(const std::string& code)
+run_initialization()
 {
+    log_i(mock_runtime, "Running initialization code");
     try {
-        py::exec(code);
+        py::exec(R"(initialize())");
     } catch (const std::exception& e) {
-        return fmt::format("Failed to run code: {}", e.what());
+        return fmt::format("Failed to run initialization: {}", e.what());
+    }
+    return std::nullopt;
+}
+
+std::optional<std::string>
+trigger_callbacks()
+{
+    log_i(mock_runtime, "Triggering callbacks");
+    try {
+        py::exec(R"(place_market_order("ETHUSD", 1, True, "market"))");
+    } catch (const std::exception& e) {
+        return fmt::format("Failed to run place_market_order: {}", e.what());
+    }
+
+    try {
+        py::exec(R"(on_trade_update("ETHUSD",1,1))");
+    } catch (const std::exception& e) {
+        return fmt::format("Failed to run on_trade_update: {}", e.what());
+    }
+    try {
+        py::exec(R"(on_orderbook_update("ETHUSD","L1",False))");
+    } catch (const std::exception& e) {
+        return fmt::format("Failed to run on_orderbook_update: {}", e.what());
+    }
+
+    try {
+        py::exec(R"(on_account_update("ETH",1,1))");
+    } catch (const std::exception& e) {
+        return fmt::format("Failed to run on_account_update: {}", e.what());
     }
     return std::nullopt;
 }

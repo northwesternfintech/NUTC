@@ -91,6 +91,7 @@ get_main_logger()
     class ____dummy_##category // makes you add a semicolon
 
 // Create loggers here for every category
+CREATE_LOG_CATEGORY(mock_runtime);
 CREATE_LOG_CATEGORY(mock_api);
 CREATE_LOG_CATEGORY(redis);
 CREATE_LOG_CATEGORY(web);
