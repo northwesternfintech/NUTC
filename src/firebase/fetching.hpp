@@ -19,7 +19,7 @@ glz::json_t firebase_request(
     const std::string& method, const std::string& url, const std::string& data = ""
 );
 
-std::string storage_request(const std::string& id, const std::string& url);
+std::string storage_request(const std::string& url);
 
 glz::json_t get_user_info(const std::string& uid);
 
