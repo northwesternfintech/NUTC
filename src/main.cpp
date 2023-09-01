@@ -6,6 +6,7 @@
 
 #include <argparse/argparse.hpp>
 
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <tuple>
@@ -19,7 +20,11 @@ process_arguments(int argc, const char** argv)
 
     program.add_argument("-U", "--uid")
         .help("set the user ID")
-        .action([](const auto& value) { return std::string(value); })
+        .action([](const auto& value) {
+            std::string uid = std::string(value);
+            std::replace(uid.begin(), uid.end(), ' ', '-');
+            return uid;
+        })
         .required();
 
     program.add_argument("-V", "--version")
