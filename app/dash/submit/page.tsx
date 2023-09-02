@@ -1,5 +1,6 @@
 "use client";
 import { PaperClipIcon } from "@heroicons/react/24/solid";
+import axios from 'axios';
 import { useState } from "react";
 import AlgorithmType from "@/app/dash/algoType";
 import Swal from "sweetalert2";
@@ -36,7 +37,7 @@ async function writeNewAlgo(
   algo: AlgorithmType,
   algoRef: any,
   database: any,
-  uid: string
+  uid: string,
 ) {
   if (algo.downloadURL === "" || algo.description === "" || algo.name === "") {
     Swal.fire({
@@ -252,7 +253,9 @@ export default function Submission() {
             type="submit"
             onClick={async () => {
               //@ts-ignore
-              if (await writeNewAlgo(algo, algoRef, database, userInfo?.user?.uid)) {
+              if (
+                await writeNewAlgo(algo, algoRef, database, userInfo?.user?.uid || "") //bad practice, fix later
+              ) {
                 Swal.fire({
                   title: "Algorithm submitted!",
                   icon: "success",
@@ -262,6 +265,10 @@ export default function Submission() {
                     window.location.reload();
                   },
                 });
+                const res = await axios.get(
+                  `https://nutc-linter-4oeeau4rxa-uc.a.run.app/lint?uid=${userInfo?.user?.uid}&algo=${algoRef.key}}`,
+                );
+                console.log(res);
               }
             }}
             className="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
