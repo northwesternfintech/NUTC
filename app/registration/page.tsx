@@ -240,9 +240,9 @@ export default function Registration() {
               </label>
               <div
                 className={currUser.resumeURL
-                  ? "mt-2 flex justify-center rounded-lg border border-solid border-indigo/50 px-6 py-10"
+                  ? "mt-2 flex justify-center rounded-lg border border-solid border-green-400 px-6 py-10"
                   : isDragOver
-                  ? "mt-2 flex justify-center rounded-lg border border-dashed border-indigo/50 px-6 py-10"
+                  ? "mt-2 flex justify-center rounded-lg border border-dashed border-indigo-500 px-6 py-10"
                   : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"}
                 ref={dropRef}
                 onDragOver={handleDragOver}

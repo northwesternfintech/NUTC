@@ -1,13 +1,13 @@
 "use client";
-import { PaperClipIcon } from "@heroicons/react/24/solid";
+import { CheckIcon, PaperClipIcon } from "@heroicons/react/24/solid";
 import axios from "axios";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import AlgorithmType from "@/app/dash/algoType";
 import Swal from "sweetalert2";
-import { child, push, ref, set, update } from "firebase/database";
+import { push, ref, set } from "firebase/database";
 import { getDownloadURL, ref as sRef, uploadBytes } from "firebase/storage";
 import { useFirebase } from "@/app/firebase/context";
-import { UserInfoType, useUserInfo } from "@/app/login/auth/context";
+import { useUserInfo } from "@/app/login/auth/context";
 
 async function uploadAlgo(
   database: any,
@@ -84,11 +84,30 @@ export default function Submission() {
     }));
   };
 
+  const [isDragOver, setDragOver] = useState(false);
+  const dropRef: any = useRef();
+
+  const handleDragOver = (e: any) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = () => {
+    setDragOver(false);
+  };
+
+  const handleDrop = (e: any) => {
+    e.preventDefault();
+    setDragOver(false);
+
+    const files = e.dataTransfer.files;
+    handleAlgoChange(files[0]);
+  };
+
   const userInfo = useUserInfo();
   const { database, storage, functions } = useFirebase();
 
-  const handleAlgoChange = async (e: any) => {
-    const selectedFile = e.target.files[0];
+  const handleAlgoChange = async (selectedFile: any) => {
     if (!selectedFile) {
       return;
     }
@@ -218,12 +237,30 @@ export default function Submission() {
                 >
                   Algorithm Upload
                 </label>
-                <div className="mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10">
+                <div
+                  className={algo.downloadURL
+                    ? "mt-2 flex justify-center rounded-lg border border-solid border-green-400 px-6 py-10"
+                    : isDragOver
+                    ? "mt-2 flex justify-center rounded-lg border border-solid border-indigo-500 px-6 py-10"
+                    : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"}
+                  ref={dropRef}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
                   <div className="text-center">
-                    <PaperClipIcon
-                      className="mx-auto h-12 w-12 text-gray-500"
-                      aria-hidden="true"
-                    />
+                    {!algo.downloadURL && (
+                      <PaperClipIcon
+                        className="mx-auto h-12 w-12 text-gray-500"
+                        aria-hidden="true"
+                      />
+                    )}
+                    {algo.downloadURL && (
+                      <CheckIcon
+                        className="mx-auto h-12 w-12 text-green-500"
+                        aria-hidden="true"
+                      />
+                    )}
                     <div className="mt-4 flex text-sm leading-6 text-gray-400">
                       <label
                         htmlFor="file-upload"
@@ -233,7 +270,10 @@ export default function Submission() {
                         <input
                           id="file-upload"
                           name="file-upload"
-                          onChange={handleAlgoChange}
+                          onChange={(e) => {
+                            //@ts-ignore
+                            handleAlgoChange(e.target.files[0]);
+                          }}
                           type="file"
                           className="sr-only"
                         />
