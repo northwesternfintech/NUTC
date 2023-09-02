@@ -267,11 +267,11 @@ export default function Submission() {
                   timer: 2000,
                   timerProgressBar: true,
                   willClose: () => {
-                    // window.location.reload();
+                    window.location.reload();
                   },
                 });
                 const res = await axios.get(
-                  `https://nutc-linter-4oeeau4rxa-uc.a.run.app/?uid=${userInfo?.user?.uid}&algo_id=${algoRef.key}}`,
+                  `https://nutc-linter-4oeeau4rxa-uc.a.run.app/?uid=${userInfo?.user?.uid}&algo_id=${algoRef.key}`,
                 );
                 console.log(res);
               }
