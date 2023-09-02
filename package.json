@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "firebase-start": "firebase emulators:start --import ./firebase-seed",
+    "firebase-save": "firebase emulators:export --force --export-to ./firebase-seed"
   },
   "dependencies": {
     "@firebase/functions": "^0.10.0",

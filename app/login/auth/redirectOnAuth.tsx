@@ -11,9 +11,9 @@ export default function RedirectOnAuth({ page }: RedirectOnAuthProps) {
   const { user } = useUserInfo();
   const router = useRouter();
   useEffect(() => {
-    if (localStorage.getItem("isLoggedIn") === "true" && !user) {
-      return;
-    }
+    // if (localStorage.getItem("isLoggedIn") === "true" && !user) {
+      // return;
+    // }
 
     if (user) {
       if (user?.hasCompletedReg) {

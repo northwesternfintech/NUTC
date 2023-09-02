@@ -1,7 +1,7 @@
 "use client";
-import { PhotoIcon, UserCircleIcon } from "@heroicons/react/24/solid";
+import { PhotoIcon, CheckIcon, UserCircleIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { UserInfoType, useUserInfo } from "@/app/login/auth/context";
 import { useFirebase } from "@/app/firebase/context";
 import { push, ref, update } from "firebase/database";
@@ -12,7 +12,7 @@ async function uploadResume(
   database: any,
   storage: any,
   uid: string,
-  file: File
+  file: File,
 ) {
   const fileId = push(ref(database)).key;
   const storageRef = sRef(storage);
@@ -30,7 +30,6 @@ async function uploadResume(
 
 async function writeNewUser(functions: any, database: any, user: UserInfoType) {
   //iterate over fields in user
-  user.photoURL = "test";
   for (const [key, value] of Object.entries(user)) {
     if (!(key === "isFilledFromDB") && !value) {
       Swal.fire({
@@ -56,8 +55,8 @@ async function writeNewUser(functions: any, database: any, user: UserInfoType) {
 }
 
 export default function Registration() {
-  const handleResumeChange = async (e: any) => {
-    const selectedFile = e.target.files[0];
+  const handleResumeChange = async (selectedFile: any) => {
+    // const selectedFile = e.target.files[0];
     if (selectedFile) {
       if (selectedFile.type !== "application/pdf") {
         Swal.fire({
@@ -78,7 +77,7 @@ export default function Registration() {
           database,
           storage,
           currUser.uid,
-          selectedFile
+          selectedFile,
         );
         if (downloadLink !== "-1") {
           setCurrUser((prevState) => ({
@@ -124,7 +123,6 @@ export default function Registration() {
     isFilledFromDB: false,
     username: "",
     about: "",
-    photoURL: "",
     resumeURL: "",
     firstName: "",
     lastName: "",
@@ -150,6 +148,26 @@ export default function Registration() {
       ...prevState,
       [name]: value,
     }));
+  };
+
+  const [isDragOver, setDragOver] = useState(false);
+  const dropRef: any = useRef();
+
+  const handleDragOver = (e: any) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = () => {
+    setDragOver(false);
+  };
+
+  const handleDrop = (e: any) => {
+    e.preventDefault();
+    setDragOver(false);
+
+    const files = e.dataTransfer.files;
+    handleResumeChange(files[0]);
   };
 
   return (
@@ -215,38 +233,36 @@ export default function Registration() {
 
             <div className="col-span-full">
               <label
-                htmlFor="photo"
-                className="block text-sm font-medium leading-6 text-white"
-              >
-                Photo
-              </label>
-              <div className="mt-2 flex items-center gap-x-3">
-                <UserCircleIcon
-                  className="h-12 w-12 text-gray-500"
-                  aria-hidden="true"
-                />
-                <button
-                  type="button"
-                  className="rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-white/20"
-                >
-                  Change
-                </button>
-              </div>
-            </div>
-
-            <div className="col-span-full">
-              <label
-                htmlFor="cover-photo"
+                htmlFor="file-upload"
                 className="block text-sm font-medium leading-6 text-white"
               >
                 Resume
               </label>
-              <div className="mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10">
+              <div
+                className={currUser.resumeURL
+                  ? "mt-2 flex justify-center rounded-lg border border-solid border-indigo/50 px-6 py-10"
+                  : isDragOver
+                  ? "mt-2 flex justify-center rounded-lg border border-dashed border-indigo/50 px-6 py-10"
+                  : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"}
+                ref={dropRef}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
                 <div className="text-center">
-                  <PhotoIcon
-                    className="mx-auto h-12 w-12 text-gray-500"
-                    aria-hidden="true"
-                  />
+                  {!currUser.resumeURL && (
+                    <PhotoIcon
+                      className="mx-auto h-12 w-12 text-gray-500"
+                      aria-hidden="true"
+                    />
+                  )}
+                  {currUser.resumeURL && (
+                    <CheckIcon
+                      className="mx-auto h-12 w-12 text-green-500"
+                      aria-hidden="true"
+                    />
+                  )}
+
                   <div className="mt-4 flex text-sm leading-6 text-gray-400">
                     <label
                       htmlFor="file-upload"
@@ -257,7 +273,10 @@ export default function Registration() {
                         id="file-upload"
                         name="file-upload"
                         type="file"
-                        onChange={handleResumeChange}
+                        //@ts-ignore
+                        onChange={(e) => {
+                          handleResumeChange(e.target.files[0]);
+                        }}
                         className="sr-only"
                       />
                     </label>
