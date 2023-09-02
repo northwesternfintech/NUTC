@@ -273,8 +273,8 @@ export default function Registration() {
                         id="file-upload"
                         name="file-upload"
                         type="file"
-                        //@ts-ignore
-                        onChange={(e) => {
+                        onChange={(e:any) => {
+                          //@ts-ignore
                           handleResumeChange(e.target.files[0]);
                         }}
                         className="sr-only"

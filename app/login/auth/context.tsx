@@ -8,7 +8,6 @@ export interface UserInfoType {
   uid: string;
   username: string;
   about: string;
-  photoURL: string;
   resumeURL: string;
   firstName: string;
   lastName: string;
