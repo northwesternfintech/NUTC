@@ -1,21 +1,9 @@
-FROM conanio/gcc10
+FROM ubuntu:latest
 
 WORKDIR /app
+RUN apt-get update && apt-get install -y python3 python3-dev
 
-RUN sudo apt-get update && sudo apt-get install -y cmake python3 python3-dev
+COPY ./build/dev/NUTC-client ./NUTC
+RUN chmod +x ./NUTC
 
-COPY ./conanfile.py ./conanfile.py
-COPY ./resources/cpp20 ./cpp20
-
-RUN mkdir ./build && cd ./build && conan install .. -s build_type=Debug -b missing -pr ../cpp20 -pr:b ../cpp20
-
-COPY ./src ./src
-COPY ./CMakeLists.txt ./CMakeLists.txt
-COPY ./CMakePresets.json ./CMakePresets.json
-
-WORKDIR /app
-
-RUN cmake --preset=dev
-RUN cmake --build
-
-# CMD ["./my_executable", "--uid"]
+CMD ./NUTC
