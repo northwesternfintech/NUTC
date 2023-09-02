@@ -104,7 +104,8 @@ export default function Dashboard() {
       return;
     }
     var tmpAlgos: any = [];
-    for (const [key, value] of Object.entries(algos)) {
+    //@ts-ignore
+    for (const [key, value] of algos) {
       const test: AlgorithmType = value;
       tmpAlgos.push({
         id: key,
