@@ -5,7 +5,7 @@ namespace lint {
 std::string
 lint(const std::string& uid, const std::string& algo_id)
 {
-    std::optional<std::string> algoCode = nutc::client::get_most_recent_algo(uid);
+    std::optional<std::string> algoCode = nutc::client::get_algo(uid, algo_id);
     if (!algoCode.has_value()) {
         return 0;
     }

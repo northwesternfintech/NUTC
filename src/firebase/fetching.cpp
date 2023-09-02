@@ -57,18 +57,23 @@ storage_request(const std::string& firebase_url)
 }
 
 std::optional<std::string>
-get_most_recent_algo(const std::string& uid)
+get_algo(const std::string& uid, const std::string& algo_id)
 {
     glz::json_t user_info = get_user_info(uid);
     // if not has "algos"
-    if (!user_info.contains("algos") || !user_info.contains("latestAlgoId")) {
-        log_w(firebase, "User {} has no algos. Will not participate in simulation.", uid);
+    if (!user_info.contains("algos")) {
+        log_w(
+            firebase, "User {} has no algos. Will not participate in simulation.", uid
+        );
         return std::nullopt;
     }
-    std::string latestAlgoId = user_info["latestAlgoId"].get<std::string>();
-    glz::json_t algo_info = user_info["algos"][latestAlgoId];
+    if (!user_info["algos"].contains(algo_id)) {
+        log_w(firebase, "User {} does not have algo id {}.", uid, algo_id);
+        return std::nullopt;
+    }
+    glz::json_t algo_info = user_info["algos"][algo_id];
     std::string downloadURL = algo_info["downloadURL"].get<std::string>();
-    print_algo_info(algo_info, latestAlgoId);
+    print_algo_info(algo_info, algo_id);
     std::string algo_file = storage_request(downloadURL);
     return algo_file;
 }
