@@ -71,7 +71,8 @@ export default function Dash(content: React.ReactNode) {
       return;
     }
     var i = 1; //not proud of this
-    for (const [key, value] of Object.entries(algos)) {
+    //@ts-ignore
+    for (const [key, value] of algos) {
       tmpSubmissions.push({
         id: key,
         name: value.name,
