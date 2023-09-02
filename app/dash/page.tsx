@@ -4,7 +4,7 @@ import { Menu, Transition } from "@headlessui/react";
 const statuses: any = {
   pending: "text-yellow-500 bg-yellow-100/10",
   success: "text-green-400 bg-green-400/10",
-  failed: "text-rose-400 bg-rose-400/10",
+  failure: "text-rose-400 bg-rose-400/10",
 };
 const environments: any = {
   Results: "text-indigo-400 bg-indigo-400/10 ring-indigo-400/20",
