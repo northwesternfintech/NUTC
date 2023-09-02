@@ -5,6 +5,7 @@
 #include "pywrapper/pywrapper.hpp"
 #include <pybind11/pybind11.h>
 #include "firebase/firebase.hpp"
+#include "firebase/fetching.hpp"
 
 namespace nutc {
 namespace lint {

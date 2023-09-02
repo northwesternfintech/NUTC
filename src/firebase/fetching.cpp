@@ -13,6 +13,23 @@ print_algo_info(const glz::json_t& algo, const std::string& algo_id)
     log_i(firebase, "Algo id: {}", algo_id);
 }
 
+void
+set_lint_result(const std::string& uid, const std::string& algo_id, bool succeeded)
+{
+    std::string success = "\"success\"";
+    std::string failure = "\"failure\"";
+    glz::json_t res = firebase_request(
+        "PUT",
+        fmt::format(
+            "{}/users/{}/algos/{}/lintResults.json",
+            std::string(FIREBASE_URL),
+            uid,
+            algo_id
+        ),
+        succeeded ? success : failure
+    );
+}
+
 glz::json_t
 get_user_info(const std::string& uid)
 {

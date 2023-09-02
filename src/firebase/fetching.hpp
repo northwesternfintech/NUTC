@@ -23,6 +23,8 @@ std::string storage_request(const std::string& url);
 
 glz::json_t get_user_info(const std::string& uid);
 
+void set_lint_result(const std::string& uid, const std::string& algo_id, bool succeeded);
+
 std::optional<std::string> get_algo(const std::string& uid, const std::string& algo_id);
 
 } // namespace client
