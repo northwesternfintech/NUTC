@@ -5,6 +5,7 @@ import { child, get, ref } from "firebase/database";
 import { UserInfoType, useUserInfo } from "@/app/login/auth/context";
 import { onAuthStateChanged } from "firebase/auth";
 import { getAuth } from "firebase/auth";
+import AlgorithmType from "@/app/dash/algoType";
 
 export default function AuthUpdate() {
   const { database } = useFirebase();
@@ -46,7 +47,7 @@ export default function AuthUpdate() {
           const dateB: any = new Date(b[1].uploadDate);
           return dateB - dateA;
         });
-        var map: any = new Map();
+        var map: Map<string, AlgorithmType> = new Map<string, AlgorithmType>();
         sortedEntries.forEach((entry) => {
           map.set(entry[0], entry[1]);
         });
