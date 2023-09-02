@@ -1,5 +1,6 @@
 "use client";
 import { Fragment, useEffect, useState } from "react";
+import NoSubmissions from "./no-submissions";
 import { Menu, Transition } from "@headlessui/react";
 const statuses: any = {
   pending: "text-yellow-500 bg-yellow-100/10",
@@ -216,6 +217,7 @@ export default function Dashboard() {
 
         {/* Deployment list */}
         <ul role="list" className="divide-y divide-white/5">
+          {algos.length === 0 && <NoSubmissions />}
           {algos.map((deployment: any) => (
             <li
               key={deployment.id}
