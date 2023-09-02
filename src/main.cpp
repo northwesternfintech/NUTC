@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <tuple>
 
@@ -85,10 +86,16 @@ main(int argc, const char** argv)
             log_e(main, "No algo_id provided");
             return crow::response(400);
         }
+        std::streambuf* oldCoutStreamBuf = std::cout.rdbuf();
+        std::stringstream ss;
+        std::cout.rdbuf(ss.rdbuf());
+
         std::string uid = req.url_params.get("uid");
         std::string algo_id = req.url_params.get("algo_id");
         log_i(main, "Linting algo_id: {} for user: {}", algo_id, uid);
         std::string response = nutc::lint::lint(uid, algo_id);
+        std::cout.rdbuf(oldCoutStreamBuf);
+        nutc::client::set_lint_success(uid, algo_id, ss.str() + "\n");
         return crow::response(response);
     });
 

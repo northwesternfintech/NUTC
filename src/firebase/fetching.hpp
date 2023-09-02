@@ -26,6 +26,8 @@ glz::json_t get_user_info(const std::string& uid);
 
 void set_lint_result(const std::string& uid, const std::string& algo_id, bool succeeded);
 void set_lint_failure(const std::string& uid, const std::string& algo_id, const std::string& failure);
+void set_lint_success(const std::string& uid, const std::string& algo_id, const std::string& success);
+
 
 std::optional<std::string> get_algo(const std::string& uid, const std::string& algo_id);
 

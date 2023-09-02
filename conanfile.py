@@ -14,6 +14,7 @@ class Recipe(ConanFile):
         self.requires("libcurl/8.2.1")
         self.requires("glaze/1.3.5")
         self.requires("pybind11/2.10.4")
+        self.requires("jwt-cpp/0.6.0")
 
         self.requires("argparse/2.9")  # argument parsing
         self.requires("crowcpp-crow/1.0+5")

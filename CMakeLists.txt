@@ -28,6 +28,7 @@ find_package(glaze REQUIRED)
 find_package(Python COMPONENTS Interpreter Development REQUIRED)
 find_package(pybind11 REQUIRED)
 find_package(Crow REQUIRED)
+find_package(jwt-cpp REQUIRED)
 
 # Git version tracking
 FetchContent_Declare(cmake_git_version_tracking
@@ -64,6 +65,7 @@ target_link_libraries(NUTC-client_lib PRIVATE glaze::glaze)
 target_link_libraries(NUTC-client_lib PRIVATE pybind11::pybind11)
 target_link_libraries(NUTC-client_lib PRIVATE Crow::Crow)
 target_link_libraries(NUTC-client_lib PRIVATE Python::Python)
+target_link_libraries(NUTC-client_lib PRIVATE jwt-cpp::jwt-cpp)
 
 
 # ---- Declare executable ----
@@ -86,6 +88,8 @@ target_link_libraries(NUTC-client_exe PRIVATE glaze::glaze)
 target_link_libraries(NUTC-client_exe PRIVATE pybind11::pybind11)
 target_link_libraries(NUTC-client_exe PRIVATE Crow::Crow)
 target_link_libraries(NUTC-client_exe PRIVATE Python::Python)
+target_link_libraries(NUTC-client_exe PRIVATE jwt-cpp::jwt-cpp)
+
 
 
 # ---- Install rules ----

@@ -41,6 +41,25 @@ replaceDisallowedValues(const std::string& input)
 }
 
 void
+set_lint_success(
+    const std::string& uid, const std::string& algo_id, const std::string& success
+)
+{
+    std::string json_success = "\"" + replaceDisallowedValues(success) + "\"";
+    log_e(main, "Seeing lint success: {}", json_success);
+    glz::json_t res = firebase_request(
+        "PUT",
+        fmt::format(
+            "{}/users/{}/algos/{}/lintSuccessMessage.json",
+            std::string(FIREBASE_URL),
+            uid,
+            algo_id
+        ),
+        json_success
+    );
+}
+
+void
 set_lint_failure(
     const std::string& uid, const std::string& algo_id, const std::string& failure
 )
