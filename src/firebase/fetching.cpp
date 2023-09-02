@@ -30,6 +30,35 @@ set_lint_result(const std::string& uid, const std::string& algo_id, bool succeed
     );
 }
 
+std::string
+replaceDisallowedValues(const std::string& input)
+{
+    std::regex newlinePattern("\\n");
+    std::string input2 = std::regex_replace(input, newlinePattern, "\\n");
+    std::regex disallowedPattern("[.$#\\[\\]]");
+
+    return std::regex_replace(input2, disallowedPattern, "");
+}
+
+void
+set_lint_failure(
+    const std::string& uid, const std::string& algo_id, const std::string& failure
+)
+{
+    std::string json_failure = "\"" + replaceDisallowedValues(failure) + "\"";
+    log_e(main, "Seeing lint failure: {}", json_failure);
+    glz::json_t res = firebase_request(
+        "PUT",
+        fmt::format(
+            "{}/users/{}/algos/{}/lintFailureMessage.json",
+            std::string(FIREBASE_URL),
+            uid,
+            algo_id
+        ),
+        json_failure
+    );
+}
+
 glz::json_t
 get_user_info(const std::string& uid)
 {

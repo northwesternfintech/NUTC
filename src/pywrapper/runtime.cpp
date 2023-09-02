@@ -91,6 +91,13 @@ trigger_callbacks()
     } catch (const std::exception& e) {
         return fmt::format("Failed to run on_account_update: {}", e.what());
     }
+
+    try {
+        py::exec(R"(on_order_update(1,1))");
+    } catch (const std::exception& e) {
+        return fmt::format("Failed to run on_order_update: {}", e.what());
+    }
+
     return std::nullopt;
 }
 

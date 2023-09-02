@@ -7,7 +7,6 @@ lint(const std::string& uid, const std::string& algo_id)
 {
     std::optional<std::string> algoCode = nutc::client::get_algo(uid, algo_id);
     if (!algoCode.has_value()) {
-        nutc::client::set_lint_result(uid, algo_id, false);
         return "Could not find algorithm";
     }
 
@@ -16,7 +15,6 @@ lint(const std::string& uid, const std::string& algo_id)
     if (!e) {
         log_e(linting, "Failed to create API module");
         nutc::client::set_lint_result(uid, algo_id, false);
-
         return "Unexpected error: failed to create API module";
     }
 
@@ -24,7 +22,7 @@ lint(const std::string& uid, const std::string& algo_id)
     if (err.has_value()) {
         log_e(linting, "{}", err.value());
         nutc::client::set_lint_result(uid, algo_id, false);
-
+        nutc::client::set_lint_failure(uid, algo_id, err.value());
         return err.value();
     }
 
@@ -32,7 +30,7 @@ lint(const std::string& uid, const std::string& algo_id)
     if (err.has_value()) {
         log_e(linting, "{}", err.value());
         nutc::client::set_lint_result(uid, algo_id, false);
-
+        nutc::client::set_lint_failure(uid, algo_id, err.value());
         return err.value();
     }
 
@@ -40,6 +38,7 @@ lint(const std::string& uid, const std::string& algo_id)
     if (err.has_value()) {
         log_e(linting, "{}", err.value());
         nutc::client::set_lint_result(uid, algo_id, false);
+        nutc::client::set_lint_failure(uid, algo_id, err.value());
         return err.value();
     }
 
