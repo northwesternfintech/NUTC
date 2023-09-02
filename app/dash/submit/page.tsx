@@ -1,6 +1,6 @@
 "use client";
 import { PaperClipIcon } from "@heroicons/react/24/solid";
-import axios from 'axios';
+import axios from "axios";
 import { useState } from "react";
 import AlgorithmType from "@/app/dash/algoType";
 import Swal from "sweetalert2";
@@ -254,7 +254,12 @@ export default function Submission() {
             onClick={async () => {
               //@ts-ignore
               if (
-                await writeNewAlgo(algo, algoRef, database, userInfo?.user?.uid || "") //bad practice, fix later
+                await writeNewAlgo(
+                  algo,
+                  algoRef,
+                  database,
+                  userInfo?.user?.uid || "",
+                ) //bad practice, fix later
               ) {
                 Swal.fire({
                   title: "Algorithm submitted!",
@@ -266,7 +271,7 @@ export default function Submission() {
                   },
                 });
                 const res = await axios.get(
-                  `https://nutc-linter-4oeeau4rxa-uc.a.run.app/lint?uid=${userInfo?.user?.uid}&algo=${algoRef.key}}`,
+                  `https://nutc-linter-4oeeau4rxa-uc.a.run.app/?uid=${userInfo?.user?.uid}&algo=${algoRef.key}}`,
                 );
                 console.log(res);
               }
