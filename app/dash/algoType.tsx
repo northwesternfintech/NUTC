@@ -5,4 +5,6 @@ export default interface AlgorithmType {
   fileIdKey: string;
   name: string;
   description: string;
+  lintFailureMessage?: string;
+  lintSuccessMessage?: string;
 }

@@ -5,7 +5,6 @@ import { child, get, ref } from "firebase/database";
 import { UserInfoType, useUserInfo } from "@/app/login/auth/context";
 import { onAuthStateChanged } from "firebase/auth";
 import { getAuth } from "firebase/auth";
-import AlgorithmType from "@/app/dash/algoType";
 
 export default function AuthUpdate() {
   const { database } = useFirebase();
@@ -49,7 +48,7 @@ export default function AuthUpdate() {
         });
         var map: any = new Map();
         sortedEntries.forEach((entry) => {
-          map[entry[0]] = entry[1];
+          map.set(entry[0], entry[1]);
         });
 
         const newUser: UserInfoType = {
