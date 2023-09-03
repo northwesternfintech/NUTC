@@ -50,7 +50,7 @@
   ]
 }
 ```
-4. `go-task init`
+4. `cd .. && go-task init`
 
 
 ## Building
