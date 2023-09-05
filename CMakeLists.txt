@@ -22,6 +22,9 @@ add_library(
     src/client/fetching.cpp
     src/client/spawning.cpp
     src/rabbitmq/rabbitmq.cpp
+    src/matching/order.cpp
+    src/matching/engine.cpp
+    src/matching/order.cpp
 )
 
 target_include_directories(
