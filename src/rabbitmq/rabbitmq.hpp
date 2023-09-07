@@ -11,9 +11,6 @@
 
 namespace nutc {
 namespace rabbitmq {
-struct RMQError {
-    std::string message;
-};
 
 class RabbitMQ {
 public:

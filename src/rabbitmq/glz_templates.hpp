@@ -9,6 +9,10 @@ struct ShutdownMessage {
     std::string shutdown_reason;
 };
 
+struct RMQError {
+    std::string message;
+};
+
 struct InitMessage {
     std::string client_uid;
     bool ready;
