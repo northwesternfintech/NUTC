@@ -5,10 +5,8 @@
 
 #include <string>
 
-#ifndef NUTC24_MATCH_H
-#  define NUTC24_MATCH_H
-
 namespace nuft {
+namespace matching {
 
 class Match {
 public:
@@ -17,7 +15,5 @@ public:
     float price;
     float quantity;
 };
-
+} // namespace matching
 } // namespace nuft
-
-#endif // NUTC24_MATCH_H

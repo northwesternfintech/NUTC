@@ -4,10 +4,8 @@
 //
 #include <string>
 
-#ifndef NUTC24_ORDER_H
-#  define NUTC24_ORDER_H
-
 namespace nuft {
+namespace matching {
 
 class Order {
 public: // yea not sure where the defined interface is
@@ -18,7 +16,5 @@ public: // yea not sure where the defined interface is
 
     Order(std::string tic, std::string typ, bool b, float pri);
 };
-
+} // namespace matching
 } // namespace nuft
-
-#endif // NUTC24_ORDER_H

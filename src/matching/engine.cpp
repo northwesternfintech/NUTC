@@ -11,6 +11,7 @@
 #include <vector>
 
 namespace nuft {
+namespace matching {
 
 Engine::Engine()
 {
@@ -56,4 +57,5 @@ Engine::match()
         ++it;
     }
 }
+} // namespace matching
 } // namespace nuft

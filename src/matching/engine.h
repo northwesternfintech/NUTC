@@ -3,14 +3,12 @@
 // Created by echav on 9/4/2023.
 //
 
-#ifndef NUTC24_ENGINE_H
-#define NUTC24_ENGINE_H
-
 #include "order.h"
 
 #include <vector>
 
 namespace nuft {
+namespace matching {
 
 class Engine {
 public: // we will need to add all communication machinery in, this will just expose
@@ -21,7 +19,5 @@ public: // we will need to add all communication machinery in, this will just ex
     void add_order(Order order);
     void match();
 };
-
+} // namespace matching
 } // namespace nuft
-
-#endif // NUTC24_ENGINE_H
