@@ -11,11 +11,8 @@ namespace nutc {
 namespace client {
 
 void spawn_client(const std::string& uid);
-
-// Should fetch all users from firebase and spawn the ones that have registered
-// Client is expected to handle specific cases (multiple submitted algos, hasn't
-// submitted algo, etc) So client should verify each uid is valid
-int spawn_all_clients();
+glz::json_t::object_t get_all_users();
+int spawn_all_clients(glz::json_t::object_t users);
 
 } // namespace client
 } // namespace nutc

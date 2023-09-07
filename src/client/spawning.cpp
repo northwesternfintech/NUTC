@@ -5,13 +5,18 @@
 
 namespace nutc {
 namespace client {
-int
-spawn_all_clients()
+
+glz::json_t::object_t
+get_all_users()
 {
     std::string endpoint = std::string(FIREBASE_URL) + std::string("users.json");
     glz::json_t res = nutc::client::firebase_request("GET", endpoint);
-    glz::json_t::object_t users = res.get<glz::json_t::object_t>();
+    return res.get<glz::json_t::object_t>();
+}
 
+int
+spawn_all_clients(glz::json_t::object_t users)
+{
     log_i(client_spawning, "Starting exchange with {} users", users.size());
     int clients = 0;
     for (auto& [uid, user] : users) {

@@ -24,7 +24,9 @@ main()
         return 1;
     }
 
-    int num_clients = nutc::client::spawn_all_clients();
+    glz::json_t::object_t users = nutc::client::get_all_users();
+    int num_clients = nutc::client::spawn_all_clients(users);
+
     nutc::logging::init(quill::LogLevel::TraceL3);
 
     if (num_clients == 0) {
