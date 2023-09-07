@@ -1,6 +1,7 @@
 #pragma once
 
 #include "glz_templates.hpp"
+#include "matching/engine.hpp"
 
 #include <iostream>
 #include <string>
@@ -18,6 +19,7 @@ class RabbitMQ {
 public:
     bool initializeConnection();
     void closeConnection();
+    void handle_incoming_messages(nutc::matching::Engine engine);
     void wait_for_clients(int num_clients);
     std::variant<InitMessage, MarketOrder, RMQError> consumeMessage();
 

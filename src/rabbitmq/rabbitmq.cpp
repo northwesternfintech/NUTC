@@ -69,6 +69,34 @@ RabbitMQ::initializeConsume(const std::string& queueName)
     return true;
 }
 
+void
+RabbitMQ::handle_incoming_messages(nutc::matching::Engine engine)
+{
+    // need condition for closing
+    while (true) {
+        std::variant<InitMessage, MarketOrder, RMQError> incoming_message =
+            consumeMessage();
+        bool is_init = std::holds_alternative<InitMessage>(incoming_message);
+        bool is_mo = std::holds_alternative<MarketOrder>(incoming_message);
+        bool is_error = std::holds_alternative<RMQError>(incoming_message);
+        if (is_init) [[unlikely]] {
+            log_e(rabbitmq, "Not expecting initialization message");
+            exit(1);
+        }
+        else if (is_error) [[unlikely]] {
+            RMQError err = std::get<RMQError>(incoming_message);
+            log_e(rabbitmq, "Received RMQError: {}", err.message);
+        }
+        else if (is_mo) [[likely]] {
+            MarketOrder order = std::get<MarketOrder>(incoming_message);
+            std::string buffer;
+            glz::write<glz::opts{}>(order, buffer);
+
+            log_i(rabbitmq, "Received market order: {}", buffer);
+        }
+    }
+}
+
 bool
 RabbitMQ::publishMessage(const std::string& queueName, const std::string& message)
 {

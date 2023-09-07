@@ -2,6 +2,7 @@
 #include "config.h"
 #include "lib.hpp"
 #include "logging.hpp"
+#include "matching/engine.hpp"
 #include "rabbitmq/rabbitmq.hpp"
 
 #include <iostream>
@@ -31,15 +32,10 @@ main()
         return 1;
     };
 
+    nutc::matching::Engine engine;
+
     conn.wait_for_clients(num_clients);
-    std::variant<rmq::InitMessage, rmq::MarketOrder, rmq::RMQError> mess =
-        conn.consumeMessage();
-    if (std::holds_alternative<rmq::MarketOrder>(mess)) {
-        std::string buffer;
-        rmq::MarketOrder order = std::get<rmq::MarketOrder>(mess);
-        glz::write<glz::opts{.prettify = true}>(order, buffer);
-        log_i(main, "Received market order: {}", buffer);
-    }
+    conn.handle_incoming_messages(engine);
     conn.closeConnection();
 
     return 0;
