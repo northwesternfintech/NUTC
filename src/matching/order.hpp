@@ -15,7 +15,7 @@ public: // yea not sure where the defined interface is
     float quantity;
     float price;
 
-    Order(std::string tic, std::string typ, bool b, float pri);
+    Order(std::string tic, std::string typ, bool b, float price, float quantity);
 };
 } // namespace matching
 } // namespace nutc

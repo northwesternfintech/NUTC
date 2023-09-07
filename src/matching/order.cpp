@@ -7,8 +7,8 @@
 
 namespace nutc {
 namespace matching {
-Order::Order(std::string tic, std::string typ, bool b, float pri) :
-    ticker(tic), type(typ), buy(b), price(pri)
+Order::Order(std::string tic, std::string typ, bool b, float price, float quantity) :
+    ticker(tic), type(typ), buy(b), quantity(quantity), price(price)
 {}
 } // namespace matching
 } // namespace nuft

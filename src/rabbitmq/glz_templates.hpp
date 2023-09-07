@@ -20,9 +20,10 @@ struct InitMessage {
 
 struct MarketOrder {
     std::string security;
-    int quantity;
+    float quantity;
     bool side;
     std::string type;
+    float price;
 };
 } // namespace rabbitmq
 } // namespace nutc
@@ -38,7 +39,7 @@ struct glz::meta<nutc::rabbitmq::MarketOrder> {
     using T = nutc::rabbitmq::MarketOrder;
     static constexpr auto value = object(
         "security", &T::security, "quantity", &T::quantity, "side", &T::side, "type",
-        &T::type
+        &T::type, "price", &T::price
     );
 };
 
