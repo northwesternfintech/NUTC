@@ -10,7 +10,7 @@
 #include <iostream>
 #include <vector>
 
-namespace nuft {
+namespace nutc {
 namespace matching {
 
 Engine::Engine()
@@ -67,4 +67,4 @@ Engine::match()
     return matches;
 }
 } // namespace matching
-} // namespace nuft
+} // namespace nutc

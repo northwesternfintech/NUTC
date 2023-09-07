@@ -9,7 +9,7 @@
 #include <vector>
 #include <chrono>
 
-namespace nuft {
+namespace nutc {
 namespace matching {
 
 class Engine {

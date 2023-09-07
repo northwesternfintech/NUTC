@@ -5,7 +5,7 @@
 
 #include <string>
 
-namespace nuft {
+namespace nutc {
 namespace matching {
 Order::Order(std::string tic, std::string typ, bool b, float pri) :
     ticker(tic), type(typ), buy(b), price(pri)

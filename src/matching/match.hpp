@@ -5,7 +5,7 @@
 
 #include <string>
 
-namespace nuft {
+namespace nutc {
 namespace matching {
 
 class Match {
@@ -16,4 +16,4 @@ public:
     float quantity;
 };
 } // namespace matching
-} // namespace nuft
+} // namespace nutc

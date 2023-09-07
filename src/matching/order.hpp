@@ -4,7 +4,7 @@
 //
 #include <string>
 
-namespace nuft {
+namespace nutc {
 namespace matching {
 
 class Order {
@@ -18,4 +18,4 @@ public: // yea not sure where the defined interface is
     Order(std::string tic, std::string typ, bool b, float pri);
 };
 } // namespace matching
-} // namespace nuft
+} // namespace nutc
