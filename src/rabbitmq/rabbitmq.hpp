@@ -15,17 +15,19 @@ class RabbitMQ {
 public:
     RabbitMQ(const std::string& uid);
     bool initializeConnection(const std::string& queueName);
-    bool publishMarketOrder(
-        const std::string& security, int quantity, bool side, const std::string& type
-    );
     bool publishInit(const std::string& uid, bool ready);
-  std::function<bool(const std::string&, int, bool, const std::string&)> getMarketFunc();
+    std::function<bool(const std::string&, int, bool, const std::string&)>
+    getMarketFunc();
     void closeConnection();
 
 private:
     amqp_connection_state_t conn;
     bool publishMessage(const std::string& queueName, const std::string& message);
     bool initializeQueue(const std::string& queueName);
+    bool publishMarketOrder(
+        const std::string& security, int quantity, bool side, const std::string& type
+    );
+
     bool connectToRabbitMQ(
         const std::string& hostname,
         int port,
@@ -33,7 +35,9 @@ private:
         const std::string& password
     );
 
-    std::string consumeMessage(const std::string& queueName);
+    std::string consumeMessageAsString(const std::string& queueName);
+    std::variant<ShutdownMessage, RMQError> consumeMessage(const std::string& queueName
+    );
 };
 
 } // namespace rabbitmq

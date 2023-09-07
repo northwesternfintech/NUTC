@@ -83,9 +83,26 @@ RabbitMQ::publishMessage(const std::string& queueName, const std::string& messag
     return true;
 }
 
+std::variant<ShutdownMessage, RMQError>
+RabbitMQ::consumeMessage(const std::string& queueName)
+{
+    std::string buf = consumeMessageAsString(queueName);
+    if (buf == "") {
+        return RMQError{"Failed to consume message."};
+    }
+
+    std::variant<ShutdownMessage, RMQError> data{};
+    auto err = glz::read_json(data, buf);
+    if (err) {
+        std::string error = glz::format_error(err, buf);
+        return RMQError{error};
+    }
+    return data;
+}
+
 // Blocking
 std::string
-RabbitMQ::consumeMessage(const std::string& queueName)
+RabbitMQ::consumeMessageAsString(const std::string& queueName)
 {
     amqp_basic_consume(
         conn,

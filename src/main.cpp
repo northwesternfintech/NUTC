@@ -5,9 +5,11 @@
 #include "rabbitmq/rabbitmq.hpp"
 
 #include <argparse/argparse.hpp>
+#include <pybind11/pybind11.h>
 
 #include <algorithm>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <tuple>
 
@@ -76,6 +78,7 @@ main(int argc, const char** argv)
 {
     // Parse args
     auto [verbosity, uid] = process_arguments(argc, argv);
+    pybind11::scoped_interpreter guard{};
 
     // Start logging and print build info
     nutc::logging::init(verbosity);
@@ -84,12 +87,13 @@ main(int argc, const char** argv)
 
     nutc::rabbitmq::RabbitMQ conn(uid);
 
-    bool hasAlgo = nutc::client::get_most_recent_algo(uid);
-    if (!hasAlgo) {
+    std::optional<std::string> algo = nutc::client::get_most_recent_algo(uid);
+    if (!algo.has_value()) {
         conn.closeConnection();
         return 0;
     }
     nutc::pywrapper::init(conn.getMarketFunc());
+    nutc::pywrapper::run_code(algo.value());
     conn.closeConnection();
     return 0;
 }
