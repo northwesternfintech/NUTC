@@ -3,9 +3,11 @@
 // Created by echav on 9/4/2023.
 //
 
+#include "match.hpp"
 #include "order.hpp"
 
 #include <vector>
+#include <chrono>
 
 namespace nuft {
 namespace matching {
@@ -17,7 +19,7 @@ public: // we will need to add all communication machinery in, this will just ex
 
     Engine(); // con
     void add_order(Order order);
-    void match();
+    std::vector<Match> match();
 };
 } // namespace matching
 } // namespace nuft

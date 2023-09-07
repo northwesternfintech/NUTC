@@ -31,9 +31,10 @@ Engine::add_order(Order order)
     return;
 }
 
-void
+std::vector<Match>
 Engine::match()
 {
+    std::vector<Match> matches;
     std::sort(this->bids.begin(), this->bids.end(), [](const Order& a, const Order& b) {
         return a.price > b.price;
     });
@@ -47,6 +48,13 @@ Engine::match()
             if (it->price >= jt->price) {
                 std::cout << "Matched: " << it->ticker << " " << it->price << " - "
                           << jt->ticker << " " << jt->price << "\n";
+                auto now = std::chrono::system_clock::now().time_since_epoch();
+                double timestamp =
+                    std::chrono::duration<double, std::milli>(now).count();
+                // TODO ETHAN: make sure passive price is used, also set up for partial
+                // fills
+                matches.push_back(Match{it->ticker, timestamp, jt->price, jt->quantity}
+                );
                 it = this->bids.erase(it);
                 jt = this->asks.erase(jt);
             }
@@ -56,6 +64,7 @@ Engine::match()
         }
         ++it;
     }
+    return matches;
 }
 } // namespace matching
 } // namespace nuft
