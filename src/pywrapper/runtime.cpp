@@ -6,8 +6,10 @@ namespace nutc {
 namespace pywrapper {
 
 bool
-create_api_module(std::function<bool(const std::string&, int, bool, const std::string&)>
-                      publish_market_order)
+create_api_module(
+    std::function<bool(const std::string&, float, bool, const std::string&, float)>
+        publish_market_order
+)
 {
     try {
         py::module m = py::module::create_extension_module(
@@ -21,8 +23,8 @@ create_api_module(std::function<bool(const std::string&, int, bool, const std::s
 
         py::exec(R"(import nutc_api)");
         py::exec(R"(
-        def place_market_order(symbol, quantity, is_buy, client_order_id):
-            nutc_api.publish_market_order(symbol, quantity, is_buy, client_order_id)
+        def place_market_order(symbol, quantity, is_buy, client_order_id, price):
+            nutc_api.publish_market_order(symbol, quantity, is_buy, client_order_id, price)
     )");
     } catch (const std::exception& e) {
         return false;
@@ -70,7 +72,7 @@ trigger_callbacks()
 {
     log_i(mock_runtime, "Triggering callbacks");
     try {
-        py::exec(R"(place_market_order("ETHUSD", 1, True, "market"))");
+        py::exec(R"(place_market_order("ETHUSD", 1, True, "market", 5))");
     } catch (const std::exception& e) {
         return fmt::format("Failed to run place_market_order: {}", e.what());
     }
