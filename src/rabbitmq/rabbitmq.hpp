@@ -18,7 +18,7 @@ struct RMQError {
 class RabbitMQ {
 public:
     bool initializeConnection();
-    void closeConnection();
+    void closeConnection(glz::json_t::object_t users);
     void handle_incoming_messages(nutc::matching::Engine engine);
     void wait_for_clients(int num_clients);
 

@@ -201,8 +201,14 @@ RabbitMQ::initializeConnection()
 }
 
 void
-RabbitMQ::closeConnection()
+RabbitMQ::closeConnection(glz::json_t::object_t users)
 {
+    for (auto& [uid, user] : users) {
+        log_i(rabbitmq, "Shutting down client {}", uid);
+        nutc::rabbitmq::ShutdownMessage shutdown{uid};
+        std::string mess = glz::write_json(shutdown);
+        publishMessage(uid, mess);
+    }
     amqp_channel_close(conn, 1, AMQP_REPLY_SUCCESS);
     amqp_connection_close(conn, AMQP_REPLY_SUCCESS);
     amqp_destroy_connection(conn);

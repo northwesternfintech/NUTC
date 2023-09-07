@@ -5,6 +5,10 @@
 namespace nutc {
 namespace rabbitmq {
 
+struct ShutdownMessage {
+    std::string shutdown_reason;
+};
+
 struct InitMessage {
     std::string client_uid;
     bool ready;
@@ -18,6 +22,12 @@ struct MarketOrder {
 };
 } // namespace rabbitmq
 } // namespace nutc
+
+template <>
+struct glz::meta<nutc::rabbitmq::ShutdownMessage> {
+    using T = nutc::rabbitmq::ShutdownMessage;
+    static constexpr auto value = object("shutdown_reason", &T::shutdown_reason);
+};
 
 template <>
 struct glz::meta<nutc::rabbitmq::MarketOrder> {
