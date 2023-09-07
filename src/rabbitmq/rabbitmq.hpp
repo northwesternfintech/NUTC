@@ -21,12 +21,12 @@ public:
     void closeConnection();
     void handle_incoming_messages(nutc::matching::Engine engine);
     void wait_for_clients(int num_clients);
-    std::variant<InitMessage, MarketOrder, RMQError> consumeMessage();
 
 private:
     amqp_connection_state_t conn;
     std::string consumeMessageAsString();
     bool publishMessage(const std::string& queueName, const std::string& message);
+    std::variant<InitMessage, MarketOrder, RMQError> consumeMessage();
     bool initializeQueue(const std::string& queueName);
     bool initializeConsume(const std::string& queueName);
     bool connectToRabbitMQ(
