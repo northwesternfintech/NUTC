@@ -6,8 +6,10 @@ namespace nutc {
 namespace pywrapper {
 
 void
-create_api_module(std::function<bool(const std::string&, int, bool, const std::string&)>
-                      publish_market_order)
+create_api_module(
+    std::function<bool(const std::string&, float, bool, const std::string&, float)>
+        publish_market_order
+)
 {
     py::module m = py::module::create_extension_module(
         "nutc_api", "NUTC Exchange API", new py::module::module_def
@@ -19,17 +21,22 @@ create_api_module(std::function<bool(const std::string&, int, bool, const std::s
     sys_modules["nutc_api"] = m;
 
     py::exec(R"(import nutc_api)");
+    py::exec(R"(
+        def place_market_order(symbol, quantity, is_buy, client_order_id, price):
+            nutc_api.publish_market_order(symbol, quantity, is_buy, client_order_id, price)
+    )");
 }
 
 void
-run_code(const std::string& py_code)
+run_code_init(const std::string& py_code)
 {
     log_i(py_runtime, "Running code:\n{}", py_code);
     py::exec(py_code);
+    py::exec("initialize()");
 }
 
 void
-init(std::function<bool(const std::string&, int, bool, const std::string&)>
+init(std::function<bool(const std::string&, float, bool, const std::string&, float)>
          publish_market_order)
 {
     create_api_module(publish_market_order);

@@ -93,7 +93,7 @@ main(int argc, const char** argv)
         return 0;
     }
     nutc::pywrapper::init(conn.getMarketFunc());
-    nutc::pywrapper::run_code(algo.value());
+    nutc::pywrapper::run_code_init(algo.value());
     conn.closeConnection();
     return 0;
 }

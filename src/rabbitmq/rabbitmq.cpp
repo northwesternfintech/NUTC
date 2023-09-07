@@ -46,10 +46,14 @@ RabbitMQ::connectToRabbitMQ(
 
 bool
 RabbitMQ::publishMarketOrder(
-    const std::string& security, int quantity, bool side, const std::string& type
+    const std::string& security,
+    float quantity,
+    bool side,
+    const std::string& type,
+    float price
 )
 {
-    MarketOrder order;
+    MarketOrder order{security, quantity, side, type, price};
     order.security = security;
     order.quantity = quantity;
     order.side = side;
@@ -170,7 +174,7 @@ RabbitMQ::RabbitMQ(const std::string& uid)
     publishInit(uid, false);
 }
 
-std::function<bool(const std::string&, int, bool, const std::string&)>
+std::function<bool(const std::string&, float, bool, const std::string&, float)>
 RabbitMQ::getMarketFunc()
 {
     return std::bind(
@@ -179,7 +183,8 @@ RabbitMQ::getMarketFunc()
         std::placeholders::_1,
         std::placeholders::_2,
         std::placeholders::_3,
-        std::placeholders::_4
+        std::placeholders::_4,
+        std::placeholders::_5
     );
 }
 

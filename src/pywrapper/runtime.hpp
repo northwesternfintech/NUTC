@@ -7,11 +7,11 @@
 
 namespace nutc {
 namespace pywrapper {
-void init(std::function<bool(const std::string&, int, bool, const std::string&)>
+void init(std::function<bool(const std::string&, float, bool, const std::string&, float)>
               publish_market_order);
 void
-create_api_module(std::function<bool(const std::string&, int, bool, const std::string&)>
+create_api_module(std::function<bool(const std::string&, float, bool, const std::string&, float)>
                       publish_market_order);
-void run_code(const std::string& py_code);
+void run_code_init(const std::string& py_code);
 } // namespace pywrapper
 } // namespace nutc
