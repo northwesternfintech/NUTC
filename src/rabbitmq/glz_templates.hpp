@@ -25,6 +25,12 @@ struct MarketOrder {
     std::string type;
     float price;
 };
+
+struct ObUpdate {
+    std::string security;
+    float price;
+    float quantity;
+};
 } // namespace rabbitmq
 } // namespace nutc
 
@@ -35,11 +41,26 @@ struct glz::meta<nutc::rabbitmq::ShutdownMessage> {
 };
 
 template <>
+struct glz::meta<nutc::rabbitmq::ObUpdate> {
+    using T = nutc::rabbitmq::ObUpdate;
+    static constexpr auto value =
+        object("security", &T::security, "price", &T::price, "quantity", &T::quantity);
+};
+
+template <>
 struct glz::meta<nutc::rabbitmq::MarketOrder> {
     using T = nutc::rabbitmq::MarketOrder;
     static constexpr auto value = object(
-        "security", &T::security, "quantity", &T::quantity, "side", &T::side, "type",
-        &T::type, "price", &T::price
+        "security",
+        &T::security,
+        "quantity",
+        &T::quantity,
+        "side",
+        &T::side,
+        "type",
+        &T::type,
+        "price",
+        &T::price
     );
 };
 

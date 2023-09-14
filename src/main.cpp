@@ -94,6 +94,7 @@ main(int argc, const char** argv)
     }
     nutc::pywrapper::init(conn.getMarketFunc());
     nutc::pywrapper::run_code_init(algo.value());
+    conn.handleIncomingMessages();
     conn.closeConnection();
     return 0;
 }

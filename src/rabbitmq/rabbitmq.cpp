@@ -44,6 +44,41 @@ RabbitMQ::connectToRabbitMQ(
     return true;
 }
 
+std::variant<ShutdownMessage, RMQError>
+RabbitMQ::handleIncomingMessages()
+{
+    while (true) {
+        std::variant<ShutdownMessage, RMQError, ObUpdate> data = consumeMessage();
+        if (std::holds_alternative<ShutdownMessage>(data)) {
+            log_w(
+                rabbitmq,
+                "Received shutdown message: {}",
+                std::get<ShutdownMessage>(data).shutdown_reason
+            );
+            return std::get<ShutdownMessage>(data);
+        }
+        else if (std::holds_alternative<RMQError>(data)) {
+            log_e(
+                rabbitmq,
+                "Failed to consume message: {}",
+                std::get<RMQError>(data).message
+            );
+            return std::get<RMQError>(data);
+        }
+        else if (std::holds_alternative<ObUpdate>(data)) {
+            log_i(
+                rabbitmq,
+                "Received order book update: {}",
+                glz::write_json(std::get<ObUpdate>(data))
+            );
+        }
+        else {
+            log_e(rabbitmq, "Unknown message type");
+            return RMQError{"Unknown message type"};
+        }
+    }
+}
+
 bool
 RabbitMQ::publishMarketOrder(
     const std::string& security,
@@ -87,15 +122,16 @@ RabbitMQ::publishMessage(const std::string& queueName, const std::string& messag
     return true;
 }
 
-std::variant<ShutdownMessage, RMQError>
-RabbitMQ::consumeMessage(const std::string& queueName)
+std::variant<ShutdownMessage, RMQError, ObUpdate>
+RabbitMQ::consumeMessage()
 {
-    std::string buf = consumeMessageAsString(queueName);
+    std::string buf = consumeMessageAsString();
     if (buf == "") {
         return RMQError{"Failed to consume message."};
     }
+    log_i(rabbitmq, "{}", buf);
 
-    std::variant<ShutdownMessage, RMQError> data{};
+    std::variant<ShutdownMessage, RMQError, ObUpdate> data{};
     auto err = glz::read_json(data, buf);
     if (err) {
         std::string error = glz::format_error(err, buf);
@@ -106,28 +142,11 @@ RabbitMQ::consumeMessage(const std::string& queueName)
 
 // Blocking
 std::string
-RabbitMQ::consumeMessageAsString(const std::string& queueName)
+RabbitMQ::consumeMessageAsString()
 {
-    amqp_basic_consume(
-        conn,
-        1,
-        amqp_cstring_bytes(queueName.c_str()),
-        amqp_empty_bytes,
-        0,
-        1,
-        0,
-        amqp_empty_table
-    );
-
-    amqp_rpc_reply_t res = amqp_get_rpc_reply(conn);
-    if (res.reply_type != AMQP_RESPONSE_NORMAL) {
-        log_e(rabbitmq, "Failed to consume message.");
-        return "";
-    }
-
     amqp_envelope_t envelope;
     amqp_maybe_release_buffers(conn);
-    res = amqp_consume_message(conn, &envelope, NULL, 0);
+    amqp_rpc_reply_t res = amqp_consume_message(conn, &envelope, NULL, 0);
 
     if (res.reply_type != AMQP_RESPONSE_NORMAL) {
         log_e(rabbitmq, "Failed to consume message.");
@@ -145,6 +164,7 @@ bool
 RabbitMQ::initializeConnection(const std::string& queueName)
 {
     if (!connectToRabbitMQ("localhost", 5672, "NUFT", "ADMIN")) {
+        log_c(rabbitmq, "Failed to connect to RabbitMQ");
         return false;
     }
     amqp_channel_open(conn, 1);
@@ -158,7 +178,34 @@ RabbitMQ::initializeConnection(const std::string& queueName)
         return false;
     }
 
+    if (!initializeConsume(queueName)) {
+        return false;
+    }
+
     log_i(rabbitmq, "Connection established");
+
+    return true;
+}
+
+bool
+RabbitMQ::initializeConsume(const std::string& queueName)
+{
+    amqp_basic_consume(
+        conn,
+        1,
+        amqp_cstring_bytes(queueName.c_str()),
+        amqp_empty_bytes,
+        0,
+        1,
+        0,
+        amqp_empty_table
+    );
+
+    amqp_rpc_reply_t res = amqp_get_rpc_reply(conn);
+    if (res.reply_type != AMQP_RESPONSE_NORMAL) {
+        log_e(rabbitmq, "Failed to consume message.");
+        return false;
+    }
 
     return true;
 }
@@ -171,7 +218,7 @@ RabbitMQ::RabbitMQ(const std::string& uid)
         publishInit(uid, false);
         exit(1);
     }
-    publishInit(uid, false);
+    publishInit(uid, true);
 }
 
 std::function<bool(const std::string&, float, bool, const std::string&, float)>

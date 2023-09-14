@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <string>
+#include <unistd.h>
 
 #include <rabbitmq-c/amqp.h>
 #include <rabbitmq-c/tcp_socket.h>
@@ -15,9 +16,12 @@ class RabbitMQ {
 public:
     RabbitMQ(const std::string& uid);
     bool initializeConnection(const std::string& queueName);
+    bool initializeConsume(const std::string& queueName);
     bool publishInit(const std::string& uid, bool ready);
     std::function<bool(const std::string&, float, bool, const std::string&, float)>
     getMarketFunc();
+    std::variant<ShutdownMessage, RMQError>
+    handleIncomingMessages();
     void closeConnection();
 
 private:
@@ -39,9 +43,9 @@ private:
         const std::string& password
     );
 
-    std::string consumeMessageAsString(const std::string& queueName);
-    std::variant<ShutdownMessage, RMQError> consumeMessage(const std::string& queueName
-    );
+    std::string consumeMessageAsString();
+    std::variant<ShutdownMessage, RMQError, ObUpdate>
+    consumeMessage();
 };
 
 } // namespace rabbitmq
