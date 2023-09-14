@@ -3,11 +3,11 @@ name: Continuous Integration
 on:
   push:
     branches:
-    - main
+    - cd-test 
 
   pull_request:
     branches:
-    - main
+    - cd-test 
 
   workflow_dispatch:
 

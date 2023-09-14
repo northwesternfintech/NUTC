@@ -2,21 +2,24 @@
 
 namespace nutc {
 namespace mock_api {
-std::function<bool(const std::string&, float, bool, const std::string&, float)>
+std::function<
+    bool(const std::string&, const std::string&, const std::string&, float, float)>
+
 getMarketFunc()
 {
-    return [](const std::string& security,
-              float quantity,
-              bool side,
+    return [](const std::string& side,
               const std::string& type,
+              const std::string& ticker,
+              float quantity,
               float price) {
         log_i(
             mock_api,
-            "Mock API: Placing order for {} {} {} {} {}",
-            security,
-            quantity,
+            "Mock API: Placing order side {} type {} ticker {} quantity {} price "
+            "{}",
             side,
             type,
+            ticker,
+            quantity,
             price
         );
         return true;

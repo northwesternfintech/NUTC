@@ -3,7 +3,7 @@
 #include "firebase/fetching.hpp"
 #include "firebase/firebase.hpp"
 #include "mock_api/mock_api.hpp"
-#include "pywrapper/pywrapper.hpp"
+#include "pywrapper/runtime.hpp"
 
 #include <pybind11/pybind11.h>
 

@@ -7,7 +7,8 @@ namespace pywrapper {
 
 bool
 create_api_module(
-    std::function<bool(const std::string&, float, bool, const std::string&, float)>
+    std::function<
+        bool(const std::string&, const std::string&, const std::string&, float, float)>
         publish_market_order
 )
 {
