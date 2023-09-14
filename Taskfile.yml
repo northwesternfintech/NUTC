@@ -52,6 +52,11 @@ tasks:
     cmds:
       - cmake --build --preset=dev -t clean
 
+  format:
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - cmake -D FIX=YES -P cmake/lint.cmake
+
   default:
     cmds:
       - task: run

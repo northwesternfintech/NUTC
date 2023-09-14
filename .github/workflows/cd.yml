@@ -9,53 +9,53 @@ on:
     branches:
     - cd-test
 
+jobs:
+  create-dockerimage:
+      strategy:
+        matrix:
+          os: [macos-12, ubuntu-22.04, windows-2022]
 
-create-dockerimage:
-    strategy:
-      matrix:
-        os: [macos-12, ubuntu-22.04, windows-2022]
+      runs-on: ${{ matrix.os }}
 
-    runs-on: ${{ matrix.os }}
+      steps:
+      - uses: actions/checkout@v3
 
-    steps:
-    - uses: actions/checkout@v3
+      - name: Install static analyzers
+        if: matrix.os == 'ubuntu-22.04'
+        run: >-
+          sudo apt-get install clang-tidy-14 cppcheck -y -q
 
-    - name: Install static analyzers
-      if: matrix.os == 'ubuntu-22.04'
-      run: >-
-        sudo apt-get install clang-tidy-14 cppcheck -y -q
+          sudo update-alternatives --install
+          /usr/bin/clang-tidy clang-tidy
+          /usr/bin/clang-tidy-14 140
 
-        sudo update-alternatives --install
-        /usr/bin/clang-tidy clang-tidy
-        /usr/bin/clang-tidy-14 140
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with: { python-version: "3.8" }
 
-    - name: Install Python
-      uses: actions/setup-python@v4
-      with: { python-version: "3.8" }
+      - name: Install dependencies
+        shell: bash
+        run: |
+          pip3 install conan
+          bash < .github/scripts/conan-profile.sh
+          conan install . -b missing
 
-    - name: Install dependencies
-      shell: bash
-      run: |
-        pip3 install conan
-        bash < .github/scripts/conan-profile.sh
-        conan install . -b missing
+      - name: Setup MultiToolTask
+        if: matrix.os == 'windows-2022'
+        run: |
+          Add-Content "$env:GITHUB_ENV" 'UseMultiToolTask=true'
+          Add-Content "$env:GITHUB_ENV" 'EnforceProcessCountAcrossBuilds=true'
 
-    - name: Setup MultiToolTask
-      if: matrix.os == 'windows-2022'
-      run: |
-        Add-Content "$env:GITHUB_ENV" 'UseMultiToolTask=true'
-        Add-Content "$env:GITHUB_ENV" 'EnforceProcessCountAcrossBuilds=true'
+      - name: Configure
+        shell: pwsh
+        run: cmake "--preset=ci-$("${{ matrix.os }}".split("-")[0])"
 
-    - name: Configure
-      shell: pwsh
-      run: cmake "--preset=ci-$("${{ matrix.os }}".split("-")[0])"
+      - name: Build
+        run: cmake --build build --config Release -j 2
 
-    - name: Build
-      run: cmake --build build --config Release -j 2
+      - name: Install
+        run: cmake --install build --config Release --prefix prefix
 
-    - name: Install
-      run: cmake --install build --config Release --prefix prefix
-
-    - name: Create Dockerimage
-      working-directory: build
-      run: docker build -t nutc-linter:latest .
+      - name: Create Dockerimage
+        working-directory: build
+        run: docker build -t nutc-linter:latest .
