@@ -20,6 +20,7 @@ handle_sigint(int sig)
 {
     log_i(rabbitmq, "Caught SIGINT, closing connection");
     conn.closeConnection(users);
+    sleep(3);
     exit(sig);
 }
 

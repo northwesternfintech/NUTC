@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <string>
+#include <unistd.h>
 
 #include <rabbitmq-c/amqp.h>
 #include <rabbitmq-c/tcp_socket.h>

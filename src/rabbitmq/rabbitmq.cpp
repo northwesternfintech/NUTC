@@ -40,7 +40,7 @@ bool
 RabbitMQ::initializeQueue(const std::string& queueName)
 {
     amqp_queue_declare(
-        conn, 1, amqp_cstring_bytes("market_order"), 0, 0, 0, 1, amqp_empty_table
+        conn, 1, amqp_cstring_bytes(queueName.c_str()), 0, 0, 0, 1, amqp_empty_table
     );
 
     amqp_rpc_reply_t res = amqp_get_rpc_reply(conn);
