@@ -75,6 +75,7 @@ get_main_logger()
     class ____dummy_##category // makes you add a semicolon
 
 // Create loggers here for every category
+CREATE_LOG_CATEGORY(matching);
 CREATE_LOG_CATEGORY(kafka);
 CREATE_LOG_CATEGORY(firebase_fetching);
 CREATE_LOG_CATEGORY(client_spawning);
