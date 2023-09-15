@@ -10,7 +10,7 @@ glz::json_t::object_t
 get_all_users()
 {
     std::string endpoint = std::string(FIREBASE_URL) + std::string("users.json");
-    glz::json_t res = nutc::client::firebase_request("GET", endpoint);
+    glz::json_t res = firebase::firebase_request("GET", endpoint);
     return res.get<glz::json_t::object_t>();
 }
 

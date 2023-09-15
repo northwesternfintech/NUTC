@@ -1,9 +1,9 @@
-#include "fetching.hpp"
+#include "firebase.hpp"
 
 #include "logging.hpp"
 
 namespace nutc {
-namespace client {
+namespace firebase {
 
 static size_t
 write_callback(void* contents, size_t size, size_t nmemb, void* userp)

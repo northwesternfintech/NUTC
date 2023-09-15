@@ -8,7 +8,7 @@
 #include <string>
 
 namespace nutc {
-namespace client {
+namespace firebase {
 
 glz::json_t firebase_request(
     const std::string& method, const std::string& url, const std::string& data = ""

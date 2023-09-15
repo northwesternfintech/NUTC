@@ -1,4 +1,5 @@
-#include "client/client.hpp"
+#include "process_spawning/spawning.hpp"
+#include "firebase/firebase.hpp"
 #include "client_manager/manager.hpp"
 #include "config.h"
 #include "lib.hpp"
@@ -21,7 +22,7 @@ handle_sigint(int sig)
 {
     log_i(rabbitmq, "Caught SIGINT, closing connection");
     conn.closeConnection(users);
-    sleep(3);
+    sleep(1);
     exit(sig);
 }
 

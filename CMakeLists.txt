@@ -19,8 +19,8 @@ add_library(
     NUTC24_lib OBJECT
     src/lib.cpp
     src/logging.cpp
-    src/client/fetching.cpp
-    src/client/spawning.cpp
+    src/firebase/firebase.cpp
+    src/process_spawning/spawning.cpp
     src/rabbitmq/rabbitmq.cpp
     src/matching/order.cpp
     src/matching/engine.cpp
