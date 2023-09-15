@@ -2,9 +2,10 @@
 
 #include "glz_templates.hpp"
 
+#include <unistd.h>
+
 #include <iostream>
 #include <string>
-#include <unistd.h>
 
 #include <rabbitmq-c/amqp.h>
 #include <rabbitmq-c/tcp_socket.h>
@@ -18,10 +19,9 @@ public:
     bool initializeConnection(const std::string& queueName);
     bool initializeConsume(const std::string& queueName);
     bool publishInit(const std::string& uid, bool ready);
-    std::function<bool(const std::string&, float, bool, const std::string&, float)>
-    getMarketFunc();
-    std::variant<ShutdownMessage, RMQError>
-    handleIncomingMessages();
+    std::function<bool(const std::string&, const std::string&, const std::string&, float, float)>
+    getMarketFunc(const std::string& uid);
+    std::variant<ShutdownMessage, RMQError> handleIncomingMessages();
     void closeConnection();
 
 private:
@@ -29,10 +29,11 @@ private:
     bool publishMessage(const std::string& queueName, const std::string& message);
     bool initializeQueue(const std::string& queueName);
     bool publishMarketOrder(
-        const std::string& security,
-        float quantity,
-        bool side,
+        const std::string& client_uid,
+        const std::string& side,
         const std::string& type,
+        const std::string& ticker,
+        float quantity,
         float price
     );
 
@@ -44,8 +45,7 @@ private:
     );
 
     std::string consumeMessageAsString();
-    std::variant<ShutdownMessage, RMQError, ObUpdate>
-    consumeMessage();
+    std::variant<ShutdownMessage, RMQError, ObUpdate> consumeMessage();
 };
 
 } // namespace rabbitmq

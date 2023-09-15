@@ -5,12 +5,14 @@
 namespace nutc {
 namespace rabbitmq {
 
+enum SIDE { BUY, SELL };
+
 struct ShutdownMessage {
     std::string shutdown_reason;
 };
 
 struct RMQError {
-    std::string message;
+    std::string message; // todo: make enum?
 };
 
 struct InitMessage {
@@ -19,10 +21,11 @@ struct InitMessage {
 };
 
 struct MarketOrder {
-    std::string security;
-    float quantity;
-    bool side;
+    std::string client_uid;
+    SIDE side;
     std::string type;
+    std::string ticker;
+    float quantity;
     float price;
 };
 
@@ -31,14 +34,9 @@ struct ObUpdate {
     float price;
     float quantity;
 };
+
 } // namespace rabbitmq
 } // namespace nutc
-
-template <>
-struct glz::meta<nutc::rabbitmq::ShutdownMessage> {
-    using T = nutc::rabbitmq::ShutdownMessage;
-    static constexpr auto value = object("shutdown_reason", &T::shutdown_reason);
-};
 
 template <>
 struct glz::meta<nutc::rabbitmq::ObUpdate> {
@@ -48,17 +46,25 @@ struct glz::meta<nutc::rabbitmq::ObUpdate> {
 };
 
 template <>
+struct glz::meta<nutc::rabbitmq::ShutdownMessage> {
+    using T = nutc::rabbitmq::ShutdownMessage;
+    static constexpr auto value = object("shutdown_reason", &T::shutdown_reason);
+};
+
+template <>
 struct glz::meta<nutc::rabbitmq::MarketOrder> {
     using T = nutc::rabbitmq::MarketOrder;
     static constexpr auto value = object(
-        "security",
-        &T::security,
-        "quantity",
-        &T::quantity,
+        "client_uid",
+        &T::client_uid,
         "side",
         &T::side,
         "type",
         &T::type,
+        "ticker",
+        &T::ticker,
+        "quantity",
+        &T::quantity,
         "price",
         &T::price
     );

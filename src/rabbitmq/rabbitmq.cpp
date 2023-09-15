@@ -81,18 +81,15 @@ RabbitMQ::handleIncomingMessages()
 
 bool
 RabbitMQ::publishMarketOrder(
-    const std::string& security,
-    float quantity,
-    bool side,
+    const std::string& client_uid,
+    const std::string& side,
     const std::string& type,
+    const std::string& ticker,
+    float quantity,
     float price
 )
 {
-    MarketOrder order{security, quantity, side, type, price};
-    order.security = security;
-    order.quantity = quantity;
-    order.side = side;
-    order.type = type;
+    MarketOrder order{client_uid, side=="BUY" ? BUY : SELL, type, ticker, quantity, price};
     std::string message = glz::write_json(order);
 
     log_i(rabbitmq, "Publishing order: {}", message);
@@ -221,12 +218,14 @@ RabbitMQ::RabbitMQ(const std::string& uid)
     publishInit(uid, true);
 }
 
-std::function<bool(const std::string&, float, bool, const std::string&, float)>
-RabbitMQ::getMarketFunc()
+std::function<
+    bool(const std::string&, const std::string&, const std::string&, float, float)>
+RabbitMQ::getMarketFunc(const std::string& uid)
 {
     return std::bind(
         &RabbitMQ::publishMarketOrder,
         this,
+        uid,
         std::placeholders::_1,
         std::placeholders::_2,
         std::placeholders::_3,

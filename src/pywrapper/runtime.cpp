@@ -1,5 +1,7 @@
 #include "runtime.hpp"
 
+#include "rabbitmq/glz_templates.hpp"
+
 namespace py = pybind11;
 
 namespace nutc {
@@ -7,7 +9,8 @@ namespace pywrapper {
 
 void
 create_api_module(
-    std::function<bool(const std::string&, float, bool, const std::string&, float)>
+    std::function<
+        bool(const std::string&, const std::string&, const std::string&, float, float)>
         publish_market_order
 )
 {
@@ -22,8 +25,8 @@ create_api_module(
 
     py::exec(R"(import nutc_api)");
     py::exec(R"(
-        def place_market_order(symbol, quantity, is_buy, client_order_id, price):
-            nutc_api.publish_market_order(symbol, quantity, is_buy, client_order_id, price)
+        def place_market_order(side, type, ticker, quantity, price):
+            nutc_api.publish_market_order(side, type, ticker, quantity, price)
     )");
 }
 
@@ -36,7 +39,8 @@ run_code_init(const std::string& py_code)
 }
 
 void
-init(std::function<bool(const std::string&, float, bool, const std::string&, float)>
+init(std::function<
+     bool(const std::string&, const std::string&, const std::string&, float, float)>
          publish_market_order)
 {
     create_api_module(publish_market_order);
