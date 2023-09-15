@@ -95,7 +95,7 @@ RabbitMQ::handle_incoming_messages(nutc::matching::Engine& engine)
             log_i(rabbitmq, "Received market order: {}", buffer);
             // TODO: these should not be two different classes
             nutc::matching::Order newMO{
-                order.ticker, "MARKET", order.side == nutc::rabbitmq::BUY,
+                order.ticker, "MARKET", order.side == messages::BUY,
                 order.quantity, order.price};
             engine.add_order(newMO);
         }
@@ -214,7 +214,7 @@ RabbitMQ::closeConnection(const nutc::manager::ClientManager& users)
 {
     for (auto& [uid, active] : users.getClients(true)) {
         log_i(rabbitmq, "Shutting down client {}", uid);
-        nutc::rabbitmq::ShutdownMessage shutdown{uid};
+        ShutdownMessage shutdown{uid};
         std::string mess = glz::write_json(shutdown);
         publishMessage(uid, mess);
     }
