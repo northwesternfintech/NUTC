@@ -38,7 +38,7 @@ main()
 
     glz::json_t::object_t firebase_users = nutc::client::get_all_users();
     users.initialize_from_firebase(firebase_users);
-    int num_clients = nutc::client::spawn_all_clients(firebase_users);
+    int num_clients = nutc::client::spawn_all_clients(users);
 
     nutc::logging::init(quill::LogLevel::TraceL3);
 

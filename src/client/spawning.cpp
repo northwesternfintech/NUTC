@@ -15,11 +15,10 @@ get_all_users()
 }
 
 int
-spawn_all_clients(glz::json_t::object_t users)
+spawn_all_clients(const nutc::manager::ClientManager& users)
 {
-    log_i(client_spawning, "Starting exchange with {} users", users.size());
     int clients = 0;
-    for (auto& [uid, user] : users) {
+    for (auto& [uid, user] : users.getClients(false)) {
         log_i(client_spawning, "Spawning client: {}", uid);
         std::string quote_uid = std::string(uid);
         std::replace(quote_uid.begin(), quote_uid.end(), '-', ' ');
