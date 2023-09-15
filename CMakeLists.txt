@@ -25,6 +25,7 @@ add_library(
     src/matching/order.cpp
     src/matching/engine.cpp
     src/matching/order.cpp
+    src/client_manager/manager.cpp
 )
 
 target_include_directories(
