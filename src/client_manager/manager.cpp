@@ -1,24 +1,42 @@
 #include "manager.hpp"
 
+
 namespace nutc {
-namespace accounts {
+namespace manager {
 void
-ClientManager::addClient(const std::string& uid, bool active)
+ClientManager::initialize_from_firebase(const glz::json_t::object_t& users)
 {
-    Client client{uid};
-    active ? activeClients.push_back(client) : inactiveClients.push_back(client);
+    for (auto& [uid, _] : users) {
+        addClient(uid);
+    }
 }
 
-std::vector<Client>
-ClientManager::getActiveClients()
+void
+ClientManager::addClient(const std::string& uid)
 {
-    return activeClients;
+    if (clients.find(uid) != clients.end()) {
+        return;
+    }
+    clients[uid] = Client{uid, false};
 }
 
-std::vector<Client>
-ClientManager::getInactiveClients()
+void
+ClientManager::setClientActive(const std::string& uid)
 {
-    return inactiveClients;
+    clients[uid].active = true;
 }
-} // namespace accounts
+
+// inefficient but who cares
+std::vector<Client>
+ClientManager::getClients(bool active) const
+{
+    std::vector<Client> client_vec;
+    for (auto& [uid, client] : clients) {
+        if ((active && client.active) || (!active && !client.active)) {
+            client_vec.push_back(client);
+        }
+    }
+    return client_vec;
+}
+} // namespace manager
 } // namespace nutc

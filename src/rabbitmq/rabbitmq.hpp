@@ -1,11 +1,13 @@
 #pragma once
 
+#include "client_manager/manager.hpp"
 #include "glz_templates.hpp"
 #include "matching/engine.hpp"
 
+#include <unistd.h>
+
 #include <iostream>
 #include <string>
-#include <unistd.h>
 
 #include <rabbitmq-c/amqp.h>
 #include <rabbitmq-c/tcp_socket.h>
@@ -16,9 +18,9 @@ namespace rabbitmq {
 class RabbitMQ {
 public:
     bool initializeConnection();
-    void closeConnection(glz::json_t::object_t users);
-    void handle_incoming_messages(nutc::matching::Engine engine);
-    void wait_for_clients(int num_clients);
+    void closeConnection(const nutc::manager::ClientManager& users);
+    void handle_incoming_messages(nutc::matching::Engine& engine);
+    void wait_for_clients(int num_clients, nutc::manager::ClientManager& users);
 
 private:
     amqp_connection_state_t conn;

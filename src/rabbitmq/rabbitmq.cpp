@@ -70,7 +70,7 @@ RabbitMQ::initializeConsume(const std::string& queueName)
 }
 
 void
-RabbitMQ::handle_incoming_messages(nutc::matching::Engine engine)
+RabbitMQ::handle_incoming_messages(nutc::matching::Engine& engine)
 {
     // need condition for closing
     while (true) {
@@ -95,7 +95,8 @@ RabbitMQ::handle_incoming_messages(nutc::matching::Engine engine)
             log_i(rabbitmq, "Received market order: {}", buffer);
             // TODO: these should not be two different classes
             nutc::matching::Order newMO{
-                order.ticker, "MARKET", order.side==nutc::rabbitmq::BUY, order.quantity, order.price};
+                order.ticker, "MARKET", order.side == nutc::rabbitmq::BUY,
+                order.quantity, order.price};
             engine.add_order(newMO);
         }
     }
@@ -161,8 +162,9 @@ RabbitMQ::consumeMessage()
     return data;
 }
 
+// todo: find way to prevent clients from starting until all are ready
 void
-RabbitMQ::wait_for_clients(int num_clients)
+RabbitMQ::wait_for_clients(int num_clients, nutc::manager::ClientManager& clients)
 {
     for (int i = 0; i < num_clients; i++) {
         std::variant<InitMessage, MarketOrder, RMQError> data = consumeMessage();
@@ -183,6 +185,9 @@ RabbitMQ::wait_for_clients(int num_clients)
             rabbitmq, "Received init message from client {} with status {}",
             init.client_uid, init.ready ? "ready" : "not ready"
         );
+        if (init.ready) {
+            clients.setClientActive(init.client_uid);
+        }
     }
     log_i(rabbitmq, "All clients ready. Starting exchange");
 }
@@ -205,9 +210,9 @@ RabbitMQ::initializeConnection()
 }
 
 void
-RabbitMQ::closeConnection(glz::json_t::object_t users)
+RabbitMQ::closeConnection(const nutc::manager::ClientManager& users)
 {
-    for (auto& [uid, user] : users) {
+    for (auto& [uid, active] : users.getClients(true)) {
         log_i(rabbitmq, "Shutting down client {}", uid);
         nutc::rabbitmq::ShutdownMessage shutdown{uid};
         std::string mess = glz::write_json(shutdown);
