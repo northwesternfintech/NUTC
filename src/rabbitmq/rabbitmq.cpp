@@ -215,7 +215,6 @@ RabbitMQ::RabbitMQ(const std::string& uid)
         publishInit(uid, false);
         exit(1);
     }
-    publishInit(uid, true);
 }
 
 std::function<
