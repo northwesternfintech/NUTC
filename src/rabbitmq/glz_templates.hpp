@@ -5,12 +5,14 @@
 namespace nutc {
 namespace rabbitmq {
 
+enum SIDE { BUY, SELL };
+
 struct ShutdownMessage {
     std::string shutdown_reason;
 };
 
 struct RMQError {
-    std::string message;
+    std::string message; // todo: make enum?
 };
 
 struct InitMessage {
@@ -19,10 +21,11 @@ struct InitMessage {
 };
 
 struct MarketOrder {
-    std::string security;
-    float quantity;
-    bool side;
+    std::string client_uid;
+    SIDE side;
     std::string type;
+    std::string ticker;
+    float quantity;
     float price;
 };
 
@@ -52,8 +55,18 @@ template <>
 struct glz::meta<nutc::rabbitmq::MarketOrder> {
     using T = nutc::rabbitmq::MarketOrder;
     static constexpr auto value = object(
-        "security", &T::security, "quantity", &T::quantity, "side", &T::side, "type",
-        &T::type, "price", &T::price
+        "client_uid",
+        &T::client_uid,
+        "side",
+        &T::side,
+        "type",
+        &T::type,
+        "ticker",
+        &T::ticker,
+        "quantity",
+        &T::quantity,
+        "price",
+        &T::price
     );
 };
 
