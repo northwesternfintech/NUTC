@@ -87,7 +87,7 @@ main(int argc, const char** argv)
 
     nutc::rabbitmq::RabbitMQ conn(uid);
 
-    std::optional<std::string> algo = nutc::client::get_most_recent_algo(uid);
+    std::optional<std::string> algo = nutc::firebase::get_most_recent_algo(uid);
     conn.publishInit(uid, algo.has_value());
     if (!algo.has_value()) {
         conn.closeConnection();

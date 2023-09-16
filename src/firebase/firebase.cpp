@@ -1,7 +1,7 @@
-#include "fetching.hpp"
+#include "firebase.hpp"
 
 namespace nutc {
-namespace client {
+namespace firebase {
 
 void
 print_algo_info(const glz::json_t& algo, const std::string& algo_id)
