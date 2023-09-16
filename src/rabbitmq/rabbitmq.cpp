@@ -5,6 +5,13 @@
 namespace nutc {
 namespace rabbitmq {
 bool
+RabbitMQ::logAndReturnError(const char* errorMessage)
+{
+    log_e(rabbitmq, "{}", errorMessage);
+    return false;
+}
+
+bool
 RabbitMQ::connectToRabbitMQ(
     const std::string& hostname, int port, const std::string& username,
     const std::string& password
@@ -13,25 +20,17 @@ RabbitMQ::connectToRabbitMQ(
     conn = amqp_new_connection();
     amqp_socket_t* socket = amqp_tcp_socket_new(conn);
 
-    if (!socket) {
-        log_e(rabbitmq, "Cannot create TCP socket");
-        return false;
-    }
-
-    int status = amqp_socket_open(socket, hostname.c_str(), port);
-    if (status) {
-        log_e(rabbitmq, "Cannot open socket");
-        return false;
-    }
+    if (!socket)
+        return logAndReturnError("Cannot create TCP socket");
+    if (amqp_socket_open(socket, hostname.c_str(), port))
+        return logAndReturnError("Cannot open socket");
 
     amqp_rpc_reply_t reply = amqp_login(
         conn, "/", 0, 131072, 0, AMQP_SASL_METHOD_PLAIN, username.c_str(),
         password.c_str()
     );
-    if (reply.reply_type != AMQP_RESPONSE_NORMAL) {
-        log_e(rabbitmq, "Login failed");
-        return false;
-    }
+    if (reply.reply_type != AMQP_RESPONSE_NORMAL)
+        return logAndReturnError("Login failed");
 
     return true;
 }
@@ -42,13 +41,12 @@ RabbitMQ::initializeQueue(const std::string& queueName)
     amqp_queue_declare(
         conn, 1, amqp_cstring_bytes(queueName.c_str()), 0, 0, 0, 1, amqp_empty_table
     );
-
     amqp_rpc_reply_t res = amqp_get_rpc_reply(conn);
-    if (res.reply_type != AMQP_RESPONSE_NORMAL) {
-        log_e(rabbitmq, "Failed to declare queue.");
-        return false;
-    }
+
+    if (res.reply_type != AMQP_RESPONSE_NORMAL)
+        return logAndReturnError("Failed to declare queue.");
     log_i(rabbitmq, "Declared queue: {}", queueName);
+
     return true;
 }
 
@@ -83,11 +81,11 @@ RabbitMQ::handleIncomingMessages(nutc::matching::Engine& engine)
             log_e(rabbitmq, "Not expecting initialization message");
             exit(1);
         }
-        else if (is_error) [[unlikely]] {
+        if (is_error) [[unlikely]] {
             RMQError err = std::get<RMQError>(incoming_message);
             log_e(rabbitmq, "Received RMQError: {}", err.message);
         }
-        else if (is_mo) [[likely]] {
+        if (is_mo) [[likely]] {
             MarketOrder order = std::get<MarketOrder>(incoming_message);
             std::string buffer;
             glz::write<glz::opts{}>(order, buffer);
@@ -95,8 +93,8 @@ RabbitMQ::handleIncomingMessages(nutc::matching::Engine& engine)
             log_i(rabbitmq, "Received market order: {}", buffer);
             // TODO: these should not be two different classes
             nutc::matching::Order newMO{
-                order.ticker, "MARKET", order.side == messages::BUY,
-                order.quantity, order.price};
+                order.ticker, "MARKET", order.side == messages::BUY, order.quantity,
+                order.price};
             engine.add_order(newMO);
         }
     }
@@ -173,7 +171,7 @@ RabbitMQ::waitForClients(int num_clients, nutc::manager::ClientManager& clients)
             log_e(rabbitmq, "Failed to consume message with error {}.", error);
             return;
         }
-        else if (std::holds_alternative<MarketOrder>(data)) {
+        if (std::holds_alternative<MarketOrder>(data)) {
             log_i(
                 rabbitmq,
                 "Received market order before initialization complete. Ignoring..."
@@ -195,17 +193,19 @@ RabbitMQ::waitForClients(int num_clients, nutc::manager::ClientManager& clients)
 bool
 RabbitMQ::initializeConnection()
 {
-    if (!connectToRabbitMQ("localhost", 5672, "NUFT", "ADMIN")) {
+    if (!connectToRabbitMQ("localhost", 5672, "NUFT", "ADMIN"))
         return false;
-    }
+
     amqp_channel_open(conn, 1);
     amqp_rpc_reply_t res = amqp_get_rpc_reply(conn);
-    if (res.reply_type != AMQP_RESPONSE_NORMAL) {
-        log_e(rabbitmq, "Failed to open channel.");
+    if (res.reply_type != AMQP_RESPONSE_NORMAL)
+        return logAndReturnError("Failed to open channel.");
+
+    if (!initializeQueue("market_order"))
         return false;
-    }
-    initializeQueue("market_order");
-    initializeConsume("market_order");
+    if (!initializeConsume("market_order"))
+        return false;
+
     return true;
 }
 

@@ -29,6 +29,7 @@ public:
 
 private:
     amqp_connection_state_t conn;
+    bool logAndReturnError(const char* errorMessage);
     std::string consumeMessageAsString();
     bool publishMessage(const std::string& queueName, const std::string& message);
     std::variant<InitMessage, MarketOrder, RMQError> consumeMessage();
