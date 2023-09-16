@@ -42,7 +42,7 @@ add_library(
     NUTC-client_lib OBJECT
     src/rabbitmq/rabbitmq.cpp
     src/firebase/firebase.cpp
-    src/pywrapper/runtime.cpp
+    src/pywrapper/pywrapper.cpp
     # Utils
     src/logging.cpp
 )
