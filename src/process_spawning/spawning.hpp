@@ -1,12 +1,12 @@
 #pragma once
 
+#include "client_manager/manager.hpp"
 #include "firebase/firebase.hpp"
 
 #include <glaze/glaze.hpp>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include "client_manager/manager.hpp"
 
 namespace nutc {
 namespace client {
