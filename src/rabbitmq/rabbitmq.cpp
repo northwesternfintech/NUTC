@@ -70,7 +70,7 @@ RabbitMQ::initializeConsume(const std::string& queueName)
 }
 
 void
-RabbitMQ::handle_incoming_messages(nutc::matching::Engine& engine)
+RabbitMQ::handleIncomingMessages(nutc::matching::Engine& engine)
 {
     // need condition for closing
     while (true) {
@@ -164,7 +164,7 @@ RabbitMQ::consumeMessage()
 
 // todo: find way to prevent clients from starting until all are ready
 void
-RabbitMQ::wait_for_clients(int num_clients, nutc::manager::ClientManager& clients)
+RabbitMQ::waitForClients(int num_clients, nutc::manager::ClientManager& clients)
 {
     for (int i = 0; i < num_clients; i++) {
         std::variant<InitMessage, MarketOrder, RMQError> data = consumeMessage();

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "client_manager/manager.hpp"
-#include "messages.hpp"
 #include "matching/engine.hpp"
+#include "messages.hpp"
 
 #include <unistd.h>
 
@@ -24,8 +24,8 @@ class RabbitMQ {
 public:
     bool initializeConnection();
     void closeConnection(const nutc::manager::ClientManager& users);
-    void handle_incoming_messages(nutc::matching::Engine& engine);
-    void wait_for_clients(int num_clients, nutc::manager::ClientManager& users);
+    void handleIncomingMessages(nutc::matching::Engine& engine);
+    void waitForClients(int num_clients, nutc::manager::ClientManager& users);
 
 private:
     amqp_connection_state_t conn;
