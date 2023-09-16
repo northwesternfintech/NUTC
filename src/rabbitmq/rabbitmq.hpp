@@ -1,6 +1,6 @@
 #pragma once
 
-#include "glz_templates.hpp"
+#include "messages.hpp"
 
 #include <unistd.h>
 
@@ -9,6 +9,12 @@
 
 #include <rabbitmq-c/amqp.h>
 #include <rabbitmq-c/tcp_socket.h>
+
+using InitMessage = nutc::messages::InitMessage;
+using MarketOrder = nutc::messages::MarketOrder;
+using RMQError = nutc::messages::RMQError;
+using ObUpdate = nutc::messages::ObUpdate;
+using ShutdownMessage = nutc::messages::ShutdownMessage;
 
 namespace nutc {
 namespace rabbitmq {
@@ -19,7 +25,8 @@ public:
     bool initializeConnection(const std::string& queueName);
     bool initializeConsume(const std::string& queueName);
     bool publishInit(const std::string& uid, bool ready);
-    std::function<bool(const std::string&, const std::string&, const std::string&, float, float)>
+    std::function<
+        bool(const std::string&, const std::string&, const std::string&, float, float)>
     getMarketFunc(const std::string& uid);
     std::variant<ShutdownMessage, RMQError> handleIncomingMessages();
     void closeConnection();

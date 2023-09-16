@@ -3,7 +3,7 @@
 #include <glaze/glaze.hpp>
 
 namespace nutc {
-namespace rabbitmq {
+namespace messages {
 
 enum SIDE { BUY, SELL };
 
@@ -39,21 +39,21 @@ struct ObUpdate {
 } // namespace nutc
 
 template <>
-struct glz::meta<nutc::rabbitmq::ObUpdate> {
-    using T = nutc::rabbitmq::ObUpdate;
+struct glz::meta<nutc::messages::ObUpdate> {
+    using T = nutc::messages::ObUpdate;
     static constexpr auto value =
         object("security", &T::security, "price", &T::price, "quantity", &T::quantity);
 };
 
 template <>
-struct glz::meta<nutc::rabbitmq::ShutdownMessage> {
-    using T = nutc::rabbitmq::ShutdownMessage;
+struct glz::meta<nutc::messages::ShutdownMessage> {
+    using T = nutc::messages::ShutdownMessage;
     static constexpr auto value = object("shutdown_reason", &T::shutdown_reason);
 };
 
 template <>
-struct glz::meta<nutc::rabbitmq::MarketOrder> {
-    using T = nutc::rabbitmq::MarketOrder;
+struct glz::meta<nutc::messages::MarketOrder> {
+    using T = nutc::messages::MarketOrder;
     static constexpr auto value = object(
         "client_uid",
         &T::client_uid,
@@ -71,8 +71,8 @@ struct glz::meta<nutc::rabbitmq::MarketOrder> {
 };
 
 template <>
-struct glz::meta<nutc::rabbitmq::InitMessage> {
-    using T = nutc::rabbitmq::InitMessage;
+struct glz::meta<nutc::messages::InitMessage> {
+    using T = nutc::messages::InitMessage;
     static constexpr auto value =
         object("client_uid", &T::client_uid, "ready", &T::ready);
 };

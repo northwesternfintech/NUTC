@@ -89,7 +89,7 @@ RabbitMQ::publishMarketOrder(
     float price
 )
 {
-    MarketOrder order{client_uid, side=="BUY" ? BUY : SELL, type, ticker, quantity, price};
+    MarketOrder order{client_uid, side=="BUY" ? messages::BUY : messages::SELL, type, ticker, quantity, price};
     std::string message = glz::write_json(order);
 
     log_i(rabbitmq, "Publishing order: {}", message);

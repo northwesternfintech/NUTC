@@ -1,7 +1,5 @@
 #include "runtime.hpp"
 
-#include "rabbitmq/glz_templates.hpp"
-
 namespace py = pybind11;
 
 namespace nutc {
