@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "firebase-start": "firebase emulators:start --import ./firebase-seed",
-    "firebase-save": "firebase emulators:export --force --export-to ./firebase-seed"
+    "firebase-save": "firebase emulators:export ./firebase-seed"
   },
   "dependencies": {
     "@firebase/functions": "^0.10.0",
