@@ -41,7 +41,7 @@ jobs:
  
       - name: Install static analyzers
         if: matrix.os == 'ubuntu-22.04'
-        run: |
+        run: >-
           sudo apt install cppcheck -y -q
 
           sudo update-alternatives --install
