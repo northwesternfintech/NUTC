@@ -24,8 +24,8 @@ create_api_module(
 
         py::exec(R"(import nutc_api)");
         py::exec(R"(
-        def place_market_order(symbol, quantity, is_buy, client_order_id, price):
-            nutc_api.publish_market_order(symbol, quantity, is_buy, client_order_id, price)
+        def place_market_order(side, type, ticker, quantity, price):
+            nutc_api.publish_market_order(side, type, ticker, quantity, price)
     )");
     } catch (const std::exception& e) {
         return false;
@@ -73,7 +73,7 @@ trigger_callbacks()
 {
     log_i(mock_runtime, "Triggering callbacks");
     try {
-        py::exec(R"(place_market_order("ETHUSD", 1, True, "market", 5))");
+        py::exec(R"(place_market_order("BUY", "MARKET", "ETHUSD", 1.0, 1.0))");
     } catch (const std::exception& e) {
         return fmt::format("Failed to run place_market_order: {}", e.what());
     }
