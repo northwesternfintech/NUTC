@@ -3,40 +3,62 @@ name: Continuous Deployment
 on:
   push:
     branches:
-    - cd-test
+      - cd-test
+      - main
 
   pull_request:
     branches:
-    - cd-test
+      - cd-test
+      - main
+
+  workflow_dispatch:
 
 jobs:
   create-dockerimage:
       strategy:
         matrix:
-          os: [macos-12, ubuntu-22.04, windows-2022]
+          os: [ubuntu-22.04]
 
       runs-on: ${{ matrix.os }}
 
+      env:
+        CC: clang-16
+        CXX: clang++-16
+        CLANG_DIR: '/usr/lib/llvm-16/lib/cmake/clang'
+        LLVM_DIR: '/usr/lib/llvm-16/lib/cmake/llvm'
+ 
       steps:
       - uses: actions/checkout@v3
-
+        with:
+          submodules: 'recursive'
+ 
+      - name: Install LLVM 16
+        run: |
+            wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+            sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-16 main"
+            sudo apt update
+            sudo apt install llvm-16 llvm-16-dev llvm-16-tools clang-16 clang-tidy-16 clang-tools-16 libclang-16-dev -y
+ 
       - name: Install static analyzers
         if: matrix.os == 'ubuntu-22.04'
-        run: >-
-          sudo apt-get install clang-tidy-14 cppcheck -y -q
+        run: |
+          sudo apt install cppcheck -y -q
 
           sudo update-alternatives --install
           /usr/bin/clang-tidy clang-tidy
-          /usr/bin/clang-tidy-14 140
+          /usr/bin/clang-tidy-16 160
 
       - name: Install Python
         uses: actions/setup-python@v4
-        with: { python-version: "3.8" }
+        with: { python-version: "3.11" }
 
       - name: Install dependencies
         shell: bash
         run: |
           pip3 install conan
+          
+          sudo apt install libssl-dev -y
+           
           bash < .github/scripts/conan-profile.sh
           conan install . -b missing
 
