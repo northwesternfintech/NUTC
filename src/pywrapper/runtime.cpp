@@ -14,7 +14,7 @@ create_api_module(
 {
     try {
         py::module m = py::module::create_extension_module(
-            "nutc_api", "NUTC Exchange API", new py::module::module_def
+            "nutc_api", "Official NUTC Exchange API", new py::module::module_def
         );
         m.def("publish_market_order", publish_market_order);
 
