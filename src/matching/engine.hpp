@@ -25,15 +25,13 @@ public: // we will need to add all communication machinery in, this will just ex
     std::priority_queue<MarketOrder> asks;
 
     Engine(); // con
-    std::optional<std::pair<const std::vector<Match>, const std::vector<ObUpdate>>>
+    std::pair<const std::vector<Match>, const std::vector<ObUpdate>>
     add_order_and_match(MarketOrder aggressive_order);
 
 private:
     void add_order(MarketOrder aggressive_order);
     std::pair<std::vector<Match>, std::vector<ObUpdate>>
-    match_buy_order(MarketOrder aggressive_order);
-    std::pair<std::vector<Match>, std::vector<ObUpdate>>
-    match_sell_order(MarketOrder aggressive_order);
+    match_order(MarketOrder aggressive_order, std::priority_queue<MarketOrder>& passive_orders);
     ObUpdate create_ob_update(const MarketOrder& order, float quantity);
 };
 } // namespace matching
