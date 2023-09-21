@@ -4,8 +4,6 @@
 
 #include "engine.hpp"
 
-#include "order.hpp"
-
 #include <algorithm>
 #include <iostream>
 #include <vector>
@@ -15,14 +13,14 @@ namespace matching {
 
 Engine::Engine()
 {
-    this->bids = std::vector<Order>{};
-    this->asks = std::vector<Order>{};
+    this->bids = std::vector<MarketOrder>{};
+    this->asks = std::vector<MarketOrder>{};
 }
 
 void
-Engine::add_order(Order order)
+Engine::add_order(MarketOrder order)
 {
-    if (order.buy) {
+    if (order.side==messages::BUY) {
         this->bids.push_back(order);
     }
     else {
@@ -35,11 +33,11 @@ std::vector<Match>
 Engine::match()
 {
     std::vector<Match> matches;
-    std::sort(this->bids.begin(), this->bids.end(), [](const Order& a, const Order& b) {
+    std::sort(this->bids.begin(), this->bids.end(), [](const MarketOrder& a, const MarketOrder& b) {
         return a.price > b.price;
     });
 
-    std::sort(this->asks.begin(), this->asks.end(), [](const Order& a, const Order& b) {
+    std::sort(this->asks.begin(), this->asks.end(), [](const MarketOrder& a, const MarketOrder& b) {
         return a.price < b.price;
     });
 

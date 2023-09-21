@@ -22,9 +22,7 @@ add_library(
     src/firebase/firebase.cpp
     src/process_spawning/spawning.cpp
     src/rabbitmq/rabbitmq.cpp
-    src/matching/order.cpp
     src/matching/engine.cpp
-    src/matching/order.cpp
     src/client_manager/manager.cpp
 )
 

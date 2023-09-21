@@ -91,12 +91,7 @@ RabbitMQ::handleIncomingMessages(nutc::matching::Engine& engine)
             glz::write<glz::opts{}>(order, buffer);
 
             log_i(rabbitmq, "Received market order: {}", buffer);
-            // TODO: these should not be two different classes
-            nutc::matching::Order newMO{
-                order.ticker, "MARKET", order.side == messages::BUY, order.quantity,
-                order.price
-            };
-            engine.add_order(newMO);
+            engine.add_order(order);
         }
     }
 }
