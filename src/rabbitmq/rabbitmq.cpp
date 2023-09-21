@@ -70,7 +70,7 @@ RabbitMQ::initializeConsume(const std::string& queueName)
 }
 
 void
-RabbitMQ::handleIncomingMessages(nutc::matching::Engine& engine)
+RabbitMQ::handleIncomingMessages()
 {
     // need condition for closing
     while (true) {

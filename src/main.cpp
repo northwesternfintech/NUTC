@@ -48,10 +48,8 @@ main()
         return 1;
     };
 
-    nutc::matching::Engine engine;
-
     conn.waitForClients(num_clients);
-    conn.handleIncomingMessages(engine);
+    conn.handleIncomingMessages();
     conn.closeConnection();
 
     return 0;

@@ -26,12 +26,13 @@ public:
     RabbitMQ(manager::ClientManager& manager);
     bool initializeConnection();
     void closeConnection();
-    void handleIncomingMessages(nutc::matching::Engine& engine);
+    void handleIncomingMessages();
     void waitForClients(int num_clients);
 
 private:
     amqp_connection_state_t conn;
     manager::ClientManager& clients;
+    matching::Engine engine;
     bool logAndReturnError(const char* errorMessage);
     std::string consumeMessageAsString();
     bool publishMessage(const std::string& queueName, const std::string& message);
