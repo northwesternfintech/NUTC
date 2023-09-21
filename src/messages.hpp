@@ -70,6 +70,7 @@ struct MarketOrder {
 
 struct ObUpdate {
     std::string security;
+    SIDE side;
     float price;
     float quantity;
 };
@@ -81,7 +82,7 @@ template <>
 struct glz::meta<nutc::messages::ObUpdate> {
     using T = nutc::messages::ObUpdate;
     static constexpr auto value =
-        object("security", &T::security, "price", &T::price, "quantity", &T::quantity);
+        object("security", &T::security, "side", &T::side, "price", &T::price, "quantity", &T::quantity);
 };
 
 template <>
