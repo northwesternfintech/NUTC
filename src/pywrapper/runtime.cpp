@@ -79,26 +79,20 @@ trigger_callbacks()
     }
 
     try {
-        py::exec(R"(on_trade_update("ETHUSD",1,1))");
-    } catch (const std::exception& e) {
-        return fmt::format("Failed to run on_trade_update: {}", e.what());
-    }
-    try {
-        py::exec(R"(on_orderbook_update("ETHUSD","L1",False))");
+        py::exec(R"(on_orderbook_update("ETHUSD","BUY",1.0,1.0))");
     } catch (const std::exception& e) {
         return fmt::format("Failed to run on_orderbook_update: {}", e.what());
     }
-
     try {
-        py::exec(R"(on_account_update("ETH",1,1))");
+        py::exec(R"(on_trade_update("ETHUSD","BUY",1.0,1.0))");
     } catch (const std::exception& e) {
-        return fmt::format("Failed to run on_account_update: {}", e.what());
+        return fmt::format("Failed to run on_trade_update: {}", e.what());
     }
 
     try {
-        py::exec(R"(on_order_update(1,1))");
+        py::exec(R"(on_account_update("ETHUSD","BUY",1.0,1.0,1.0))");
     } catch (const std::exception& e) {
-        return fmt::format("Failed to run on_order_update: {}", e.what());
+        return fmt::format("Failed to run on_account_update: {}", e.what());
     }
 
     return std::nullopt;
