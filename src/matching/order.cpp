@@ -11,4 +11,4 @@ Order::Order(std::string tic, std::string typ, bool b, float price, float quanti
     ticker(tic), type(typ), buy(b), quantity(quantity), price(price)
 {}
 } // namespace matching
-} // namespace nuft
+} // namespace nutc

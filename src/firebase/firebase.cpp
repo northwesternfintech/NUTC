@@ -60,5 +60,5 @@ firebase_request(
     }
     return json;
 }
-} // namespace client
+} // namespace firebase
 } // namespace nutc

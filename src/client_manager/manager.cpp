@@ -1,6 +1,5 @@
 #include "manager.hpp"
 
-
 namespace nutc {
 namespace manager {
 void

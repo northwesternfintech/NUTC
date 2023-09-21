@@ -35,7 +35,7 @@ struct ObUpdate {
     float quantity;
 };
 
-} // namespace rabbitmq
+} // namespace messages
 } // namespace nutc
 
 template <>
@@ -55,18 +55,8 @@ template <>
 struct glz::meta<nutc::messages::MarketOrder> {
     using T = nutc::messages::MarketOrder;
     static constexpr auto value = object(
-        "client_uid",
-        &T::client_uid,
-        "side",
-        &T::side,
-        "type",
-        &T::type,
-        "ticker",
-        &T::ticker,
-        "quantity",
-        &T::quantity,
-        "price",
-        &T::price
+        "client_uid", &T::client_uid, "side", &T::side, "type", &T::type, "ticker",
+        &T::ticker, "quantity", &T::quantity, "price", &T::price
     );
 };
 

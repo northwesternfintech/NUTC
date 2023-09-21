@@ -6,8 +6,9 @@
 #include "match.hpp"
 #include "order.hpp"
 
-#include <vector>
 #include <chrono>
+
+#include <vector>
 
 namespace nutc {
 namespace matching {
@@ -22,4 +23,4 @@ public: // we will need to add all communication machinery in, this will just ex
     std::vector<Match> match();
 };
 } // namespace matching
-} // namespace nuft
+} // namespace nutc

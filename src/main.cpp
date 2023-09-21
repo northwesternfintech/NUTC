@@ -1,10 +1,10 @@
-#include "process_spawning/spawning.hpp"
-#include "firebase/firebase.hpp"
 #include "client_manager/manager.hpp"
 #include "config.h"
+#include "firebase/firebase.hpp"
 #include "lib.hpp"
 #include "logging.hpp"
 #include "matching/engine.hpp"
+#include "process_spawning/spawning.hpp"
 #include "rabbitmq/rabbitmq.hpp"
 
 #include <iostream>

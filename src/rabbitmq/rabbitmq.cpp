@@ -94,7 +94,8 @@ RabbitMQ::handleIncomingMessages(nutc::matching::Engine& engine)
             // TODO: these should not be two different classes
             nutc::matching::Order newMO{
                 order.ticker, "MARKET", order.side == messages::BUY, order.quantity,
-                order.price};
+                order.price
+            };
             engine.add_order(newMO);
         }
     }
