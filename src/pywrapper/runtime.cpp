@@ -45,7 +45,6 @@ import_py_code(const std::string& code)
     try {
         py::object main_module = py::module_::import("__main__");
         py::dict main_dict = main_module.attr("__dict__");
-        py::object on_order_update = main_dict["on_order_update"];
         py::object on_trade_update = main_dict["on_trade_update"];
         py::object on_orderbook_update = main_dict["on_orderbook_update"];
         py::object on_account_update = main_dict["on_account_update"];
