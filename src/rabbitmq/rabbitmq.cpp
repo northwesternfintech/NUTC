@@ -89,9 +89,23 @@ RabbitMQ::handleIncomingMessages(nutc::matching::Engine& engine)
             MarketOrder order = std::get<MarketOrder>(incoming_message);
             std::string buffer;
             glz::write<glz::opts{}>(order, buffer);
+            std::string replace1 = R"("side":0)";
+            std::string replace2 = R"("side":1)";
+            size_t pos1 = buffer.find(replace1);
+            size_t pos2 = buffer.find(replace2);
+            if (pos1 != std::string::npos) {
+                buffer.replace(pos1, replace1.length(), R"("side":"buy")");
+            }
+            if (pos2 != std::string::npos) {
+                buffer.replace(pos2, replace2.length(), R"("side":"ask")");
+            }
 
             log_i(rabbitmq, "Received market order: {}", buffer);
-            engine.add_order(order);
+            const std::optional<const std::vector<Match>> matches =
+                engine.add_order_and_match(order);
+            for (const auto& match : matches.value_or(std::vector<Match>())) {
+                log_i(rabbitmq, "Matched order with price {} and quantity {}", match.price, match.quantity);
+            }
         }
     }
 }

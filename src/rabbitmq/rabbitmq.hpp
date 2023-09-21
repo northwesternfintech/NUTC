@@ -16,6 +16,7 @@ using InitMessage = nutc::messages::InitMessage;
 using MarketOrder = nutc::messages::MarketOrder;
 using RMQError = nutc::messages::RMQError;
 using ShutdownMessage = nutc::messages::ShutdownMessage;
+using Match = nutc::matching::Match;
 
 namespace nutc {
 namespace rabbitmq {

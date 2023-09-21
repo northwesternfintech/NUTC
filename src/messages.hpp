@@ -27,6 +27,37 @@ struct MarketOrder {
     std::string ticker;
     float quantity;
     float price;
+
+    bool
+    operator<(const MarketOrder& other) const
+    {
+        // assuming both sides are same
+        // otherwise, this shouldn't even be called
+        if (this->side == BUY) {
+            return this->price > other.price;
+        }
+        else {
+            return this->price < other.price;
+        }
+    }
+
+    bool
+    can_match(const MarketOrder& other) const
+    {
+        if (this->side == other.side) [[unlikely]] {
+            return false;
+        }
+        if (this->ticker != other.ticker) [[unlikely]] {
+            return false;
+        }
+        if (this->side == BUY && this->price < other.price) {
+            return false;
+        }
+        if (this->side == SELL && this->price > other.price) {
+            return false;
+        }
+        return true;
+    }
 };
 
 struct ObUpdate {
