@@ -48,7 +48,8 @@ std::variant<ShutdownMessage, RMQError>
 RabbitMQ::handleIncomingMessages()
 {
     while (true) {
-        std::variant<ShutdownMessage, RMQError, ObUpdate> data = consumeMessage();
+        std::variant<ShutdownMessage, RMQError, ObUpdate, Match> data =
+            consumeMessage();
         if (std::holds_alternative<ShutdownMessage>(data)) {
             log_w(
                 rabbitmq,
@@ -72,6 +73,11 @@ RabbitMQ::handleIncomingMessages()
                 glz::write_json(std::get<ObUpdate>(data))
             );
         }
+        else if (std::holds_alternative<Match>(data)) {
+            log_i(
+                rabbitmq, "Received match: {}", glz::write_json(std::get<Match>(data))
+            );
+        }
         else {
             log_e(rabbitmq, "Unknown message type");
             return RMQError{"Unknown message type"};
@@ -89,7 +95,14 @@ RabbitMQ::publishMarketOrder(
     float price
 )
 {
-    MarketOrder order{client_uid, side=="BUY" ? messages::BUY : messages::SELL, type, ticker, quantity, price};
+    MarketOrder order{
+        client_uid,
+        side == "BUY" ? messages::BUY : messages::SELL,
+        type,
+        ticker,
+        quantity,
+        price
+    };
     std::string message = glz::write_json(order);
 
     log_i(rabbitmq, "Publishing order: {}", message);
@@ -119,7 +132,7 @@ RabbitMQ::publishMessage(const std::string& queueName, const std::string& messag
     return true;
 }
 
-std::variant<ShutdownMessage, RMQError, ObUpdate>
+std::variant<ShutdownMessage, RMQError, ObUpdate, Match>
 RabbitMQ::consumeMessage()
 {
     std::string buf = consumeMessageAsString();
@@ -128,7 +141,7 @@ RabbitMQ::consumeMessage()
     }
     log_i(rabbitmq, "{}", buf);
 
-    std::variant<ShutdownMessage, RMQError, ObUpdate> data{};
+    std::variant<ShutdownMessage, RMQError, ObUpdate, Match> data{};
     auto err = glz::read_json(data, buf);
     if (err) {
         std::string error = glz::format_error(err, buf);
