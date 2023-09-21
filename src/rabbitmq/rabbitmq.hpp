@@ -44,6 +44,7 @@ private:
         const std::string& password
     );
     void broadcastMatches(const std::vector<Match>& matches);
+    void handleIncomingMarketOrder(const MarketOrder& order);
 };
 
 } // namespace rabbitmq
