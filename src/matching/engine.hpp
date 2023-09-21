@@ -4,7 +4,6 @@
 //
 
 #include "logging.hpp"
-#include "match.hpp"
 #include "messages.hpp"
 
 #include <chrono>
@@ -14,6 +13,7 @@
 #include <vector>
 
 using MarketOrder = nutc::messages::MarketOrder;
+using Match = nutc::messages::Match;
 
 namespace nutc {
 namespace matching {
