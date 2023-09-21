@@ -3,12 +3,10 @@ name: Continuous Deployment
 on:
   push:
     branches:
-      - cd-test
       - main
 
   pull_request:
     branches:
-      - cd-test
       - main
 
   workflow_dispatch:
