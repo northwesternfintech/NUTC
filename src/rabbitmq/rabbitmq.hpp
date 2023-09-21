@@ -25,7 +25,7 @@ class RabbitMQ {
 public:
     bool initializeConnection();
     void closeConnection(const nutc::manager::ClientManager& users);
-    void handleIncomingMessages(nutc::matching::Engine& engine);
+    void handleIncomingMessages(const manager::ClientManager& users, nutc::matching::Engine& engine);
     void waitForClients(int num_clients, nutc::manager::ClientManager& users);
 
 private:
@@ -39,6 +39,9 @@ private:
     bool connectToRabbitMQ(
         const std::string& hostname, int port, const std::string& username,
         const std::string& password
+    );
+    void broadcastMatches(
+        const manager::ClientManager& manager, const std::vector<Match>& matches
     );
 };
 

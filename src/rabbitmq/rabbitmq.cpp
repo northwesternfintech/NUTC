@@ -68,7 +68,9 @@ RabbitMQ::initializeConsume(const std::string& queueName)
 }
 
 void
-RabbitMQ::handleIncomingMessages(nutc::matching::Engine& engine)
+RabbitMQ::handleIncomingMessages(
+    const manager::ClientManager& users, nutc::matching::Engine& engine
+)
 {
     // need condition for closing
     while (true) {
@@ -103,11 +105,33 @@ RabbitMQ::handleIncomingMessages(nutc::matching::Engine& engine)
             log_i(rabbitmq, "Received market order: {}", buffer);
             const std::optional<const std::vector<Match>> matches =
                 engine.add_order_and_match(order);
-            for (const auto& match : matches.value_or(std::vector<Match>())) {
-                log_i(rabbitmq, "Matched order with price {} and quantity {}", match.price, match.quantity);
+            if (!matches.has_value()) {
+                continue;
             }
+            for (const auto& match : matches.value()) {
+                log_i(
+                    rabbitmq, "Matched order with price {} and quantity {}",
+                    match.price, match.quantity
+                );
+            }
+            broadcastMatches(users, matches.value());
         }
     }
+}
+
+void
+RabbitMQ::broadcastMatches(
+    const manager::ClientManager& manager, const std::vector<Match>& matches
+)
+{
+    for (auto& [uid, active] : manager.getClients(true)) {
+        for (auto& match : matches) {
+            // todo: eliminate for loop
+            std::string buffer;
+            glz::write<glz::opts{}>(match, buffer);
+            publishMessage(uid, buffer);
+        };
+    };
 }
 
 bool

@@ -51,7 +51,7 @@ main()
     nutc::matching::Engine engine;
 
     conn.waitForClients(num_clients, users);
-    conn.handleIncomingMessages(engine);
+    conn.handleIncomingMessages(users, engine);
     conn.closeConnection(users);
 
     return 0;
