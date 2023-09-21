@@ -13,6 +13,7 @@
 #include <vector>
 
 using MarketOrder = nutc::messages::MarketOrder;
+using ObUpdate = nutc::messages::ObUpdate;
 using Match = nutc::messages::Match;
 
 namespace nutc {
@@ -24,13 +25,16 @@ public: // we will need to add all communication machinery in, this will just ex
     std::priority_queue<MarketOrder> asks;
 
     Engine(); // con
-    const std::optional<const std::vector<Match>>
+    std::optional<std::pair<const std::vector<Match>, const std::vector<ObUpdate>>>
     add_order_and_match(MarketOrder aggressive_order);
 
 private:
     void add_order(MarketOrder aggressive_order);
-    std::vector<Match> match_buy_order(MarketOrder aggressive_order);
-    std::vector<Match> match_sell_order(MarketOrder aggressive_order);
+    std::pair<std::vector<Match>, std::vector<ObUpdate>>
+    match_buy_order(MarketOrder aggressive_order);
+    std::pair<std::vector<Match>, std::vector<ObUpdate>>
+    match_sell_order(MarketOrder aggressive_order);
+    ObUpdate create_ob_update(const MarketOrder& order, float quantity);
 };
 } // namespace matching
 } // namespace nutc

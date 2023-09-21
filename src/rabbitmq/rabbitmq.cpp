@@ -111,18 +111,36 @@ RabbitMQ::handleIncomingMarketOrder(const MarketOrder& order)
     }
 
     log_i(rabbitmq, "Received market order: {}", buffer);
-    const std::optional<const std::vector<Match>> matches =
-        engine.add_order_and_match(order);
+    auto matches = engine.add_order_and_match(order);
     if (!matches.has_value()) {
         return;
     }
-    for (const auto& match : matches.value()) {
+    for (const auto& match : matches.value().first) {
         log_i(
             rabbitmq, "Matched order with price {} and quantity {}", match.price,
             match.quantity
         );
     }
-    broadcastMatches(matches.value());
+    for (const auto& update : matches.value().second) {
+        log_i(
+            rabbitmq, "New ObUpdate with ticker {} price {} quantity {} side {}",
+            update.security, update.price, update.quantity, update.side==messages::SIDE::BUY ? "BUY" : "ASK"
+        );
+    }
+    broadcastMatches(matches.value().first);
+    broadcastObUpdates(matches.value().second);
+}
+
+void
+RabbitMQ::broadcastObUpdates(const std::vector<ObUpdate>& updates)
+{
+    for (auto& [uid, active] : clients.getClients(true)) {
+        for (auto& update : updates) {
+            std::string buffer;
+            glz::write<glz::opts{}>(update, buffer);
+            publishMessage(uid, buffer);
+        }
+    }
 }
 
 void

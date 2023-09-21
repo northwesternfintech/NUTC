@@ -27,29 +27,43 @@ Engine::add_order(MarketOrder aggressive_order)
     }
 }
 
-const std::optional<const std::vector<Match>>
+std::optional<std::pair<const std::vector<Match>, const std::vector<ObUpdate>>>
 Engine::add_order_and_match(MarketOrder aggressive_order)
 {
     if (aggressive_order.side == messages::BUY) {
-        std::vector<Match> matches = match_buy_order(aggressive_order);
-        const std::optional<const std::vector<Match>> res = matches;
-        return (matches.size() > 0) ? res : std::nullopt;
+        std::pair<std::vector<Match>, std::vector<ObUpdate>> matches =
+            match_buy_order(aggressive_order);
+        std::optional<std::pair<const std::vector<Match>, const std::vector<ObUpdate>>>
+            res = matches;
+        return (matches.first.size() > 0) ? res : std::nullopt;
     }
     else {
-        std::vector<Match> matches = match_sell_order(aggressive_order);
-        const std::optional<const std::vector<Match>> res = matches;
-        return (matches.size() > 0) ? res : std::nullopt;
+        std::pair<std::vector<Match>, std::vector<ObUpdate>> matches =
+            match_sell_order(aggressive_order);
+        std::optional<std::pair<const std::vector<Match>, const std::vector<ObUpdate>>>
+            res = matches;
+        return (matches.first.size() > 0) ? res : std::nullopt;
     }
 }
 
-std::vector<Match>
+ObUpdate
+Engine::create_ob_update(const MarketOrder& order, float quantity)
+{
+    return ObUpdate{order.ticker, order.side, order.price, quantity};
+}
+
+std::pair<std::vector<Match>, std::vector<ObUpdate>>
 Engine::match_sell_order(MarketOrder aggressive_order)
 {
     // Assuming incoming is type BUY
     std::vector<Match> matches;
+    std::vector<ObUpdate> ob_updates;
     if (bids.size() == 0 || !bids.top().can_match(aggressive_order)) {
         add_order(aggressive_order);
-        return matches;
+        ob_updates.push_back(
+            create_ob_update(aggressive_order, aggressive_order.quantity)
+        );
+        return std::make_tuple(matches, ob_updates);
     }
     while (bids.size() > 0 && bids.top().can_match(aggressive_order)) {
         MarketOrder passive_order = bids.top();
@@ -61,30 +75,40 @@ Engine::match_sell_order(MarketOrder aggressive_order)
             passive_order.ticker, passive_order.client_uid, aggressive_order.client_uid,
             price_to_match, quantity_to_match
         });
+        ob_updates.push_back(create_ob_update(passive_order, 0));
         passive_order.quantity -= quantity_to_match;
         aggressive_order.quantity -= quantity_to_match;
         if (passive_order.quantity > 0) {
             bids.push(passive_order);
-            return matches;
+            ob_updates.push_back(create_ob_update(passive_order, passive_order.quantity)
+            );
+            return std::make_tuple(matches, ob_updates);
         }
         else if (aggressive_order.quantity <= 0) {
-            return matches;
+            return std::make_tuple(matches, ob_updates);
         }
     }
     if (aggressive_order.quantity > 0) {
+        ob_updates.push_back(
+            create_ob_update(aggressive_order, aggressive_order.quantity)
+        );
         add_order(aggressive_order);
     }
-    return matches;
+    return std::make_tuple(matches, ob_updates);
 }
 
-std::vector<Match>
+std::pair<std::vector<Match>, std::vector<ObUpdate>>
 Engine::match_buy_order(MarketOrder aggressive_order)
 {
     // Assuming incoming is type BUY
     std::vector<Match> matches;
+    std::vector<ObUpdate> ob_updates;
     if (asks.size() == 0 || !asks.top().can_match(aggressive_order)) {
         add_order(aggressive_order);
-        return matches;
+        ob_updates.push_back(
+            create_ob_update(aggressive_order, aggressive_order.quantity)
+        );
+        return std::make_tuple(matches, ob_updates);
     }
     while (asks.size() > 0 && asks.top().can_match(aggressive_order)) {
         MarketOrder passive_order = asks.top();
@@ -93,23 +117,29 @@ Engine::match_buy_order(MarketOrder aggressive_order)
             std::min(passive_order.quantity, aggressive_order.quantity);
         float price_to_match = passive_order.price;
         matches.push_back(Match{
-            passive_order.ticker, aggressive_order.client_uid, passive_order.client_uid,
+            passive_order.ticker, passive_order.client_uid, aggressive_order.client_uid,
             price_to_match, quantity_to_match
         });
+        ob_updates.push_back(create_ob_update(passive_order, 0));
         passive_order.quantity -= quantity_to_match;
         aggressive_order.quantity -= quantity_to_match;
         if (passive_order.quantity > 0) {
             asks.push(passive_order);
-            return matches;
+            ob_updates.push_back(create_ob_update(passive_order, passive_order.quantity)
+            );
+            return std::make_tuple(matches, ob_updates);
         }
         else if (aggressive_order.quantity <= 0) {
-            return matches;
+            return std::make_tuple(matches, ob_updates);
         }
     }
     if (aggressive_order.quantity > 0) {
+        ob_updates.push_back(
+            create_ob_update(aggressive_order, aggressive_order.quantity)
+        );
         add_order(aggressive_order);
     }
-    return matches;
+    return std::make_tuple(matches, ob_updates);
 }
 
 } // namespace matching
