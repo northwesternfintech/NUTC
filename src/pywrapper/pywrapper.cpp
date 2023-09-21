@@ -1,6 +1,5 @@
 #include "pywrapper.hpp"
 
-namespace py = pybind11;
 
 namespace nutc {
 namespace pywrapper {
@@ -27,6 +26,19 @@ create_api_module(
             nutc_api.publish_market_order(side, type, ticker, quantity, price)
     )");
 }
+
+py::object get_ob_update_function() {
+  return py::globals()["on_orderbook_update"];
+}
+
+py::object get_trade_update_function() {
+  return py::globals()["on_trade_update"];
+}
+
+py::object get_account_update_function() {
+  return py::globals()["on_account_update"];
+}
+
 
 void
 run_code_init(const std::string& py_code)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "messages.hpp"
+#include "pywrapper/pywrapper.hpp"
 
 #include <unistd.h>
 

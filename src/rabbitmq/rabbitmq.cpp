@@ -72,10 +72,20 @@ RabbitMQ::handleIncomingMessages()
                 "Received order book update: {}",
                 glz::write_json(std::get<ObUpdate>(data))
             );
+            ObUpdate update = std::get<ObUpdate>(data);
+            std::string side = update.side == messages::SIDE::BUY ? "BUY" : "SELL";
+            nutc::pywrapper::get_ob_update_function()(
+                update.security, side, update.price, update.quantity
+            );
         }
         else if (std::holds_alternative<Match>(data)) {
             log_i(
                 rabbitmq, "Received match: {}", glz::write_json(std::get<Match>(data))
+            );
+            Match match = std::get<Match>(data);
+            std::string side = "BUY"; // TODO
+            nutc::pywrapper::get_trade_update_function()(
+                match.ticker, side, match.price, match.quantity
             );
         }
         else {
