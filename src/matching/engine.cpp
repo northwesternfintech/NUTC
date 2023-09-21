@@ -57,9 +57,10 @@ Engine::match_sell_order(MarketOrder aggressive_order)
         float quantity_to_match =
             std::min(passive_order.quantity, aggressive_order.quantity);
         float price_to_match = passive_order.price;
-        matches.push_back(
-            Match{passive_order.ticker, 0, price_to_match, quantity_to_match}
-        );
+        matches.push_back(Match{
+            passive_order.ticker, passive_order.client_uid, aggressive_order.client_uid,
+            price_to_match, quantity_to_match
+        });
         passive_order.quantity -= quantity_to_match;
         aggressive_order.quantity -= quantity_to_match;
         if (passive_order.quantity > 0) {
@@ -91,9 +92,10 @@ Engine::match_buy_order(MarketOrder aggressive_order)
         float quantity_to_match =
             std::min(passive_order.quantity, aggressive_order.quantity);
         float price_to_match = passive_order.price;
-        matches.push_back(
-            Match{passive_order.ticker, 0, price_to_match, quantity_to_match}
-        );
+        matches.push_back(Match{
+            passive_order.ticker, aggressive_order.client_uid, passive_order.client_uid,
+            price_to_match, quantity_to_match
+        });
         passive_order.quantity -= quantity_to_match;
         aggressive_order.quantity -= quantity_to_match;
         if (passive_order.quantity > 0) {

@@ -11,7 +11,8 @@ namespace matching {
 class Match {
 public:
     std::string ticker;
-    double timestamp;
+    std::string buyer_uid;
+    std::string seller_uid;
     float price;
     float quantity;
 };
