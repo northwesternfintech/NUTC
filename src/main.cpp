@@ -14,14 +14,14 @@
 
 namespace rmq = nutc::rabbitmq;
 
-rmq::RabbitMQ conn;
 nutc::manager::ClientManager users;
+rmq::RabbitMQ conn(users);
 
 void
 handle_sigint(int sig)
 {
     log_i(rabbitmq, "Caught SIGINT, closing connection");
-    conn.closeConnection(users);
+    conn.closeConnection();
     sleep(1);
     exit(sig);
 }
@@ -50,9 +50,9 @@ main()
 
     nutc::matching::Engine engine;
 
-    conn.waitForClients(num_clients, users);
-    conn.handleIncomingMessages(users, engine);
-    conn.closeConnection(users);
+    conn.waitForClients(num_clients);
+    conn.handleIncomingMessages(engine);
+    conn.closeConnection();
 
     return 0;
 }

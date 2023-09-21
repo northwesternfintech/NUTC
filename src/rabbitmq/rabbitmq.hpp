@@ -23,13 +23,15 @@ namespace rabbitmq {
 
 class RabbitMQ {
 public:
+    RabbitMQ(manager::ClientManager& manager);
     bool initializeConnection();
-    void closeConnection(const nutc::manager::ClientManager& users);
-    void handleIncomingMessages(const manager::ClientManager& users, nutc::matching::Engine& engine);
-    void waitForClients(int num_clients, nutc::manager::ClientManager& users);
+    void closeConnection();
+    void handleIncomingMessages(nutc::matching::Engine& engine);
+    void waitForClients(int num_clients);
 
 private:
     amqp_connection_state_t conn;
+    manager::ClientManager& clients;
     bool logAndReturnError(const char* errorMessage);
     std::string consumeMessageAsString();
     bool publishMessage(const std::string& queueName, const std::string& message);
@@ -40,9 +42,7 @@ private:
         const std::string& hostname, int port, const std::string& username,
         const std::string& password
     );
-    void broadcastMatches(
-        const manager::ClientManager& manager, const std::vector<Match>& matches
-    );
+    void broadcastMatches(const std::vector<Match>& matches);
 };
 
 } // namespace rabbitmq

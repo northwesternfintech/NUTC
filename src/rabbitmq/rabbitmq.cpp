@@ -4,6 +4,8 @@
 
 namespace nutc {
 namespace rabbitmq {
+RabbitMQ::RabbitMQ(manager::ClientManager& manager) : clients(manager) {}
+
 bool
 RabbitMQ::logAndReturnError(const char* errorMessage)
 {
@@ -68,9 +70,7 @@ RabbitMQ::initializeConsume(const std::string& queueName)
 }
 
 void
-RabbitMQ::handleIncomingMessages(
-    const manager::ClientManager& users, nutc::matching::Engine& engine
-)
+RabbitMQ::handleIncomingMessages(nutc::matching::Engine& engine)
 {
     // need condition for closing
     while (true) {
@@ -114,17 +114,15 @@ RabbitMQ::handleIncomingMessages(
                     match.price, match.quantity
                 );
             }
-            broadcastMatches(users, matches.value());
+            broadcastMatches(matches.value());
         }
     }
 }
 
 void
-RabbitMQ::broadcastMatches(
-    const manager::ClientManager& manager, const std::vector<Match>& matches
-)
+RabbitMQ::broadcastMatches(const std::vector<Match>& matches)
 {
-    for (auto& [uid, active] : manager.getClients(true)) {
+    for (auto& [uid, active] : clients.getClients(true)) {
         for (auto& match : matches) {
             // todo: eliminate for loop
             std::string buffer;
@@ -196,7 +194,7 @@ RabbitMQ::consumeMessage()
 
 // todo: find way to prevent clients from starting until all are ready
 void
-RabbitMQ::waitForClients(int num_clients, nutc::manager::ClientManager& clients)
+RabbitMQ::waitForClients(int num_clients)
 {
     for (int i = 0; i < num_clients; i++) {
         std::variant<InitMessage, MarketOrder, RMQError> data = consumeMessage();
@@ -244,9 +242,9 @@ RabbitMQ::initializeConnection()
 }
 
 void
-RabbitMQ::closeConnection(const nutc::manager::ClientManager& users)
+RabbitMQ::closeConnection()
 {
-    for (auto& [uid, active] : users.getClients(true)) {
+    for (auto& [uid, active] : clients.getClients(true)) {
         log_i(rabbitmq, "Shutting down client {}", uid);
         ShutdownMessage shutdown{uid};
         std::string mess = glz::write_json(shutdown);
