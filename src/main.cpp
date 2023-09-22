@@ -81,7 +81,7 @@ main(int argc, const char** argv)
     pybind11::scoped_interpreter guard{};
 
     // Start logging and print build info
-    nutc::logging::init(verbosity);
+    nutc::logging::init(verbosity, uid);
     log_build_info();
     log_i(main, "Starting NUTC Client for UID {}", uid);
 

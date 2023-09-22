@@ -30,7 +30,7 @@ using namespace quill; // NOLINT(*-using-namespace)
 using cc = quill::ConsoleColours;
 
 void
-init(quill::LogLevel log_level)
+init(quill::LogLevel log_level, const std::string& uid)
 {
     detail::application_log_level = log_level;
 
@@ -91,7 +91,8 @@ init(quill::LogLevel log_level)
     handler_cfg.set_max_backup_files(LOG_BACKUP_COUNT);
     handler_cfg.set_open_mode('a');
 
-    auto file_handler = quill::rotating_file_handler(LOG_FILE, handler_cfg);
+    const std::string log_file = LOG_DIR "/" + uid + ".log";
+    auto file_handler = quill::rotating_file_handler(log_file, handler_cfg);
 
     file_handler->set_pattern(
         LOGLINE_FORMAT,
