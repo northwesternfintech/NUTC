@@ -56,3 +56,11 @@
 ## Building
 `go-task build`
 
+
+## Running
+1. NUTC-Client
+- Standard setup instructions included in repo
+- Must run `go-task move-to-bin`
+2. Docker
+- Must have docker installed and running
+3. `go-task run`
