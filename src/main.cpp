@@ -85,17 +85,22 @@ main(int argc, const char** argv)
     log_build_info();
     log_i(main, "Starting NUTC Client for UID {}", uid);
 
+    // Initialize the RMQ connection to the exchange
     nutc::rabbitmq::RabbitMQ conn(uid);
 
     std::optional<std::string> algo = nutc::firebase::get_most_recent_algo(uid);
+
+    // Send message to exchange to let it know we successfully initialized
     conn.publishInit(uid, algo.has_value());
     if (!algo.has_value()) {
-        conn.closeConnection();
         return 0;
     }
+
+    // Initialize the algorithm. For now, only designed for py
     nutc::pywrapper::init(conn.getMarketFunc(uid));
     nutc::pywrapper::run_code_init(algo.value());
+
+    // Main event loop
     conn.handleIncomingMessages();
-    conn.closeConnection();
     return 0;
 }

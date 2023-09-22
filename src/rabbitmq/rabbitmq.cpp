@@ -4,6 +4,7 @@
 
 namespace nutc {
 namespace rabbitmq {
+
 bool
 RabbitMQ::connectToRabbitMQ(
     const std::string& hostname,
@@ -297,8 +298,7 @@ RabbitMQ::initializeQueue(const std::string& queueName)
     return true;
 }
 
-void
-RabbitMQ::closeConnection()
+RabbitMQ::~RabbitMQ()
 {
     amqp_channel_close(conn, 1, AMQP_REPLY_SUCCESS);
     amqp_connection_close(conn, AMQP_REPLY_SUCCESS);
