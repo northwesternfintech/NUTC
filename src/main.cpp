@@ -1,10 +1,10 @@
-#include "process_spawning/spawning.hpp"
-#include "firebase/firebase.hpp"
 #include "client_manager/manager.hpp"
 #include "config.h"
+#include "firebase/firebase.hpp"
 #include "lib.hpp"
 #include "logging.hpp"
 #include "matching/engine.hpp"
+#include "process_spawning/spawning.hpp"
 #include "rabbitmq/rabbitmq.hpp"
 
 #include <iostream>
@@ -14,14 +14,14 @@
 
 namespace rmq = nutc::rabbitmq;
 
-rmq::RabbitMQ conn;
 nutc::manager::ClientManager users;
+rmq::RabbitMQ conn(users);
 
 void
 handle_sigint(int sig)
 {
     log_i(rabbitmq, "Caught SIGINT, closing connection");
-    conn.closeConnection(users);
+    conn.closeConnection();
     sleep(1);
     exit(sig);
 }
@@ -48,11 +48,9 @@ main()
         return 1;
     };
 
-    nutc::matching::Engine engine;
-
-    conn.waitForClients(num_clients, users);
-    conn.handleIncomingMessages(engine);
-    conn.closeConnection(users);
+    conn.waitForClients(num_clients);
+    conn.handleIncomingMessages();
+    conn.closeConnection();
 
     return 0;
 }

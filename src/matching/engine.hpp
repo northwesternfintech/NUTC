@@ -3,23 +3,34 @@
 // Created by echav on 9/4/2023.
 //
 
-#include "match.hpp"
-#include "order.hpp"
+#include "logging.hpp"
+#include "messages.hpp"
 
-#include <vector>
 #include <chrono>
+
+#include <optional>
+#include <queue>
+#include <vector>
+
+using MarketOrder = nutc::messages::MarketOrder;
+using ObUpdate = nutc::messages::ObUpdate;
+using Match = nutc::messages::Match;
 
 namespace nutc {
 namespace matching {
 
 class Engine {
 public: // we will need to add all communication machinery in, this will just expose
-    std::vector<Order> bids;
-    std::vector<Order> asks;
+    std::priority_queue<MarketOrder> bids;
+    std::priority_queue<MarketOrder> asks;
+    std::pair<std::vector<Match>, std::vector<ObUpdate>>
+    match_order(MarketOrder aggressive_order);
 
     Engine(); // con
-    void add_order(Order order);
-    std::vector<Match> match();
+
+private:
+    void add_order(MarketOrder aggressive_order);
+    ObUpdate create_ob_update(const MarketOrder& order, float quantity);
 };
 } // namespace matching
-} // namespace nuft
+} // namespace nutc

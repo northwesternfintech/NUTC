@@ -4,6 +4,8 @@
 
 namespace nutc {
 namespace rabbitmq {
+RabbitMQ::RabbitMQ(manager::ClientManager& manager) : clients(manager) {}
+
 bool
 RabbitMQ::logAndReturnError(const char* errorMessage)
 {
@@ -68,7 +70,7 @@ RabbitMQ::initializeConsume(const std::string& queueName)
 }
 
 void
-RabbitMQ::handleIncomingMessages(nutc::matching::Engine& engine)
+RabbitMQ::handleIncomingMessages()
 {
     // need condition for closing
     while (true) {
@@ -86,18 +88,74 @@ RabbitMQ::handleIncomingMessages(nutc::matching::Engine& engine)
             log_e(rabbitmq, "Received RMQError: {}", err.message);
         }
         if (is_mo) [[likely]] {
-            MarketOrder order = std::get<MarketOrder>(incoming_message);
-            std::string buffer;
-            glz::write<glz::opts{}>(order, buffer);
-
-            log_i(rabbitmq, "Received market order: {}", buffer);
-            // TODO: these should not be two different classes
-            nutc::matching::Order newMO{
-                order.ticker, "MARKET", order.side == messages::BUY, order.quantity,
-                order.price};
-            engine.add_order(newMO);
+            MarketOrder mo = std::get<MarketOrder>(incoming_message);
+            handleIncomingMarketOrder(mo);
         }
     }
+}
+
+void
+RabbitMQ::handleIncomingMarketOrder(const MarketOrder& order)
+{
+    std::string buffer;
+    glz::write<glz::opts{}>(order, buffer);
+    std::string replace1 = R"("side":0)";
+    std::string replace2 = R"("side":1)";
+    size_t pos1 = buffer.find(replace1);
+    size_t pos2 = buffer.find(replace2);
+    if (pos1 != std::string::npos) {
+        buffer.replace(pos1, replace1.length(), R"("side":"buy")");
+    }
+    if (pos2 != std::string::npos) {
+        buffer.replace(pos2, replace2.length(), R"("side":"ask")");
+    }
+
+    log_i(rabbitmq, "Received market order: {}", buffer);
+    auto [matches, ob_updates] = engine.match_order(order);
+    for (const auto& match : matches) {
+        log_i(
+            rabbitmq, "Matched order with price {} and quantity {}", match.price,
+            match.quantity
+        );
+    }
+    for (const auto& update : ob_updates) {
+        log_i(
+            rabbitmq, "New ObUpdate with ticker {} price {} quantity {} side {}",
+            update.security, update.price, update.quantity,
+            update.side == messages::SIDE::BUY ? "BUY" : "ASK"
+        );
+    }
+    if (matches.size() > 0) {
+        broadcastMatches(matches);
+    }
+    if (ob_updates.size() > 0) {
+        broadcastObUpdates(ob_updates);
+    }
+}
+
+void
+RabbitMQ::broadcastObUpdates(const std::vector<ObUpdate>& updates)
+{
+    for (auto& [uid, active] : clients.getClients(true)) {
+        for (auto& update : updates) {
+            std::string buffer;
+            glz::write<glz::opts{}>(update, buffer);
+            publishMessage(uid, buffer);
+        }
+    }
+}
+
+void
+RabbitMQ::broadcastMatches(const std::vector<Match>& matches)
+{
+    for (auto& [uid, active] : clients.getClients(true)) {
+        for (auto& match : matches) {
+            // todo: eliminate for loop
+            std::string buffer;
+            glz::write<glz::opts{}>(match, buffer);
+            publishMessage(uid, buffer);
+        };
+    };
 }
 
 bool
@@ -162,7 +220,7 @@ RabbitMQ::consumeMessage()
 
 // todo: find way to prevent clients from starting until all are ready
 void
-RabbitMQ::waitForClients(int num_clients, nutc::manager::ClientManager& clients)
+RabbitMQ::waitForClients(int num_clients)
 {
     for (int i = 0; i < num_clients; i++) {
         std::variant<InitMessage, MarketOrder, RMQError> data = consumeMessage();
@@ -210,9 +268,9 @@ RabbitMQ::initializeConnection()
 }
 
 void
-RabbitMQ::closeConnection(const nutc::manager::ClientManager& users)
+RabbitMQ::closeConnection()
 {
-    for (auto& [uid, active] : users.getClients(true)) {
+    for (auto& [uid, active] : clients.getClients(true)) {
         log_i(rabbitmq, "Shutting down client {}", uid);
         ShutdownMessage shutdown{uid};
         std::string mess = glz::write_json(shutdown);

@@ -14,5 +14,5 @@ glz::json_t firebase_request(
     const std::string& method, const std::string& url, const std::string& data = ""
 );
 
-} // namespace client
+} // namespace firebase
 } // namespace nutc
