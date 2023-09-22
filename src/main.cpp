@@ -97,7 +97,7 @@ main(int argc, const char** argv)
     }
 
     // Initialize the algorithm. For now, only designed for py
-    nutc::pywrapper::init(conn.getMarketFunc(uid));
+    nutc::pywrapper::create_api_module(conn.getMarketFunc(uid));
     nutc::pywrapper::run_code_init(algo.value());
 
     // Main event loop

@@ -1,6 +1,5 @@
 #include "pywrapper.hpp"
 
-
 namespace nutc {
 namespace pywrapper {
 
@@ -27,18 +26,23 @@ create_api_module(
     )");
 }
 
-py::object get_ob_update_function() {
-  return py::globals()["on_orderbook_update"];
+py::object
+get_ob_update_function()
+{
+    return py::globals()["on_orderbook_update"];
 }
 
-py::object get_trade_update_function() {
-  return py::globals()["on_trade_update"];
+py::object
+get_trade_update_function()
+{
+    return py::globals()["on_trade_update"];
 }
 
-py::object get_account_update_function() {
-  return py::globals()["on_account_update"];
+py::object
+get_account_update_function()
+{
+    return py::globals()["on_account_update"];
 }
-
 
 void
 run_code_init(const std::string& py_code)
@@ -46,14 +50,6 @@ run_code_init(const std::string& py_code)
     log_i(py_runtime, "Running code:\n{}", py_code);
     py::exec(py_code);
     py::exec("initialize()");
-}
-
-void
-init(std::function<
-     bool(const std::string&, const std::string&, const std::string&, float, float)>
-         publish_market_order)
-{
-    create_api_module(publish_market_order);
 }
 
 } // namespace pywrapper

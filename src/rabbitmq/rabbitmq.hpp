@@ -19,7 +19,14 @@ using ShutdownMessage = nutc::messages::ShutdownMessage;
 using Match = nutc::messages::Match;
 using AccountUpdate = nutc::messages::AccountUpdate;
 
+/**
+ * @brief The namespace for the NUTC client
+ */
 namespace nutc {
+
+/**
+ * @brief Contains all RabbitMQ related functionality
+ */
 namespace rabbitmq {
 /**
  * @class RabbitMQ
