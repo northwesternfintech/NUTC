@@ -1,6 +1,7 @@
 #pragma once
 
 #include "messages.hpp"
+#include "pywrapper/pywrapper.hpp"
 
 #include <unistd.h>
 
@@ -15,6 +16,7 @@ using MarketOrder = nutc::messages::MarketOrder;
 using RMQError = nutc::messages::RMQError;
 using ObUpdate = nutc::messages::ObUpdate;
 using ShutdownMessage = nutc::messages::ShutdownMessage;
+using Match = nutc::messages::Match;
 
 namespace nutc {
 namespace rabbitmq {
@@ -52,7 +54,7 @@ private:
     );
 
     std::string consumeMessageAsString();
-    std::variant<ShutdownMessage, RMQError, ObUpdate> consumeMessage();
+    std::variant<ShutdownMessage, RMQError, ObUpdate, Match> consumeMessage();
 };
 
 } // namespace rabbitmq
