@@ -27,21 +27,6 @@ Engine::add_order(MarketOrder aggressive_order)
     }
 }
 
-std::pair<const std::vector<Match>, const std::vector<ObUpdate>>
-Engine::add_order_and_match(MarketOrder aggressive_order)
-{
-    if (aggressive_order.side == messages::BUY) {
-        std::pair<std::vector<Match>, std::vector<ObUpdate>> matches =
-            match_order(aggressive_order, this->asks);
-        return matches;
-    }
-    else {
-        std::pair<std::vector<Match>, std::vector<ObUpdate>> matches =
-            match_order(aggressive_order, this->bids);
-        return matches;
-    }
-}
-
 ObUpdate
 Engine::create_ob_update(const MarketOrder& order, float quantity)
 {
@@ -49,10 +34,10 @@ Engine::create_ob_update(const MarketOrder& order, float quantity)
 }
 
 std::pair<std::vector<Match>, std::vector<ObUpdate>>
-Engine::match_order(
-    MarketOrder aggressive_order, std::priority_queue<MarketOrder>& passive_orders
-)
+Engine::match_order(MarketOrder aggressive_order)
 {
+    std::priority_queue<MarketOrder>& passive_orders =
+        aggressive_order.side == messages::SIDE::SELL ? this->bids : this->asks;
     // Assuming incoming is type BUY
     std::vector<Match> matches;
     std::vector<ObUpdate> ob_updates;
@@ -75,7 +60,7 @@ Engine::match_order(
 
         matches.push_back(Match{
             passive_order.ticker, passive_order.client_uid, aggressive_order.client_uid,
-            price_to_match, quantity_to_match
+            aggressive_order.side, price_to_match, quantity_to_match
         });
         ob_updates.push_back(create_ob_update(passive_order, 0));
         passive_order.quantity -= quantity_to_match;

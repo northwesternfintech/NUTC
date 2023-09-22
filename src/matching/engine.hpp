@@ -23,15 +23,13 @@ class Engine {
 public: // we will need to add all communication machinery in, this will just expose
     std::priority_queue<MarketOrder> bids;
     std::priority_queue<MarketOrder> asks;
+    std::pair<std::vector<Match>, std::vector<ObUpdate>>
+    match_order(MarketOrder aggressive_order);
 
     Engine(); // con
-    std::pair<const std::vector<Match>, const std::vector<ObUpdate>>
-    add_order_and_match(MarketOrder aggressive_order);
 
 private:
     void add_order(MarketOrder aggressive_order);
-    std::pair<std::vector<Match>, std::vector<ObUpdate>>
-    match_order(MarketOrder aggressive_order, std::priority_queue<MarketOrder>& passive_orders);
     ObUpdate create_ob_update(const MarketOrder& order, float quantity);
 };
 } // namespace matching
