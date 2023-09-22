@@ -117,7 +117,7 @@ RabbitMQ::handleIncomingMarketOrder(const MarketOrder& order)
     }
 
     log_i(rabbitmq, "Received market order: {}", buffer);
-    std::optional<matching::Engine> engine = engine_manager.getEngine(order.ticker);
+    std::optional<std::reference_wrapper<Engine>> engine = engine_manager.getEngine(order.ticker);
     if (!engine.has_value()) {
         log_w(
             matching, "Received order for unknown ticker {}. Discarding order",
@@ -125,7 +125,7 @@ RabbitMQ::handleIncomingMarketOrder(const MarketOrder& order)
         );
         return;
     }
-    auto [matches, ob_updates] = engine.value().match_order(order);
+    auto [matches, ob_updates] = engine.value().get().match_order(order);
     for (const auto& match : matches) {
         std::string buyer_uid = match.buyer_uid;
         std::string seller_uid = match.seller_uid;

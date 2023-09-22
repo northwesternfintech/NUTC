@@ -2,11 +2,11 @@
 
 namespace nutc {
 namespace engine_manager {
-std::optional<Engine>
+std::optional<std::reference_wrapper<Engine>>
 Manager::getEngine(const std::string& ticker)
 {
     if (engines.find(ticker) != engines.end()) {
-        return engines[ticker];
+        return std::reference_wrapper<Engine>(engines[ticker]);
     }
     else {
         return std::nullopt;

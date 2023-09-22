@@ -10,7 +10,7 @@ namespace nutc {
 namespace engine_manager {
 class Manager {
 public:
-    std::optional<Engine> getEngine(const std::string& ticker);
+    std::optional<std::reference_wrapper<Engine>> getEngine(const std::string& ticker);
     void addEngine(const std::string& ticker);
 
 private:
