@@ -113,6 +113,12 @@ RabbitMQ::handleIncomingMarketOrder(const MarketOrder& order)
     log_i(rabbitmq, "Received market order: {}", buffer);
     auto [matches, ob_updates] = engine.match_order(order);
     for (const auto& match : matches) {
+        std::string buyer_uid = match.buyer_uid;
+        std::string seller_uid = match.seller_uid;
+        float capital_exchanged = match.price * match.quantity;
+        clients.modifyCapital(buyer_uid, -capital_exchanged);
+        clients.modifyCapital(seller_uid, capital_exchanged);
+        broadcastAccountUpdate(match);
         log_i(
             rabbitmq, "Matched order with price {} and quantity {}", match.price,
             match.quantity
@@ -134,10 +140,33 @@ RabbitMQ::handleIncomingMarketOrder(const MarketOrder& order)
 }
 
 void
+RabbitMQ::broadcastAccountUpdate(const Match& match)
+{
+    std::string buyer_uid = match.buyer_uid;
+    std::string seller_uid = match.seller_uid;
+    AccountUpdate buyer_update = {
+        clients.getCapital(match.buyer_uid), match.ticker, messages::SIDE::BUY, match.price,
+        match.quantity
+    };
+    AccountUpdate seller_update = {
+        clients.getCapital(match.seller_uid), match.ticker, messages::SIDE::SELL, match.price,
+        match.quantity
+    };
+
+    std::string buyer_buffer;
+    std::string seller_buffer;
+    glz::write<glz::opts{}>(buyer_update, buyer_buffer);
+    glz::write<glz::opts{}>(seller_update, seller_buffer);
+    publishMessage(buyer_uid, buyer_buffer);
+    publishMessage(seller_uid, seller_buffer);
+}
+
+void
 RabbitMQ::broadcastObUpdates(const std::vector<ObUpdate>& updates)
 {
-    for (auto& [uid, active] : clients.getClients(true)) {
+    for (auto& [uid, active, capital_remaining] : clients.getClients(true)) {
         for (auto& update : updates) {
+            // todo: eliminate for loop
             std::string buffer;
             glz::write<glz::opts{}>(update, buffer);
             publishMessage(uid, buffer);
@@ -148,7 +177,7 @@ RabbitMQ::broadcastObUpdates(const std::vector<ObUpdate>& updates)
 void
 RabbitMQ::broadcastMatches(const std::vector<Match>& matches)
 {
-    for (auto& [uid, active] : clients.getClients(true)) {
+    for (auto& [uid, active, capital_remaining] : clients.getClients(true)) {
         for (auto& match : matches) {
             // todo: eliminate for loop
             std::string buffer;
@@ -270,7 +299,7 @@ RabbitMQ::initializeConnection()
 void
 RabbitMQ::closeConnection()
 {
-    for (auto& [uid, active] : clients.getClients(true)) {
+    for (auto& [uid, active, capital_remaining] : clients.getClients(true)) {
         log_i(rabbitmq, "Shutting down client {}", uid);
         ShutdownMessage shutdown{uid};
         std::string mess = glz::write_json(shutdown);

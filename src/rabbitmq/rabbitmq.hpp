@@ -17,6 +17,7 @@ using MarketOrder = nutc::messages::MarketOrder;
 using RMQError = nutc::messages::RMQError;
 using ShutdownMessage = nutc::messages::ShutdownMessage;
 using Match = nutc::messages::Match;
+using AccountUpdate = nutc::messages::AccountUpdate;
 
 namespace nutc {
 namespace rabbitmq {
@@ -45,6 +46,7 @@ private:
     );
     void broadcastMatches(const std::vector<Match>& matches);
     void broadcastObUpdates(const std::vector<ObUpdate>& updates);
+    void broadcastAccountUpdate(const Match& match);
     void handleIncomingMarketOrder(const MarketOrder& order);
 };
 

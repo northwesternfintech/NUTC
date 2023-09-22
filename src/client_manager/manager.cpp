@@ -16,7 +16,20 @@ ClientManager::addClient(const std::string& uid)
     if (clients.find(uid) != clients.end()) {
         return;
     }
-    clients[uid] = Client{uid, false};
+    clients[uid] = Client{uid, false, 1000};
+}
+
+float
+ClientManager::modifyCapital(const std::string& uid, float change_in_capital)
+{
+    clients[uid].capital_remaining += change_in_capital;
+    return clients[uid].capital_remaining;
+}
+
+float
+ClientManager::getCapital(const std::string& uid)
+{
+    return clients[uid].capital_remaining;
 }
 
 void
