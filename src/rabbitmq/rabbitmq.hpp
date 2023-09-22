@@ -1,12 +1,13 @@
 #pragma once
 
 #include "client_manager/manager.hpp"
-#include "matching/engine.hpp"
+#include "matching/manager.hpp"
 #include "messages.hpp"
 
 #include <unistd.h>
 
 #include <iostream>
+#include <optional>
 #include <string>
 
 #include <rabbitmq-c/amqp.h>
@@ -18,6 +19,7 @@ using RMQError = nutc::messages::RMQError;
 using ShutdownMessage = nutc::messages::ShutdownMessage;
 using Match = nutc::messages::Match;
 using AccountUpdate = nutc::messages::AccountUpdate;
+using Engine = nutc::matching::Engine;
 
 namespace nutc {
 namespace rabbitmq {
@@ -28,12 +30,13 @@ public:
     bool initializeConnection();
     void closeConnection();
     void handleIncomingMessages();
+    void addTicker(const std::string& ticker);
     void waitForClients(int num_clients);
 
 private:
     amqp_connection_state_t conn;
     manager::ClientManager& clients;
-    matching::Engine engine;
+    engine_manager::Manager engine_manager;
     bool logAndReturnError(const char* errorMessage);
     std::string consumeMessageAsString();
     bool publishMessage(const std::string& queueName, const std::string& message);

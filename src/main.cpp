@@ -53,6 +53,8 @@ main()
         return 1;
     };
 
+    conn.addTicker("ETHUSD");
+
     // Run exchange
     conn.waitForClients(num_clients);
     conn.handleIncomingMessages();

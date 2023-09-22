@@ -95,6 +95,12 @@ RabbitMQ::handleIncomingMessages()
 }
 
 void
+RabbitMQ::addTicker(const std::string& ticker)
+{
+    engine_manager.addEngine(ticker);
+}
+
+void
 RabbitMQ::handleIncomingMarketOrder(const MarketOrder& order)
 {
     std::string buffer;
@@ -111,7 +117,15 @@ RabbitMQ::handleIncomingMarketOrder(const MarketOrder& order)
     }
 
     log_i(rabbitmq, "Received market order: {}", buffer);
-    auto [matches, ob_updates] = engine.match_order(order);
+    std::optional<matching::Engine> engine = engine_manager.getEngine(order.ticker);
+    if (!engine.has_value()) {
+        log_w(
+            matching, "Received order for unknown ticker {}. Discarding order",
+            order.ticker
+        );
+        return;
+    }
+    auto [matches, ob_updates] = engine.value().match_order(order);
     for (const auto& match : matches) {
         std::string buyer_uid = match.buyer_uid;
         std::string seller_uid = match.seller_uid;
@@ -120,7 +134,7 @@ RabbitMQ::handleIncomingMarketOrder(const MarketOrder& order)
         clients.modifyCapital(seller_uid, capital_exchanged);
         broadcastAccountUpdate(match);
         log_i(
-            rabbitmq, "Matched order with price {} and quantity {}", match.price,
+            matching, "Matched order with price {} and quantity {}", match.price,
             match.quantity
         );
     }
@@ -145,12 +159,12 @@ RabbitMQ::broadcastAccountUpdate(const Match& match)
     std::string buyer_uid = match.buyer_uid;
     std::string seller_uid = match.seller_uid;
     AccountUpdate buyer_update = {
-        clients.getCapital(match.buyer_uid), match.ticker, messages::SIDE::BUY, match.price,
-        match.quantity
+        clients.getCapital(match.buyer_uid), match.ticker, messages::SIDE::BUY,
+        match.price, match.quantity
     };
     AccountUpdate seller_update = {
-        clients.getCapital(match.seller_uid), match.ticker, messages::SIDE::SELL, match.price,
-        match.quantity
+        clients.getCapital(match.seller_uid), match.ticker, messages::SIDE::SELL,
+        match.price, match.quantity
     };
 
     std::string buyer_buffer;

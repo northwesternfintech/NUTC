@@ -82,7 +82,7 @@ init(quill::LogLevel log_level)
     //
     auto file_handler = quill::rotating_file_handler(
         LOG_FILE,
-        "a",                  // append
+        "w",                  // append
         FilenameAppend::None, // just keep the filename
         LOG_FILE_SIZE,        // 512 KB
         LOG_BACKUP_COUNT      // 5 backups

@@ -1,7 +1,4 @@
 #pragma once
-//
-// Created by echav on 9/4/2023.
-//
 
 #include "logging.hpp"
 #include "messages.hpp"
@@ -20,7 +17,7 @@ namespace nutc {
 namespace matching {
 
 class Engine {
-public: // we will need to add all communication machinery in, this will just expose
+public: 
     std::priority_queue<MarketOrder> bids;
     std::priority_queue<MarketOrder> asks;
     std::pair<std::vector<Match>, std::vector<ObUpdate>>
