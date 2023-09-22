@@ -83,7 +83,7 @@ RabbitMQ::handleIncomingMessages()
                 rabbitmq, "Received match: {}", glz::write_json(std::get<Match>(data))
             );
             Match match = std::get<Match>(data);
-            std::string side = "BUY"; // TODO
+            std::string side = match.side == messages::SIDE::BUY ? "BUY" : "SELL";
             nutc::pywrapper::get_trade_update_function()(
                 match.ticker, side, match.price, match.quantity
             );

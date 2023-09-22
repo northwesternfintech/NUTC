@@ -24,6 +24,7 @@ struct Match {
     std::string ticker;
     std::string buyer_uid;
     std::string seller_uid;
+    SIDE side;
     float price;
     float quantity;
 };
@@ -81,8 +82,10 @@ struct ObUpdate {
 template <>
 struct glz::meta<nutc::messages::ObUpdate> {
     using T = nutc::messages::ObUpdate;
-    static constexpr auto value =
-        object("security", &T::security, "side", &T::side, "price", &T::price, "quantity", &T::quantity);
+    static constexpr auto value = object(
+        "security", &T::security, "side", &T::side, "price", &T::price, "quantity",
+        &T::quantity
+    );
 };
 
 template <>
@@ -90,7 +93,7 @@ struct glz::meta<nutc::messages::Match> {
     using T = nutc::messages::Match;
     static constexpr auto value = object(
         "ticker", &T::ticker, "buyer_uid", &T::buyer_uid, "seller_uid", &T::seller_uid,
-        "price", &T::price, "quantity", &T::quantity
+        "side", &T::side, "price", &T::price, "quantity", &T::quantity
     );
 };
 
