@@ -17,6 +17,7 @@ using RMQError = nutc::messages::RMQError;
 using ObUpdate = nutc::messages::ObUpdate;
 using ShutdownMessage = nutc::messages::ShutdownMessage;
 using Match = nutc::messages::Match;
+using AccountUpdate = nutc::messages::AccountUpdate;
 
 namespace nutc {
 namespace rabbitmq {
@@ -54,7 +55,7 @@ private:
     );
 
     std::string consumeMessageAsString();
-    std::variant<ShutdownMessage, RMQError, ObUpdate, Match> consumeMessage();
+    std::variant<ShutdownMessage, RMQError, ObUpdate, Match, AccountUpdate> consumeMessage();
 };
 
 } // namespace rabbitmq

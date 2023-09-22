@@ -76,6 +76,14 @@ struct ObUpdate {
     float quantity;
 };
 
+struct AccountUpdate {
+    float capital_remaining;
+    std::string ticker;
+    SIDE side;
+    float price;
+    float quantity;
+};
+
 } // namespace messages
 } // namespace nutc
 
@@ -85,6 +93,15 @@ struct glz::meta<nutc::messages::ObUpdate> {
     static constexpr auto value = object(
         "security", &T::security, "side", &T::side, "price", &T::price, "quantity",
         &T::quantity
+    );
+};
+
+template <>
+struct glz::meta<nutc::messages::AccountUpdate> {
+    using T = nutc::messages::AccountUpdate;
+    static constexpr auto value = object(
+        "capital_remaining", &T::capital_remaining, "ticker", &T::ticker, "side",
+        &T::side, "price", &T::price, "quantity", &T::quantity
     );
 };
 

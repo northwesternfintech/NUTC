@@ -48,7 +48,7 @@ std::variant<ShutdownMessage, RMQError>
 RabbitMQ::handleIncomingMessages()
 {
     while (true) {
-        std::variant<ShutdownMessage, RMQError, ObUpdate, Match> data =
+        std::variant<ShutdownMessage, RMQError, ObUpdate, Match, AccountUpdate> data =
             consumeMessage();
         if (std::holds_alternative<ShutdownMessage>(data)) {
             log_w(
@@ -86,6 +86,22 @@ RabbitMQ::handleIncomingMessages()
             std::string side = match.side == messages::SIDE::BUY ? "BUY" : "SELL";
             nutc::pywrapper::get_trade_update_function()(
                 match.ticker, side, match.price, match.quantity
+            );
+        }
+        else if (std::holds_alternative<AccountUpdate>(data)) {
+            AccountUpdate update = std::get<AccountUpdate>(data);
+            log_i(
+                rabbitmq,
+                "Received account update with capital remaining: {}",
+                update.capital_remaining
+            );
+            std::string side = update.side == messages::SIDE::BUY ? "BUY" : "SELL";
+            nutc::pywrapper::get_account_update_function()(
+                update.ticker,
+                side,
+                update.price,
+                update.quantity,
+                update.capital_remaining
             );
         }
         else {
@@ -142,7 +158,7 @@ RabbitMQ::publishMessage(const std::string& queueName, const std::string& messag
     return true;
 }
 
-std::variant<ShutdownMessage, RMQError, ObUpdate, Match>
+std::variant<ShutdownMessage, RMQError, ObUpdate, Match, AccountUpdate>
 RabbitMQ::consumeMessage()
 {
     std::string buf = consumeMessageAsString();
@@ -151,7 +167,7 @@ RabbitMQ::consumeMessage()
     }
     log_i(rabbitmq, "{}", buf);
 
-    std::variant<ShutdownMessage, RMQError, ObUpdate, Match> data{};
+    std::variant<ShutdownMessage, RMQError, ObUpdate, Match, AccountUpdate> data{};
     auto err = glz::read_json(data, buf);
     if (err) {
         std::string error = glz::format_error(err, buf);
