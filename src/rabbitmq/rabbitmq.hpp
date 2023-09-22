@@ -21,7 +21,18 @@ using AccountUpdate = nutc::messages::AccountUpdate;
 
 namespace nutc {
 namespace rabbitmq {
-
+/*
+ * @class RabbitMQ
+ * @brief Handles all RabbitMQ related functionality; main event loop
+ *
+ * Main event loop (i.e., program loops on this class)
+ * Handles initialization and closure of the RMQ connection
+ * Handles incoming messages from exchange (i.e., order book updates, matches, etc.)
+ * Handles outgoing messages to exchange (i.e., market orders)
+ * Provides a callback for the market order function (so it can be triggered by algo)
+ * Calls the algo's callbacks when receiving a message from the exchange (order book
+ * update, account update, etc)
+ */
 class RabbitMQ {
 public:
     RabbitMQ(const std::string& uid);
@@ -55,7 +66,8 @@ private:
     );
 
     std::string consumeMessageAsString();
-    std::variant<ShutdownMessage, RMQError, ObUpdate, Match, AccountUpdate> consumeMessage();
+    std::variant<ShutdownMessage, RMQError, ObUpdate, Match, AccountUpdate>
+    consumeMessage();
 };
 
 } // namespace rabbitmq
