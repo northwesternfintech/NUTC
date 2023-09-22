@@ -89,7 +89,7 @@ init(quill::LogLevel log_level, const std::string& uid)
 
     handler_cfg.set_rotation_max_file_size(LOG_FILE_SIZE);
     handler_cfg.set_max_backup_files(LOG_BACKUP_COUNT);
-    handler_cfg.set_open_mode('a');
+    handler_cfg.set_open_mode('w');
 
     const std::string log_file = LOG_DIR "/" + uid + ".log";
     auto file_handler = quill::rotating_file_handler(log_file, handler_cfg);
