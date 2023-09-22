@@ -56,6 +56,12 @@
 ## Building
 `go-task build`
 
+## Doxygen
+This repository uses Doxygen for documentation purposes. To generate and display:
+
+1. `doxygen Doxyfile`
+2. `open html/index.html`
+
 
 ## Running
 NUTC-Client is not designed to be a standalone executable. It should be executed with NUTC24 (the exchange) via `task run`.
