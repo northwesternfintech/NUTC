@@ -2,7 +2,7 @@
 
 #include "client_manager/manager.hpp"
 #include "matching/manager.hpp"
-#include "messages.hpp"
+#include "util/messages.hpp"
 
 #include <unistd.h>
 
