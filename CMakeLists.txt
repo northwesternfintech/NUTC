@@ -18,6 +18,7 @@ include(cmake/variables.cmake)
 add_library(
     NUTC24_lib OBJECT
     src/lib.cpp
+    src/matching/manager.cpp
     src/logging.cpp
     src/firebase/firebase.cpp
     src/process_spawning/spawning.cpp

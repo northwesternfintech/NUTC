@@ -6,6 +6,10 @@
 #include <unordered_map>
 
 namespace nutc {
+/**
+ * @brief Handles client tracking and capital management
+ * Keeps track of all clients, whether they're active, and their capital
+ */
 namespace manager {
 struct Client {
     std::string uid;

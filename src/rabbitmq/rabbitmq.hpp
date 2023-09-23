@@ -1,12 +1,13 @@
 #pragma once
 
 #include "client_manager/manager.hpp"
-#include "matching/engine.hpp"
-#include "messages.hpp"
+#include "matching/manager.hpp"
+#include "util/messages.hpp"
 
 #include <unistd.h>
 
 #include <iostream>
+#include <optional>
 #include <string>
 
 #include <rabbitmq-c/amqp.h>
@@ -18,23 +19,67 @@ using RMQError = nutc::messages::RMQError;
 using ShutdownMessage = nutc::messages::ShutdownMessage;
 using Match = nutc::messages::Match;
 using AccountUpdate = nutc::messages::AccountUpdate;
+using Engine = nutc::matching::Engine;
 
 namespace nutc {
+
+/**
+ * @brief Handles all RabbitMQ communication for the exchange
+ */
 namespace rabbitmq {
 
+/**
+ * @class RabbitMQ
+ * @brief Handles all RabbitMQ communication for the exchange
+ */
 class RabbitMQ {
 public:
+    /**
+     * @brief Initializes a RabbitMQ connection with a given ClientManager (RAII)
+     *
+     * @param manager The ClientManager to use for client management
+     */
     RabbitMQ(manager::ClientManager& manager);
-    bool initializeConnection();
-    void closeConnection();
+
+    /**
+     * @brief Disconnects from RabbitMQ (RAII)
+     */
+    ~RabbitMQ();
+
+    /**
+     * @brief Main event loop, handles incoming messages from exchange
+     *
+     * Handles incoming orderbook updates, trade updates, account updates, and shutdown
+     * messages from the exchange
+     */
     void handleIncomingMessages();
+
+    /**
+     * @brief Adds a ticker to the encapsulated engine manager
+     * */
+    void addTicker(const std::string& ticker);
+
+    /**
+     * @brief On startup, waits for all clients to send an initialization message
+     *
+     * This ensures that all clients are connected to the exchange and have successfully
+     * started (vs a RMQ or firebase error)
+     */
     void waitForClients(int num_clients);
+
+    /**
+     * @brief Returns whether the class is connected to rabbitmq
+     */
+    bool connectedToRMQ();
 
 private:
     amqp_connection_state_t conn;
     manager::ClientManager& clients;
-    matching::Engine engine;
+    engine_manager::Manager engine_manager;
+    bool connected;
     bool logAndReturnError(const char* errorMessage);
+    bool initializeConnection();
+    void closeConnection();
     std::string consumeMessageAsString();
     bool publishMessage(const std::string& queueName, const std::string& message);
     std::variant<InitMessage, MarketOrder, RMQError> consumeMessage();

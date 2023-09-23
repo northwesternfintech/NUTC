@@ -1,10 +1,7 @@
 #pragma once
-//
-// Created by echav on 9/4/2023.
-//
 
 #include "logging.hpp"
-#include "messages.hpp"
+#include "util/messages.hpp"
 
 #include <chrono>
 
@@ -17,12 +14,22 @@ using ObUpdate = nutc::messages::ObUpdate;
 using Match = nutc::messages::Match;
 
 namespace nutc {
+/**
+ * @brief Handles matching for an arbitrary ticker
+ */
 namespace matching {
 
 class Engine {
-public: // we will need to add all communication machinery in, this will just expose
+public:
     std::priority_queue<MarketOrder> bids;
     std::priority_queue<MarketOrder> asks;
+
+    /**
+     * @brief Matches the given order against the current order book.
+     * @param aggressive_order The order to match against the order book.
+     * @return A pair of vectors, the first containing all matches, the second
+     * containing the orderbook updates
+     */
     std::pair<std::vector<Match>, std::vector<ObUpdate>>
     match_order(MarketOrder aggressive_order);
 
