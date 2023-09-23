@@ -26,11 +26,42 @@ namespace rabbitmq {
 
 class RabbitMQ {
 public:
+    /**
+     * @brief Initializes a RabbitMQ connection with a given ClientManager (RAII)
+     *
+     * @param manager The ClientManager to use for client management
+     */
     RabbitMQ(manager::ClientManager& manager);
+
+    /**
+     * @brief Disconnects from RabbitMQ (RAII)
+     */
     ~RabbitMQ();
+
+    /**
+     * @brief Main event loop, handles incoming messages from exchange
+     *
+     * Handles incoming orderbook updates, trade updates, account updates, and shutdown
+     * messages from the exchange
+     */
     void handleIncomingMessages();
+
+    /**
+     * @brief Adds a ticker to the encapsulated engine manager
+     * */
     void addTicker(const std::string& ticker);
+
+    /**
+     * @brief On startup, waits for all clients to send an initialization message
+     *
+     * This ensures that all clients are connected to the exchange and have successfully
+     * started (vs a RMQ or firebase error)
+     */
     void waitForClients(int num_clients);
+
+    /**
+     * @brief Returns whether the class is connected to rabbitmq
+     */
     bool connectedToRMQ();
 
 private:
