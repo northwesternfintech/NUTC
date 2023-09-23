@@ -4,7 +4,18 @@
 
 namespace nutc {
 namespace rabbitmq {
-RabbitMQ::RabbitMQ(manager::ClientManager& manager) : clients(manager) {}
+RabbitMQ::RabbitMQ(manager::ClientManager& manager) : clients(manager)
+{
+    connected = initializeConnection();
+}
+
+RabbitMQ::~RabbitMQ() {
+  closeConnection();
+}
+
+bool RabbitMQ::connectedToRMQ() {
+  return connected;
+}
 
 bool
 RabbitMQ::logAndReturnError(const char* errorMessage)
@@ -117,7 +128,8 @@ RabbitMQ::handleIncomingMarketOrder(const MarketOrder& order)
     }
 
     log_i(rabbitmq, "Received market order: {}", buffer);
-    std::optional<std::reference_wrapper<Engine>> engine = engine_manager.getEngine(order.ticker);
+    std::optional<std::reference_wrapper<Engine>> engine =
+        engine_manager.getEngine(order.ticker);
     if (!engine.has_value()) {
         log_w(
             matching, "Received order for unknown ticker {}. Discarding order",

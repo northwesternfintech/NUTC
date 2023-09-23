@@ -21,7 +21,6 @@ void
 handle_sigint(int sig)
 {
     log_i(rabbitmq, "Caught SIGINT, closing connection");
-    conn.closeConnection();
     sleep(1);
     exit(sig);
 }
@@ -36,7 +35,7 @@ main()
     signal(SIGINT, handle_sigint);
 
     // Connect to RabbitMQ
-    if (!conn.initializeConnection()) {
+    if (!conn.connectedToRMQ()) {
         log_e(rabbitmq, "Failed to initialize connection");
         return 1;
     }
@@ -58,7 +57,6 @@ main()
     // Run exchange
     conn.waitForClients(num_clients);
     conn.handleIncomingMessages();
-    conn.closeConnection();
 
     return 0;
 }

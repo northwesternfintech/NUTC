@@ -27,17 +27,20 @@ namespace rabbitmq {
 class RabbitMQ {
 public:
     RabbitMQ(manager::ClientManager& manager);
-    bool initializeConnection();
-    void closeConnection();
+    ~RabbitMQ();
     void handleIncomingMessages();
     void addTicker(const std::string& ticker);
     void waitForClients(int num_clients);
+    bool connectedToRMQ();
 
 private:
     amqp_connection_state_t conn;
     manager::ClientManager& clients;
     engine_manager::Manager engine_manager;
+    bool connected;
     bool logAndReturnError(const char* errorMessage);
+    bool initializeConnection();
+    void closeConnection();
     std::string consumeMessageAsString();
     bool publishMessage(const std::string& queueName, const std::string& message);
     std::variant<InitMessage, MarketOrder, RMQError> consumeMessage();
