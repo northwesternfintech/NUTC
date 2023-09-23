@@ -14,12 +14,22 @@ using ObUpdate = nutc::messages::ObUpdate;
 using Match = nutc::messages::Match;
 
 namespace nutc {
+/**
+ * @brief Handles matching for an arbitrary ticker
+ */
 namespace matching {
 
 class Engine {
-public: 
+public:
     std::priority_queue<MarketOrder> bids;
     std::priority_queue<MarketOrder> asks;
+
+    /**
+     * @brief Matches the given order against the current order book.
+     * @param aggressive_order The order to match against the order book.
+     * @return A pair of vectors, the first containing all matches, the second
+     * containing the orderbook updates
+     */
     std::pair<std::vector<Match>, std::vector<ObUpdate>>
     match_order(MarketOrder aggressive_order);
 

@@ -22,8 +22,16 @@ using AccountUpdate = nutc::messages::AccountUpdate;
 using Engine = nutc::matching::Engine;
 
 namespace nutc {
+
+/**
+ * @brief Handles all RabbitMQ communication for the exchange
+ */
 namespace rabbitmq {
 
+/**
+ * @class RabbitMQ
+ * @brief Handles all RabbitMQ communication for the exchange
+ */
 class RabbitMQ {
 public:
     /**
