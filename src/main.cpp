@@ -46,7 +46,7 @@ main()
     users.initialize_from_firebase(firebase_users);
 
     // Spawn clients
-    int num_clients = nutc::client::spawn_all_clients(users);
+    const int num_clients = nutc::client::spawn_all_clients(users);
 
     if (num_clients == 0) {
         log_c(client_spawning, "Spawned 0 clients");
