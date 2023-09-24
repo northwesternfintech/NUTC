@@ -8,7 +8,8 @@
 - `dnf install perl`
 - `conan profile detect`
 - Copy `.conan2/profiles/default` to `.conan2/profiles/cpp20` 
-- Change gnu17 to gnu20 
+- Change compiler.cppstd from gnu14 to gnu20
+- Change compiler.version from 8 to 13
 2. Install dependencies
 - `mkdir build && cd build`
 - `conan install .. -s build_type=Debug -b missing -pr cpp20 -pr:b cpp20`
