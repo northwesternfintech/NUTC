@@ -11,7 +11,8 @@ include(GoogleTest)
 
 # ---- Tests ----
 
-add_executable(NUTC24_test src/NUTC24_test.cpp)
+add_executable(NUTC24_test 
+  src/Matching_test.cpp)
 target_link_libraries(
     NUTC24_test PRIVATE
     NUTC24_lib
