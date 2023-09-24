@@ -37,23 +37,23 @@ target_compile_features(NUTC24_lib PUBLIC cxx_std_20)
 
 # Fmt
 find_package(fmt REQUIRED)
-target_link_libraries(NUTC24_lib PRIVATE fmt::fmt)
+target_link_libraries(NUTC24_lib PUBLIC fmt::fmt)
 
 # quill
 find_package(quill REQUIRED)
-target_link_libraries(NUTC24_lib PRIVATE quill::quill)
+target_link_libraries(NUTC24_lib PUBLIC quill::quill)
 
 # rabbitmq
 find_package(rabbitmq-c REQUIRED)
-target_link_libraries(NUTC24_lib PRIVATE rabbitmq::rabbitmq-static)
+target_link_libraries(NUTC24_lib PUBLIC rabbitmq::rabbitmq-static)
 
 # libcurl
 find_package(CURL REQUIRED)
-target_link_libraries(NUTC24_lib PRIVATE CURL::libcurl)
+target_link_libraries(NUTC24_lib PUBLIC CURL::libcurl)
 
 # glaze
 find_package(glaze REQUIRED)
-target_link_libraries(NUTC24_lib PRIVATE glaze::glaze)
+target_link_libraries(NUTC24_lib PUBLIC glaze::glaze)
 
 # ---- Declare executable ----
 
