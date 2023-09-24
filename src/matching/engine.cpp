@@ -47,7 +47,7 @@ Engine::match_order(MarketOrder aggressive_order)
         ob_updates.push_back(
             create_ob_update(aggressive_order, aggressive_order.quantity)
         );
-        return std::make_tuple(matches, ob_updates);
+        return std::make_pair(matches, ob_updates);
     }
 
     while (passive_orders.size() > 0 && passive_orders.top().can_match(aggressive_order)
@@ -69,10 +69,10 @@ Engine::match_order(MarketOrder aggressive_order)
             passive_orders.push(passive_order);
             ob_updates.push_back(create_ob_update(passive_order, passive_order.quantity)
             );
-            return std::make_tuple(matches, ob_updates);
+            return std::make_pair(matches, ob_updates);
         }
         else if (aggressive_order.quantity <= 0) {
-            return std::make_tuple(matches, ob_updates);
+            return std::make_pair(matches, ob_updates);
         }
     }
     if (aggressive_order.quantity > 0) {
@@ -81,7 +81,7 @@ Engine::match_order(MarketOrder aggressive_order)
         );
         add_order(aggressive_order);
     }
-    return std::make_tuple(matches, ob_updates);
+    return std::make_pair(matches, ob_updates);
 }
 
 } // namespace matching
