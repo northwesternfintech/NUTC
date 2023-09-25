@@ -1,5 +1,6 @@
 #pragma once
 
+#include "client_manager/manager.hpp"
 #include "logging.hpp"
 #include "util/messages.hpp"
 
@@ -27,11 +28,12 @@ public:
     /**
      * @brief Matches the given order against the current order book.
      * @param aggressive_order The order to match against the order book.
+     * @param manager ClientManager to verify validity of orders/matches (correct funds/holdings)
      * @return A pair of vectors, the first containing all matches, the second
      * containing the orderbook updates
      */
     std::pair<std::vector<Match>, std::vector<ObUpdate>>
-    match_order(MarketOrder aggressive_order);
+    match_order(MarketOrder aggressive_order, const manager::ClientManager& manager);
 
     Engine(); // con
 

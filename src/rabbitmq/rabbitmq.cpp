@@ -140,7 +140,7 @@ RabbitMQ::handleIncomingMarketOrder(const MarketOrder& order)
         );
         return;
     }
-    auto [matches, ob_updates] = engine.value().get().match_order(order);
+    auto [matches, ob_updates] = engine.value().get().match_order(order, clients);
     for (const auto& match : matches) {
         std::string buyer_uid = match.buyer_uid;
         std::string seller_uid = match.seller_uid;

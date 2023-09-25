@@ -34,7 +34,7 @@ Engine::create_ob_update(const MarketOrder& order, float quantity)
 }
 
 std::pair<std::vector<Match>, std::vector<ObUpdate>>
-Engine::match_order(MarketOrder aggressive_order)
+Engine::match_order(MarketOrder aggressive_order, const manager::ClientManager& manager)
 {
     std::priority_queue<MarketOrder>& passive_orders =
         aggressive_order.side == messages::SIDE::SELL ? this->bids : this->asks;
