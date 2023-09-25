@@ -41,6 +41,12 @@ Engine::match_order(MarketOrder aggressive_order, const manager::ClientManager& 
     // Assuming incoming is type BUY
     std::vector<Match> matches;
     std::vector<ObUpdate> ob_updates;
+    if (aggressive_order.side == messages::SIDE::BUY
+        && aggressive_order.price * aggressive_order.quantity
+               > manager.getCapital(aggressive_order.client_uid)) {
+        return std::make_pair(matches, ob_updates);
+    }
+
     if (passive_orders.size() == 0
         || !passive_orders.top().can_match(aggressive_order)) {
         add_order(aggressive_order);

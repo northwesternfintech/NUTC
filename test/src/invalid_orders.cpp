@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 using Engine = nutc::matching::Engine;
 using MarketOrder = nutc::messages::MarketOrder;
+using ObUpdate = nutc::messages::ObUpdate;
 using ClientManager = nutc::manager::ClientManager;
 using SIDE = nutc::messages::SIDE;
 
@@ -38,11 +39,26 @@ TEST_F(InvalidOrders, MatchingInvalidFunds)
 
     MarketOrder order1{"ABC", nutc::messages::BUY, "MARKET", "ETHUSD", 1, 1};
     MarketOrder order2{"DEF", nutc::messages::SELL, "MARKET", "ETHUSD", 1, 1};
+
+    // Thrown out
     auto [matches, ob_updates] = engine.match_order(order1, manager);
     EXPECT_EQ(matches.size(), 0);
-    EXPECT_EQ(ob_updates.size(), 1);
+    EXPECT_EQ(ob_updates.size(), 0);
 
+    // Kept, but not matched
     auto [matches2, ob_updates2] = engine.match_order(order2, manager);
     EXPECT_EQ(matches2.size(), 0);
     EXPECT_EQ(ob_updates2.size(), 1);
+
+    manager.modifyCapital("ABC", 1000);
+
+    // Kept, but not matched
+    auto [matches3, ob_updates3] = engine.match_order(order2, manager);
+    EXPECT_EQ(matches3.size(), 0);
+    EXPECT_EQ(ob_updates3.size(), 1);
+
+    // Kept and matched
+    auto [matches4, ob_updates4] = engine.match_order(order1, manager);
+    EXPECT_EQ(matches4.size(), 1);
+    EXPECT_EQ(ob_updates4.size(), 1);
 }
