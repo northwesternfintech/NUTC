@@ -56,6 +56,28 @@ Engine::match_order(MarketOrder aggressive_order, const manager::ClientManager& 
         return std::make_pair(matches, ob_updates);
     }
 
+    std::pair<std::vector<Match>, std::vector<ObUpdate>> match_attempt =
+        attempt_matches(passive_orders, aggressive_order, manager);
+    matches = match_attempt.first;
+    ob_updates = match_attempt.second;
+
+    if (aggressive_order.quantity > 0) {
+        ob_updates.push_back(
+            create_ob_update(aggressive_order, aggressive_order.quantity)
+        );
+        add_order(aggressive_order);
+    }
+    return std::make_pair(matches, ob_updates);
+}
+
+std::pair<std::vector<Match>, std::vector<ObUpdate>>
+Engine::attempt_matches(
+    std::priority_queue<MarketOrder>& passive_orders, MarketOrder& aggressive_order,
+    const manager::ClientManager& manager
+)
+{
+    std::vector<Match> matches;
+    std::vector<ObUpdate> ob_updates;
     while (passive_orders.size() > 0 && passive_orders.top().can_match(aggressive_order)
     ) {
         MarketOrder passive_order = passive_orders.top();
@@ -96,12 +118,6 @@ Engine::match_order(MarketOrder aggressive_order, const manager::ClientManager& 
         else if (aggressive_order.quantity <= 0) {
             return std::make_pair(matches, ob_updates);
         }
-    }
-    if (aggressive_order.quantity > 0) {
-        ob_updates.push_back(
-            create_ob_update(aggressive_order, aggressive_order.quantity)
-        );
-        add_order(aggressive_order);
     }
     return std::make_pair(matches, ob_updates);
 }
