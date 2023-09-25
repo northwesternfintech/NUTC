@@ -20,7 +20,7 @@ initialize(manager::ClientManager& users, bool development_mode)
         users.initialize_from_firebase(firebase_users);
 
         // Spawn clients
-        const int num_clients = nutc::client::spawn_all_clients(users);
+        const int num_clients = nutc::client::spawn_all_clients(users, development_mode);
 
         if (num_clients == 0) {
             log_c(client_spawning, "Spawned 0 clients");
@@ -39,25 +39,28 @@ get_all_users()
 }
 
 int
-spawn_all_clients(const nutc::manager::ClientManager& users)
+spawn_all_clients(const nutc::manager::ClientManager& users, bool development_mode)
 {
     int clients = 0;
     for (const auto& [uid, user, capital_remaining] : users.getClients(false)) {
         log_i(client_spawning, "Spawning client: {}", uid);
         std::string quote_uid = std::string(uid);
         std::replace(quote_uid.begin(), quote_uid.end(), '-', ' ');
-        spawn_client(quote_uid);
+        spawn_client(quote_uid, development_mode);
         clients++;
     };
     return clients;
 }
 
 void
-spawn_client(const std::string& uid)
+spawn_client(const std::string& uid, bool development_mode)
 {
     pid_t pid = fork();
     if (pid == 0) {
         std::vector<std::string> args = {"NUTC-client", "--uid", uid};
+        if (development_mode) {
+            args.push_back("--dev");
+        }
 
         std::vector<char*> c_args;
         for (auto& arg : args)
