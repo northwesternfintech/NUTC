@@ -43,6 +43,7 @@ add_library(
     src/rabbitmq/rabbitmq.cpp
     src/firebase/firebase.cpp
     src/pywrapper/pywrapper.cpp
+    src/dev_mode/dev_mode.cpp
     # Utils
     src/logging.cpp
 )

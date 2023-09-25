@@ -3,6 +3,7 @@
 #include "git.h"
 #include "pywrapper/pywrapper.hpp"
 #include "rabbitmq/rabbitmq.hpp"
+#include "dev_mode/dev_mode.hpp"
 
 #include <argparse/argparse.hpp>
 #include <pybind11/pybind11.h>
@@ -13,12 +14,19 @@
 #include <string>
 #include <tuple>
 
-static std::tuple<uint8_t, std::string>
+static std::tuple<uint8_t, std::string, bool>
 process_arguments(int argc, const char** argv)
 {
     argparse::ArgumentParser program(
         "NUTC Client", VERSION, argparse::default_arguments::help
     );
+
+    program.add_argument("-D", "--dev")
+        .help("Enable development features")
+        .action([](const auto& /* unused */) {})
+        .default_value(false)
+        .implicit_value(true)
+        .nargs(0);
 
     program.add_argument("-U", "--uid")
         .help("set the user ID")
@@ -56,7 +64,9 @@ process_arguments(int argc, const char** argv)
         exit(1); // NOLINT(concurrency-*)
     }
 
-    return std::make_tuple(verbosity, program.get<std::string>("--uid"));
+    return std::make_tuple(
+        verbosity, program.get<std::string>("--uid"), program.get<bool>("--dev")
+    );
 }
 
 static void
@@ -77,7 +87,7 @@ int
 main(int argc, const char** argv)
 {
     // Parse args
-    auto [verbosity, uid] = process_arguments(argc, argv);
+    auto [verbosity, uid, development_mode] = process_arguments(argc, argv);
     pybind11::scoped_interpreter guard{};
 
     // Start logging and print build info
@@ -85,17 +95,28 @@ main(int argc, const char** argv)
     log_build_info();
     log_i(main, "Starting NUTC Client for UID {}", uid);
 
+    // Initialize the RMQ connection to the exchange
     nutc::rabbitmq::RabbitMQ conn(uid);
 
-    std::optional<std::string> algo = nutc::firebase::get_most_recent_algo(uid);
+    std::optional<std::string> algo;
+    if (development_mode) {
+        algo = nutc::dev_mode::get_algo_from_file(uid);
+    }
+    else {
+        algo = nutc::firebase::get_most_recent_algo(uid);
+    }
+
+    // Send message to exchange to let it know we successfully initialized
     conn.publishInit(uid, algo.has_value());
     if (!algo.has_value()) {
-        conn.closeConnection();
         return 0;
     }
-    nutc::pywrapper::init(conn.getMarketFunc(uid));
+
+    // Initialize the algorithm. For now, only designed for py
+    nutc::pywrapper::create_api_module(conn.getMarketFunc(uid));
     nutc::pywrapper::run_code_init(algo.value());
+
+    // Main event loop
     conn.handleIncomingMessages();
-    conn.closeConnection();
     return 0;
 }

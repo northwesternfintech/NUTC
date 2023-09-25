@@ -10,3 +10,7 @@ CMakeLists.txt.user
 CMakeUserPresets.json
 logs/
 compile_commands.json
+html
+latex
+Doxyfile.bak
+algos/

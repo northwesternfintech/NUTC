@@ -4,6 +4,7 @@
 
 namespace nutc {
 namespace rabbitmq {
+
 bool
 RabbitMQ::connectToRabbitMQ(
     const std::string& hostname,
@@ -277,7 +278,9 @@ RabbitMQ::publishInit(const std::string& uid, bool ready)
 {
     std::string message = glz::write_json(InitMessage{uid, ready});
     log_i(rabbitmq, "Publishing init message: {}", message);
-    return publishMessage("market_order", message);
+    bool rVal = publishMessage("market_order", message);
+    sleep(1);
+    return rVal;
 }
 
 bool
@@ -297,8 +300,7 @@ RabbitMQ::initializeQueue(const std::string& queueName)
     return true;
 }
 
-void
-RabbitMQ::closeConnection()
+RabbitMQ::~RabbitMQ()
 {
     amqp_channel_close(conn, 1, AMQP_REPLY_SUCCESS);
     amqp_connection_close(conn, AMQP_REPLY_SUCCESS);
