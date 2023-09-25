@@ -2,6 +2,16 @@
 
 namespace nutc {
 namespace manager {
+
+std::optional<messages::SIDE> ClientManager::validateMatch(const messages::Match& match) const {
+  float trade_value = match.price*match.quantity;
+  if(getCapital(match.buyer_uid)-trade_value<0) {
+    return messages::SIDE::BUY;
+  }
+  //TODO: holdings check
+  return std::nullopt;
+}
+
 void
 ClientManager::initialize_from_firebase(const glz::json_t::object_t& users)
 {
@@ -27,9 +37,9 @@ ClientManager::modifyCapital(const std::string& uid, float change_in_capital)
 }
 
 float
-ClientManager::getCapital(const std::string& uid)
+ClientManager::getCapital(const std::string& uid) const
 {
-    return clients[uid].capital_remaining;
+    return clients.at(uid).capital_remaining;
 }
 
 void

@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 using Engine = nutc::matching::Engine;
 using MarketOrder = nutc::messages::MarketOrder;
+using ClientManager = nutc::manager::ClientManager;
 
 class BasicMatching : public ::testing::Test {
 protected:
@@ -16,12 +17,12 @@ protected:
         manager.addClient("DEF");
     }
 
-    nutc::manager::ClientManager manager;
+    ClientManager manager;
+    Engine engine;
 };
 
 TEST_F(BasicMatching, SimpleMatch)
 {
-    Engine engine;
     MarketOrder order1{"ABC", nutc::messages::BUY, "MARKET", "ETHUSD", 1, 1};
     MarketOrder order2{"DEF", nutc::messages::SELL, "MARKET", "ETHUSD", 1, 1};
     auto [matches, ob_updates] = engine.match_order(order1, manager);
@@ -35,7 +36,6 @@ TEST_F(BasicMatching, SimpleMatch)
 
 TEST_F(BasicMatching, PassivePriceMatch)
 {
-    Engine engine;
     MarketOrder order1{"ABC", nutc::messages::BUY, "MARKET", "ETHUSD", 1, 2};
     MarketOrder order2{"DEF", nutc::messages::SELL, "MARKET", "ETHUSD", 1, 1};
     auto [matches, ob_updates] = engine.match_order(order1, manager);
@@ -50,7 +50,6 @@ TEST_F(BasicMatching, PassivePriceMatch)
 
 TEST_F(BasicMatching, PartialFill)
 {
-    Engine engine;
     MarketOrder order1{"ABC", nutc::messages::BUY, "MARKET", "ETHUSD", 2, 1};
     MarketOrder order2{"DEF", nutc::messages::SELL, "MARKET", "ETHUSD", 1, 1};
     auto [matches, ob_updates] = engine.match_order(order1, manager);

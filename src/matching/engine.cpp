@@ -53,16 +53,32 @@ Engine::match_order(MarketOrder aggressive_order, const manager::ClientManager& 
     while (passive_orders.size() > 0 && passive_orders.top().can_match(aggressive_order)
     ) {
         MarketOrder passive_order = passive_orders.top();
-        passive_orders.pop();
         float quantity_to_match =
             std::min(passive_order.quantity, aggressive_order.quantity);
         float price_to_match = passive_order.price;
 
-        matches.push_back(Match{
-            passive_order.ticker, passive_order.client_uid, aggressive_order.client_uid,
-            aggressive_order.side, price_to_match, quantity_to_match
-        });
+        Match toMatch = Match{passive_order.ticker,
+                              passive_order.client_uid,
+                              aggressive_order.client_uid,
+                              aggressive_order.side,
+                              price_to_match,
+                              quantity_to_match};
+
+        std::optional<messages::SIDE> match_failure = manager.validateMatch(toMatch);
+        if (match_failure.has_value()) {
+            bool aggressive_failure = match_failure.value() == aggressive_order.side;
+            if (aggressive_failure) {
+                return std::make_pair(matches, ob_updates);
+            }
+            else {
+                passive_orders.pop();
+                continue;
+            }
+        }
+        passive_orders.pop();
+
         ob_updates.push_back(create_ob_update(passive_order, 0));
+        matches.push_back(toMatch);
         passive_order.quantity -= quantity_to_match;
         aggressive_order.quantity -= quantity_to_match;
         if (passive_order.quantity > 0) {
