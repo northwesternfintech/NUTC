@@ -12,7 +12,7 @@ include(GoogleTest)
 # ---- Tests ----
 
 add_executable(NUTC24_test 
-  src/Matching_test.cpp)
+  src/basic_matching.cpp)
 target_link_libraries(
     NUTC24_test PRIVATE
     NUTC24_lib
