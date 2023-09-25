@@ -1,11 +1,14 @@
 #include "client_manager/manager.hpp"
 #include "config.h"
+#include "dev_mode/dev_mode.hpp"
 #include "firebase/firebase.hpp"
 #include "lib.hpp"
 #include "logging.hpp"
 #include "matching/engine.hpp"
 #include "process_spawning/spawning.hpp"
 #include "rabbitmq/rabbitmq.hpp"
+
+#include <argparse/argparse.hpp>
 
 #include <iostream>
 #include <string>
@@ -17,6 +20,41 @@ namespace rmq = nutc::rabbitmq;
 nutc::manager::ClientManager users;
 rmq::RabbitMQ conn(users);
 
+static std::tuple<bool>
+process_arguments(int argc, const char** argv)
+{
+    argparse::ArgumentParser program(
+        "NUTC24", VERSION, argparse::default_arguments::help
+    );
+
+    program.add_argument("-D", "--dev")
+        .help("Enable development features")
+        .action([](const auto& /* unused */) {})
+        .default_value(false)
+        .implicit_value(true)
+        .nargs(0);
+
+    program.add_argument("-V", "--version")
+        .help("prints version information and exits")
+        .action([&](const auto& /* unused */) {
+            fmt::println("NUTC24  v{}", VERSION);
+            exit(0); // NOLINT(concurrency-*)
+        })
+        .default_value(false)
+        .implicit_value(true)
+        .nargs(0);
+
+    try {
+        program.parse_args(argc, argv);
+    } catch (const std::runtime_error& err) {
+        std::cerr << err.what() << std::endl;
+        std::cerr << program;
+        exit(1); // NOLINT(concurrency-*)
+    }
+
+    return std::make_tuple(program.get<bool>("--dev"));
+}
+
 void
 handle_sigint(int sig)
 {
@@ -26,10 +64,17 @@ handle_sigint(int sig)
 }
 
 int
-main()
+main(int argc, const char** argv)
 {
+    auto [dev_mode] = process_arguments(argc, argv);
+
     // Set up logging
     nutc::logging::init(quill::LogLevel::TraceL3);
+
+    if (dev_mode) {
+        log_t1(main, "Initializing NUTC24 in development mode...");
+        nutc::dev_mode::create_algo_files();
+    }
 
     // Initialize signal handler
     signal(SIGINT, handle_sigint);
@@ -40,17 +85,7 @@ main()
         return 1;
     }
 
-    // Get users from firebase
-    glz::json_t::object_t firebase_users = nutc::client::get_all_users();
-    users.initialize_from_firebase(firebase_users);
-
-    // Spawn clients
-    const int num_clients = nutc::client::spawn_all_clients(users);
-
-    if (num_clients == 0) {
-        log_c(client_spawning, "Spawned 0 clients");
-        return 1;
-    };
+    int num_clients = nutc::client::initialize(users, dev_mode);
 
     conn.addTicker("ETHUSD");
 

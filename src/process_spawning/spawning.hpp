@@ -32,5 +32,7 @@ glz::json_t::object_t get_all_users();
  */
 int spawn_all_clients(const nutc::manager::ClientManager& users);
 
+int initialize(manager::ClientManager& users, bool development_mode);
+
 } // namespace client
 } // namespace nutc

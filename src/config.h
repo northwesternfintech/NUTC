@@ -1,3 +1,7 @@
+#define VERSION "1.0"
+#define STARTING_CAPITAL 1000000
+#define DEBUG_NUM_USERS 2
+
 // logging
 #define LOG_BACKTRACE_SIZE 10
 

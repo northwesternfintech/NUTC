@@ -1,10 +1,34 @@
 #include "spawning.hpp"
 
 #include "config.h"
+#include "dev_mode/dev_mode.hpp"
 #include "logging.hpp"
 
 namespace nutc {
 namespace client {
+
+int
+initialize(manager::ClientManager& users, bool development_mode)
+{
+    if (development_mode) {
+        dev_mode::initialize_client_manager(users, DEBUG_NUM_USERS);
+        return DEBUG_NUM_USERS;
+    }
+    else {
+        // Get users from firebase
+        glz::json_t::object_t firebase_users = nutc::client::get_all_users();
+        users.initialize_from_firebase(firebase_users);
+
+        // Spawn clients
+        const int num_clients = nutc::client::spawn_all_clients(users);
+
+        if (num_clients == 0) {
+            log_c(client_spawning, "Spawned 0 clients");
+            exit(1);
+        };
+        return num_clients;
+    }
+}
 
 glz::json_t::object_t
 get_all_users()

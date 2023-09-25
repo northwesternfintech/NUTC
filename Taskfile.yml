@@ -35,6 +35,14 @@ tasks:
       - task: check-and-start-services
       - ./build/dev/{{.NAME}}
 
+  dev:
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - task: build
+      - task: check-and-start-services
+      - ./build/dev/{{.NAME}} --dev
+
+
   run-v:
     env:
       SPDLOG_LEVEL: trace

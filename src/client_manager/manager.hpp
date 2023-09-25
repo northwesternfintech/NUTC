@@ -1,6 +1,7 @@
 #pragma once
 // keep track of active users and account information
 #include <glaze/glaze.hpp>
+#include "config.h"
 
 #include <string>
 #include <unordered_map>

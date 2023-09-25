@@ -16,7 +16,7 @@ ClientManager::addClient(const std::string& uid)
     if (clients.find(uid) != clients.end()) {
         return;
     }
-    clients[uid] = Client{uid, false, 1000};
+    clients[uid] = Client{uid, false, STARTING_CAPITAL};
 }
 
 float
