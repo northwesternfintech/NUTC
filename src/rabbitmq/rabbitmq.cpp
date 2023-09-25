@@ -9,12 +9,15 @@ RabbitMQ::RabbitMQ(manager::ClientManager& manager) : clients(manager)
     connected = initializeConnection();
 }
 
-RabbitMQ::~RabbitMQ() {
-  closeConnection();
+RabbitMQ::~RabbitMQ()
+{
+    closeConnection();
 }
 
-bool RabbitMQ::connectedToRMQ() {
-  return connected;
+bool
+RabbitMQ::connectedToRMQ()
+{
+    return connected;
 }
 
 bool
@@ -161,7 +164,7 @@ RabbitMQ::handleIncomingMarketOrder(const MarketOrder& order)
         broadcastMatches(matches);
     }
     if (ob_updates.size() > 0) {
-        broadcastObUpdates(ob_updates);
+        broadcastObUpdates(ob_updates, order.client_uid);
     }
 }
 
@@ -188,9 +191,14 @@ RabbitMQ::broadcastAccountUpdate(const Match& match)
 }
 
 void
-RabbitMQ::broadcastObUpdates(const std::vector<ObUpdate>& updates)
+RabbitMQ::broadcastObUpdates(
+    const std::vector<ObUpdate>& updates, const std::string& ignore_uid
+)
 {
     for (auto& [uid, active, capital_remaining] : clients.getClients(true)) {
+        if (uid == ignore_uid) {
+            continue;
+        }
         for (auto& update : updates) {
             // todo: eliminate for loop
             std::string buffer;
