@@ -73,7 +73,7 @@ main(int argc, const char** argv)
 
     if (dev_mode) {
         log_t1(main, "Initializing NUTC24 in development mode...");
-        nutc::dev_mode::create_algo_files();
+        nutc::dev_mode::create_algo_files(DEBUG_NUM_USERS);
     }
 
     // Initialize signal handler

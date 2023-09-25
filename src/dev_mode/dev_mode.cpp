@@ -6,7 +6,7 @@ void
 initialize_client_manager(manager::ClientManager& users, int num_users)
 {
     for (int i = 0; i < num_users; i++) {
-        std::string uid = "user-" + std::to_string(i);
+        std::string uid = "algo_" + std::to_string(i);
         users.addClient(uid);
     }
 }
@@ -28,11 +28,9 @@ read_file_content(const std::string& filename)
 }
 
 void
-create_algo_files()
+create_algo_files(int num_users)
 {
     std::string dir_name = "./algos";
-    std::string file1_name = dir_name + "/algo_1.py";
-    std::string file2_name = dir_name + "/algo_2.py";
     std::string content = read_file_content("./template.py");
 
     struct stat st;
@@ -43,25 +41,18 @@ create_algo_files()
         }
     }
 
-    if (!file_exists(file1_name)) {
-        std::ofstream file1(file1_name);
-        if (file1) {
-            file1 << content;
-            file1.close();
-        }
-        else {
-            std::cerr << "Failed to create " << file1_name << "\n";
-        }
-    }
-
-    if (!file_exists(file2_name)) {
-        std::ofstream file2(file2_name);
-        if (file2) {
-            file2 << content;
-            file2.close();
-        }
-        else {
-            std::cerr << "Failed to create " << file2_name << "\n";
+    for (int i = 0; i < num_users; i++) {
+        std::string file_name = dir_name + "/algo_" + std::to_string(i) + ".py";
+        if (!file_exists(file_name)) {
+            log_i(dev_mode, "Creating default algo {}", file_name);
+            std::ofstream file1(file_name);
+            if (file1) {
+                file1 << content;
+                file1.close();
+            }
+            else {
+                std::cerr << "Failed to create " << file_name << "\n";
+            }
         }
     }
 }

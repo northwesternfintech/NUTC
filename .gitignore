@@ -12,3 +12,4 @@ logs/
 compile_commands.json
 html
 latex
+algos/
