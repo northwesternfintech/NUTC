@@ -35,6 +35,10 @@ target_include_directories(
 
 target_compile_features(NUTC24_lib PUBLIC cxx_std_20)
 
+# argparse
+find_package(argparse REQUIRED)
+target_link_libraries(NUTC24_lib PUBLIC argparse::argparse)
+
 # Fmt
 find_package(fmt REQUIRED)
 target_link_libraries(NUTC24_lib PUBLIC fmt::fmt)
@@ -76,6 +80,8 @@ target_link_libraries(NUTC24_exe PRIVATE rabbitmq::rabbitmq-static)
 # curl
 find_package(CURL REQUIRED)
 target_link_libraries(NUTC24_exe PRIVATE CURL::libcurl)
+
+target_link_libraries(NUTC24_exe PRIVATE argparse::argparse)
 
 # glaze
 find_package(glaze REQUIRED)
