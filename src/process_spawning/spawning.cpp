@@ -12,6 +12,7 @@ initialize(manager::ClientManager& users, bool development_mode)
 {
     if (development_mode) {
         dev_mode::initialize_client_manager(users, DEBUG_NUM_USERS);
+        spawn_all_clients(users, development_mode);
         return DEBUG_NUM_USERS;
     }
     else {
@@ -20,7 +21,8 @@ initialize(manager::ClientManager& users, bool development_mode)
         users.initialize_from_firebase(firebase_users);
 
         // Spawn clients
-        const int num_clients = nutc::client::spawn_all_clients(users, development_mode);
+        const int num_clients =
+            nutc::client::spawn_all_clients(users, development_mode);
 
         if (num_clients == 0) {
             log_c(client_spawning, "Spawned 0 clients");
