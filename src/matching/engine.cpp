@@ -63,43 +63,41 @@ cannot_match_passive(
            || !(passive_orders.top().can_match(aggressive_order));
 }
 
-std::pair<std::vector<Match>, std::vector<ObUpdate>>
+MatchResult
 Engine::match_order(MarketOrder& aggressive_order, const manager::ClientManager& manager)
 {
-    std::vector<Match> matches;
-    std::vector<ObUpdate> ob_updates;
+    MatchResult result;
 
     if (insufficient_capital(aggressive_order, manager)) {
-        return {matches, ob_updates};
+        return result;
     }
 
     auto& passive_orders = get_passive_orders(aggressive_order.side);
 
     if (cannot_match_passive(aggressive_order, passive_orders)) {
         add_order_without_matching(aggressive_order);
-        add_ob_update(ob_updates, aggressive_order, aggressive_order.quantity);
-        return {matches, ob_updates};
+        add_ob_update(result.ob_updates, aggressive_order, aggressive_order.quantity);
+        return result;
     }
 
-    std::tie(matches, ob_updates) = attempt_matches(passive_orders, aggressive_order, manager);
+    MatchResult res = attempt_matches(passive_orders, aggressive_order, manager);
 
     if (aggressive_order.quantity > 0) {
         add_order_without_matching(aggressive_order);
-        add_ob_update(ob_updates, aggressive_order, aggressive_order.quantity);
+        add_ob_update(res.ob_updates, aggressive_order, aggressive_order.quantity);
     }
 
-    return {matches, ob_updates};
+    return res;
 }
 
 
-std::pair<std::vector<Match>, std::vector<ObUpdate>>
+MatchResult
 Engine::attempt_matches(
     std::priority_queue<MarketOrder>& passive_orders, MarketOrder& aggressive_order,
     const manager::ClientManager& manager
 )
 {
-    std::vector<Match> matches;
-    std::vector<ObUpdate> ob_updates;
+  MatchResult result;
     while (passive_orders.size() > 0 && passive_orders.top().can_match(aggressive_order)
     ) {
         MarketOrder passive_order = passive_orders.top();
@@ -118,7 +116,7 @@ Engine::attempt_matches(
         if (match_failure.has_value()) {
             bool aggressive_failure = match_failure.value() == aggressive_order.side;
             if (aggressive_failure) {
-                return std::make_pair(matches, ob_updates);
+                return result;
             }
             else {
                 passive_orders.pop();
@@ -127,20 +125,20 @@ Engine::attempt_matches(
         }
         passive_orders.pop();
 
-        add_ob_update(ob_updates, passive_order, 0);
-        matches.push_back(toMatch);
+        add_ob_update(result.ob_updates, passive_order, 0);
+        result.matches.push_back(toMatch);
         passive_order.quantity -= quantity_to_match;
         aggressive_order.quantity -= quantity_to_match;
         if (passive_order.quantity > 0) {
             passive_orders.push(passive_order);
-            add_ob_update(ob_updates, passive_order, passive_order.quantity);
-            return std::make_pair(matches, ob_updates);
+            add_ob_update(result.ob_updates, passive_order, passive_order.quantity);
+            return result;
         }
         else if (aggressive_order.quantity <= 0) {
-            return std::make_pair(matches, ob_updates);
+            return result;
         }
     }
-    return std::make_pair(matches, ob_updates);
+    return result;
 }
 
 } // namespace matching
