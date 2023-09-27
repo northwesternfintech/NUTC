@@ -94,7 +94,7 @@ private:
         const std::vector<ObUpdate>& updates, const std::string& ignore_uid
     );
     void broadcastAccountUpdate(const Match& match);
-    void handleIncomingMarketOrder(const MarketOrder& order);
+    void handleIncomingMarketOrder(MarketOrder& order);
 };
 
 } // namespace rabbitmq

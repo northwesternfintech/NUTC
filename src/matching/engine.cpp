@@ -17,7 +17,7 @@ Engine::Engine()
 }
 
 void
-Engine::add_order(MarketOrder aggressive_order)
+Engine::add_order_without_matching(MarketOrder aggressive_order)
 {
     if (aggressive_order.side == messages::BUY) {
         bids.push(aggressive_order);
@@ -27,48 +27,70 @@ Engine::add_order(MarketOrder aggressive_order)
     }
 }
 
-ObUpdate
-Engine::create_ob_update(const MarketOrder& order, float quantity)
+constexpr ObUpdate
+create_ob_update(const MarketOrder& order, float quantity)
 {
     return ObUpdate{order.ticker, order.side, order.price, quantity};
 }
 
-std::pair<std::vector<Match>, std::vector<ObUpdate>>
-Engine::match_order(MarketOrder aggressive_order, const manager::ClientManager& manager)
+void
+add_ob_update(std::vector<ObUpdate>& vec, const MarketOrder& order, float quantity)
 {
-    std::priority_queue<MarketOrder>& passive_orders =
-        aggressive_order.side == messages::SIDE::SELL ? this->bids : this->asks;
-    // Assuming incoming is type BUY
+    vec.push_back(create_ob_update(order, quantity));
+}
+
+std::priority_queue<MarketOrder>&
+Engine::get_passive_orders(messages::SIDE side)
+{
+    return side == messages::SIDE::BUY ? this->asks : this->bids;
+}
+
+bool
+insufficient_capital(const MarketOrder& order, const manager::ClientManager& manager)
+{
+    float order_value = order.price * order.quantity;
+    float capital = manager.getCapital(order.client_uid);
+    return order.side == messages::SIDE::BUY && order_value > capital;
+}
+
+bool
+cannot_match_passive(
+    const MarketOrder& aggressive_order,
+    std::priority_queue<MarketOrder>& passive_orders
+)
+{
+    return (passive_orders.size() == 0)
+           || !(passive_orders.top().can_match(aggressive_order));
+}
+
+std::pair<std::vector<Match>, std::vector<ObUpdate>>
+Engine::match_order(MarketOrder& aggressive_order, const manager::ClientManager& manager)
+{
     std::vector<Match> matches;
     std::vector<ObUpdate> ob_updates;
-    if (aggressive_order.side == messages::SIDE::BUY
-        && aggressive_order.price * aggressive_order.quantity
-               > manager.getCapital(aggressive_order.client_uid)) {
-        return std::make_pair(matches, ob_updates);
+
+    if (insufficient_capital(aggressive_order, manager)) {
+        return {matches, ob_updates};
     }
 
-    if (passive_orders.size() == 0
-        || !passive_orders.top().can_match(aggressive_order)) {
-        add_order(aggressive_order);
-        ob_updates.push_back(
-            create_ob_update(aggressive_order, aggressive_order.quantity)
-        );
-        return std::make_pair(matches, ob_updates);
+    auto& passive_orders = get_passive_orders(aggressive_order.side);
+
+    if (cannot_match_passive(aggressive_order, passive_orders)) {
+        add_order_without_matching(aggressive_order);
+        add_ob_update(ob_updates, aggressive_order, aggressive_order.quantity);
+        return {matches, ob_updates};
     }
 
-    std::pair<std::vector<Match>, std::vector<ObUpdate>> match_attempt =
-        attempt_matches(passive_orders, aggressive_order, manager);
-    matches = match_attempt.first;
-    ob_updates = match_attempt.second;
+    std::tie(matches, ob_updates) = attempt_matches(passive_orders, aggressive_order, manager);
 
     if (aggressive_order.quantity > 0) {
-        ob_updates.push_back(
-            create_ob_update(aggressive_order, aggressive_order.quantity)
-        );
-        add_order(aggressive_order);
+        add_order_without_matching(aggressive_order);
+        add_ob_update(ob_updates, aggressive_order, aggressive_order.quantity);
     }
-    return std::make_pair(matches, ob_updates);
+
+    return {matches, ob_updates};
 }
+
 
 std::pair<std::vector<Match>, std::vector<ObUpdate>>
 Engine::attempt_matches(
@@ -105,14 +127,13 @@ Engine::attempt_matches(
         }
         passive_orders.pop();
 
-        ob_updates.push_back(create_ob_update(passive_order, 0));
+        add_ob_update(ob_updates, passive_order, 0);
         matches.push_back(toMatch);
         passive_order.quantity -= quantity_to_match;
         aggressive_order.quantity -= quantity_to_match;
         if (passive_order.quantity > 0) {
             passive_orders.push(passive_order);
-            ob_updates.push_back(create_ob_update(passive_order, passive_order.quantity)
-            );
+            add_ob_update(ob_updates, passive_order, passive_order.quantity);
             return std::make_pair(matches, ob_updates);
         }
         else if (aggressive_order.quantity <= 0) {

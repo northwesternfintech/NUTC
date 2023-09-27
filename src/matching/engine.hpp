@@ -34,13 +34,14 @@ public:
      * containing the orderbook updates
      */
     std::pair<std::vector<Match>, std::vector<ObUpdate>>
-    match_order(MarketOrder aggressive_order, const manager::ClientManager& manager);
+    match_order(MarketOrder& aggressive_order, const manager::ClientManager& manager);
 
-    static ObUpdate create_ob_update(const MarketOrder& order, float quantity);
     Engine(); // con
 
 private:
-    void add_order(MarketOrder aggressive_order);
+    std::priority_queue<MarketOrder>& get_passive_orders(messages::SIDE side);
+
+    void add_order_without_matching(MarketOrder aggressive_order);
     std::pair<std::vector<Match>, std::vector<ObUpdate>> attempt_matches(
         std::priority_queue<MarketOrder>& passive_orders, MarketOrder& aggressive_order,
         const manager::ClientManager& manager

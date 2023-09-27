@@ -115,7 +115,7 @@ RabbitMQ::addTicker(const std::string& ticker)
 }
 
 void
-RabbitMQ::handleIncomingMarketOrder(const MarketOrder& order)
+RabbitMQ::handleIncomingMarketOrder(MarketOrder& order)
 {
     std::string buffer;
     glz::write<glz::opts{}>(order, buffer);
