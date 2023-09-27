@@ -44,6 +44,7 @@ public:
     Engine(); // con
 
 private:
+  float getMatchQuantity(const MarketOrder& passive_order, const MarketOrder& aggressive_order);
     std::priority_queue<MarketOrder>& get_passive_orders(messages::SIDE side);
 
     void add_order_without_matching(MarketOrder aggressive_order);

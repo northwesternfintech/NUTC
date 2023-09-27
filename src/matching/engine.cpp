@@ -64,7 +64,9 @@ cannot_match_passive(
 }
 
 MatchResult
-Engine::match_order(MarketOrder& aggressive_order, const manager::ClientManager& manager)
+Engine::match_order(
+    MarketOrder& aggressive_order, const manager::ClientManager& manager
+)
 {
     MatchResult result;
 
@@ -90,6 +92,13 @@ Engine::match_order(MarketOrder& aggressive_order, const manager::ClientManager&
     return res;
 }
 
+float
+Engine::getMatchQuantity(
+    const MarketOrder& passive_order, const MarketOrder& aggressive_order
+)
+{
+    return std::min(passive_order.quantity, aggressive_order.quantity);
+}
 
 MatchResult
 Engine::attempt_matches(
@@ -97,12 +106,12 @@ Engine::attempt_matches(
     const manager::ClientManager& manager
 )
 {
-  MatchResult result;
+    MatchResult result;
     while (passive_orders.size() > 0 && passive_orders.top().can_match(aggressive_order)
     ) {
         MarketOrder passive_order = passive_orders.top();
-        float quantity_to_match =
-            std::min(passive_order.quantity, aggressive_order.quantity);
+        float quantity_to_match = getMatchQuantity(passive_order, aggressive_order);
+
         float price_to_match = passive_order.price;
 
         Match toMatch = Match{passive_order.ticker,
@@ -118,10 +127,8 @@ Engine::attempt_matches(
             if (aggressive_failure) {
                 return result;
             }
-            else {
-                passive_orders.pop();
-                continue;
-            }
+            passive_orders.pop();
+            continue;
         }
         passive_orders.pop();
 
