@@ -45,14 +45,14 @@ bool validateObUpdate(
 
 #define EXPECT_EQ_OB_UPDATE(update, ticker_, side_, price_, quantity_)                 \
     do {                                                                               \
-        bool isUpdateValid = nutc::testing_utils::validateMatch(                       \
+        bool isUpdateValid = nutc::testing_utils::validateObUpdate(                    \
             (update), (ticker_), (side_), (price_), (quantity_)                        \
         );                                                                             \
         EXPECT_TRUE(isUpdateValid)                                                     \
             << "Expected update with ticker = " << (ticker_)                           \
             << ", side = " << static_cast<int>(side_) << ", price = " << (price_)      \
             << ", quantity = " << (quantity_)                                          \
-            << ". Actual update: ticker = " << (update).ticker                         \
+            << ". Actual update: ticker = " << (update).security                       \
             << ", side = " << static_cast<int>((update).side)                          \
             << ", price = " << (update).price << ", quantity = " << (update).quantity; \
     } while (0)

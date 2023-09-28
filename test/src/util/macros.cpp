@@ -30,8 +30,9 @@ validateObUpdate(
     float quantity
 )
 {
-    return update.security == ticker, update.side == side,
-           isNearlyEqual(update.price, price), isNearlyEqual(update.quantity, quantity);
+    return update.security == ticker && update.side == side
+           && isNearlyEqual(update.price, price)
+           && isNearlyEqual(update.quantity, quantity);
 }
 
 } // namespace testing_utils
