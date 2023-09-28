@@ -122,6 +122,9 @@ RabbitMQ::publishMarketOrder(
     float price
 )
 {
+    if (!limiter.ensureRate()) {
+        return false;
+    }
     MarketOrder order{
         client_uid,
         side == "BUY" ? messages::BUY : messages::SELL,

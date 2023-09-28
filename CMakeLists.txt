@@ -44,6 +44,7 @@ add_library(
     src/firebase/firebase.cpp
     src/pywrapper/pywrapper.cpp
     src/dev_mode/dev_mode.cpp
+    src/pywrapper/rate_limiter.cpp
     # Utils
     src/logging.cpp
 )
