@@ -17,13 +17,13 @@ Engine::Engine()
 }
 
 void
-Engine::add_order_without_matching(MarketOrder aggressive_order)
+Engine::add_order_without_matching(MarketOrder order)
 {
-    if (aggressive_order.side == messages::BUY) {
-        bids.push(aggressive_order);
+    if (order.side == messages::BUY) {
+        bids.push(order);
     }
     else {
-        asks.push(aggressive_order);
+        asks.push(order);
     }
 }
 
@@ -46,11 +46,13 @@ Engine::get_passive_orders(messages::SIDE side)
 }
 
 bool
-insufficient_capital(const MarketOrder& order, const manager::ClientManager& manager)
+insufficient_capital(
+    const MarketOrder& aggressive_order, float order_value,
+    const manager::ClientManager& manager
+)
 {
-    float order_value = order.price * order.quantity;
-    float capital = manager.getCapital(order.client_uid);
-    return order.side == messages::SIDE::BUY && order_value > capital;
+    float capital = manager.getCapital(aggressive_order.client_uid);
+    return aggressive_order.side == messages::SIDE::BUY && order_value > capital;
 }
 
 bool
@@ -65,29 +67,21 @@ cannot_match_passive(
 
 MatchResult
 Engine::match_order(
-    MarketOrder& aggressive_order, const manager::ClientManager& manager
+    MarketOrder& order, const manager::ClientManager& manager
 )
 {
     MatchResult result;
 
-    if (insufficient_capital(aggressive_order, manager)) {
+    if (insufficient_capital(
+            order, order.quantity * order.price,
+            manager
+        )) {
         return result;
     }
 
-    auto& passive_orders = get_passive_orders(aggressive_order.side);
+    auto& passive_orders = get_passive_orders(order.side);
 
-    if (cannot_match_passive(aggressive_order, passive_orders)) {
-        add_order_without_matching(aggressive_order);
-        add_ob_update(result.ob_updates, aggressive_order, aggressive_order.quantity);
-        return result;
-    }
-
-    MatchResult res = attempt_matches(passive_orders, aggressive_order, manager);
-
-    if (aggressive_order.quantity > 0) {
-        add_order_without_matching(aggressive_order);
-        add_ob_update(res.ob_updates, aggressive_order, aggressive_order.quantity);
-    }
+    MatchResult res = attempt_matches(passive_orders, order, manager);
 
     return res;
 }
@@ -113,18 +107,21 @@ Engine::attempt_matches(
         float quantity_to_match = getMatchQuantity(passive_order, aggressive_order);
 
         float price_to_match = passive_order.price;
+        std::string buyer_uid = passive_order.side == messages::SIDE::BUY
+                                    ? passive_order.client_uid
+                                    : aggressive_order.client_uid;
+        std::string seller_uid = passive_order.side == messages::SIDE::SELL
+                                     ? passive_order.client_uid
+                                     : aggressive_order.client_uid;
 
-        Match toMatch = Match{passive_order.ticker,
-                              passive_order.client_uid,
-                              aggressive_order.client_uid,
-                              aggressive_order.side,
-                              price_to_match,
-                              quantity_to_match};
+        Match toMatch = Match{passive_order.ticker,  buyer_uid,      seller_uid,
+                              aggressive_order.side, price_to_match, quantity_to_match};
 
         std::optional<messages::SIDE> match_failure = manager.validateMatch(toMatch);
         if (match_failure.has_value()) {
             bool aggressive_failure = match_failure.value() == aggressive_order.side;
             if (aggressive_failure) {
+                std::cout << "yihhh\n";
                 return result;
             }
             passive_orders.pop();
@@ -141,9 +138,10 @@ Engine::attempt_matches(
             add_ob_update(result.ob_updates, passive_order, passive_order.quantity);
             return result;
         }
-        else if (aggressive_order.quantity <= 0) {
-            return result;
-        }
+    }
+    if (aggressive_order.quantity > 0) {
+        add_order_without_matching(aggressive_order);
+        add_ob_update(result.ob_updates, aggressive_order, aggressive_order.quantity);
     }
     return result;
 }

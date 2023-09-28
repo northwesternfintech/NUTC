@@ -2,8 +2,11 @@
 #include "lib.hpp"
 #include "matching/engine.hpp"
 #include "util/messages.hpp"
+#include "util/macros.hpp"
 
 #include <gtest/gtest.h>
+
+
 using Engine = nutc::matching::Engine;
 using MarketOrder = nutc::messages::MarketOrder;
 using ClientManager = nutc::manager::ClientManager;
@@ -21,6 +24,7 @@ protected:
     Engine engine;
 };
 
+
 TEST_F(BasicMatching, SimpleMatch)
 {
     MarketOrder order1{"ABC", nutc::messages::BUY, "MARKET", "ETHUSD", 1, 1};
@@ -32,6 +36,7 @@ TEST_F(BasicMatching, SimpleMatch)
     auto [matches2, ob_updates2] = engine.match_order(order2, manager);
     EXPECT_EQ(matches2.size(), 1);
     EXPECT_EQ(ob_updates2.size(), 1);
+    EXPECT_EQ_MATCH(matches2.at(0), "ETHUSD", "ABC", "DEF", nutc::messages::SELL, 1, 1);
 }
 
 TEST_F(BasicMatching, PassivePriceMatch)
@@ -46,6 +51,7 @@ TEST_F(BasicMatching, PassivePriceMatch)
     EXPECT_EQ(matches2.size(), 1);
     EXPECT_EQ(ob_updates2.size(), 1);
     EXPECT_EQ(matches2.at(0).price, 2);
+    EXPECT_EQ_MATCH(matches2.at(0), "ETHUSD", "ABC", "DEF", nutc::messages::SELL, 2, 1);
 }
 
 TEST_F(BasicMatching, PartialFill)
@@ -77,6 +83,8 @@ TEST_F(BasicMatching, MultipleFill)
     auto [matches3, ob_updates3] = engine.match_order(order3, manager);
     EXPECT_EQ(matches3.size(), 2);
     EXPECT_EQ(ob_updates3.size(), 2);
+    // EXPECT_EQ_MATCH(matches3.at(0), "ETHUSD", "ABC", "DEF", nutc::messages::SELL, 2, 1);
+    // EXPECT_EQ_MATCH(matches3.at(1), "ETHUSD", "ABC", "DEF", nutc::messages::SELL, 2, 1);
 }
 
 TEST_F(BasicMatching, MultiplePartialFill)
@@ -97,3 +105,78 @@ TEST_F(BasicMatching, MultiplePartialFill)
     EXPECT_EQ(ob_updates3.size(), 3);
 }
 
+TEST_F(BasicMatching, SimpleMatchReversed)
+{
+    MarketOrder order1{"ABC", nutc::messages::SELL, "MARKET", "ETHUSD", 1, 1};
+    MarketOrder order2{"DEF", nutc::messages::BUY, "MARKET", "ETHUSD", 1, 1};
+    auto [matches, ob_updates] = engine.match_order(order1, manager);
+    EXPECT_EQ(matches.size(), 0);
+    EXPECT_EQ(ob_updates.size(), 1);
+
+    auto [matches2, ob_updates2] = engine.match_order(order2, manager);
+    EXPECT_EQ(matches2.size(), 1);
+    EXPECT_EQ(ob_updates2.size(), 1);
+}
+
+TEST_F(BasicMatching, PassivePriceMatchReversed)
+{
+    MarketOrder order1{"ABC", nutc::messages::SELL, "MARKET", "ETHUSD", 1, 1};
+    MarketOrder order2{"DEF", nutc::messages::BUY, "MARKET", "ETHUSD", 1, 2};
+    auto [matches, ob_updates] = engine.match_order(order1, manager);
+    EXPECT_EQ(matches.size(), 0);
+    EXPECT_EQ(ob_updates.size(), 1);
+
+    auto [matches2, ob_updates2] = engine.match_order(order2, manager);
+    EXPECT_EQ(matches2.size(), 1);
+    EXPECT_EQ(ob_updates2.size(), 1);
+    EXPECT_EQ(matches2.at(0).price, 1);
+}
+
+TEST_F(BasicMatching, PartialFillReversed)
+{
+    MarketOrder order1{"ABC", nutc::messages::SELL, "MARKET", "ETHUSD", 2, 1};
+    MarketOrder order2{"DEF", nutc::messages::BUY, "MARKET", "ETHUSD", 1, 1};
+    auto [matches, ob_updates] = engine.match_order(order1, manager);
+    EXPECT_EQ(matches.size(), 0);
+    EXPECT_EQ(ob_updates.size(), 1);
+
+    auto [matches2, ob_updates2] = engine.match_order(order2, manager);
+    EXPECT_EQ(matches2.size(), 1);
+    EXPECT_EQ(ob_updates2.size(), 2);
+}
+
+TEST_F(BasicMatching, MultipleFillReversed)
+{
+    MarketOrder order1{"ABC", nutc::messages::SELL, "MARKET", "ETHUSD", 1, 1};
+    MarketOrder order2{"ABC", nutc::messages::SELL, "MARKET", "ETHUSD", 1, 1};
+    MarketOrder order3{"DEF", nutc::messages::BUY, "MARKET", "ETHUSD", 2, 1};
+    auto [matches, ob_updates] = engine.match_order(order1, manager);
+    EXPECT_EQ(matches.size(), 0);
+    EXPECT_EQ(ob_updates.size(), 1);
+
+    auto [matches2, ob_updates2] = engine.match_order(order2, manager);
+    EXPECT_EQ(matches2.size(), 0);
+    EXPECT_EQ(ob_updates2.size(), 1);
+
+    auto [matches3, ob_updates3] = engine.match_order(order3, manager);
+    EXPECT_EQ(matches3.size(), 2);
+    EXPECT_EQ(ob_updates3.size(), 2);
+}
+
+TEST_F(BasicMatching, MultiplePartialFillReversed)
+{
+    MarketOrder order1{"ABC", nutc::messages::SELL, "MARKET", "ETHUSD", 1, 1};
+    MarketOrder order2{"ABC", nutc::messages::SELL, "MARKET", "ETHUSD", 1, 1};
+    MarketOrder order3{"DEF", nutc::messages::BUY, "MARKET", "ETHUSD", 3, 1};
+    auto [matches, ob_updates] = engine.match_order(order1, manager);
+    EXPECT_EQ(matches.size(), 0);
+    EXPECT_EQ(ob_updates.size(), 1);
+
+    auto [matches2, ob_updates2] = engine.match_order(order2, manager);
+    EXPECT_EQ(matches2.size(), 0);
+    EXPECT_EQ(ob_updates2.size(), 1);
+
+    auto [matches3, ob_updates3] = engine.match_order(order3, manager);
+    EXPECT_EQ(matches3.size(), 2);
+    EXPECT_EQ(ob_updates3.size(), 3);
+}
