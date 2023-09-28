@@ -24,6 +24,15 @@ validateMatch(
            && isNearlyEqual(match.quantity, quantity);
 }
 
+bool
+validateObUpdate(
+    const ObUpdate& update, const std::string& ticker, messages::SIDE side, float price,
+    float quantity
+)
+{
+    return update.security == ticker, update.side == side,
+           isNearlyEqual(update.price, price), isNearlyEqual(update.quantity, quantity);
+}
 
 } // namespace testing_utils
 } // namespace nutc

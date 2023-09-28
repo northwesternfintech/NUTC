@@ -14,28 +14,14 @@ bool validateMatch(
     const std::string& seller_uid, nutc::messages::SIDE side, float price,
     float quantity
 );
+
+bool validateObUpdate(
+    const ObUpdate& update, const std::string& ticker, messages::SIDE side, float price,
+    float quantity
+);
+
 } // namespace testing_utils
 } // namespace nutc
-
-#define EXPECT_EQ_OB_UPDATE(                                                           \
-    match, ticker_, buyer_uid_, seller_uid_, side_, price_, quantity_                  \
-)                                                                                      \
-    do {                                                                               \
-        bool isMatchValid = nutc::testing_utils::validateMatch(                        \
-            (match), (ticker_), (buyer_uid_), (seller_uid_), (side_), (price_),        \
-            (quantity_)                                                                \
-        );                                                                             \
-        EXPECT_TRUE(isMatchValid)                                                      \
-            << "Expected match with ticker = " << (ticker_)                            \
-            << ", buyer_uid = " << (buyer_uid_) << ", seller_uid = " << (seller_uid_)  \
-            << ", side = " << static_cast<int>(side_) << ", price = " << (price_)      \
-            << ", quantity = " << (quantity_)                                          \
-            << ". Actual match: ticker = " << (match).ticker                           \
-            << ", buyer_uid = " << (match).buyer_uid                                   \
-            << ", seller_uid = " << (match).seller_uid                                 \
-            << ", side = " << static_cast<int>((match).side)                           \
-            << ", price = " << (match).price << ", quantity = " << (match).quantity;   \
-    } while (0)
 
 #define EXPECT_EQ_MATCH(                                                               \
     match, ticker_, buyer_uid_, seller_uid_, side_, price_, quantity_                  \
@@ -55,4 +41,18 @@ bool validateMatch(
             << ", seller_uid = " << (match).seller_uid                                 \
             << ", side = " << static_cast<int>((match).side)                           \
             << ", price = " << (match).price << ", quantity = " << (match).quantity;   \
+    } while (0)
+
+#define EXPECT_EQ_OB_UPDATE(update, ticker_, side_, price_, quantity_)                 \
+    do {                                                                               \
+        bool isUpdateValid = nutc::testing_utils::validateMatch(                       \
+            (update), (ticker_), (side_), (price_), (quantity_)                        \
+        );                                                                             \
+        EXPECT_TRUE(isUpdateValid)                                                     \
+            << "Expected update with ticker = " << (ticker_)                           \
+            << ", side = " << static_cast<int>(side_) << ", price = " << (price_)      \
+            << ", quantity = " << (quantity_)                                          \
+            << ". Actual update: ticker = " << (update).ticker                         \
+            << ", side = " << static_cast<int>((update).side)                          \
+            << ", price = " << (update).price << ", quantity = " << (update).quantity; \
     } while (0)
