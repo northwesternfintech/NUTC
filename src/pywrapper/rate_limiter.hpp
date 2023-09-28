@@ -9,7 +9,7 @@ namespace rate_limiter {
 class RateLimiter {
 private:
     std::queue<std::chrono::steady_clock::time_point> timestamps;
-    const size_t MAX_CALLS = 120;
+    const size_t MAX_CALLS = 30;
     const std::chrono::seconds TIME_WINDOW = std::chrono::seconds(60);
 
 public:
