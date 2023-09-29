@@ -3,13 +3,15 @@
 namespace nutc {
 namespace manager {
 
-std::optional<messages::SIDE> ClientManager::validateMatch(const messages::Match& match) const {
-  float trade_value = match.price*match.quantity;
-  if(getCapital(match.buyer_uid)-trade_value<0) {
-    return messages::SIDE::BUY;
-  }
-  //TODO: holdings check
-  return std::nullopt;
+std::optional<messages::SIDE>
+ClientManager::validateMatch(const messages::Match& match) const
+{
+    float trade_value = match.price * match.quantity;
+    if (getCapital(match.buyer_uid) - trade_value < 0) {
+        return messages::SIDE::BUY;
+    }
+    // TODO: holdings check
+    return std::nullopt;
 }
 
 void
@@ -32,6 +34,9 @@ ClientManager::addClient(const std::string& uid)
 float
 ClientManager::modifyCapital(const std::string& uid, float change_in_capital)
 {
+    if (clients.find(uid) == clients.end()) {
+        return 0;
+    }
     clients[uid].capital_remaining += change_in_capital;
     return clients[uid].capital_remaining;
 }
@@ -39,12 +44,18 @@ ClientManager::modifyCapital(const std::string& uid, float change_in_capital)
 float
 ClientManager::getCapital(const std::string& uid) const
 {
+    if (clients.find(uid) == clients.end()) {
+        return 0;
+    }
     return clients.at(uid).capital_remaining;
 }
 
 void
 ClientManager::setClientActive(const std::string& uid)
 {
+    if (clients.find(uid) == clients.end()) {
+        return;
+    }
     clients[uid].active = true;
 }
 
