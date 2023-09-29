@@ -1,5 +1,6 @@
 #pragma once
 
+#include "client_manager/manager.hpp"
 #include "logging.hpp"
 #include "util/messages.hpp"
 
@@ -19,6 +20,11 @@ namespace nutc {
  */
 namespace matching {
 
+struct MatchResult {
+    std::vector<Match> matches;
+    std::vector<ObUpdate> ob_updates;
+};
+
 class Engine {
 public:
     std::priority_queue<MarketOrder> bids;
@@ -27,17 +33,25 @@ public:
     /**
      * @brief Matches the given order against the current order book.
      * @param aggressive_order The order to match against the order book.
-     * @return A pair of vectors, the first containing all matches, the second
-     * containing the orderbook updates
+     * @param manager ClientManager to verify validity of orders/matches (correct
+     * funds/holdings)
+     * @return a MatchResult containing all matches and a vector containing the
+     * orderbook updates
      */
-    std::pair<std::vector<Match>, std::vector<ObUpdate>>
-    match_order(MarketOrder aggressive_order);
+    MatchResult
+    match_order(MarketOrder& aggressive_order, const manager::ClientManager& manager);
 
     Engine(); // con
 
 private:
-    void add_order(MarketOrder aggressive_order);
-    ObUpdate create_ob_update(const MarketOrder& order, float quantity);
+  float getMatchQuantity(const MarketOrder& passive_order, const MarketOrder& aggressive_order);
+    std::priority_queue<MarketOrder>& get_passive_orders(messages::SIDE side);
+
+    void add_order_without_matching(MarketOrder aggressive_order);
+    MatchResult attempt_matches(
+        std::priority_queue<MarketOrder>& passive_orders, MarketOrder& aggressive_order,
+        const manager::ClientManager& manager
+    );
 };
 } // namespace matching
 } // namespace nutc

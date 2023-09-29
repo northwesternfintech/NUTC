@@ -9,12 +9,15 @@ RabbitMQ::RabbitMQ(manager::ClientManager& manager) : clients(manager)
     connected = initializeConnection();
 }
 
-RabbitMQ::~RabbitMQ() {
-  closeConnection();
+RabbitMQ::~RabbitMQ()
+{
+    closeConnection();
 }
 
-bool RabbitMQ::connectedToRMQ() {
-  return connected;
+bool
+RabbitMQ::connectedToRMQ()
+{
+    return connected;
 }
 
 bool
@@ -112,7 +115,7 @@ RabbitMQ::addTicker(const std::string& ticker)
 }
 
 void
-RabbitMQ::handleIncomingMarketOrder(const MarketOrder& order)
+RabbitMQ::handleIncomingMarketOrder(MarketOrder& order)
 {
     std::string buffer;
     glz::write<glz::opts{}>(order, buffer);
@@ -137,7 +140,7 @@ RabbitMQ::handleIncomingMarketOrder(const MarketOrder& order)
         );
         return;
     }
-    auto [matches, ob_updates] = engine.value().get().match_order(order);
+    auto [matches, ob_updates] = engine.value().get().match_order(order, clients);
     for (const auto& match : matches) {
         std::string buyer_uid = match.buyer_uid;
         std::string seller_uid = match.seller_uid;
@@ -161,7 +164,7 @@ RabbitMQ::handleIncomingMarketOrder(const MarketOrder& order)
         broadcastMatches(matches);
     }
     if (ob_updates.size() > 0) {
-        broadcastObUpdates(ob_updates);
+        broadcastObUpdates(ob_updates, order.client_uid);
     }
 }
 
@@ -188,9 +191,14 @@ RabbitMQ::broadcastAccountUpdate(const Match& match)
 }
 
 void
-RabbitMQ::broadcastObUpdates(const std::vector<ObUpdate>& updates)
+RabbitMQ::broadcastObUpdates(
+    const std::vector<ObUpdate>& updates, const std::string& ignore_uid
+)
 {
     for (auto& [uid, active, capital_remaining] : clients.getClients(true)) {
+        if (uid == ignore_uid) {
+            continue;
+        }
         for (auto& update : updates) {
             // todo: eliminate for loop
             std::string buffer;

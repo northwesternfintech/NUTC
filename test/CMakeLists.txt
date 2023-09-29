@@ -3,7 +3,7 @@
 # tree and is not feasible from an install location
 
 project(NUTC24Tests LANGUAGES CXX)
-
+set(CMAKE_BUILD_TYPE Debug)
 # ---- Dependencies ----
 
 find_package(GTest REQUIRED)
@@ -12,7 +12,11 @@ include(GoogleTest)
 # ---- Tests ----
 
 add_executable(NUTC24_test 
-  src/basic_matching.cpp)
+  src/basic_matching.cpp
+  src/invalid_orders.cpp
+  src/many_orders.cpp
+  src/util/macros.cpp 
+  )
 target_link_libraries(
     NUTC24_test PRIVATE
     NUTC24_lib
