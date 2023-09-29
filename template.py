@@ -1,3 +1,6 @@
+# Global function:
+# place_market_order(side, type, ticker, quantity, price)
+# Where side = "BUY" or "SELL", type = "MARKET", ticker = "HIGH_VOL", "MED_VOL", or "LOW_VOL", quantity = float, price = float
 class Strategy:
     """Template for a strategy."""
 
