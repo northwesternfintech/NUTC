@@ -1,16 +1,66 @@
-def initialize() -> None:
-    print("Initializing...")
-    # initialization logic goes here
-    # you can call constructors, etc.
+class Strategy:
+    """Template for a strategy."""
 
-# Called whenever two orders match. Could be one of your orders, or two other people's orders.
-def on_trade_update(ticker: str, side: str, price: float, quantity: float) -> None:
-    print(f"Python Trade update: {ticker} {side} {price} {quantity}")
+    def __init__(self) -> None:
+        """Your initialization code goes here."""
 
-# Called whenever the orderbook changes. This could be because of a trade, or because of a new order, or both.
-def on_orderbook_update(ticker: str, side: str, price: float, quantity: bool) -> None:
-    print(f"Python Orderbook update: {ticker} {side} {price} {quantity}")
+    def on_trade_update(self, ticker: str, side: str, price: float, quantity: float) -> None:
+        """Called whenever two orders match. Could be one of your orders, or two other people's orders.
 
-# Called whenever one of your orders is filled.
-def on_account_update(ticker: str, side: str, price: float, quantity: float, capital_remaining: float) -> None:
-    print(f"Python Account update: {ticker} {side} {price} {quantity} {capital_remaining}")
+        Parameters
+        ----------
+        ticker
+            Ticker of orders that were matched
+        side
+
+        price
+            Price that trade was executed at
+        quantity
+            Volume traded
+        """
+        print(f"Python Trade update: {ticker} {side} {price} {quantity}")
+
+    def on_orderbook_update(
+        self, ticker: str, side: str, price: float, quantity: bool
+    ) -> None:
+        """Called whenever the orderbook changes. This could be because of a trade, or because of a new order, or both.
+
+        Parameters
+        ----------
+        ticker
+            Ticker that has an orderbook update
+        side
+            Which orderbook was updated
+        price
+            Price of orderbook that has an update
+        quantity
+            Volume placed into orderbook
+        """
+        print(f"Python Orderbook update: {ticker} {side} {price} {quantity}")
+
+    def on_account_update(
+        self,
+        ticker: str,
+        side: str,
+        price: float,
+        quantity: float,
+        capital_remaining: float,
+    ) -> None:
+        """Called whenever one of your orders is filled.
+
+        Parameters
+        ----------
+        ticker
+            Ticker of order that was fulfilled
+        side
+            Side of order that was fulfilled
+        price
+            Price that order was fulfilled at
+        quantity
+            Volume of order that was fulfilled
+        capital_remaining
+            Ammount of capital after fulfilling order
+        """
+        print(
+            f"Python Account update: {ticker} {side} {price} {quantity} {capital_remaining}"
+        )
