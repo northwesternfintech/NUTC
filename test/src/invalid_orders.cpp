@@ -5,11 +5,6 @@
 #include "util/macros.hpp"
 
 #include <gtest/gtest.h>
-using Engine = nutc::matching::Engine;
-using MarketOrder = nutc::messages::MarketOrder;
-using ObUpdate = nutc::messages::ObUpdate;
-using ClientManager = nutc::manager::ClientManager;
-using SIDE = nutc::messages::SIDE;
 
 class InvalidOrders : public ::testing::Test {
 protected:

@@ -6,10 +6,6 @@
 
 #include <gtest/gtest.h>
 
-using Engine = nutc::matching::Engine;
-using MarketOrder = nutc::messages::MarketOrder;
-using ClientManager = nutc::manager::ClientManager;
-
 class BasicMatching : public ::testing::Test {
 protected:
     void
