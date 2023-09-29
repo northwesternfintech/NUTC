@@ -1,7 +1,8 @@
 #pragma once
 
-#include "util/messages.hpp"
 #include "pywrapper/pywrapper.hpp"
+#include "pywrapper/rate_limiter.hpp"
+#include "util/messages.hpp"
 
 #include <unistd.h>
 
@@ -98,6 +99,7 @@ public:
     std::variant<ShutdownMessage, RMQError> handleIncomingMessages();
 
 private:
+    rate_limiter::RateLimiter limiter;
     bool initializeConnection(const std::string& queueName);
     bool initializeConsume(const std::string& queueName);
     bool connectToRabbitMQ(

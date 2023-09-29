@@ -29,19 +29,19 @@ create_api_module(
 py::object
 get_ob_update_function()
 {
-    return py::globals()["on_orderbook_update"];
+    return py::globals()["strat"].attr("on_orderbook_update");
 }
 
 py::object
 get_trade_update_function()
 {
-    return py::globals()["on_trade_update"];
+    return py::globals()["strat"].attr("on_trade_update");
 }
 
 py::object
 get_account_update_function()
 {
-    return py::globals()["on_account_update"];
+    return py::globals()["strat"].attr("on_account_update");
 }
 
 void
@@ -49,7 +49,7 @@ run_code_init(const std::string& py_code)
 {
     log_i(py_runtime, "Running code:\n{}", py_code);
     py::exec(py_code);
-    py::exec("initialize()");
+    py::exec("strat = Strategy()");
 }
 
 } // namespace pywrapper
