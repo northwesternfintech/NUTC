@@ -60,7 +60,7 @@ run_initialization()
 {
     log_i(mock_runtime, "Running initialization code");
     try {
-        py::exec("strat = Strategy()");
+        py::exec("strategy = Strategy()");
     } catch (const std::exception& e) {
         return fmt::format("Failed to run initialization: {}", e.what());
     }
@@ -78,18 +78,18 @@ trigger_callbacks()
     }
 
     try {
-        py::exec(R"(strat.on_orderbook_update("ETHUSD","BUY",1.0,1.0))");
+        py::exec(R"(strategy.on_orderbook_update("ETHUSD","BUY",1.0,1.0))");
     } catch (const std::exception& e) {
         return fmt::format("Failed to run on_orderbook_update: {}", e.what());
     }
     try {
-        py::exec(R"(strat.on_trade_update("ETHUSD","BUY",1.0,1.0))");
+        py::exec(R"(strategy.on_trade_update("ETHUSD","BUY",1.0,1.0))");
     } catch (const std::exception& e) {
         return fmt::format("Failed to run on_trade_update: {}", e.what());
     }
 
     try {
-        py::exec(R"(strat.on_account_update("ETHUSD","BUY",1.0,1.0,1.0))");
+        py::exec(R"(strategy.on_account_update("ETHUSD","BUY",1.0,1.0,1.0))");
     } catch (const std::exception& e) {
         return fmt::format("Failed to run on_account_update: {}", e.what());
     }
