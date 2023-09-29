@@ -1,7 +1,3 @@
-//
-// Created by echav on 9/4/2023.
-//
-
 #include "engine.hpp"
 
 #include <algorithm>
@@ -66,16 +62,11 @@ cannot_match_passive(
 }
 
 MatchResult
-Engine::match_order(
-    MarketOrder& order, const manager::ClientManager& manager
-)
+Engine::match_order(MarketOrder& order, const manager::ClientManager& manager)
 {
     MatchResult result;
 
-    if (insufficient_capital(
-            order, order.quantity * order.price,
-            manager
-        )) {
+    if (insufficient_capital(order, order.quantity * order.price, manager)) {
         return result;
     }
 
@@ -86,6 +77,12 @@ Engine::match_order(
     return res;
 }
 
+bool
+isCloseToZero(float value, float epsilon = 1e-6f)
+{
+    return std::fabs(value) < epsilon;
+}
+
 float
 Engine::getMatchQuantity(
     const MarketOrder& passive_order, const MarketOrder& aggressive_order
@@ -94,6 +91,8 @@ Engine::getMatchQuantity(
     return std::min(passive_order.quantity, aggressive_order.quantity);
 }
 
+// TODO: modify so it's not matching an incoming and passive order, it just matches
+// orders from both sides
 MatchResult
 Engine::attempt_matches(
     std::priority_queue<MarketOrder>& passive_orders, MarketOrder& aggressive_order,
@@ -105,7 +104,6 @@ Engine::attempt_matches(
     ) {
         MarketOrder passive_order = passive_orders.top();
         float quantity_to_match = getMatchQuantity(passive_order, aggressive_order);
-
         float price_to_match = passive_order.price;
         std::string buyer_uid = passive_order.side == messages::SIDE::BUY
                                     ? passive_order.client_uid
@@ -121,11 +119,12 @@ Engine::attempt_matches(
         if (match_failure.has_value()) {
             bool aggressive_failure = match_failure.value() == aggressive_order.side;
             if (aggressive_failure) {
-                std::cout << "yihhh\n";
                 return result;
             }
-            passive_orders.pop();
-            continue;
+            else {
+                passive_orders.pop();
+                continue;
+            }
         }
         passive_orders.pop();
 
@@ -133,13 +132,16 @@ Engine::attempt_matches(
         result.matches.push_back(toMatch);
         passive_order.quantity -= quantity_to_match;
         aggressive_order.quantity -= quantity_to_match;
-        if (passive_order.quantity > 0) {
+        if (!isCloseToZero(passive_order.quantity)) {
             passive_orders.push(passive_order);
             add_ob_update(result.ob_updates, passive_order, passive_order.quantity);
+        }
+        //cannot match anymore
+        if (isCloseToZero(aggressive_order.quantity)) {
             return result;
         }
     }
-    if (aggressive_order.quantity > 0) {
+    if (!isCloseToZero(aggressive_order.quantity)) {
         add_order_without_matching(aggressive_order);
         add_ob_update(result.ob_updates, aggressive_order, aggressive_order.quantity);
     }
