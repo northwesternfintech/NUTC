@@ -42,15 +42,6 @@ import_py_code(const std::string& code)
     } catch (const std::exception& e) {
         return fmt::format("Failed to import code: {}", e.what());
     }
-    try {
-        py::object main_module = py::module_::import("__main__");
-        py::dict main_dict = main_module.attr("__dict__");
-        py::object on_trade_update = main_dict["on_trade_update"];
-        py::object on_orderbook_update = main_dict["on_orderbook_update"];
-        py::object on_account_update = main_dict["on_account_update"];
-    } catch (py::error_already_set& e) {
-        return fmt::format("Failed to import callback functions: {}", e.what());
-    }
 
     return std::nullopt;
 }
@@ -64,6 +55,16 @@ run_initialization()
     } catch (const std::exception& e) {
         return fmt::format("Failed to run initialization: {}", e.what());
     }
+    try {
+        py::object main_module = py::module_::import("__main__");
+        py::dict main_dict = main_module.attr("__dict__");
+        py::object on_trade_update = main_dict["strategy"].attr("on_trade_update");
+        py::object on_orderbook_update = main_dict["strategy"].attr("on_orderbook_update");
+        py::object on_account_update = main_dict["strategy"].attr("on_account_update");
+    } catch (py::error_already_set& e) {
+        return fmt::format("Failed to import callback functions: {}", e.what());
+    }
+
     return std::nullopt;
 }
 
