@@ -3,7 +3,7 @@
 # tree and is not feasible from an install location
 
 project(NUTC24Tests LANGUAGES CXX)
-
+set(CMAKE_BUILD_TYPE Debug)
 # ---- Dependencies ----
 
 find_package(GTest REQUIRED)
