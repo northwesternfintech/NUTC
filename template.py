@@ -1,6 +1,6 @@
-# Global function:
-# place_market_order(side, type, ticker, quantity, price)
-# Where side = "BUY" or "SELL", type = "MARKET", ticker = "HIGH_VOL", "MED_VOL", or "LOW_VOL", quantity = float, price = float
+def place_market_order(side: str, ticker: str, quantity: float, price: float) -> None:
+    """Place a market order - DO NOT MODIFY"""
+
 class Strategy:
     """Template for a strategy."""
 
