@@ -48,7 +48,7 @@ py::object get_account_update_function();
  */
 void create_api_module(
     std::function<
-        bool(const std::string&, const std::string&, const std::string&, float, float)>
+        bool(const std::string&, const std::string&, float, float)>
         publish_market_order
 );
 

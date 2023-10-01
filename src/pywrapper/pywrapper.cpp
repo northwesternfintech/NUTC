@@ -6,7 +6,7 @@ namespace pywrapper {
 void
 create_api_module(
     std::function<
-        bool(const std::string&, const std::string&, const std::string&, float, float)>
+        bool(const std::string&, const std::string&, float, float)>
         publish_market_order
 )
 {
@@ -21,8 +21,8 @@ create_api_module(
 
     py::exec(R"(import nutc_api)");
     py::exec(R"(
-        def place_market_order(side, type, ticker, quantity, price):
-            nutc_api.publish_market_order(side, type, ticker, quantity, price)
+        def place_market_order(side, ticker, quantity, price):
+            nutc_api.publish_market_order(side, ticker, quantity, price)
     )");
 }
 

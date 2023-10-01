@@ -260,8 +260,7 @@ RabbitMQ::RabbitMQ(const std::string& uid)
     }
 }
 
-std::function<
-    bool(const std::string&, const std::string&, const std::string&, float, float)>
+std::function<bool(const std::string&, const std::string&, float, float)>
 RabbitMQ::getMarketFunc(const std::string& uid)
 {
     return std::bind(
@@ -269,10 +268,10 @@ RabbitMQ::getMarketFunc(const std::string& uid)
         this,
         uid,
         std::placeholders::_1,
+        "MARKET",
         std::placeholders::_2,
         std::placeholders::_3,
-        std::placeholders::_4,
-        std::placeholders::_5
+        std::placeholders::_4
     );
 }
 
