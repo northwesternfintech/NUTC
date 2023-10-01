@@ -2,7 +2,7 @@ import { ChevronRightIcon } from "@heroicons/react/20/solid";
 import Image from "next/image";
 import Link from "next/link";
 import Logo from "@/app/assets/logo.png";
-import BackgroundScreenshot from "@/app/assets/background.png";
+import BackgroundScreenshot from "@/app/assets/background.webp";
 
 export default function Hero() {
   return (

@@ -7,7 +7,7 @@ import "firebase/compat/functions";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCo2l3x2DMhg5CaNy1Pyvknk_GK8v34iUc",
-  authDomain: "nutc-web.firebaseapp.com",
+  authDomain: "www.nutc.site",
   databaseURL: "https://nutc-web-default-rtdb.firebaseio.com",
   projectId: "nutc-web",
   storageBucket: "nutc-web.appspot.com",
