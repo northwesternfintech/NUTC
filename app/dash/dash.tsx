@@ -11,6 +11,7 @@ import {
   Bars3Icon,
   UserGroupIcon,
   XMarkIcon,
+  ArrowDownOnSquareIcon
 } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 
@@ -20,6 +21,12 @@ const navigation = [
     href: "/dash",
     icon: ArrowTrendingUpIcon,
     activeName: "/dash",
+  },
+  {
+    name: "Download Template",
+    href: "/dash/template",
+    icon: ArrowDownOnSquareIcon,
+    activeName: "/dash/template",
   },
   {
     name: "Upload Algorithm",
@@ -57,7 +64,7 @@ export default function Dash(content: React.ReactNode) {
   const pathName = usePathname();
 
   //array of AlgorithmType
-  const [submissions, setSubmissions]:any = useState([]);
+  const [submissions, setSubmissions]: any = useState([]);
 
   useEffect(() => {
     setCurrentPage(pathName);
@@ -82,7 +89,7 @@ export default function Dash(content: React.ReactNode) {
       });
       i++;
     }
-    if (tmpSubmissions.length>0) {
+    if (tmpSubmissions.length > 0) {
       tmpSubmissions[0].current = true;
       setSubmissions(tmpSubmissions);
     }
@@ -183,7 +190,7 @@ export default function Dash(content: React.ReactNode) {
                             Your submissions
                           </div>
                           <ul role="list" className="-mx-2 mt-2 space-y-1">
-                            {submissions.map((team:any) => (
+                            {submissions.map((team: any) => (
                               <li key={team.name}>
                                 <a
                                   href={team.href}
@@ -257,7 +264,7 @@ export default function Dash(content: React.ReactNode) {
                     Your submissions
                   </div>
                   <ul role="list" className="-mx-2 mt-2 space-y-1">
-                    {submissions.map((team:any) => (
+                    {submissions.map((team: any) => (
                       <li key={team.name}>
                         <a
                           href={team.href}
