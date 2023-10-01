@@ -7,8 +7,7 @@ namespace pywrapper {
 
 bool
 create_api_module(
-    std::function<
-        bool(const std::string&, const std::string&, float, float)>
+    std::function<bool(const std::string&, const std::string&, float, float)>
         publish_market_order
 )
 {
@@ -59,7 +58,8 @@ run_initialization()
         py::object main_module = py::module_::import("__main__");
         py::dict main_dict = main_module.attr("__dict__");
         py::object on_trade_update = main_dict["strategy"].attr("on_trade_update");
-        py::object on_orderbook_update = main_dict["strategy"].attr("on_orderbook_update");
+        py::object on_orderbook_update =
+            main_dict["strategy"].attr("on_orderbook_update");
         py::object on_account_update = main_dict["strategy"].attr("on_account_update");
     } catch (py::error_already_set& e) {
         return fmt::format("Failed to import callback functions: {}", e.what());

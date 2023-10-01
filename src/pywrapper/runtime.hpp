@@ -11,8 +11,7 @@
 namespace nutc {
 namespace pywrapper {
 bool create_api_module(
-    std::function<
-        bool(const std::string&, const std::string&, float, float)>
+    std::function<bool(const std::string&, const std::string&, float, float)>
         publish_market_order
 );
 std::optional<std::string> import_py_code(const std::string& code);
