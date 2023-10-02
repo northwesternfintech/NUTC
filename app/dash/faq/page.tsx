@@ -53,7 +53,7 @@ const faqs = [
       "By the amount of capital they hold at the end of the competition (incl. value of held stocks)",
   },
   {
-    question: "What if I have other questions?",
+    question: "What if I have other questions or have issues with the website?",
     answer:
       'Please reach out to nuft@u.northwestern.edu with the subject "NUTC Question".',
   },
