@@ -6,12 +6,12 @@ import Logo from "@/app/assets/logo.png";
 import Image from "next/image";
 import { useUserInfo } from "@/app/login/auth/context";
 import {
+  ArrowDownOnSquareIcon,
   ArrowTrendingUpIcon,
   ArrowUpTrayIcon,
   Bars3Icon,
   QuestionMarkCircleIcon,
   XMarkIcon,
-  ArrowDownOnSquareIcon
 } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 
@@ -21,6 +21,12 @@ const navigation = [
     href: "/dash",
     icon: ArrowTrendingUpIcon,
     activeName: "/dash",
+  },
+  {
+    name: "FAQ",
+    href: "/dash/faq",
+    icon: QuestionMarkCircleIcon,
+    activeName: "/dash/faq",
   },
   {
     name: "Download Template",
@@ -34,15 +40,11 @@ const navigation = [
     icon: ArrowUpTrayIcon,
     activeName: "/dash/submit",
   },
-  {name:"FAQ",
-    href:"/dash/faq",
-  icon: QuestionMarkCircleIcon,
-  activeName: "/dash/faq"}
   // {
-    // name: "Team Profile",
-    // href: "#",
-    // icon: UserGroupIcon,
-    // activeName: "team-profile",
+  // name: "Team Profile",
+  // href: "#",
+  // icon: UserGroupIcon,
+  // activeName: "team-profile",
   // },
 ];
 const submissions2 = [
