@@ -59,7 +59,6 @@ async function writeNewAlgo(
   algo.uploadDate = new Date().toISOString();
 
   await set(algoRef, algo);
-  await set(ref(database, `users/${uid}/latestAlgoId`), algoRef.key);
   // await functions.httpsCallable("emailApplication")();
   // above should be lint function
   return true;
@@ -113,9 +112,9 @@ export default function Submission() {
     }
     const fileName = selectedFile.name;
     const fileExtension = fileName.split(".").pop().toLowerCase();
-    if (fileExtension !== "py" && fileExtension !== "cpp") {
+    if (fileExtension !== "py") {
       Swal.fire({
-        title: "Please upload a Python or C++ file",
+        title: "Please upload a Python file",
         icon: "error",
         toast: true,
         position: "top-end",
@@ -281,7 +280,7 @@ export default function Submission() {
                       <p className="pl-1">or drag and drop</p>
                     </div>
                     <p className="text-xs leading-5 text-gray-400">
-                      .py or .cpp up to 100KB
+                      .py up to 100KB
                     </p>
                   </div>
                 </div>
@@ -301,6 +300,9 @@ export default function Submission() {
                   userInfo?.user?.uid || "",
                 ) //bad practice, fix later
               ) {
+                const res = axios.get(
+                  `https://nutc-linter-4oeeau4rxa-uc.a.run.app/?uid=${userInfo?.user?.uid}&algo_id=${algoRef.key}`,
+                );
                 Swal.fire({
                   title: "Algorithm submitted!",
                   icon: "success",
@@ -310,9 +312,6 @@ export default function Submission() {
                     window.location.reload();
                   },
                 });
-                const res = await axios.get(
-                  `https://nutc-linter-4oeeau4rxa-uc.a.run.app/?uid=${userInfo?.user?.uid}&algo_id=${algoRef.key}`,
-                );
                 console.log(res);
               }
             }}

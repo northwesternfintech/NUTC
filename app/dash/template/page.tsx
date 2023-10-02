@@ -37,7 +37,7 @@ export default function Template() {
                 Template.py
               </div>
               <div className="border-r border-gray-600/10 px-4 py-2">
-                340-homework-answers.txt
+                
               </div>
             </div>
           </div>

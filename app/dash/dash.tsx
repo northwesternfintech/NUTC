@@ -34,12 +34,12 @@ const navigation = [
     icon: ArrowUpTrayIcon,
     activeName: "/dash/submit",
   },
-  {
-    name: "Team Profile",
-    href: "#",
-    icon: UserGroupIcon,
-    activeName: "team-profile",
-  },
+  // {
+    // name: "Team Profile",
+    // href: "#",
+    // icon: UserGroupIcon,
+    // activeName: "team-profile",
+  // },
 ];
 const submissions2 = [
   {
@@ -284,7 +284,7 @@ export default function Dash(content: React.ReactNode) {
                     ))}
                   </ul>
                 </li>
-                <li className="-mx-6 mt-auto">
+                <li className="-mx-6 mt-auto hidden">
                   <a
                     href="#"
                     className="flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-white hover:bg-gray-800"

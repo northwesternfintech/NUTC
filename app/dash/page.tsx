@@ -146,10 +146,10 @@ export default function Dashboard() {
           </form>
         </div>
       </div>
-      <main className="lg:pr-96">
+      <main className="lg:pr-96 lg:pr-0">
         <header className="flex items-center justify-between border-b border-white/5 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
           <h1 className="text-base font-semibold leading-7 text-white">
-            Deployments
+            Submissions
           </h1>
 
           {/* Sort dropdown */}
@@ -206,7 +206,7 @@ export default function Dashboard() {
                         "block px-3 py-1 text-sm leading-6 text-gray-900",
                       )}
                     >
-                      Environment
+                      Status
                     </a>
                   )}
                 </Menu.Item>
@@ -235,8 +235,8 @@ export default function Dashboard() {
                   </div>
                   <h2 className="min-w-0 text-sm font-semibold leading-6 text-white">
                     <a href={deployment.href} className="flex gap-x-2">
-                      <span className="truncate">{deployment.teamName}</span>
-                      <span className="text-gray-400">/</span>
+                      <span className="hidden truncate">{deployment.teamName}</span>
+                      <span className="hidden text-gray-400">/</span>
                       <span className="whitespace-nowrap">
                         {deployment.projectName}
                       </span>
@@ -271,7 +271,7 @@ export default function Dashboard() {
           ))}
         </ul>
       </main>
-      <aside className="bg-black/10 lg:fixed lg:bottom-0 lg:right-0 lg:top-16 lg:w-96 lg:overflow-y-auto lg:border-l lg:border-white/5">
+      <aside className="hidden bg-black/10 lg:fixed lg:bottom-0 lg:right-0 lg:top-16 lg:w-96 lg:overflow-y-auto lg:border-l lg:border-white/5">
         <header className="flex items-center justify-between border-b border-white/5 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
           <h2 className="text-base font-semibold leading-7 text-white">
             Activity feed
