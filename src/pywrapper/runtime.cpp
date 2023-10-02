@@ -22,10 +22,6 @@ create_api_module(
         sys_modules["nutc_api"] = m;
 
         py::exec(R"(import nutc_api)");
-        py::exec(R"(
-        def place_market_order(side, ticker, quantity, price):
-            nutc_api.publish_market_order(side, ticker, quantity, price)
-    )");
     } catch (const std::exception& e) {
         return false;
     }
@@ -41,6 +37,9 @@ import_py_code(const std::string& code)
     } catch (const std::exception& e) {
         return fmt::format("Failed to import code: {}", e.what());
     }
+    py::exec(R"(
+        def place_market_order(side, ticker, quantity, price):
+            nutc_api.publish_market_order(side, ticker, quantity, price))");
 
     return std::nullopt;
 }
@@ -51,9 +50,12 @@ run_initialization()
     log_i(mock_runtime, "Running initialization code");
     try {
         py::exec("strategy = Strategy()");
-    } catch (const std::exception& e) {
+    }
+
+    catch (const std::exception& e) {
         return fmt::format("Failed to run initialization: {}", e.what());
     }
+
     try {
         py::object main_module = py::module_::import("__main__");
         py::dict main_dict = main_module.attr("__dict__");
@@ -73,7 +75,7 @@ trigger_callbacks()
 {
     log_i(mock_runtime, "Triggering callbacks");
     try {
-        py::exec(R"(place_market_order("BUY", "MARKET", "ETHUSD", 1.0, 1.0))");
+        py::exec(R"(place_market_order("BUY", "ETHUSD", 1.0, 1.0))");
     } catch (const std::exception& e) {
         return fmt::format("Failed to run place_market_order: {}", e.what());
     }

@@ -57,6 +57,11 @@ set_lint_success(
         ),
         json_success
     );
+    glz::json_t res2 = firebase_request(
+        "PUT",
+        fmt::format("{}/users/{}/latestAlgoId.json", std::string(FIREBASE_URL), uid),
+        "\"" + algo_id + "\""
+    );
 }
 
 void
