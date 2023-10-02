@@ -9,7 +9,7 @@ import {
   ArrowTrendingUpIcon,
   ArrowUpTrayIcon,
   Bars3Icon,
-  UserGroupIcon,
+  QuestionMarkCircleIcon,
   XMarkIcon,
   ArrowDownOnSquareIcon
 } from "@heroicons/react/24/outline";
@@ -34,6 +34,10 @@ const navigation = [
     icon: ArrowUpTrayIcon,
     activeName: "/dash/submit",
   },
+  {name:"FAQ",
+    href:"/dash/faq",
+  icon: QuestionMarkCircleIcon,
+  activeName: "/dash/faq"}
   // {
     // name: "Team Profile",
     // href: "#",
