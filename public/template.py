@@ -1,5 +1,24 @@
-def place_market_order(side: str, ticker: str, quantity: float, price: float) -> None:
-    """Place a market order - DO NOT MODIFY"""
+def place_market_order(side: str, ticker: str, quantity: float, price: float) -> bool:
+    """Place a market order - DO NOT MODIFY
+
+    Parameters
+    ----------
+    side
+        Side of order to place ("BUY" or "SELL")
+    ticker
+        Ticker of order to place ("A", "B", or "C")
+    quantity
+        Volume of order to place
+    price
+        Price of order to place
+
+    Returns
+    -------
+    True if order succeeded, False if order failed due to rate limiting
+
+    ((IMPORTANT))
+    You should handle the case where the order fails due to rate limiting (maybe wait and try again?)
+    """
 
 class Strategy:
     """Template for a strategy."""
@@ -13,9 +32,9 @@ class Strategy:
         Parameters
         ----------
         ticker
-            Ticker of orders that were matched
-        side
-
+            Ticker of orders that were matched ("A", "B", or "C")
+        side 
+            Side of orders that were matched ("BUY" or "SELL")
         price
             Price that trade was executed at
         quantity
@@ -31,9 +50,9 @@ class Strategy:
         Parameters
         ----------
         ticker
-            Ticker that has an orderbook update
+            Ticker that has an orderbook update ("A", "B", or "C")
         side
-            Which orderbook was updated
+            Which orderbook was updated ("BUY" or "SELL")
         price
             Price of orderbook that has an update
         quantity
@@ -54,9 +73,9 @@ class Strategy:
         Parameters
         ----------
         ticker
-            Ticker of order that was fulfilled
+            Ticker of order that was fulfilled ("A", "B", or "C")
         side
-            Side of order that was fulfilled
+            Side of order that was fulfilled ("BUY" or "SELL")
         price
             Price that order was fulfilled at
         quantity
