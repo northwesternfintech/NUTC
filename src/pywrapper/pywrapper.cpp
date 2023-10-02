@@ -5,8 +5,7 @@ namespace pywrapper {
 
 void
 create_api_module(
-    std::function<
-        bool(const std::string&, const std::string&, float, float)>
+    std::function<bool(const std::string&, const std::string&, float, float)>
         publish_market_order
 )
 {
@@ -20,10 +19,6 @@ create_api_module(
     sys_modules["nutc_api"] = m;
 
     py::exec(R"(import nutc_api)");
-    py::exec(R"(
-        def place_market_order(side, ticker, quantity, price):
-            nutc_api.publish_market_order(side, ticker, quantity, price)
-    )");
 }
 
 py::object
@@ -49,6 +44,10 @@ run_code_init(const std::string& py_code)
 {
     log_i(py_runtime, "Running code:\n{}", py_code);
     py::exec(py_code);
+    py::exec(R"(
+        def place_market_order(side, ticker, quantity, price):
+            nutc_api.publish_market_order(side, ticker, quantity, price)
+    )");
     py::exec("strat = Strategy()");
 }
 
