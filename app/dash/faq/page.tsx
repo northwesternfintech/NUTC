@@ -39,6 +39,11 @@ const faqs = [
       "As many as you want, but the last algorithm that passes linting will be the one to run in the contest",
   },
   {
+    question: "How does order matching work?",
+    answer:
+      "When a BUY order is submitted, if the SELL order with lowest asking price <= the BUY price, they will match.",
+  },
+  {
     question: "When is the deadline to submit algorithms?",
     answer: "11:59pm on 10/9.",
   },
