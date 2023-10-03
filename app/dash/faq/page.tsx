@@ -6,7 +6,7 @@ const faqs = [
   {
     question: "What is the Northwestern Trading Competition?",
     answer:
-      "A competition to design a stock trading algorithm that maximizes PnL (profit and loss) against other algorithms in the competition. In other words, you want your algorithm to buy and sell stocks in a way that maximizes the amount of money you end up with.",
+      "A competition to design a stock trading algorithm that maximizes PnL (profit and loss) against other algorithms in the competition. In other words, you want your algorithm to buy and sell stocks in a way that maximizes the amount of money you end up with. For NUFT recruitment, results will be heavily factored into recruitment decisions.",
   },
   {
     question: "How can I get started?",
