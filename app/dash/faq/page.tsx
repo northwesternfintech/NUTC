@@ -41,7 +41,7 @@ const faqs = [
   {
     question: "How does order matching work?",
     answer:
-      "When a BUY order is submitted, if the SELL order with lowest asking price <= the BUY price, they will match.",
+      "When a BUY order is submitted, if the SELL order with lowest asking price <= the BUY price, they will match (and vice versa for incoming SELL orders).",
   },
   {
     question: "When is the deadline to submit algorithms?",
@@ -51,6 +51,12 @@ const faqs = [
     question: "How are algorithms evaluated?",
     answer:
       "By the amount of capital they hold at the end of the competition (incl. value of held stocks)",
+  },
+  {
+    question:
+      "How does buying and selling at the beginning of the contest work if nobody holds stocks?",
+    answer:
+      "We provide simulated SELL orders at the beginning of the contest. You are not competing against these simulated sellers, they exist soleley to provide initial liquidity.",
   },
   {
     question: "What if I have other questions or have issues with the website?",
