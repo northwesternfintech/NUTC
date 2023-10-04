@@ -43,7 +43,7 @@ class Strategy:
         print(f"Python Trade update: {ticker} {side} {price} {quantity}")
 
     def on_orderbook_update(
-        self, ticker: str, side: str, price: float, quantity: bool
+        self, ticker: str, side: str, price: float, quantity: float
     ) -> None:
         """Called whenever the orderbook changes. This could be because of a trade, or because of a new order, or both.
 
