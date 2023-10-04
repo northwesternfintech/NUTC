@@ -23,6 +23,12 @@ const faqs = [
     answer:
       "You can place an order (BUY or SELL) at a given price/quantity for a given stock ticker. Importantly, it returns True if the order was placed, or False if it was not placed (due to you placing more than 30 orders in a minute). You may want to handle the case where you aren't able to place an order.",
   },
+  { question: "What's my starting capital?", answer: "100,000" },
+  {
+    question: "What libraries can I use?",
+    answer:
+      "Standard libraries (numpy, pandas, etc.) and tensorflow (but please dont use 32gb of ram 😃)",
+  },
   {
     question: "How can I do well in the competition?",
     answer:
@@ -67,7 +73,7 @@ const faqs = [
 
 export default function FAQs() {
   return (
-    <div className="bg-gray-900">
+    <div className="bg-gray-800">
       <div className="mx-auto max-w-7xl px-6 lg:px-8 pt-6 sm:pt-12 lg:pt-20 pb-12">
         <div className="mx-auto max-w-4xl divide-y divide-white/10">
           <h2 className="text-2xl font-bold leading-10 tracking-tight text-white">

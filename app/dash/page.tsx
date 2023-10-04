@@ -124,7 +124,7 @@ export default function Dashboard() {
 
   return (
     <div>
-      <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-6 border-b border-white/5 bg-gray-900 px-4 shadow-sm sm:px-6 lg:px-8">
+      <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-6 border-b border-white/5 bg-[#212936] px-4 shadow-sm sm:px-6 lg:px-8">
         <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
           <form className="flex flex-1" action="#" method="GET">
             <label htmlFor="search-field" className="sr-only">
@@ -146,7 +146,7 @@ export default function Dashboard() {
           </form>
         </div>
       </div>
-      <main className="lg:pr-0">
+      <main className="lg:pr-96">
         <header className="flex items-center justify-between border-b border-white/5 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
           <h1 className="text-base font-semibold leading-7 text-white">
             Submissions
@@ -271,7 +271,7 @@ export default function Dashboard() {
           ))}
         </ul>
       </main>
-      <aside className="hidden bg-black/10 lg:fixed lg:bottom-0 lg:right-0 lg:top-16 lg:w-96 lg:overflow-y-auto lg:border-l lg:border-white/5">
+      <aside className="bg-[#1B2230] lg:fixed lg:bottom-0 lg:right-0 lg:top-16 lg:w-96 lg:overflow-y-auto lg:border-l lg:border-white/5">
         <header className="flex items-center justify-between border-b border-white/5 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
           <h2 className="text-base font-semibold leading-7 text-white">
             Activity feed

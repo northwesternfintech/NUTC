@@ -119,7 +119,7 @@ export default function Dash(content: React.ReactNode) {
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <div className="fixed inset-0 bg-gray-900/80" />
+              <div className="fixed inset-0 bg-gray-700/80" />
             </Transition.Child>
 
             <div className="fixed inset-0 flex">
@@ -156,7 +156,7 @@ export default function Dash(content: React.ReactNode) {
                       </button>
                     </div>
                   </Transition.Child>
-                  <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 pb-2 ring-1 ring-white/10">
+                  <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-800 px-6 pb-2 ring-1 ring-white/10">
                     <div className="flex h-16 shrink-0 items-center">
                       <Image
                         width="32"
@@ -176,7 +176,7 @@ export default function Dash(content: React.ReactNode) {
                                   href={item.href}
                                   className={classNames(
                                     item.activeName === currentPage
-                                      ? "bg-gray-800 text-white"
+                                      ? "bg-gray-700 text-white"
                                       : "text-gray-400 hover:text-white hover:bg-gray-800",
                                     "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold",
                                   )}
@@ -207,7 +207,7 @@ export default function Dash(content: React.ReactNode) {
                                     "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold",
                                   )}
                                 >
-                                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium text-gray-400 group-hover:text-white">
+                                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-700 text-[0.625rem] font-medium text-gray-400 group-hover:text-white">
                                     {team.initial}
                                   </span>
                                   <span className="truncate">{team.name}</span>
@@ -229,7 +229,7 @@ export default function Dash(content: React.ReactNode) {
         <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
           <div
             className="flex grow flex-col gap-y-5 overflow-y-auto px-6"
-            style={{ backgroundColor: "rgb(14,19,31)" }}
+            style={{ backgroundColor: "#1B2230" }}
           >
             <div className="flex h-16 shrink-0 items-center">
               <Image
@@ -331,7 +331,7 @@ export default function Dash(content: React.ReactNode) {
           </a>
         </div>
 
-        <main className="bg-gray-900 lg:pl-72">
+        <main className="bg-[#212936] lg:pl-72">
           <div>{content}</div>
         </main>
       </div>
