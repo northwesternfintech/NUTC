@@ -8,7 +8,7 @@ export default function DashLayout({
   children: React.ReactNode;
 }) {
   return (
-    <section className="h-screen bg-[#212936]">
+    <section className="h-screen bg-gray-900">
       <RedirectOnAuth page="dash" />
       {Dash(children)}
     </section>
