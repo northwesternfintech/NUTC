@@ -18,7 +18,7 @@ RUN cmake --preset=ci-docker \
     && cmake --build build --config Release -j
 
 
-# Main stange
+# Main stage
 FROM python:3.11-slim
 
 RUN pip install numpy pandas polars scipy scikit-learn
