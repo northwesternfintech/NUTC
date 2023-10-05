@@ -1,17 +1,21 @@
 #build stage
 FROM python:3.11-slim as build
 
-RUN pip install conan \
-    && sudo apt update \
-    && sudo apt install -y --no-install-recommends build-essential libssl-dev
+RUN pip install conan numpy pandas polars scipy scikit-learn \
+    # c++ stuff
+    && apt update \
+    && apt install -y --no-install-recommends build-essential libssl-dev cmake git
 
 WORKDIR /app
-COPY . /app
+COPY ./conanfile.py /app/
+COPY ./.github/scripts/conan-profile.sh /app/
 
-RUN cat .github/scripts/conan-profile.sh | bash \
-    && conan install . -b missing \
-    && cmake --preset=ci-docker \
-    && cmake --build build --config Release -j 2
+RUN cat conan-profile.sh | bash \
+    && conan install . -b missing
+
+COPY . /app
+RUN cmake --preset=ci-docker \
+    && cmake --build build --config Release -j
 
 
 # Main stange
