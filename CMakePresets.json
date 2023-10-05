@@ -180,6 +180,10 @@
     {
       "name": "ci-windows",
       "inherits": ["ci-build", "ci-win64", "dev-mode", "conan"]
+    },
+    {
+      "name": "ci-docker",
+      "inherits": ["ci-build", "ci-linux", "conan"]
     }
   ]
 }
