@@ -69,10 +69,6 @@ jobs:
           Add-Content "$env:GITHUB_ENV" 'UseMultiToolTask=true'
           Add-Content "$env:GITHUB_ENV" 'EnforceProcessCountAcrossBuilds=true'
 
-      - name: Configure
-        shell: pwsh
-        run: cmake "--preset=ci-$("${{ matrix.os }}".split("-")[0])"
-
       - name: Create Dockerimage
         run: docker build -t nutc-linter:latest .
 
