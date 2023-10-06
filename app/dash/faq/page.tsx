@@ -19,6 +19,11 @@ const faqs = [
       "There are four main functions that allow you to interact with the exchange. place_market_order allows you to place orders for the exchange at a given price/quantity, and you can call this in any function (including __init__). on_orderbook_update is called when a new order is placed by another algorithm (BUY or SELL). on_trade_update is called when two orders match (one BUY, one SELL). This could be your order or two other orders. on_account_update is called when one of *your* orders matches with another order.",
   },
   {
+    question: "What does a zero-quantity order mean?",
+    answer:
+      "An order at the given price point was filled. This helps you to update your order book.",
+  },
+  {
     question: "How does place_market_order work?",
     answer:
       "You can place an order (BUY or SELL) at a given price/quantity for a given stock ticker. Importantly, it returns True if the order was placed, or False if it was not placed (due to you placing more than 30 orders in a minute). You may want to handle the case where you aren't able to place an order.",
@@ -26,8 +31,7 @@ const faqs = [
   { question: "What's my starting capital?", answer: "100,000" },
   {
     question: "What libraries can I use?",
-    answer:
-      "numpy, pandas, scipy, polars, and scikit-learn"
+    answer: "numpy, pandas, scipy, polars, and scikit-learn",
   },
   {
     question: "How can I do well in the competition?",
