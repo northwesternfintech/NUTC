@@ -27,7 +27,7 @@ const faqs = [
   {
     question: "What libraries can I use?",
     answer:
-      "Standard libraries (numpy, pandas, etc.) and tensorflow (but please dont use 32gb of ram 😃)",
+      "numpy, pandas, scipy, polars, and scikit-learn"
   },
   {
     question: "How can I do well in the competition?",
