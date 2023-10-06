@@ -36,6 +36,7 @@ jobs:
           gcloud auth configure-docker
 
       - name: Write GCP Service Account Key to File
+        run: mkdir "./.github/terraform"
         run: echo "$GCP_SA_KEY" > ./.github/terraform/gcp-sa-key.json
         env:
           GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
