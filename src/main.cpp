@@ -95,6 +95,7 @@ main(int argc, const char** argv)
             std::string uid = req.url_params.get("uid");
             std::string algo_id = req.url_params.get("algo_id");
             queue.push(std::make_pair(uid, algo_id));
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
             return crow::response();
         });
         app.port(8080).run();
