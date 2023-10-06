@@ -44,6 +44,7 @@ add_library(
     src/pywrapper/runtime.cpp
     src/mock_api/mock_api.cpp
     src/lint/lint.cpp
+    src/thread_safe_queue/tsq.cpp
     # Utils
     src/logging.cpp
 )

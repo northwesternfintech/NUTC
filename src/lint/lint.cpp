@@ -10,7 +10,6 @@ lint(const std::string& uid, const std::string& algo_id)
         return "Could not find algorithm";
     }
 
-    pybind11::scoped_interpreter guard{};
     bool e = nutc::pywrapper::create_api_module(nutc::mock_api::getMarketFunc());
     if (!e) {
         log_e(linting, "Failed to create API module");
