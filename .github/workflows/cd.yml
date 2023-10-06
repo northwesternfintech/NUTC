@@ -63,16 +63,6 @@ jobs:
         uses: actions/setup-python@v4
         with: { python-version: "3.11" }
 
-      - name: Install dependencies
-        shell: bash
-        run: |
-          pip3 install conan
-          
-          sudo apt install libssl-dev -y
-           
-          bash < .github/scripts/conan-profile.sh
-          conan install . -b missing
-
       - name: Setup MultiToolTask
         if: matrix.os == 'windows-2022'
         run: |
@@ -82,12 +72,6 @@ jobs:
       - name: Configure
         shell: pwsh
         run: cmake "--preset=ci-$("${{ matrix.os }}".split("-")[0])"
-
-      - name: Build
-        run: cmake --build build --config Release -j 2
-
-      - name: Install
-        run: cmake --install build --config Release --prefix prefix
 
       - name: Create Dockerimage
         run: docker build -t nutc-linter:latest .
