@@ -26,6 +26,7 @@ add_library(
     src/rabbitmq/rabbitmq.cpp
     src/matching/engine.cpp
     src/client_manager/manager.cpp
+    src/logger/logger.cpp
 )
 
 target_include_directories(
