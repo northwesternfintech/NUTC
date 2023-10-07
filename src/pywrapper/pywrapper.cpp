@@ -42,7 +42,7 @@ get_account_update_function()
 void
 run_code_init(const std::string& py_code)
 {
-    log_i(py_runtime, "Running code:\n{}", py_code);
+    // log_i(py_runtime, "Running code:\n{}", py_code);
     py::exec(py_code);
     py::exec(R"(
         def place_market_order(side, ticker, quantity, price):

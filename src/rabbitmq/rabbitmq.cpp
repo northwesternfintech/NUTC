@@ -281,7 +281,7 @@ RabbitMQ::publishInit(const std::string& uid, bool ready)
     std::string message = glz::write_json(InitMessage{uid, ready});
     log_i(rabbitmq, "Publishing init message: {}", message);
     bool rVal = publishMessage("market_order", message);
-    sleep(1);
+    sleep(5);
     return rVal;
 }
 
