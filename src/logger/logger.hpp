@@ -9,7 +9,7 @@
 namespace nutc {
 namespace logger_class {
 
-  enum MessageType {
+  enum MessageType { // needs to be changed to something better, but I will leave this here for now
     AccountUpdate,
     ObUpdate,
     TradeUpdate,
@@ -39,6 +39,13 @@ namespace logger_class {
        * @brief Destroy the Logger object and close the output file
        */
       ~Logger();
+
+      /**
+       * @brief Get the file name string
+       * 
+       * @return std::string 
+       */
+      std::string get_file_name();
 
     private:
       /**
