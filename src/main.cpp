@@ -87,7 +87,9 @@ main(int argc, const char** argv)
 
     int num_clients = nutc::client::initialize(users, dev_mode);
 
-    conn.addTicker("ETHUSD");
+    conn.addTicker("A");
+    conn.addTicker("B");
+    conn.addTicker("C");
 
     // Run exchange
     conn.waitForClients(num_clients);

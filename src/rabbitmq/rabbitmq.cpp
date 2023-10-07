@@ -292,20 +292,25 @@ RabbitMQ::waitForClients(int num_clients)
             log_e(rabbitmq, "Failed to consume message with error {}.", error);
             return;
         }
-        if (std::holds_alternative<MarketOrder>(data)) {
+        else if (std::holds_alternative<MarketOrder>(data)) {
             log_i(
                 rabbitmq,
                 "Received market order before initialization complete. Ignoring..."
             );
-            continue;
         }
-        InitMessage init = std::get<InitMessage>(data);
-        log_i(
-            rabbitmq, "Received init message from client {} with status {}",
-            init.client_uid, init.ready ? "ready" : "not ready"
-        );
-        if (init.ready) {
-            clients.setClientActive(init.client_uid);
+        else if (std::holds_alternative<InitMessage>(data)) {
+            InitMessage init = std::get<InitMessage>(data);
+            log_i(
+                rabbitmq, "Received init message from client {} with status {}",
+                init.client_uid, init.ready ? "ready" : "not ready"
+            );
+            if (init.ready) {
+                clients.setClientActive(init.client_uid);
+            }
+        }
+        else {
+            log_e(rabbitmq, "Unknown message type received.");
+            exit(1);
         }
     }
     log_i(rabbitmq, "All clients ready. Starting exchange");
