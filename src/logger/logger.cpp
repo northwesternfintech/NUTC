@@ -42,9 +42,9 @@ namespace nutc {
       this->output_file.close(); // close the logging file
     }
 
-    Logger::get_file_name()
+    std::string Logger::get_file_name()
     {
-      return this->file_name
+      return this->file_name;
     }
 
   } // namespace logger_class

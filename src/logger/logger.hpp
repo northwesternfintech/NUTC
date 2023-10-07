@@ -58,7 +58,7 @@ namespace logger_class {
        */
       std::ofstream output_file;
 
-  }
+  };
 
 } // namespace logger_class
 } // namespace nutc
