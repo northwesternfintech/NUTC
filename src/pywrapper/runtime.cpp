@@ -75,27 +75,64 @@ trigger_callbacks()
 {
     log_i(mock_runtime, "Triggering callbacks");
     try {
-        py::exec(R"(place_market_order("BUY", "ETHUSD", 1.0, 1.0))");
+        py::exec(R"(place_market_order("BUY", "A", 1.0, 1.0))");
     } catch (const std::exception& e) {
         return fmt::format("Failed to run place_market_order: {}", e.what());
     }
 
     try {
-        py::exec(R"(strategy.on_orderbook_update("ETHUSD","BUY",1.0,1.0))");
+        py::exec(R"(strategy.on_orderbook_update("A","BUY",1.0,1.0))");
     } catch (const std::exception& e) {
         return fmt::format("Failed to run on_orderbook_update: {}", e.what());
     }
     try {
-        py::exec(R"(strategy.on_trade_update("ETHUSD","BUY",1.0,1.0))");
+        py::exec(R"(strategy.on_trade_update("A","BUY",1.0,1.0))");
     } catch (const std::exception& e) {
         return fmt::format("Failed to run on_trade_update: {}", e.what());
     }
 
     try {
-        py::exec(R"(strategy.on_account_update("ETHUSD","BUY",1.0,1.0,1.0))");
+        py::exec(R"(strategy.on_account_update("A","BUY",1.0,1.0,1.0))");
     } catch (const std::exception& e) {
         return fmt::format("Failed to run on_account_update: {}", e.what());
     }
+
+    try {
+        py::exec(R"(strategy.on_orderbook_update("B","BUY",1.0,1.0))");
+    } catch (const std::exception& e) {
+        return fmt::format("Failed to run on_orderbook_update: {}", e.what());
+    }
+    try {
+        py::exec(R"(strategy.on_trade_update("B","BUY",1.0,1.0))");
+    } catch (const std::exception& e) {
+        return fmt::format("Failed to run on_trade_update: {}", e.what());
+    }
+
+    try {
+        py::exec(R"(strategy.on_account_update("B","BUY",1.0,1.0,1.0))");
+    } catch (const std::exception& e) {
+        return fmt::format("Failed to run on_account_update: {}", e.what());
+    }
+
+      try {
+        py::exec(R"(strategy.on_orderbook_update("C","BUY",1.0,1.0))");
+    } catch (const std::exception& e) {
+        return fmt::format("Failed to run on_orderbook_update: {}", e.what());
+    }
+    try {
+        py::exec(R"(strategy.on_trade_update("C","BUY",1.0,1.0))");
+    } catch (const std::exception& e) {
+        return fmt::format("Failed to run on_trade_update: {}", e.what());
+    }
+
+    try {
+        py::exec(R"(strategy.on_account_update("C","BUY",1.0,1.0,1.0))");
+    } catch (const std::exception& e) {
+        return fmt::format("Failed to run on_account_update: {}", e.what());
+    }
+
+
+  
 
     return std::nullopt;
 }
