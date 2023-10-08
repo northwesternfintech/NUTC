@@ -9,6 +9,12 @@ RabbitMQ::RabbitMQ(manager::ClientManager& manager) : clients(manager)
     connected = initializeConnection();
 }
 
+void
+RabbitMQ::addLiquidityToTicker(const std::string& ticker, float quantity, float price)
+{
+    engine_manager.add_initial_liquidity(ticker, quantity, price);
+}
+
 RabbitMQ::~RabbitMQ()
 {
     closeConnection();

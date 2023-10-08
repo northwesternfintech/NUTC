@@ -7,10 +7,7 @@
 namespace nutc {
 namespace matching {
 
-Engine::Engine()
-{
-    // pass
-}
+Engine::Engine() {}
 
 void
 Engine::add_order_without_matching(MarketOrder order)
@@ -136,7 +133,7 @@ Engine::attempt_matches(
             passive_orders.push(passive_order);
             add_ob_update(result.ob_updates, passive_order, passive_order.quantity);
         }
-        //cannot match anymore
+        // cannot match anymore
         if (isCloseToZero(aggressive_order.quantity)) {
             return result;
         }

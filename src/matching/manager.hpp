@@ -33,6 +33,11 @@ public:
      */
     void addEngine(const std::string& ticker);
 
+    /** @brief Adds initial liquidity by creating fake sell orders for a given ticker at
+     * a given quantity/price
+     */
+    void add_initial_liquidity(const std::string& ticker, float quantity, float price);
+
 private:
     std::map<std::string, matching::Engine> engines;
 };

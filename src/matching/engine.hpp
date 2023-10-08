@@ -41,13 +41,16 @@ public:
     MatchResult
     match_order(MarketOrder& aggressive_order, const manager::ClientManager& manager);
 
+    void add_order_without_matching(MarketOrder aggressive_order);
+
     Engine(); // con
 
 private:
-  float getMatchQuantity(const MarketOrder& passive_order, const MarketOrder& aggressive_order);
+    float getMatchQuantity(
+        const MarketOrder& passive_order, const MarketOrder& aggressive_order
+    );
     std::priority_queue<MarketOrder>& get_passive_orders(messages::SIDE side);
 
-    void add_order_without_matching(MarketOrder aggressive_order);
     MatchResult attempt_matches(
         std::priority_queue<MarketOrder>& passive_orders, MarketOrder& aggressive_order,
         const manager::ClientManager& manager

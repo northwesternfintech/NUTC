@@ -58,6 +58,7 @@ public:
      * @brief Adds a ticker to the encapsulated engine manager
      * */
     void addTicker(const std::string& ticker);
+    void addLiquidityToTicker(const std::string& ticker, float quantity, float price);
 
     /**
      * @brief On startup, waits for all clients to send an initialization message

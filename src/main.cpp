@@ -90,6 +90,9 @@ main(int argc, const char** argv)
     conn.addTicker("A");
     conn.addTicker("B");
     conn.addTicker("C");
+    conn.addLiquidityToTicker("A", 100, 100);
+    conn.addLiquidityToTicker("B", 100, 100);
+    conn.addLiquidityToTicker("C", 100, 100);
 
     // Run exchange
     conn.waitForClients(num_clients);
