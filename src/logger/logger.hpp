@@ -47,10 +47,7 @@ namespace logger_class {
        */
       explicit Logger(
         std::string file_name
-      ) : file_name(file_name)
-      {
-        this->output_file.open(this->file_name, std::ios::out | std::ios::app); // open the logging file
-      }
+      ) : file_name(file_name), output_file(file_name, std::ios::out | std::ios::app) {}
 
       /**
        * @brief Get the file name string
