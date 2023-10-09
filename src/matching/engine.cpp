@@ -96,9 +96,17 @@ Engine::attempt_matches(
     const manager::ClientManager& manager
 )
 {
+    if (!passive_orders.empty() && !passive_orders.top().can_match(aggressive_order)) {
+        log_i(
+            main, "Cannot match orders: {} {} {}", passive_orders.top().price,
+            aggressive_order.price,
+            aggressive_order.side == messages::SIDE::BUY ? "BUY" : "SELL"
+        );
+    }
     MatchResult result;
     while (passive_orders.size() > 0 && passive_orders.top().can_match(aggressive_order)
     ) {
+        std::cout << "MATCHING!!!\n";
         MarketOrder passive_order = passive_orders.top();
         float quantity_to_match = getMatchQuantity(passive_order, aggressive_order);
         float price_to_match = passive_order.price;

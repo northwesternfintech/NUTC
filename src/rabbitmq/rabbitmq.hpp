@@ -73,6 +73,8 @@ public:
      */
     bool connectedToRMQ();
 
+    void sendInitialLiquidity();
+
 private:
     amqp_connection_state_t conn;
     manager::ClientManager& clients;

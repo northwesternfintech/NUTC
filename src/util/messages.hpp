@@ -2,6 +2,8 @@
 
 #include <glaze/glaze.hpp>
 
+#include <iostream>
+
 namespace nutc {
 
 /**
@@ -66,10 +68,10 @@ struct MarketOrder {
         // assuming both sides are same
         // otherwise, this shouldn't even be called
         if (this->side == BUY) {
-            return this->price > other.price;
+            return this->price < other.price;
         }
         else {
-            return this->price < other.price;
+            return this->price > other.price;
         }
     }
 
@@ -122,13 +124,7 @@ template <>
 struct glz::meta<nutc::messages::ObUpdate> {
     using T = nutc::messages::ObUpdate;
     static constexpr auto value = object(
-        "security",
-        &T::security,
-        "side",
-        &T::side,
-        "price",
-        &T::price,
-        "quantity",
+        "security", &T::security, "side", &T::side, "price", &T::price, "quantity",
         &T::quantity
     );
 };
@@ -138,16 +134,8 @@ template <>
 struct glz::meta<nutc::messages::AccountUpdate> {
     using T = nutc::messages::AccountUpdate;
     static constexpr auto value = object(
-        "capital_remaining",
-        &T::capital_remaining,
-        "ticker",
-        &T::ticker,
-        "side",
-        &T::side,
-        "price",
-        &T::price,
-        "quantity",
-        &T::quantity
+        "capital_remaining", &T::capital_remaining, "ticker", &T::ticker, "side",
+        &T::side, "price", &T::price, "quantity", &T::quantity
     );
 };
 
@@ -156,18 +144,8 @@ template <>
 struct glz::meta<nutc::messages::Match> {
     using T = nutc::messages::Match;
     static constexpr auto value = object(
-        "ticker",
-        &T::ticker,
-        "buyer_uid",
-        &T::buyer_uid,
-        "seller_uid",
-        &T::seller_uid,
-        "side",
-        &T::side,
-        "price",
-        &T::price,
-        "quantity",
-        &T::quantity
+        "ticker", &T::ticker, "buyer_uid", &T::buyer_uid, "seller_uid", &T::seller_uid,
+        "side", &T::side, "price", &T::price, "quantity", &T::quantity
     );
 };
 
@@ -183,18 +161,8 @@ template <>
 struct glz::meta<nutc::messages::MarketOrder> {
     using T = nutc::messages::MarketOrder;
     static constexpr auto value = object(
-        "client_uid",
-        &T::client_uid,
-        "side",
-        &T::side,
-        "type",
-        &T::type,
-        "ticker",
-        &T::ticker,
-        "quantity",
-        &T::quantity,
-        "price",
-        &T::price
+        "client_uid", &T::client_uid, "side", &T::side, "type", &T::type, "ticker",
+        &T::ticker, "quantity", &T::quantity, "price", &T::price
     );
 };
 

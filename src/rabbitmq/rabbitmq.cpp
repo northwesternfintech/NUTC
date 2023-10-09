@@ -13,6 +13,10 @@ void
 RabbitMQ::addLiquidityToTicker(const std::string& ticker, float quantity, float price)
 {
     engine_manager.add_initial_liquidity(ticker, quantity, price);
+    ObUpdate update{ticker, messages::SIDE::SELL, price, quantity};
+    std::vector<ObUpdate> vec{};
+    vec.push_back(update);
+    broadcastObUpdates(vec, "");
 }
 
 RabbitMQ::~RabbitMQ()
@@ -88,6 +92,10 @@ RabbitMQ::initializeConsume(const std::string& queueName)
 
     return true;
 }
+
+// void RabbitMQ::sendInitialLiquidity() {
+// super hacky, will rewrite nutc soon. this is just to have something
+// }
 
 void
 RabbitMQ::handleIncomingMessages()
@@ -291,6 +299,7 @@ RabbitMQ::consumeMessage()
 void
 RabbitMQ::waitForClients(int num_clients)
 {
+  int num_running = 0;
     for (int i = 0; i < num_clients; i++) {
         std::variant<InitMessage, MarketOrder, RMQError> data = consumeMessage();
         if (std::holds_alternative<RMQError>(data)) {
@@ -312,6 +321,7 @@ RabbitMQ::waitForClients(int num_clients)
             );
             if (init.ready) {
                 clients.setClientActive(init.client_uid);
+        num_running++;
             }
         }
         else {
@@ -319,7 +329,7 @@ RabbitMQ::waitForClients(int num_clients)
             exit(1);
         }
     }
-    log_i(rabbitmq, "All clients ready. Starting exchange");
+    log_i(rabbitmq, "All {} clients ready. Starting exchange with {} ready clients", num_clients, num_running);
 }
 
 bool

@@ -13,8 +13,7 @@ Manager::getEngine(const std::string& ticker)
     }
 }
 
-void
-Manager::add_initial_liquidity(const std::string& ticker, float quantity, float price)
+void Manager::add_initial_liquidity(const std::string& ticker, float quantity, float price)
 {
     MarketOrder to_add{"SIMULATED", messages::SIDE::SELL, "MARKET", ticker, quantity,
                        price};

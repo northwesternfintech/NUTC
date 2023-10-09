@@ -38,6 +38,7 @@ public:
      */
     void add_initial_liquidity(const std::string& ticker, float quantity, float price);
 
+
 private:
     std::map<std::string, matching::Engine> engines;
 };

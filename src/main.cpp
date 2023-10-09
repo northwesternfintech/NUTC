@@ -59,6 +59,7 @@ void
 handle_sigint(int sig)
 {
     log_i(rabbitmq, "Caught SIGINT, closing connection");
+    users.printResults();
     sleep(1);
     exit(sig);
 }
@@ -90,12 +91,12 @@ main(int argc, const char** argv)
     conn.addTicker("A");
     conn.addTicker("B");
     conn.addTicker("C");
-    conn.addLiquidityToTicker("A", 100, 100);
-    conn.addLiquidityToTicker("B", 100, 100);
-    conn.addLiquidityToTicker("C", 100, 100);
 
     // Run exchange
     conn.waitForClients(num_clients);
+    conn.addLiquidityToTicker("A", 100, 1);
+    conn.addLiquidityToTicker("B", 100, 1);
+    conn.addLiquidityToTicker("C", 100, 1);
     conn.handleIncomingMessages();
 
     return 0;

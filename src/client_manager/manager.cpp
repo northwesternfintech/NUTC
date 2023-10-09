@@ -3,6 +3,17 @@
 namespace nutc {
 namespace manager {
 
+void
+ClientManager::printResults()
+{
+    for (const auto& pair : clients) {
+        if (!pair.second.active) {
+            continue;
+        }
+        std::cout << pair.first << " " << pair.second.capital_remaining << std::endl;
+    }
+}
+
 std::optional<messages::SIDE>
 ClientManager::validateMatch(const messages::Match& match) const
 {

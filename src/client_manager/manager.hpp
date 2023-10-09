@@ -6,6 +6,7 @@
 #include <glaze/glaze.hpp>
 
 #include <optional>
+#include <iostream>
 #include <string>
 #include <unordered_map>
 
@@ -31,6 +32,7 @@ public:
     float getCapital(const std::string& uid) const;
     std::vector<Client> getClients(bool active) const;
     std::optional<messages::SIDE> validateMatch(const messages::Match& match) const;
+    void printResults();
 
 private:
     std::unordered_map<std::string, Client> clients;
