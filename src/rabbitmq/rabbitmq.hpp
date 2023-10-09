@@ -83,7 +83,7 @@ private:
     bool logAndReturnError(const char* errorMessage);
     bool initializeConnection();
     void closeConnection();
-    std::string consumeMessageAsString();
+    std::optional<std::string> consumeMessageAsString();
     bool publishMessage(const std::string& queueName, const std::string& message);
     std::variant<InitMessage, MarketOrder, RMQError> consumeMessage();
     bool initializeQueue(const std::string& queueName);

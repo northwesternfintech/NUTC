@@ -100,25 +100,28 @@ RabbitMQ::initializeConsume(const std::string& queueName)
 void
 RabbitMQ::handleIncomingMessages()
 {
-    // need condition for closing
-    while (true) {
-        std::variant<InitMessage, MarketOrder, RMQError> incoming_message =
-            consumeMessage();
-        bool is_init = std::holds_alternative<InitMessage>(incoming_message);
-        bool is_mo = std::holds_alternative<MarketOrder>(incoming_message);
-        bool is_error = std::holds_alternative<RMQError>(incoming_message);
-        if (is_init) [[unlikely]] {
-            log_e(rabbitmq, "Not expecting initialization message");
-            exit(1);
-        }
-        if (is_error) [[unlikely]] {
-            RMQError err = std::get<RMQError>(incoming_message);
-            log_e(rabbitmq, "Received RMQError: {}", err.message);
-        }
-        if (is_mo) [[likely]] {
-            MarketOrder mo = std::get<MarketOrder>(incoming_message);
-            handleIncomingMarketOrder(mo);
-        }
+    bool keepRunning = true;
+
+    while (keepRunning) {
+        auto incoming_message = consumeMessage();
+
+        // Use std::visit to deal with the variant
+        std::visit(
+            [&](auto&& arg) {
+                using T = std::decay_t<decltype(arg)>;
+                if constexpr (std::is_same_v<T, InitMessage>) {
+                    log_e(rabbitmq, "Not expecting initialization message");
+                    exit(1);
+                }
+                else if constexpr (std::is_same_v<T, RMQError>) {
+                    log_e(rabbitmq, "Received RMQError: {}", arg.message);
+                }
+                else if constexpr (std::is_same_v<T, MarketOrder>) {
+                    handleIncomingMarketOrder(arg);
+                }
+            },
+            incoming_message
+        );
     }
 }
 
@@ -209,57 +212,63 @@ RabbitMQ::broadcastObUpdates(
     const std::vector<ObUpdate>& updates, const std::string& ignore_uid
 )
 {
-    for (auto& [uid, active, capital_remaining] : clients.getClients(true)) {
-        if (uid == ignore_uid) {
-            continue;
+    auto broadcastToClient = [&](const auto& client) {
+        if (client.uid == ignore_uid) {
+            return;
         }
-        for (auto& update : updates) {
-            // todo: eliminate for loop
+        const auto& [uid, active, capital_remaining] = client;
+        for (const auto& update : updates) {
             std::string buffer;
             glz::write<glz::opts{}>(update, buffer);
             publishMessage(uid, buffer);
         }
-    }
+    };
+
+    const auto activeClients = clients.getClients(true);
+    std::for_each(activeClients.begin(), activeClients.end(), broadcastToClient);
 }
 
 void
 RabbitMQ::broadcastMatches(const std::vector<Match>& matches)
 {
-    for (auto& [uid, active, capital_remaining] : clients.getClients(true)) {
-        for (auto& match : matches) {
-            // todo: eliminate for loop
+    auto broadcastToClient = [&](const auto& client) {
+        const auto& [uid, active, capital_remaining] = client;
+        for (const auto& match : matches) {
             std::string buffer;
             glz::write<glz::opts{}>(match, buffer);
             publishMessage(uid, buffer);
-        };
+        }
     };
+
+    const auto activeClients = clients.getClients(true);
+    std::for_each(activeClients.begin(), activeClients.end(), broadcastToClient);
 }
 
 bool
 RabbitMQ::publishMessage(const std::string& queueName, const std::string& message)
 {
-    amqp_rpc_reply_t res = amqp_get_rpc_reply(conn);
-    if (res.reply_type != AMQP_RESPONSE_NORMAL) {
-        log_e(rabbitmq, "Failed to declare queue.");
+    auto checkReply = [&](amqp_rpc_reply_t reply, const char* errorMsg) -> bool {
+        if (reply.reply_type != AMQP_RESPONSE_NORMAL) {
+            log_e(rabbitmq, "{}", errorMsg);
+            return false;
+        }
+        return true;
+    };
+
+    if (!checkReply(amqp_get_rpc_reply(conn), "Failed to declare queue.")) {
         return false;
     }
 
     amqp_basic_publish(
         conn, 1, amqp_cstring_bytes(""), amqp_cstring_bytes(queueName.c_str()), 0, 0,
-        NULL, amqp_cstring_bytes(message.c_str())
+        nullptr, amqp_cstring_bytes(message.c_str())
     );
 
-    res = amqp_get_rpc_reply(conn);
-    if (res.reply_type != AMQP_RESPONSE_NORMAL) {
-        log_e(rabbitmq, "Failed to publish message.");
-        return false;
-    }
-
-    return true;
+    return checkReply(amqp_get_rpc_reply(conn), "Failed to publish message.");
 }
 
 // Blocking
-std::string
+std::optional<std::string>
 RabbitMQ::consumeMessageAsString()
 {
     amqp_envelope_t envelope;
@@ -268,7 +277,7 @@ RabbitMQ::consumeMessageAsString()
 
     if (res.reply_type != AMQP_RESPONSE_NORMAL) {
         log_e(rabbitmq, "Failed to consume message.");
-        return "";
+        return std::nullopt;
     }
 
     std::string message(
@@ -281,55 +290,62 @@ RabbitMQ::consumeMessageAsString()
 std::variant<InitMessage, MarketOrder, RMQError>
 RabbitMQ::consumeMessage()
 {
-    std::string buf = consumeMessageAsString();
-    if (buf == "") {
+    std::optional<std::string> buf = consumeMessageAsString();
+    if (!buf.has_value()) {
         return RMQError{"Failed to consume message."};
     }
 
-    std::variant<InitMessage, MarketOrder, RMQError> data{};
-    auto err = glz::read_json(data, buf);
+    std::variant<InitMessage, MarketOrder, RMQError> data;
+    auto err = glz::read_json(data, buf.value());
     if (err) {
-        std::string error = glz::format_error(err, buf);
-        return RMQError{error};
+        return RMQError{glz::format_error(err, buf.value())};
     }
     return data;
 }
 
-// todo: find way to prevent clients from starting until all are ready
 void
 RabbitMQ::waitForClients(int num_clients)
 {
-  int num_running = 0;
-    for (int i = 0; i < num_clients; i++) {
-        std::variant<InitMessage, MarketOrder, RMQError> data = consumeMessage();
-        if (std::holds_alternative<RMQError>(data)) {
-            std::string error = std::get<RMQError>(data).message;
-            log_e(rabbitmq, "Failed to consume message with error {}.", error);
-            return;
+    int num_running = 0;
+
+    auto processMessage = [&](const auto& message) {
+        using T = std::decay_t<decltype(message)>;
+        if constexpr (std::is_same_v<T, RMQError>) {
+            log_e(
+                rabbitmq, "Failed to consume message with error {}.", message.message
+            );
+            return false;
         }
-        else if (std::holds_alternative<MarketOrder>(data)) {
+        else if constexpr (std::is_same_v<T, MarketOrder>) {
             log_i(
                 rabbitmq,
                 "Received market order before initialization complete. Ignoring..."
             );
         }
-        else if (std::holds_alternative<InitMessage>(data)) {
-            InitMessage init = std::get<InitMessage>(data);
+        else if constexpr (std::is_same_v<T, InitMessage>) {
             log_i(
                 rabbitmq, "Received init message from client {} with status {}",
-                init.client_uid, init.ready ? "ready" : "not ready"
+                message.client_uid, message.ready ? "ready" : "not ready"
             );
-            if (init.ready) {
-                clients.setClientActive(init.client_uid);
-        num_running++;
+            if (message.ready) {
+                clients.setClientActive(message.client_uid);
+                num_running++;
             }
         }
-        else {
-            log_e(rabbitmq, "Unknown message type received.");
-            exit(1);
+        return true; // indicate that function should continue
+    };
+
+    for (int i = 0; i < num_clients; i++) {
+        auto data = consumeMessage();
+        if (!std::visit(processMessage, data)) {
+            return;
         }
     }
-    log_i(rabbitmq, "All {} clients ready. Starting exchange with {} ready clients", num_clients, num_running);
+
+    log_i(
+        rabbitmq, "All {} clients ready. Starting exchange with {} ready clients",
+        num_clients, num_running
+    );
 }
 
 bool
@@ -354,12 +370,21 @@ RabbitMQ::initializeConnection()
 void
 RabbitMQ::closeConnection()
 {
-    for (auto& [uid, active, capital_remaining] : clients.getClients(true)) {
+    // Handle client shutdown
+    auto shutdownClient = [&](const auto& client) {
+        auto& [uid, active, capital_remaining] = client;
         log_i(rabbitmq, "Shutting down client {}", uid);
         ShutdownMessage shutdown{uid};
-        std::string mess = glz::write_json(shutdown);
-        publishMessage(uid, mess);
+        auto messageStr = glz::write_json(shutdown);
+        publishMessage(uid, messageStr);
+    };
+
+    // Iterate over clients and shut them down
+    for (const auto& client : clients.getClients(true)) {
+        shutdownClient(client);
     }
+
+    // Close channel and connection, then destroy connection
     amqp_channel_close(conn, 1, AMQP_REPLY_SUCCESS);
     amqp_connection_close(conn, AMQP_REPLY_SUCCESS);
     amqp_destroy_connection(conn);
