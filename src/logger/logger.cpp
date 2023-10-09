@@ -20,14 +20,14 @@ Logger::log_event(
   }
   
   // Write MessageType, JSON message, and optional UID to file
-  output_file << "Type: " << static_cast<int>(type) << ", ";
-  output_file << "Message: " << json_message;
+  output_file << "{ \"type\": " << static_cast<int>(type) << ", ";
+  output_file << "\"message\": " << json_message;
   
   if (uid.has_value()) {
-    output_file << ", UID: " << uid.value();
+    output_file << ", \"uid\": " << uid.value();
   }
 
-  output_file << std::endl;
+  output_file << " }" << std::endl;
 }
 
 } // namespace logger_class
