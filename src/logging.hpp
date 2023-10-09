@@ -81,6 +81,7 @@ CREATE_LOG_CATEGORY(firebase_fetching);
 CREATE_LOG_CATEGORY(client_spawning);
 CREATE_LOG_CATEGORY(rabbitmq);
 CREATE_LOG_CATEGORY(dev_mode);
+CREATE_LOG_CATEGORY(events);
 
 #undef CREATE_LOG_CATEGORY
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)

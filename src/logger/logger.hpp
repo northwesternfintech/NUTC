@@ -5,6 +5,7 @@
 #include <optional>
 
 #include "util/messages.hpp" // TYPE should be an enum {AccountUpdate, OrderbookUpdate, TradeUpdate, MarketOrder}
+#include "logging.hpp"
 
 namespace nutc {
 namespace logger_class {

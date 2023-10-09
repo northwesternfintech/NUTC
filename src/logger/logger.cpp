@@ -15,7 +15,7 @@ Logger::log_event(
   // useful information. Right now it spits out information.
   bool output_file_closed = !output_file.is_open();
   if (output_file_closed) {
-    std::cerr << "File " << this->get_file_name() << " not open. Unable to log event." << std::endl;
+    log_e(events, "Output file {} not open, unable to log event", get_file_name());
     return;
   }
   
