@@ -2,6 +2,7 @@
 #include "logger.hpp" // includes fstream, string, optional
 
 namespace nutc {
+namespace events {
 namespace logger_class {
 
 void
@@ -31,4 +32,5 @@ Logger::log_event(
 }
 
 } // namespace logger_class
+} // namespace events
 } // namespace nutc
