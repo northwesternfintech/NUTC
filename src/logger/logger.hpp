@@ -8,7 +8,7 @@
 #include "logging.hpp"
 
 namespace nutc {
-namespace logger_class {
+namespace events {
 
   enum class MessageType { // needs to be changed to something better, but I will leave this here for now
     ACCOUNT_UPDATE,
@@ -19,18 +19,26 @@ namespace logger_class {
 
   class Logger {
 
-    private:
-      /**
-       * @brief The file name to log events to
-       */
-      std::string file_name;
+    /**
+     * @brief The file name to log events to
+     */
+    std::string file_name_;
 
-      /**
-       * @brief The output file object
-       */
-      std::ofstream output_file;
+    /**
+     * @brief The output file object
+     */
+    std::ofstream output_file_;
 
     public:
+      /**
+       * @brief Construct a new Logger object
+       * 
+       * @param file_name File name to log to
+       */
+      explicit Logger(
+        std::string file_name
+      ) : file_name_(file_name), output_file_(file_name, std::ios::out | std::ios::app) {}
+
       /**
        * @brief Log an event to this Logger's file
        * 
@@ -41,25 +49,16 @@ namespace logger_class {
       void log_event(MessageType type, const std::string& json_message, const std::optional<std::string>& uid);
 
       /**
-       * @brief Construct a new Logger object
-       * 
-       * @param file_name File name to log to
-       */
-      explicit Logger(
-        std::string file_name
-      ) : file_name(file_name), output_file(file_name, std::ios::out | std::ios::app) {}
-
-      /**
        * @brief Get the file name string
        * 
        * @return std::string 
        */
       [[nodiscard]] const std::string& get_file_name() const
       {
-        return file_name;
+        return file_name_;
       }
 
   };
 
-} // namespace logger_class
+} // namespace events
 } // namespace nutc
