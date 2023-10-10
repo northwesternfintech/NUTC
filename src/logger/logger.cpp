@@ -22,8 +22,7 @@ Logger::log_event(
     const std::optional<std::string>& uid
 )
 {
-    // TODO: Need to fix this to have better formatting and more
-    // useful information. Right now it spits out information.
+    // If file is not open, throw an error to the error logger
     if (!output_file_.is_open()) [[unlikely]] {
         log_e(events, "Output file {} not open, unable to log event", get_file_name());
         return;
