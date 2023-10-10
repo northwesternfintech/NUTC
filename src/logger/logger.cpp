@@ -1,5 +1,13 @@
 #include "logger.hpp" // includes fstream, string, optional
 
+// GCC >= 13.2 supports std::chrono::utc_clock
+// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=104167
+#if defined(__GNUC__) \
+    && (__GNUC__ > 13 \
+        || (__GNUC__ == 13 && __GNUC_MINOR__ >= 2))
+#define FMT_USE_UTC_TIME 1
+#endif
+
 #include <fmt/chrono.h>
 #include <fmt/format.h>
 
@@ -22,12 +30,13 @@ Logger::log_event(
     log_e(events, "Output file {} not open, unable to log event", get_file_name());
     return;
   }
+
+  // Write start of JSON
+  std::cout << "{ ";
   
   // Write current GMT time
-  const auto now = std::chrono::system_clock::now(); // get current time
-  std::time_t now_t = std::chrono::system_clock::to_time_t(now); // convert to a time_t type
-  std::tm* now_tm = std::gmtime(&now_t); // convert to GMT time
-  output_file_ << "{ \"time\": \"" << fmt::format("{:%Y-%m-%dT%H:%M:%S}Z", *now_tm) << "\", "; // TODO: I do not know if this works.
+  const auto now = std::chrono::utc_clock::now();
+  std::cout << fmt::format("\"time\": \"{:%FT%TZ}\", ", now);
 
   // Add MessageType and JSON message (and opt UID) to file
   output_file_ << "\"type\": " << static_cast<int>(type) << ", "; // add type
