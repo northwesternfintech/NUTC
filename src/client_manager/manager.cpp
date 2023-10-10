@@ -3,6 +3,33 @@
 namespace nutc {
 namespace manager {
 
+float
+ClientManager::getHoldings(const std::string& uid, const std::string& ticker) const
+{
+    if (clients.find(uid) == clients.end()) {
+        return 0;
+    }
+    if (clients.at(uid).holdings.find(ticker) == clients.at(uid).holdings.end()) {
+        return 0;
+    }
+    return clients.at(uid).holdings.at(ticker);
+}
+
+float
+ClientManager::modifyHoldings(
+    const std::string& uid, const std::string& ticker, float change_in_holdings
+)
+{
+    if (clients.find(uid) == clients.end()) {
+        return 0;
+    }
+    if (clients[uid].holdings.find(ticker) == clients[uid].holdings.end()) {
+        clients[uid].holdings[ticker] = 0;
+    }
+    clients[uid].holdings[ticker] += change_in_holdings;
+    return clients[uid].holdings[ticker];
+}
+
 void
 ClientManager::printResults()
 {
@@ -21,7 +48,9 @@ ClientManager::validateMatch(const messages::Match& match) const
     if (getCapital(match.buyer_uid) - trade_value < 0) {
         return messages::SIDE::BUY;
     }
-    // TODO: holdings check
+    if (match.seller_uid!="SIMULATED" && getHoldings(match.seller_uid, match.ticker) - match.quantity < 0) {
+        return messages::SIDE::SELL;
+    }
     return std::nullopt;
 }
 
@@ -39,7 +68,8 @@ ClientManager::addClient(const std::string& uid)
     if (clients.find(uid) != clients.end()) {
         return;
     }
-    clients[uid] = Client{uid, false, STARTING_CAPITAL};
+    clients[uid] =
+        Client{uid, false, STARTING_CAPITAL, std::unordered_map<std::string, float>()};
 }
 
 float

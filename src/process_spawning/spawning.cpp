@@ -44,7 +44,8 @@ int
 spawn_all_clients(const nutc::manager::ClientManager& users, bool development_mode)
 {
     int clients = 0;
-    for (const auto& [uid, user, capital_remaining] : users.getClients(false)) {
+    for (const auto& client : users.getClients(false)) {
+      const std::string uid = client.uid;
         log_i(client_spawning, "Spawning client: {}", uid);
         std::string quote_uid = std::string(uid);
         std::replace(quote_uid.begin(), quote_uid.end(), '-', ' ');

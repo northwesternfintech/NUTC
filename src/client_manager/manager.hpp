@@ -5,8 +5,8 @@
 
 #include <glaze/glaze.hpp>
 
-#include <optional>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <unordered_map>
 
@@ -21,6 +21,7 @@ struct Client {
     std::string uid;
     bool active;
     float capital_remaining;
+    std::unordered_map<std::string, float> holdings;
 };
 
 class ClientManager {
@@ -30,6 +31,10 @@ public:
     void initialize_from_firebase(const glz::json_t::object_t& users);
     float modifyCapital(const std::string& uid, float change_in_capital);
     float getCapital(const std::string& uid) const;
+    float getHoldings(const std::string& uid, const std::string& ticker) const;
+    float modifyHoldings(
+        const std::string& uid, const std::string& ticker, float change_in_holdings
+    );
     std::vector<Client> getClients(bool active) const;
     std::optional<messages::SIDE> validateMatch(const messages::Match& match) const;
     void printResults();

@@ -164,6 +164,10 @@ RabbitMQ::handleIncomingMarketOrder(MarketOrder& order)
         float capital_exchanged = match.price * match.quantity;
         clients.modifyCapital(buyer_uid, -capital_exchanged);
         clients.modifyCapital(seller_uid, capital_exchanged);
+        clients.modifyHoldings(buyer_uid, match.ticker, match.quantity);
+        if (seller_uid != "SIMULATED") {
+            clients.modifyHoldings(seller_uid, match.ticker, -match.quantity);
+        }
         broadcastAccountUpdate(match);
         log_i(
             matching, "Matched order with price {} and quantity {}", match.price,
@@ -216,14 +220,13 @@ RabbitMQ::broadcastObUpdates(
         if (client.uid == ignore_uid) {
             return;
         }
-        const auto& [uid, active, capital_remaining] = client;
         for (const auto& update : updates) {
             // if (update.quantity <= 1e-6f) {
-                // continue;
+            // continue;
             // }
             std::string buffer;
             glz::write<glz::opts{}>(update, buffer);
-            publishMessage(uid, buffer);
+            publishMessage(client.uid, buffer);
         }
     };
 
@@ -235,11 +238,10 @@ void
 RabbitMQ::broadcastMatches(const std::vector<Match>& matches)
 {
     auto broadcastToClient = [&](const auto& client) {
-        const auto& [uid, active, capital_remaining] = client;
         for (const auto& match : matches) {
             std::string buffer;
             glz::write<glz::opts{}>(match, buffer);
-            publishMessage(uid, buffer);
+            publishMessage(client.uid, buffer);
         }
     };
 
@@ -375,11 +377,10 @@ RabbitMQ::closeConnection()
 {
     // Handle client shutdown
     auto shutdownClient = [&](const auto& client) {
-        auto& [uid, active, capital_remaining] = client;
-        log_i(rabbitmq, "Shutting down client {}", uid);
-        ShutdownMessage shutdown{uid};
+        log_i(rabbitmq, "Shutting down client {}", client.uid);
+        ShutdownMessage shutdown{client.uid};
         auto messageStr = glz::write_json(shutdown);
-        publishMessage(uid, messageStr);
+        publishMessage(client.uid, messageStr);
     };
 
     // Iterate over clients and shut them down

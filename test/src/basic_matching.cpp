@@ -16,6 +16,8 @@ protected:
     {
         manager.addClient("ABC");
         manager.addClient("DEF");
+        manager.modifyHoldings("ABC", "ETHUSD", 1000);
+        manager.modifyHoldings("DEF", "ETHUSD", 1000);
     }
 
     ClientManager manager;
