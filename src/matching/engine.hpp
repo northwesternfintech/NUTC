@@ -39,7 +39,7 @@ public:
      * orderbook updates
      */
     MatchResult
-    match_order(MarketOrder& aggressive_order, const manager::ClientManager& manager);
+    match_order(MarketOrder& aggressive_order, manager::ClientManager& manager);
 
     void add_order_without_matching(MarketOrder aggressive_order);
 
@@ -53,7 +53,7 @@ private:
 
     MatchResult attempt_matches(
         std::priority_queue<MarketOrder>& passive_orders, MarketOrder& aggressive_order,
-        const manager::ClientManager& manager
+        manager::ClientManager& manager
     );
 };
 } // namespace matching

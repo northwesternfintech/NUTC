@@ -94,9 +94,9 @@ main(int argc, const char** argv)
 
     // Run exchange
     conn.waitForClients(num_clients);
-    conn.addLiquidityToTicker("A", 100, 1);
-    conn.addLiquidityToTicker("B", 100, 1);
-    conn.addLiquidityToTicker("C", 100, 1);
+    conn.addLiquidityToTicker("A", 10000, 1);
+    conn.addLiquidityToTicker("B", 10000, 1);
+    conn.addLiquidityToTicker("C", 10000, 1);
     conn.handleIncomingMessages();
 
     return 0;

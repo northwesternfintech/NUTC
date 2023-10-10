@@ -161,13 +161,13 @@ RabbitMQ::handleIncomingMarketOrder(MarketOrder& order)
     for (const auto& match : matches) {
         std::string buyer_uid = match.buyer_uid;
         std::string seller_uid = match.seller_uid;
-        float capital_exchanged = match.price * match.quantity;
-        clients.modifyCapital(buyer_uid, -capital_exchanged);
-        clients.modifyCapital(seller_uid, capital_exchanged);
-        clients.modifyHoldings(buyer_uid, match.ticker, match.quantity);
-        if (seller_uid != "SIMULATED") {
-            clients.modifyHoldings(seller_uid, match.ticker, -match.quantity);
-        }
+        // float capital_exchanged = match.price * match.quantity;
+        // clients.modifyCapital(buyer_uid, -capital_exchanged);
+        // clients.modifyCapital(seller_uid, capital_exchanged);
+        // clients.modifyHoldings(buyer_uid, match.ticker, match.quantity);
+        // if (seller_uid != "SIMULATED") {
+            // clients.modifyHoldings(seller_uid, match.ticker, -match.quantity);
+        // }
         broadcastAccountUpdate(match);
         log_i(
             matching, "Matched order with price {} and quantity {}", match.price,
@@ -221,9 +221,9 @@ RabbitMQ::broadcastObUpdates(
             return;
         }
         for (const auto& update : updates) {
-            // if (update.quantity <= 1e-6f) {
-            // continue;
-            // }
+            if (update.quantity <= 1e-6f) {
+            continue;
+            }
             std::string buffer;
             glz::write<glz::opts{}>(update, buffer);
             publishMessage(client.uid, buffer);

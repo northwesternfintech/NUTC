@@ -59,7 +59,7 @@ cannot_match_passive(
 }
 
 MatchResult
-Engine::match_order(MarketOrder& order, const manager::ClientManager& manager)
+Engine::match_order(MarketOrder& order, manager::ClientManager& manager)
 {
     MatchResult result;
 
@@ -93,14 +93,13 @@ Engine::getMatchQuantity(
 MatchResult
 Engine::attempt_matches(
     std::priority_queue<MarketOrder>& passive_orders, MarketOrder& aggressive_order,
-    const manager::ClientManager& manager
+    manager::ClientManager& manager
 )
 {
     MatchResult result;
 
     while (passive_orders.size() > 0 && passive_orders.top().can_match(aggressive_order)
     ) {
-        std::cout << "MATCHING!!!\n";
         MarketOrder passive_order = passive_orders.top();
         float quantity_to_match = getMatchQuantity(passive_order, aggressive_order);
         float price_to_match = passive_order.price;
@@ -131,6 +130,34 @@ Engine::attempt_matches(
         result.matches.push_back(toMatch);
         passive_order.quantity -= quantity_to_match;
         aggressive_order.quantity -= quantity_to_match;
+        if (passive_order.side == messages::SIDE::SELL) {
+            manager.modifyCapital(
+                passive_order.client_uid, quantity_to_match * price_to_match
+            );
+            manager.modifyCapital(
+                aggressive_order.client_uid, -quantity_to_match * price_to_match
+            );
+            manager.modifyHoldings(
+                aggressive_order.client_uid, aggressive_order.ticker, quantity_to_match
+            );
+            manager.modifyHoldings(
+                passive_order.client_uid, passive_order.ticker, -quantity_to_match
+            );
+        }
+        else {
+            manager.modifyCapital(
+                passive_order.client_uid, -quantity_to_match * price_to_match
+            );
+            manager.modifyCapital(
+                aggressive_order.client_uid, quantity_to_match * price_to_match
+            );
+            manager.modifyHoldings(
+                aggressive_order.client_uid, aggressive_order.ticker, -quantity_to_match
+            );
+            manager.modifyHoldings(
+                passive_order.client_uid, passive_order.ticker, quantity_to_match
+            );
+        }
         if (!isCloseToZero(passive_order.quantity)) {
             passive_orders.push(passive_order);
             add_ob_update(result.ob_updates, passive_order, passive_order.quantity);
