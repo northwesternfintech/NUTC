@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glaze/glaze.hpp>
+#include <fmt/format.h>
 
 #include <iostream>
 
@@ -61,6 +62,18 @@ struct MarketOrder {
     std::string ticker;
     float quantity;
     float price;
+
+    // toString
+    std::string
+    to_string() const
+    {
+        std::string side_str = side == BUY ? "BUY" : "SELL";
+        return fmt::format(
+            "MarketOrder(client_uid={}, side={}, type={}, ticker={}, quantity={}, "
+            "price={})",
+            client_uid, side_str, type, ticker, quantity, price
+        );
+    }
 
     bool
     operator<(const MarketOrder& other) const

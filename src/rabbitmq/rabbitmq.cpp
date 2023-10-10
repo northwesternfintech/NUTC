@@ -218,6 +218,9 @@ RabbitMQ::broadcastObUpdates(
         }
         const auto& [uid, active, capital_remaining] = client;
         for (const auto& update : updates) {
+            // if (update.quantity <= 1e-6f) {
+                // continue;
+            // }
             std::string buffer;
             glz::write<glz::opts{}>(update, buffer);
             publishMessage(uid, buffer);

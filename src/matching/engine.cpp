@@ -97,6 +97,7 @@ Engine::attempt_matches(
 )
 {
     MatchResult result;
+
     while (passive_orders.size() > 0 && passive_orders.top().can_match(aggressive_order)
     ) {
         std::cout << "MATCHING!!!\n";
