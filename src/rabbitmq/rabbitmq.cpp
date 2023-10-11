@@ -4,7 +4,11 @@
 
 namespace nutc {
 namespace rabbitmq {
-RabbitMQ::RabbitMQ(manager::ClientManager& manager) : clients(manager)
+RabbitMQ::RabbitMQ(
+    manager::ClientManager& manager, engine_manager::Manager& matching_manager
+) :
+    clients(manager),
+    engine_manager(matching_manager)
 {
     connected = initializeConnection();
 }
@@ -166,7 +170,7 @@ RabbitMQ::handleIncomingMarketOrder(MarketOrder& order)
         // clients.modifyCapital(seller_uid, capital_exchanged);
         // clients.modifyHoldings(buyer_uid, match.ticker, match.quantity);
         // if (seller_uid != "SIMULATED") {
-            // clients.modifyHoldings(seller_uid, match.ticker, -match.quantity);
+        // clients.modifyHoldings(seller_uid, match.ticker, -match.quantity);
         // }
         broadcastAccountUpdate(match);
         log_i(
@@ -221,9 +225,9 @@ RabbitMQ::broadcastObUpdates(
             return;
         }
         for (const auto& update : updates) {
-            if (update.quantity <= 1e-6f) {
-            continue;
-            }
+            // if (update.quantity <= 1e-6f) {
+            // continue;
+            // }
             std::string buffer;
             glz::write<glz::opts{}>(update, buffer);
             publishMessage(client.uid, buffer);

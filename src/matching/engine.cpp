@@ -9,6 +9,12 @@ namespace matching {
 
 Engine::Engine() {}
 
+float
+Engine::get_last_sell_price()
+{
+    return last_sell_price;
+}
+
 void
 Engine::add_order_without_matching(MarketOrder order)
 {
@@ -124,6 +130,7 @@ Engine::attempt_matches(
                 continue;
             }
         }
+        last_sell_price = price_to_match;
         passive_orders.pop();
 
         add_ob_update(result.ob_updates, passive_order, 0);

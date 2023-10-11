@@ -40,12 +40,14 @@ public:
      */
     MatchResult
     match_order(MarketOrder& aggressive_order, manager::ClientManager& manager);
+    float get_last_sell_price();
 
     void add_order_without_matching(MarketOrder aggressive_order);
 
     Engine(); // con
 
 private:
+    float last_sell_price{};
     float getMatchQuantity(
         const MarketOrder& passive_order, const MarketOrder& aggressive_order
     );

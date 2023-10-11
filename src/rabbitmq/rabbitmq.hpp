@@ -39,7 +39,7 @@ public:
      *
      * @param manager The ClientManager to use for client management
      */
-    RabbitMQ(manager::ClientManager& manager);
+    RabbitMQ(manager::ClientManager& manager, engine_manager::Manager& matching_manager);
 
     /**
      * @brief Disconnects from RabbitMQ (RAII)
@@ -78,7 +78,7 @@ public:
 private:
     amqp_connection_state_t conn;
     manager::ClientManager& clients;
-    engine_manager::Manager engine_manager;
+    engine_manager::Manager& engine_manager;
     bool connected;
     bool logAndReturnError(const char* errorMessage);
     bool initializeConnection();

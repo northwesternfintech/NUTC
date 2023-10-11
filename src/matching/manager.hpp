@@ -38,6 +38,8 @@ public:
      */
     void add_initial_liquidity(const std::string& ticker, float quantity, float price);
 
+    float get_last_sell_price(const std::string& ticker);
+    void printResults(manager::ClientManager& manager);
 
 private:
     std::map<std::string, matching::Engine> engines;
