@@ -1,11 +1,5 @@
 #include "logger.hpp" // includes fstream, string, optional
 
-// GCC >= 13.2 supports std::chrono::utc_clock
-// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=104167
-#if defined(__GNUC__) && (__GNUC__ > 13 || (__GNUC__ == 13 && __GNUC_MINOR__ >= 2))
-#  define FMT_USE_UTC_TIME 1
-#endif
-
 #include <fmt/chrono.h>
 #include <fmt/format.h>
 
@@ -32,7 +26,7 @@ Logger::log_event(
     std::cout << "{ ";
 
     // Write current GMT time
-    const auto now = std::chrono::utc_clock::now();
+    const auto now = std::chrono::system_clock::now();
     std::cout << fmt::format("\"time\": \"{:%FT%TZ}\", ", now);
 
     // Add MessageType and JSON message (and opt UID) to file
