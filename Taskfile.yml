@@ -1,0 +1,71 @@
+version: '3'
+
+env:
+  NAME: NUTC
+
+#todo: task will not work if alias is go-task. Maybe try to fix?
+
+tasks:
+  init-default-user-presets:
+    cmds:
+      - cp config/DefaultCMakeUserPresets.json exchange/CMakeUserPresets.json
+      - cp config/DefaultCMakeUserPresets.json client/CMakeUserPresets.json
+      - cp config/DefaultCMakeUserPresets.json linter/CMakeUserPresets.json
+
+  init-exchange:
+    dir: ./exchange
+    deps: [init-default-user-presets]
+    preconditions: 
+      - sh: command -v conan >/dev/null 2>&1 || exit 1
+        msg: "Conan is not installed"
+    cmds:
+      - task deps
+      - task init
+      - task build
+
+  init-client:
+    dir: ./client
+    deps: [init-default-user-presets]
+    preconditions: 
+      - sh: command -v conan >/dev/null 2>&1 || exit 1
+        msg: "Conan is not installed"
+    cmds:
+      - task deps
+      - task init
+      - task build
+
+  init-linter:
+    dir: ./linter
+    deps: [init-default-user-presets]
+    preconditions: 
+      - sh: command -v conan >/dev/null 2>&1 || exit 1
+        msg: "Conan is not installed"
+    cmds:
+      - task deps
+      - task init
+      - task build
+
+  init-analyzer:
+    dir: ./analyzer
+    cmds:
+      - task setup
+      - task build
+
+  init-web:
+    dir: ./web
+    preconditions: 
+      - sh: command -v bun >/dev/null 2>&1 || exit 1
+        msg: "Bun is not installed"
+    cmds:
+      - bun install
+      - bun run build
+
+  # listing tasks as deps makes them run in parallel
+  init-all:
+    deps: 
+      - task: init-exchange
+      - task: init-client
+      - task: init-linter
+    cmds:
+      - task: init-analyzer
+      - task: init-web
