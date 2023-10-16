@@ -39,7 +39,7 @@ public:
      *
      * @param manager The ClientManager to use for client management
      */
-    RabbitMQ(manager::ClientManager& manager);
+    RabbitMQ(manager::ClientManager& manager, engine_manager::Manager& matching_manager);
 
     /**
      * @brief Disconnects from RabbitMQ (RAII)
@@ -58,6 +58,7 @@ public:
      * @brief Adds a ticker to the encapsulated engine manager
      * */
     void addTicker(const std::string& ticker);
+    void addLiquidityToTicker(const std::string& ticker, float quantity, float price);
 
     /**
      * @brief On startup, waits for all clients to send an initialization message
@@ -72,15 +73,17 @@ public:
      */
     bool connectedToRMQ();
 
+    void sendInitialLiquidity();
+
 private:
     amqp_connection_state_t conn;
     manager::ClientManager& clients;
-    engine_manager::Manager engine_manager;
+    engine_manager::Manager& engine_manager;
     bool connected;
     bool logAndReturnError(const char* errorMessage);
     bool initializeConnection();
     void closeConnection();
-    std::string consumeMessageAsString();
+    std::optional<std::string> consumeMessageAsString();
     bool publishMessage(const std::string& queueName, const std::string& message);
     std::variant<InitMessage, MarketOrder, RMQError> consumeMessage();
     bool initializeQueue(const std::string& queueName);

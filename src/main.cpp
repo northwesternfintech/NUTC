@@ -18,7 +18,8 @@
 namespace rmq = nutc::rabbitmq;
 
 nutc::manager::ClientManager users;
-rmq::RabbitMQ conn(users);
+nutc::engine_manager::Manager engine_manager;
+rmq::RabbitMQ conn(users, engine_manager);
 
 static std::tuple<bool>
 process_arguments(int argc, const char** argv)
@@ -59,6 +60,7 @@ void
 handle_sigint(int sig)
 {
     log_i(rabbitmq, "Caught SIGINT, closing connection");
+    engine_manager.printResults(users);
     sleep(1);
     exit(sig);
 }
@@ -87,10 +89,15 @@ main(int argc, const char** argv)
 
     int num_clients = nutc::client::initialize(users, dev_mode);
 
-    conn.addTicker("ETHUSD");
+    conn.addTicker("A");
+    conn.addTicker("B");
+    conn.addTicker("C");
 
     // Run exchange
     conn.waitForClients(num_clients);
+    conn.addLiquidityToTicker("A", 1000, 100);
+    conn.addLiquidityToTicker("B", 2000, 200);
+    conn.addLiquidityToTicker("C", 3000, 300);
     conn.handleIncomingMessages();
 
     return 0;

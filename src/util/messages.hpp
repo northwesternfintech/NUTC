@@ -1,6 +1,9 @@
 #pragma once
 
 #include <glaze/glaze.hpp>
+#include <fmt/format.h>
+
+#include <iostream>
 
 namespace nutc {
 
@@ -49,6 +52,8 @@ struct Match {
 
 /**
  * @brief Sent by clients to the exchange to place an order
+ * TODO: client_uid=="SIMULATED" indicates simulated order with no actual
+ * owner, but this is improper. Instead, it should be an optional
  */
 struct MarketOrder {
     std::string client_uid;
@@ -58,16 +63,28 @@ struct MarketOrder {
     float quantity;
     float price;
 
+    // toString
+    std::string
+    to_string() const
+    {
+        std::string side_str = side == BUY ? "BUY" : "SELL";
+        return fmt::format(
+            "MarketOrder(client_uid={}, side={}, type={}, ticker={}, quantity={}, "
+            "price={})",
+            client_uid, side_str, type, ticker, quantity, price
+        );
+    }
+
     bool
     operator<(const MarketOrder& other) const
     {
         // assuming both sides are same
         // otherwise, this shouldn't even be called
         if (this->side == BUY) {
-            return this->price > other.price;
+            return this->price < other.price;
         }
         else {
-            return this->price < other.price;
+            return this->price > other.price;
         }
     }
 
@@ -120,13 +137,7 @@ template <>
 struct glz::meta<nutc::messages::ObUpdate> {
     using T = nutc::messages::ObUpdate;
     static constexpr auto value = object(
-        "security",
-        &T::security,
-        "side",
-        &T::side,
-        "price",
-        &T::price,
-        "quantity",
+        "security", &T::security, "side", &T::side, "price", &T::price, "quantity",
         &T::quantity
     );
 };
@@ -136,16 +147,8 @@ template <>
 struct glz::meta<nutc::messages::AccountUpdate> {
     using T = nutc::messages::AccountUpdate;
     static constexpr auto value = object(
-        "capital_remaining",
-        &T::capital_remaining,
-        "ticker",
-        &T::ticker,
-        "side",
-        &T::side,
-        "price",
-        &T::price,
-        "quantity",
-        &T::quantity
+        "capital_remaining", &T::capital_remaining, "ticker", &T::ticker, "side",
+        &T::side, "price", &T::price, "quantity", &T::quantity
     );
 };
 
@@ -154,18 +157,8 @@ template <>
 struct glz::meta<nutc::messages::Match> {
     using T = nutc::messages::Match;
     static constexpr auto value = object(
-        "ticker",
-        &T::ticker,
-        "buyer_uid",
-        &T::buyer_uid,
-        "seller_uid",
-        &T::seller_uid,
-        "side",
-        &T::side,
-        "price",
-        &T::price,
-        "quantity",
-        &T::quantity
+        "ticker", &T::ticker, "buyer_uid", &T::buyer_uid, "seller_uid", &T::seller_uid,
+        "side", &T::side, "price", &T::price, "quantity", &T::quantity
     );
 };
 
@@ -181,18 +174,8 @@ template <>
 struct glz::meta<nutc::messages::MarketOrder> {
     using T = nutc::messages::MarketOrder;
     static constexpr auto value = object(
-        "client_uid",
-        &T::client_uid,
-        "side",
-        &T::side,
-        "type",
-        &T::type,
-        "ticker",
-        &T::ticker,
-        "quantity",
-        &T::quantity,
-        "price",
-        &T::price
+        "client_uid", &T::client_uid, "side", &T::side, "type", &T::type, "ticker",
+        &T::ticker, "quantity", &T::quantity, "price", &T::price
     );
 };
 

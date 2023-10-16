@@ -16,6 +16,8 @@ protected:
     {
         manager.addClient("ABC");
         manager.addClient("DEF");
+        manager.modifyHoldings("ABC", "ETHUSD", 1000);
+        manager.modifyHoldings("DEF", "ETHUSD", 1000);
     }
 
     ClientManager manager;
@@ -36,6 +38,35 @@ TEST_F(BasicMatching, SimpleMatch)
     EXPECT_EQ(ob_updates2.size(), 1);
     EXPECT_EQ_OB_UPDATE(ob_updates2.at(0), "ETHUSD", BUY, 1, 0);
     EXPECT_EQ_MATCH(matches2.at(0), "ETHUSD", "ABC", "DEF", SELL, 1, 1);
+}
+
+TEST_F(BasicMatching, NoMatchThenMatchBuy)
+{
+    MarketOrder order1{"ABC", SELL, "MARKET", "ETHUSD", 1, 1000};
+    MarketOrder order2{"DEF", SELL, "MARKET", "ETHUSD", 1, 1};
+    MarketOrder order3{"DEF", BUY, "MARKET", "ETHUSD", 1, 2};
+    auto [matches, ob_updates] = engine.match_order(order1, manager);
+    auto [matches2, ob_updates2] = engine.match_order(order2, manager);
+    auto [matches3, ob_updates3] = engine.match_order(order3, manager);
+    EXPECT_EQ(matches.size(), 0);
+    EXPECT_EQ(matches2.size(), 0);
+    EXPECT_EQ(matches3.size(), 1);
+}
+
+TEST_F(BasicMatching, NoMatchThenMatchSell)
+{
+    MarketOrder order1{"ABC", BUY, "MARKET", "ETHUSD", 1, 1};
+    MarketOrder order2{"DEF", BUY, "MARKET", "ETHUSD", 1, 1000};
+
+    MarketOrder order3{"DEF", SELL, "MARKET", "ETHUSD", 1, 500};
+    auto [matches, ob_updates] = engine.match_order(order1, manager);
+    auto [matches2, ob_updates2] = engine.match_order(order2, manager);
+    auto [matches3, ob_updates3] = engine.match_order(order1, manager);
+    auto [matches4, ob_updates4] = engine.match_order(order3, manager);
+    EXPECT_EQ(matches.size(), 0);
+    EXPECT_EQ(matches2.size(), 0);
+    EXPECT_EQ(matches3.size(), 0);
+    EXPECT_EQ(matches4.size(), 1);
 }
 
 TEST_F(BasicMatching, PassivePriceMatch)
