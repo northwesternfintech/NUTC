@@ -63,10 +63,9 @@ tasks:
 
   # listing tasks as deps makes them run in parallel
   init-all:
-    deps: 
+    cmds:
       - task: init-exchange
       - task: init-wrapper
       - task: init-linter
-    cmds:
       - task: init-analyzer
       - task: init-web
