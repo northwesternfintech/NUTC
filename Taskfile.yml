@@ -58,6 +58,7 @@ tasks:
         msg: "Bun is not installed"
     cmds:
       - bun install
+      - cd functions && bun install && cd ..
       - bun run build
 
   # listing tasks as deps makes them run in parallel
