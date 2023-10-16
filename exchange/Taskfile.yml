@@ -1,0 +1,71 @@
+version: '3'
+
+env:
+  NAME: NUTC24
+
+tasks:
+  deps:
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - conan install . -s build_type=Debug -b missing -pr cpp20 -pr:b cpp20
+    
+  init:
+    dir: '{{.USER_WORKING_DIR}}'
+    preconditions:
+      - test -f CMakeUserPresets.json
+    cmds:
+      - cmake --preset=dev
+
+  check-and-start-services:
+    cmds:
+      # - ./scripts/check_redis.sh
+      - ./scripts/check_rabbitmq.sh
+
+  build:
+    dir: '{{.USER_WORKING_DIR}}'
+    preconditions:
+      - test -f CMakeUserPresets.json
+    cmds:
+      - cmake --build --preset=dev
+
+  run:
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - task: build
+      - task: check-and-start-services
+      - ./build/dev/{{.NAME}}
+
+  dev:
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - task: build
+      - task: check-and-start-services
+      - ./build/dev/{{.NAME}} --dev
+
+
+  run-v:
+    env:
+      SPDLOG_LEVEL: trace
+    cmds:
+      - task: run
+
+  test:
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - task: build
+      - ctest --preset=dev
+
+  docs:
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - cmake --build --preset=dev -t docs
+      - cmake --build --preset=dev -t docs-serve
+
+  clean:
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - cmake --build --preset=dev -t clean
+
+  default:
+    cmds:
+      - task: run

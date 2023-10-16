@@ -1,0 +1,48 @@
+#pragma once
+#include "matching/engine.hpp"
+
+#include <optional>
+#include <string>
+
+using Engine = nutc::matching::Engine;
+
+namespace nutc {
+/**
+ * @brief Manages all matching engines for arbitrary tickers
+ */
+namespace engine_manager {
+/**
+ * @class Manager
+ * @brief Manages all matching engines for arbitrary tickers
+ * @details This class is responsible for creating and managing all matching engines for
+ * different tickers
+ */
+class Manager {
+public:
+    /**
+     * @brief Returns a reference to the engine with the given ticker, if it exists
+     * @param ticker The ticker of the engine to return
+     * @return A reference to the engine with the given ticker, if it exists
+     */
+    std::optional<std::reference_wrapper<Engine>> getEngine(const std::string& ticker);
+
+    /**
+     * @brief Adds an engine with the given ticker
+     * @param ticker The ticker of the engine to add
+     * @return A reference to the engine with the given ticker
+     */
+    void addEngine(const std::string& ticker);
+
+    /** @brief Adds initial liquidity by creating fake sell orders for a given ticker at
+     * a given quantity/price
+     */
+    void addInitialLiquidity(const std::string& ticker, float quantity, float price);
+
+    float get_last_sell_price(const std::string& ticker);
+    void printResults(manager::ClientManager& manager);
+
+private:
+    std::map<std::string, matching::Engine> engines;
+};
+} // namespace engine_manager
+} // namespace nutc
