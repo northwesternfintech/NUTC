@@ -9,7 +9,7 @@ tasks:
   init-default-user-presets:
     cmds:
       - cp config/DefaultCMakeUserPresets.json exchange/CMakeUserPresets.json
-      - cp config/DefaultCMakeUserPresets.json client/CMakeUserPresets.json
+      - cp config/DefaultCMakeUserPresets.json wrapper/CMakeUserPresets.json
       - cp config/DefaultCMakeUserPresets.json linter/CMakeUserPresets.json
 
   init-exchange:
@@ -23,8 +23,8 @@ tasks:
       - task init
       - task build
 
-  init-client:
-    dir: ./client
+  init-wrapper:
+    dir: ./wrapper
     deps: [init-default-user-presets]
     preconditions: 
       - sh: command -v conan >/dev/null 2>&1 || exit 1
@@ -65,7 +65,7 @@ tasks:
   init-all:
     deps: 
       - task: init-exchange
-      - task: init-client
+      - task: init-wrapper
       - task: init-linter
     cmds:
       - task: init-analyzer
