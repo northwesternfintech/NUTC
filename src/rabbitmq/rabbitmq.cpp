@@ -16,7 +16,7 @@ RabbitMQ::RabbitMQ(
 void
 RabbitMQ::addLiquidityToTicker(const std::string& ticker, float quantity, float price)
 {
-    engine_manager.add_initial_liquidity(ticker, quantity, price);
+    engine_manager.addInitialLiquidity(ticker, quantity, price);
     ObUpdate update{ticker, messages::SIDE::SELL, price, quantity};
     std::vector<ObUpdate> vec{};
     vec.push_back(update);

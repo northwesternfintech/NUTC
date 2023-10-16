@@ -18,15 +18,15 @@ Manager::printResults(manager::ClientManager& manager)
 {
     for (const auto& client : manager.getClients(true)) {
         float cap_remaining = client.capital_remaining;
-        // for (const auto& holding : client.holdings) {
-            // cap_remaining += holding.second * get_last_sell_price(holding.first);
-        // }
+        for (const auto& holding : client.holdings) {
+            cap_remaining += holding.second * get_last_sell_price(holding.first);
+        }
         std::cout << client.uid << " " << cap_remaining << std::endl;
     }
 }
 
 void
-Manager::add_initial_liquidity(const std::string& ticker, float quantity, float price)
+Manager::addInitialLiquidity(const std::string& ticker, float quantity, float price)
 {
     MarketOrder to_add{"SIMULATED", messages::SIDE::SELL, "MARKET", ticker, quantity,
                        price};

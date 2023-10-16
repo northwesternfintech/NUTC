@@ -36,7 +36,7 @@ public:
     /** @brief Adds initial liquidity by creating fake sell orders for a given ticker at
      * a given quantity/price
      */
-    void add_initial_liquidity(const std::string& ticker, float quantity, float price);
+    void addInitialLiquidity(const std::string& ticker, float quantity, float price);
 
     float get_last_sell_price(const std::string& ticker);
     void printResults(manager::ClientManager& manager);
