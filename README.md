@@ -27,6 +27,5 @@ To initialize and build all repos, follow the steps below
 - `conan profile detect`
 - Copy `.conan2/profiles/default` to `.conan2/profiles/cpp20` 
 - Change compiler.cppstd from gnu14 to gnu20
-- Change compiler.version from 8 to 13
-- The above changes may vary by OS
+- Change compiler.version from 8 to 13 on Linux, or to 16 on Mac
 2. `task init-all`
