@@ -84,7 +84,7 @@ public:
      * @returns A function that takes the order parameters and publishes the order
      */
     std::function<
-        bool(const std::string&, const std::string&, const std::string&, float, float)>
+        bool(const std::string&, const std::string&, float, float)>
     getMarketFunc(const std::string& uid);
 
     /**
