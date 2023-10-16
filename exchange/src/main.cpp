@@ -1,4 +1,4 @@
-#include "client_manager/manager.hpp"
+#include "client_manager/client_manager.hpp"
 #include "config.h"
 #include "dev_mode/dev_mode.hpp"
 #include "firebase/firebase.hpp"

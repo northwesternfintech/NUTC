@@ -19,13 +19,13 @@ add_library(
     NUTC24_lib OBJECT
     src/lib.cpp
     src/dev_mode/dev_mode.cpp
-    src/matching/manager.cpp
+    src/matching/engine_manager.cpp
     src/logging.cpp
     src/firebase/firebase.cpp
     src/process_spawning/spawning.cpp
     src/rabbitmq/rabbitmq.cpp
     src/matching/engine.cpp
-    src/client_manager/manager.cpp
+    src/client_manager/client_manager.cpp
     src/logger/logger.cpp
 )
 

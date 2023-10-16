@@ -1,6 +1,6 @@
 #pragma once
 
-#include "client_manager/manager.hpp"
+#include "client_manager/client_manager.hpp"
 #include "config.h"
 #include "logging.hpp"
 
