@@ -11,14 +11,14 @@ protected:
     void
     SetUp() override
     {
-        manager.addClient("A");
-        manager.addClient("B");
-        manager.addClient("C");
-        manager.addClient("D");
-        manager.modifyHoldings("A", "ETHUSD", 1000);
-        manager.modifyHoldings("B", "ETHUSD", 1000);
-        manager.modifyHoldings("C", "ETHUSD", 1000);
-        manager.modifyHoldings("D", "ETHUSD", 1000);
+        manager.add_client("A");
+        manager.add_client("B");
+        manager.add_client("C");
+        manager.add_client("D");
+        manager.modify_holdings("A", "ETHUSD", 1000);
+        manager.modify_holdings("B", "ETHUSD", 1000);
+        manager.modify_holdings("C", "ETHUSD", 1000);
+        manager.modify_holdings("D", "ETHUSD", 1000);
     }
 
     ClientManager manager;

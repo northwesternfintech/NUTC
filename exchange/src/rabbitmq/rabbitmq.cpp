@@ -199,11 +199,11 @@ RabbitMQ::broadcastAccountUpdate(const Match& match)
     std::string buyer_uid = match.buyer_uid;
     std::string seller_uid = match.seller_uid;
     AccountUpdate buyer_update = {
-        clients.getCapital(match.buyer_uid), match.ticker, messages::SIDE::BUY,
+        clients.get_capital(match.buyer_uid), match.ticker, messages::SIDE::BUY,
         match.price, match.quantity
     };
     AccountUpdate seller_update = {
-        clients.getCapital(match.seller_uid), match.ticker, messages::SIDE::SELL,
+        clients.get_capital(match.seller_uid), match.ticker, messages::SIDE::SELL,
         match.price, match.quantity
     };
 
@@ -234,7 +234,7 @@ RabbitMQ::broadcastObUpdates(
         }
     };
 
-    const auto activeClients = clients.getClients(true);
+    const auto activeClients = clients.get_clients(true);
     std::for_each(activeClients.begin(), activeClients.end(), broadcastToClient);
 }
 
@@ -249,7 +249,7 @@ RabbitMQ::broadcastMatches(const std::vector<Match>& matches)
         }
     };
 
-    const auto activeClients = clients.getClients(true);
+    const auto activeClients = clients.get_clients(true);
     std::for_each(activeClients.begin(), activeClients.end(), broadcastToClient);
 }
 
@@ -337,7 +337,7 @@ RabbitMQ::waitForClients(int num_clients)
                 message.client_uid, message.ready ? "ready" : "not ready"
             );
             if (message.ready) {
-                clients.setClientActive(message.client_uid);
+                clients.set_active(message.client_uid);
                 num_running++;
             }
         }
@@ -388,7 +388,7 @@ RabbitMQ::closeConnection()
     };
 
     // Iterate over clients and shut them down
-    for (const auto& client : clients.getClients(true)) {
+    for (const auto& client : clients.get_clients(true)) {
         shutdownClient(client);
     }
 

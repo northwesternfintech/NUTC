@@ -14,10 +14,10 @@ protected:
     void
     SetUp() override
     {
-        manager.addClient("ABC");
-        manager.addClient("DEF");
-        manager.modifyHoldings("ABC", "ETHUSD", 1000);
-        manager.modifyHoldings("DEF", "ETHUSD", 1000);
+        manager.add_client("ABC");
+        manager.add_client("DEF");
+        manager.modify_holdings("ABC", "ETHUSD", 1000);
+        manager.modify_holdings("DEF", "ETHUSD", 1000);
     }
 
     ClientManager manager;
@@ -26,16 +26,16 @@ protected:
 
 TEST_F(InvalidOrders, SimpleInvalidFunds)
 {
-    manager.modifyCapital("ABC", -100000);
+    manager.modify_capital("ABC", -100000);
     std::optional<SIDE> err =
-        manager.validateMatch(Match{"ETHUSD", "ABC", "DEF", SELL, 1, 1});
+        manager.validate_match(Match{"ETHUSD", "ABC", "DEF", SELL, 1, 1});
     EXPECT_TRUE(err.has_value());
     EXPECT_EQ(err.value(), BUY);
 }
 
 TEST_F(InvalidOrders, RemoveThenAddFunds)
 {
-    manager.modifyCapital("ABC", -100000);
+    manager.modify_capital("ABC", -100000);
 
     MarketOrder order1{"ABC", BUY, "MARKET", "ETHUSD", 1, 1};
     MarketOrder order2{"DEF", SELL, "MARKET", "ETHUSD", 1, 1};
@@ -51,7 +51,7 @@ TEST_F(InvalidOrders, RemoveThenAddFunds)
     EXPECT_EQ(ob_updates2.size(), 1);
     EXPECT_EQ_OB_UPDATE(ob_updates2[0], "ETHUSD", SELL, 1, 1);
 
-    manager.modifyCapital("ABC", 100000);
+    manager.modify_capital("ABC", 100000);
 
     // Kept, but not matched
     auto [matches3, ob_updates3] = engine.match_order(order2, manager);
@@ -71,7 +71,7 @@ TEST_F(InvalidOrders, RemoveThenAddFunds)
 
 TEST_F(InvalidOrders, MatchingInvalidFunds)
 {
-    manager.modifyCapital("ABC", -100000);
+    manager.modify_capital("ABC", -100000);
 
     MarketOrder order1{"ABC", BUY, "MARKET", "ETHUSD", 1, 1};
     MarketOrder order2{"DEF", SELL, "MARKET", "ETHUSD", 1, 1};
@@ -90,15 +90,15 @@ TEST_F(InvalidOrders, MatchingInvalidFunds)
 
 TEST_F(InvalidOrders, SimpleManyInvalidOrder)
 {
-    manager.addClient("A");
-    manager.addClient("B");
-    manager.addClient("C");
-    manager.addClient("D");
-    manager.modifyCapital("B", -100000);
-    manager.modifyHoldings("A", "ETHUSD", 1000);
-    manager.modifyHoldings("B", "ETHUSD", 1000);
-    manager.modifyHoldings("C", "ETHUSD", 1000);
-    manager.modifyHoldings("D", "ETHUSD", 1000);
+    manager.add_client("A");
+    manager.add_client("B");
+    manager.add_client("C");
+    manager.add_client("D");
+    manager.modify_capital("B", -100000);
+    manager.modify_holdings("A", "ETHUSD", 1000);
+    manager.modify_holdings("B", "ETHUSD", 1000);
+    manager.modify_holdings("C", "ETHUSD", 1000);
+    manager.modify_holdings("D", "ETHUSD", 1000);
 
     MarketOrder order1{"A", BUY, "MARKET", "ETHUSD", 1, 1};
     MarketOrder order2{"B", BUY, "MARKET", "ETHUSD", 1, 1};

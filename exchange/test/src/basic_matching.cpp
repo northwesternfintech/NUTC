@@ -14,10 +14,10 @@ protected:
     void
     SetUp() override
     {
-        manager.addClient("ABC");
-        manager.addClient("DEF");
-        manager.modifyHoldings("ABC", "ETHUSD", 1000);
-        manager.modifyHoldings("DEF", "ETHUSD", 1000);
+        manager.add_client("ABC");
+        manager.add_client("DEF");
+        manager.modify_holdings("ABC", "ETHUSD", 1000);
+        manager.modify_holdings("DEF", "ETHUSD", 1000);
     }
 
     ClientManager manager;

@@ -50,7 +50,7 @@ insufficient_capital(
     const manager::ClientManager& manager
 )
 {
-    float capital = manager.getCapital(aggressive_order.client_uid);
+    float capital = manager.get_capital(aggressive_order.client_uid);
     return aggressive_order.side == messages::SIDE::BUY && order_value > capital;
 }
 
@@ -119,7 +119,7 @@ Engine::attempt_matches(
         Match toMatch = Match{passive_order.ticker,  buyer_uid,      seller_uid,
                               aggressive_order.side, price_to_match, quantity_to_match};
 
-        std::optional<messages::SIDE> match_failure = manager.validateMatch(toMatch);
+        std::optional<messages::SIDE> match_failure = manager.validate_match(toMatch);
         if (match_failure.has_value()) {
             bool aggressive_failure = match_failure.value() == aggressive_order.side;
             if (aggressive_failure) {
@@ -138,30 +138,30 @@ Engine::attempt_matches(
         passive_order.quantity -= quantity_to_match;
         aggressive_order.quantity -= quantity_to_match;
         if (passive_order.side == messages::SIDE::SELL) {
-            manager.modifyCapital(
+            manager.modify_capital(
                 passive_order.client_uid, quantity_to_match * price_to_match
             );
-            manager.modifyCapital(
+            manager.modify_capital(
                 aggressive_order.client_uid, -quantity_to_match * price_to_match
             );
-            manager.modifyHoldings(
+            manager.modify_holdings(
                 aggressive_order.client_uid, aggressive_order.ticker, quantity_to_match
             );
-            manager.modifyHoldings(
+            manager.modify_holdings(
                 passive_order.client_uid, passive_order.ticker, -quantity_to_match
             );
         }
         else {
-            manager.modifyCapital(
+            manager.modify_capital(
                 passive_order.client_uid, -quantity_to_match * price_to_match
             );
-            manager.modifyCapital(
+            manager.modify_capital(
                 aggressive_order.client_uid, quantity_to_match * price_to_match
             );
-            manager.modifyHoldings(
+            manager.modify_holdings(
                 aggressive_order.client_uid, aggressive_order.ticker, -quantity_to_match
             );
-            manager.modifyHoldings(
+            manager.modify_holdings(
                 passive_order.client_uid, passive_order.ticker, quantity_to_match
             );
         }

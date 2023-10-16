@@ -16,7 +16,7 @@ Manager::getEngine(const std::string& ticker)
 void
 Manager::printResults(manager::ClientManager& manager)
 {
-    for (const auto& client : manager.getClients(true)) {
+    for (const auto& client : manager.get_clients(true)) {
         float cap_remaining = client.capital_remaining;
         for (const auto& holding : client.holdings) {
             cap_remaining += holding.second * get_last_sell_price(holding.first);

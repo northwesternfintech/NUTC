@@ -25,21 +25,31 @@ struct Client {
 };
 
 class ClientManager {
-public:
-    void addClient(const std::string& uid);
-    void setClientActive(const std::string& uid);
-    void initialize_from_firebase(const glz::json_t::object_t& users);
-    float modifyCapital(const std::string& uid, float change_in_capital);
-    float getCapital(const std::string& uid) const;
-    float getHoldings(const std::string& uid, const std::string& ticker) const;
-    float modifyHoldings(
-        const std::string& uid, const std::string& ticker, float change_in_holdings
-    );
-    std::vector<Client> getClients(bool active) const;
-    std::optional<messages::SIDE> validateMatch(const messages::Match& match) const;
-
 private:
     std::unordered_map<std::string, Client> clients;
+
+public:
+    void add_client(
+        const std::string& uid, float capital = STARTING_CAPITAL, bool active = false
+    );
+    void initialize_from_firebase(const glz::json_t::object_t& users);
+    void set_active(const std::string& uid);
+
+    float get_capital(const std::string& uid) const;
+    float get_holdings(const std::string& uid, const std::string& ticker) const;
+    std::vector<Client> get_clients(bool active) const;
+
+    void modify_capital(const std::string& uid, float change_in_capital);
+    void modify_holdings(
+        const std::string& uid, const std::string& ticker, float change_in_holdings
+    );
+
+    [[nodiscard]] std::optional<messages::SIDE>
+    validate_match(const messages::Match& match) const;
+
+private:
+    bool user_exists(const std::string& uid) const;
+    bool user_holds_stock(const std::string& uid, const std::string& ticker) const;
 };
 
 } // namespace manager
