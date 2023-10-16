@@ -1,0 +1,37 @@
+{
+  "name": "nutc-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "firebase-start": "firebase emulators:start --import ./firebase-seed",
+    "firebase-save": "firebase emulators:export ./firebase-seed"
+  },
+  "dependencies": {
+    "@firebase/functions": "^0.10.0",
+    "@headlessui/react": "^1.7.16",
+    "@heroicons/react": "^2.0.18",
+    "@tailwindcss/forms": "^0.5.4",
+    "@types/node": "20.4.5",
+    "@types/react": "18.2.17",
+    "@types/react-dom": "18.2.7",
+    "autoprefixer": "10.4.14",
+    "axios": "^1.5.0",
+    "encoding": "^0.1.13",
+    "eslint": "8.46.0",
+    "eslint-config-next": "^13.5.4",
+    "firebase": "^10.1.0",
+    "next": "13.4.12",
+    "node-fetch": "^3.3.2",
+    "postcss": "8.4.27",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "sharp": "^0.32.6",
+    "sweetalert2": "^11.7.23",
+    "tailwindcss": "3.3.3",
+    "typescript": "5.1.6"
+  }
+}
