@@ -12,9 +12,9 @@
 
 namespace nutc {
 namespace dev_mode {
-bool file_exists(const std::string& path);
+bool file_exists(const std::string& path) noexcept;
 std::string read_file(const std::string& path);
-void create_algo_files(int num_users);
+void create_algo_files(int num_users) noexcept;
 void initialize_client_manager(manager::ClientManager& users, int num_users);
 } // namespace dev_mode
 } // namespace nutc
