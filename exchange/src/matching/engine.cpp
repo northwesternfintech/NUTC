@@ -73,6 +73,8 @@ Engine::match_order(MarketOrder& order, manager::ClientManager& manager)
         return result;
     }
 
+    // TODO: insufficient holdings
+
     auto& passive_orders = get_passive_orders(order.side);
 
     MatchResult res = attempt_matches(passive_orders, order, manager);
