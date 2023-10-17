@@ -18,7 +18,7 @@ Engine::get_last_sell_price()
 void
 Engine::add_order_without_matching(MarketOrder order)
 {
-    if (order.side == messages::SIDE::BUY) {
+    if (order.side == SIDE::BUY) {
         bids.push(order);
     }
     else {
@@ -39,9 +39,9 @@ add_ob_update(std::vector<ObUpdate>& vec, const MarketOrder& order, float quanti
 }
 
 std::priority_queue<MarketOrder>&
-Engine::get_passive_orders(messages::SIDE side)
+Engine::get_passive_orders(SIDE side)
 {
-    return side == messages::SIDE::BUY ? this->asks : this->bids;
+    return side == SIDE::BUY ? this->asks : this->bids;
 }
 
 bool
@@ -51,7 +51,7 @@ insufficient_capital(
 )
 {
     float capital = manager.get_capital(aggressive_order.client_uid);
-    return aggressive_order.side == messages::SIDE::BUY && order_value > capital;
+    return aggressive_order.side == SIDE::BUY && order_value > capital;
 }
 
 bool
@@ -96,6 +96,14 @@ Engine::getMatchQuantity(
     return std::min(passive_order.quantity, aggressive_order.quantity);
 }
 
+std::string
+Engine::get_client_uid(
+    SIDE side, const MarketOrder& aggressive, const MarketOrder& passive
+)
+{
+    return side == aggressive.side ? aggressive.client_uid : passive.client_uid;
+}
+
 // TODO: modify so it's not matching an incoming and passive order, it just matches
 // orders from both sides
 MatchResult
@@ -111,17 +119,15 @@ Engine::attempt_matches(
         MarketOrder passive_order = passive_orders.top();
         float quantity_to_match = getMatchQuantity(passive_order, aggressive_order);
         float price_to_match = passive_order.price;
-        std::string buyer_uid = passive_order.side == messages::SIDE::BUY
-                                    ? passive_order.client_uid
-                                    : aggressive_order.client_uid;
-        std::string seller_uid = passive_order.side == messages::SIDE::SELL
-                                     ? passive_order.client_uid
-                                     : aggressive_order.client_uid;
+        std::string buyer_uid =
+            get_client_uid(SIDE::BUY, aggressive_order, passive_order);
+        std::string seller_uid =
+            get_client_uid(SIDE::SELL, aggressive_order, passive_order);
 
         Match toMatch = Match{passive_order.ticker,  buyer_uid,      seller_uid,
                               aggressive_order.side, price_to_match, quantity_to_match};
 
-        std::optional<messages::SIDE> match_failure = manager.validate_match(toMatch);
+        std::optional<SIDE> match_failure = manager.validate_match(toMatch);
         if (match_failure.has_value()) {
             bool aggressive_failure = match_failure.value() == aggressive_order.side;
             if (aggressive_failure) {
@@ -139,7 +145,7 @@ Engine::attempt_matches(
         result.matches.push_back(toMatch);
         passive_order.quantity -= quantity_to_match;
         aggressive_order.quantity -= quantity_to_match;
-        if (passive_order.side == messages::SIDE::SELL) {
+        if (passive_order.side == SIDE::SELL) {
             manager.modify_capital(
                 passive_order.client_uid, quantity_to_match * price_to_match
             );

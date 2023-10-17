@@ -13,6 +13,7 @@
 using MarketOrder = nutc::messages::MarketOrder;
 using ObUpdate = nutc::messages::ObUpdate;
 using Match = nutc::messages::Match;
+using SIDE = nutc::messages::SIDE;
 
 namespace nutc {
 /**
@@ -48,10 +49,11 @@ public:
 
 private:
     float last_sell_price{};
+    static std::string get_client_uid(SIDE side, const MarketOrder& aggressive, const MarketOrder& passive);
     float getMatchQuantity(
         const MarketOrder& passive_order, const MarketOrder& aggressive_order
     );
-    std::priority_queue<MarketOrder>& get_passive_orders(messages::SIDE side);
+    std::priority_queue<MarketOrder>& get_passive_orders(SIDE side);
 
     MatchResult attempt_matches(
         std::priority_queue<MarketOrder>& passive_orders, MarketOrder& aggressive_order,
