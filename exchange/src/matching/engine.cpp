@@ -7,8 +7,6 @@
 namespace nutc {
 namespace matching {
 
-Engine::Engine() {}
-
 float
 Engine::get_last_sell_price()
 {
@@ -45,34 +43,20 @@ Engine::get_orders(SIDE side)
 }
 
 bool
-insufficient_capital(
-    const MarketOrder& aggressive_order, float order_value,
-    const manager::ClientManager& manager
+Engine::insufficient_capital(
+    const MarketOrder& order, const manager::ClientManager& manager
 )
 {
-    float capital = manager.get_capital(aggressive_order.client_uid);
-    return aggressive_order.side == SIDE::BUY && order_value > capital;
+    float capital = manager.get_capital(order.client_uid);
+    float order_value = order.price * order.quantity;
+    return order.side == SIDE::BUY && order_value > capital;
 }
 
 bool
-insufficient_holdings(
-    const MarketOrder& aggressive_order, float order_quantity,
-    const manager::ClientManager& manager
-)
+insufficient_holdings(const MarketOrder& order, const manager::ClientManager& manager)
 {
-    float holdings =
-        manager.get_holdings(aggressive_order.client_uid, aggressive_order.ticker);
-    return aggressive_order.side == SIDE::SELL && order_quantity > holdings;
-}
-
-bool
-cannot_match_passive(
-    const MarketOrder& aggressive_order,
-    std::priority_queue<MarketOrder>& passive_orders
-)
-{
-    return (passive_orders.size() == 0)
-           || !(passive_orders.top().can_match(aggressive_order));
+    float holdings = manager.get_holdings(order.client_uid, order.ticker);
+    return order.side == SIDE::SELL && order.quantity > holdings;
 }
 
 MatchResult
@@ -80,11 +64,11 @@ Engine::match_order(MarketOrder& order, manager::ClientManager& manager)
 {
     MatchResult result;
 
-    if (insufficient_capital(order, order.quantity * order.price, manager)) {
+    if (insufficient_capital(order, manager)) {
         return result;
     }
 
-    if (insufficient_holdings(order, order.quantity, manager)) {
+    if (insufficient_holdings(order, manager)) {
         return result;
     }
 
@@ -102,7 +86,7 @@ is_close_to_zero(float value, float epsilon = 1e-6f)
 }
 
 inline constexpr bool
-isSameValue(float value1, float value2, float epsilon = 1e-6f)
+is_same_value(float value1, float value2, float epsilon = 1e-6f)
 {
     return std::fabs(value1 - value2) < epsilon;
 }
@@ -123,8 +107,12 @@ Engine::get_client_uid(
     return side == aggressive.side ? aggressive.client_uid : passive.client_uid;
 }
 
-// TODO: modify so it's not matching an incoming and passive order, it just matches
-// orders from both sides
+SIDE
+Engine::get_aggressive_side(const MarketOrder& order1, const MarketOrder& order2)
+{
+    return order1.order_index > order2.order_index ? order1.side : order2.side;
+}
+
 MatchResult
 Engine::attempt_matches(
     manager::ClientManager& manager, const MarketOrder& aggressive_order
@@ -132,16 +120,15 @@ Engine::attempt_matches(
 {
     MatchResult result;
     float aggressive_quantity = aggressive_order.quantity;
-    float aggressive_order_index = aggressive_order.order_index;
+    float aggressive_index = aggressive_order.order_index;
 
     while (bids.size() > 0 && asks.size() > 0 && bids.top().can_match(asks.top())) {
         MarketOrder sell_order = asks.top();
         MarketOrder buy_order = bids.top();
 
         float quantity_to_match = get_match_quantity(buy_order, sell_order);
-        SIDE aggressive_side = buy_order.order_index > sell_order.order_index
-                                   ? buy_order.side
-                                   : sell_order.side;
+        SIDE aggressive_side = get_aggressive_side(sell_order, buy_order);
+
         float price_to_match =
             aggressive_side == SIDE::BUY ? sell_order.price : buy_order.price;
 
@@ -154,14 +141,10 @@ Engine::attempt_matches(
         std::optional<SIDE> match_failure = manager.validate_match(toMatch);
         if (match_failure.has_value()) {
             SIDE side = match_failure.value();
-            switch (side) {
-                case SIDE::BUY:
-                    bids.pop();
-                    break;
-                case SIDE::SELL:
-                    asks.pop();
-                    break;
-            }
+            if (side == SIDE::BUY)
+                bids.pop();
+            else
+                asks.pop();
             continue;
         }
 
@@ -175,10 +158,8 @@ Engine::attempt_matches(
 
         result.matches.push_back(toMatch);
 
-        bool sell_aggressive =
-            isSameValue(sell_order.order_index, aggressive_order_index);
-        bool buy_aggressive =
-            isSameValue(buy_order.order_index, aggressive_order_index);
+        bool sell_aggressive = is_same_value(sell_order.order_index, aggressive_index);
+        bool buy_aggressive = is_same_value(buy_order.order_index, aggressive_index);
 
         if (buy_aggressive)
             aggressive_quantity -= quantity_to_match;

@@ -45,8 +45,6 @@ public:
 
     void add_order_without_matching(MarketOrder aggressive_order);
 
-    Engine(); // con
-
 private:
     float last_sell_price;
     static std::string get_client_uid(
@@ -58,6 +56,10 @@ private:
 
     MatchResult
     attempt_matches(manager::ClientManager& manager, const MarketOrder& aggressive);
+    SIDE get_aggressive_side(const MarketOrder& order1, const MarketOrder& order2);
+    bool insufficient_capital(
+        const MarketOrder& order, const manager::ClientManager& manager
+    );
 };
 } // namespace matching
 } // namespace nutc
