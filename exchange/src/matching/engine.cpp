@@ -39,7 +39,7 @@ add_ob_update(std::vector<ObUpdate>& vec, const MarketOrder& order, float quanti
 }
 
 std::priority_queue<MarketOrder>&
-Engine::get_respective_orders(SIDE side)
+Engine::get_orders(SIDE side)
 {
     return side == SIDE::SELL ? this->asks : this->bids;
 }
@@ -52,6 +52,17 @@ insufficient_capital(
 {
     float capital = manager.get_capital(aggressive_order.client_uid);
     return aggressive_order.side == SIDE::BUY && order_value > capital;
+}
+
+bool
+insufficient_holdings(
+    const MarketOrder& aggressive_order, float order_quantity,
+    const manager::ClientManager& manager
+)
+{
+    float holdings =
+        manager.get_holdings(aggressive_order.client_uid, aggressive_order.ticker);
+    return aggressive_order.side == SIDE::SELL && order_quantity > holdings;
 }
 
 bool
@@ -73,10 +84,11 @@ Engine::match_order(MarketOrder& order, manager::ClientManager& manager)
         return result;
     }
 
-    // TODO: insufficient holdings
+    if (insufficient_holdings(order, order.quantity, manager)) {
+        return result;
+    }
 
-    auto& respective_orders = get_respective_orders(order.side);
-    respective_orders.push(order);
+    get_orders(order.side).push(order);
 
     MatchResult res = attempt_matches(manager, order);
 
@@ -84,7 +96,7 @@ Engine::match_order(MarketOrder& order, manager::ClientManager& manager)
 }
 
 inline constexpr bool
-isCloseToZero(float value, float epsilon = 1e-6f)
+is_close_to_zero(float value, float epsilon = 1e-6f)
 {
     return std::fabs(value) < epsilon;
 }
@@ -96,7 +108,7 @@ isSameValue(float value1, float value2, float epsilon = 1e-6f)
 }
 
 float
-Engine::getMatchQuantity(
+Engine::get_match_quantity(
     const MarketOrder& passive_order, const MarketOrder& aggressive_order
 )
 {
@@ -126,7 +138,7 @@ Engine::attempt_matches(
         MarketOrder sell_order = asks.top();
         MarketOrder buy_order = bids.top();
 
-        float quantity_to_match = getMatchQuantity(buy_order, sell_order);
+        float quantity_to_match = get_match_quantity(buy_order, sell_order);
         SIDE aggressive_side = buy_order.order_index > sell_order.order_index
                                    ? buy_order.side
                                    : sell_order.side;
@@ -141,7 +153,8 @@ Engine::attempt_matches(
 
         std::optional<SIDE> match_failure = manager.validate_match(toMatch);
         if (match_failure.has_value()) {
-            switch (match_failure.value()) {
+            SIDE side = match_failure.value();
+            switch (side) {
                 case SIDE::BUY:
                     bids.pop();
                     break;
@@ -177,13 +190,13 @@ Engine::attempt_matches(
         else
             add_ob_update(result.ob_updates, sell_order, 0);
 
-        if (!isCloseToZero(buy_order.quantity)) {
+        if (!is_close_to_zero(buy_order.quantity)) {
             if (!buy_aggressive)
                 add_ob_update(result.ob_updates, buy_order, buy_order.quantity);
             bids.push(buy_order);
         }
 
-        if (!isCloseToZero(sell_order.quantity)) {
+        if (!is_close_to_zero(sell_order.quantity)) {
             if (!sell_aggressive)
                 add_ob_update(result.ob_updates, sell_order, sell_order.quantity);
             asks.push(sell_order);

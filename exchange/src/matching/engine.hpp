@@ -48,17 +48,16 @@ public:
     Engine(); // con
 
 private:
-    float last_sell_price{};
+    float last_sell_price;
     static std::string get_client_uid(
         SIDE side, const MarketOrder& aggressive, const MarketOrder& passive
     );
-    float getMatchQuantity(
-        const MarketOrder& passive_order, const MarketOrder& aggressive_order
-    );
+    float get_match_quantity(const MarketOrder& passive, const MarketOrder& aggressive);
 
-    std::priority_queue<MarketOrder>& get_respective_orders(SIDE side);
+    std::priority_queue<MarketOrder>& get_orders(SIDE side);
 
-    MatchResult attempt_matches(manager::ClientManager& manager, const MarketOrder& aggressive_order);
+    MatchResult
+    attempt_matches(manager::ClientManager& manager, const MarketOrder& aggressive);
 };
 } // namespace matching
 } // namespace nutc
