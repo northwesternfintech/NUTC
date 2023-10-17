@@ -63,6 +63,22 @@ struct MarketOrder {
     float quantity;
     float price;
 
+    // Used to sort orders by time created
+    long long order_index;
+    static long long global_index;
+
+    MarketOrder() { order_index = global_index++; }
+
+    MarketOrder(
+        const std::string& client_uid, SIDE side, const std::string& type,
+        const std::string& ticker, float quantity, float price
+    ) :
+        client_uid(client_uid),
+        side(side), type(type), ticker(ticker), quantity(quantity), price(price)
+    {
+        order_index = global_index++;
+    }
+
     // toString
     std::string
     to_string() const

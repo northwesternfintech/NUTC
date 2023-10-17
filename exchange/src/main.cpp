@@ -21,6 +21,9 @@ nutc::manager::ClientManager users;
 nutc::engine_manager::Manager engine_manager;
 rmq::RabbitMQ conn(users, engine_manager);
 
+//TODO: move?
+long long MarketOrder::global_index = 0;
+
 static std::tuple<bool>
 process_arguments(int argc, const char** argv)
 {

@@ -49,7 +49,9 @@ public:
 
 private:
     float last_sell_price{};
-    static std::string get_client_uid(SIDE side, const MarketOrder& aggressive, const MarketOrder& passive);
+    static std::string get_client_uid(
+        SIDE side, const MarketOrder& aggressive, const MarketOrder& passive
+    );
     float getMatchQuantity(
         const MarketOrder& passive_order, const MarketOrder& aggressive_order
     );
