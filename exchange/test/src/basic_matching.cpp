@@ -24,6 +24,22 @@ protected:
     Engine engine;
 };
 
+TEST_F(BasicMatching, SimpleMatch)
+{
+    MarketOrder order1{"ABC", BUY, "MARKET", "ETHUSD", 1, 1};
+    MarketOrder order2{"DEF", SELL, "MARKET", "ETHUSD", 1, 1};
+    auto [matches, ob_updates] = engine.match_order(order1, manager);
+    EXPECT_EQ(matches.size(), 0);
+    EXPECT_EQ(ob_updates.size(), 1);
+    EXPECT_EQ_OB_UPDATE(ob_updates.at(0), "ETHUSD", BUY, 1, 1);
+
+    auto [matches2, ob_updates2] = engine.match_order(order2, manager);
+    EXPECT_EQ(matches2.size(), 1);
+    EXPECT_EQ(ob_updates2.size(), 1);
+    EXPECT_EQ_OB_UPDATE(ob_updates2.at(0), "ETHUSD", BUY, 1, 0);
+    EXPECT_EQ_MATCH(matches2.at(0), "ETHUSD", "ABC", "DEF", SELL, 1, 1);
+}
+
 TEST_F(BasicMatching, CorrectBuyPricingOrder)
 {
     MarketOrder buy1{"ABC", BUY, "MARKET", "ETHUSD", 1, 1};
@@ -56,26 +72,9 @@ TEST_F(BasicMatching, CorrectBuyPricingOrder)
     EXPECT_EQ_OB_UPDATE(ob_updates5.at(0), "ETHUSD", BUY, 4, 0);
 
     auto [matches6, ob_updates6] = engine.match_order(sell1, manager);
-    EXPECT_EQ(ob_updates6.size(), 2);
+    EXPECT_EQ(ob_updates6.size(), 1);
     EXPECT_EQ(matches6.size(), 1);
     EXPECT_EQ_OB_UPDATE(ob_updates6.at(0), "ETHUSD", BUY, 3, 0);
-    //EXPECT_EQ_OB_UPDATE(ob_updates6.at(1), "ETHUSD", BUY, 3, 1); TODO: incorrect?
-}
-
-TEST_F(BasicMatching, SimpleMatch)
-{
-    MarketOrder order1{"ABC", BUY, "MARKET", "ETHUSD", 1, 1};
-    MarketOrder order2{"DEF", SELL, "MARKET", "ETHUSD", 1, 1};
-    auto [matches, ob_updates] = engine.match_order(order1, manager);
-    EXPECT_EQ(matches.size(), 0);
-    EXPECT_EQ(ob_updates.size(), 1);
-    EXPECT_EQ_OB_UPDATE(ob_updates.at(0), "ETHUSD", BUY, 1, 1);
-
-    auto [matches2, ob_updates2] = engine.match_order(order2, manager);
-    EXPECT_EQ(matches2.size(), 1);
-    EXPECT_EQ(ob_updates2.size(), 1);
-    EXPECT_EQ_OB_UPDATE(ob_updates2.at(0), "ETHUSD", BUY, 1, 0);
-    EXPECT_EQ_MATCH(matches2.at(0), "ETHUSD", "ABC", "DEF", SELL, 1, 1);
 }
 
 TEST_F(BasicMatching, NoMatchThenMatchBuy)

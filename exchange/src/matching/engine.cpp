@@ -39,9 +39,9 @@ add_ob_update(std::vector<ObUpdate>& vec, const MarketOrder& order, float quanti
 }
 
 std::priority_queue<MarketOrder>&
-Engine::get_passive_orders(SIDE side)
+Engine::get_respective_orders(SIDE side)
 {
-    return side == SIDE::BUY ? this->asks : this->bids;
+    return side == SIDE::SELL ? this->asks : this->bids;
 }
 
 bool
@@ -75,9 +75,10 @@ Engine::match_order(MarketOrder& order, manager::ClientManager& manager)
 
     // TODO: insufficient holdings
 
-    auto& passive_orders = get_passive_orders(order.side);
+    auto& respective_orders = get_respective_orders(order.side);
+    respective_orders.push(order);
 
-    MatchResult res = attempt_matches(passive_orders, order, manager);
+    MatchResult res = attempt_matches(manager, order);
 
     return res;
 }
@@ -86,6 +87,12 @@ inline constexpr bool
 isCloseToZero(float value, float epsilon = 1e-6f)
 {
     return std::fabs(value) < epsilon;
+}
+
+inline constexpr bool
+isSameValue(float value1, float value2, float epsilon = 1e-6f)
+{
+    return std::fabs(value1 - value2) < epsilon;
 }
 
 float
@@ -108,84 +115,90 @@ Engine::get_client_uid(
 // orders from both sides
 MatchResult
 Engine::attempt_matches(
-    std::priority_queue<MarketOrder>& passive_orders, MarketOrder& aggressive_order,
-    manager::ClientManager& manager
+    manager::ClientManager& manager, const MarketOrder& aggressive_order
 )
 {
     MatchResult result;
+    float aggressive_quantity = aggressive_order.quantity;
+    float aggressive_order_index = aggressive_order.order_index;
 
-    while (passive_orders.size() > 0 && passive_orders.top().can_match(aggressive_order)
-    ) {
-        MarketOrder passive_order = passive_orders.top();
-        float quantity_to_match = getMatchQuantity(passive_order, aggressive_order);
-        float price_to_match = passive_order.price;
-        std::string buyer_uid =
-            get_client_uid(SIDE::BUY, aggressive_order, passive_order);
-        std::string seller_uid =
-            get_client_uid(SIDE::SELL, aggressive_order, passive_order);
+    while (bids.size() > 0 && asks.size() > 0 && bids.top().can_match(asks.top())) {
+        MarketOrder sell_order = asks.top();
+        MarketOrder buy_order = bids.top();
 
-        Match toMatch = Match{passive_order.ticker,  buyer_uid,      seller_uid,
-                              aggressive_order.side, price_to_match, quantity_to_match};
+        float quantity_to_match = getMatchQuantity(buy_order, sell_order);
+        SIDE aggressive_side = buy_order.order_index > sell_order.order_index
+                                   ? buy_order.side
+                                   : sell_order.side;
+        float price_to_match =
+            aggressive_side == SIDE::BUY ? sell_order.price : buy_order.price;
+
+        std::string buyer_uid = buy_order.client_uid;
+        std::string seller_uid = sell_order.client_uid;
+
+        Match toMatch = Match{sell_order.ticker, buyer_uid,      seller_uid,
+                              aggressive_side,   price_to_match, quantity_to_match};
 
         std::optional<SIDE> match_failure = manager.validate_match(toMatch);
         if (match_failure.has_value()) {
-            bool aggressive_failure = match_failure.value() == aggressive_order.side;
-            if (aggressive_failure) {
-                return result;
+            switch (match_failure.value()) {
+                case SIDE::BUY:
+                    bids.pop();
+                    break;
+                case SIDE::SELL:
+                    asks.pop();
+                    break;
             }
-            else {
-                passive_orders.pop();
-                continue;
-            }
+            continue;
         }
-        last_sell_price = price_to_match;
-        passive_orders.pop();
 
-        add_ob_update(result.ob_updates, passive_order, 0);
+        last_sell_price = price_to_match;
+
+        bids.pop();
+        asks.pop();
+
+        buy_order.quantity -= quantity_to_match;
+        sell_order.quantity -= quantity_to_match;
+
         result.matches.push_back(toMatch);
-        passive_order.quantity -= quantity_to_match;
-        aggressive_order.quantity -= quantity_to_match;
-        if (passive_order.side == SIDE::SELL) {
-            manager.modify_capital(
-                passive_order.client_uid, quantity_to_match * price_to_match
-            );
-            manager.modify_capital(
-                aggressive_order.client_uid, -quantity_to_match * price_to_match
-            );
-            manager.modify_holdings(
-                aggressive_order.client_uid, aggressive_order.ticker, quantity_to_match
-            );
-            manager.modify_holdings(
-                passive_order.client_uid, passive_order.ticker, -quantity_to_match
-            );
+
+        bool sell_aggressive =
+            isSameValue(sell_order.order_index, aggressive_order_index);
+        bool buy_aggressive =
+            isSameValue(buy_order.order_index, aggressive_order_index);
+
+        if (buy_aggressive)
+            aggressive_quantity -= quantity_to_match;
+        else
+            add_ob_update(result.ob_updates, buy_order, 0);
+
+        if (sell_aggressive)
+            aggressive_quantity -= quantity_to_match;
+        else
+            add_ob_update(result.ob_updates, sell_order, 0);
+
+        if (!isCloseToZero(buy_order.quantity)) {
+            if (!buy_aggressive)
+                add_ob_update(result.ob_updates, buy_order, buy_order.quantity);
+            bids.push(buy_order);
         }
-        else {
-            manager.modify_capital(
-                passive_order.client_uid, -quantity_to_match * price_to_match
-            );
-            manager.modify_capital(
-                aggressive_order.client_uid, quantity_to_match * price_to_match
-            );
-            manager.modify_holdings(
-                aggressive_order.client_uid, aggressive_order.ticker, -quantity_to_match
-            );
-            manager.modify_holdings(
-                passive_order.client_uid, passive_order.ticker, quantity_to_match
-            );
+
+        if (!isCloseToZero(sell_order.quantity)) {
+            if (!sell_aggressive)
+                add_ob_update(result.ob_updates, sell_order, sell_order.quantity);
+            asks.push(sell_order);
         }
-        if (!isCloseToZero(passive_order.quantity)) {
-            passive_orders.push(passive_order);
-            add_ob_update(result.ob_updates, passive_order, passive_order.quantity);
-        }
-        // cannot match anymore
-        if (isCloseToZero(aggressive_order.quantity)) {
-            return result;
-        }
+
+        manager.modify_capital(buyer_uid, -quantity_to_match * price_to_match);
+        manager.modify_capital(seller_uid, quantity_to_match * price_to_match);
+        manager.modify_holdings(seller_uid, buy_order.ticker, -quantity_to_match);
+        manager.modify_holdings(buyer_uid, buy_order.ticker, quantity_to_match);
     }
-    if (!isCloseToZero(aggressive_order.quantity)) {
-        add_order_without_matching(aggressive_order);
-        add_ob_update(result.ob_updates, aggressive_order, aggressive_order.quantity);
+
+    if (aggressive_quantity > 0) {
+        add_ob_update(result.ob_updates, aggressive_order, aggressive_quantity);
     }
+
     return result;
 }
 

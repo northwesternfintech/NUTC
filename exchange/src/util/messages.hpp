@@ -133,6 +133,35 @@ struct MarketOrder {
         }
         return true;
     }
+
+    // To ensure we don't increment the client_uid
+    MarketOrder(const MarketOrder& other) : order_index(other.order_index)
+    {
+        this->client_uid = other.client_uid;
+        this->side = other.side;
+        this->type = other.type;
+        this->ticker = other.ticker;
+        this->quantity = other.quantity;
+        this->price = other.price;
+    }
+
+    MarketOrder&
+    operator=(const MarketOrder& other)
+    {
+        if (this == &other) {
+            return *this;
+        }
+
+        this->order_index = other.order_index;
+        this->client_uid = other.client_uid;
+        this->side = other.side;
+        this->type = other.type;
+        this->ticker = other.ticker;
+        this->quantity = other.quantity;
+        this->price = other.price;
+
+        return *this;
+    }
 };
 
 /**

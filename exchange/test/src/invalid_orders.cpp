@@ -37,8 +37,8 @@ TEST_F(InvalidOrders, RemoveThenAddFunds)
 {
     manager.modify_capital("ABC", -100000);
 
-    MarketOrder order1{"ABC", BUY, "MARKET", "ETHUSD", 1, 1};
     MarketOrder order2{"DEF", SELL, "MARKET", "ETHUSD", 1, 1};
+    MarketOrder order1{"ABC", BUY, "MARKET", "ETHUSD", 1, 1};
 
     // Thrown out
     auto [matches, ob_updates] = engine.match_order(order1, manager);
@@ -64,7 +64,7 @@ TEST_F(InvalidOrders, RemoveThenAddFunds)
     EXPECT_EQ(matches4.size(), 1);
     EXPECT_EQ(ob_updates4.size(), 1);
     EXPECT_EQ_OB_UPDATE(ob_updates4[0], "ETHUSD", SELL, 1, 0);
-    EXPECT_EQ_MATCH(matches4[0], "ETHUSD", "ABC", "DEF", BUY, 1, 1);
+    EXPECT_EQ_MATCH(matches4.at(0), "ETHUSD", "ABC", "DEF", BUY, 1, 1);
 }
 
 // TODO: valid when first added, then invalid due to reducing capital

@@ -55,12 +55,10 @@ private:
     float getMatchQuantity(
         const MarketOrder& passive_order, const MarketOrder& aggressive_order
     );
-    std::priority_queue<MarketOrder>& get_passive_orders(SIDE side);
 
-    MatchResult attempt_matches(
-        std::priority_queue<MarketOrder>& passive_orders, MarketOrder& aggressive_order,
-        manager::ClientManager& manager
-    );
+    std::priority_queue<MarketOrder>& get_respective_orders(SIDE side);
+
+    MatchResult attempt_matches(manager::ClientManager& manager, const MarketOrder& aggressive_order);
 };
 } // namespace matching
 } // namespace nutc
