@@ -50,6 +50,12 @@ struct Match {
     float quantity;
 };
 
+inline constexpr bool
+isCloseToZero(float value, float epsilon = 1e-6f)
+{
+    return std::fabs(value) < epsilon;
+}
+
 /**
  * @brief Sent by clients to the exchange to place an order
  * TODO: client_uid=="SIMULATED" indicates simulated order with no actual
@@ -96,11 +102,17 @@ struct MarketOrder {
     {
         // assuming both sides are same
         // otherwise, this shouldn't even be called
-        if (this->side == SIDE::BUY) {
+        if (isCloseToZero(this->price - other.price)) {
+            return this->order_index > other.order_index;
+        }
+        else if (this->side == SIDE::BUY) {
             return this->price < other.price;
         }
-        else {
+        else if (this->side == SIDE::SELL) {
             return this->price > other.price;
+        }
+        else {
+            return false;
         }
     }
 

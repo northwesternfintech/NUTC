@@ -82,7 +82,7 @@ Engine::match_order(MarketOrder& order, manager::ClientManager& manager)
     return res;
 }
 
-bool
+inline constexpr bool
 isCloseToZero(float value, float epsilon = 1e-6f)
 {
     return std::fabs(value) < epsilon;
