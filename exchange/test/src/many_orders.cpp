@@ -3,8 +3,8 @@
 
 #include <gtest/gtest.h>
 
-using nutc::messages::BUY;
-using nutc::messages::SELL;
+using nutc::messages::SIDE::BUY;
+using nutc::messages::SIDE::SELL;
 
 class ManyOrders : public ::testing::Test {
 protected:

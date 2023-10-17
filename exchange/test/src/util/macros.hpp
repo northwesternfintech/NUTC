@@ -17,8 +17,7 @@ isNearlyEqual(float a, float b, float epsilon = std::numeric_limits<float>::epsi
 
 bool validateMatch(
     const Match& match, const std::string& ticker, const std::string& buyer_uid,
-    const std::string& seller_uid, nutc::messages::SIDE side, float price,
-    float quantity
+    const std::string& seller_uid, messages::SIDE side, float price, float quantity
 );
 
 bool validateObUpdate(
@@ -33,7 +32,7 @@ bool validateObUpdate(
     match, ticker_, buyer_uid_, seller_uid_, side_, price_, quantity_                  \
 )                                                                                      \
     do {                                                                               \
-        bool isMatchValid = nutc::testing_utils::validateMatch(                        \
+        bool isMatchValid = nutc::testing_utils::validateMatch(                              \
             (match), (ticker_), (buyer_uid_), (seller_uid_), (side_), (price_),        \
             (quantity_)                                                                \
         );                                                                             \
@@ -51,7 +50,7 @@ bool validateObUpdate(
 
 #define EXPECT_EQ_OB_UPDATE(update, ticker_, side_, price_, quantity_)                 \
     do {                                                                               \
-        bool isUpdateValid = nutc::testing_utils::validateObUpdate(                    \
+        bool isUpdateValid = nutc::testing_utils::validateObUpdate(                          \
             (update), (ticker_), (side_), (price_), (quantity_)                        \
         );                                                                             \
         EXPECT_TRUE(isUpdateValid)                                                     \

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <glaze/glaze.hpp>
 #include <fmt/format.h>
+#include <glaze/glaze.hpp>
 
 #include <iostream>
 
@@ -13,7 +13,7 @@ namespace nutc {
  */
 namespace messages {
 
-enum SIDE { BUY, SELL };
+enum class SIDE { BUY, SELL };
 
 /**
  * @brief Sent by the exchange to initiate client shutdowns
@@ -67,7 +67,7 @@ struct MarketOrder {
     std::string
     to_string() const
     {
-        std::string side_str = side == BUY ? "BUY" : "SELL";
+        std::string side_str = side == SIDE::BUY ? "BUY" : "SELL";
         return fmt::format(
             "MarketOrder(client_uid={}, side={}, type={}, ticker={}, quantity={}, "
             "price={})",
@@ -80,7 +80,7 @@ struct MarketOrder {
     {
         // assuming both sides are same
         // otherwise, this shouldn't even be called
-        if (this->side == BUY) {
+        if (this->side == SIDE::BUY) {
             return this->price < other.price;
         }
         else {
@@ -97,10 +97,10 @@ struct MarketOrder {
         if (this->ticker != other.ticker) [[unlikely]] {
             return false;
         }
-        if (this->side == BUY && this->price < other.price) {
+        if (this->side == SIDE::BUY && this->price < other.price) {
             return false;
         }
-        if (this->side == SELL && this->price > other.price) {
+        if (this->side == SIDE::SELL && this->price > other.price) {
             return false;
         }
         return true;

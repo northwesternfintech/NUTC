@@ -6,8 +6,8 @@
 
 #include <gtest/gtest.h>
 
-using nutc::messages::BUY;
-using nutc::messages::SELL;
+using nutc::messages::SIDE::BUY;
+using nutc::messages::SIDE::SELL;
 
 class BasicMatching : public ::testing::Test {
 protected:

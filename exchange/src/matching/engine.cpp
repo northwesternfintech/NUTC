@@ -18,7 +18,7 @@ Engine::get_last_sell_price()
 void
 Engine::add_order_without_matching(MarketOrder order)
 {
-    if (order.side == messages::BUY) {
+    if (order.side == messages::SIDE::BUY) {
         bids.push(order);
     }
     else {
