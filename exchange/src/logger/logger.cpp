@@ -23,11 +23,11 @@ Logger::log_event(
     }
 
     // Write start of JSON
-    std::cout << "{ ";
+    output_file_ << "{ ";
 
     // Write current GMT time
     const auto now = std::chrono::system_clock::now();
-    std::cout << fmt::format("\"time\": \"{:%FT%TZ}\", ", now);
+    output_file_ << fmt::format("\"time\": \"{:%FT%TZ}\", ", now);
 
     // Add MessageType and JSON message (and opt UID) to file
     output_file_ << "\"type\": " << static_cast<int>(type) << ", "; // add type
