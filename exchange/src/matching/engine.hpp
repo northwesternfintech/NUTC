@@ -42,7 +42,6 @@ public:
      */
     MatchResult
     match_order(MarketOrder& aggressive_order, manager::ClientManager& manager);
-    float get_last_sell_price();
 
     void add_order_without_matching(MarketOrder aggressive_order);
 

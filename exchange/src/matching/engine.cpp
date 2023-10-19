@@ -7,12 +7,6 @@
 namespace nutc {
 namespace matching {
 
-float
-Engine::get_last_sell_price()
-{
-    return last_sell_price;
-}
-
 void
 Engine::add_order_without_matching(MarketOrder order)
 {
