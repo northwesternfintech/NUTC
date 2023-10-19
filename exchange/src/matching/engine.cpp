@@ -156,7 +156,7 @@ Engine::attempt_matches(
         buy_order.quantity -= quantity_to_match;
         sell_order.quantity -= quantity_to_match;
 
-        events::Logger& logger = events::Logger::get_logger("exchange_info.json");
+        events::Logger& logger = events::Logger::get_logger();
         std::string buf;
         glz::write<glz::opts{}>(toMatch, buf);
         logger.log_event(events::MESSAGE_TYPE::MATCH, buf);

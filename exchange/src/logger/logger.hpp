@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config.h"
 #include "logging.hpp"
 #include "util/messages.hpp" // TYPE should be an enum {AccountUpdate, OrderbookUpdate, TradeUpdate, MarketOrder}
 
@@ -34,7 +35,7 @@ public:
      * @param file_name File name to log to
      */
 
-    static Logger& get_logger(const std::string& file_name);
+    static Logger& get_logger();
 
     // Logger(const Logger&) = delete;
     // Logger(Logger&&) = delete;
