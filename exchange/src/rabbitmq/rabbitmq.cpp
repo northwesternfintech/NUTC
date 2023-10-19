@@ -16,7 +16,7 @@ RabbitMQ::RabbitMQ(
 void
 RabbitMQ::addLiquidityToTicker(const std::string& ticker, float quantity, float price)
 {
-    engine_manager.addInitialLiquidity(ticker, quantity, price);
+    engine_manager.add_initial_liquidity(ticker, quantity, price);
     ObUpdate update{ticker, messages::SIDE::SELL, price, quantity};
     std::vector<ObUpdate> vec{};
     vec.push_back(update);
@@ -132,7 +132,7 @@ RabbitMQ::handleIncomingMessages()
 void
 RabbitMQ::addTicker(const std::string& ticker)
 {
-    engine_manager.addEngine(ticker);
+    engine_manager.add_engine(ticker);
 }
 
 void
@@ -153,7 +153,7 @@ RabbitMQ::handleIncomingMarketOrder(MarketOrder& order)
 
     log_i(rabbitmq, "Received market order: {}", buffer);
     std::optional<std::reference_wrapper<Engine>> engine =
-        engine_manager.getEngine(order.ticker);
+        engine_manager.get_engine(order.ticker);
     if (!engine.has_value()) {
         log_w(
             matching, "Received order for unknown ticker {}. Discarding order",
@@ -165,13 +165,6 @@ RabbitMQ::handleIncomingMarketOrder(MarketOrder& order)
     for (const auto& match : matches) {
         std::string buyer_uid = match.buyer_uid;
         std::string seller_uid = match.seller_uid;
-        // float capital_exchanged = match.price * match.quantity;
-        // clients.modifyCapital(buyer_uid, -capital_exchanged);
-        // clients.modifyCapital(seller_uid, capital_exchanged);
-        // clients.modifyHoldings(buyer_uid, match.ticker, match.quantity);
-        // if (seller_uid != "SIMULATED") {
-        // clients.modifyHoldings(seller_uid, match.ticker, -match.quantity);
-        // }
         broadcastAccountUpdate(match);
         log_i(
             matching, "Matched order with price {} and quantity {}", match.price,

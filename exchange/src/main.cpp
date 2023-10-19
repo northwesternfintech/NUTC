@@ -63,7 +63,6 @@ void
 handle_sigint(int sig)
 {
     log_i(rabbitmq, "Caught SIGINT, closing connection");
-    engine_manager.printResults(users);
     sleep(1);
     exit(sig);
 }
