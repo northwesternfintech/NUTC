@@ -1,9 +1,9 @@
 #include "common.hpp"
+#include "dev_mode/dev_mode.hpp"
 #include "firebase/firebase.hpp"
 #include "git.h"
 #include "pywrapper/pywrapper.hpp"
 #include "rabbitmq/rabbitmq.hpp"
-#include "dev_mode/dev_mode.hpp"
 
 #include <argparse/argparse.hpp>
 #include <pybind11/pybind11.h>
@@ -111,6 +111,7 @@ main(int argc, const char** argv)
     if (!algo.has_value()) {
         return 0;
     }
+    conn.waitForStartTime();
 
     // Initialize the algorithm. For now, only designed for py
     nutc::pywrapper::create_api_module(conn.getMarketFunc(uid));

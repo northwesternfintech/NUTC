@@ -2,6 +2,8 @@
 
 #include "logging.hpp"
 
+#include <chrono>
+
 namespace nutc {
 namespace rabbitmq {
 RabbitMQ::RabbitMQ(
@@ -16,7 +18,7 @@ RabbitMQ::RabbitMQ(
 void
 RabbitMQ::addLiquidityToTicker(const std::string& ticker, float quantity, float price)
 {
-    engine_manager.addInitialLiquidity(ticker, quantity, price);
+    engine_manager.add_initial_liquidity(ticker, quantity, price);
     ObUpdate update{ticker, messages::SIDE::SELL, price, quantity};
     std::vector<ObUpdate> vec{};
     vec.push_back(update);
@@ -26,6 +28,28 @@ RabbitMQ::addLiquidityToTicker(const std::string& ticker, float quantity, float 
 RabbitMQ::~RabbitMQ()
 {
     closeConnection();
+}
+
+void
+RabbitMQ::sendStartTime(const manager::ClientManager& manager, int wait_seconds)
+{
+    std::vector<manager::Client> active_clients = manager.get_clients(true);
+    using time_point = std::chrono::high_resolution_clock::time_point;
+    time_point time =
+        std::chrono::high_resolution_clock::now() + std::chrono::seconds(wait_seconds);
+    long long time_ns = std::chrono::time_point_cast<std::chrono::nanoseconds>(time)
+                            .time_since_epoch()
+                            .count();
+
+    messages::StartTime message{time_ns};
+    std::string buf = glz::write_json(message);
+    auto send_to_client = [this, buf](const manager::Client& client) {
+        publishMessage(client.uid, buf);
+    };
+
+    for (const auto& client : active_clients) {
+        send_to_client(client);
+    }
 }
 
 bool
@@ -132,7 +156,7 @@ RabbitMQ::handleIncomingMessages()
 void
 RabbitMQ::addTicker(const std::string& ticker)
 {
-    engine_manager.addEngine(ticker);
+    engine_manager.add_engine(ticker);
 }
 
 void
@@ -153,7 +177,7 @@ RabbitMQ::handleIncomingMarketOrder(MarketOrder& order)
 
     log_i(rabbitmq, "Received market order: {}", buffer);
     std::optional<std::reference_wrapper<Engine>> engine =
-        engine_manager.getEngine(order.ticker);
+        engine_manager.get_engine(order.ticker);
     if (!engine.has_value()) {
         log_w(
             matching, "Received order for unknown ticker {}. Discarding order",
@@ -165,13 +189,6 @@ RabbitMQ::handleIncomingMarketOrder(MarketOrder& order)
     for (const auto& match : matches) {
         std::string buyer_uid = match.buyer_uid;
         std::string seller_uid = match.seller_uid;
-        // float capital_exchanged = match.price * match.quantity;
-        // clients.modifyCapital(buyer_uid, -capital_exchanged);
-        // clients.modifyCapital(seller_uid, capital_exchanged);
-        // clients.modifyHoldings(buyer_uid, match.ticker, match.quantity);
-        // if (seller_uid != "SIMULATED") {
-        // clients.modifyHoldings(seller_uid, match.ticker, -match.quantity);
-        // }
         broadcastAccountUpdate(match);
         log_i(
             matching, "Matched order with price {} and quantity {}", match.price,
@@ -199,11 +216,11 @@ RabbitMQ::broadcastAccountUpdate(const Match& match)
     std::string buyer_uid = match.buyer_uid;
     std::string seller_uid = match.seller_uid;
     AccountUpdate buyer_update = {
-        clients.getCapital(match.buyer_uid), match.ticker, messages::SIDE::BUY,
+        clients.get_capital(match.buyer_uid), match.ticker, messages::SIDE::BUY,
         match.price, match.quantity
     };
     AccountUpdate seller_update = {
-        clients.getCapital(match.seller_uid), match.ticker, messages::SIDE::SELL,
+        clients.get_capital(match.seller_uid), match.ticker, messages::SIDE::SELL,
         match.price, match.quantity
     };
 
@@ -234,7 +251,7 @@ RabbitMQ::broadcastObUpdates(
         }
     };
 
-    const auto activeClients = clients.getClients(true);
+    const auto activeClients = clients.get_clients(true);
     std::for_each(activeClients.begin(), activeClients.end(), broadcastToClient);
 }
 
@@ -249,7 +266,7 @@ RabbitMQ::broadcastMatches(const std::vector<Match>& matches)
         }
     };
 
-    const auto activeClients = clients.getClients(true);
+    const auto activeClients = clients.get_clients(true);
     std::for_each(activeClients.begin(), activeClients.end(), broadcastToClient);
 }
 
@@ -337,7 +354,7 @@ RabbitMQ::waitForClients(int num_clients)
                 message.client_uid, message.ready ? "ready" : "not ready"
             );
             if (message.ready) {
-                clients.setClientActive(message.client_uid);
+                clients.set_active(message.client_uid);
                 num_running++;
             }
         }
@@ -388,7 +405,7 @@ RabbitMQ::closeConnection()
     };
 
     // Iterate over clients and shut them down
-    for (const auto& client : clients.getClients(true)) {
+    for (const auto& client : clients.get_clients(true)) {
         shutdownClient(client);
     }
 

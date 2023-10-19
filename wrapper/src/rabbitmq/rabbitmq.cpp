@@ -2,6 +2,8 @@
 
 #include "logging.hpp"
 
+#include <chrono>
+
 namespace nutc {
 namespace rabbitmq {
 
@@ -49,8 +51,14 @@ std::variant<ShutdownMessage, RMQError>
 RabbitMQ::handleIncomingMessages()
 {
     while (true) {
-        std::variant<ShutdownMessage, RMQError, ObUpdate, Match, AccountUpdate> data =
-            consumeMessage();
+        std::variant<
+            StartTime,
+            ShutdownMessage,
+            RMQError,
+            ObUpdate,
+            Match,
+            AccountUpdate>
+            data = consumeMessage();
         if (std::holds_alternative<ShutdownMessage>(data)) {
             log_w(
                 rabbitmq,
@@ -116,7 +124,6 @@ bool
 RabbitMQ::publishMarketOrder(
     const std::string& client_uid,
     const std::string& side,
-    const std::string& type,
     const std::string& ticker,
     float quantity,
     float price
@@ -127,8 +134,7 @@ RabbitMQ::publishMarketOrder(
     }
     MarketOrder order{
         client_uid,
-        side == "BUY" ? messages::BUY : messages::SELL,
-        type,
+        side == "BUY" ? messages::SIDE::BUY : messages::SIDE::SELL,
         ticker,
         quantity,
         price
@@ -162,16 +168,16 @@ RabbitMQ::publishMessage(const std::string& queueName, const std::string& messag
     return true;
 }
 
-std::variant<ShutdownMessage, RMQError, ObUpdate, Match, AccountUpdate>
+std::variant<StartTime, ShutdownMessage, RMQError, ObUpdate, Match, AccountUpdate>
 RabbitMQ::consumeMessage()
 {
     std::string buf = consumeMessageAsString();
     if (buf == "") {
         return RMQError{"Failed to consume message."};
     }
-    log_i(rabbitmq, "{}", buf);
 
-    std::variant<ShutdownMessage, RMQError, ObUpdate, Match, AccountUpdate> data{};
+    std::variant<StartTime, ShutdownMessage, RMQError, ObUpdate, Match, AccountUpdate>
+        data{};
     auto err = glz::read_json(data, buf);
     if (err) {
         std::string error = glz::format_error(err, buf);
@@ -268,7 +274,6 @@ RabbitMQ::getMarketFunc(const std::string& uid)
         this,
         uid,
         std::placeholders::_1,
-        "MARKET",
         std::placeholders::_2,
         std::placeholders::_3,
         std::placeholders::_4
@@ -281,8 +286,23 @@ RabbitMQ::publishInit(const std::string& uid, bool ready)
     std::string message = glz::write_json(InitMessage{uid, ready});
     log_i(rabbitmq, "Publishing init message: {}", message);
     bool rVal = publishMessage("market_order", message);
-    sleep(5);
     return rVal;
+}
+
+void
+RabbitMQ::waitForStartTime()
+{
+    auto message = consumeMessage();
+    if (std::holds_alternative<StartTime>(message)) {
+        StartTime start = std::get<StartTime>(message);
+        std::chrono::high_resolution_clock::time_point wait_until =
+            std::chrono::high_resolution_clock::time_point(
+                std::chrono::nanoseconds(start.start_time_ns)
+            );
+        std::this_thread::sleep_until(wait_until);
+        log_i(rabbitmq, "Received start time: {}", start.start_time_ns);
+        return;
+    }
 }
 
 bool

@@ -5,6 +5,7 @@
 #include <string>
 
 using Engine = nutc::matching::Engine;
+using EngineRef = std::reference_wrapper<nutc::matching::Engine>;
 
 namespace nutc {
 /**
@@ -24,22 +25,19 @@ public:
      * @param ticker The ticker of the engine to return
      * @return A reference to the engine with the given ticker, if it exists
      */
-    std::optional<std::reference_wrapper<Engine>> getEngine(const std::string& ticker);
+    std::optional<EngineRef> get_engine(const std::string& ticker);
 
     /**
      * @brief Adds an engine with the given ticker
      * @param ticker The ticker of the engine to add
      * @return A reference to the engine with the given ticker
      */
-    void addEngine(const std::string& ticker);
+    void add_engine(const std::string& ticker);
 
     /** @brief Adds initial liquidity by creating fake sell orders for a given ticker at
      * a given quantity/price
      */
-    void addInitialLiquidity(const std::string& ticker, float quantity, float price);
-
-    float get_last_sell_price(const std::string& ticker);
-    void printResults(manager::ClientManager& manager);
+    void add_initial_liquidity(const std::string& ticker, float quantity, float price);
 
 private:
     std::map<std::string, matching::Engine> engines;

@@ -14,7 +14,7 @@ isNearlyEqual(float a, float b, float epsilon)
 bool
 validateMatch(
     const Match& match, const std::string& ticker, const std::string& buyer_uid,
-    const std::string& seller_uid, nutc::messages::SIDE side, float price,
+    const std::string& seller_uid, messages::SIDE side, float price,
     float quantity
 )
 {

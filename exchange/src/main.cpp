@@ -1,4 +1,4 @@
-#include "client_manager/manager.hpp"
+#include "client_manager/client_manager.hpp"
 #include "config.h"
 #include "dev_mode/dev_mode.hpp"
 #include "firebase/firebase.hpp"
@@ -60,7 +60,6 @@ void
 handle_sigint(int sig)
 {
     log_i(rabbitmq, "Caught SIGINT, closing connection");
-    engine_manager.printResults(users);
     sleep(1);
     exit(sig);
 }
@@ -95,6 +94,7 @@ main(int argc, const char** argv)
 
     // Run exchange
     conn.waitForClients(num_clients);
+    conn.sendStartTime(users, CLIENT_WAIT_SECS);
     conn.addLiquidityToTicker("A", 1000, 100);
     conn.addLiquidityToTicker("B", 2000, 200);
     conn.addLiquidityToTicker("C", 3000, 300);

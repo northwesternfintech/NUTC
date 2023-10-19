@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config.h"
 #include "logging.hpp"
 #include "util/messages.hpp" // TYPE should be an enum {AccountUpdate, OrderbookUpdate, TradeUpdate, MarketOrder}
 
@@ -10,12 +11,10 @@
 namespace nutc {
 namespace events {
 
-enum class MessageType { // needs to be changed to something better, but I will leave
-                         // this here for now
-    ACCOUNT_UPDATE,
-    ORDERBOOK_UPDATE,
-    TRADE_UPDATE,
-    MARKET_ORDER
+enum class MESSAGE_TYPE { // needs to be changed to something better, but I will leave
+                          // this here for now
+    MARKET_ORDER,
+    MATCH
 };
 
 class Logger {
@@ -35,9 +34,13 @@ public:
      *
      * @param file_name File name to log to
      */
-    explicit Logger(std::string file_name) :
-        file_name_(file_name), output_file_(file_name, std::ios::out | std::ios::app)
-    {}
+
+    static Logger& get_logger();
+
+    // Logger(const Logger&) = delete;
+    // Logger(Logger&&) = delete;
+    // Logger& operator=(const Logger&) = delete;
+    // Logger& operator=(Logger&&) = delete;
 
     /**
      * @brief Log an event to this Logger's file
@@ -47,8 +50,8 @@ public:
      * @param uid optional UID to log with this message
      */
     void log_event(
-        MessageType type, const std::string& json_message,
-        const std::optional<std::string>& uid
+        MESSAGE_TYPE type, const std::string& json_message,
+        const std::optional<std::string>& uid = std::nullopt
     );
 
     /**
@@ -61,6 +64,11 @@ public:
     {
         return file_name_;
     }
+
+private:
+    explicit Logger(std::string file_name) :
+        file_name_(file_name), output_file_(file_name, std::ios::out | std::ios::app)
+    {}
 };
 
 } // namespace events

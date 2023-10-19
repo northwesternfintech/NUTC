@@ -1,8 +1,9 @@
 #pragma once
 
-#include "client_manager/manager.hpp"
+#include "client_manager/client_manager.hpp"
 #include "logging.hpp"
 #include "util/messages.hpp"
+#include "logger/logger.hpp"
 
 #include <chrono>
 
@@ -13,6 +14,7 @@
 using MarketOrder = nutc::messages::MarketOrder;
 using ObUpdate = nutc::messages::ObUpdate;
 using Match = nutc::messages::Match;
+using SIDE = nutc::messages::SIDE;
 
 namespace nutc {
 /**
@@ -40,22 +42,23 @@ public:
      */
     MatchResult
     match_order(MarketOrder& aggressive_order, manager::ClientManager& manager);
-    float get_last_sell_price();
 
     void add_order_without_matching(MarketOrder aggressive_order);
 
-    Engine(); // con
-
 private:
-    float last_sell_price{};
-    float getMatchQuantity(
-        const MarketOrder& passive_order, const MarketOrder& aggressive_order
+    float last_sell_price;
+    static std::string get_client_uid(
+        SIDE side, const MarketOrder& aggressive, const MarketOrder& passive
     );
-    std::priority_queue<MarketOrder>& get_passive_orders(messages::SIDE side);
+    float get_match_quantity(const MarketOrder& passive, const MarketOrder& aggressive);
 
-    MatchResult attempt_matches(
-        std::priority_queue<MarketOrder>& passive_orders, MarketOrder& aggressive_order,
-        manager::ClientManager& manager
+    std::priority_queue<MarketOrder>& get_orders(SIDE side);
+
+    MatchResult
+    attempt_matches(manager::ClientManager& manager, const MarketOrder& aggressive);
+    SIDE get_aggressive_side(const MarketOrder& order1, const MarketOrder& order2);
+    bool insufficient_capital(
+        const MarketOrder& order, const manager::ClientManager& manager
     );
 };
 } // namespace matching

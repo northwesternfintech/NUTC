@@ -2,11 +2,14 @@
 #define STARTING_CAPITAL 100000
 #define DEBUG_NUM_USERS 2
 
+#define CLIENT_WAIT_SECS 10
+
 // logging
 #define LOG_BACKTRACE_SIZE 10
 
 #define LOG_DIR            "logs"
 #define LOG_FILE           (LOG_DIR "/app.log")
+#define JSON_LOG_FILE      (LOG_DIR "/structured.log")
 
 #define LOG_FILE_SIZE      (1024 * 1024 / 2) // 512 KB
 #define LOG_BACKUP_COUNT   5

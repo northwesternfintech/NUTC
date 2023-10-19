@@ -10,9 +10,16 @@
 namespace nutc {
 namespace events {
 
+Logger&
+Logger::get_logger()
+{
+    static Logger logger(JSON_LOG_FILE);
+    return logger;
+}
+
 void
 Logger::log_event(
-    MessageType type, const std::string& json_message,
+    MESSAGE_TYPE type, const std::string& json_message,
     const std::optional<std::string>& uid
 )
 {
@@ -23,11 +30,11 @@ Logger::log_event(
     }
 
     // Write start of JSON
-    std::cout << "{ ";
+    output_file_ << "{ ";
 
     // Write current GMT time
     const auto now = std::chrono::system_clock::now();
-    std::cout << fmt::format("\"time\": \"{:%FT%TZ}\", ", now);
+    output_file_ << fmt::format("\"time\": \"{:%FT%TZ}\", ", now);
 
     // Add MessageType and JSON message (and opt UID) to file
     output_file_ << "\"type\": " << static_cast<int>(type) << ", "; // add type
