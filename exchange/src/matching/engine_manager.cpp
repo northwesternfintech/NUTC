@@ -15,7 +15,7 @@ Manager::get_engine(const std::string& ticker)
 void
 Manager::add_initial_liquidity(const std::string& ticker, float quantity, float price)
 {
-    MarketOrder to_add{"SIMULATED", messages::SIDE::SELL, "MARKET", ticker, quantity,
+    MarketOrder to_add{"SIMULATED", messages::SIDE::SELL, ticker, quantity,
                        price};
     auto it = engines.find(ticker);
     if (it != engines.end()) {

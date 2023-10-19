@@ -51,7 +51,7 @@ struct Match {
 };
 
 inline constexpr bool
-isCloseToZero(float value, float epsilon = 1e-6f)
+is_close_to_zero(float value, float epsilon = 1e-6f)
 {
     return std::fabs(value) < epsilon;
 }
@@ -64,25 +64,36 @@ isCloseToZero(float value, float epsilon = 1e-6f)
 struct MarketOrder {
     std::string client_uid;
     SIDE side;
-    std::string type;
     std::string ticker;
     float quantity;
     float price;
 
     // Used to sort orders by time created
     long long order_index;
-    static long long global_index;
 
-    MarketOrder() { order_index = global_index++; }
+    MarketOrder() { order_index = get_and_increment_global_index(); }
+
+    static long long
+    get_and_increment_global_index()
+    {
+        static long long global_index = 0;
+        return global_index++;
+    }
 
     MarketOrder(
-        const std::string& client_uid, SIDE side, const std::string& type,
-        const std::string& ticker, float quantity, float price
+        const std::string& client_uid,
+        SIDE side,
+        const std::string& ticker,
+        float quantity,
+        float price
     ) :
         client_uid(client_uid),
-        side(side), type(type), ticker(ticker), quantity(quantity), price(price)
+        side(side),
+        ticker(ticker),
+        quantity(quantity),
+        price(price)
     {
-        order_index = global_index++;
+        order_index = get_and_increment_global_index();
     }
 
     // toString
@@ -91,9 +102,13 @@ struct MarketOrder {
     {
         std::string side_str = side == SIDE::BUY ? "BUY" : "SELL";
         return fmt::format(
-            "MarketOrder(client_uid={}, side={}, type={}, ticker={}, quantity={}, "
+            "MarketOrder(client_uid={}, side={}, ticker={}, quantity={}, "
             "price={})",
-            client_uid, side_str, type, ticker, quantity, price
+            client_uid,
+            side_str,
+            ticker,
+            quantity,
+            price
         );
     }
 
@@ -102,7 +117,7 @@ struct MarketOrder {
     {
         // assuming both sides are same
         // otherwise, this shouldn't even be called
-        if (isCloseToZero(this->price - other.price)) {
+        if (is_close_to_zero(this->price - other.price)) {
             return this->order_index > other.order_index;
         }
         else if (this->side == SIDE::BUY) {
@@ -139,7 +154,6 @@ struct MarketOrder {
     {
         this->client_uid = other.client_uid;
         this->side = other.side;
-        this->type = other.type;
         this->ticker = other.ticker;
         this->quantity = other.quantity;
         this->price = other.price;
@@ -155,7 +169,6 @@ struct MarketOrder {
         this->order_index = other.order_index;
         this->client_uid = other.client_uid;
         this->side = other.side;
-        this->type = other.type;
         this->ticker = other.ticker;
         this->quantity = other.quantity;
         this->price = other.price;
@@ -194,7 +207,13 @@ template <>
 struct glz::meta<nutc::messages::ObUpdate> {
     using T = nutc::messages::ObUpdate;
     static constexpr auto value = object(
-        "security", &T::security, "side", &T::side, "price", &T::price, "quantity",
+        "security",
+        &T::security,
+        "side",
+        &T::side,
+        "price",
+        &T::price,
+        "quantity",
         &T::quantity
     );
 };
@@ -204,8 +223,16 @@ template <>
 struct glz::meta<nutc::messages::AccountUpdate> {
     using T = nutc::messages::AccountUpdate;
     static constexpr auto value = object(
-        "capital_remaining", &T::capital_remaining, "ticker", &T::ticker, "side",
-        &T::side, "price", &T::price, "quantity", &T::quantity
+        "capital_remaining",
+        &T::capital_remaining,
+        "ticker",
+        &T::ticker,
+        "side",
+        &T::side,
+        "price",
+        &T::price,
+        "quantity",
+        &T::quantity
     );
 };
 
@@ -214,8 +241,18 @@ template <>
 struct glz::meta<nutc::messages::Match> {
     using T = nutc::messages::Match;
     static constexpr auto value = object(
-        "ticker", &T::ticker, "buyer_uid", &T::buyer_uid, "seller_uid", &T::seller_uid,
-        "side", &T::side, "price", &T::price, "quantity", &T::quantity
+        "ticker",
+        &T::ticker,
+        "buyer_uid",
+        &T::buyer_uid,
+        "seller_uid",
+        &T::seller_uid,
+        "side",
+        &T::side,
+        "price",
+        &T::price,
+        "quantity",
+        &T::quantity
     );
 };
 
@@ -231,8 +268,16 @@ template <>
 struct glz::meta<nutc::messages::MarketOrder> {
     using T = nutc::messages::MarketOrder;
     static constexpr auto value = object(
-        "client_uid", &T::client_uid, "side", &T::side, "type", &T::type, "ticker",
-        &T::ticker, "quantity", &T::quantity, "price", &T::price
+        "client_uid",
+        &T::client_uid,
+        "side",
+        &T::side,
+        "ticker",
+        &T::ticker,
+        "quantity",
+        &T::quantity,
+        "price",
+        &T::price
     );
 };
 

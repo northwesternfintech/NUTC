@@ -25,10 +25,37 @@ protected:
     Engine engine;
 };
 
+TEST_F(ManyOrders, CorrectTimePriority)
+{
+    MarketOrder order1{"A", BUY, "ETHUSD", 1, 1};
+    MarketOrder order2{"B", BUY, "ETHUSD", 1, 1};
+    MarketOrder order3{"C", SELL, "ETHUSD", 1, 1};
+    MarketOrder order4{"D", BUY, "ETHUSD", 1, 1};
+
+    auto [matches1, updates1] = engine.match_order(order1, manager);
+    auto [matches2, updates2] = engine.match_order(order2, manager);
+    engine.add_order_without_matching(order3);
+    auto [matches3, updates3] = engine.match_order(order4, manager);
+    EXPECT_EQ(matches1.size(), 0);
+    EXPECT_EQ(updates1.size(), 1);
+    EXPECT_EQ_OB_UPDATE(updates1[0], "ETHUSD", BUY, 1, 1);
+    EXPECT_EQ(matches2.size(), 0);
+    EXPECT_EQ(updates2.size(), 1);
+    EXPECT_EQ_OB_UPDATE(updates2[0], "ETHUSD", BUY, 1, 1);
+
+    EXPECT_EQ(matches3.size(), 1);
+    EXPECT_EQ(updates3.size(), 3);
+    EXPECT_EQ_OB_UPDATE(updates3[0], "ETHUSD", BUY, 1, 0);
+    EXPECT_EQ_OB_UPDATE(updates3[1], "ETHUSD", SELL, 1, 0);
+    EXPECT_EQ_OB_UPDATE(updates3[2], "ETHUSD", BUY, 1, 1);
+    // TODO: INCORRECT, SHOULD BE SELL
+    EXPECT_EQ_MATCH(matches3[0], "ETHUSD", "A", "C", SELL, 1, 1);
+}
+
 TEST_F(ManyOrders, OnlyMatchesOne)
 {
-    MarketOrder order1{"A", BUY, "MARKET", "ETHUSD", 1, 1};
-    MarketOrder order2{"B", SELL, "MARKET", "ETHUSD", 1, 1};
+    MarketOrder order1{"A", BUY, "ETHUSD", 1, 1};
+    MarketOrder order2{"B", SELL, "ETHUSD", 1, 1};
 
     auto [matches1, updates1] = engine.match_order(order1, manager);
     auto [matches2, updates2] = engine.match_order(order1, manager);
@@ -46,10 +73,10 @@ TEST_F(ManyOrders, OnlyMatchesOne)
 
 TEST_F(ManyOrders, SimpleManyOrder)
 {
-    MarketOrder order1{"A", BUY, "MARKET", "ETHUSD", 1, 1};
-    MarketOrder order2{"B", BUY, "MARKET", "ETHUSD", 1, 1};
-    MarketOrder order3{"C", BUY, "MARKET", "ETHUSD", 1, 1};
-    MarketOrder order4{"D", SELL, "MARKET", "ETHUSD", 3, 1};
+    MarketOrder order1{"A", BUY, "ETHUSD", 1, 1};
+    MarketOrder order2{"B", BUY, "ETHUSD", 1, 1};
+    MarketOrder order3{"C", BUY, "ETHUSD", 1, 1};
+    MarketOrder order4{"D", SELL, "ETHUSD", 3, 1};
 
     auto [matches1, updates1] = engine.match_order(order1, manager);
     auto [matches2, updates2] = engine.match_order(order2, manager);
@@ -77,10 +104,10 @@ TEST_F(ManyOrders, SimpleManyOrder)
 
 TEST_F(ManyOrders, PassiveAndAggressivePartial)
 {
-    MarketOrder order1{"A", SELL, "MARKET", "ETHUSD", 1, 1};
-    MarketOrder order2{"B", SELL, "MARKET", "ETHUSD", 10, 1};
-    MarketOrder order3{"C", BUY, "MARKET", "ETHUSD", 2, 3};
-    MarketOrder order4{"D", BUY, "MARKET", "ETHUSD", 10, 4};
+    MarketOrder order1{"A", SELL, "ETHUSD", 1, 1};
+    MarketOrder order2{"B", SELL, "ETHUSD", 10, 1};
+    MarketOrder order3{"C", BUY, "ETHUSD", 2, 3};
+    MarketOrder order4{"D", BUY, "ETHUSD", 10, 4};
 
     auto [matches1, updates1] = engine.match_order(order1, manager);
     auto [matches2, updates2] = engine.match_order(order2, manager);

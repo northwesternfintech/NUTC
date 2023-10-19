@@ -1,9 +1,9 @@
 #include "common.hpp"
+#include "dev_mode/dev_mode.hpp"
 #include "firebase/firebase.hpp"
 #include "git.h"
 #include "pywrapper/pywrapper.hpp"
 #include "rabbitmq/rabbitmq.hpp"
-#include "dev_mode/dev_mode.hpp"
 
 #include <argparse/argparse.hpp>
 #include <pybind11/pybind11.h>

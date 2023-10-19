@@ -115,7 +115,6 @@ private:
     bool publishMarketOrder(
         const std::string& client_uid,
         const std::string& side,
-        const std::string& type,
         const std::string& ticker,
         float quantity,
         float price

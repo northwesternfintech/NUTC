@@ -1,7 +1,5 @@
 #include "macros.hpp"
 
-long long MarketOrder::global_index = 0;
-
 namespace nutc {
 namespace testing_utils {
 bool

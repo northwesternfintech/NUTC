@@ -116,7 +116,6 @@ bool
 RabbitMQ::publishMarketOrder(
     const std::string& client_uid,
     const std::string& side,
-    const std::string& type,
     const std::string& ticker,
     float quantity,
     float price
@@ -127,8 +126,7 @@ RabbitMQ::publishMarketOrder(
     }
     MarketOrder order{
         client_uid,
-        side == "BUY" ? messages::BUY : messages::SELL,
-        type,
+        side == "BUY" ? messages::SIDE::BUY : messages::SIDE::SELL,
         ticker,
         quantity,
         price
@@ -268,7 +266,6 @@ RabbitMQ::getMarketFunc(const std::string& uid)
         this,
         uid,
         std::placeholders::_1,
-        "MARKET",
         std::placeholders::_2,
         std::placeholders::_3,
         std::placeholders::_4
