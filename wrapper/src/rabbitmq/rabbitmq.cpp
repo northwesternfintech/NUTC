@@ -175,7 +175,6 @@ RabbitMQ::consumeMessage()
     if (buf == "") {
         return RMQError{"Failed to consume message."};
     }
-    log_i(rabbitmq, "{}", buf);
 
     std::variant<StartTime, ShutdownMessage, RMQError, ObUpdate, Match, AccountUpdate>
         data{};
