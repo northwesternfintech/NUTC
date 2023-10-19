@@ -10,9 +10,20 @@
 namespace nutc {
 namespace events {
 
+Logger&
+Logger::get_logger(const std::string& file_name)
+{
+    static std::unordered_map<std::string, Logger> loggers;
+    auto it = loggers.find(file_name);
+    if (it == loggers.end()) {
+        it = loggers.emplace(file_name, Logger(file_name)).first;
+    }
+    return it->second;
+}
+
 void
 Logger::log_event(
-    MessageType type, const std::string& json_message,
+    MESSAGE_TYPE type, const std::string& json_message,
     const std::optional<std::string>& uid
 )
 {

@@ -3,6 +3,7 @@
 #include "client_manager/client_manager.hpp"
 #include "logging.hpp"
 #include "util/messages.hpp"
+#include "logger/logger.hpp"
 
 #include <chrono>
 
