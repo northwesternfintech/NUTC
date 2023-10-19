@@ -94,6 +94,7 @@ main(int argc, const char** argv)
 
     // Run exchange
     conn.waitForClients(num_clients);
+    conn.sendStartTime(users, CLIENT_WAIT_SECS);
     conn.addLiquidityToTicker("A", 1000, 100);
     conn.addLiquidityToTicker("B", 2000, 200);
     conn.addLiquidityToTicker("C", 3000, 300);

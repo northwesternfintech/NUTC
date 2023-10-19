@@ -111,6 +111,7 @@ main(int argc, const char** argv)
     if (!algo.has_value()) {
         return 0;
     }
+    conn.waitForStartTime();
 
     // Initialize the algorithm. For now, only designed for py
     nutc::pywrapper::create_api_module(conn.getMarketFunc(uid));

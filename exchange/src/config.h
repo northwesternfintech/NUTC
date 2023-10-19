@@ -2,6 +2,8 @@
 #define STARTING_CAPITAL 100000
 #define DEBUG_NUM_USERS 2
 
+#define CLIENT_WAIT_SECS 10
+
 // logging
 #define LOG_BACKTRACE_SIZE 10
 

@@ -39,7 +39,9 @@ public:
      *
      * @param manager The ClientManager to use for client management
      */
-    RabbitMQ(manager::ClientManager& manager, engine_manager::Manager& matching_manager);
+    RabbitMQ(
+        manager::ClientManager& manager, engine_manager::Manager& matching_manager
+    );
 
     /**
      * @brief Disconnects from RabbitMQ (RAII)
@@ -59,6 +61,7 @@ public:
      * */
     void addTicker(const std::string& ticker);
     void addLiquidityToTicker(const std::string& ticker, float quantity, float price);
+    void sendStartTime(const manager::ClientManager& manager, int wait_seconds);
 
     /**
      * @brief On startup, waits for all clients to send an initialization message

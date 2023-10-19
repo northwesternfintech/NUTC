@@ -2,6 +2,8 @@
 
 #include "logging.hpp"
 
+#include <chrono>
+
 namespace nutc {
 namespace rabbitmq {
 RabbitMQ::RabbitMQ(
@@ -26,6 +28,28 @@ RabbitMQ::addLiquidityToTicker(const std::string& ticker, float quantity, float 
 RabbitMQ::~RabbitMQ()
 {
     closeConnection();
+}
+
+void
+RabbitMQ::sendStartTime(const manager::ClientManager& manager, int wait_seconds)
+{
+    std::vector<manager::Client> active_clients = manager.get_clients(true);
+    using time_point = std::chrono::high_resolution_clock::time_point;
+    time_point time =
+        std::chrono::high_resolution_clock::now() + std::chrono::seconds(wait_seconds);
+    long long time_ns = std::chrono::time_point_cast<std::chrono::nanoseconds>(time)
+                            .time_since_epoch()
+                            .count();
+
+    messages::StartTime message{time_ns};
+    std::string buf = glz::write_json(message);
+    auto send_to_client = [this, buf](const manager::Client& client) {
+        publishMessage(client.uid, buf);
+    };
+
+    for (const auto& client : active_clients) {
+        send_to_client(client);
+    }
 }
 
 bool

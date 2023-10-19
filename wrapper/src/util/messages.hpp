@@ -38,6 +38,10 @@ struct InitMessage {
     bool ready;
 };
 
+struct StartTime {
+    long long start_time_ns;
+};
+
 /**
  * @brief Sent by exchange to a client to indicate a match has occured
  */
@@ -254,6 +258,13 @@ struct glz::meta<nutc::messages::Match> {
         "quantity",
         &T::quantity
     );
+};
+
+/// \cond
+template <>
+struct glz::meta<nutc::messages::StartTime> {
+    using T = nutc::messages::StartTime;
+    static constexpr auto value = object("start_time_ns", &T::start_time_ns);
 };
 
 /// \cond

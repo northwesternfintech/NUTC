@@ -6,6 +6,8 @@
 
 #include <unistd.h>
 
+#include <chrono>
+
 #include <iostream>
 #include <string>
 
@@ -19,6 +21,7 @@ using ObUpdate = nutc::messages::ObUpdate;
 using ShutdownMessage = nutc::messages::ShutdownMessage;
 using Match = nutc::messages::Match;
 using AccountUpdate = nutc::messages::AccountUpdate;
+using StartTime = nutc::messages::StartTime;
 
 /**
  * @brief The namespace for the NUTC client
@@ -83,9 +86,10 @@ public:
      * @param uid The unique identifier for the client
      * @returns A function that takes the order parameters and publishes the order
      */
-    std::function<
-        bool(const std::string&, const std::string&, float, float)>
+    std::function<bool(const std::string&, const std::string&, float, float)>
     getMarketFunc(const std::string& uid);
+
+    void waitForStartTime();
 
     /**
      * @brief Main event loop; handles incoming messages from exchange
@@ -121,7 +125,7 @@ private:
     );
 
     std::string consumeMessageAsString();
-    std::variant<ShutdownMessage, RMQError, ObUpdate, Match, AccountUpdate>
+    std::variant<StartTime, ShutdownMessage, RMQError, ObUpdate, Match, AccountUpdate>
     consumeMessage();
 };
 

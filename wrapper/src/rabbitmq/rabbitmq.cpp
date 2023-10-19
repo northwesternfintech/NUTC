@@ -2,6 +2,8 @@
 
 #include "logging.hpp"
 
+#include <chrono>
+
 namespace nutc {
 namespace rabbitmq {
 
@@ -49,8 +51,14 @@ std::variant<ShutdownMessage, RMQError>
 RabbitMQ::handleIncomingMessages()
 {
     while (true) {
-        std::variant<ShutdownMessage, RMQError, ObUpdate, Match, AccountUpdate> data =
-            consumeMessage();
+        std::variant<
+            StartTime,
+            ShutdownMessage,
+            RMQError,
+            ObUpdate,
+            Match,
+            AccountUpdate>
+            data = consumeMessage();
         if (std::holds_alternative<ShutdownMessage>(data)) {
             log_w(
                 rabbitmq,
@@ -160,7 +168,7 @@ RabbitMQ::publishMessage(const std::string& queueName, const std::string& messag
     return true;
 }
 
-std::variant<ShutdownMessage, RMQError, ObUpdate, Match, AccountUpdate>
+std::variant<StartTime, ShutdownMessage, RMQError, ObUpdate, Match, AccountUpdate>
 RabbitMQ::consumeMessage()
 {
     std::string buf = consumeMessageAsString();
@@ -169,7 +177,8 @@ RabbitMQ::consumeMessage()
     }
     log_i(rabbitmq, "{}", buf);
 
-    std::variant<ShutdownMessage, RMQError, ObUpdate, Match, AccountUpdate> data{};
+    std::variant<StartTime, ShutdownMessage, RMQError, ObUpdate, Match, AccountUpdate>
+        data{};
     auto err = glz::read_json(data, buf);
     if (err) {
         std::string error = glz::format_error(err, buf);
@@ -278,8 +287,23 @@ RabbitMQ::publishInit(const std::string& uid, bool ready)
     std::string message = glz::write_json(InitMessage{uid, ready});
     log_i(rabbitmq, "Publishing init message: {}", message);
     bool rVal = publishMessage("market_order", message);
-    sleep(5);
     return rVal;
+}
+
+void
+RabbitMQ::waitForStartTime()
+{
+    auto message = consumeMessage();
+    if (std::holds_alternative<StartTime>(message)) {
+        StartTime start = std::get<StartTime>(message);
+        std::chrono::high_resolution_clock::time_point wait_until =
+            std::chrono::high_resolution_clock::time_point(
+                std::chrono::nanoseconds(start.start_time_ns)
+            );
+        std::this_thread::sleep_until(wait_until);
+        log_i(rabbitmq, "Received start time: {}", start.start_time_ns);
+        return;
+    }
 }
 
 bool
