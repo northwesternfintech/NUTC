@@ -1,4 +1,4 @@
-#include "rabbitmq.hpp"
+#include "networking/rabbitmq/rabbitmq.hpp"
 
 #include "logging.hpp"
 

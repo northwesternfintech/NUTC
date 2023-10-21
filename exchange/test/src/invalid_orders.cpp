@@ -1,8 +1,8 @@
 #include "client_manager/client_manager.hpp"
 #include "lib.hpp"
 #include "matching/engine.hpp"
-#include "util/macros.hpp"
-#include "util/messages.hpp"
+#include "test_utils/macros.hpp"
+#include "utils/messages.hpp"
 
 #include <gtest/gtest.h>
 

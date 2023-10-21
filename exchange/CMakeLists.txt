@@ -18,15 +18,15 @@ include(cmake/variables.cmake)
 add_library(
     NUTC24_lib OBJECT
     src/lib.cpp
-    src/dev_mode/dev_mode.cpp
+    src/utils/dev_mode/dev_mode.cpp
     src/matching/engine_manager.cpp
     src/logging.cpp
-    src/firebase/firebase.cpp
+    src/networking/firebase/firebase.cpp
     src/process_spawning/spawning.cpp
-    src/rabbitmq/rabbitmq.cpp
+    src/networking/rabbitmq/rabbitmq.cpp
     src/matching/engine.cpp
     src/client_manager/client_manager.cpp
-    src/logger/logger.cpp
+    src/utils/logger/logger.cpp
 )
 
 target_include_directories(

@@ -1,12 +1,12 @@
 #include "client_manager/client_manager.hpp"
 #include "config.h"
-#include "dev_mode/dev_mode.hpp"
-#include "firebase/firebase.hpp"
+#include "utils/dev_mode/dev_mode.hpp"
+#include "networking/firebase/firebase.hpp"
 #include "lib.hpp"
 #include "logging.hpp"
 #include "matching/engine.hpp"
 #include "process_spawning/spawning.hpp"
-#include "rabbitmq/rabbitmq.hpp"
+#include "networking/rabbitmq/rabbitmq.hpp"
 
 #include <argparse/argparse.hpp>
 
