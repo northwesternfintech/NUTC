@@ -1,10 +1,10 @@
 #pragma once
 
-#include <sys/stat.h>
 #include <fmt/format.h>
+#include <sys/stat.h>
 
-#include <fstream>
 #include <exception>
+#include <fstream>
 #include <iostream>
 #include <optional>
 #include <sstream>

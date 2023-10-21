@@ -26,8 +26,8 @@ protected:
 
 TEST_F(BasicMatching, SimpleMatch)
 {
-    MarketOrder order1{"ABC", BUY,  "ETHUSD", 1, 1};
-    MarketOrder order2{"DEF", SELL,  "ETHUSD", 1, 1};
+    MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
+    MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
     auto [matches, ob_updates] = engine.match_order(order1, manager);
     EXPECT_EQ(matches.size(), 0);
     EXPECT_EQ(ob_updates.size(), 1);
@@ -42,11 +42,11 @@ TEST_F(BasicMatching, SimpleMatch)
 
 TEST_F(BasicMatching, CorrectBuyPricingOrder)
 {
-    MarketOrder buy1{"ABC", BUY,  "ETHUSD", 1, 1};
-    MarketOrder buy2{"ABC", BUY,  "ETHUSD", 1, 2};
-    MarketOrder buy3{"ABC", BUY,  "ETHUSD", 1, 3};
-    MarketOrder buy4{"ABC", BUY,  "ETHUSD", 1, 4};
-    MarketOrder sell1{"DEF", SELL,  "ETHUSD", 1, 1};
+    MarketOrder buy1{"ABC", BUY, "ETHUSD", 1, 1};
+    MarketOrder buy2{"ABC", BUY, "ETHUSD", 1, 2};
+    MarketOrder buy3{"ABC", BUY, "ETHUSD", 1, 3};
+    MarketOrder buy4{"ABC", BUY, "ETHUSD", 1, 4};
+    MarketOrder sell1{"DEF", SELL, "ETHUSD", 1, 1};
 
     // Place cheapest buy orders first, then most expensive
     auto [matches1, ob_updates1] = engine.match_order(buy1, manager);
@@ -79,9 +79,9 @@ TEST_F(BasicMatching, CorrectBuyPricingOrder)
 
 TEST_F(BasicMatching, NoMatchThenMatchBuy)
 {
-    MarketOrder order1{"ABC", SELL,  "ETHUSD", 1, 1000};
-    MarketOrder order2{"DEF", SELL,  "ETHUSD", 1, 1};
-    MarketOrder order3{"DEF", BUY,  "ETHUSD", 1, 2};
+    MarketOrder order1{"ABC", SELL, "ETHUSD", 1, 1000};
+    MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
+    MarketOrder order3{"DEF", BUY, "ETHUSD", 1, 2};
     auto [matches, ob_updates] = engine.match_order(order1, manager);
     auto [matches2, ob_updates2] = engine.match_order(order2, manager);
     auto [matches3, ob_updates3] = engine.match_order(order3, manager);
@@ -92,10 +92,10 @@ TEST_F(BasicMatching, NoMatchThenMatchBuy)
 
 TEST_F(BasicMatching, NoMatchThenMatchSell)
 {
-    MarketOrder order1{"ABC", BUY,  "ETHUSD", 1, 1};
-    MarketOrder order2{"DEF", BUY,  "ETHUSD", 1, 1000};
+    MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
+    MarketOrder order2{"DEF", BUY, "ETHUSD", 1, 1000};
 
-    MarketOrder order3{"DEF", SELL,  "ETHUSD", 1, 500};
+    MarketOrder order3{"DEF", SELL, "ETHUSD", 1, 500};
     auto [matches, ob_updates] = engine.match_order(order1, manager);
     auto [matches2, ob_updates2] = engine.match_order(order2, manager);
     auto [matches3, ob_updates3] = engine.match_order(order1, manager);
@@ -108,8 +108,8 @@ TEST_F(BasicMatching, NoMatchThenMatchSell)
 
 TEST_F(BasicMatching, PassivePriceMatch)
 {
-    MarketOrder order1{"ABC", BUY,  "ETHUSD", 1, 2};
-    MarketOrder order2{"DEF", SELL,  "ETHUSD", 1, 1};
+    MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 2};
+    MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
     auto [matches, ob_updates] = engine.match_order(order1, manager);
     EXPECT_EQ(matches.size(), 0);
     EXPECT_EQ(ob_updates.size(), 1);
@@ -124,8 +124,8 @@ TEST_F(BasicMatching, PassivePriceMatch)
 
 TEST_F(BasicMatching, PartialFill)
 {
-    MarketOrder order1{"ABC", BUY,  "ETHUSD", 2, 1};
-    MarketOrder order2{"DEF", SELL,  "ETHUSD", 1, 1};
+    MarketOrder order1{"ABC", BUY, "ETHUSD", 2, 1};
+    MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
     auto [matches, ob_updates] = engine.match_order(order1, manager);
     EXPECT_EQ(matches.size(), 0);
     EXPECT_EQ(ob_updates.size(), 1);
@@ -141,9 +141,9 @@ TEST_F(BasicMatching, PartialFill)
 
 TEST_F(BasicMatching, MultipleFill)
 {
-    MarketOrder order1{"ABC", BUY,  "ETHUSD", 1, 1};
-    MarketOrder order2{"ABC", BUY,  "ETHUSD", 1, 1};
-    MarketOrder order3{"DEF", SELL,  "ETHUSD", 2, 1};
+    MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
+    MarketOrder order2{"ABC", BUY, "ETHUSD", 1, 1};
+    MarketOrder order3{"DEF", SELL, "ETHUSD", 2, 1};
     auto [matches, ob_updates] = engine.match_order(order1, manager);
     EXPECT_EQ(matches.size(), 0);
     EXPECT_EQ(ob_updates.size(), 1);
@@ -165,9 +165,9 @@ TEST_F(BasicMatching, MultipleFill)
 
 TEST_F(BasicMatching, MultiplePartialFill)
 {
-    MarketOrder order1{"ABC", BUY,  "ETHUSD", 1, 1};
-    MarketOrder order2{"ABC", BUY,  "ETHUSD", 1, 1};
-    MarketOrder order3{"DEF", SELL,  "ETHUSD", 3, 1};
+    MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
+    MarketOrder order2{"ABC", BUY, "ETHUSD", 1, 1};
+    MarketOrder order3{"DEF", SELL, "ETHUSD", 3, 1};
     auto [matches, ob_updates] = engine.match_order(order1, manager);
     EXPECT_EQ(matches.size(), 0);
     EXPECT_EQ(ob_updates.size(), 1);
@@ -190,8 +190,8 @@ TEST_F(BasicMatching, MultiplePartialFill)
 
 TEST_F(BasicMatching, SimpleMatchReversed)
 {
-    MarketOrder order1{"ABC", SELL,  "ETHUSD", 1, 1};
-    MarketOrder order2{"DEF", BUY,  "ETHUSD", 1, 1};
+    MarketOrder order1{"ABC", SELL, "ETHUSD", 1, 1};
+    MarketOrder order2{"DEF", BUY, "ETHUSD", 1, 1};
     auto [matches, ob_updates] = engine.match_order(order1, manager);
     EXPECT_EQ(matches.size(), 0);
     EXPECT_EQ(ob_updates.size(), 1);
@@ -205,8 +205,8 @@ TEST_F(BasicMatching, SimpleMatchReversed)
 
 TEST_F(BasicMatching, PassivePriceMatchReversed)
 {
-    MarketOrder order1{"ABC", SELL,  "ETHUSD", 1, 1};
-    MarketOrder order2{"DEF", BUY,  "ETHUSD", 1, 2};
+    MarketOrder order1{"ABC", SELL, "ETHUSD", 1, 1};
+    MarketOrder order2{"DEF", BUY, "ETHUSD", 1, 2};
     auto [matches, ob_updates] = engine.match_order(order1, manager);
     EXPECT_EQ(matches.size(), 0);
     EXPECT_EQ(ob_updates.size(), 1);
@@ -222,8 +222,8 @@ TEST_F(BasicMatching, PassivePriceMatchReversed)
 
 TEST_F(BasicMatching, PartialFillReversed)
 {
-    MarketOrder order1{"ABC", SELL,  "ETHUSD", 2, 1};
-    MarketOrder order2{"DEF", BUY,  "ETHUSD", 1, 1};
+    MarketOrder order1{"ABC", SELL, "ETHUSD", 2, 1};
+    MarketOrder order2{"DEF", BUY, "ETHUSD", 1, 1};
     auto [matches, ob_updates] = engine.match_order(order1, manager);
     EXPECT_EQ(matches.size(), 0);
     EXPECT_EQ(ob_updates.size(), 1);
@@ -238,9 +238,9 @@ TEST_F(BasicMatching, PartialFillReversed)
 
 TEST_F(BasicMatching, MultipleFillReversed)
 {
-    MarketOrder order1{"ABC", SELL,  "ETHUSD", 1, 1};
-    MarketOrder order2{"ABC", SELL,  "ETHUSD", 1, 1};
-    MarketOrder order3{"DEF", BUY,  "ETHUSD", 2, 1};
+    MarketOrder order1{"ABC", SELL, "ETHUSD", 1, 1};
+    MarketOrder order2{"ABC", SELL, "ETHUSD", 1, 1};
+    MarketOrder order3{"DEF", BUY, "ETHUSD", 2, 1};
     auto [matches, ob_updates] = engine.match_order(order1, manager);
     EXPECT_EQ(matches.size(), 0);
     EXPECT_EQ(ob_updates.size(), 1);
@@ -262,9 +262,9 @@ TEST_F(BasicMatching, MultipleFillReversed)
 
 TEST_F(BasicMatching, MultiplePartialFillReversed)
 {
-    MarketOrder order1{"ABC", SELL,  "ETHUSD", 1, 1};
-    MarketOrder order2{"ABC", SELL,  "ETHUSD", 1, 1};
-    MarketOrder order3{"DEF", BUY,  "ETHUSD", 3, 1};
+    MarketOrder order1{"ABC", SELL, "ETHUSD", 1, 1};
+    MarketOrder order2{"ABC", SELL, "ETHUSD", 1, 1};
+    MarketOrder order3{"DEF", BUY, "ETHUSD", 3, 1};
     auto [matches, ob_updates] = engine.match_order(order1, manager);
     EXPECT_EQ(matches.size(), 0);
     EXPECT_EQ(ob_updates.size(), 1);

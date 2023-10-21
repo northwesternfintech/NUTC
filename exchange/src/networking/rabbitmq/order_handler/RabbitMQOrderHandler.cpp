@@ -61,15 +61,15 @@ RabbitMQOrderHandler::handleIncomingMarketOrder(
 
 void
 RabbitMQOrderHandler::addLiquidityToTicker(
-    manager::ClientManager& clients, engine_manager::Manager& engine_manager, const std::string& ticker, float quantity,
-    float price
+    manager::ClientManager& clients, engine_manager::Manager& engine_manager,
+    const std::string& ticker, float quantity, float price
 )
 {
     engine_manager.add_initial_liquidity(ticker, quantity, price);
     messages::ObUpdate update{ticker, messages::SIDE::SELL, price, quantity};
     std::vector<messages::ObUpdate> vec{};
     vec.push_back(update);
-  RabbitMQPublisher::broadcastObUpdates(clients, vec, "");
+    RabbitMQPublisher::broadcastObUpdates(clients, vec, "");
 }
 
 } // namespace rabbitmq

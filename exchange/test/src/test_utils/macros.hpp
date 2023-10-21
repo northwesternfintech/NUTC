@@ -32,7 +32,7 @@ bool validateObUpdate(
     match, ticker_, buyer_uid_, seller_uid_, side_, price_, quantity_                  \
 )                                                                                      \
     do {                                                                               \
-        bool isMatchValid = nutc::testing_utils::validateMatch(                              \
+        bool isMatchValid = nutc::testing_utils::validateMatch(                        \
             (match), (ticker_), (buyer_uid_), (seller_uid_), (side_), (price_),        \
             (quantity_)                                                                \
         );                                                                             \
@@ -50,7 +50,7 @@ bool validateObUpdate(
 
 #define EXPECT_EQ_OB_UPDATE(update, ticker_, side_, price_, quantity_)                 \
     do {                                                                               \
-        bool isUpdateValid = nutc::testing_utils::validateObUpdate(                          \
+        bool isUpdateValid = nutc::testing_utils::validateObUpdate(                    \
             (update), (ticker_), (side_), (price_), (quantity_)                        \
         );                                                                             \
         EXPECT_TRUE(isUpdateValid)                                                     \

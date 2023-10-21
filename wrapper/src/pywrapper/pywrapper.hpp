@@ -47,8 +47,7 @@ const py::object get_account_update_function();
  * @param publish_market_order The callback function to place market orders
  */
 void create_api_module(
-    std::function<
-        bool(const std::string&, const std::string&, float, float)>
+    std::function<bool(const std::string&, const std::string&, float, float)>
         publish_market_order
 );
 
