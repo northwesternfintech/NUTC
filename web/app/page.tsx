@@ -54,7 +54,7 @@ export default function Hero() {
             src={Logo}
             width={50}
             height={50}
-            className="h-11"
+            className="h-12"
             alt="Logo"
           />
           <div className="mt-24 sm:mt-32 lg:mt-16">
