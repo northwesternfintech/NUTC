@@ -15,24 +15,24 @@ export default function RedirectOnAuth({ page }: RedirectOnAuthProps) {
       return;
     }
 
-    // if (user) {
-    //   if (user?.hasCompletedReg) {
-    //     if (user?.isApprovedApplicant) {
-    //       if (page === "dash") {
-    //         return;
-    //       }
-    //       router.push("/dash");
-    //     } else if (user?.isRejectedApplicant) {
-    //       router.push("/app-rejected");
-    //     } else {
-    //       router.push("/app-submitted");
-    //     }
-    //   } else {
-    //     router.push("/registration");
-    //   }
-    // } else {
-    //   router.push("/login");
-    // }
+    if (user) {
+      if (user?.hasCompletedReg) {
+        if (user?.isApprovedApplicant) {
+          if (page === "dash") {
+            return;
+          }
+          router.push("/dash");
+        } else if (user?.isRejectedApplicant) {
+          router.push("/app-rejected");
+        } else {
+          router.push("/app-submitted");
+        }
+      } else {
+        router.push("/registration");
+      }
+    } else {
+      router.push("/login");
+    }
   }, [user]);
 
   return <></>;
