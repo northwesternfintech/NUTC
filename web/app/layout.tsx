@@ -7,8 +7,8 @@ import AuthUpdate from "@/app/login/auth/authUpdate";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "FinRL 2023",
-  description: "FinRL Trading Competition",
+  title: "ICAIF FinRL 2023",
+  description: "ICAIF 2023 FinRL Contest",
 };
 
 export default function RootLayout({
