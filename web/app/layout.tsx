@@ -7,8 +7,8 @@ import AuthUpdate from "@/app/login/auth/authUpdate";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "NUTC 2024",
-  description: "NUFT Trading Competition",
+  title: "ICAIF 2023",
+  description: "ICAIF Trading Competition",
 };
 
 export default function RootLayout({

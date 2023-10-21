@@ -6,7 +6,7 @@ export default function Header() {
           Finish your registration
         </h2>
         <p className="mt-6 text-lg leading-8 text-gray-300">
-          Complete your registration to join the FinRL Trading
+          Complete your registration to join the ICAIF Trading
           Competition and showcase your skills.
         </p>
       </div>
