@@ -6,13 +6,13 @@ import "firebase/compat/auth";
 import "firebase/compat/functions";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCo2l3x2DMhg5CaNy1Pyvknk_GK8v34iUc",
-  authDomain: "nutc-web.firebaseapp.com",
-  databaseURL: "https://nutc-web-default-rtdb.firebaseio.com",
-  projectId: "nutc-web",
-  storageBucket: "nutc-web.appspot.com",
-  messagingSenderId: "690190717923",
-  appId: "1:690190717923:web:bbab373b3199cdbba606d6",
+  apiKey: "AIzaSyCa6g_38lybuuzfoBunEOhBUYwSavtF1rw",
+  authDomain: "finrl-contest-f019d.firebaseapp.com",
+  projectId: "finrl-contest-f019d",
+  storageBucket: "finrl-contest-f019d.appspot.com",
+  messagingSenderId: "382005499144",
+  appId: "1:382005499144:web:739edf880af14dbc2388bd",
+  measurementId: "G-QYWBD8SJPJ"
 };
 
 var database: any;
