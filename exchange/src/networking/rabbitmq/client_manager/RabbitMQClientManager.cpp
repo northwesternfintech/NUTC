@@ -2,8 +2,8 @@
 
 #include "client_manager/client_manager.hpp"
 #include "logging.hpp"
-#include "RabbitMQConsumer.hpp"
-#include "RabbitMQPublisher.hpp"
+#include "networking/rabbitmq/consumer/RabbitMQConsumer.hpp"
+#include "networking/rabbitmq/publisher/RabbitMQPublisher.hpp"
 
 namespace nutc {
 namespace rabbitmq {

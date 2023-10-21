@@ -1,5 +1,5 @@
-#include "networking/rabbitmq/RabbitMQPublisher.hpp"
-#include "RabbitMQConnectionManager.hpp"
+#include "RabbitMQPublisher.hpp"
+#include "networking/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
 
 #include "logging.hpp"
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "RabbitMQOrderHandler.hpp"
-#include "RabbitMQClientManager.hpp"
-#include "RabbitMQConnectionManager.hpp"
-#include "RabbitMQQueueManager.hpp"
-#include "RabbitMQPublisher.hpp"
-#include "RabbitMQConsumer.hpp"
+#include "client_manager/RabbitMQClientManager.hpp"
+#include "connection_manager/RabbitMQConnectionManager.hpp"
+#include "consumer/RabbitMQConsumer.hpp"
+#include "order_handler/RabbitMQOrderHandler.hpp"
+#include "publisher/RabbitMQPublisher.hpp"
+#include "queue_manager/RabbitMQQueueManager.hpp"
