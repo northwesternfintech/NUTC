@@ -1,7 +1,7 @@
-#include "networking/rabbitmq/RabbitMQQueueManager.hpp"
+#include "RabbitMQQueueManager.hpp"
 
 #include "logging.hpp"
-#include "networking/rabbitmq/RabbitMQConnectionManager.hpp"
+#include "networking/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
 
 #include <rabbitmq-c/amqp.h>
 
