@@ -4,7 +4,7 @@
 
 namespace nutc {
 namespace rabbitmq {
-//TODO: refactor to client_manager?
+// TODO: refactor to client_manager?
 
 class RabbitMQClientManager {
 public:

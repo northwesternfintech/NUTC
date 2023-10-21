@@ -47,77 +47,93 @@ RabbitMQ::connectToRabbitMQ(
     return true;
 }
 
+// todo: split into helpers
 std::variant<ShutdownMessage, RMQError>
 RabbitMQ::handleIncomingMessages()
 {
-    while (true) {
-        std::variant<
-            StartTime,
-            ShutdownMessage,
-            RMQError,
-            ObUpdate,
-            Match,
-            AccountUpdate>
-            data = consumeMessage();
-        if (std::holds_alternative<ShutdownMessage>(data)) {
-            log_w(
-                rabbitmq,
-                "Received shutdown message: {}",
-                std::get<ShutdownMessage>(data).shutdown_reason
-            );
-            return std::get<ShutdownMessage>(data);
-        }
-        else if (std::holds_alternative<RMQError>(data)) {
-            log_e(
-                rabbitmq,
-                "Failed to consume message: {}",
-                std::get<RMQError>(data).message
-            );
-            return std::get<RMQError>(data);
-        }
-        else if (std::holds_alternative<ObUpdate>(data)) {
-            log_i(
-                rabbitmq,
-                "Received order book update: {}",
-                glz::write_json(std::get<ObUpdate>(data))
-            );
-            ObUpdate update = std::get<ObUpdate>(data);
-            std::string side = update.side == messages::SIDE::BUY ? "BUY" : "SELL";
-            nutc::pywrapper::get_ob_update_function()(
-                update.security, side, update.price, update.quantity
-            );
-        }
-        else if (std::holds_alternative<Match>(data)) {
-            log_i(
-                rabbitmq, "Received match: {}", glz::write_json(std::get<Match>(data))
-            );
-            Match match = std::get<Match>(data);
-            std::string side = match.side == messages::SIDE::BUY ? "BUY" : "SELL";
-            nutc::pywrapper::get_trade_update_function()(
-                match.ticker, side, match.price, match.quantity
-            );
-        }
-        else if (std::holds_alternative<AccountUpdate>(data)) {
-            AccountUpdate update = std::get<AccountUpdate>(data);
-            log_i(
-                rabbitmq,
-                "Received account update with capital remaining: {}",
-                update.capital_remaining
-            );
-            std::string side = update.side == messages::SIDE::BUY ? "BUY" : "SELL";
-            nutc::pywrapper::get_account_update_function()(
-                update.ticker,
-                side,
-                update.price,
-                update.quantity,
-                update.capital_remaining
-            );
-        }
-        else {
-            log_e(rabbitmq, "Unknown message type");
-            return RMQError{"Unknown message type"};
+    bool keep_running = true;
+    while (keep_running) {
+        auto data = consumeMessage();
+        std::optional<std::variant<ShutdownMessage, RMQError>> res = std::visit(
+            [&](auto&& arg) {
+                using T = std::decay_t<decltype(arg)>;
+                std::optional<std::variant<ShutdownMessage, RMQError>> nothing =
+                    std::nullopt;
+                if constexpr (std::is_same_v<T, ShutdownMessage>) {
+                    log_w(
+                        rabbitmq,
+                        "Received shutdown message: {}",
+                        std::get<ShutdownMessage>(data).shutdown_reason
+                    );
+                    std::optional<std::variant<ShutdownMessage, RMQError>> var = arg;
+                    return var;
+                }
+                else if constexpr (std::is_same_v<T, RMQError>) {
+                    log_e(
+                        rabbitmq,
+                        "Failed to consume message: {}",
+                        std::get<RMQError>(data).message
+                    );
+                    std::optional<std::variant<ShutdownMessage, RMQError>> var = arg;
+                    return var;
+                }
+                else if constexpr (std::is_same_v<T, ObUpdate>) {
+                    log_i(
+                        rabbitmq,
+                        "Received order book update: {}",
+                        glz::write_json(std::get<ObUpdate>(data))
+                    );
+                    ObUpdate update = std::get<ObUpdate>(data);
+                    std::string side =
+                        update.side == messages::SIDE::BUY ? "BUY" : "SELL";
+                    nutc::pywrapper::get_ob_update_function()(
+                        update.security, side, update.price, update.quantity
+                    );
+                    return nothing;
+                }
+                else if constexpr (std::is_same_v<T, Match>) {
+                    log_i(
+                        rabbitmq,
+                        "Received match: {}",
+                        glz::write_json(std::get<Match>(data))
+                    );
+                    Match match = std::get<Match>(data);
+                    std::string side =
+                        match.side == messages::SIDE::BUY ? "BUY" : "SELL";
+                    nutc::pywrapper::get_trade_update_function()(
+                        match.ticker, side, match.price, match.quantity
+                    );
+                    return nothing;
+                }
+                else if constexpr (std::is_same_v<T, AccountUpdate>) {
+                    AccountUpdate update = std::get<AccountUpdate>(data);
+                    log_i(
+                        rabbitmq,
+                        "Received account update with capital remaining: {}",
+                        update.capital_remaining
+                    );
+                    std::string side =
+                        update.side == messages::SIDE::BUY ? "BUY" : "SELL";
+                    nutc::pywrapper::get_account_update_function()(
+                        update.ticker,
+                        side,
+                        update.price,
+                        update.quantity,
+                        update.capital_remaining
+                    );
+                    return nothing;
+                }
+                else {
+                    return nothing;
+                }
+            },
+            data
+        );
+        if (res.has_value()) {
+            return res.value();
         }
     }
+    return ShutdownMessage{"Received shutdown message."};
 }
 
 bool

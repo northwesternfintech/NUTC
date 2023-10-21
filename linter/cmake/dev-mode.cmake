@@ -7,10 +7,10 @@ endif()
 
 add_custom_target(
     run-exe
-    COMMAND NUTC-client_exe
+    COMMAND NUTC-linter_exe
     VERBATIM
 )
-add_dependencies(run-exe NUTC-client_exe)
+add_dependencies(run-exe NUTC-linter_exe)
 
 option(BUILD_MCSS_DOCS "Build documentation using Doxygen and m.css" OFF)
 if(BUILD_MCSS_DOCS)

@@ -1,7 +1,7 @@
 #include "RabbitMQPublisher.hpp"
-#include "networking/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
 
 #include "logging.hpp"
+#include "networking/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
 
 namespace nutc {
 namespace rabbitmq {
@@ -19,9 +19,7 @@ RabbitMQPublisher::publishMessage(
         return true;
     };
 
-  const auto& conn = RabbitMQConnectionManager::getInstance().get_connection_state();
-
-    
+    const auto& conn = RabbitMQConnectionManager::getInstance().get_connection_state();
 
     if (!checkReply(amqp_get_rpc_reply(conn), "Failed to declare queue.")) {
         return false;

@@ -24,19 +24,19 @@ create_api_module(
 const py::object
 get_ob_update_function()
 {
-    return py::globals()["strat"].attr("on_orderbook_update");
+    return py::globals()["strategy"].attr("on_orderbook_update");
 }
 
 const py::object
 get_trade_update_function()
 {
-    return py::globals()["strat"].attr("on_trade_update");
+    return py::globals()["strategy"].attr("on_trade_update");
 }
 
 const py::object
 get_account_update_function()
 {
-    return py::globals()["strat"].attr("on_account_update");
+    return py::globals()["strategy"].attr("on_account_update");
 }
 
 void
@@ -47,7 +47,7 @@ run_code_init(const std::string& py_code)
         def place_market_order(side, ticker, quantity, price):
             nutc_api.publish_market_order(side, ticker, quantity, price)
     )");
-    py::exec("strat = Strategy()");
+    py::exec("strategy = Strategy()");
 }
 
 } // namespace pywrapper

@@ -43,7 +43,7 @@ struct StartTime {
 };
 
 /**
- * @brief Sent by exchange to a client to indicate a match has occured
+ * @brief Sent by exchange to a client to indicate a match has occurred
  */
 struct Match {
     std::string ticker;

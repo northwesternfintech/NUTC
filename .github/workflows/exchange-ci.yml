@@ -1,62 +1,109 @@
-name: Continuous Integration
+name: Exchange - Continuous Integration
 
 on:
   push:
     branches:
-    - master
+      - main
+      - ci-test
+    paths:
+      - 'exchange/**'
 
   pull_request:
     branches:
-    - master
+      - main
+      - ci-test
+    paths:
+      - 'exchange/**'
+
+  workflow_dispatch:
+
+# We only care about the latest revision of a PR, so cancel all previous instances.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref_name }}
+  cancel-in-progress: true
 
 jobs:
   lint:
     runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: exchange
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
 
     - uses: actions/setup-python@v4
-      with: { python-version: "3.8" }
+      with: { python-version: "3.11" }
+
+    - name: Install LLVM 17
+      run: |
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+          sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main"
+          sudo apt update
+          sudo apt install llvm-17 llvm-17-dev llvm-17-tools clang-17 clang-tidy-17 clang-format-17 clang-tools-17 libclang-17-dev -y
 
     - name: Install codespell
       run: pip3 install codespell
 
     - name: Lint
-      run: cmake -D FORMAT_COMMAND=clang-format-14 -P cmake/lint.cmake
+      run: cmake -D FORMAT_COMMAND=clang-format-17 -P cmake/lint.cmake
 
     - name: Spell check
-      if: always()
       run: cmake -P cmake/spell.cmake
 
   coverage:
     needs: [lint]
 
     runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: exchange
+
 
     # To enable coverage, delete the last line from the conditional below and
     # edit the "<name>" placeholder to your GitHub name.
     # If you do not wish to use codecov, then simply delete this job from the
     # workflow.
-    if: github.repository_owner == '<name>'
-      && false
+    if: github.repository_owner == 'northwesternfintech'
+
+    env:
+      CC: gcc-13
+      CXX: g++-13
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
 
     - name: Install LCov
-      run: sudo apt-get update -q
-        && sudo apt-get install lcov -q -y
+      run: sudo apt update -q
+        && sudo apt install lcov -q -y
 
     - name: Install Python
       uses: actions/setup-python@v4
-      with: { python-version: "3.8" }
+      with: { python-version: "3.11" }
+
+    - name: Install GCC 13
+      run: |
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+        sudo apt update
+        sudo apt install gcc-13 g++-13 -y
+
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 130
+        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-13 130
+        sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-13 130
 
     - name: Install dependencies
       run: |
         pip3 install conan
-        bash < .github/scripts/conan-profile.sh
-        conan install . -b missing
+
+        sudo apt install libssl-dev -y
+
+        bash < ../.github/scripts/conan-profile.sh
+        conan install . -s build_type=Release -b missing
+
 
     - name: Configure
       run: cmake --preset=ci-coverage
@@ -65,7 +112,7 @@ jobs:
       run: cmake --build build/coverage -j 2
 
     - name: Test
-      working-directory: build/coverage
+      working-directory: exchange/build/coverage
       run: ctest --output-on-failure --no-tests=error -j 2
 
     - name: Process coverage info
@@ -80,21 +127,41 @@ jobs:
     needs: [lint]
 
     runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: exchange
 
-    env: { CXX: clang++-14 }
+
+    env:
+      CC: clang-17
+      CXX: clang++-17
+      CLANG_DIR: '/usr/lib/llvm-17/lib/cmake/clang'
+      LLVM_DIR: '/usr/lib/llvm-17/lib/cmake/llvm'
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
 
     - name: Install Python
       uses: actions/setup-python@v4
-      with: { python-version: "3.8" }
+      with: { python-version: "3.11" }
+
+    - name: Install LLVM 17
+      run: |
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+          sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main"
+          sudo apt update
+          sudo apt install llvm-17 llvm-17-dev llvm-17-tools clang-17 clang-tidy-17 clang-tools-17 libclang-17-dev -y
 
     - name: Install dependencies
       run: |
         pip3 install conan
-        bash < .github/scripts/conan-profile.sh
-        conan install . -b missing
+
+        sudo apt install libssl-dev -y
+        
+        bash < ../.github/scripts/conan-profile.sh
+        conan install . -s build_type=Release -b missing
 
     - name: Configure
       run: cmake --preset=ci-sanitize
@@ -103,7 +170,7 @@ jobs:
       run: cmake --build build/sanitize -j 2
 
     - name: Test
-      working-directory: build/sanitize
+      working-directory: exchange/build/sanitize
       env:
         ASAN_OPTIONS: "strict_string_checks=1:\
           detect_stack_use_after_return=1:\
@@ -118,32 +185,54 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-12, ubuntu-22.04, windows-2022]
+        os: [ubuntu-22.04]
 
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: exchange
+
+
+    env:
+      CC: clang-17
+      CXX: clang++-17
+      CLANG_DIR: '/usr/lib/llvm-17/lib/cmake/clang'
+      LLVM_DIR: '/usr/lib/llvm-17/lib/cmake/llvm'
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+
+    - name: Install LLVM 17
+      run: |
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+          sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main"
+          sudo apt update
+          sudo apt install llvm-17 llvm-17-dev llvm-17-tools clang-17 clang-tidy-17 clang-tools-17 libclang-17-dev -y
 
     - name: Install static analyzers
       if: matrix.os == 'ubuntu-22.04'
       run: >-
-        sudo apt-get install clang-tidy-14 cppcheck -y -q
+        sudo apt install cppcheck -y -q
 
         sudo update-alternatives --install
         /usr/bin/clang-tidy clang-tidy
-        /usr/bin/clang-tidy-14 140
+        /usr/bin/clang-tidy-17 160
 
     - name: Install Python
       uses: actions/setup-python@v4
-      with: { python-version: "3.8" }
+      with: { python-version: "3.11" }
 
     - name: Install dependencies
       shell: bash
       run: |
         pip3 install conan
-        bash < .github/scripts/conan-profile.sh
-        conan install . -b missing
+        
+        sudo apt install libssl-dev -y
+        
+        bash < ../.github/scripts/conan-profile.sh
+        conan install . -s build_type=Release -b missing
 
     - name: Setup MultiToolTask
       if: matrix.os == 'windows-2022'
@@ -162,7 +251,7 @@ jobs:
       run: cmake --install build --config Release --prefix prefix
 
     - name: Test
-      working-directory: build
+      working-directory: exchange/build
       run: ctest --output-on-failure --no-tests=error -C Release -j 2
 
   docs:
@@ -170,6 +259,10 @@ jobs:
     needs: [sanitize, test]
 
     runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: exchange
+
 
     # To enable, first you have to create an orphaned gh-pages branch:
     #
@@ -182,23 +275,24 @@ jobs:
     # this comment and the last line in the conditional below.
     # If you do not wish to use GitHub Pages for deploying documentation, then
     # simply delete this job similarly to the coverage one.
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
       && github.event_name == 'push'
-      && github.repository_owner == '<name>'
-      && false
+      && github.repository_owner == 'northwesternfintech'
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
 
     - uses: actions/setup-python@v4
-      with: { python-version: "3.8" }
+      with: { python-version: "3.11" }
 
     - name: Install m.css dependencies
       run: pip3 install jinja2 Pygments
 
     - name: Install Doxygen
-      run: sudo apt-get update -q
-        && sudo apt-get install doxygen -q -y
+      run: sudo apt update -q
+        && sudo apt install doxygen -q -y
 
     - name: Build docs
       run: cmake "-DPROJECT_SOURCE_DIR=$PWD" "-DPROJECT_BINARY_DIR=$PWD/build"

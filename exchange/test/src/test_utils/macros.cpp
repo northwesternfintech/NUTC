@@ -14,8 +14,7 @@ isNearlyEqual(float a, float b, float epsilon)
 bool
 validateMatch(
     const Match& match, const std::string& ticker, const std::string& buyer_uid,
-    const std::string& seller_uid, messages::SIDE side, float price,
-    float quantity
+    const std::string& seller_uid, messages::SIDE side, float price, float quantity
 )
 {
     return match.ticker == ticker && match.buyer_uid == buyer_uid

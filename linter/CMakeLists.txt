@@ -4,9 +4,9 @@ include(FetchContent)
 include(cmake/prelude.cmake)
 
 project(
-    NUTC-client
+    NUTC-linter
     VERSION 0.1.0
-    DESCRIPTION "Client for the Northwestern University Trading Competition."
+    DESCRIPTION "Linter for the Northwestern University Trading Competition."
     HOMEPAGE_URL "https://example.com/"
     LANGUAGES CXX
 )
@@ -39,7 +39,7 @@ FetchContent_MakeAvailable(cmake_git_version_tracking)
 # ---- Declare library ----
 
 add_library(
-    NUTC-client_lib OBJECT
+    NUTC-linter_lib OBJECT 
     src/firebase/fetching.cpp
     src/pywrapper/runtime.cpp
     src/mock_api/mock_api.cpp
@@ -50,43 +50,43 @@ add_library(
 )
 
 target_include_directories(
-    NUTC-client_lib ${warning_guard}
+    NUTC-linter_lib ${warning_guard}
     PUBLIC
     "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/>"
 )
 
-target_compile_features(NUTC-client_lib PUBLIC cxx_std_20)
+target_compile_features(NUTC-linter_lib PUBLIC cxx_std_20)
 
-target_link_libraries(NUTC-client_lib PRIVATE fmt::fmt)
-target_link_libraries(NUTC-client_lib PRIVATE quill::quill)
-target_link_libraries(NUTC-client_lib PRIVATE CURL::libcurl)
-target_link_libraries(NUTC-client_lib PRIVATE glaze::glaze)
-target_link_libraries(NUTC-client_lib PRIVATE pybind11::pybind11)
-target_link_libraries(NUTC-client_lib PRIVATE Crow::Crow)
-target_link_libraries(NUTC-client_lib PRIVATE Python::Python)
+target_link_libraries(NUTC-linter_lib PRIVATE fmt::fmt)
+target_link_libraries(NUTC-linter_lib PRIVATE quill::quill)
+target_link_libraries(NUTC-linter_lib PRIVATE CURL::libcurl)
+target_link_libraries(NUTC-linter_lib PRIVATE glaze::glaze)
+target_link_libraries(NUTC-linter_lib PRIVATE pybind11::pybind11)
+target_link_libraries(NUTC-linter_lib PRIVATE Crow::Crow)
+target_link_libraries(NUTC-linter_lib PRIVATE Python::Python)
 
 
 # ---- Declare executable ----
 
-add_executable(NUTC-client_exe src/main.cpp)
-add_executable(NUTC-client::exe ALIAS NUTC-client_exe)
+add_executable(NUTC-linter_exe src/main.cpp)
+add_executable(NUTC-linter::exe ALIAS NUTC-linter_exe)
 
-set_property(TARGET NUTC-client_exe PROPERTY OUTPUT_NAME NUTC-client)
+set_property(TARGET NUTC-linter_exe PROPERTY OUTPUT_NAME NUTC-linter)
 
-target_compile_features(NUTC-client_exe PRIVATE cxx_std_20)
+target_compile_features(NUTC-linter_exe PRIVATE cxx_std_20)
 
-target_link_libraries(NUTC-client_exe PRIVATE NUTC-client_lib)
-target_link_libraries(NUTC-client_exe PRIVATE fmt::fmt)
-target_link_libraries(NUTC-client_exe PRIVATE quill::quill)
+target_link_libraries(NUTC-linter_exe PRIVATE NUTC-linter_lib)
+target_link_libraries(NUTC-linter_exe PRIVATE fmt::fmt)
+target_link_libraries(NUTC-linter_exe PRIVATE quill::quill)
 
-target_link_libraries(NUTC-client_exe PRIVATE argparse::argparse)
-target_link_libraries(NUTC-client_exe PRIVATE cmake_git_version_tracking)
-target_link_libraries(NUTC-client_exe PRIVATE CURL::libcurl)
-target_link_libraries(NUTC-client_exe PRIVATE glaze::glaze)
-target_link_libraries(NUTC-client_exe PRIVATE pybind11::pybind11)
-target_link_libraries(NUTC-client_exe PRIVATE Crow::Crow)
-target_link_libraries(NUTC-client_exe PRIVATE Python::Python)
+target_link_libraries(NUTC-linter_exe PRIVATE argparse::argparse)
+target_link_libraries(NUTC-linter_exe PRIVATE cmake_git_version_tracking)
+target_link_libraries(NUTC-linter_exe PRIVATE CURL::libcurl)
+target_link_libraries(NUTC-linter_exe PRIVATE glaze::glaze)
+target_link_libraries(NUTC-linter_exe PRIVATE pybind11::pybind11)
+target_link_libraries(NUTC-linter_exe PRIVATE Crow::Crow)
+target_link_libraries(NUTC-linter_exe PRIVATE Python::Python)
 
 
 
@@ -98,12 +98,12 @@ endif()
 
 # ---- Developer mode ----
 
-if(NOT NUTC-client_DEVELOPER_MODE)
+if(NOT NUTC-linter_DEVELOPER_MODE)
   return()
 elseif(NOT PROJECT_IS_TOP_LEVEL)
   message(
       AUTHOR_WARNING
-      "Developer mode is intended for developers of NUTC-client"
+      "Developer mode is intended for developers of NUTC-linter"
   )
 endif()
 
