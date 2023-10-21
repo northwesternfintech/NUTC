@@ -4,6 +4,8 @@ import Link from "next/link";
 import Logo from "@/app/assets/logo.png";
 import BackgroundScreenshot from "@/app/assets/background.webp";
 
+const GOOGLE_DOCS_URL = "https://docs.google.com/document/d/e/2PACX-1vS3papowYO7cRuiH7ov3dAoWRb-328BQ-OLtl1NI85EuvLkqp6jA6iKsqSMp4F5Q7--1ZfPwWX5bYq-/pub"
+
 export default function Hero() {
   return (
     <div className="relative isolate overflow-hidden bg-gray-900">
@@ -52,31 +54,24 @@ export default function Hero() {
         <div className="mx-auto max-w-2xl flex-shrink-0 lg:mx-0 lg:max-w-xl lg:pt-8">
           <Image
             src={Logo}
-            width={50}
-            height={50}
-            className="h-11"
+            width={100}
+            height={100}
+            className="h-[100px]"
             alt="Logo"
           />
           <div className="mt-24 sm:mt-32 lg:mt-16">
             <Link
-              href="https://nu-fintech.web.app"
+              href={GOOGLE_DOCS_URL}
               target="_blank"
               className="inline-flex space-x-6"
             >
               <span className="rounded-full bg-indigo-500/10 px-3 py-1 text-sm font-semibold leading-6 text-indigo-400 ring-1 ring-inset ring-indigo-500/20">
                 Learn More
               </span>
-              <span className="inline-flex items-center space-x-2 text-sm font-medium leading-6 text-gray-300">
-                <span>NUFT Main Site</span>
-                <ChevronRightIcon
-                  className="h-5 w-5 text-gray-500"
-                  aria-hidden="true"
-                />
-              </span>
             </Link>
           </div>
           <h1 className="mt-10 text-4xl font-bold tracking-tight text-white sm:text-6xl">
-            Northwestern Trading Competition 2024
+            ICAIF 2023 FinRL Contest
           </h1>
           <p className="mt-6 text-lg leading-8 text-gray-300">
             Explore and advance your algorithmic trading skills through intense
