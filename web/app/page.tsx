@@ -54,29 +54,11 @@ export default function Hero() {
             src={Logo}
             width={50}
             height={50}
-            className="h-11"
+            className="h-12"
             alt="Logo"
           />
-          <div className="mt-24 sm:mt-32 lg:mt-16">
-            <Link
-              href="https://nu-fintech.web.app"
-              target="_blank"
-              className="inline-flex space-x-6"
-            >
-              <span className="rounded-full bg-indigo-500/10 px-3 py-1 text-sm font-semibold leading-6 text-indigo-400 ring-1 ring-inset ring-indigo-500/20">
-                Learn More
-              </span>
-              <span className="inline-flex items-center space-x-2 text-sm font-medium leading-6 text-gray-300">
-                <span>NUFT Main Site</span>
-                <ChevronRightIcon
-                  className="h-5 w-5 text-gray-500"
-                  aria-hidden="true"
-                />
-              </span>
-            </Link>
-          </div>
           <h1 className="mt-10 text-4xl font-bold tracking-tight text-white sm:text-6xl">
-            Northwestern Trading Competition 2024
+            ICAIF Trading Competition 2023
           </h1>
           <p className="mt-6 text-lg leading-8 text-gray-300">
             Explore and advance your algorithmic trading skills through intense
