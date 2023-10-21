@@ -1,7 +1,7 @@
-#include "spawning.hpp"
+#include "process_spawning/spawning.hpp"
 
 #include "config.h"
-#include "dev_mode/dev_mode.hpp"
+#include "utils/dev_mode/dev_mode.hpp"
 #include "logging.hpp"
 
 namespace nutc {

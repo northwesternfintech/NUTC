@@ -1,7 +1,7 @@
 #pragma once
 // keep track of active users and account information
 #include "config.h"
-#include "util/messages.hpp"
+#include "utils/messages.hpp"
 
 #include <glaze/glaze.hpp>
 

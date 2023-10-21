@@ -1,12 +1,12 @@
 #include "client_manager/client_manager.hpp"
 #include "config.h"
-#include "dev_mode/dev_mode.hpp"
-#include "firebase/firebase.hpp"
 #include "lib.hpp"
 #include "logging.hpp"
 #include "matching/engine.hpp"
+#include "networking/firebase/firebase.hpp"
+#include "networking/rabbitmq/rabbitmq.hpp"
 #include "process_spawning/spawning.hpp"
-#include "rabbitmq/rabbitmq.hpp"
+#include "utils/dev_mode/dev_mode.hpp"
 
 #include <argparse/argparse.hpp>
 
@@ -19,7 +19,6 @@ namespace rmq = nutc::rabbitmq;
 
 nutc::manager::ClientManager users;
 nutc::engine_manager::Manager engine_manager;
-rmq::RabbitMQ conn(users, engine_manager);
 
 static std::tuple<bool>
 process_arguments(int argc, const char** argv)
@@ -80,25 +79,33 @@ main(int argc, const char** argv)
     // Initialize signal handler
     signal(SIGINT, handle_sigint);
 
+    auto& rmq_conn = rmq::RabbitMQConnectionManager::getInstance();
+
     // Connect to RabbitMQ
-    if (!conn.connectedToRMQ()) {
+    if (!rmq_conn.connectedToRMQ()) {
         log_e(rabbitmq, "Failed to initialize connection");
         return 1;
     }
 
     int num_clients = nutc::client::initialize(users, dev_mode);
 
-    conn.addTicker("A");
-    conn.addTicker("B");
-    conn.addTicker("C");
+    engine_manager.add_engine("A");
+    engine_manager.add_engine("B");
+    engine_manager.add_engine("C");
 
     // Run exchange
-    conn.waitForClients(num_clients);
-    conn.sendStartTime(users, CLIENT_WAIT_SECS);
-    conn.addLiquidityToTicker("A", 1000, 100);
-    conn.addLiquidityToTicker("B", 2000, 200);
-    conn.addLiquidityToTicker("C", 3000, 300);
-    conn.handleIncomingMessages();
+    rmq::RabbitMQClientManager::waitForClients(users, num_clients);
+    rmq::RabbitMQClientManager::sendStartTime(users, CLIENT_WAIT_SECS);
+    rmq::RabbitMQOrderHandler::addLiquidityToTicker(
+        users, engine_manager, "A", 1000, 100
+    );
+    rmq::RabbitMQOrderHandler::addLiquidityToTicker(
+        users, engine_manager, "B", 2000, 200
+    );
+    rmq::RabbitMQOrderHandler::addLiquidityToTicker(
+        users, engine_manager, "C", 3000, 300
+    );
+    rmq::RabbitMQConsumer::handleIncomingMessages(users, engine_manager);
 
     return 0;
 }

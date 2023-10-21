@@ -2,7 +2,7 @@
 
 #include "config.h"
 #include "logging.hpp"
-#include "util/messages.hpp" // TYPE should be an enum {AccountUpdate, OrderbookUpdate, TradeUpdate, MarketOrder}
+#include "utils/messages.hpp" // TYPE should be an enum {AccountUpdate, OrderbookUpdate, TradeUpdate, MarketOrder}
 
 #include <fstream>
 #include <optional>
