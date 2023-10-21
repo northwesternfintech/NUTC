@@ -19,17 +19,17 @@ add_library(
     NUTC24_lib OBJECT
     src/lib.cpp
     src/utils/dev_mode/dev_mode.cpp
-    src/matching/engine_manager.cpp
+    src/matching/manager/engine_manager.cpp
     src/logging.cpp
     src/networking/firebase/firebase.cpp
     src/process_spawning/spawning.cpp
-    src/networking/rabbitmq/RabbitMQClientManager.cpp
-    src/networking/rabbitmq/RabbitMQConnectionManager.cpp
-    src/networking/rabbitmq/RabbitMQConsumer.cpp
-    src/networking/rabbitmq/RabbitMQOrderHandler.cpp
-    src/networking/rabbitmq/RabbitMQPublisher.cpp
-    src/networking/rabbitmq/RabbitMQQueueManager.cpp
-    src/matching/engine.cpp
+    src/networking/rabbitmq/client_manager/RabbitMQClientManager.cpp
+    src/networking/rabbitmq/connection_manager/RabbitMQConnectionManager.cpp
+    src/networking/rabbitmq/consumer/RabbitMQConsumer.cpp
+    src/networking/rabbitmq/order_handler/RabbitMQOrderHandler.cpp
+    src/networking/rabbitmq/publisher/RabbitMQPublisher.cpp
+    src/networking/rabbitmq/queue_manager/RabbitMQQueueManager.cpp
+    src/matching/engine/engine.cpp
     src/client_manager/client_manager.cpp
     src/utils/logger/logger.cpp
 )

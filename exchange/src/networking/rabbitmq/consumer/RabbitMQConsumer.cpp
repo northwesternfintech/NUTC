@@ -1,7 +1,7 @@
-#include "networking/rabbitmq/RabbitMQConsumer.hpp"
+#include "RabbitMQConsumer.hpp"
 
-#include "networking/rabbitmq/RabbitMQConnectionManager.hpp"
-#include "RabbitMQOrderHandler.hpp"
+#include "networking/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
+#include "networking/rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
 
 namespace nutc {
 namespace rabbitmq {
