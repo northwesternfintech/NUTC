@@ -1,32 +1,11 @@
 "use client";
 import { PhotoIcon, CheckIcon, UserCircleIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect,  useState } from "react";
 import { UserInfoType, useUserInfo } from "@/app/login/auth/context";
 import { useFirebase } from "@/app/firebase/context";
-import { push, ref, update } from "firebase/database";
-import { getDownloadURL, ref as sRef, uploadBytes } from "firebase/storage";
+import { ref, update } from "firebase/database";
 import Swal from "sweetalert2";
-
-async function uploadResume(
-  database: any,
-  storage: any,
-  uid: string,
-  file: File,
-) {
-  const fileId = push(ref(database)).key;
-  const storageRef = sRef(storage);
-  const fileType = file.type.split("/")[1];
-  const resumeRef = sRef(storageRef, `resumes/${uid}/${fileId}.${fileType}`);
-  try {
-    const snapshot = await uploadBytes(resumeRef, file);
-    const downloadURL = await getDownloadURL(snapshot.ref);
-    return downloadURL;
-  } catch (e) {
-    console.log(e);
-    return "-1";
-  }
-}
 
 async function writeNewUser(functions: any, database: any, user: UserInfoType) {
   //iterate over fields in user
@@ -55,67 +34,6 @@ async function writeNewUser(functions: any, database: any, user: UserInfoType) {
 }
 
 export default function Registration() {
-  const handleResumeChange = async (selectedFile: any) => {
-    // const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      if (selectedFile.type !== "application/pdf") {
-        Swal.fire({
-          title: "Please upload a PDF",
-          icon: "warning",
-          toast: true,
-          position: "top-end",
-          showConfirmButton: false,
-          timer: 4000,
-          timerProgressBar: true,
-          didOpen: (toast) => {
-            toast.addEventListener("mouseenter", Swal.stopTimer);
-            toast.addEventListener("mouseleave", Swal.resumeTimer);
-          },
-        });
-      } else {
-        const downloadLink: string = await uploadResume(
-          database,
-          storage,
-          currUser.uid,
-          selectedFile,
-        );
-        if (downloadLink !== "-1") {
-          setCurrUser((prevState) => ({
-            ...prevState,
-            resumeURL: downloadLink,
-          }));
-          Swal.fire({
-            title: "Resume uploaded!",
-            icon: "success",
-            toast: true,
-            position: "top-end",
-            showConfirmButton: false,
-            timer: 4000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-              toast.addEventListener("mouseenter", Swal.stopTimer);
-              toast.addEventListener("mouseleave", Swal.resumeTimer);
-            },
-          });
-        } else {
-          Swal.fire({
-            title: "Resume upload failed",
-            icon: "error",
-            toast: true,
-            position: "top-end",
-            showConfirmButton: false,
-            timer: 4000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-              toast.addEventListener("mouseenter", Swal.stopTimer);
-              toast.addEventListener("mouseleave", Swal.resumeTimer);
-            },
-          });
-        }
-      }
-    }
-  };
-
   const { database, storage, functions } = useFirebase();
   const userInfo = useUserInfo();
   const defaultUser: UserInfoType = {
@@ -123,11 +41,11 @@ export default function Registration() {
     isFilledFromDB: false,
     username: "",
     about: "",
-    resumeURL: "",
+    teamLeader: "",
     firstName: "",
     lastName: "",
     email: "",
-    school: "Northwestern",
+    school: "",
     hasCompletedReg: true, //will be after this
   };
 
@@ -148,26 +66,6 @@ export default function Registration() {
       ...prevState,
       [name]: value,
     }));
-  };
-
-  const [isDragOver, setDragOver] = useState(false);
-  const dropRef: any = useRef();
-
-  const handleDragOver = (e: any) => {
-    e.preventDefault();
-    setDragOver(true);
-  };
-
-  const handleDragLeave = () => {
-    setDragOver(false);
-  };
-
-  const handleDrop = (e: any) => {
-    e.preventDefault();
-    setDragOver(false);
-
-    const files = e.dataTransfer.files;
-    handleResumeChange(files[0]);
   };
 
   return (
@@ -229,64 +127,6 @@ export default function Registration() {
               <p className="mt-3 text-sm leading-6 text-gray-400">
                 Write a few sentences about yourself.
               </p>
-            </div>
-
-            <div className="col-span-full">
-              <label
-                htmlFor="file-upload"
-                className="block text-sm font-medium leading-6 text-white"
-              >
-                Resume
-              </label>
-              <div
-                className={currUser.resumeURL
-                  ? "mt-2 flex justify-center rounded-lg border border-solid border-green-400 px-6 py-10"
-                  : isDragOver
-                  ? "mt-2 flex justify-center rounded-lg border border-dashed border-indigo-500 px-6 py-10"
-                  : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"}
-                ref={dropRef}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-              >
-                <div className="text-center">
-                  {!currUser.resumeURL && (
-                    <PhotoIcon
-                      className="mx-auto h-12 w-12 text-gray-500"
-                      aria-hidden="true"
-                    />
-                  )}
-                  {currUser.resumeURL && (
-                    <CheckIcon
-                      className="mx-auto h-12 w-12 text-green-500"
-                      aria-hidden="true"
-                    />
-                  )}
-
-                  <div className="mt-4 flex text-sm leading-6 text-gray-400">
-                    <label
-                      htmlFor="file-upload"
-                      className="relative cursor-pointer rounded-md bg-gray-900 font-semibold text-white focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 focus-within:ring-offset-gray-900 hover:text-indigo-500"
-                    >
-                      <span>Upload a file</span>
-                      <input
-                        id="file-upload"
-                        name="file-upload"
-                        type="file"
-                        onChange={(e:any) => {
-                          //@ts-ignore
-                          handleResumeChange(e.target.files[0]);
-                        }}
-                        className="sr-only"
-                      />
-                    </label>
-                    <p className="pl-1">or drag and drop</p>
-                  </div>
-                  <p className="text-xs leading-5 text-gray-400">
-                    PDF up to 10MB
-                  </p>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -362,23 +202,39 @@ export default function Registration() {
 
             <div className="sm:col-span-3">
               <label
+                htmlFor="team-leader"
+                className="block text-sm font-medium leading-6 text-white"
+              >
+                Team leader
+              </label>
+              <div className="mt-2">
+                <input
+                  id="teamLeader"
+                  name="teamLeader"
+                  type="text"
+                  value={currUser.teamLeader}
+                  className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 sm:text-sm sm:leading-6"
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+
+            <div className="sm:col-span-3">
+              <label
                 htmlFor="school"
                 className="block text-sm font-medium leading-6 text-white"
               >
-                School
+                Institution
               </label>
               <div className="mt-2">
-                <select
+                <input
                   id="school"
                   name="school"
-                  defaultValue={currUser.school}
+                  type="text"
+                  value={currUser.school}
+                  className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 sm:text-sm sm:leading-6"
                   onChange={handleInputChange}
-                  className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6 [&_*]:text-black"
-                >
-                  <option>Northwestern</option>
-                  <option>UChicago</option>
-                  <option>Other</option>
-                </select>
+                />
               </div>
             </div>
           </div>
@@ -446,15 +302,6 @@ export default function Registration() {
                       type="checkbox"
                       className="h-4 w-4 rounded border-white/10 bg-white/5 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-gray-900"
                     />
-                  </div>
-                  <div className="text-sm leading-6">
-                    <label htmlFor="news" className="font-medium text-white">
-                      News
-                    </label>
-                    <p className="text-gray-400">
-                      Get notified regarding new events and announcements for
-                      NUFT
-                    </p>
                   </div>
                 </div>
               </div>
