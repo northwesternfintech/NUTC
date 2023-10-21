@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "ICAIF 2023",
-  description: "ICAIF Trading Competition",
+  description: "ICAIF 2023 FinRL Contest",
 };
 
 export default function RootLayout({
