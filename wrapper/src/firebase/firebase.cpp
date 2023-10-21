@@ -38,20 +38,22 @@ storage_request(const std::string& firebase_url)
     std::string readBuffer;
 
     curl = curl_easy_init();
-    if (curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, firebase_url.c_str());
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
-
-        res = curl_easy_perform(curl);
-
-        if (res != CURLE_OK) {
-            std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res)
-                      << std::endl;
-        }
-
-        curl_easy_cleanup(curl);
+    if (!curl) {
+        throw std::runtime_error("curl_easy_init() failed");
     }
+
+    curl_easy_setopt(curl, CURLOPT_URL, firebase_url.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+
+    res = curl_easy_perform(curl);
+
+    if (res != CURLE_OK) {
+        std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res)
+                  << std::endl;
+    }
+
+    curl_easy_cleanup(curl);
 
     return readBuffer;
 }
@@ -60,22 +62,21 @@ std::optional<std::string>
 get_most_recent_algo(const std::string& uid)
 {
     glz::json_t user_info = get_user_info(uid);
-    // if not has "algos"
     if (!user_info.contains("algos") || !user_info.contains("latestAlgoId")) {
-        // log_w(firebase, "User {} has no algos. Will not participate in simulation.",
-        // uid);
         return std::nullopt;
     }
+
     std::string latestAlgoId = user_info["latestAlgoId"].get<std::string>();
     if (!user_info["algos"].contains(latestAlgoId)) {
         return std::nullopt;
     }
+
     glz::json_t algo_info = user_info["algos"][latestAlgoId];
     if (!algo_info.contains("downloadURL")) {
         return std::nullopt;
     }
+
     std::string downloadURL = algo_info["downloadURL"].get<std::string>();
-    // print_algo_info(algo_info, latestAlgoId);
     std::string algo_file = storage_request(downloadURL);
     return algo_file;
 }
@@ -90,29 +91,30 @@ firebase_request(
     std::string readBuffer;
 
     curl = curl_easy_init();
-    if (curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
-
-        if (method == "POST") {
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
-        }
-        else if (method == "PUT") {
-            curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
-        }
-        else if (method == "DELETE") {
-            curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
-        }
-
-        res = curl_easy_perform(curl);
-        if (res != CURLE_OK) {
-            log_e(firebase, "curl_easy_perform() failed: {}", curl_easy_strerror(res));
-        }
-
-        curl_easy_cleanup(curl);
+    if (!curl) {
+        throw std::runtime_error("curl_easy_init() failed");
     }
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+
+    if (method == "POST") {
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
+    }
+    else if (method == "PUT") {
+        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
+    }
+    else if (method == "DELETE") {
+        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+    }
+
+    res = curl_easy_perform(curl);
+    if (res != CURLE_OK) {
+        log_e(firebase, "curl_easy_perform() failed: {}", curl_easy_strerror(res));
+    }
+
+    curl_easy_cleanup(curl);
 
     glz::json_t json{};
     auto error = glz::read_json(json, readBuffer);

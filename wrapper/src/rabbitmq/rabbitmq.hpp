@@ -75,7 +75,7 @@ public:
      *
      * @returns True if the message was successfully published, false otherwise
      */
-    bool publishInit(const std::string& uid, bool ready);
+    [[nodiscard]] bool publishInit(const std::string& uid, bool ready);
 
     /**
      * @brief Callback for the market order function
@@ -104,9 +104,9 @@ public:
 
 private:
     rate_limiter::RateLimiter limiter;
-    bool initializeConnection(const std::string& queueName);
-    bool initializeConsume(const std::string& queueName);
-    bool connectToRabbitMQ(
+    [[nodiscard]] bool initializeConnection(const std::string& queueName);
+    [[nodiscard]] bool initializeConsume(const std::string& queueName);
+    [[nodiscard]] bool connectToRabbitMQ(
         const std::string& hostname,
         int port,
         const std::string& username,
@@ -114,9 +114,10 @@ private:
     );
 
     amqp_connection_state_t conn;
-    bool publishMessage(const std::string& queueName, const std::string& message);
-    bool initializeQueue(const std::string& queueName);
-    bool publishMarketOrder(
+    [[nodiscard]] bool
+    publishMessage(const std::string& queueName, const std::string& message);
+    [[nodiscard]] bool initializeQueue(const std::string& queueName);
+    [[nodiscard]] bool publishMarketOrder(
         const std::string& client_uid,
         const std::string& side,
         const std::string& ticker,

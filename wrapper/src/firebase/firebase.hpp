@@ -8,13 +8,13 @@
 
 #include <iostream>
 #include <map>
-#include <string>
 #include <optional>
+#include <string>
 
 namespace nutc {
 namespace firebase {
 
-//database request - change name
+// database request - change name
 glz::json_t firebase_request(
     const std::string& method, const std::string& url, const std::string& data = ""
 );
@@ -25,5 +25,5 @@ glz::json_t get_user_info(const std::string& uid);
 
 std::optional<std::string> get_most_recent_algo(const std::string& uid);
 
-} // namespace client
+} // namespace firebase
 } // namespace nutc

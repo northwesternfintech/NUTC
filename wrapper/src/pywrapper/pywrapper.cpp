@@ -21,19 +21,19 @@ create_api_module(
     py::exec(R"(import nutc_api)");
 }
 
-py::object
+const py::object
 get_ob_update_function()
 {
     return py::globals()["strat"].attr("on_orderbook_update");
 }
 
-py::object
+const py::object
 get_trade_update_function()
 {
     return py::globals()["strat"].attr("on_trade_update");
 }
 
-py::object
+const py::object
 get_account_update_function()
 {
     return py::globals()["strat"].attr("on_account_update");
@@ -42,7 +42,6 @@ get_account_update_function()
 void
 run_code_init(const std::string& py_code)
 {
-    // log_i(py_runtime, "Running code:\n{}", py_code);
     py::exec(py_code);
     py::exec(R"(
         def place_market_order(side, ticker, quantity, price):

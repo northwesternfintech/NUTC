@@ -107,7 +107,11 @@ main(int argc, const char** argv)
     }
 
     // Send message to exchange to let it know we successfully initialized
-    conn.publishInit(uid, algo.has_value());
+    bool published_init = conn.publishInit(uid, algo.has_value());
+    if (!published_init) {
+        log_e(main, "Failed to publish init message");
+        return 1;
+    }
     if (!algo.has_value()) {
         return 0;
     }

@@ -13,7 +13,7 @@ private:
     const std::chrono::seconds TIME_WINDOW = std::chrono::seconds(60);
 
 public:
-    bool ensureRate();
+    bool should_rate_limit();
 };
 } // namespace rate_limiter
 } // namespace nutc

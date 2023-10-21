@@ -3,7 +3,7 @@
 namespace nutc {
 namespace rate_limiter {
 bool
-RateLimiter::ensureRate()
+RateLimiter::should_rate_limit()
 {
     auto now = std::chrono::steady_clock::now();
 
@@ -12,11 +12,11 @@ RateLimiter::ensureRate()
     }
 
     if (timestamps.size() >= MAX_CALLS) {
-        return false;
+        return true;
     }
 
     timestamps.push(now);
-    return true;
+    return false;
 }
 } // namespace rate_limiter
 } // namespace nutc

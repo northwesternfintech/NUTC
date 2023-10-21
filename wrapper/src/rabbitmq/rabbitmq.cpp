@@ -129,7 +129,7 @@ RabbitMQ::publishMarketOrder(
     float price
 )
 {
-    if (!limiter.ensureRate()) {
+    if (limiter.should_rate_limit()) {
         return false;
     }
     MarketOrder order{
@@ -261,7 +261,11 @@ RabbitMQ::RabbitMQ(const std::string& uid)
     if (!initializeConnection(uid)) {
         log_c(rabbitmq, "Failed to initialize connection to RabbitMQ");
         // attempt to say we didn't init correctly
-        publishInit(uid, false);
+        bool published_init = publishInit(uid, false);
+        if (!published_init) {
+            log_e(rabbitmq, "Failed to publish init message");
+        }
+
         exit(1);
     }
 }
