@@ -27,7 +27,7 @@ export default function Login() {
             </div>
             <div className="relative flex justify-center text-sm font-medium leading-6">
               <span className="bg-gray-900 px-6 text-white">
-                Use your school email
+                Use your institution email
               </span>
             </div>
           </div>
