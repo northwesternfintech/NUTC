@@ -67,7 +67,7 @@ export default function Hero() {
                 Learn More
               </span>
               <span className="inline-flex items-center space-x-2 text-sm font-medium leading-6 text-gray-300">
-                <span>NUFT Main Site</span>
+                <span>FinRL Main Site</span>
                 <ChevronRightIcon
                   className="h-5 w-5 text-gray-500"
                   aria-hidden="true"
@@ -76,7 +76,7 @@ export default function Hero() {
             </Link>
           </div>
           <h1 className="mt-10 text-4xl font-bold tracking-tight text-white sm:text-6xl">
-            Northwestern Trading Competition 2024
+            FinRL Trading Competition 2023
           </h1>
           <p className="mt-6 text-lg leading-8 text-gray-300">
             Explore and advance your algorithmic trading skills through intense

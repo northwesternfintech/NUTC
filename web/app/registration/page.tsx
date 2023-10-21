@@ -294,16 +294,6 @@ export default function Registration() {
                     </p>
                   </div>
                 </div>
-                <div className="relative flex gap-x-3">
-                  <div className="flex h-6 items-center">
-                    <input
-                      id="news"
-                      name="news"
-                      type="checkbox"
-                      className="h-4 w-4 rounded border-white/10 bg-white/5 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-gray-900"
-                    />
-                  </div>
-                </div>
               </div>
             </fieldset>
           </div>
