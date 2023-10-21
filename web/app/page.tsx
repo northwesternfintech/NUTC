@@ -4,6 +4,8 @@ import Link from "next/link";
 import Logo from "@/app/assets/logo.png";
 import BackgroundScreenshot from "@/app/assets/background.webp";
 
+const GOOGLE_DOCS_URL = "https://docs.google.com/document/d/e/2PACX-1vS3papowYO7cRuiH7ov3dAoWRb-328BQ-OLtl1NI85EuvLkqp6jA6iKsqSMp4F5Q7--1ZfPwWX5bYq-/pub"
+
 export default function Hero() {
   return (
     <div className="relative isolate overflow-hidden bg-gray-900">
@@ -52,9 +54,9 @@ export default function Hero() {
         <div className="mx-auto max-w-2xl flex-shrink-0 lg:mx-0 lg:max-w-xl lg:pt-8">
           <Image
             src={Logo}
-            width={50}
-            height={50}
-            className="h-12"
+            width={100}
+            height={100}
+            className="h-[100px]"
             alt="Logo"
           />
           <div className="mt-24 sm:mt-32 lg:mt-16">
