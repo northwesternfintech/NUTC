@@ -1,4 +1,4 @@
-#include "firebase.hpp"
+#include "networking/firebase/firebase.hpp"
 
 #include "logging.hpp"
 

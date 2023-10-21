@@ -15,7 +15,7 @@ add_executable(NUTC24_test
   src/basic_matching.cpp
   src/invalid_orders.cpp
   src/many_orders.cpp
-  src/util/macros.cpp 
+  src/test_utils/macros.cpp 
   )
 target_link_libraries(
     NUTC24_test PRIVATE
