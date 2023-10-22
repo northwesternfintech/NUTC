@@ -1,9 +1,10 @@
 "use client";
-import Link from "next/link";
 import React, { ReactNode } from "react";
 import Figure1 from "@/app/assets/figures/fig1.png";
 import Table1 from "@/app/assets/figures/table1.png";
 import Image from "next/image";
+import { ALL_STAFF_ARRAY } from "./staff";
+import { NextPage } from "next";
 
 interface IAboutUsSection {
   title: string;
@@ -20,9 +21,30 @@ interface IAboutUsFigure {
   fig_number: string;
 }
 
+interface IAboutUsOrganizerHuman {
+  children: ReactNode; // ideally a photo lol
+  name: string;
+  bio: string;
+}
+
+const AboutUsOrganizerHuman: React.FC<IAboutUsOrganizerHuman> = ({children, name, bio}) => {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-7 gap-4 mt-4">
+      <div className="col-span-1 md:col-span-2">
+        {children}
+      </div>
+      <div className="col-span-1 md:col-span-5">
+        <p>
+          <span className="font-bold">{name}</span> {bio}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 const AboutUsH3: React.FC<IAboutUsH> = ({children}) => {
   return (
-    <h2 className="text-base font-semibold leading-8 text-white">
+    <h2 className="text-base font-semibold leading-8 mt-4 text-white">
       {children}
     </h2>
   );
@@ -60,7 +82,7 @@ const AboutUsFigure: React.FC<IAboutUsFigure> = ({children, caption, fig_number}
   );
 }
 
-export const AboutUs: React.FC = () => {
+export default function AboutUs() {
   return (
     <div>
       <div className="space-y-12 p-3">
@@ -209,13 +231,33 @@ export const AboutUs: React.FC = () => {
         </AboutUsSection>
 
         <AboutUsSection title="Organizers">
+          {ALL_STAFF_ARRAY.map((cat, index) => (
+            <div key={`staff-category-${cat.category}-${index}`}>
+              <AboutUsH3>
+                {cat.category}
+              </AboutUsH3>
+              {cat.members.map((element, i) => (
+                <AboutUsOrganizerHuman name={element.name} bio={element.bio} key={`human-${cat.category}-${element.name}-${i}`}>
+                  <Image
+                    src={element.photo}
+                    alt={element.name}
+                    className="w-full"
+                  />
+                </AboutUsOrganizerHuman>
+              ))}
+            </div>
+          ))}
+        </AboutUsSection>
+
+        <AboutUsSection title="Contact">
           <p className="mt-2 mb-2 text-sm leading-6 text-gray-400">
-            {"todo later :)"}
+            Contestants can communicate any questions on Discord.
+          </p>
+          <p className="mt-2 mb-2 text-sm leading-6 text-gray-400">
+          Contact email: <a href="mailto:finrlcontest@gmail.com" className="underline">finrlcontest@gmail.com</a>
           </p>
         </AboutUsSection>
       </div>
     </div>
   );
 }
-
-export default AboutUs;
