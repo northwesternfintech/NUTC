@@ -1,6 +1,6 @@
-# NUTC Monorepo
+# ACM ICAIF 2023
 
-This monorepo holds all relevant repositories for the Northwestern Trading Competition project. The details of each are described below.
+This repository is for FinRL Contest at ACM ICAIF 2023. It is adapted from the Northwestern Trading Competition project.
 
 ## Exchange
 The exchange is the core of the trading competition. It handles spawning in algorithm wrappers, receiving and matching orders, and many other tasks.
