@@ -38,5 +38,13 @@
       "enabled": true
     },
     "singleProjectMode": true
+  },
+  "hosting": {
+    "source": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
   }
 }
