@@ -1,10 +1,13 @@
 import KeyiWang from "@/app/assets/staffphotos/organizers/wang-ky.jpg";
 import ZiyiXia from "@/app/assets/staffphotos/organizers/xia-zy.png";
 import KentWu from "@/app/assets/staffphotos/organizers/wu-k.jpg";
+
+// TODO: fix the photos
 import EthanHavemann from "@/app/assets/staffphotos/organizers/wang-ky.jpg";
 import SteveEwald from "@/app/assets/staffphotos/organizers/wang-ky.jpg";
 import AndrewLi from "@/app/assets/staffphotos/organizers/wang-ky.jpg";
 import GavinWang from "@/app/assets/staffphotos/organizers/wang-ky.jpg";
+
 import XiaoyangLiu from "@/app/assets/staffphotos/advisors/liu-xy.png";
 import ZihanDing from "@/app/assets/staffphotos/advisors/ding-zh.png";
 import Zhaoran from "@/app/assets/staffphotos/advisors/zhaoran.png";
@@ -83,7 +86,7 @@ export const ALL_STAFF_ARRAY: IStaffCategory[] = [
             {
                 photo: Zhaoran,
                 name: "Zhaoran Wang",
-                bio: "will be written later. PLEASE fix this photo later too.",
+                bio: "Assistant Professor in the Departments of Industrial Engineering & Management Sciences and Computer Science (by courtesy) at Northwestern University (since 2018). He is affiliated with the Centers for Deep Learning and Optimization & Statistical Learning.",
             },
         ]
     },
