@@ -135,7 +135,7 @@ export default function AboutUs() {
             Timeline
           </AboutUsH3>
           <ol className="mt-2 mb-2 text-sm leading-6 text-gray-400">
-            <li><span className="font-bold">Submissions Open</span>: October 25rd, 2023</li>
+            <li><span className="font-bold">Submissions Open</span>: October 25th, 2023</li>
             <li><span className="font-bold">Submissions Deadline</span>: November 12th, 2023</li>
             <li><span className="font-bold">Winners Notification</span>: November 25th, 2023</li>
           </ol>
