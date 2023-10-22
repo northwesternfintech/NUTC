@@ -37,6 +37,10 @@ jobs:
         run: yarn install
         working-directory: ./web
 
+      - name: Install the other dependencies
+        run: yarn install
+        working-directory: ./web/functions
+
       - name: Build with Next.js
         run: yarn next build
         working-directory: ./web
