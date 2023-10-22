@@ -1,10 +1,14 @@
 import KeyiWang from "@/app/assets/staffphotos/organizers/wang-ky.jpg";
 import ZiyiXia from "@/app/assets/staffphotos/organizers/xia-zy.png";
 import KentWu from "@/app/assets/staffphotos/organizers/wu-k.jpg";
+
+// TODO: fix the photos
 import EthanHavemann from "@/app/assets/staffphotos/organizers/wang-ky.jpg";
 import SteveEwald from "@/app/assets/staffphotos/organizers/wang-ky.jpg";
 import AndrewLi from "@/app/assets/staffphotos/organizers/wang-ky.jpg";
 import GavinWang from "@/app/assets/staffphotos/organizers/wang-ky.jpg";
+import Nino from "@/app/assets/staffphotos/organizers/wang-ky.jpg";
+
 import XiaoyangLiu from "@/app/assets/staffphotos/advisors/liu-xy.png";
 import ZihanDing from "@/app/assets/staffphotos/advisors/ding-zh.png";
 import Zhaoran from "@/app/assets/staffphotos/advisors/zhaoran.png";
@@ -53,17 +57,22 @@ export const ALL_STAFF_ARRAY: IStaffCategory[] = [
             {
                 photo: SteveEwald,
                 name: "Steve Ewald",
-                bio: "will be written later",
+                bio: "Third-year undergraduate student at Northwestern University. Incoming Software Engineer Intern at IMC Trading. Leading research on floating point attack vectors and interactions with chaos theory at the Prescience Lab.",
             },
             {
                 photo: AndrewLi,
                 name: "Andrew Li",
-                bio: "will be written later.",
+                bio: "Second-year undergraduate student at Northwestern University doing BA/MS in Computer Science.",
             },
             {
                 photo: GavinWang,
                 name: "Gavin Wang",
                 bio: "will be written later.",
+            },
+            {
+                photo: Nino,
+                name: "Nikola Maruszewski",
+                bio: "Nikola Maruszewski is an undergraduate student at Northwestern University majoring in Computer Science, and plans to complete a Masters in Computer Engineering through the BS/MS program. Currently performing research on Quantum Systems with Prof. Nikos Hardavellas in the PARAG@N Lab. Other interests lie in computer hardware, embedded systems, compilers, and operating systems.",
             },
         ]
     },
@@ -83,7 +92,7 @@ export const ALL_STAFF_ARRAY: IStaffCategory[] = [
             {
                 photo: Zhaoran,
                 name: "Zhaoran Wang",
-                bio: "will be written later. PLEASE fix this photo later too.",
+                bio: "Assistant Professor in the Departments of Industrial Engineering & Management Sciences and Computer Science (by courtesy) at Northwestern University (since 2018). He is affiliated with the Centers for Deep Learning and Optimization & Statistical Learning.",
             },
         ]
     },
