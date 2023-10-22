@@ -2,7 +2,7 @@
 *.log
 bun.*
 functions/__pycache__
-
+.firebase/
 firebase-seed
 
 # dependencies
