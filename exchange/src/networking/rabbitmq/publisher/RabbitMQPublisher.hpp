@@ -11,7 +11,8 @@ namespace rabbitmq {
 class RabbitMQPublisher {
 public:
     // TODO: should take in variant of messages
-    static bool publishMessage(const std::string& queueName, const std::string& message);
+    static bool
+    publishMessage(const std::string& queueName, const std::string& message);
     static void broadcastMatches(
         const manager::ClientManager& clients,
         const std::vector<messages::Match>& matches

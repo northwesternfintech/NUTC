@@ -1,8 +1,8 @@
 #include "process_spawning/spawning.hpp"
 
 #include "config.h"
-#include "utils/dev_mode/dev_mode.hpp"
 #include "logging.hpp"
+#include "utils/dev_mode/dev_mode.hpp"
 
 namespace nutc {
 namespace client {
@@ -45,7 +45,7 @@ spawn_all_clients(const nutc::manager::ClientManager& users, bool development_mo
 {
     int clients = 0;
     for (const auto& client : users.get_clients(false)) {
-      const std::string uid = client.uid;
+        const std::string uid = client.uid;
         log_i(client_spawning, "Spawning client: {}", uid);
         std::string quote_uid = std::string(uid);
         std::replace(quote_uid.begin(), quote_uid.end(), '-', ' ');

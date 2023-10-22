@@ -80,6 +80,9 @@ target_link_libraries(NUTC24_exe PRIVATE NUTC24_lib)
 # quill
 target_link_libraries(NUTC24_exe PRIVATE quill::quill)
 
+# fmt
+target_link_libraries(NUTC24_exe PRIVATE fmt::fmt)
+
 # rabbitmq
 find_package(rabbitmq-c REQUIRED)
 target_link_libraries(NUTC24_exe PRIVATE rabbitmq::rabbitmq-static)
