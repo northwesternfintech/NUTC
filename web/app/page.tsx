@@ -61,8 +61,7 @@ export default function Hero() {
           />
           <div className="mt-24 sm:mt-32 lg:mt-16">
             <Link
-              href={GOOGLE_DOCS_URL}
-              target="_blank"
+              href="/aboutus"
               className="inline-flex space-x-6"
             >
               <span className="rounded-full bg-indigo-500/10 px-3 py-1 text-sm font-semibold leading-6 text-indigo-400 ring-1 ring-inset ring-indigo-500/20">
