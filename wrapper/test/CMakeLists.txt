@@ -3,6 +3,10 @@
 # tree and is not feasible from an install location
 
 project(NUTC-clientTests LANGUAGES CXX)
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Debug)
+endif()
+
 
 # ---- Dependencies ----
 

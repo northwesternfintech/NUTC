@@ -1,6 +1,6 @@
 install(
-    TARGETS NUTC-client_exe
-    RUNTIME COMPONENT NUTC-client_Runtime
+    TARGETS NUTC-linter_exe
+    RUNTIME COMPONENT NUTC-linter_Runtime
 )
 
 if(PROJECT_IS_TOP_LEVEL)
