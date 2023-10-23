@@ -1,6 +1,5 @@
 #define CROW_MAIN
 #include "common.hpp"
-#include "git.h"
 #include "lint/lint.hpp"
 #include "thread_safe_queue/tsq.hpp"
 
@@ -51,20 +50,6 @@ process_arguments(int argc, const char** argv)
     return std::make_tuple(verbosity);
 }
 
-static void
-log_build_info()
-{
-    log_i(main, "NUTC Linter: Linter for NUTC user-submitted algorithms");
-
-    // Git info
-    log_i(main, "Built from {} on {}", git_Describe(), git_Branch());
-    log_d(main, "Commit: \"{}\" at {}", git_CommitSubject(), git_CommitDate());
-    log_d(main, "Author: {} <{}>", git_AuthorName(), git_AuthorEmail());
-
-    if (git_AnyUncommittedChanges())
-        log_w(main, "Built from dirty commit!");
-}
-
 int
 main(int argc, const char** argv)
 {
@@ -73,7 +58,6 @@ main(int argc, const char** argv)
 
     // Start logging and print build info
     nutc::logging::init(verbosity);
-    log_build_info();
     log_i(main, "Starting NUTC Linter");
 
     nutc::tsq::ThreadSafeQueue<std::pair<std::string, std::string>> queue;

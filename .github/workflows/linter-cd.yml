@@ -1,6 +1,11 @@
 name: Linter - Continuous Deployment
 
 on:
+  # workflow_run:
+    # workflows: ["Linter - Continuous Integration"]
+    # branches: [main]
+    # types:
+      # - completed
   push:
     branches:
       - main
@@ -11,10 +16,9 @@ on:
       - main
       - linter-cd
 
-  workflow_dispatch:
-
 jobs:
   create-dockerimage:
+      # if: ${{ github.event.workflow_run.conclusion == 'success' }}
       runs-on: ubuntu-22.04
       defaults:
         run:
