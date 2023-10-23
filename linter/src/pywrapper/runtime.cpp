@@ -114,7 +114,7 @@ trigger_callbacks()
         return fmt::format("Failed to run on_account_update: {}", e.what());
     }
 
-      try {
+    try {
         py::exec(R"(strategy.on_orderbook_update("C","BUY",1.0,1.0))");
     } catch (const std::exception& e) {
         return fmt::format("Failed to run on_orderbook_update: {}", e.what());
@@ -130,9 +130,6 @@ trigger_callbacks()
     } catch (const std::exception& e) {
         return fmt::format("Failed to run on_account_update: {}", e.what());
     }
-
-
-  
 
     return std::nullopt;
 }
