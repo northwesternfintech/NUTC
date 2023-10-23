@@ -18,7 +18,7 @@ def resize_images(folder_path, new_width):
                 img.save(img_path)
 
 if __name__ == '__main__':
-    folder_path = "./logos"
+    folder_path = "./staffphotos/platform"
     new_width = 400  # The width you want for all images
 
     resize_images(folder_path, new_width)
