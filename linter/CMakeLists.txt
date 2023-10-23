@@ -29,13 +29,6 @@ find_package(Python COMPONENTS Interpreter Development REQUIRED)
 find_package(pybind11 REQUIRED)
 find_package(Crow REQUIRED)
 
-# Git version tracking
-FetchContent_Declare(cmake_git_version_tracking
-  GIT_REPOSITORY https://github.com/andrew-hardin/cmake-git-version-tracking.git
-  GIT_TAG 9b5fc5088b4089ff2adc20d607976b9923e3d737
-)
-FetchContent_MakeAvailable(cmake_git_version_tracking)
-
 # ---- Declare library ----
 
 add_library(
@@ -81,7 +74,6 @@ target_link_libraries(NUTC-linter_exe PRIVATE fmt::fmt)
 target_link_libraries(NUTC-linter_exe PRIVATE quill::quill)
 
 target_link_libraries(NUTC-linter_exe PRIVATE argparse::argparse)
-target_link_libraries(NUTC-linter_exe PRIVATE cmake_git_version_tracking)
 target_link_libraries(NUTC-linter_exe PRIVATE CURL::libcurl)
 target_link_libraries(NUTC-linter_exe PRIVATE glaze::glaze)
 target_link_libraries(NUTC-linter_exe PRIVATE pybind11::pybind11)
