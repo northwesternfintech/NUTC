@@ -24,27 +24,27 @@ const isLocalhost = () => {
   return process && process.env.NODE_ENV === "development";
 };
 
-if (isLocalhost()) {
-  database = getDatabase();
-  storage = getStorage();
-  connectDatabaseEmulator(database, "localhost", 9000);
-  connectStorageEmulator(storage, "localhost", 9199);
-  firebase.functions().useEmulator("localhost", 5001);
-  firebase.auth().useEmulator("http://localhost:9099");
-  functions = firebase.functions();
-  if (
-    typeof sessionStorage != "undefined" &&
-    !sessionStorage.getItem("givenWarning")
-  ) {
-    alert(
-      "Initializing in emulator mode. If you aren't a developer, contact support@nuft_getdomain.com immediately."
-    );
-    sessionStorage.setItem("givenWarning", "true");
-  }
-} else {
+// if (isLocalhost()) {
+//   database = getDatabase();
+//   storage = getStorage();
+//   connectDatabaseEmulator(database, "localhost", 9000);
+//   connectStorageEmulator(storage, "localhost", 9199);
+//   firebase.functions().useEmulator("localhost", 5001);
+//   firebase.auth().useEmulator("http://localhost:9099");
+//   functions = firebase.functions();
+//   if (
+//     typeof sessionStorage != "undefined" &&
+//     !sessionStorage.getItem("givenWarning")
+//   ) {
+//     alert(
+//       "Initializing in emulator mode. If you aren't a developer, contact support@nuft_getdomain.com immediately."
+//     );
+//     sessionStorage.setItem("givenWarning", "true");
+//   }
+// } else {
   storage = getStorage(app);
   database = getDatabase(app);
   functions = firebase.functions();
-}
+// }
 
 export { app, database, functions, storage };
