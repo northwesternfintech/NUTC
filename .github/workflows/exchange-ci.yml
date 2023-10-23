@@ -1,4 +1,4 @@
-name: Exchange Continuous Integration
+name: Exchange - Continuous Integration
 
 on:
   push:
@@ -6,14 +6,14 @@ on:
     - main
     - ci-test
     paths:
-      - exchange
+      - 'exchange/**'
 
   pull_request:
     branches:
     - main
     - ci-test
     paths:
-      - exchange
+      - 'exchange/**'
 
   workflow_dispatch:
 

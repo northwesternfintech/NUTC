@@ -1,19 +1,19 @@
-name: Linter Continuous Integration
+name: Linter - Continuous Integration
 
 on:
   push:
     branches:
     - main
     - ci-test
-    # paths:
-      # - linter
+    paths:
+      - 'linter/**'
 
   pull_request:
     branches:
     - main
     - ci-test
     paths:
-      - linter
+      - 'linter/**'
 
   workflow_dispatch:
 
