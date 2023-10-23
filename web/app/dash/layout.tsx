@@ -1,6 +1,5 @@
 "use client";
 import RedirectOnAuth from "@/app/login/auth/redirectOnAuth";
-import NoSubmissions from "@/app/dash/no-submissions";
 import Dash from "@/app/dash/dash";
 
 export default function DashLayout({
@@ -9,9 +8,9 @@ export default function DashLayout({
   children: React.ReactNode;
 }) {
   return (
-    <section className="h-screen bg">
+    <section className="bun h-screen bg-gray-900">
       <RedirectOnAuth page="dash" />
-      <NoSubmissions />
+        {Dash(children)}
     </section>
   );
 }

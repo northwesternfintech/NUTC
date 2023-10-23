@@ -10,12 +10,12 @@ interface RedirectOnAuthProps {
 export default function RedirectOnAuth({ page }: RedirectOnAuthProps) {
   const { user } = useUserInfo();
   const router = useRouter();
-  useEffect(() => {
-    if (localStorage.getItem("isLoggedIn") === "true" && !user) {
-      return;
-    }
+  useEffect(() => {    if (localStorage.getItem("isLoggedIn") === "true" && !user) {
+    return;
+  }
 
     if (user) {
+      console.log("user", user);
       if (user?.hasCompletedReg) {
         if (user?.isApprovedApplicant) {
           if (page === "dash") {
@@ -45,6 +45,7 @@ export default function RedirectOnAuth({ page }: RedirectOnAuthProps) {
       }
       router.push("/login");
     }
+
   }, [user]);
 
   return <></>;
