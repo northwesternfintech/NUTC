@@ -1,13 +1,14 @@
 import KeyiWang from "@/app/assets/staffphotos/organizers/wang-ky.jpg";
 import ZiyiXia from "@/app/assets/staffphotos/organizers/xia-zy.png";
 import KentWu from "@/app/assets/staffphotos/organizers/wu-k.jpg";
+import EthanHavemann from "@/app/assets/staffphotos/organizers/ethan.jpeg";
+import Jiale from "@/app/assets/staffphotos/organizers/jiale.jpeg";
 
 // TODO: fix the photos
-import EthanHavemann from "@/app/assets/staffphotos/organizers/wang-ky.jpg";
-import SteveEwald from "@/app/assets/staffphotos/organizers/wang-ky.jpg";
-import AndrewLi from "@/app/assets/staffphotos/organizers/wang-ky.jpg";
-import GavinWang from "@/app/assets/staffphotos/organizers/wang-ky.jpg";
-import Nino from "@/app/assets/staffphotos/organizers/wang-ky.jpg";
+import SteveEwald from "@/app/assets/staffphotos/platform/steve.jpeg";
+import AndrewLi from "@/app/assets/staffphotos/platform/al.png";
+import GavinWang from "@/app/assets/staffphotos/platform/gavin.jpg";
+import Nino from "@/app/assets/staffphotos/platform/nino.png";
 
 import XiaoyangLiu from "@/app/assets/staffphotos/advisors/liu-xy.png";
 import ZihanDing from "@/app/assets/staffphotos/advisors/ding-zh.png";
@@ -44,16 +45,21 @@ export const ALL_STAFF_ARRAY: IStaffCategory[] = [
                 name: "Kent Wu",
                 bio: "Master's candidate at Columbia University with a keen interest in financial reinforcement learning and language modeling. He plays a pivotal role as the primary maintainer of the AI4Finance open-source community. This includes renowned projects such as FinRL and FinRL-Meta.",
             },
+            {
+                photo: EthanHavemann,
+                name: "Ethan Havemann",
+                bio: "Undergraduate at Northwestern University, Founder of Northwestern Fintech, and original designer of NUTC. Ethan focuses on software architecture, powerful developer tools, and hardware-up performance optimizations.",
+            },
+            {
+                photo: Jiale,
+                name: "Jiale Chen",
+                bio: "Undergraduate at Northwestern University and RL lead for Northwestern Fintech. Jiale’s interests lie in applying ML to solve complex, data driven problems.",
+            },
         ]
     },
     {
         category: "Platform",
         members: [
-            {
-                photo: EthanHavemann,
-                name: "Ethan Havemann",
-                bio: "will be written later.",
-            },
             {
                 photo: SteveEwald,
                 name: "Steve Ewald",
@@ -62,7 +68,7 @@ export const ALL_STAFF_ARRAY: IStaffCategory[] = [
             {
                 photo: AndrewLi,
                 name: "Andrew Li",
-                bio: "Second-year undergraduate student at Northwestern University doing BA/MS in Computer Science.",
+                bio: "Second-year undergraduate student at Northwestern University doing BA/MS in Computer Science. Incoming intern at Capital One. Interested in developing high performance, impactful software and building infrastructure.",
             },
             {
                 photo: GavinWang,
