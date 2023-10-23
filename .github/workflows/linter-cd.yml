@@ -1,23 +1,24 @@
-name: Continuous Deployment
+name: Linter - Continuous Deployment
 
 on:
   push:
     branches:
       - main
+      - linter-cd
 
   pull_request:
     branches:
       - main
+      - linter-cd
 
   workflow_dispatch:
 
 jobs:
   create-dockerimage:
-      strategy:
-        matrix:
-          os: [ubuntu-22.04]
-
-      runs-on: ${{ matrix.os }}
+      runs-on: ubuntu-22.04
+      defaults:
+        run:
+          working-directory: linter
 
       env:
         CC: clang-16
@@ -51,7 +52,6 @@ jobs:
             sudo apt install llvm-16 llvm-16-dev llvm-16-tools clang-16 clang-tidy-16 clang-tools-16 libclang-16-dev -y
  
       - name: Install static analyzers
-        if: matrix.os == 'ubuntu-22.04'
         run: >-
           sudo apt install cppcheck -y -q
 
@@ -62,12 +62,6 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v4
         with: { python-version: "3.11" }
-
-      - name: Setup MultiToolTask
-        if: matrix.os == 'windows-2022'
-        run: |
-          Add-Content "$env:GITHUB_ENV" 'UseMultiToolTask=true'
-          Add-Content "$env:GITHUB_ENV" 'EnforceProcessCountAcrossBuilds=true'
 
       - name: Create Dockerimage
         run: docker build -t nutc-linter:latest .
