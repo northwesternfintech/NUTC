@@ -73,7 +73,7 @@ export const ALL_STAFF_ARRAY: IStaffCategory[] = [
             {
                 photo: GavinWang,
                 name: "Gavin Wang",
-                bio: "will be written later.",
+                bio: "First-year undergraduate student at Northwestern University pursuing a degree in Computer Science and Math. Interested in system architecture, databases, and networking.",
             },
             {
                 photo: Nino,
