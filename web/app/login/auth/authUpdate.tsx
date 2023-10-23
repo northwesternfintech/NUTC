@@ -40,6 +40,7 @@ export default function AuthUpdate() {
         setUser(newUser);
       } else {
         const dbUser: UserInfoType = snapshot.val();
+        console.log("dbUser", dbUser);
         const entries = Object.entries(dbUser.algos || {});
         const sortedEntries = entries.sort((a, b) => {
           const dateA: any = new Date(a[1].uploadDate);
