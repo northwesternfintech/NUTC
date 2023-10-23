@@ -38,6 +38,9 @@ jobs:
       - name: Authenticate with Google Cloud
         run: gcloud auth activate-service-account --key-file=../.github/gcp-sa-key.json
 
+      - name: Copy conan-profile.sh to linter directory
+        run: cp ../.github/scripts/conan-profile.sh conan-profile.sh
+
       - name: Create Dockerimage
         run: docker build -t nutc-linter:latest .
 
