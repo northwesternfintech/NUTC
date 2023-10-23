@@ -6,13 +6,13 @@ import "firebase/compat/auth";
 import "firebase/compat/functions";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCa6g_38lybuuzfoBunEOhBUYwSavtF1rw",
-  authDomain: "finrl-contest-f019d.firebaseapp.com",
-  projectId: "finrl-contest-f019d",
-  storageBucket: "finrl-contest-f019d.appspot.com",
-  messagingSenderId: "382005499144",
-  appId: "1:382005499144:web:739edf880af14dbc2388bd",
-  measurementId: "G-QYWBD8SJPJ"
+  apiKey: "AIzaSyD1_vt8MWf2gJLUPcWl5iXrWVSQJ56yOTM",
+  authDomain: "finrl-contest-2023.firebaseapp.com",
+  projectId: "finrl-contest-2023",
+  storageBucket: "finrl-contest-2023.appspot.com",
+  messagingSenderId: "987972509982",
+  appId: "1:987972509982:web:9f503ee5685b9620c9690f",
+  measurementId: "G-2BS37K5ZZX"
 };
 
 var database: any;

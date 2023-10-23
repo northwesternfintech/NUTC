@@ -19,7 +19,7 @@ const transporter = nodemailer.createTransport({
 
 admin.initializeApp({
   credential: admin.credential.applicationDefault(),
-  databaseURL: "https://nutc-web-default-rtdb.firebaseio.com/",
+  databaseURL: "https://finrl-contest-2023-default-rtdb.firebaseio.com/",
 });
 
 export const emailApplication = functions.https.onCall(
@@ -55,7 +55,7 @@ export const emailApplication = functions.https.onCall(
     );
     const mailOptions = {
       from: "noreply@nutc.site",
-      to: "nuft@u.northwestern.edu",
+      to: "andrewli@u.northwestern.edu",
       // to: "steveewald2025@u.northwestern.edu",
       subject: "[ACTION REQUIRED] NUTC Application Submitted",
       html: emailText,
@@ -76,7 +76,7 @@ async function generateApprovalLink(uid: any) {
   const token: string = crypto.randomBytes(16).toString("hex");
   const ref = admin.database().ref("approvalTokens").child(token);
   await ref.set(uid);
-  const region = "https://us-central1-nutc-web.cloudfunctions.net";
+  const region = "https://ssrfinrlcontest2023-ubk2ezl53a-uc.a.run.app";
   // const region = "http://127.0.0.1:5001/nutc-web/us-central1";
 
   const link = `${region}/approveApplicant?token=${token}`;
@@ -88,7 +88,7 @@ async function generateRejectionLink(uid: any) {
   const token: string = crypto.randomBytes(16).toString("hex");
   const ref = admin.database().ref("rejectionTokens").child(token);
   await ref.set(uid);
-  const region = "https://us-central1-nutc-web.cloudfunctions.net";
+  const region = "https://ssrfinrlcontest2023-ubk2ezl53a-uc.a.run.app";
   // const region = "http://127.0.0.1:5001/nutc-web/us-central1";
 
   const link = `${region}/rejectApplicant?token=${token}`;

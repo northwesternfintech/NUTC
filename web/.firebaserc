@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "finrl-contest-f019d"
-  }
+    "default": "finrl-contest-2023",
+    "prod": "finrl-contest-2023"
+  },
+  "targets": {},
+  "etags": {}
 }

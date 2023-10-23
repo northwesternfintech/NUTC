@@ -6,7 +6,7 @@ export default function AppSubmittedLayout({
 })  {
   return (
     <section className="h-screen bg-gray-900">
-      <RedirectOnAuth page="registration" />
+      <RedirectOnAuth page="app-submitted" />
       {children}
     </section>
   );
