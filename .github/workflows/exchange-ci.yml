@@ -1,0 +1,305 @@
+name: Exchange Continuous Integration
+
+on:
+  push:
+    branches:
+    - main
+    - ci-test
+    paths:
+      - exchange
+
+  pull_request:
+    branches:
+    - main
+    - ci-test
+    paths:
+      - exchange
+
+  workflow_dispatch:
+
+# We only care about the latest revision of a PR, so cancel all previous instances.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: exchange
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+
+    - uses: actions/setup-python@v4
+      with: { python-version: "3.11" }
+
+    - name: Install LLVM 17
+      run: |
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+          sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main"
+          sudo apt update
+          sudo apt install llvm-17 llvm-17-dev llvm-17-tools clang-17 clang-tidy-17 clang-format-17 clang-tools-17 libclang-17-dev -y
+
+    - name: Install codespell
+      run: pip3 install codespell
+
+    - name: Lint
+      run: cmake -D FORMAT_COMMAND=clang-format-17 -P cmake/lint.cmake
+
+    - name: Spell check
+      run: cmake -P cmake/spell.cmake
+
+  coverage:
+    needs: [lint]
+
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: exchange
+
+
+    # To enable coverage, delete the last line from the conditional below and
+    # edit the "<name>" placeholder to your GitHub name.
+    # If you do not wish to use codecov, then simply delete this job from the
+    # workflow.
+    if: github.repository_owner == 'northwesternfintech'
+
+    env:
+      CC: gcc-13
+      CXX: g++-13
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+
+    - name: Install LCov
+      run: sudo apt update -q
+        && sudo apt install lcov -q -y
+
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with: { python-version: "3.11" }
+
+    - name: Install GCC 13
+      run: |
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+        sudo apt update
+        sudo apt install gcc-13 g++-13 -y
+
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 130
+        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-13 130
+        sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-13 130
+
+    - name: Install dependencies
+      run: |
+        pip3 install conan
+
+        sudo apt install libssl-dev -y
+
+        bash < ../.github/scripts/conan-profile.sh
+        conan install . -s build_type=Release -b missing
+
+
+    - name: Configure
+      run: cmake --preset=ci-coverage
+
+    - name: Build
+      run: cmake --build build/coverage -j 2
+
+    - name: Test
+      working-directory: exchange/build/coverage
+      run: ctest --output-on-failure --no-tests=error -j 2
+
+    - name: Process coverage info
+      run: cmake --build build/coverage -t coverage
+
+    - name: Submit to codecov.io
+      uses: codecov/codecov-action@v3
+      with:
+        file: build/coverage/coverage.info
+
+  sanitize:
+    needs: [lint]
+
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: exchange
+
+
+    env:
+      CC: clang-17
+      CXX: clang++-17
+      CLANG_DIR: '/usr/lib/llvm-17/lib/cmake/clang'
+      LLVM_DIR: '/usr/lib/llvm-17/lib/cmake/llvm'
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with: { python-version: "3.11" }
+
+    - name: Install LLVM 17
+      run: |
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+          sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main"
+          sudo apt update
+          sudo apt install llvm-17 llvm-17-dev llvm-17-tools clang-17 clang-tidy-17 clang-tools-17 libclang-17-dev -y
+
+    - name: Install dependencies
+      run: |
+        pip3 install conan
+
+        sudo apt install libssl-dev -y
+        
+        bash < ../.github/scripts/conan-profile.sh
+        conan install . -s build_type=Release -b missing
+
+    - name: Configure
+      run: cmake --preset=ci-sanitize
+
+    - name: Build
+      run: cmake --build build/sanitize -j 2
+
+    - name: Test
+      working-directory: exchange/build/sanitize
+      env:
+        ASAN_OPTIONS: "strict_string_checks=1:\
+          detect_stack_use_after_return=1:\
+          check_initialization_order=1:\
+          strict_init_order=1:\
+          detect_leaks=1"
+        UBSAN_OPTIONS: print_stacktrace=1
+      run: ctest --output-on-failure --no-tests=error -j 2
+
+  test:
+    needs: [lint]
+
+    strategy:
+      matrix:
+        os: [ubuntu-22.04]
+
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: exchange
+
+
+    env:
+      CC: clang-17
+      CXX: clang++-17
+      CLANG_DIR: '/usr/lib/llvm-17/lib/cmake/clang'
+      LLVM_DIR: '/usr/lib/llvm-17/lib/cmake/llvm'
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+
+    - name: Install LLVM 17
+      run: |
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+          sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main"
+          sudo apt update
+          sudo apt install llvm-17 llvm-17-dev llvm-17-tools clang-17 clang-tidy-17 clang-tools-17 libclang-17-dev -y
+
+    - name: Install static analyzers
+      if: matrix.os == 'ubuntu-22.04'
+      run: >-
+        sudo apt install cppcheck -y -q
+
+        sudo update-alternatives --install
+        /usr/bin/clang-tidy clang-tidy
+        /usr/bin/clang-tidy-17 160
+
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with: { python-version: "3.11" }
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        pip3 install conan
+        
+        sudo apt install libssl-dev -y
+        
+        bash < ../.github/scripts/conan-profile.sh
+        conan install . -s build_type=Release -b missing
+
+    - name: Setup MultiToolTask
+      if: matrix.os == 'windows-2022'
+      run: |
+        Add-Content "$env:GITHUB_ENV" 'UseMultiToolTask=true'
+        Add-Content "$env:GITHUB_ENV" 'EnforceProcessCountAcrossBuilds=true'
+
+    - name: Configure
+      shell: pwsh
+      run: cmake "--preset=ci-$("${{ matrix.os }}".split("-")[0])"
+
+    - name: Build
+      run: cmake --build build --config Release -j 2
+
+    - name: Install
+      run: cmake --install build --config Release --prefix prefix
+
+    - name: Test
+      working-directory: exchange/build
+      run: ctest --output-on-failure --no-tests=error -C Release -j 2
+
+  docs:
+    # Deploy docs only when builds succeed
+    needs: [sanitize, test]
+
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: exchange
+
+
+    # To enable, first you have to create an orphaned gh-pages branch:
+    #
+    #    git switch --orphan gh-pages
+    #    git commit --allow-empty -m "Initial commit"
+    #    git push -u origin gh-pages
+    #
+    # Edit the <name> placeholder below to your GitHub name, so this action
+    # runs only in your repository and no one else's fork. After these, delete
+    # this comment and the last line in the conditional below.
+    # If you do not wish to use GitHub Pages for deploying documentation, then
+    # simply delete this job similarly to the coverage one.
+    if: github.ref == 'refs/heads/main'
+      && github.event_name == 'push'
+      && github.repository_owner == 'northwesternfintech'
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+
+    - uses: actions/setup-python@v4
+      with: { python-version: "3.11" }
+
+    - name: Install m.css dependencies
+      run: pip3 install jinja2 Pygments
+
+    - name: Install Doxygen
+      run: sudo apt update -q
+        && sudo apt install doxygen -q -y
+
+    - name: Build docs
+      run: cmake "-DPROJECT_SOURCE_DIR=$PWD" "-DPROJECT_BINARY_DIR=$PWD/build"
+        -P cmake/docs-ci.cmake
+
+    - name: Deploy docs
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: build/docs/html

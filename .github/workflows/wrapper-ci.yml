@@ -1,19 +1,19 @@
-name: Exchange Continuous Integration
+name: Wrapper Continuous Integration
 
 on:
   push:
     branches:
     - main
     - ci-test
-    # paths:
-      # - exchange
+    paths:
+      - wrapper
 
   pull_request:
     branches:
     - main
     - ci-test
-    # paths:
-      # - exchange
+    paths:
+      - wrapper
 
   workflow_dispatch:
 
@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-22.04
     defaults:
       run:
-        working-directory: exchange
+        working-directory: wrapper
 
     steps:
     - uses: actions/checkout@v3
@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-22.04
     defaults:
       run:
-        working-directory: exchange
+        working-directory: wrapper
 
 
     # To enable coverage, delete the last line from the conditional below and
@@ -112,7 +112,7 @@ jobs:
       run: cmake --build build/coverage -j 2
 
     - name: Test
-      working-directory: exchange/build/coverage
+      working-directory: wrapper/build/coverage
       run: ctest --output-on-failure --no-tests=error -j 2
 
     - name: Process coverage info
@@ -129,7 +129,7 @@ jobs:
     runs-on: ubuntu-22.04
     defaults:
       run:
-        working-directory: exchange
+        working-directory: wrapper
 
 
     env:
@@ -170,7 +170,7 @@ jobs:
       run: cmake --build build/sanitize -j 2
 
     - name: Test
-      working-directory: exchange/build/sanitize
+      working-directory: wrapper/build/sanitize
       env:
         ASAN_OPTIONS: "strict_string_checks=1:\
           detect_stack_use_after_return=1:\
@@ -190,7 +190,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     defaults:
       run:
-        working-directory: exchange
+        working-directory: wrapper
 
 
     env:
@@ -251,7 +251,7 @@ jobs:
       run: cmake --install build --config Release --prefix prefix
 
     - name: Test
-      working-directory: exchange/build
+      working-directory: wrapper/build
       run: ctest --output-on-failure --no-tests=error -C Release -j 2
 
   docs:
@@ -261,7 +261,7 @@ jobs:
     runs-on: ubuntu-22.04
     defaults:
       run:
-        working-directory: exchange
+        working-directory: wrapper
 
 
     # To enable, first you have to create an orphaned gh-pages branch:
