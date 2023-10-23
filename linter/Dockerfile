@@ -8,7 +8,7 @@ RUN pip install conan numpy pandas polars scipy scikit-learn \
 
 WORKDIR /app
 COPY ./conanfile.py /app/
-COPY ../.github/scripts/conan-profile.sh /app/
+COPY conan-profile.sh /app/
 
 RUN cat conan-profile.sh | bash \
     && conan install . -b missing
