@@ -61,8 +61,7 @@ export default function Hero() {
           />
           <div className="mt-24 sm:mt-32 lg:mt-16">
             <Link
-              href="https://nu-fintech.web.app"
-              target="_blank"
+              href="https://finrl-contest.github.io/"
               className="inline-flex space-x-6"
             >
               <span className="rounded-full bg-indigo-500/10 px-3 py-1 text-sm font-semibold leading-6 text-indigo-400 ring-1 ring-inset ring-indigo-500/20">
