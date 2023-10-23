@@ -3,15 +3,15 @@ name: Exchange - Continuous Integration
 on:
   push:
     branches:
-    - main
-    - ci-test
+      - main
+      - ci-test
     paths:
       - 'exchange/**'
 
   pull_request:
     branches:
-    - main
-    - ci-test
+      - main
+      - ci-test
     paths:
       - 'exchange/**'
 

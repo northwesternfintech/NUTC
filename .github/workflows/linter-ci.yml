@@ -3,15 +3,15 @@ name: Linter - Continuous Integration
 on:
   push:
     branches:
-    - main
-    - ci-test
+      - main
+      - ci-test
     paths:
       - 'linter/**'
 
   pull_request:
     branches:
-    - main
-    - ci-test
+      - main
+      - ci-test
     paths:
       - 'linter/**'
 
