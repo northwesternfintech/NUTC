@@ -39,7 +39,7 @@ FetchContent_MakeAvailable(cmake_git_version_tracking)
 # ---- Declare library ----
 
 add_library(
-    NUTC-linter_lib OBJECT
+    NUTC-linter_lib OBJECT 
     src/firebase/fetching.cpp
     src/pywrapper/runtime.cpp
     src/mock_api/mock_api.cpp
