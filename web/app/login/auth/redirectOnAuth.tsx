@@ -23,14 +23,26 @@ export default function RedirectOnAuth({ page }: RedirectOnAuthProps) {
           }
           router.push("/dash");
         } else if (user?.isRejectedApplicant) {
+          if (page === "app-rejected") {
+            return;
+          }
           router.push("/app-rejected");
         } else {
+          if (page === "app-submitted") {
+            return;
+          }
           router.push("/app-submitted");
         }
       } else {
+        if (page === "registration") {
+          return;
+        }
         router.push("/registration");
       }
     } else {
+      if (page === "login") {
+        return;
+      }
       router.push("/login");
     }
   }, [user]);
