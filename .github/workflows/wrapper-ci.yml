@@ -5,8 +5,8 @@ on:
     branches:
     - main
     - ci-test
-    # paths:
-      # - wrapper
+    paths:
+      - wrapper
 
   pull_request:
     branches:
