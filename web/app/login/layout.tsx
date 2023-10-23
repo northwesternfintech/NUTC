@@ -6,7 +6,7 @@ export default function LoginLayout({
 }) {
   return (
     <section className="h-screen bg-gray-900">
-      <RedirectOnAuth page="registration" />
+      <RedirectOnAuth page="login" />
       {children}
     </section>
   );
