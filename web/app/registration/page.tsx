@@ -241,15 +241,15 @@ export default function Registration() {
           </div>
         </div>
 
-        <div className="border-b border-white/10 pb-12">
+        {/* <div className="border-b border-white/10 pb-12">
           <h2 className="text-base font-semibold leading-7 text-white">
             Notifications
           </h2>
           <p className="mt-1 text-sm leading-6 text-gray-400">
             We&#39;ll always let you know about important updates, but you pick
             what else you want to hear about.
-          </p>
-
+          </p> */}
+{/* 
           <div className="mt-10 space-y-10">
             <fieldset>
               <legend className="text-sm font-semibold leading-6 text-white">
@@ -298,7 +298,7 @@ export default function Registration() {
               </div>
             </fieldset>
           </div>
-        </div>
+        </div> */}
       </div>
 
       <div className="mt-6 flex items-center justify-end gap-x-6">
