@@ -8,8 +8,8 @@ const statuses: any = {
   failure: "text-rose-400 bg-rose-400/10",
 };
 const environments: any = {
-  Results: "text-indigo-400 bg-indigo-400/10 ring-indigo-400/20",
-  Pending: "text-gray-400 bg-gray-400/10 ring-gray-400/20",
+  success: "text-indigo-400 bg-indigo-400/10 ring-indigo-400/20",
+  pending: "text-gray-500 bg-gray-400/10 ring-gray-400/20",
   "Lint Output": "text-rose-400 bg-rose-400/10 ring-rose-400/30",
 };
 const deployments: any = [
@@ -90,7 +90,7 @@ import {
   MagnifyingGlassIcon,
 } from "@heroicons/react/20/solid";
 import { useUserInfo } from "../login/auth/context";
-import AlgorithmType from "./algoType";
+import {AlgorithmType} from "./algoType";
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
