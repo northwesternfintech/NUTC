@@ -8,7 +8,7 @@ export default function Example() {
                     className="absolute inset-0 -z-10 h-full w-full object-cover object-top"
                 />
                 <div className="mx-auto max-w-7xl px-6 py-32 text-center sm:py-40 lg:px-8">
-                    <h1 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-5xl">Recruitment NUTC competition is complete.</h1>
+                    <h1 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-5xl">ACM ICAIF 2023 FinRL Contest is complete.</h1>
                     <p className="mt-4 text-base text-white/70 sm:mt-6">You&apos;ll receive results within the next wee.</p>
                     <div className="mt-10 flex justify-center">
                         <a href="/" className="text-sm font-semibold leading-7 text-white">

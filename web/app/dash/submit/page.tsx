@@ -4,7 +4,6 @@ import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import type {
   AlgorithmType,
-  FirebaseUploadType,
   SubmissionFile,
 } from "@/app/dash/algoType";
 import Swal from "sweetalert2";
