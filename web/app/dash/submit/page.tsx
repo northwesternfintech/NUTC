@@ -2,10 +2,7 @@
 import { CheckIcon, PaperClipIcon } from "@heroicons/react/24/solid";
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
-import type {
-  AlgorithmType,
-  SubmissionFile,
-} from "@/app/dash/algoType";
+import type { AlgorithmType, SubmissionFile } from "@/app/dash/algoType";
 import Swal from "sweetalert2";
 import { push, ref, set, update } from "firebase/database";
 import { getDownloadURL, ref as sRef, uploadBytes } from "firebase/storage";
@@ -484,7 +481,7 @@ export default function Submission() {
                   ref={refs[3]}
                   onDragOver={(e) => handleDragOver(e, 3)}
                   onDragLeave={() => handleDragLeave(3)}
-                  onDrop={(e) => handleDrop(e, "readme.md", "md", 3)}
+                  onDrop={(e) => handleDrop(e, "readme_md", "md", 3)}
                 >
                   <div className="text-center">
                     {!submissionFiles[3].downloadURL && (
@@ -510,7 +507,7 @@ export default function Submission() {
                           name="file-upload-trained_model"
                           onChange={(e) => {
                             handleFileChange(
-                              "readme.md",
+                              "readme_md",
                               "md",
                               3,
                               //@ts-ignore
