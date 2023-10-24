@@ -28,6 +28,7 @@ async function writeNewUser(functions: any, database: any, user: UserInfoType) {
       return false;
     }
   }
+  user.isApprovedApplicant = true; // auto accept for FinRL
   await update(ref(database, "users/" + user.uid), user);
   await functions.httpsCallable("emailApplication")();
   return true;
