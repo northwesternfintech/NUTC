@@ -12,7 +12,7 @@ const firebaseConfig = {
   storageBucket: "finrl-contest-2023.appspot.com",
   messagingSenderId: "987972509982",
   appId: "1:987972509982:web:9f503ee5685b9620c9690f",
-  measurementId: "G-2BS37K5ZZX"
+  measurementId: "G-2BS37K5ZZX",
 };
 
 var database: any;
@@ -42,9 +42,9 @@ const isLocalhost = () => {
 //     sessionStorage.setItem("givenWarning", "true");
 //   }
 // } else {
-  storage = getStorage(app);
-  database = getDatabase(app);
-  functions = firebase.functions();
+storage = getStorage(app);
+database = getDatabase(app);
+functions = firebase.functions();
 // }
 
 export { app, database, functions, storage };
