@@ -26,7 +26,7 @@
       "hidden": true,
       "inherits": "cmake-pedantic",
       "cacheVariables": {
-        "NUTC-client_DEVELOPER_MODE": "ON"
+        "NUTC-linter_DEVELOPER_MODE": "ON"
       }
     },
     {
