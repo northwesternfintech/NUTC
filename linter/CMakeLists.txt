@@ -9,7 +9,7 @@ project(
     DESCRIPTION "Linter for the Northwestern University Trading Competition."
     HOMEPAGE_URL "https://example.com/"
     LANGUAGES CXX
-)
+)  
 
 include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
