@@ -1,5 +1,3 @@
-import Submission from "./submit/page";
-
 export interface AlgorithmType {
   lintResults: string;
   uploadDate: string;
@@ -13,4 +11,3 @@ export interface SubmissionFile {
   fileIdKey: string;
   fileName: string;
 }
-export type FirebaseUploadType = AlgorithmType & SubmissionFile[];
