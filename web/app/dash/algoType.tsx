@@ -1,10 +1,16 @@
-export default interface AlgorithmType {
+import Submission from "./submit/page";
+
+export  interface AlgorithmType {
   lintResults: string;
   uploadDate: string;
-  downloadURL: string;
-  fileIdKey: string;
   name: string;
   description: string;
   lintFailureMessage?: string;
   lintSuccessMessage?: string;
 }
+export  interface SubmissionFile {
+  downloadURL: string;
+  fileIdKey: string;
+  fileName: string;
+}
+export type FirebaseUploadType = AlgorithmType & SubmissionFile[];

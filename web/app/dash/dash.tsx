@@ -271,7 +271,7 @@ export default function Dash(content: React.ReactNode) {
                   </div>
                   <ul role="list" className="-mx-2 mt-2 space-y-1">
                     {submissions.map((team: any) => (
-                      <li key={team.name}>
+                      <li key={team}>
                         <a
                           href={team.href}
                           className={classNames(

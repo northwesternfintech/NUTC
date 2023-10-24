@@ -15,7 +15,6 @@ export default function RedirectOnAuth({ page }: RedirectOnAuthProps) {
   }
 
     if (user) {
-      console.log("user", user);
       if (user?.hasCompletedReg) {
         if (user?.isApprovedApplicant) {
           if (page === "dash") {
