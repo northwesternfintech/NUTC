@@ -12,7 +12,7 @@ project(
 )  
 
 include(cmake/project-is-top-level.cmake)
-include(cmake/variables.cmake)
+include(cmake/variables.cmake) 
 
 configure_file(src/config.h.in config.h)
 
