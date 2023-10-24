@@ -9,22 +9,24 @@ import { getDownloadURL, ref as sRef, uploadBytes } from "firebase/storage";
 import { useFirebase } from "@/app/firebase/context";
 import { useUserInfo } from "@/app/login/auth/context";
 
-async function uploadAlgo(
+async function uploadFile(
   database: any,
   storage: any,
   uid: string,
   file: File,
 ) {
-  const fileRef = push(ref(database, `users/${uid}/algos`));
+  const fileNameWithoutType = file.type.split("/")[0];
+  const fileRef = push(ref(database, `users/${uid}/${fileNameWithoutType}`));
   if (!fileRef) {
     return { downloadURL: "", fileIdKey: "", fileRef: "" };
   }
   const fileIdKey: string = `${uid}/${fileRef.key}` || ""; //bad practice
   const storageRef = sRef(storage);
   const fileType = file.type.split("/")[1];
-  const algoRef = sRef(storageRef, `algos/${fileIdKey}.${fileType}`);
+  const storageFileRef = sRef(storageRef, `${fileNameWithoutType}/${fileIdKey}.${fileType}`);
   try {
-    const snapshot = await uploadBytes(algoRef, file);
+    console.log("uploading");
+    const snapshot = await uploadBytes(storageFileRef, file);
     const downloadURL = await getDownloadURL(snapshot.ref); //in theory, we should be saving the ID, rather than URL. this is easier.
     return { downloadURL, fileIdKey, fileRef };
   } catch (e) {
@@ -100,40 +102,42 @@ export default function Submission() {
     setDragOver(false);
 
     const files = e.dataTransfer.files;
-    handleAlgoChange(files[0]);
+    // handleFileChange(files[0]);
   };
 
   const userInfo = useUserInfo();
   const { database, storage, functions } = useFirebase();
 
-  const handleAlgoChange = async (selectedFile: any) => {
+  const handleFileChange = async (file_name: string, selectedFile: any) => {
     if (!selectedFile) {
       return;
     }
+    console.log(selectedFile);
     const fileName = selectedFile.name;
-    const fileExtension = fileName.split(".").pop().toLowerCase();
-    if (fileExtension !== "py") {
-      Swal.fire({
-        title: "Please upload a Python file",
-        icon: "error",
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 4000,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-          toast.addEventListener("mouseenter", Swal.stopTimer);
-          toast.addEventListener("mouseleave", Swal.resumeTimer);
-        },
-      });
-      return;
-    }
-    const downloadLink = await uploadAlgo(
+    // const fileExtension = fileName.split(".").pop().toLowerCase();
+    // if (fileExtension !== "py") {
+    //   Swal.fire({
+    //     title: "Please upload a Python file",
+    //     icon: "error",
+    //     toast: true,
+    //     position: "top-end",
+    //     showConfirmButton: false,
+    //     timer: 4000,
+    //     timerProgressBar: true,
+    //     didOpen: (toast) => {
+    //       toast.addEventListener("mouseenter", Swal.stopTimer);
+    //       toast.addEventListener("mouseleave", Swal.resumeTimer);
+    //     },
+    //   });
+    //   return;
+    // }
+    const downloadLink = await uploadFile(
       database,
       storage,
       userInfo?.user?.uid || "unknown",
       selectedFile,
     );
+    console.log("downloadLink", downloadLink);
     if (downloadLink.downloadURL !== "") {
       setAlgo((prevState) => ({
         ...prevState,
@@ -265,14 +269,15 @@ export default function Submission() {
                         htmlFor="file-upload"
                         className="relative cursor-pointer rounded-md bg-gray-900 font-semibold text-white focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 focus-within:ring-offset-gray-900 hover:text-indigo-500"
                       >
-                        <span>Upload a file</span>
+                        <span>Upload requirements.txt</span>
                         <input
                           id="file-upload"
                           name="file-upload"
                           onChange={(e) => {
                             //@ts-ignore
-                            handleAlgoChange(e.target.files[0]);
+                            handleFileChange("requirements.txt", e.target.files[0]);
                           }}
+                          multiple
                           type="file"
                           className="sr-only"
                         />
@@ -280,7 +285,7 @@ export default function Submission() {
                       <p className="pl-1">or drag and drop</p>
                     </div>
                     <p className="text-xs leading-5 text-gray-400">
-                      .py up to 100KB
+                      .txt up to 100KB
                     </p>
                   </div>
                 </div>
