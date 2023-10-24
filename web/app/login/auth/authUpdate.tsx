@@ -5,7 +5,7 @@ import { child, get, ref } from "firebase/database";
 import { UserInfoType, useUserInfo } from "@/app/login/auth/context";
 import { onAuthStateChanged } from "firebase/auth";
 import { getAuth } from "firebase/auth";
-import AlgorithmType from "@/app/dash/algoType";
+import {AlgorithmType} from "@/app/dash/algoType";
 
 export default function AuthUpdate() {
   const { database } = useFirebase();
@@ -40,7 +40,6 @@ export default function AuthUpdate() {
         setUser(newUser);
       } else {
         const dbUser: UserInfoType = snapshot.val();
-        console.log("dbUser", dbUser);
         const entries = Object.entries(dbUser.algos || {});
         const sortedEntries = entries.sort((a, b) => {
           const dateA: any = new Date(a[1].uploadDate);

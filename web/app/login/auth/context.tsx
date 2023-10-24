@@ -1,6 +1,6 @@
 "use client";
 
-import AlgorithmType from "@/app/dash/algoType";
+import { AlgorithmType } from "@/app/dash/algoType";
 import { createContext, ReactNode, useContext, useState } from "react";
 
 export interface UserInfoType {
