@@ -1,6 +1,6 @@
 import Submission from "./submit/page";
 
-export  interface AlgorithmType {
+export interface AlgorithmType {
   lintResults: string;
   uploadDate: string;
   name: string;
@@ -8,7 +8,7 @@ export  interface AlgorithmType {
   lintFailureMessage?: string;
   lintSuccessMessage?: string;
 }
-export  interface SubmissionFile {
+export interface SubmissionFile {
   downloadURL: string;
   fileIdKey: string;
   fileName: string;

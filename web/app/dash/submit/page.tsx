@@ -2,7 +2,11 @@
 import { CheckIcon, PaperClipIcon } from "@heroicons/react/24/solid";
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
-import type { AlgorithmType, FirebaseUploadType, SubmissionFile } from "@/app/dash/algoType";
+import type {
+  AlgorithmType,
+  FirebaseUploadType,
+  SubmissionFile,
+} from "@/app/dash/algoType";
 import Swal from "sweetalert2";
 import { push, ref, set, update } from "firebase/database";
 import { getDownloadURL, ref as sRef, uploadBytes } from "firebase/storage";
@@ -57,11 +61,7 @@ async function writeNewAlgo(
       hasEmptyFile = true;
     }
   }
-  if (
-    hasEmptyFile ||
-    algo.description === "" ||
-    algo.name === ""
-  ) {
+  if (hasEmptyFile || algo.description === "" || algo.name === "") {
     Swal.fire({
       title: "Please fill out all fields",
       icon: "warning",
@@ -81,7 +81,7 @@ async function writeNewAlgo(
   algo.uploadDate = new Date().toISOString();
 
   await set(algoRef, { ...algo, ...submissionFiles });
- 
+
   return true;
 }
 
@@ -474,7 +474,6 @@ export default function Submission() {
                   </div>
                 </div>
 
-
                 <div
                   className={
                     submissionFiles[3].downloadURL
@@ -530,7 +529,6 @@ export default function Submission() {
                     </p>
                   </div>
                 </div>
-
               </div>
             </div>
           </div>

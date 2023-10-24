@@ -5,7 +5,7 @@ import { child, get, ref } from "firebase/database";
 import { UserInfoType, useUserInfo } from "@/app/login/auth/context";
 import { onAuthStateChanged } from "firebase/auth";
 import { getAuth } from "firebase/auth";
-import {AlgorithmType} from "@/app/dash/algoType";
+import { AlgorithmType } from "@/app/dash/algoType";
 
 export default function AuthUpdate() {
   const { database } = useFirebase();
