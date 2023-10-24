@@ -51,8 +51,14 @@ async function writeNewAlgo(
   database: any,
   uid: string
 ) {
+  let hasEmptyFile = false;
+  for (let i = 0; i < 4; i++) {
+    if (submissionFiles[i].downloadURL === "") {
+      hasEmptyFile = true;
+    }
+  }
   if (
-    submissionFiles.length !== 4 ||
+    hasEmptyFile ||
     algo.description === "" ||
     algo.name === ""
   ) {
