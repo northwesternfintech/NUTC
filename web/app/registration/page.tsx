@@ -205,7 +205,7 @@ export default function Registration() {
                 htmlFor="team-leader"
                 className="block text-sm font-medium leading-6 text-white"
               >
-                Team leader
+                Team Name
               </label>
               <div className="mt-2">
                 <input

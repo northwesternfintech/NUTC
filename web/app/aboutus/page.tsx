@@ -220,7 +220,7 @@ export default function AboutUs() {
 
         <AboutUsSection title="Team Registration">
           <p className="mt-2 mb-2 text-sm leading-6 text-gray-400">
-            Team registration is done through the website. Please ensure that all team members input the same team leader. Registrations will be processed within 24 hours. 
+            Team registration is done through the website. Please ensure that all team members input the same team name. Registrations will be processed within 24 hours. 
           </p>
         </AboutUsSection>
 
