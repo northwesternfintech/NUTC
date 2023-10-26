@@ -301,7 +301,7 @@ export default function Registration() {
               </div>
             </div>
           </div>
-        </div> */}
+        </div>
       </div>
 
       <div className="mt-6 flex items-center justify-end gap-x-6">
