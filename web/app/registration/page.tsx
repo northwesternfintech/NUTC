@@ -1,9 +1,4 @@
 "use client";
-import {
-  PhotoIcon,
-  CheckIcon,
-  UserCircleIcon,
-} from "@heroicons/react/24/solid";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { UserInfoType, useUserInfo } from "@/app/login/auth/context";
@@ -14,7 +9,7 @@ import Swal from "sweetalert2";
 async function writeNewUser(functions: any, database: any, user: UserInfoType) {
   //iterate over fields in user
   for (const [key, value] of Object.entries(user)) {
-    if (!(key === "isFilledFromDB") && !value) {
+    if (!(key === "isFilledFromDB") && key !== "ICAIFRegistrationNumber" && !value) {
       Swal.fire({
         title: "Please fill out all fields",
         icon: "warning",
@@ -34,7 +29,7 @@ async function writeNewUser(functions: any, database: any, user: UserInfoType) {
   }
   user.isApprovedApplicant = true; // auto accept for FinRL
   await update(ref(database, "users/" + user.uid), user);
-  await functions.httpsCallable("emailApplication")();
+  // await functions.httpsCallable("emailApplication")();
   return true;
 }
 
@@ -67,6 +62,7 @@ export default function Registration() {
 
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
+    console.log(name, value)
     //@ts-ignore
     setCurrUser((prevState) => ({
       ...prevState,
