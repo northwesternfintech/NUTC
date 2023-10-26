@@ -47,6 +47,7 @@ export default function Registration() {
     lastName: "",
     email: "",
     school: "",
+    ICAIFRegistrationNumber: "",
     hasCompletedReg: true, //will be after this
   };
 
@@ -238,8 +239,6 @@ export default function Registration() {
                 />
               </div>
             </div>
-          </div>
-        </div>
 
         {/* <div className="border-b border-white/10 pb-12">
           <h2 className="text-base font-semibold leading-7 text-white">
@@ -296,7 +295,7 @@ export default function Registration() {
                   </div>
                 </div>
               </div>
-            </fieldset>
+            </div>
           </div>
         </div> */}
       </div>
