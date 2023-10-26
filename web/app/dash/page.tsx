@@ -8,8 +8,8 @@ const statuses: any = {
   failure: "text-rose-400 bg-rose-400/10",
 };
 const environments: any = {
-  Results: "text-indigo-400 bg-indigo-400/10 ring-indigo-400/20",
-  Pending: "text-gray-400 bg-gray-400/10 ring-gray-400/20",
+  success: "text-indigo-400 bg-indigo-400/10 ring-indigo-400/20",
+  pending: "text-gray-500 bg-gray-400/10 ring-gray-400/20",
   "Lint Output": "text-rose-400 bg-rose-400/10 ring-rose-400/30",
 };
 const deployments: any = [
@@ -90,7 +90,7 @@ import {
   MagnifyingGlassIcon,
 } from "@heroicons/react/20/solid";
 import { useUserInfo } from "../login/auth/context";
-import AlgorithmType from "./algoType";
+import { AlgorithmType } from "./algoType";
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
@@ -177,7 +177,7 @@ export default function Dashboard() {
                       href="#"
                       className={classNames(
                         active ? "bg-gray-50" : "",
-                        "block px-3 py-1 text-sm leading-6 text-gray-900",
+                        "block px-3 py-1 text-sm leading-6 text-gray-900"
                       )}
                     >
                       Name
@@ -190,7 +190,7 @@ export default function Dashboard() {
                       href="#"
                       className={classNames(
                         active ? "bg-gray-50" : "",
-                        "block px-3 py-1 text-sm leading-6 text-gray-900",
+                        "block px-3 py-1 text-sm leading-6 text-gray-900"
                       )}
                     >
                       Date updated
@@ -203,7 +203,7 @@ export default function Dashboard() {
                       href="#"
                       className={classNames(
                         active ? "bg-gray-50" : "",
-                        "block px-3 py-1 text-sm leading-6 text-gray-900",
+                        "block px-3 py-1 text-sm leading-6 text-gray-900"
                       )}
                     >
                       Status
@@ -228,14 +228,16 @@ export default function Dashboard() {
                   <div
                     className={classNames(
                       statuses[deployment.status],
-                      "flex-none rounded-full p-1",
+                      "flex-none rounded-full p-1"
                     )}
                   >
                     <div className="h-2 w-2 rounded-full bg-current" />
                   </div>
                   <h2 className="min-w-0 text-sm font-semibold leading-6 text-white">
                     <a href={deployment.href} className="flex gap-x-2">
-                      <span className="hidden truncate">{deployment.teamName}</span>
+                      <span className="hidden truncate">
+                        {deployment.teamName}
+                      </span>
                       <span className="hidden text-gray-400">/</span>
                       <span className="whitespace-nowrap">
                         {deployment.projectName}
@@ -258,7 +260,7 @@ export default function Dashboard() {
               <div
                 className={classNames(
                   environments[deployment.environment],
-                  "rounded-full flex-none py-1 px-2 text-xs font-medium ring-1 ring-inset",
+                  "rounded-full flex-none py-1 px-2 text-xs font-medium ring-1 ring-inset"
                 )}
               >
                 {deployment.environment}

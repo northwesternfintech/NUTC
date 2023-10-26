@@ -1,10 +1,13 @@
-export default interface AlgorithmType {
+export interface AlgorithmType {
   lintResults: string;
   uploadDate: string;
-  downloadURL: string;
-  fileIdKey: string;
   name: string;
   description: string;
   lintFailureMessage?: string;
   lintSuccessMessage?: string;
+}
+export interface SubmissionFile {
+  downloadURL: string;
+  fileIdKey: string;
+  fileName: string;
 }

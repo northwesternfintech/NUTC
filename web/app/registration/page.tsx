@@ -1,7 +1,11 @@
 "use client";
-import { PhotoIcon, CheckIcon, UserCircleIcon } from "@heroicons/react/24/solid";
+import {
+  PhotoIcon,
+  CheckIcon,
+  UserCircleIcon,
+} from "@heroicons/react/24/solid";
 import Link from "next/link";
-import { useEffect,  useState } from "react";
+import { useEffect, useState } from "react";
 import { UserInfoType, useUserInfo } from "@/app/login/auth/context";
 import { useFirebase } from "@/app/firebase/context";
 import { ref, update } from "firebase/database";
@@ -46,6 +50,7 @@ export default function Registration() {
     lastName: "",
     email: "",
     school: "",
+    ICAIFRegistrationNumber: "",
     hasCompletedReg: true, //will be after this
   };
 
@@ -205,7 +210,7 @@ export default function Registration() {
                 htmlFor="team-leader"
                 className="block text-sm font-medium leading-6 text-white"
               >
-                Team leader
+                Team name
               </label>
               <div className="mt-2">
                 <input
@@ -237,65 +242,37 @@ export default function Registration() {
                 />
               </div>
             </div>
-          </div>
-        </div>
 
-        <div className="border-b border-white/10 pb-12">
-          <h2 className="text-base font-semibold leading-7 text-white">
-            Notifications
-          </h2>
-          <p className="mt-1 text-sm leading-6 text-gray-400">
-            We&#39;ll always let you know about important updates, but you pick
-            what else you want to hear about.
-          </p>
-
-          <div className="mt-10 space-y-10">
-            <fieldset>
-              <legend className="text-sm font-semibold leading-6 text-white">
-                By Email
-              </legend>
-              <div className="mt-6 space-y-6">
-                <div className="relative flex gap-x-3">
-                  <div className="flex h-6 items-center">
-                    <input
-                      id="test-runs"
-                      name="test-runs"
-                      type="checkbox"
-                      className="h-4 w-4 rounded border-white/10 bg-white/5 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-gray-900"
-                    />
-                  </div>
-                  <div className="text-sm leading-6">
-                    <label
-                      htmlFor="test-runs"
-                      className="font-medium text-white"
-                    >
-                      Test Runs
-                    </label>
-                    <p className="text-gray-400">
-                      Get notified when your script passes or fails linting
-                    </p>
-                  </div>
-                </div>
-                <div className="relative flex gap-x-3">
-                  <div className="flex h-6 items-center">
-                    <input
-                      id="results"
-                      name="results"
-                      type="checkbox"
-                      className="h-4 w-4 rounded border-white/10 bg-white/5 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-gray-900"
-                    />
-                  </div>
-                  <div className="text-sm leading-6">
-                    <label htmlFor="results" className="font-medium text-white">
-                      Results
-                    </label>
-                    <p className="text-gray-400">
-                      Get notified when results are announced
-                    </p>
-                  </div>
-                </div>
+            <div className="sm:col-span-3">
+              <div className="flex flex-col">
+                <label
+                  htmlFor="registrationNumber"
+                  className="block text-sm font-medium leading-6 text-white"
+                >
+                  ICAIF registration number
+                </label>
+               <div className="text-sm text-gray-400">
+               (ICAIF register {" "}
+                <Link
+                  className="text-sm text-indigo-500 underline"
+                  href="https://ai-finance.org/icaif-23-registration/?"
+                >
+                 here 
+                </Link>
+      )
+               </div>
               </div>
-            </fieldset>
+              <div className="mt-2">
+                <input
+                  id="registrationNumber"
+                  name="registrationNumber"
+                  type="text"
+                  value={currUser.ICAIFRegistrationNumber}
+                  className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 sm:text-sm sm:leading-6"
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>

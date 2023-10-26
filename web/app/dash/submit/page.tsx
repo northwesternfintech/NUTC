@@ -1,30 +1,34 @@
 "use client";
 import { CheckIcon, PaperClipIcon } from "@heroicons/react/24/solid";
 import axios from "axios";
-import { useRef, useState } from "react";
-import AlgorithmType from "@/app/dash/algoType";
+import { useEffect, useRef, useState } from "react";
+import type { AlgorithmType, SubmissionFile } from "@/app/dash/algoType";
 import Swal from "sweetalert2";
-import { push, ref, set } from "firebase/database";
+import { push, ref, set, update } from "firebase/database";
 import { getDownloadURL, ref as sRef, uploadBytes } from "firebase/storage";
 import { useFirebase } from "@/app/firebase/context";
 import { useUserInfo } from "@/app/login/auth/context";
 
-async function uploadAlgo(
+async function uploadFile(
   database: any,
   storage: any,
   uid: string,
   file: File,
+  uploadCategory: string
 ) {
+  const fileExtension = file.name.split(".").pop();
   const fileRef = push(ref(database, `users/${uid}/algos`));
   if (!fileRef) {
     return { downloadURL: "", fileIdKey: "", fileRef: "" };
   }
   const fileIdKey: string = `${uid}/${fileRef.key}` || ""; //bad practice
   const storageRef = sRef(storage);
-  const fileType = file.type.split("/")[1];
-  const algoRef = sRef(storageRef, `algos/${fileIdKey}.${fileType}`);
+  const storageFileRef = sRef(
+    storageRef,
+    `${uploadCategory}/${fileIdKey}.${fileExtension}`
+  );
   try {
-    const snapshot = await uploadBytes(algoRef, file);
+    const snapshot = await uploadBytes(storageFileRef, file);
     const downloadURL = await getDownloadURL(snapshot.ref); //in theory, we should be saving the ID, rather than URL. this is easier.
     return { downloadURL, fileIdKey, fileRef };
   } catch (e) {
@@ -33,13 +37,27 @@ async function uploadAlgo(
   }
 }
 
+// ├── Finrl-contest
+// │ ├── trained_models # Your trained PPO weights
+// │ ├── test.py # File for testing your submitted PPO model
+// │ ├── readme.md # File to explain the your code
+// │ ├── requirements.txt # Have it if adding any new packages
+// │ ├── And any additional scripts you create
+
 async function writeNewAlgo(
   algo: AlgorithmType,
+  submissionFiles: SubmissionFile[],
   algoRef: any,
   database: any,
-  uid: string,
+  uid: string
 ) {
-  if (algo.downloadURL === "" || algo.description === "" || algo.name === "") {
+  let hasEmptyFile = false;
+  for (let i = 0; i < 4; i++) {
+    if (submissionFiles[i].downloadURL === "") {
+      hasEmptyFile = true;
+    }
+  }
+  if (hasEmptyFile || algo.description === "" || algo.name === "") {
     Swal.fire({
       title: "Please fill out all fields",
       icon: "warning",
@@ -58,9 +76,8 @@ async function writeNewAlgo(
   algo.lintResults = "pending";
   algo.uploadDate = new Date().toISOString();
 
-  await set(algoRef, algo);
-  // await functions.httpsCallable("emailApplication")();
-  // above should be lint function
+  await set(algoRef, { ...algo, ...submissionFiles });
+
   return true;
 }
 
@@ -68,11 +85,32 @@ export default function Submission() {
   const defaultAlgo: AlgorithmType = {
     lintResults: "pending",
     uploadDate: "",
-    downloadURL: "",
-    fileIdKey: "",
     name: "",
     description: "",
   };
+
+  const [submissionFiles, setSubmissionFiles] = useState<SubmissionFile[]>([
+    {
+      fileName: "requirements.txt",
+      downloadURL: "",
+      fileIdKey: "",
+    },
+    {
+      fileName: "test.py",
+      downloadURL: "",
+      fileIdKey: "",
+    },
+    {
+      fileName: "trained_ppo.zip",
+      downloadURL: "",
+      fileIdKey: "",
+    },
+    {
+      fileName: "readme.md",
+      downloadURL: "",
+      fileIdKey: "",
+    },
+  ]);
 
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
@@ -83,38 +121,60 @@ export default function Submission() {
     }));
   };
 
-  const [isDragOver, setDragOver] = useState(false);
-  const dropRef: any = useRef();
+  const [isDragOver, setDragOver] = useState([false, false, false, false]);
+  const refs = [useRef<any>(), useRef<any>(), useRef<any>(), useRef<any>()];
 
-  const handleDragOver = (e: any) => {
+  const handleDragOver = (e: any, index: number) => {
     e.preventDefault();
-    setDragOver(true);
+    setDragOver((prevState) => {
+      const updatedState = [...prevState];
+      updatedState[index] = true;
+      return updatedState;
+    });
   };
 
-  const handleDragLeave = () => {
-    setDragOver(false);
+  const handleDragLeave = (index: number) => {
+    setDragOver((prevState) => {
+      const updatedState = [...prevState];
+      updatedState[index] = false;
+      return updatedState;
+    });
   };
 
-  const handleDrop = (e: any) => {
+  const handleDrop = (
+    e: any,
+    uploadCategory: string,
+    fileType: string,
+    uploadIndex: number
+  ) => {
     e.preventDefault();
-    setDragOver(false);
+    setDragOver((prevState) => {
+      const updatedState = [...prevState];
+      updatedState[uploadIndex] = false;
+      return updatedState;
+    });
 
     const files = e.dataTransfer.files;
-    handleAlgoChange(files[0]);
+    handleFileChange(uploadCategory, fileType, uploadIndex, files[0]);
   };
 
   const userInfo = useUserInfo();
   const { database, storage, functions } = useFirebase();
 
-  const handleAlgoChange = async (selectedFile: any) => {
+  const handleFileChange = async (
+    uploadCategory: string,
+    fileType: string,
+    uploadIndex: number,
+    selectedFile: any
+  ) => {
     if (!selectedFile) {
       return;
     }
     const fileName = selectedFile.name;
     const fileExtension = fileName.split(".").pop().toLowerCase();
-    if (fileExtension !== "py") {
+    if (fileExtension !== fileType) {
       Swal.fire({
-        title: "Please upload a Python file",
+        title: `Please upload a .${fileType} file`,
         icon: "error",
         toast: true,
         position: "top-end",
@@ -128,21 +188,24 @@ export default function Submission() {
       });
       return;
     }
-    const downloadLink = await uploadAlgo(
+    const downloadLink = await uploadFile(
       database,
       storage,
       userInfo?.user?.uid || "unknown",
       selectedFile,
+      uploadCategory
     );
     if (downloadLink.downloadURL !== "") {
-      setAlgo((prevState) => ({
-        ...prevState,
-        downloadURL: downloadLink.downloadURL,
-        fileIdKey: downloadLink.fileIdKey,
-      }));
+      setSubmissionFiles((prevState) => {
+        const updatedState = [...prevState];
+        updatedState[uploadIndex].downloadURL = downloadLink.downloadURL;
+        updatedState[uploadIndex].fileIdKey = downloadLink.fileIdKey;
+        return updatedState;
+      });
+
       setAlgoRef(downloadLink.fileRef);
       Swal.fire({
-        title: "Algorithm uploaded!",
+        title: `${fileName} uploaded!`,
         icon: "success",
         toast: true,
         position: "top-end",
@@ -172,6 +235,7 @@ export default function Submission() {
   };
 
   const [algo, setAlgo] = useState(defaultAlgo);
+
   const [algoRef, setAlgoRef]: any = useState(null);
   return (
     <div className="mx-auto max-w-7xl px-4 pb-24 pt-12 sm:px-6 sm:pb-32 sm:pt-16 lg:px-8">
@@ -192,7 +256,7 @@ export default function Submission() {
                   htmlFor="name"
                   className="block text-sm font-medium leading-6 text-white"
                 >
-                  Algorithm Name
+                  Submission Name
                 </label>
                 <div className="mt-2">
                   <div className="flex rounded-md bg-white/5 ring-1 ring-inset ring-white/10 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500">
@@ -225,7 +289,7 @@ export default function Submission() {
                   />
                 </div>
                 <p className="mt-3 text-sm leading-6 text-gray-400">
-                  Explain how your algorithm works.
+                  Explain how your submission works.
                 </p>
               </div>
 
@@ -234,27 +298,30 @@ export default function Submission() {
                   htmlFor="algo-upload"
                   className="block text-sm font-medium leading-6 text-white"
                 >
-                  Algorithm Upload
+                  Submission Upload
                 </label>
+
                 <div
-                  className={algo.downloadURL
-                    ? "mt-2 flex justify-center rounded-lg border border-solid border-green-400 px-6 py-10"
-                    : isDragOver
-                    ? "mt-2 flex justify-center rounded-lg border border-solid border-indigo-500 px-6 py-10"
-                    : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"}
-                  ref={dropRef}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
+                  className={
+                    submissionFiles[0].downloadURL
+                      ? "mt-2 flex justify-center rounded-lg border border-solid border-green-400 px-6 py-10"
+                      : isDragOver[0]
+                      ? "mt-2 flex justify-center rounded-lg border border-solid border-indigo-500 px-6 py-10"
+                      : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"
+                  }
+                  ref={refs[0]}
+                  onDragOver={(e) => handleDragOver(e, 0)}
+                  onDragLeave={() => handleDragLeave(0)}
+                  onDrop={(e) => handleDrop(e, "requirements_txt", "txt", 0)}
                 >
                   <div className="text-center">
-                    {!algo.downloadURL && (
+                    {!submissionFiles[0].downloadURL && (
                       <PaperClipIcon
                         className="mx-auto h-12 w-12 text-gray-500"
                         aria-hidden="true"
                       />
                     )}
-                    {algo.downloadURL && (
+                    {submissionFiles[0].downloadURL && (
                       <CheckIcon
                         className="mx-auto h-12 w-12 text-green-500"
                         aria-hidden="true"
@@ -262,16 +329,78 @@ export default function Submission() {
                     )}
                     <div className="mt-4 flex text-sm leading-6 text-gray-400">
                       <label
-                        htmlFor="file-upload"
+                        htmlFor="file-upload-requirements"
                         className="relative cursor-pointer rounded-md bg-gray-900 font-semibold text-white focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 focus-within:ring-offset-gray-900 hover:text-indigo-500"
                       >
-                        <span>Upload a file</span>
+                        <span>Upload requirements.txt</span>
                         <input
-                          id="file-upload"
-                          name="file-upload"
+                          id="file-upload-requirements"
+                          name="file-upload-requirements"
                           onChange={(e) => {
-                            //@ts-ignore
-                            handleAlgoChange(e.target.files[0]);
+                            handleFileChange(
+                              "requirements_txt",
+                              "txt",
+                              0,
+                              //@ts-ignore
+                              e.target.files![0]
+                            );
+                          }}
+                          multiple
+                          type="file"
+                          className="sr-only"
+                        />
+                      </label>
+                      <p className="pl-1">or drag and drop</p>
+                    </div>
+                    <p className="text-xs leading-5 text-gray-400">
+                      .txt up to 100KB
+                    </p>
+                  </div>
+                </div>
+
+                <div
+                  className={
+                    submissionFiles[1].downloadURL
+                      ? "mt-2 flex justify-center rounded-lg border border-solid border-green-400 px-6 py-10"
+                      : isDragOver[1]
+                      ? "mt-2 flex justify-center rounded-lg border border-solid border-indigo-500 px-6 py-10"
+                      : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"
+                  }
+                  ref={refs[1]}
+                  onDragOver={(e) => handleDragOver(e, 1)}
+                  onDragLeave={() => handleDragLeave(1)}
+                  onDrop={(e) => handleDrop(e, "test_py", "py", 1)}
+                >
+                  <div className="text-center">
+                    {!submissionFiles[1].downloadURL && (
+                      <PaperClipIcon
+                        className="mx-auto h-12 w-12 text-gray-500"
+                        aria-hidden="true"
+                      />
+                    )}
+                    {submissionFiles[1].downloadURL && (
+                      <CheckIcon
+                        className="mx-auto h-12 w-12 text-green-500"
+                        aria-hidden="true"
+                      />
+                    )}
+                    <div className="mt-4 flex text-sm leading-6 text-gray-400">
+                      <label
+                        htmlFor="file-upload-test"
+                        className="relative cursor-pointer rounded-md bg-gray-900 font-semibold text-white focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 focus-within:ring-offset-gray-900 hover:text-indigo-500"
+                      >
+                        <span>Upload test.py</span>
+                        <input
+                          id="file-upload-test"
+                          name="file-upload-test"
+                          onChange={(e) => {
+                            handleFileChange(
+                              "test_py",
+                              "py",
+                              1,
+                              //@ts-ignore
+                              e.target.files[0]
+                            );
                           }}
                           type="file"
                           className="sr-only"
@@ -281,6 +410,118 @@ export default function Submission() {
                     </div>
                     <p className="text-xs leading-5 text-gray-400">
                       .py up to 100KB
+                    </p>
+                  </div>
+                </div>
+
+                <div
+                  className={
+                    submissionFiles[2].downloadURL
+                      ? "mt-2 flex justify-center rounded-lg border border-solid border-green-400 px-6 py-10"
+                      : isDragOver[2]
+                      ? "mt-2 flex justify-center rounded-lg border border-solid border-indigo-500 px-6 py-10"
+                      : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"
+                  }
+                  ref={refs[2]}
+                  onDragOver={(e) => handleDragOver(e, 2)}
+                  onDragLeave={() => handleDragLeave(2)}
+                  onDrop={(e) => handleDrop(e, "trained_ppo_zip", "zip", 2)}
+                >
+                  <div className="text-center">
+                    {!submissionFiles[2].downloadURL && (
+                      <PaperClipIcon
+                        className="mx-auto h-12 w-12 text-gray-500"
+                        aria-hidden="true"
+                      />
+                    )}
+                    {submissionFiles[2].downloadURL && (
+                      <CheckIcon
+                        className="mx-auto h-12 w-12 text-green-500"
+                        aria-hidden="true"
+                      />
+                    )}
+                    <div className="mt-4 flex text-sm leading-6 text-gray-400">
+                      <label
+                        htmlFor="file-upload-trained_model"
+                        className="relative cursor-pointer rounded-md bg-gray-900 font-semibold text-white focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 focus-within:ring-offset-gray-900 hover:text-indigo-500"
+                      >
+                        <span>Upload trained model</span>
+                        <input
+                          id="file-upload-trained_model"
+                          name="file-upload-trained_model"
+                          onChange={(e) => {
+                            handleFileChange(
+                              "trained_ppo_zip",
+                              "zip",
+                              2,
+                              //@ts-ignore
+                              e.target.files[0]
+                            );
+                          }}
+                          type="file"
+                          className="sr-only"
+                        />
+                      </label>
+                      <p className="pl-1">or drag and drop</p>
+                    </div>
+                    <p className="text-xs leading-5 text-gray-400">
+                      .zip up to 100KB
+                    </p>
+                  </div>
+                </div>
+
+                <div
+                  className={
+                    submissionFiles[3].downloadURL
+                      ? "mt-2 flex justify-center rounded-lg border border-solid border-green-400 px-6 py-10"
+                      : isDragOver[3]
+                      ? "mt-2 flex justify-center rounded-lg border border-solid border-indigo-500 px-6 py-10"
+                      : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"
+                  }
+                  ref={refs[3]}
+                  onDragOver={(e) => handleDragOver(e, 3)}
+                  onDragLeave={() => handleDragLeave(3)}
+                  onDrop={(e) => handleDrop(e, "readme_md", "md", 3)}
+                >
+                  <div className="text-center">
+                    {!submissionFiles[3].downloadURL && (
+                      <PaperClipIcon
+                        className="mx-auto h-12 w-12 text-gray-500"
+                        aria-hidden="true"
+                      />
+                    )}
+                    {submissionFiles[3].downloadURL && (
+                      <CheckIcon
+                        className="mx-auto h-12 w-12 text-green-500"
+                        aria-hidden="true"
+                      />
+                    )}
+                    <div className="mt-4 flex text-sm leading-6 text-gray-400">
+                      <label
+                        htmlFor="file-upload-trained_model"
+                        className="relative cursor-pointer rounded-md bg-gray-900 font-semibold text-white focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 focus-within:ring-offset-gray-900 hover:text-indigo-500"
+                      >
+                        <span>Upload readme.md</span>
+                        <input
+                          id="file-upload-trained_model"
+                          name="file-upload-trained_model"
+                          onChange={(e) => {
+                            handleFileChange(
+                              "readme_md",
+                              "md",
+                              3,
+                              //@ts-ignore
+                              e.target.files[0]
+                            );
+                          }}
+                          type="file"
+                          className="sr-only"
+                        />
+                      </label>
+                      <p className="pl-1">or drag and drop</p>
+                    </div>
+                    <p className="text-xs leading-5 text-gray-400">
+                      .md up to 100KB
                     </p>
                   </div>
                 </div>
@@ -295,16 +536,17 @@ export default function Submission() {
               if (
                 await writeNewAlgo(
                   algo,
+                  submissionFiles,
                   algoRef,
                   database,
-                  userInfo?.user?.uid || "",
+                  userInfo?.user?.uid || ""
                 ) //bad practice, fix later
               ) {
                 const res = axios.get(
-                  `https://nutc-linter-4oeeau4rxa-uc.a.run.app/?uid=${userInfo?.user?.uid}&algo_id=${algoRef.key}`,
+                  `https://nutc-linter-4oeeau4rxa-uc.a.run.app/?uid=${userInfo?.user?.uid}&algo_id=${algoRef.key}`
                 );
                 Swal.fire({
-                  title: "Algorithm submitted!",
+                  title: "Submission submitted!",
                   icon: "success",
                   timer: 2000,
                   timerProgressBar: true,
