@@ -1,7 +1,11 @@
 "use client";
-import { PhotoIcon, CheckIcon, UserCircleIcon } from "@heroicons/react/24/solid";
+import {
+  PhotoIcon,
+  CheckIcon,
+  UserCircleIcon,
+} from "@heroicons/react/24/solid";
 import Link from "next/link";
-import { useEffect,  useState } from "react";
+import { useEffect, useState } from "react";
 import { UserInfoType, useUserInfo } from "@/app/login/auth/context";
 import { useFirebase } from "@/app/firebase/context";
 import { ref, update } from "firebase/database";
@@ -240,12 +244,24 @@ export default function Registration() {
             </div>
 
             <div className="sm:col-span-3">
-              <label
-                htmlFor="registrationNumber"
-                className="block text-sm font-medium leading-6 text-white"
-              >
-                ICAIF registration number
-              </label>
+              <div className="flex flex-col">
+                <label
+                  htmlFor="registrationNumber"
+                  className="block text-sm font-medium leading-6 text-white"
+                >
+                  ICAIF registration number
+                </label>
+               <div className="text-sm text-gray-400">
+               (get your number   {" "}
+                <Link
+                  className="text-sm text-indigo-500 underline"
+                  href="https://ai-finance.org/icaif-23-registration/?"
+                >
+                 here 
+                </Link>
+      )
+               </div>
+              </div>
               <div className="mt-2">
                 <input
                   id="registrationNumber"
@@ -259,8 +275,6 @@ export default function Registration() {
             </div>
           </div>
         </div>
-
-       
       </div>
 
       <div className="mt-6 flex items-center justify-end gap-x-6">
