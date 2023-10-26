@@ -252,7 +252,7 @@ export default function Registration() {
                   ICAIF registration number
                 </label>
                <div className="text-sm text-gray-400">
-               (get your number   {" "}
+               (ICAIF register {" "}
                 <Link
                   className="text-sm text-indigo-500 underline"
                   href="https://ai-finance.org/icaif-23-registration/?"
