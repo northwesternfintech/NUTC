@@ -16,6 +16,7 @@ export interface UserInfoType {
   hasCompletedReg: boolean;
   isApprovedApplicant?: boolean;
   isRejectedApplicant?: boolean;
+  ICAIFRegistrationNumber?: string;
   algos?: Map<string, AlgorithmType>;
   latestAlgoId?: string;
 }

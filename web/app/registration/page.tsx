@@ -46,6 +46,7 @@ export default function Registration() {
     lastName: "",
     email: "",
     school: "",
+    ICAIFRegistrationNumber: "",
     hasCompletedReg: true, //will be after this
   };
 
@@ -237,67 +238,29 @@ export default function Registration() {
                 />
               </div>
             </div>
-          </div>
-        </div>
 
-        <div className="border-b border-white/10 pb-12">
-          <h2 className="text-base font-semibold leading-7 text-white">
-            Notifications
-          </h2>
-          <p className="mt-1 text-sm leading-6 text-gray-400">
-            We&#39;ll always let you know about important updates, but you pick
-            what else you want to hear about.
-          </p>
-
-          <div className="mt-10 space-y-10">
-            <fieldset>
-              <legend className="text-sm font-semibold leading-6 text-white">
-                By Email
-              </legend>
-              <div className="mt-6 space-y-6">
-                <div className="relative flex gap-x-3">
-                  <div className="flex h-6 items-center">
-                    <input
-                      id="test-runs"
-                      name="test-runs"
-                      type="checkbox"
-                      className="h-4 w-4 rounded border-white/10 bg-white/5 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-gray-900"
-                    />
-                  </div>
-                  <div className="text-sm leading-6">
-                    <label
-                      htmlFor="test-runs"
-                      className="font-medium text-white"
-                    >
-                      Test Runs
-                    </label>
-                    <p className="text-gray-400">
-                      Get notified when your script passes or fails linting
-                    </p>
-                  </div>
-                </div>
-                <div className="relative flex gap-x-3">
-                  <div className="flex h-6 items-center">
-                    <input
-                      id="results"
-                      name="results"
-                      type="checkbox"
-                      className="h-4 w-4 rounded border-white/10 bg-white/5 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-gray-900"
-                    />
-                  </div>
-                  <div className="text-sm leading-6">
-                    <label htmlFor="results" className="font-medium text-white">
-                      Results
-                    </label>
-                    <p className="text-gray-400">
-                      Get notified when results are announced
-                    </p>
-                  </div>
-                </div>
+            <div className="sm:col-span-3">
+              <label
+                htmlFor="registrationNumber"
+                className="block text-sm font-medium leading-6 text-white"
+              >
+                ICAIF registration number
+              </label>
+              <div className="mt-2">
+                <input
+                  id="registrationNumber"
+                  name="registrationNumber"
+                  type="text"
+                  value={currUser.ICAIFRegistrationNumber}
+                  className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 sm:text-sm sm:leading-6"
+                  onChange={handleInputChange}
+                />
               </div>
-            </fieldset>
+            </div>
           </div>
         </div>
+
+       
       </div>
 
       <div className="mt-6 flex items-center justify-end gap-x-6">
