@@ -10,6 +10,7 @@ const statuses: any = {
 const environments: any = {
   success: "text-indigo-400 bg-indigo-400/10 ring-indigo-400/20",
   pending: "text-gray-500 bg-gray-400/10 ring-gray-400/20",
+  failure: "text-gray-500 bg-gray-400/10 ring-gray-400/20",
   "Lint Output": "text-rose-400 bg-rose-400/10 ring-rose-400/30",
 };
 const deployments: any = [

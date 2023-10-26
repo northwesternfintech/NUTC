@@ -498,13 +498,13 @@ export default function Submission() {
                     )}
                     <div className="mt-4 flex text-sm leading-6 text-gray-400">
                       <label
-                        htmlFor="file-upload-trained_model"
+                        htmlFor="file-upload-readme_md"
                         className="relative cursor-pointer rounded-md bg-gray-900 font-semibold text-white focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 focus-within:ring-offset-gray-900 hover:text-indigo-500"
                       >
                         <span>Upload readme.md</span>
                         <input
-                          id="file-upload-trained_model"
-                          name="file-upload-trained_model"
+                          id="file-upload-readme_md"
+                          name="file-upload-readme_md"
                           onChange={(e) => {
                             handleFileChange(
                               "readme_md",
