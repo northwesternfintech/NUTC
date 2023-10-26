@@ -1,7 +1,11 @@
 "use client";
-import { PhotoIcon, CheckIcon, UserCircleIcon } from "@heroicons/react/24/solid";
+import {
+  PhotoIcon,
+  CheckIcon,
+  UserCircleIcon,
+} from "@heroicons/react/24/solid";
 import Link from "next/link";
-import { useEffect,  useState } from "react";
+import { useEffect, useState } from "react";
 import { UserInfoType, useUserInfo } from "@/app/login/auth/context";
 import { useFirebase } from "@/app/firebase/context";
 import { ref, update } from "firebase/database";
