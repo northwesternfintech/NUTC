@@ -28,8 +28,8 @@ const CodeBlock = () => {
 
 export default function Template() {
   return (
-    <div className="flex flex-col items-center relative h-screen px-6 pt-8 sm:pt-16 md:pl-16 md:pr-16">
-      <div className="mx-auto max-w-2xl md:mx-0 md:max-w-none">
+    <div className="flex flex-col items-center relative h-screen px-6 pt-8 sm:pt-16 md:pl-16 md:pr-16 ">
+      <div className="mx-auto  md:mx-0 w-full">
         <div className="overflow-hidden rounded-tl-xl rounded-bl-xl rounded-br-xl rounded-tr-xl bg-gray-950">
           <div className="flex bg-gray-700/40 ring-1 ring-white/5">
             <div className="-mb-px flex text-sm font-medium leading-6 text-gray-400">
@@ -41,7 +41,7 @@ export default function Template() {
               </div>
             </div>
           </div>
-          <div className="px-6 pb-14 pt-6">
+          <div className="px-4 pb-10 pt-4 overflow-x-scroll">
             <CodeBlock />
           </div>
         </div>
