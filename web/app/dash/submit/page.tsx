@@ -284,11 +284,6 @@ export default function Submission() {
     }
   };
 
-  useEffect(() => {
-    console.log(submissionFilesTaskOne);
-    console.log(submissionFilesTaskTwo);
-  }, [submissionFilesTaskOne, submissionFilesTaskTwo]);
-
   return (
     <div className="mx-auto max-w-7xl px-4 pb-24 pt-12 sm:px-6 sm:pb-32 sm:pt-16 lg:px-8">
       <div className="mx-auto max-w-2xl">
