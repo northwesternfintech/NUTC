@@ -718,7 +718,7 @@ export default function Submission() {
                 ) //bad practice, fix later
               ) {
                 const res = axios.get(
-                  `https://nutc-linter-4oeeau4rxa-uc.a.run.app/?uid=${userInfo?.user?.uid}&algo_id=${algoRef.key}&task=${selectedTask}`
+                  `https://nutc-linter-4oeeau4rxa-uc.a.run.app/?uid=${userInfo?.user?.uid}&algo_id=${algoRef.key}&task=${selectedTask === "Task I" ? "1" : "2"}`
                 );
                 Swal.fire({
                   title: "Submission submitted!",
