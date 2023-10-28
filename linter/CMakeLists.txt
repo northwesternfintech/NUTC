@@ -82,6 +82,7 @@ target_include_directories(
 target_link_libraries(NUTC-linter-spawner_lib PRIVATE quill::quill)
 target_link_libraries(NUTC-linter-spawner_lib PRIVATE glaze::glaze)
 target_link_libraries(NUTC-linter-spawner_lib PRIVATE pybind11::pybind11)
+target_link_libraries(NUTC-linter-spawner_lib PRIVATE CURL::libcurl)
 
 # ---- Declare main executable ----
 
