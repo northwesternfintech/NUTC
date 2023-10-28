@@ -49,13 +49,14 @@ process_arguments(int argc, const char** argv)
     return std::make_tuple(verbosity);
 }
 
-
 void
 spawn_client(const std::string& uid, const std::string& algoid)
 {
     pid_t pid = fork();
     if (pid == 0) {
-        std::vector<std::string> args = {"NUTC-linter-spawner", "--uid", uid, "--algoid", algoid};
+        std::vector<std::string> args = {
+            "NUTC-linter-spawner", "--uid", uid, "--algoid", algoid
+        };
 
         std::vector<char*> c_args;
         for (auto& arg : args)
@@ -109,17 +110,16 @@ main(int argc, const char** argv)
         app.port(8080).run();
     });
 
-
     while (true) {
         std::optional<std::pair<std::string, std::string>> pair = queue.pop();
         if (!pair) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             continue;
         }
-        
+
         std::string uid = pair.value().first;
         std::string algo_id = pair.value().second;
-        
+
         spawn_client(uid, algo_id);
     }
 

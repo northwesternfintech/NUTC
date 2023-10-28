@@ -25,7 +25,7 @@ process_arguments(int argc, const char** argv)
             return uid;
         })
         .required();
-    
+
     program.add_argument("-A", "--algoid")
         .help("set the algorithm ID")
         .action([](const auto& value) {
@@ -53,7 +53,9 @@ process_arguments(int argc, const char** argv)
     }
 
     return std::make_tuple(
-        verbosity, program.get<std::string>("--uid"), program.get<std::string>("--algoid")
+        verbosity,
+        program.get<std::string>("--uid"),
+        program.get<std::string>("--algoid")
     );
 }
 
