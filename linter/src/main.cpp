@@ -1,6 +1,5 @@
 #define CROW_MAIN
 #include "common.hpp"
-#include "lint/lint.hpp"
 #include "thread_safe_queue/tsq.hpp"
 
 #include <argparse/argparse.hpp>
@@ -50,6 +49,31 @@ process_arguments(int argc, const char** argv)
     return std::make_tuple(verbosity);
 }
 
+
+void
+spawn_client(const std::string& uid, const std::string& algoid)
+{
+    pid_t pid = fork();
+    if (pid == 0) {
+        std::vector<std::string> args = {"NUTC-linter-spawner", "--uid", uid, "--algoid", algoid};
+
+        std::vector<char*> c_args;
+        for (auto& arg : args)
+            c_args.push_back(arg.data());
+        c_args.push_back(nullptr);
+
+        execvp(c_args[0], c_args.data());
+
+        log_e(linting, "Failed to lint algoid {} for uid {}", algoid, uid);
+
+        exit(1);
+    }
+    else if (pid < 0) {
+        log_e(linting, "Failed to fork");
+        exit(1);
+    }
+}
+
 int
 main(int argc, const char** argv)
 {
@@ -85,7 +109,6 @@ main(int argc, const char** argv)
         app.port(8080).run();
     });
 
-    pybind11::initialize_interpreter();
 
     while (true) {
         std::optional<std::pair<std::string, std::string>> pair = queue.pop();
@@ -93,15 +116,12 @@ main(int argc, const char** argv)
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             continue;
         }
-        pybind11::exec("locals().clear()");
+        
         std::string uid = pair.value().first;
         std::string algo_id = pair.value().second;
-        std::stringstream ss;
-        log_i(main, "Linting algo_id: {} for user: {}", algo_id, uid);
-        std::string response = nutc::lint::lint(uid, algo_id);
-        nutc::client::set_lint_success(uid, algo_id, ss.str() + "\n");
+        
+        spawn_client(uid, algo_id);
     }
-    pybind11::finalize_interpreter();
 
     server_thread.join();
 
