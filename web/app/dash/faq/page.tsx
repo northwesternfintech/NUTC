@@ -4,11 +4,6 @@ import { MinusSmallIcon, PlusSmallIcon } from "@heroicons/react/24/outline";
 
 const faqs = [
   {
-    question: "What is the Northwestern Trading Competition?",
-    answer:
-      "A competition to design a stock trading algorithm that maximizes PnL (profit and loss) against other algorithms in the competition. In other words, you want your algorithm to buy and sell stocks in a way that maximizes the amount of money you end up with. For NUFT recruitment, results will be heavily factored into recruitment decisions.",
-  },
-  {
     question: "How can I get started?",
     answer:
       "Download the template, read the instructions carefully, and modify the Strategy class. Feel free to add new functions to the class, but DO NOT change the signatures of the provided functions.",
@@ -55,7 +50,7 @@ const faqs = [
   },
   {
     question: "When is the deadline to submit algorithms?",
-    answer: "11:59pm on 10/9.",
+    answer: "11:59pm on 11/12.",
   },
   {
     question: "How are algorithms evaluated?",
@@ -71,7 +66,7 @@ const faqs = [
   {
     question: "What if I have other questions or have issues with the website?",
     answer:
-      'Please reach out to nuft@u.northwestern.edu with the subject "NUTC Question".',
+      'Please reach out to finrlcontest@gmail.com with the subject "Submission Platform Question".',
   },
 ];
 
@@ -81,7 +76,7 @@ export default function FAQs() {
       <div className="mx-auto max-w-7xl px-6 lg:px-8 pt-6 sm:pt-12 lg:pt-20 pb-12">
         <div className="mx-auto max-w-4xl divide-y divide-white/10">
           <h2 className="text-2xl font-bold leading-10 tracking-tight text-white">
-            Frequently asked questions
+            Frequently asked questions for Task II Real Time Order Execution
           </h2>
           <dl className="mt-10 space-y-6 divide-y divide-white/10">
             {faqs.map((faq) => (
