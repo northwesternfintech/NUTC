@@ -50,8 +50,9 @@ process_arguments(int argc, const char** argv)
 }
 
 void
-spawn_client(const std::string& uid, const std::string& algoid)
+spawn_client(const std::string& uid, std::string& algoid)
 {
+    std::replace(algoid.begin(), algoid.end(), '-', ' ');
     pid_t pid = fork();
     if (pid == 0) {
         std::vector<std::string> args = {
