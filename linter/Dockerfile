@@ -23,7 +23,9 @@ FROM python:3.11-slim
 
 RUN pip install numpy pandas polars scipy scikit-learn
 
+COPY --from=build /app/build/NUTC-linter-spawner /bin/NUTC-linter-spawner
 COPY --from=build /app/build/NUTC-linter /bin/NUTC-linter
+
 RUN chmod +x /bin/NUTC-linter
 
 CMD NUTC-linter
