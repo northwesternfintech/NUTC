@@ -36,7 +36,6 @@ add_library(
     src/firebase/fetching.cpp
     src/pywrapper/runtime.cpp
     src/mock_api/mock_api.cpp
-    src/thread_safe_queue/tsq.cpp
     # Utils
     src/logging.cpp
     )
