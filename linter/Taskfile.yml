@@ -12,7 +12,7 @@ tasks:
   lint:
     dir: '{{.USER_WORKING_DIR}}'
     cmds:
-      - cmake -D FORMAT_COMMAND=$(command -v clang-format || command -v clang-format-17 || command -v clang-format-12) FIX=YES -P cmake/lint.cmake
+      - cmake -D FIX=YES -P cmake/lint.cmake
     
   init:
     dir: '{{.USER_WORKING_DIR}}'
