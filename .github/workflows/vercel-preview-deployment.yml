@@ -9,12 +9,6 @@ on:
     paths:
       - 'web/**'
 
-# We only care about the latest revision of a PR, so cancel all previous instances.
-concurrency:
-  group: web-preview-cd-${{ github.event.pull_request.number || github.ref_name }}
-  cancel-in-progress: true
-
-
 jobs:
   Deploy-Preview:
     runs-on: ubuntu-latest
