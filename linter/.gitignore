@@ -1,4 +1,5 @@
 .idea/
+conan-profile.sh
 .vs/
 .vscode/
 build/

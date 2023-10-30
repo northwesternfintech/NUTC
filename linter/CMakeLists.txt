@@ -36,11 +36,23 @@ add_library(
     src/firebase/fetching.cpp
     src/pywrapper/runtime.cpp
     src/mock_api/mock_api.cpp
+    src/spawning/spawning.cpp
+    src/crow/crow.cpp
+    # Utils
+    src/logging.cpp
+    )
+    
+add_library(
+    NUTC-linter-spawner_lib OBJECT
     src/lint/lint.cpp
-    src/thread_safe_queue/tsq.cpp
+    src/firebase/fetching.cpp
+    src/pywrapper/runtime.cpp
+    src/mock_api/mock_api.cpp
     # Utils
     src/logging.cpp
 )
+
+# --- Main executable libs ----
 
 target_include_directories(
     NUTC-linter_lib ${warning_guard}
@@ -51,16 +63,30 @@ target_include_directories(
 
 target_compile_features(NUTC-linter_lib PUBLIC cxx_std_20)
 
-target_link_libraries(NUTC-linter_lib PRIVATE fmt::fmt)
-target_link_libraries(NUTC-linter_lib PRIVATE quill::quill)
-target_link_libraries(NUTC-linter_lib PRIVATE CURL::libcurl)
-target_link_libraries(NUTC-linter_lib PRIVATE glaze::glaze)
-target_link_libraries(NUTC-linter_lib PRIVATE pybind11::pybind11)
-target_link_libraries(NUTC-linter_lib PRIVATE Crow::Crow)
-target_link_libraries(NUTC-linter_lib PRIVATE Python::Python)
+target_link_libraries(NUTC-linter_lib PUBLIC fmt::fmt)
+target_link_libraries(NUTC-linter_lib PUBLIC quill::quill)
+target_link_libraries(NUTC-linter_lib PUBLIC CURL::libcurl)
+target_link_libraries(NUTC-linter_lib PUBLIC glaze::glaze)
+target_link_libraries(NUTC-linter_lib PUBLIC pybind11::pybind11)
+target_link_libraries(NUTC-linter_lib PUBLIC Crow::Crow)
+target_link_libraries(NUTC-linter_lib PUBLIC Python::Python)
+target_link_libraries(NUTC-linter_lib PUBLIC argparse::argparse)
 
+# ---- The other executable's libs ----
 
-# ---- Declare executable ----
+target_include_directories(
+    NUTC-linter-spawner_lib ${warning_guard}
+    PUBLIC
+    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/>"
+)
+
+target_link_libraries(NUTC-linter-spawner_lib PRIVATE quill::quill)
+target_link_libraries(NUTC-linter-spawner_lib PRIVATE glaze::glaze)
+target_link_libraries(NUTC-linter-spawner_lib PRIVATE pybind11::pybind11)
+target_link_libraries(NUTC-linter-spawner_lib PRIVATE CURL::libcurl)
+
+# ---- Declare main executable ----
 
 add_executable(NUTC-linter_exe src/main.cpp)
 add_executable(NUTC-linter::exe ALIAS NUTC-linter_exe)
@@ -80,7 +106,22 @@ target_link_libraries(NUTC-linter_exe PRIVATE pybind11::pybind11)
 target_link_libraries(NUTC-linter_exe PRIVATE Crow::Crow)
 target_link_libraries(NUTC-linter_exe PRIVATE Python::Python)
 
+# ---- Declare secondary (process spawning) executable ----
 
+add_executable(NUTC-linter-spawner_exe src/spawner/main.cpp)
+add_executable(NUTC-linter-spawner::exe ALIAS NUTC-linter-spawner_exe)
+
+set_property(TARGET NUTC-linter-spawner_exe PROPERTY OUTPUT_NAME NUTC-linter-spawner)
+
+target_compile_features(NUTC-linter-spawner_exe PRIVATE cxx_std_20)
+
+target_link_libraries(NUTC-linter-spawner_exe PRIVATE NUTC-linter-spawner_lib)
+target_link_libraries(NUTC-linter-spawner_exe PRIVATE CURL::libcurl)
+target_link_libraries(NUTC-linter-spawner_exe PRIVATE argparse::argparse)
+target_link_libraries(NUTC-linter-spawner_exe PRIVATE pybind11::pybind11)
+target_link_libraries(NUTC-linter-spawner_exe PRIVATE quill::quill)
+target_link_libraries(NUTC-linter-spawner_exe PRIVATE glaze::glaze)
+target_link_libraries(NUTC-linter-spawner_exe PRIVATE Python::Python)
 
 # ---- Install rules ----
 
