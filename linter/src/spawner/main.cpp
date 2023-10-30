@@ -76,7 +76,7 @@ main(int argc, const char** argv)
     std::stringstream ss;
 
     // Watchdog to kill after 120s
-    std::thread timeout_thread([&ss, &algoid, &uid]() {
+    std::thread timeout_thread([&ss, &algoid = algoid, &uid = uid]() {
         std::this_thread::sleep_for(std::chrono::seconds(120));
         log_e(
             main,

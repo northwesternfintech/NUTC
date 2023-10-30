@@ -1,5 +1,6 @@
 #define CROW_MAIN
 #include "common.hpp"
+#include "spawning/spawning.hpp"
 
 #include <argparse/argparse.hpp>
 #include <crow/app.h>
@@ -48,33 +49,6 @@ process_arguments(int argc, const char** argv)
     return std::make_tuple(verbosity);
 }
 
-void
-spawn_client(const std::string& uid, std::string& algoid)
-{
-    std::replace(algoid.begin(), algoid.end(), '-', ' ');
-    pid_t pid = fork();
-    if (pid == 0) {
-        std::vector<std::string> args = {
-            "NUTC-linter-spawner", "--uid", uid, "--algoid", algoid
-        };
-
-        std::vector<char*> c_args;
-        for (auto& arg : args)
-            c_args.push_back(arg.data());
-        c_args.push_back(nullptr);
-
-        execvp(c_args[0], c_args.data());
-
-        log_e(linting, "Failed to lint algoid {} for uid {}", algoid, uid);
-
-        exit(1);
-    }
-    else if (pid < 0) {
-        log_e(linting, "Failed to fork");
-        exit(1);
-    }
-}
-
 int
 main(int argc, const char** argv)
 {
@@ -102,7 +76,7 @@ main(int argc, const char** argv)
             std::string uid = req.url_params.get("uid");
             std::string algo_id = req.url_params.get("algo_id");
 
-            spawn_client(uid, algo_id);
+            nutc::spawning::spawn_client(uid, algo_id);
 
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
             return crow::response();
