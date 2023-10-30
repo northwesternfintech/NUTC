@@ -9,6 +9,9 @@
 #include <optional>
 #include <string>
 #include <tuple>
+#include <thread>
+#include <chrono>
+#include <cstdlib>
 
 static std::tuple<uint8_t, std::string, std::string>
 process_arguments(int argc, const char** argv)
@@ -68,18 +71,27 @@ main(int argc, const char** argv)
     // Start logging and print build info
     nutc::logging::init(verbosity);
 
-    // Log this event
-    log_i(main, "Linting algo_id: {} for user: {}", algoid, uid);
-
     // Move a string stream from the loop to this process
     std::stringstream ss;
+
+    // Watchdog to kill after 120s
+    std::thread timeout_thread([&ss, &algoid, &uid]() {
+        std::this_thread::sleep_for(std::chrono::seconds(120));
+        log_e(main, "Timeout reached. Exiting process. Failed lint for algoid {} and uid {}.", algoid, uid);
+        nutc::client::set_lint_failure(uid, algoid, ss.str() + "Failure\n");
+        std::exit(1);
+    });
+    timeout_thread.detach();
+
+    // Log this event
+    log_i(main, "Linting algo_id: {} for user: {}", algoid, uid);
 
     // Initialize py
     pybind11::initialize_interpreter();
 
     // Actually lint the algo and set success
     std::string response = nutc::lint::lint(uid, algoid);
-    nutc::client::set_lint_success(uid, algoid, ss.str() + "\n");
+    nutc::client::set_lint_success(uid, algoid, ss.str() + "Success\n");
     log_i(main, "Finished linting algo_id: {} for user: {}", algoid, uid);
 
     // Stop py
