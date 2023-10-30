@@ -1,6 +1,6 @@
 module analyzer
 
-go 1.23
+go 1.21.1
 
 require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
