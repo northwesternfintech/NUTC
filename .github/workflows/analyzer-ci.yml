@@ -1,0 +1,52 @@
+name: Analyzer - Continuous Integration
+
+on:
+  push:
+    branches:
+      - main
+      - ci-test
+    paths:
+      - 'analyzer/**'
+
+  pull_request:
+    branches:
+      - main
+      - ci-test
+    paths:
+      - 'analyzer/**'
+
+  workflow_dispatch:
+
+# We only care about the latest revision of a PR, so cancel all previous instances.
+concurrency:
+  group: analyzer-ci-${{ github.event.pull_request.number || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: exchange
+
+    steps:
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17  # specify the Go version you want
+
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Lint
+      run: |
+        go get -u golang.org/x/lint/golint
+        golint .
+
+    - name: Build
+      run: go build -v .
+
+    - name: Test
+      run: go test .
