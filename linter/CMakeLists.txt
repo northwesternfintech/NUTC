@@ -9,7 +9,7 @@ project(
     DESCRIPTION "Linter for the Northwestern University Trading Competition."
     HOMEPAGE_URL "https://example.com/"
     LANGUAGES CXX
-)  
+)
 
 include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake) 
@@ -40,7 +40,7 @@ add_library(
     src/crow/crow.cpp
     # Utils
     src/logging.cpp
-    )
+)
     
 add_library(
     NUTC-linter-spawner_lib OBJECT
