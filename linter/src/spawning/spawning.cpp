@@ -4,10 +4,10 @@ namespace nutc {
 namespace spawning {
 
 void
-spawn_client(const std::string& uid, std::string& algoid)
+spawn_client(const std::string& uid, std::string& algoid, pid_t& pid)
 {
     std::replace(algoid.begin(), algoid.end(), '-', ' ');
-    pid_t pid = fork();
+
     if (pid == 0) {
         std::vector<std::string> args = {
             "NUTC-linter-spawner", "--uid", uid, "--algoid", algoid
