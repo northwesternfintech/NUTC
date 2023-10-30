@@ -1,9 +1,9 @@
 #define CROW_MAIN
 #include "common.hpp"
+#include "crow/crow.hpp"
 #include "spawning/spawning.hpp"
 
 #include <argparse/argparse.hpp>
-#include <crow/app.h>
 
 #include <algorithm>
 #include <iostream>
@@ -59,30 +59,7 @@ main(int argc, const char** argv)
     nutc::logging::init(verbosity);
     log_i(main, "Starting NUTC Linter");
 
-    std::thread server_thread([]() {
-        crow::SimpleApp app;
-        CROW_ROUTE(app, "/")
-        ([&](const crow::request& req) {
-            log_i(main, "Registered");
-
-            if (!req.url_params.get("uid")) {
-                log_e(main, "No uid provided");
-                return crow::response(400);
-            };
-            if (!req.url_params.get("algo_id")) {
-                log_e(main, "No algo_id provided");
-                return crow::response(400);
-            }
-            std::string uid = req.url_params.get("uid");
-            std::string algo_id = req.url_params.get("algo_id");
-
-            nutc::spawning::spawn_client(uid, algo_id);
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-            return crow::response();
-        });
-        app.port(8080).run();
-    });
+    auto server_thread = nutc::crow::get_server_thread();
 
     server_thread.join();
 

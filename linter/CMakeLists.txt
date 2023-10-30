@@ -37,6 +37,7 @@ add_library(
     src/pywrapper/runtime.cpp
     src/mock_api/mock_api.cpp
     src/spawning/spawning.cpp
+    src/crow/crow.cpp
     # Utils
     src/logging.cpp
     )
@@ -62,13 +63,14 @@ target_include_directories(
 
 target_compile_features(NUTC-linter_lib PUBLIC cxx_std_20)
 
-target_link_libraries(NUTC-linter_lib PRIVATE fmt::fmt)
-target_link_libraries(NUTC-linter_lib PRIVATE quill::quill)
-target_link_libraries(NUTC-linter_lib PRIVATE CURL::libcurl)
-target_link_libraries(NUTC-linter_lib PRIVATE glaze::glaze)
-target_link_libraries(NUTC-linter_lib PRIVATE pybind11::pybind11)
-target_link_libraries(NUTC-linter_lib PRIVATE Crow::Crow)
-target_link_libraries(NUTC-linter_lib PRIVATE Python::Python)
+target_link_libraries(NUTC-linter_lib PUBLIC fmt::fmt)
+target_link_libraries(NUTC-linter_lib PUBLIC quill::quill)
+target_link_libraries(NUTC-linter_lib PUBLIC CURL::libcurl)
+target_link_libraries(NUTC-linter_lib PUBLIC glaze::glaze)
+target_link_libraries(NUTC-linter_lib PUBLIC pybind11::pybind11)
+target_link_libraries(NUTC-linter_lib PUBLIC Crow::Crow)
+target_link_libraries(NUTC-linter_lib PUBLIC Python::Python)
+target_link_libraries(NUTC-linter_lib PUBLIC argparse::argparse)
 
 # ---- The other executable's libs ----
 
