@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-22.04
     defaults:
       run:
-        working-directory: exchange
+        working-directory: analyzer
 
     steps:
 
