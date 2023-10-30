@@ -25,6 +25,7 @@ tasks:
   run:
     desc: Run the CLI tool
     cmds:
+      - task: build
       - ./bin/nutc-analyzer
 
   clean:
