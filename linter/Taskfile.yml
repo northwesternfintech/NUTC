@@ -9,7 +9,7 @@ tasks:
     cmds:
       - conan install . -s build_type=Debug -b missing -pr cpp20 -pr:b cpp20
 
-  lint:
+  format:
     dir: '{{.USER_WORKING_DIR}}'
     cmds:
       - cmake -D FIX=YES -P cmake/lint.cmake
