@@ -43,6 +43,7 @@ jobs:
     - name: Lint
       run: |
         go get -u golang.org/x/lint/golint
+        echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
         golint .
 
     - name: Build
