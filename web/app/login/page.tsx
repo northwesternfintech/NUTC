@@ -34,7 +34,6 @@ export default function Login() {
 
           <div className="mt-6 grid grid-cols-2 gap-4">
             <GoogleLogin />
-            <GithubLogin />
           </div>
         </div>
 
