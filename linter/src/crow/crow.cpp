@@ -1,5 +1,7 @@
 #include "crow.hpp"
 
+#include "firebase/fetching.hpp"
+
 namespace nutc {
 namespace crow {
 
@@ -28,6 +30,7 @@ get_server_thread()
             spawning::spawn_client(uid, algo_id, pid);
 
             // After 130 seconds, check status - if still pending, set failure and stop
+            int status = 0;
             std::this_thread::sleep_for(std::chrono::seconds(130));
             pid_t result = waitpid(pid, &status, WNOHANG);
 

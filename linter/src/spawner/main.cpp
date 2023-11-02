@@ -85,7 +85,8 @@ main(int argc, const char** argv)
             algoid,
             uid
         );
-        ss << "[linter] FAILED to lint algo_id " << algoid << " for uid " << uid << "\n";
+        ss << "[linter] FAILED to lint algo_id " << algoid << " for uid " << uid
+           << "\n";
 
         nutc::client::set_lint_failure(uid, algoid, ss.str() + "Failure!\n");
         std::exit(1);
@@ -103,7 +104,8 @@ main(int argc, const char** argv)
     std::string response = nutc::lint::lint(uid, algoid, ss);
 
     log_i(main, "Finished linting algo_id: {} for user: {}", algoid, uid);
-    ss << "[linter] exited linting process and finished linting algo_id " << algoid << " for uid " << uid << "\n";
+    ss << "[linter] exited linting process and finished linting algo_id " << algoid
+       << " for uid " << uid << "\n";
 
     nutc::client::set_lint_success(uid, algoid, ss.str() + "Success!\n");
 
