@@ -2,6 +2,8 @@
 
 #include "firebase/fetching.hpp"
 
+#include <sys/wait.h>
+
 namespace nutc {
 namespace crow {
 
