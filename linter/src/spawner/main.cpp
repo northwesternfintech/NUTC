@@ -76,29 +76,36 @@ main(int argc, const char** argv)
     std::stringstream ss;
 
     // Watchdog to kill after 120s
-    std::thread timeout_thread([&ss, &algoid = algoid, &uid = uid]() {
+    std::thread timeout_thread([&ss = ss, &algoid = algoid, &uid = uid]() {
         std::this_thread::sleep_for(std::chrono::seconds(120));
+
         log_e(
             main,
             "Timeout reached. Exiting process. Failed lint for algoid {} and uid {}.",
             algoid,
             uid
         );
-        nutc::client::set_lint_failure(uid, algoid, ss.str() + "Failure\n");
+        ss << "[linter] FAILED to lint algo_id " << algoid << " for uid " << uid << "\n";
+
+        nutc::client::set_lint_failure(uid, algoid, ss.str() + "Failure!\n");
         std::exit(1);
     });
     timeout_thread.detach();
 
     // Log this event
     log_i(main, "Linting algo_id: {} for user: {}", algoid, uid);
+    ss << "[linter] starting to lint algo_id " << algoid << " for uid " << uid << "\n";
 
     // Initialize py
     pybind11::initialize_interpreter();
 
     // Actually lint the algo and set success
-    std::string response = nutc::lint::lint(uid, algoid);
-    nutc::client::set_lint_success(uid, algoid, ss.str() + "Success\n");
+    std::string response = nutc::lint::lint(uid, algoid, ss);
+
     log_i(main, "Finished linting algo_id: {} for user: {}", algoid, uid);
+    ss << "[linter] exited linting process and finished linting algo_id " << algoid << " for uid " << uid << "\n";
+
+    nutc::client::set_lint_success(uid, algoid, ss.str() + "Success!\n");
 
     // Stop py
     pybind11::finalize_interpreter();
