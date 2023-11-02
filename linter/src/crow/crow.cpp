@@ -32,15 +32,12 @@ get_server_thread()
             pid_t result = waitpid(pid, &status, WNOHANG);
 
             // Some flags
-            bool should_kill = false;  // If should force kill PID
-            bool push_failure = false; // If should tell Firebase
-
-            if (should_kill) {
-                // Kill process PID
-                kill(pid, SIGKILL);
-            }
+            bool push_failure = (WIFEXITED(status) && WEXITSTATUS(status) != 0);
 
             if (push_failure) {
+                // Kill process
+                kill(pid, SIGKILL);
+
                 // Push failure to Firebase
                 nutc::client::set_lint_failure(
                     uid, algo_id, "Linting not completed after 130 seconds.\n"
