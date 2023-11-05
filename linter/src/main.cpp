@@ -27,7 +27,7 @@ process_arguments(int argc, const char** argv)
         })
         .default_value(false)
         .implicit_value(true)
-        .nargs(0);
+        .nargs(0); 
 
     uint8_t verbosity = 0;
     program.add_argument("-v", "--verbose")
