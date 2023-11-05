@@ -27,7 +27,7 @@ process_arguments(int argc, const char** argv)
         })
         .default_value(false)
         .implicit_value(true)
-        .nargs(0); 
+        .nargs(0);
 
     uint8_t verbosity = 0;
     program.add_argument("-v", "--verbose")
@@ -55,7 +55,7 @@ main(int argc, const char** argv)
     // Parse args
     auto [verbosity] = process_arguments(argc, argv);
 
-    // Start logging and print build info
+    // Start logging and print the build info
     nutc::logging::init(verbosity);
     log_i(main, "Starting NUTC Linter");
 
