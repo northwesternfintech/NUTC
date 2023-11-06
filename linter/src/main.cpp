@@ -55,7 +55,7 @@ main(int argc, const char** argv)
     // Parse args
     auto [verbosity] = process_arguments(argc, argv);
 
-    // Start logging and print build info
+    // Start logging and print the build info
     nutc::logging::init(verbosity);
     log_i(main, "Starting NUTC Linter");
 
