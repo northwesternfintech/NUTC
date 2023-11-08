@@ -148,6 +148,26 @@ get_algo(const std::string& uid, const std::string& algo_id)
     return algo_file;
 }
 
+std::optional<std::string>
+get_algo_status(const std::string& uid, const std::string& algo_id)
+{
+    glz::json_t user_info = get_user_info(uid);
+    // if not has "algos"
+    if (!user_info.contains("algos")) {
+        log_w(
+            firebase, "User {} has no algos. Will not participate in simulation.", uid
+        );
+        return std::nullopt;
+    }
+    if (!user_info["algos"].contains(algo_id)) {
+        log_w(firebase, "User {} does not have algo id {}.", uid, algo_id);
+        return std::nullopt;
+    }
+    glz::json_t algo_info = user_info["algos"][algo_id];
+    std::string linting_result = algo_info["lintResults"].get<std::string>();
+    return linting_result;
+}
+
 glz::json_t
 firebase_request(
     const std::string& method, const std::string& url, const std::string& data

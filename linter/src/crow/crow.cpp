@@ -32,21 +32,23 @@ get_server_thread()
             spawning::spawn_client(uid, algo_id, pid);
 
             // After 130 seconds, check status - if still pending, set failure and stop
-            int status = 0;
             std::this_thread::sleep_for(std::chrono::seconds(130));
-            pid_t result = waitpid(pid, &status, WNOHANG);
 
-            // Some flags
-            bool push_failure = (WIFEXITED(status) && WEXITSTATUS(status) != 0);
+            // Check status from Firebase
+            std::optional<std::string> linting_status =
+                nutc::client::get_algo_status(uid, algo_id);
 
-            if (push_failure) {
-                // Kill process
-                kill(pid, SIGKILL);
+            // If status is pending, force push a failure
+            if (linting_status.has_value()) {
+                if (linting_status == "pending") {
+                    // Push failure
+                    std::string error_msg =
+                        "unknown runtime error: your code is syntactically correct but "
+                        "crashed during runtime";
 
-                // Push failure to Firebase
-                nutc::client::set_lint_failure(
-                    uid, algo_id, "Linting not completed after 130 seconds.\n"
-                ); // TODO: pass ss str back from the process to have better error msg
+                    nutc::client::set_lint_result(uid, algo_id, false);
+                    nutc::client::set_lint_failure(uid, algo_id, error_msg);
+                }
             }
 
             return crow::response();

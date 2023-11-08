@@ -34,6 +34,9 @@ void set_lint_success(
 );
 
 std::optional<std::string> get_algo(const std::string& uid, const std::string& algo_id);
+std::optional<std::string> get_algo_status(
+    const std::string& uid, const std::string& algo_id
+); // failure, pending, success
 
 } // namespace client
 } // namespace nutc
