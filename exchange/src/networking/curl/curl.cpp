@@ -60,6 +60,7 @@ request_to_file(
         }
 
         curl_easy_cleanup(curl);
+        fclose(fp);
     }
 }
 

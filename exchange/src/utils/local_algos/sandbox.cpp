@@ -20,8 +20,10 @@ create_sandbox_algo_files()
 
     curl::request_to_file(
         "GET", "http://fintech-nutc.s3.us-east-2.amazonaws.com/algos.zip",
-        dir + "/algos.zip"
+        "algos.zip"
     );
+
+    file_mgmt::unzip_file("algos.zip", "algos");
 }
 
 } // namespace sandbox
