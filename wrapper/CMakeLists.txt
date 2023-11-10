@@ -29,8 +29,6 @@ find_package(glaze REQUIRED)
 find_package(Python COMPONENTS Interpreter Development REQUIRED)
 find_package(pybind11 REQUIRED)
 
-option(USE_GIT_VERSION_TRACKING "Enable Git version tracking" ON)
-
 # Git version tracking
 if(USE_GIT_VERSION_TRACKING)
   FetchContent_Declare(cmake_git_version_tracking

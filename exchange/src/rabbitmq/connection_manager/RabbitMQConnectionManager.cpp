@@ -23,8 +23,10 @@ RabbitMQConnectionManager::connectToRabbitMQ(
     if (!socket) {
         log_e(rabbitmq, "{}", "Failed to create TCP socket.");
     }
-    if (amqp_socket_open(socket, hostname.c_str(), port)) {
-        log_e(rabbitmq, "{}", "Failed to open TCP socket.");
+    amqp_status_enum status =
+        static_cast<amqp_status_enum>(amqp_socket_open(socket, hostname.c_str(), port));
+    if (status != AMQP_STATUS_OK) {
+        log_e(rabbitmq, "Failed to open TCP socket: {}", amqp_error_string2(status));
         return false;
     }
 
