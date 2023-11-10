@@ -45,17 +45,17 @@ FROM python:3.11-slim as run-exchange
 
 RUN apt update
 RUN apt install -y rabbitmq-server
-# RUN pip install numpy pandas polars scipy scikit-learn
+RUN pip install numpy pandas polars scipy scikit-learn
 
 COPY --from=build-wrapper /app/wrapper/build/NUTC-client /bin/NUTC-client
 COPY --from=build-exchange /app/exchange/build/NUTC24 /bin/NUTC-exchange
+COPY ./exchange/scripts/docker-start.sh /app/docker-start.sh
 
 RUN chmod +x /bin/NUTC-client
 RUN chmod +x /bin/NUTC-exchange
+RUN chmod +X /app/docker-start.sh
 
 ENV RABBITMQ_DEFAULT_USER="NUFT"
 ENV RABBITMQ_DEFAULT_PASS="ADMIN"
 
-WORKDIR /app
-
-ENTRYPOINT rabbitmq-server -detached && sleep 5 && NUTC-exchange --sandbox 1Pd1lJUMPURc0ezL393vWwRz9g32
+ENTRYPOINT ["./app/docker-start.sh"]
