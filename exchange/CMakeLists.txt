@@ -6,7 +6,7 @@ project(
     NUTC24
     VERSION 0.1.0
     DESCRIPTION "Northwestern University Trading Competition, 2024"
-    HOMEPAGE_URL "https://github.com/northwesternfintech/NUTC24"
+    HOMEPAGE_URL "https://github.com/northwesternfintech/NUTC"
     LANGUAGES CXX
 )
 
