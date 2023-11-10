@@ -30,10 +30,8 @@ private:
     std::unordered_map<std::string, Client> clients;
 
 public:
-    void add_client(
-        const std::string& uid, float capital = STARTING_CAPITAL,
-        bool is_local_algo = false, bool active = false
-    );
+    void add_client(const std::string& uid);
+    void add_client(const std::string& uid, bool is_local_algo);
     void initialize_from_firebase(const glz::json_t::object_t& users);
     void set_active(const std::string& uid);
 

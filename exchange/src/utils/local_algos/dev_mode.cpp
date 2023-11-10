@@ -12,7 +12,7 @@ initialize_client_manager(manager::ClientManager& users, int num_users)
 {
     for (int i = 0; i < num_users; i++) {
         std::string uid = "algo_" + std::to_string(i);
-        users.add_client(uid, STARTING_CAPITAL, true);
+        users.add_client(uid, true);
     }
 }
 

@@ -16,8 +16,8 @@ initialize_client_manager(manager::ClientManager& users)
     for (const auto& entry : std::filesystem::directory_iterator(ALGO_DIR)) {
         std::string uid = entry.path().filename().string();
         uid = uid.substr(0, uid.find(".py"));
-        log_i(sandbox_mode, "Adding client: {}", uid);
-        users.add_client(uid, STARTING_CAPITAL, true);
+        log_i(sandbox, "Adding client: {}", uid);
+        users.add_client(uid, true);
         num_users += 1;
     }
     return num_users + 1;

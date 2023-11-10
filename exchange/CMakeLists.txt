@@ -90,7 +90,6 @@ target_link_libraries(NUTC24_exe PRIVATE quill::quill)
 target_link_libraries(NUTC24_exe PRIVATE fmt::fmt)
 
 # libzip
-find_package(libzip REQUIRED)
 target_link_libraries(NUTC24_exe PUBLIC libzip::zip)
 
 # rabbitmq

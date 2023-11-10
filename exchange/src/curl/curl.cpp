@@ -17,12 +17,6 @@ write_callback(void* contents, size_t size, size_t nmemb, void* userp)
     return size * nmemb;
 }
 
-static size_t
-file_write_callback(void* contents, size_t size, size_t nmemb, FILE* stream)
-{
-    return fwrite(contents, size, nmemb, stream);
-}
-
 void
 request_to_file(
     const std::string& method, const std::string& url, const std::string& filepath,
@@ -36,8 +30,12 @@ request_to_file(
     curl = curl_easy_init();
     if (curl) {
         fp = fopen(filepath.c_str(), "wb");
+        if (!fp) {
+            log_e(firebase_fetching, "failed to open file: {}", filepath);
+            return;
+        }
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, file_write_callback);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
 
         if (method == "POST") {

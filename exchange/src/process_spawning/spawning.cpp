@@ -12,29 +12,29 @@ namespace client {
 int
 initialize(manager::ClientManager& users, Mode mode)
 {
-    if (mode == Mode::DEV) {
-        dev_mode::initialize_client_manager(users, DEBUG_NUM_USERS);
-        spawn_all_clients(users);
-        return DEBUG_NUM_USERS;
-    }
-    else if (mode == Mode::SANDBOX) {
-        int num_users = sandbox::initialize_client_manager(users);
-        spawn_all_clients(users);
-        return num_users;
-    }
-    else {
-        // Get users from firebase
-        glz::json_t::object_t firebase_users = nutc::client::get_all_users();
-        users.initialize_from_firebase(firebase_users);
+    int num_users;
+    switch (mode) {
+        case Mode::DEV:
+            dev_mode::initialize_client_manager(users, DEBUG_NUM_USERS);
+            spawn_all_clients(users);
+            return DEBUG_NUM_USERS;
+        case Mode::SANDBOX:
+            num_users = sandbox::initialize_client_manager(users);
+            spawn_all_clients(users);
+            return num_users;
+        default:
+            // Get users from firebase
+            glz::json_t::object_t firebase_users = nutc::client::get_all_users();
+            users.initialize_from_firebase(firebase_users);
 
-        // Spawn clients
-        const int num_clients = nutc::client::spawn_all_clients(users);
+            // Spawn clients
+            const int num_clients = nutc::client::spawn_all_clients(users);
 
-        if (num_clients == 0) {
-            log_c(client_spawning, "Spawned 0 clients");
-            exit(1);
-        };
-        return num_clients;
+            if (num_clients == 0) {
+                log_c(client_spawning, "Spawned 0 clients");
+                exit(1);
+            };
+            return num_clients;
     }
 }
 

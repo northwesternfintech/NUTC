@@ -40,7 +40,7 @@ unzip_file(const std::string& src, const std::string& dest)
         zip_file* f = zip_fopen_index(z, i, 0);
         if (f == nullptr) {
             log_e(dev_mode, "Error opening file in zip: {}", zip_strerror(z));
-            continue;
+            return;
         }
 
         char* contents = new char[st.size];
@@ -64,10 +64,10 @@ unzip_file(const std::string& src, const std::string& dest)
 bool
 create_directory(std::string dir_name)
 {
-    struct stat st;
-    if (stat(dir_name.c_str(), &st) != 0) {
-        if (mkdir(dir_name.c_str(), 0777) != 0) {
-            log_e(dev_mode, "{}", "Failed to create directory.");
+    std::filesystem::path dir_path{dir_name};
+    if (!std::filesystem::exists(dir_path)) {
+        if (!std::filesystem::create_directory(dir_path)) {
+            std::cerr << "Failed to create directory." << std::endl;
             return false;
         }
     }

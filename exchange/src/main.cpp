@@ -112,7 +112,7 @@ main(int argc, const char** argv)
     else if (mode == Mode::SANDBOX) {
         log_t1(main, "Initializing NUTC in sandbox node");
         nutc::sandbox::create_sandbox_algo_files();
-        users.add_client(sandbox.value(), STARTING_CAPITAL);
+        users.add_client(sandbox.value(), false);
     }
 
     int num_clients = nutc::client::initialize(users, mode);
