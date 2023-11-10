@@ -29,7 +29,7 @@ tasks:
     preconditions:
       - test -f CMakeUserPresets.json
     cmds:
-      - cmake --build --preset=dev
+      - cmake --build --preset=dev -j
 
   run:
     dir: '{{.USER_WORKING_DIR}}'
