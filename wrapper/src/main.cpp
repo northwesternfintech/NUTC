@@ -1,7 +1,6 @@
 #include "common.hpp"
 #include "dev_mode/dev_mode.hpp"
 #include "firebase/firebase.hpp"
-#include "git.h"
 #include "pywrapper/pywrapper.hpp"
 #include "rabbitmq/rabbitmq.hpp"
 
@@ -86,6 +85,8 @@ log_build_info()
 {
     log_i(main, "NUTC Client: Interface to the NUFT Trading Competition");
 
+#ifndef NO_GIT_VERSION_TRACKING
+
     // Git info
     log_i(main, "Built from {} on {}", git_Describe(), git_Branch());
     log_d(main, "Commit: \"{}\" at {}", git_CommitSubject(), git_CommitDate());
@@ -93,6 +94,8 @@ log_build_info()
 
     if (git_AnyUncommittedChanges())
         log_w(main, "Built from dirty commit!");
+
+#endif
 }
 
 int
