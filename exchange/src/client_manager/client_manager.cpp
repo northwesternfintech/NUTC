@@ -68,9 +68,11 @@ ClientManager::initialize_from_firebase(const glz::json_t::object_t& users)
 }
 
 void
-ClientManager::add_client(const std::string& uid, float capital, bool active)
+ClientManager::add_client(
+    const std::string& uid, float capital, bool is_local_algo, bool active
+)
 {
-    clients[uid] = Client{uid, active, capital, {}};
+    clients[uid] = Client{uid, active, is_local_algo, capital, {}};
 }
 
 void

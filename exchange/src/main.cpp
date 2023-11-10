@@ -20,7 +20,7 @@ namespace rmq = nutc::rabbitmq;
 nutc::manager::ClientManager users;
 nutc::engine_manager::Manager engine_manager;
 
-static std::tuple<Mode, std::string>
+static std::tuple<Mode, std::optional<std::string>>
 process_arguments(int argc, const char** argv)
 {
     argparse::ArgumentParser program(
@@ -35,12 +35,13 @@ process_arguments(int argc, const char** argv)
         .nargs(0);
 
     program.add_argument("-S", "--sandbox")
-        .help("Enable sandbox mode with a given uid")
+        .help("Provide a sandbox algo id")
         .action([](const auto& value) {
             std::string uid = std::string(value);
             std::replace(uid.begin(), uid.end(), ' ', '-');
             return uid;
         })
+        .default_value("")
         .nargs(1);
 
     program.add_argument("-V", "--version")
@@ -62,18 +63,19 @@ process_arguments(int argc, const char** argv)
     }
 
     bool dev_mode = program.get<bool>("--dev");
-    std::string sandbox_uid = program.is_used("--sandbox")
-                                  ? program.get<std::string>("--sandbox")
-                                  : std::string("");
-
+    std::optional<std::string> uid = std::nullopt;
+    if (program.is_used("--sandbox")) {
+        uid = program.get<std::string>("--sandbox");
+    }
     auto get_mode = [&]() -> Mode {
         if (dev_mode)
             return Mode::DEV;
-        if (sandbox_uid.size() > 0)
+        if (uid.has_value())
             return Mode::SANDBOX;
         return Mode::PROD;
     };
-    return std::make_tuple(get_mode(), sandbox_uid);
+
+    return std::make_tuple(get_mode(), uid);
 }
 
 void
@@ -87,7 +89,7 @@ handle_sigint(int sig)
 int
 main(int argc, const char** argv)
 {
-    auto [mode, sandbox_uid] = process_arguments(argc, argv);
+    auto [mode, sandbox] = process_arguments(argc, argv);
 
     // Set up logging
     nutc::logging::init(quill::LogLevel::TraceL3);
@@ -110,6 +112,7 @@ main(int argc, const char** argv)
     else if (mode == Mode::SANDBOX) {
         log_t1(main, "Initializing NUTC in sandbox node");
         nutc::sandbox::create_sandbox_algo_files();
+        users.add_client(sandbox.value(), STARTING_CAPITAL);
     }
 
     int num_clients = nutc::client::initialize(users, mode);

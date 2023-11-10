@@ -13,5 +13,5 @@ std::string read_file_content(const std::string& path);
 
 [[nodiscard]] bool create_directory(std::string dir);
 
-} // namespace file_management
+} // namespace file_mgmt
 } // namespace nutc

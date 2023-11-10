@@ -20,6 +20,7 @@ namespace manager {
 struct Client {
     std::string uid;
     bool active;
+    bool is_local_algo;
     float capital_remaining;
     std::unordered_map<std::string, float> holdings;
 };
@@ -30,7 +31,8 @@ private:
 
 public:
     void add_client(
-        const std::string& uid, float capital = STARTING_CAPITAL, bool active = false
+        const std::string& uid, float capital = STARTING_CAPITAL,
+        bool is_local_algo = false, bool active = false
     );
     void initialize_from_firebase(const glz::json_t::object_t& users);
     void set_active(const std::string& uid);

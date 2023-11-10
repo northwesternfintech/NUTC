@@ -14,12 +14,12 @@ initialize(manager::ClientManager& users, Mode mode)
 {
     if (mode == Mode::DEV) {
         dev_mode::initialize_client_manager(users, DEBUG_NUM_USERS);
-        spawn_all_clients(users, mode);
+        spawn_all_clients(users);
         return DEBUG_NUM_USERS;
     }
     else if (mode == Mode::SANDBOX) {
         int num_users = sandbox::initialize_client_manager(users);
-        spawn_all_clients(users, mode);
+        spawn_all_clients(users);
         return num_users;
     }
     else {
@@ -28,7 +28,7 @@ initialize(manager::ClientManager& users, Mode mode)
         users.initialize_from_firebase(firebase_users);
 
         // Spawn clients
-        const int num_clients = nutc::client::spawn_all_clients(users, mode);
+        const int num_clients = nutc::client::spawn_all_clients(users);
 
         if (num_clients == 0) {
             log_c(client_spawning, "Spawned 0 clients");
@@ -47,7 +47,7 @@ get_all_users()
 }
 
 int
-spawn_all_clients(const nutc::manager::ClientManager& users, Mode mode)
+spawn_all_clients(const nutc::manager::ClientManager& users)
 {
     int clients = 0;
     for (const auto& client : users.get_clients(false)) {
@@ -55,19 +55,19 @@ spawn_all_clients(const nutc::manager::ClientManager& users, Mode mode)
         log_i(client_spawning, "Spawning client: {}", uid);
         std::string quote_uid = std::string(uid);
         std::replace(quote_uid.begin(), quote_uid.end(), '-', ' ');
-        spawn_client(quote_uid, mode);
+        spawn_client(quote_uid, client.is_local_algo);
         clients++;
     };
     return clients;
 }
 
 void
-spawn_client(const std::string& uid, Mode mode)
+spawn_client(const std::string& uid, bool is_local_algo)
 {
     pid_t pid = fork();
     if (pid == 0) {
         std::vector<std::string> args = {"NUTC-client", "--uid", uid};
-        if (mode == Mode::DEV || mode == Mode::SANDBOX) {
+        if (is_local_algo) {
             args.push_back("--dev");
         }
 

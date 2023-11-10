@@ -17,10 +17,10 @@ initialize_client_manager(manager::ClientManager& users)
         std::string uid = entry.path().filename().string();
         uid = uid.substr(0, uid.find(".py"));
         log_i(sandbox_mode, "Adding client: {}", uid);
-        users.add_client(uid);
+        users.add_client(uid, STARTING_CAPITAL, true);
         num_users += 1;
     }
-    return num_users;
+    return num_users + 1;
 }
 
 void
