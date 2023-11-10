@@ -6,7 +6,8 @@
 #include "networking/firebase/firebase.hpp"
 #include "networking/rabbitmq/rabbitmq.hpp"
 #include "process_spawning/spawning.hpp"
-#include "utils/local_algos/local_algo_spawning.hpp"
+#include "utils/local_algos/dev_mode.hpp"
+#include "utils/local_algos/sandbox.hpp"
 
 #include <argparse/argparse.hpp>
 
@@ -20,7 +21,7 @@ namespace rmq = nutc::rabbitmq;
 nutc::manager::ClientManager users;
 nutc::engine_manager::Manager engine_manager;
 
-static std::tuple<bool, std::string>
+static std::tuple<Mode, std::string>
 process_arguments(int argc, const char** argv)
 {
     argparse::ArgumentParser program(
@@ -66,7 +67,14 @@ process_arguments(int argc, const char** argv)
                                   ? program.get<std::string>("--sandbox")
                                   : std::string("");
 
-    return std::make_tuple(dev_mode, sandbox_uid);
+    auto get_mode = [&]() -> Mode {
+        if (dev_mode)
+            return Mode::DEV;
+        if (sandbox_uid.size() > 0)
+            return Mode::SANDBOX;
+        return Mode::PROD;
+    };
+    return std::make_tuple(get_mode(), sandbox_uid);
 }
 
 void
@@ -80,19 +88,19 @@ handle_sigint(int sig)
 int
 main(int argc, const char** argv)
 {
-    auto [dev_mode, sandbox_uid] = process_arguments(argc, argv);
+    auto [mode, sandbox_uid] = process_arguments(argc, argv);
 
     // Set up logging
     nutc::logging::init(quill::LogLevel::TraceL3);
 
-    if (dev_mode) {
+    if (mode == Mode::DEV) {
         log_t1(main, "Initializing NUTC in development mode");
         nutc::dev_mode::create_mt_algo_files(DEBUG_NUM_USERS);
     }
 
-    if (sandbox_uid.size() > 0) {
+    if (mode == Mode::SANDBOX) {
         log_t1(main, "Initializing NUTC in sandbox node");
-        // nutc::dev_mode::create_sandbox_algo_files();
+        nutc::sandbox::create_sandbox_algo_files();
     }
 
     // Initialize signal handler
@@ -106,7 +114,7 @@ main(int argc, const char** argv)
         return 1;
     }
 
-    int num_clients = nutc::client::initialize(users, dev_mode);
+    int num_clients = nutc::client::initialize(users, mode);
 
     engine_manager.add_engine("A");
     engine_manager.add_engine("B");

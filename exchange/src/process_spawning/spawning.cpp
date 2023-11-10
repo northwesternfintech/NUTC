@@ -2,17 +2,21 @@
 
 #include "config.h"
 #include "logging.hpp"
-#include "utils/local_algos/local_algo_spawning.hpp"
+#include "utils/local_algos/dev_mode.hpp"
 
 namespace nutc {
 namespace client {
 
 int
-initialize(manager::ClientManager& users, bool development_mode)
+initialize(manager::ClientManager& users, Mode mode)
 {
-    if (development_mode) {
+    if (mode == Mode::DEV) {
         dev_mode::initialize_client_manager(users, DEBUG_NUM_USERS);
-        spawn_all_clients(users, development_mode);
+        spawn_all_clients(users, mode);
+        return DEBUG_NUM_USERS;
+    }
+    else if (mode == Mode::SANDBOX) {
+        // dev_mode::initialize_client_manager
         return DEBUG_NUM_USERS;
     }
     else {
@@ -21,8 +25,7 @@ initialize(manager::ClientManager& users, bool development_mode)
         users.initialize_from_firebase(firebase_users);
 
         // Spawn clients
-        const int num_clients =
-            nutc::client::spawn_all_clients(users, development_mode);
+        const int num_clients = nutc::client::spawn_all_clients(users, mode);
 
         if (num_clients == 0) {
             log_c(client_spawning, "Spawned 0 clients");
@@ -41,7 +44,7 @@ get_all_users()
 }
 
 int
-spawn_all_clients(const nutc::manager::ClientManager& users, bool development_mode)
+spawn_all_clients(const nutc::manager::ClientManager& users, Mode mode)
 {
     int clients = 0;
     for (const auto& client : users.get_clients(false)) {
@@ -49,19 +52,19 @@ spawn_all_clients(const nutc::manager::ClientManager& users, bool development_mo
         log_i(client_spawning, "Spawning client: {}", uid);
         std::string quote_uid = std::string(uid);
         std::replace(quote_uid.begin(), quote_uid.end(), '-', ' ');
-        spawn_client(quote_uid, development_mode);
+        spawn_client(quote_uid, mode);
         clients++;
     };
     return clients;
 }
 
 void
-spawn_client(const std::string& uid, bool development_mode)
+spawn_client(const std::string& uid, Mode mode)
 {
     pid_t pid = fork();
     if (pid == 0) {
         std::vector<std::string> args = {"NUTC-client", "--uid", uid};
-        if (development_mode) {
+        if (mode == Mode::DEV) {
             args.push_back("--dev");
         }
 
