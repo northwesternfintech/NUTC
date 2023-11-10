@@ -1,7 +1,6 @@
 #pragma once
 
 #include "client_manager/client_manager.hpp"
-#include "networking/firebase/firebase.hpp"
 
 #include <glaze/glaze.hpp>
 #include <sys/types.h>

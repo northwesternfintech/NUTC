@@ -3,7 +3,6 @@
 #include "config.h"
 #include "file_management.hpp"
 #include "logging.hpp"
-#include "networking/firebase/firebase.hpp"
 
 namespace nutc {
 namespace dev_mode {

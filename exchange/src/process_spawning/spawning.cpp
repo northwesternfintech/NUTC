@@ -2,6 +2,7 @@
 
 #include "config.h"
 #include "logging.hpp"
+#include "networking/curl/curl.hpp"
 #include "utils/local_algos/dev_mode.hpp"
 
 namespace nutc {
@@ -17,6 +18,7 @@ initialize(manager::ClientManager& users, Mode mode)
     }
     else if (mode == Mode::SANDBOX) {
         // dev_mode::initialize_client_manager
+    //TODO
         return DEBUG_NUM_USERS;
     }
     else {
@@ -39,7 +41,7 @@ glz::json_t::object_t
 get_all_users()
 {
     std::string endpoint = std::string(FIREBASE_URL) + std::string("users.json");
-    glz::json_t res = firebase::firebase_request("GET", endpoint);
+    glz::json_t res = curl::request_to_json("GET", endpoint);
     return res.get<glz::json_t::object_t>();
 }
 

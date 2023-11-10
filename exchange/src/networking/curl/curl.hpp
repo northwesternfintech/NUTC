@@ -1,6 +1,5 @@
 #pragma once
 
-#include <curl/curl.h>
 #include <glaze/glaze.hpp>
 
 #include <iostream>
@@ -11,7 +10,17 @@ namespace nutc {
 /**
  * @brief Handles all communication with firebase
  */
-namespace firebase {
+namespace curl {
+
+// TODO: better name
+std::string request_to_string(
+    const std::string& method, const std::string& url, const std::string& data = ""
+);
+
+void request_to_file(
+    const std::string& method, const std::string& url, const std::string& filename,
+    const std::string& data = ""
+);
 
 /**
  * @brief Sends a request to the firebase server
@@ -20,9 +29,9 @@ namespace firebase {
  * @param data The string to write received data to
  * @return The response from the server in JSON format
  */
-glz::json_t firebase_request(
+glz::json_t request_to_json(
     const std::string& method, const std::string& url, const std::string& data = ""
 );
 
-} // namespace firebase
+} // namespace curl
 } // namespace nutc

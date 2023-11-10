@@ -23,7 +23,7 @@ add_library(
     src/utils/local_algos/file_management.cpp
     src/matching/manager/engine_manager.cpp
     src/logging.cpp
-    src/networking/firebase/firebase.cpp
+    src/networking/curl/curl.cpp
     src/process_spawning/spawning.cpp
     src/networking/rabbitmq/client_manager/RabbitMQClientManager.cpp
     src/networking/rabbitmq/connection_manager/RabbitMQConnectionManager.cpp

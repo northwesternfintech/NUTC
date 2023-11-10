@@ -3,7 +3,6 @@
 #include "lib.hpp"
 #include "logging.hpp"
 #include "matching/engine/engine.hpp"
-#include "networking/firebase/firebase.hpp"
 #include "networking/rabbitmq/rabbitmq.hpp"
 #include "process_spawning/spawning.hpp"
 #include "utils/local_algos/dev_mode.hpp"
