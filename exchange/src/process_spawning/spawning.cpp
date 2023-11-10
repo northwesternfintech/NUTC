@@ -1,9 +1,10 @@
 #include "process_spawning/spawning.hpp"
 
 #include "config.h"
-#include "logging.hpp"
 #include "curl/curl.hpp"
+#include "logging.hpp"
 #include "utils/local_algos/dev_mode.hpp"
+#include "utils/local_algos/sandbox.hpp"
 
 namespace nutc {
 namespace client {
@@ -17,9 +18,9 @@ initialize(manager::ClientManager& users, Mode mode)
         return DEBUG_NUM_USERS;
     }
     else if (mode == Mode::SANDBOX) {
-        // dev_mode::initialize_client_manager
-    //TODO
-        return DEBUG_NUM_USERS;
+        int num_users = sandbox::initialize_client_manager(users);
+        spawn_all_clients(users, mode);
+        return num_users;
     }
     else {
         // Get users from firebase
@@ -66,7 +67,7 @@ spawn_client(const std::string& uid, Mode mode)
     pid_t pid = fork();
     if (pid == 0) {
         std::vector<std::string> args = {"NUTC-client", "--uid", uid};
-        if (mode == Mode::DEV) {
+        if (mode == Mode::DEV || mode == Mode::SANDBOX) {
             args.push_back("--dev");
         }
 

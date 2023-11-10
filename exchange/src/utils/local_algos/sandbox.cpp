@@ -1,13 +1,28 @@
 #include "sandbox.hpp"
 
+#include "curl/curl.hpp"
 #include "file_management.hpp"
 #include "logging.hpp"
-#include "curl/curl.hpp"
 
 #include <glaze/glaze.hpp>
 
 namespace nutc {
 namespace sandbox {
+int
+initialize_client_manager(manager::ClientManager& users)
+{
+    // check number of algos in algos directory
+    int num_users = 0;
+    for (const auto& entry : std::filesystem::directory_iterator(ALGO_DIR)) {
+        std::string uid = entry.path().filename().string();
+        uid = uid.substr(0, uid.find(".py"));
+        log_i(sandbox_mode, "Adding client: {}", uid);
+        users.add_client(uid);
+        num_users += 1;
+    }
+    return num_users;
+}
+
 void
 create_sandbox_algo_files()
 {
@@ -19,8 +34,7 @@ create_sandbox_algo_files()
         return;
 
     curl::request_to_file(
-        "GET", "http://fintech-nutc.s3.us-east-2.amazonaws.com/algos.zip",
-        "algos.zip"
+        "GET", "http://fintech-nutc.s3.us-east-2.amazonaws.com/algos.zip", "algos.zip"
     );
 
     file_mgmt::unzip_file("algos.zip", "algos");

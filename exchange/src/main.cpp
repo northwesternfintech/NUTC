@@ -3,8 +3,8 @@
 #include "lib.hpp"
 #include "logging.hpp"
 #include "matching/engine/engine.hpp"
-#include "rabbitmq/rabbitmq.hpp"
 #include "process_spawning/spawning.hpp"
+#include "rabbitmq/rabbitmq.hpp"
 #include "utils/local_algos/dev_mode.hpp"
 #include "utils/local_algos/sandbox.hpp"
 
@@ -92,16 +92,6 @@ main(int argc, const char** argv)
     // Set up logging
     nutc::logging::init(quill::LogLevel::TraceL3);
 
-    if (mode == Mode::DEV) {
-        log_t1(main, "Initializing NUTC in development mode");
-        nutc::dev_mode::create_mt_algo_files(DEBUG_NUM_USERS);
-    }
-
-    if (mode == Mode::SANDBOX) {
-        log_t1(main, "Initializing NUTC in sandbox node");
-        nutc::sandbox::create_sandbox_algo_files();
-    }
-
     // Initialize signal handler
     signal(SIGINT, handle_sigint);
 
@@ -111,6 +101,15 @@ main(int argc, const char** argv)
     if (!rmq_conn.connectedToRMQ()) {
         log_e(rabbitmq, "Failed to initialize connection");
         return 1;
+    }
+
+    if (mode == Mode::DEV) {
+        log_t1(main, "Initializing NUTC in development mode");
+        nutc::dev_mode::create_mt_algo_files(DEBUG_NUM_USERS);
+    }
+    else if (mode == Mode::SANDBOX) {
+        log_t1(main, "Initializing NUTC in sandbox node");
+        nutc::sandbox::create_sandbox_algo_files();
     }
 
     int num_clients = nutc::client::initialize(users, mode);
