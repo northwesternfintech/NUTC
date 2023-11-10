@@ -6,6 +6,7 @@
 # consumers can trivially build and package the project
 if(PROJECT_IS_TOP_LEVEL)
   option(NUTC-client_DEVELOPER_MODE "Enable developer mode" OFF)
+  option(USE_GIT_VERSION_TRACKING "Enable Git version tracking" ON)
 endif()
 
 # ---- Warning guard ----
