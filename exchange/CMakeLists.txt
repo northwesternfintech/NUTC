@@ -18,7 +18,7 @@ include(cmake/variables.cmake)
 add_library(
     NUTC24_lib OBJECT
     src/lib.cpp
-    src/utils/dev_mode/dev_mode.cpp
+    src/utils/local_algos/local_algo_spawning.cpp
     src/matching/manager/engine_manager.cpp
     src/logging.cpp
     src/networking/firebase/firebase.cpp
@@ -45,6 +45,10 @@ target_compile_features(NUTC24_lib PUBLIC cxx_std_20)
 # argparse
 find_package(argparse REQUIRED)
 target_link_libraries(NUTC24_lib PUBLIC argparse::argparse)
+
+# libzip
+find_package(libzip REQUIRED)
+target_link_libraries(NUTC24_lib PUBLIC libzip::zip)
 
 # Fmt
 find_package(fmt REQUIRED)
@@ -82,6 +86,10 @@ target_link_libraries(NUTC24_exe PRIVATE quill::quill)
 
 # fmt
 target_link_libraries(NUTC24_exe PRIVATE fmt::fmt)
+
+# libzip
+find_package(libzip REQUIRED)
+target_link_libraries(NUTC24_exe PUBLIC libzip::zip)
 
 # rabbitmq
 find_package(rabbitmq-c REQUIRED)

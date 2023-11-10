@@ -6,7 +6,7 @@
 #include "networking/firebase/firebase.hpp"
 #include "networking/rabbitmq/rabbitmq.hpp"
 #include "process_spawning/spawning.hpp"
-#include "utils/dev_mode/dev_mode.hpp"
+#include "utils/local_algos/local_algo_spawning.hpp"
 
 #include <argparse/argparse.hpp>
 
@@ -20,7 +20,7 @@ namespace rmq = nutc::rabbitmq;
 nutc::manager::ClientManager users;
 nutc::engine_manager::Manager engine_manager;
 
-static std::tuple<bool>
+static std::tuple<bool, std::string>
 process_arguments(int argc, const char** argv)
 {
     argparse::ArgumentParser program(
@@ -33,6 +33,15 @@ process_arguments(int argc, const char** argv)
         .default_value(false)
         .implicit_value(true)
         .nargs(0);
+
+    program.add_argument("-S", "--sandbox")
+        .help("Enable sandbox mode with a given uid")
+        .action([](const auto& value) {
+            std::string uid = std::string(value);
+            std::replace(uid.begin(), uid.end(), ' ', '-');
+            return uid;
+        })
+        .nargs(1);
 
     program.add_argument("-V", "--version")
         .help("prints version information and exits")
@@ -52,7 +61,12 @@ process_arguments(int argc, const char** argv)
         exit(1); // NOLINT(concurrency-*)
     }
 
-    return std::make_tuple(program.get<bool>("--dev"));
+    bool dev_mode = program.get<bool>("--dev");
+    std::string sandbox_uid = program.is_used("--sandbox")
+                                  ? program.get<std::string>("--sandbox")
+                                  : std::string("");
+
+    return std::make_tuple(dev_mode, sandbox_uid);
 }
 
 void
@@ -66,14 +80,19 @@ handle_sigint(int sig)
 int
 main(int argc, const char** argv)
 {
-    auto [dev_mode] = process_arguments(argc, argv);
+    auto [dev_mode, sandbox_uid] = process_arguments(argc, argv);
 
     // Set up logging
     nutc::logging::init(quill::LogLevel::TraceL3);
 
     if (dev_mode) {
-        log_t1(main, "Initializing NUTC24 in development mode...");
-        nutc::dev_mode::create_algo_files(DEBUG_NUM_USERS);
+        log_t1(main, "Initializing NUTC in development mode");
+        nutc::dev_mode::create_mt_algo_files(DEBUG_NUM_USERS);
+    }
+
+    if (sandbox_uid.size() > 0) {
+        log_t1(main, "Initializing NUTC in sandbox node");
+        // nutc::dev_mode::create_sandbox_algo_files();
     }
 
     // Initialize signal handler

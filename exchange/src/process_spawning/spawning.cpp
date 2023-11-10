@@ -2,7 +2,7 @@
 
 #include "config.h"
 #include "logging.hpp"
-#include "utils/dev_mode/dev_mode.hpp"
+#include "utils/local_algos/local_algo_spawning.hpp"
 
 namespace nutc {
 namespace client {

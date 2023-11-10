@@ -1,4 +1,4 @@
-#include "utils/dev_mode/dev_mode.hpp"
+#include "utils/local_algos/local_algo_spawning.hpp"
 
 namespace nutc {
 namespace dev_mode {
@@ -34,7 +34,7 @@ read_file_content(const std::string& filename)
 }
 
 void
-create_algo_files(int num_users) noexcept
+create_mt_algo_files(int num_users) noexcept
 {
     std::string dir_name = "./algos";
     std::string content = read_file_content("./template.py");
