@@ -1,0 +1,15 @@
+#pragma once
+
+#include <string>
+
+namespace nutc {
+namespace file_mgmt {
+
+bool file_exists(const std::string& path) noexcept;
+
+std::string read_file_content(const std::string& path);
+
+[[nodiscard]] bool create_directory(std::string dir);
+
+} // namespace file_management
+} // namespace nutc
