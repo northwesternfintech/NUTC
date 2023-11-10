@@ -1,6 +1,6 @@
 #include "RabbitMQOrderHandler.hpp"
 
-#include "networking/rabbitmq/publisher/RabbitMQPublisher.hpp"
+#include "rabbitmq/publisher/RabbitMQPublisher.hpp"
 
 namespace nutc {
 namespace rabbitmq {

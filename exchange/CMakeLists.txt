@@ -23,14 +23,14 @@ add_library(
     src/utils/local_algos/file_management.cpp
     src/matching/manager/engine_manager.cpp
     src/logging.cpp
-    src/networking/curl/curl.cpp
+    src/curl/curl.cpp
     src/process_spawning/spawning.cpp
-    src/networking/rabbitmq/client_manager/RabbitMQClientManager.cpp
-    src/networking/rabbitmq/connection_manager/RabbitMQConnectionManager.cpp
-    src/networking/rabbitmq/consumer/RabbitMQConsumer.cpp
-    src/networking/rabbitmq/order_handler/RabbitMQOrderHandler.cpp
-    src/networking/rabbitmq/publisher/RabbitMQPublisher.cpp
-    src/networking/rabbitmq/queue_manager/RabbitMQQueueManager.cpp
+    src/rabbitmq/client_manager/RabbitMQClientManager.cpp
+    src/rabbitmq/connection_manager/RabbitMQConnectionManager.cpp
+    src/rabbitmq/consumer/RabbitMQConsumer.cpp
+    src/rabbitmq/order_handler/RabbitMQOrderHandler.cpp
+    src/rabbitmq/publisher/RabbitMQPublisher.cpp
+    src/rabbitmq/queue_manager/RabbitMQQueueManager.cpp
     src/matching/engine/engine.cpp
     src/client_manager/client_manager.cpp
     src/utils/logger/logger.cpp

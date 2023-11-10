@@ -1,4 +1,4 @@
-#include "client_manager/client_manager.hpp"
+#include "client_manager.hpp"
 
 namespace nutc {
 namespace manager {

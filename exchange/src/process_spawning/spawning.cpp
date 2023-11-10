@@ -2,7 +2,7 @@
 
 #include "config.h"
 #include "logging.hpp"
-#include "networking/curl/curl.hpp"
+#include "curl/curl.hpp"
 #include "utils/local_algos/dev_mode.hpp"
 
 namespace nutc {

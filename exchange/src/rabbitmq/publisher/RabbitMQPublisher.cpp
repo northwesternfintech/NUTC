@@ -1,7 +1,7 @@
 #include "RabbitMQPublisher.hpp"
 
 #include "logging.hpp"
-#include "networking/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
+#include "rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
 
 namespace nutc {
 namespace rabbitmq {

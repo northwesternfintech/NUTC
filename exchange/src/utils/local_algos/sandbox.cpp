@@ -2,7 +2,7 @@
 
 #include "file_management.hpp"
 #include "logging.hpp"
-#include "networking/curl/curl.hpp"
+#include "curl/curl.hpp"
 
 #include <glaze/glaze.hpp>
 

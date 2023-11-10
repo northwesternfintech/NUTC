@@ -1,8 +1,8 @@
 #include "RabbitMQConnectionManager.hpp"
 
 #include "logging.hpp"
-#include "networking/rabbitmq/publisher/RabbitMQPublisher.hpp"
-#include "networking/rabbitmq/queue_manager/RabbitMQQueueManager.hpp"
+#include "rabbitmq/publisher/RabbitMQPublisher.hpp"
+#include "rabbitmq/queue_manager/RabbitMQQueueManager.hpp"
 #include "utils/messages.hpp"
 
 #include <glaze/glaze.hpp>
