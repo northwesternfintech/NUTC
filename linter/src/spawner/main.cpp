@@ -99,7 +99,7 @@ main(int argc, const char** argv)
 
         // Check status from Firebase
         std::optional<std::string> linting_status =
-                nutc::client::get_algo_status(uid, algoid);
+            nutc::client::get_algo_status(uid, algoid);
 
         // If status is pending, force push a failure
         if (linting_status.has_value()) {
@@ -116,12 +116,13 @@ main(int argc, const char** argv)
 
         log_e(
             main,
-            "Algoid {} for uid {} still pending after 130s. FORCE PUSHING failure to Firebase.",
+            "Algoid {} for uid {} still pending after 130s. FORCE PUSHING failure to "
+            "Firebase.",
             algoid,
             uid
         );
-        ss << "[linter] unknown runtime error for lint algo_id " << algoid << " and uid " << uid
-           << "\n";
+        ss << "[linter] unknown runtime error for lint algo_id " << algoid
+           << " and uid " << uid << "\n";
 
         std::exit(1);
     });
