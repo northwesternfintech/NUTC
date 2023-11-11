@@ -9,7 +9,7 @@
 namespace nutc {
 namespace spawning {
 
-void spawn_client(const std::string& uid, std::string& algoid, pid_t& pid);
+void spawn_client(const std::string& uid, std::string& algoid);
 
 }
 } // namespace nutc

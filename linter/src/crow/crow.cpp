@@ -27,9 +27,8 @@ get_server_thread()
             }
             std::string uid = req.url_params.get("uid");
             std::string algo_id = req.url_params.get("algo_id");
-            pid_t pid = fork();
 
-            spawning::spawn_client(uid, algo_id, pid);
+            spawning::spawn_client(uid, algo_id);
 
             return crow::response();
         });
