@@ -99,7 +99,7 @@ main(int argc, const char** argv)
 
         // Check status from Firebase
         std::optional<std::string> linting_status =
-                nutc::client::get_algo_status(uid, algo_id);
+                nutc::client::get_algo_status(uid, algoid);
 
         // If status is pending, force push a failure
         if (linting_status.has_value()) {
@@ -109,8 +109,8 @@ main(int argc, const char** argv)
                     "unknown runtime error: your code is syntactically correct but "
                     "crashed during runtime";
 
-                nutc::client::set_lint_result(uid, algo_id, false);
-                nutc::client::set_lint_failure(uid, algo_id, error_msg);
+                nutc::client::set_lint_result(uid, algoid, false);
+                nutc::client::set_lint_failure(uid, algoid, error_msg);
             }
         }
 
