@@ -148,7 +148,7 @@ get_algo(const std::string& uid, const std::string& algo_id)
     return algo_file;
 }
 
-std::optional<std::string>
+int
 get_algo_status(const std::string& uid, const std::string& algo_id)
 {
     glz::json_t user_info = get_user_info(uid);
@@ -157,15 +157,24 @@ get_algo_status(const std::string& uid, const std::string& algo_id)
         log_w(
             firebase, "User {} has no algos. Will not participate in simulation.", uid
         );
-        return std::nullopt;
+        return nutc::client::LRO_UNKNOWN;
     }
     if (!user_info["algos"].contains(algo_id)) {
         log_w(firebase, "User {} does not have algo id {}.", uid, algo_id);
-        return std::nullopt;
+        return nutc::client::LRO_UNKNOWN;
     }
     glz::json_t algo_info = user_info["algos"][algo_id];
     std::string linting_result = algo_info["lintResults"].get<std::string>();
-    return linting_result;
+
+    if (linting_result == "failure") {
+        return nutc::client::LRO_FAILURE;
+    }
+    else if (linting_result == "success") {
+        return nutc::client::LRO_SUCCESS;
+    }
+    else {
+        return nutc::client::LRO_PENDING;
+    }
 }
 
 glz::json_t
