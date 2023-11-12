@@ -41,8 +41,6 @@ process_arguments(int argc, const char** argv)
 
     program.add_argument("-S", "--sandbox")
         .help("Provide a sandbox algo id")
-        .action([](const auto& /* unused */) {})
-        .default_value("")
         .nargs(2);
 
     program.add_argument("-V", "--version")

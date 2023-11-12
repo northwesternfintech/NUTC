@@ -45,7 +45,7 @@ tasks:
     cmds:
       - task: build
       - task: check-and-start-services
-      - ./build/dev/{{.NAME}} --sandbox 1Pd1lJUMPURc0ezL393vWwRz9g32
+      - ./build/dev/{{.NAME}} --sandbox 1Pd1lJUMPURc0ezL393vWwRz9g32 1Pd1lJUMPURc0ezL393vWwRz9g32
 
   run-v:
     env:
