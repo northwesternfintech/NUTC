@@ -1,4 +1,4 @@
-#include "client_manager/client_manager.hpp"
+#include "client_manager.hpp"
 
 namespace nutc {
 namespace manager {
@@ -64,13 +64,19 @@ void
 ClientManager::initialize_from_firebase(const glz::json_t::object_t& users)
 {
     for (auto& [uid, _] : users)
-        add_client(uid);
+        add_client(uid, false);
 }
 
 void
-ClientManager::add_client(const std::string& uid, float capital, bool active)
+ClientManager::add_client(const std::string& uid, bool is_local_algo)
 {
-    clients[uid] = Client{uid, active, capital, {}};
+    clients[uid] = Client{uid, false, is_local_algo, STARTING_CAPITAL, {}};
+}
+
+void
+ClientManager::add_client(const std::string& uid)
+{
+    clients[uid] = Client{uid, false, false, STARTING_CAPITAL, {}};
 }
 
 void

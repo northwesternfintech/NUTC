@@ -26,7 +26,7 @@ tasks:
     preconditions:
       - test -f CMakeUserPresets.json
     cmds:
-      - cmake --build --preset=dev
+      - cmake --build --preset=dev -j
 
   run:
     dir: '{{.USER_WORKING_DIR}}'
@@ -36,12 +36,16 @@ tasks:
       - ./build/dev/{{.NAME}}
 
   dev:
-    dir: '{{.USER_WORKING_DIR}}'
     cmds:
       - task: build
       - task: check-and-start-services
       - ./build/dev/{{.NAME}} --dev
 
+  sandbox:
+    cmds:
+      - task: build
+      - task: check-and-start-services
+      - ./build/dev/{{.NAME}} --sandbox 1Pd1lJUMPURc0ezL393vWwRz9g32
 
   run-v:
     env:

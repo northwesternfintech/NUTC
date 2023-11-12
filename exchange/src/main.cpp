@@ -1,12 +1,12 @@
 #include "client_manager/client_manager.hpp"
 #include "config.h"
 #include "lib.hpp"
+#include "local_algos/dev_mode.hpp"
+#include "local_algos/sandbox.hpp"
 #include "logging.hpp"
 #include "matching/engine/engine.hpp"
-#include "networking/firebase/firebase.hpp"
-#include "networking/rabbitmq/rabbitmq.hpp"
 #include "process_spawning/spawning.hpp"
-#include "utils/dev_mode/dev_mode.hpp"
+#include "rabbitmq/rabbitmq.hpp"
 
 #include <argparse/argparse.hpp>
 
@@ -20,7 +20,7 @@ namespace rmq = nutc::rabbitmq;
 nutc::manager::ClientManager users;
 nutc::engine_manager::Manager engine_manager;
 
-static std::tuple<bool>
+static std::tuple<Mode, std::optional<std::string>>
 process_arguments(int argc, const char** argv)
 {
     argparse::ArgumentParser program(
@@ -33,6 +33,16 @@ process_arguments(int argc, const char** argv)
         .default_value(false)
         .implicit_value(true)
         .nargs(0);
+
+    program.add_argument("-S", "--sandbox")
+        .help("Provide a sandbox algo id")
+        .action([](const auto& value) {
+            std::string uid = std::string(value);
+            std::replace(uid.begin(), uid.end(), ' ', '-');
+            return uid;
+        })
+        .default_value("")
+        .nargs(1);
 
     program.add_argument("-V", "--version")
         .help("prints version information and exits")
@@ -52,7 +62,20 @@ process_arguments(int argc, const char** argv)
         exit(1); // NOLINT(concurrency-*)
     }
 
-    return std::make_tuple(program.get<bool>("--dev"));
+    bool dev_mode = program.get<bool>("--dev");
+    std::optional<std::string> uid = std::nullopt;
+    if (program.is_used("--sandbox")) {
+        uid = program.get<std::string>("--sandbox");
+    }
+    auto get_mode = [&]() -> Mode {
+        if (dev_mode)
+            return Mode::DEV;
+        if (uid.has_value())
+            return Mode::SANDBOX;
+        return Mode::PROD;
+    };
+
+    return std::make_tuple(get_mode(), uid);
 }
 
 void
@@ -66,15 +89,10 @@ handle_sigint(int sig)
 int
 main(int argc, const char** argv)
 {
-    auto [dev_mode] = process_arguments(argc, argv);
+    auto [mode, sandbox] = process_arguments(argc, argv);
 
     // Set up logging
     nutc::logging::init(quill::LogLevel::TraceL3);
-
-    if (dev_mode) {
-        log_t1(main, "Initializing NUTC24 in development mode...");
-        nutc::dev_mode::create_algo_files(DEBUG_NUM_USERS);
-    }
 
     // Initialize signal handler
     signal(SIGINT, handle_sigint);
@@ -87,7 +105,17 @@ main(int argc, const char** argv)
         return 1;
     }
 
-    int num_clients = nutc::client::initialize(users, dev_mode);
+    if (mode == Mode::DEV) {
+        log_t1(main, "Initializing NUTC in development mode");
+        nutc::dev_mode::create_mt_algo_files(DEBUG_NUM_USERS);
+    }
+    else if (mode == Mode::SANDBOX) {
+        log_t1(main, "Initializing NUTC in sandbox node");
+        nutc::sandbox::create_sandbox_algo_files();
+        users.add_client(sandbox.value(), false);
+    }
+
+    int num_clients = nutc::client::initialize(users, mode);
 
     engine_manager.add_engine("A");
     engine_manager.add_engine("B");

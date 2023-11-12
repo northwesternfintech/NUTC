@@ -6,7 +6,7 @@ project(
     NUTC24
     VERSION 0.1.0
     DESCRIPTION "Northwestern University Trading Competition, 2024"
-    HOMEPAGE_URL "https://github.com/northwesternfintech/NUTC24"
+    HOMEPAGE_URL "https://github.com/northwesternfintech/NUTC"
     LANGUAGES CXX
 )
 
@@ -18,17 +18,19 @@ include(cmake/variables.cmake)
 add_library(
     NUTC24_lib OBJECT
     src/lib.cpp
-    src/utils/dev_mode/dev_mode.cpp
+    src/local_algos/sandbox.cpp
+    src/local_algos/dev_mode.cpp
+    src/local_algos/file_management.cpp
     src/matching/manager/engine_manager.cpp
     src/logging.cpp
-    src/networking/firebase/firebase.cpp
+    src/curl/curl.cpp
     src/process_spawning/spawning.cpp
-    src/networking/rabbitmq/client_manager/RabbitMQClientManager.cpp
-    src/networking/rabbitmq/connection_manager/RabbitMQConnectionManager.cpp
-    src/networking/rabbitmq/consumer/RabbitMQConsumer.cpp
-    src/networking/rabbitmq/order_handler/RabbitMQOrderHandler.cpp
-    src/networking/rabbitmq/publisher/RabbitMQPublisher.cpp
-    src/networking/rabbitmq/queue_manager/RabbitMQQueueManager.cpp
+    src/rabbitmq/client_manager/RabbitMQClientManager.cpp
+    src/rabbitmq/connection_manager/RabbitMQConnectionManager.cpp
+    src/rabbitmq/consumer/RabbitMQConsumer.cpp
+    src/rabbitmq/order_handler/RabbitMQOrderHandler.cpp
+    src/rabbitmq/publisher/RabbitMQPublisher.cpp
+    src/rabbitmq/queue_manager/RabbitMQQueueManager.cpp
     src/matching/engine/engine.cpp
     src/client_manager/client_manager.cpp
     src/utils/logger/logger.cpp
@@ -45,6 +47,10 @@ target_compile_features(NUTC24_lib PUBLIC cxx_std_20)
 # argparse
 find_package(argparse REQUIRED)
 target_link_libraries(NUTC24_lib PUBLIC argparse::argparse)
+
+# libzip
+find_package(libzip REQUIRED)
+target_link_libraries(NUTC24_lib PUBLIC libzip::zip)
 
 # Fmt
 find_package(fmt REQUIRED)
@@ -82,6 +88,9 @@ target_link_libraries(NUTC24_exe PRIVATE quill::quill)
 
 # fmt
 target_link_libraries(NUTC24_exe PRIVATE fmt::fmt)
+
+# libzip
+target_link_libraries(NUTC24_exe PUBLIC libzip::zip)
 
 # rabbitmq
 find_package(rabbitmq-c REQUIRED)

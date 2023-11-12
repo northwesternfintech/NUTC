@@ -82,6 +82,7 @@ CREATE_LOG_CATEGORY(client_spawning);
 CREATE_LOG_CATEGORY(rabbitmq);
 CREATE_LOG_CATEGORY(dev_mode);
 CREATE_LOG_CATEGORY(events);
+CREATE_LOG_CATEGORY(sandbox);
 
 #undef CREATE_LOG_CATEGORY
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
