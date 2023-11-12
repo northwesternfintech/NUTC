@@ -62,7 +62,7 @@ unzip_file(const std::string& src, const std::string& dest)
 }
 
 bool
-create_directory(std::string dir_name)
+create_directory(const std::string& dir_name)
 {
     std::filesystem::path dir_path{dir_name};
     if (!std::filesystem::exists(dir_path)) {

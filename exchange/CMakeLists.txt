@@ -18,9 +18,9 @@ include(cmake/variables.cmake)
 add_library(
     NUTC24_lib OBJECT
     src/lib.cpp
-    src/utils/local_algos/sandbox.cpp
-    src/utils/local_algos/dev_mode.cpp
-    src/utils/local_algos/file_management.cpp
+    src/local_algos/sandbox.cpp
+    src/local_algos/dev_mode.cpp
+    src/local_algos/file_management.cpp
     src/matching/manager/engine_manager.cpp
     src/logging.cpp
     src/curl/curl.cpp

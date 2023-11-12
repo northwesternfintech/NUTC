@@ -2,9 +2,9 @@
 
 #include "config.h"
 #include "curl/curl.hpp"
+#include "local_algos/dev_mode.hpp"
+#include "local_algos/sandbox.hpp"
 #include "logging.hpp"
-#include "utils/local_algos/dev_mode.hpp"
-#include "utils/local_algos/sandbox.hpp"
 
 namespace nutc {
 namespace client {
