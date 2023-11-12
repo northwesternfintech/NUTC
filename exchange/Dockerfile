@@ -40,7 +40,7 @@ COPY ./exchange /app/exchange
 RUN cmake --preset=ci-docker \
     && cmake --build build --config Release -j
 
-# Main stage for exchage
+# Main stage for exchange
 FROM python:3.11-slim as run-exchange
 
 RUN apt update
