@@ -39,7 +39,9 @@ process_arguments(int argc, const char** argv)
         .implicit_value(true)
         .nargs(0);
 
-    program.add_argument("-S", "--sandbox").help("Provide a sandbox algo id").nargs(2);
+    program.add_argument("-S", "--sandbox")
+        .help("Provide a sandbox algo id")
+        .nargs(2);
 
     program.add_argument("-V", "--version")
         .help("prints version information and exits")
