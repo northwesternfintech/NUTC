@@ -1,65 +1,50 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"io"
-	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/client"
 )
 
-const firebaseURL = "https://nutc-web-default-rtdb.firebaseio.com/"
-
 func main() {
-	r := mux.NewRouter()
-	r.HandleFunc("/", handler)
-	log.Fatal(http.ListenAndServe(":8080", r))
-
+	http.HandleFunc("/", handler)
+	http.ListenAndServe(":8080", nil)
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	userID := r.URL.Query().Get("user_id")
-	algoID := r.URL.Query().Get("algo_id")
-
-	if userID == "" || algoID == "" {
-		http.Error(w, "Missing parameter", http.StatusBadRequest)
+	user_id := r.URL.Query().Get("user_id")
+	algo_id := r.URL.Query().Get("algo_id")
+	if user_id == "" || algo_id == ""{
+		http.Error(w, "Missing required query parameter", http.StatusBadRequest)
 		return
 	}
 
-	fbData, err := getFirebaseData(userID, algoID)
+	ctx := context.Background()
+	cli, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
-		http.Error(w, "Firebase error", http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
-	err = spawnDockerContainer(userID, algoID)
-	if err != nil {
-		http.Error(w, "Docker error", http.StatusInternalServerError)
-		return
+	config := &container.Config{
+		Image:        "nutc-exchange",
+		Cmd:          []string{"--sandbox", user_id, algo_id},
+	}
+	hostConfig := &container.HostConfig{
+		AutoRemove: true,
 	}
 
-	w.Write([]byte(fmt.Sprintf("Container started for User ID: %s, Algo ID: %s, Firebase Data: %s", userID, algoID, fbData)))
-}
-
-func getFirebaseData(userID string, algoID string) (string, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/users/%s/algos/%s.json", firebaseURL, userID, algoID))
+	resp, err := cli.ContainerCreate(ctx, config, hostConfig, nil, nil, "")
 	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
+		panic(err)
 	}
 
-	return string(body), nil
-}
+	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+		panic(err)
+	}
 
-func spawnDockerContainer(userID string, algoID string) error {
-	fmt.Print("Spawning container,...")
-	return nil
-	// cmd := exec.Command("docker", "run", "--sandbox", userID, algoID, "docker_image")
-	// return cmd.Run()
+	fmt.Fprintf(w, "Container %s started successfully with user_id: %s and algo_id: %s", resp.ID, user_id, algo_id)
 }
