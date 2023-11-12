@@ -59,17 +59,25 @@ process_arguments(int argc, const char** argv)
         exit(1); // NOLINT(concurrency-*)
     }
 
-    bool dev_mode = program.get<bool>("--dev");
     std::optional<algorithm> algo = std::nullopt;
     if (program.is_used("--sandbox")) {
-        auto ids = program.get<std::vector<std::string>>("--sandbox");
-        std::string uid = std::string(ids[0]);
+        auto sandbox = program.get<std::vector<std::string>>("--sandbox");
+        if (sandbox.size() != 2) {
+            std::cerr << "Invalid number of arguments for --sandbox" << std::endl;
+            std::cerr << program;
+            exit(1); // NOLINT(concurrency-*)
+        }
+
+        std::string uid = sandbox[0];
+        std::string algo_id = sandbox[1];
+
         std::replace(uid.begin(), uid.end(), ' ', '-');
-        std::string algo_id = std::string(ids[1]);
         std::replace(algo_id.begin(), algo_id.end(), ' ', '-');
+
         algo = algorithm{uid, algo_id};
     }
 
+    bool dev_mode = program.get<bool>("--dev");
     auto get_mode = [&]() -> Mode {
         if (dev_mode)
             return Mode::DEV;
