@@ -20,7 +20,12 @@ namespace rmq = nutc::rabbitmq;
 nutc::manager::ClientManager users;
 nutc::engine_manager::Manager engine_manager;
 
-static std::tuple<Mode, std::optional<std::string>>
+struct algorithm {
+    std::string uid;
+    std::string algo_id;
+};
+
+static std::tuple<Mode, std::optional<algorithm>>
 process_arguments(int argc, const char** argv)
 {
     argparse::ArgumentParser program(
@@ -36,13 +41,7 @@ process_arguments(int argc, const char** argv)
 
     program.add_argument("-S", "--sandbox")
         .help("Provide a sandbox algo id")
-        .action([](const auto& value) {
-            std::string uid = std::string(value);
-            std::replace(uid.begin(), uid.end(), ' ', '-');
-            return uid;
-        })
-        .default_value("")
-        .nargs(1);
+        .nargs(2);
 
     program.add_argument("-V", "--version")
         .help("prints version information and exits")
@@ -63,19 +62,25 @@ process_arguments(int argc, const char** argv)
     }
 
     bool dev_mode = program.get<bool>("--dev");
-    std::optional<std::string> uid = std::nullopt;
+    std::optional<algorithm> algo = std::nullopt;
     if (program.is_used("--sandbox")) {
-        uid = program.get<std::string>("--sandbox");
+        auto ids = program.get<std::vector<std::string>>("--sandbox");
+        std::string uid = std::string(ids[0]);
+        std::replace(uid.begin(), uid.end(), ' ', '-');
+        std::string algo_id = std::string(ids[1]);
+        std::replace(algo_id.begin(), algo_id.end(), ' ', '-');
+        algo = algorithm{uid, algo_id};
     }
+
     auto get_mode = [&]() -> Mode {
         if (dev_mode)
             return Mode::DEV;
-        if (uid.has_value())
+        if (algo.has_value())
             return Mode::SANDBOX;
         return Mode::PROD;
     };
 
-    return std::make_tuple(get_mode(), uid);
+    return std::make_tuple(get_mode(), algo);
 }
 
 void
@@ -112,7 +117,8 @@ main(int argc, const char** argv)
     else if (mode == Mode::SANDBOX) {
         log_t1(main, "Initializing NUTC in sandbox node");
         nutc::sandbox::create_sandbox_algo_files();
-        users.add_client(sandbox.value(), false);
+        auto& [uid, algo_id] = sandbox.value();
+        users.add_client(uid, algo_id, false);
     }
 
     int num_clients = nutc::client::initialize(users, mode);

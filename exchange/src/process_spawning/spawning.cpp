@@ -46,27 +46,37 @@ get_all_users()
     return res.get<glz::json_t::object_t>();
 }
 
+std::string
+quote_id(const std::string& id)
+{
+    std::string quote_id = std::string(id);
+    std::replace(quote_id.begin(), quote_id.end(), '-', ' ');
+    return quote_id;
+}
+
 int
 spawn_all_clients(const nutc::manager::ClientManager& users)
 {
     int clients = 0;
     for (const auto& client : users.get_clients(false)) {
-        const std::string uid = client.uid;
-        log_i(client_spawning, "Spawning client: {}", uid);
-        std::string quote_uid = std::string(uid);
-        std::replace(quote_uid.begin(), quote_uid.end(), '-', ' ');
-        spawn_client(quote_uid, client.is_local_algo);
+        log_i(client_spawning, "Spawning client: {}", client.uid);
+        std::string quoted_user_id = quote_id(client.uid);
+        std::string quoted_algo_id = quote_id(client.algo_id);
+
+        spawn_client(quoted_user_id, quoted_algo_id, client.is_local_algo);
         clients++;
     };
     return clients;
 }
 
 void
-spawn_client(const std::string& uid, bool is_local_algo)
+spawn_client(const std::string& uid, const std::string& algo_id, bool is_local_algo)
 {
     pid_t pid = fork();
     if (pid == 0) {
-        std::vector<std::string> args = {"NUTC-client", "--uid", uid};
+        std::vector<std::string> args = {
+            "NUTC-client", "--uid", uid, "--algo_id", algo_id
+        };
         if (is_local_algo) {
             args.push_back("--dev");
         }

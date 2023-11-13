@@ -19,9 +19,9 @@ read_file_content(const std::string& filename)
 }
 
 std::string
-get_algo_from_file(const std::string& uid)
+get_algo_from_file(const std::string& algo_id)
 {
-    std::string filename = fmt::format("./algos/{}.py", uid);
+    std::string filename = fmt::format("./algos/{}.py", algo_id);
     if (!file_exists(filename)) {
         throw std::invalid_argument("File not found");
     }

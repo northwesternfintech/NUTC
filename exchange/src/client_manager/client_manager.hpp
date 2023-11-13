@@ -19,6 +19,7 @@ namespace manager {
 
 struct Client {
     std::string uid;
+    std::string algo_id;
     bool active;
     bool is_local_algo;
     float capital_remaining;
@@ -30,8 +31,8 @@ private:
     std::unordered_map<std::string, Client> clients;
 
 public:
-    void add_client(const std::string& uid);
-    void add_client(const std::string& uid, bool is_local_algo);
+    void add_client(const std::string& uid, const std::string& algo_id);
+    void add_client(const std::string& uid, const std::string& algo_id, bool is_local_algo);
     void initialize_from_firebase(const glz::json_t::object_t& users);
     void set_active(const std::string& uid);
 
