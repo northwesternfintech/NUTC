@@ -98,10 +98,10 @@ main(int argc, const char** argv)
         std::this_thread::sleep_for(std::chrono::seconds(130));
 
         // Check status from Firebase
-        int linting_status = nutc::client::get_algo_status(uid, algoid);
+        nutc::client::LINTING_RESULT_OPTIONS linting_status = nutc::client::get_algo_status(uid, algoid);
 
         // If status is pending, force push a failure
-        if (linting_status == nutc::client::LRO_PENDING) { // TODO: include branches for
+        if (linting_status == nutc::client::LINTING_RESULT_OPTIONS::LRO_PENDING) { // TODO: include branches for
                                                            // LRO_UNKNOWN (?)
             // Push failure
             std::string error_msg =
