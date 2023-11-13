@@ -1,22 +1,26 @@
-export default function Example() {
+import { PlusIcon } from "@heroicons/react/20/solid";
+import { ArrowUpOnSquareIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+
+export default function NoSubmissions() {
   return (
-    <>
-      <main className="relative isolate min-h-full">
-        <img
-          src="https://images.unsplash.com/photo-1545972154-9bb223aac798?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=3050&q=80&exp=8&con=-15&sat=-75"
-          alt=""
-          className="absolute inset-0 -z-10 h-full w-full object-cover object-top"
-        />
-        <div className="mx-auto max-w-7xl px-6 py-32 text-center sm:py-40 lg:px-8">
-          <h1 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-5xl">Recruitment NUTC competition is complete.</h1>
-          <p className="mt-4 text-base text-white/70 sm:mt-6">You&apos;ll receive results within the next wee.</p>
-          <div className="mt-10 flex justify-center">
-            <a href="/" className="text-sm font-semibold leading-7 text-white">
-              <span aria-hidden="true">&larr;</span> Back to home
-            </a>
-          </div>
-        </div>
-      </main>
-    </>
-  )
+    <div className="text-center py-20 sm:py-24">
+      <ArrowUpOnSquareIcon className="mx-auto h-12 w-12 text-gray-400" />
+      <h3 className="mt-2 text-sm font-semibold text-gray-900">
+        No submissions
+      </h3>
+      <p className="mt-1 text-sm text-gray-500">
+        Get started by uploading your first algorithm.
+      </p>
+      <div className="mt-6">
+        <Link
+          className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          href="/dash/submit"
+        >
+          <PlusIcon className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
+          New Algorithm
+        </Link>
+      </div>
+    </div>
+  );
 }
