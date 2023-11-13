@@ -22,22 +22,30 @@ export default function Page({ params }: { params: { id: string } }) {
     const LINES = str.split("\n");
     return LINES.map((line: string, index: number) => (
       <React.Fragment key={`line_${index}`}>
-        <h1>{line}</h1>
+        <p>{line}</p>
         {index < LINES.length - 1 && <br />}
       </React.Fragment>
     ));
   }
   
 
-  const stringToRender = userInfo?.user?.algos?.get(params.id)?.lintFailureMessage ||
-  userInfo?.user?.algos?.get(params.id)?.lintSuccessMessage || "";
+  const algoDetails = userInfo?.user?.algos?.get(params.id);
+  const lintFailureMessage = algoDetails?.lintFailureMessage;
+  const lintSuccessMessage = algoDetails?.lintSuccessMessage;
+  const stringToRender = lintFailureMessage || lintSuccessMessage || "";
+
   if(stringToRender === "") {
-    return <></>
-  } else {
     return (
-      <>
+      <div>
+        <p>Waiting on output...</p>
+      </div>
+    );
+  } else {
+    // TODO: add styling
+    return (
+      <div> 
         {formatNewLines(stringToRender)}
-      </>
+      </div>
     );
   }
 }
