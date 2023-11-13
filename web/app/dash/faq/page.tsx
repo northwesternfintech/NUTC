@@ -77,7 +77,7 @@ const faqs = [
 
 export default function FAQs() {
   return (
-    <div className="bg-gray-800">
+    <div className="bg-gray-900">
       <div className="mx-auto max-w-7xl px-6 lg:px-8 pt-6 sm:pt-12 lg:pt-20 pb-12">
         <div className="mx-auto max-w-4xl divide-y divide-white/10">
           <h2 className="text-2xl font-bold leading-10 tracking-tight text-white">

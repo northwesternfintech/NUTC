@@ -14,7 +14,22 @@ get_server_thread()
         ::crow::SimpleApp app;
         CROW_ROUTE(app, "/")
         ([&](const crow::request& req) {
-            log_i(main, "Registered");
+            crow::response res;
+
+            // Set CORS headers
+            res.add_header("Access-Control-Allow-Origin", "*");
+            res.add_header(
+                "Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS"
+            );
+            res.add_header(
+                "Access-Control-Allow-Headers", "Origin, Content-Type, Accept"
+            );
+
+            // Handle preflight request for OPTIONS method
+            if (req.method == crow::HTTPMethod::OPTIONS) {
+                res.code = 204; // No Content
+                return res;
+            }
 
             if (!req.url_params.get("uid")) {
                 log_e(main, "No uid provided");
@@ -92,8 +107,10 @@ get_server_thread()
 
             spawning::spawn_client(uid, algo_id);
 
-            // TODO: continually check firebase until updated
-            return crow::response(200, "OK");
+            res.body = "OK";
+            res.code = 200;
+
+            return res;
         });
         app.port(8080).run();
     });
