@@ -24,6 +24,9 @@
 
 #define FIREBASE_URL "https://nutc-web-default-rtdb.firebaseio.com/"
 
+// Linting
+#define LINT_AUTO_TIMEOUT_SECONDS 120
+#define LINT_ABSOLUTE_TIMEOUT_SECONDS 130
 
 /**
  * If we are in debug mode.

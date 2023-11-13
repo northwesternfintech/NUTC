@@ -180,14 +180,13 @@ get_algo_status(const std::string& uid, const std::string& algo_id)
 
     std::string linting_result = algo_info["lintResults"].get<std::string>();
 
-    if (linting_result == "failure") {
-        return nutc::client::LintingResultOption::FAILURE;
-    }
-    else if (linting_result == "success") {
-        return nutc::client::LintingResultOption::SUCCESS;
-    }
-    else {
-        return nutc::client::LintingResultOption::PENDING;
+    switch (linting_result[0]) {
+        case 'f':
+            return nutc::client::LintingResultOption::FAILURE;
+        case 's':
+            return nutc::client::LintingResultOption::SUCCESS;
+        default:
+            return nutc::client::LintingResultOption::PENDING;
     }
 }
 

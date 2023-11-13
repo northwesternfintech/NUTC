@@ -1,5 +1,6 @@
 #include "crow.hpp"
 
+#include "common.hpp"
 #include "firebase/fetching.hpp"
 
 namespace nutc {
@@ -28,43 +29,63 @@ get_server_thread()
 
             // Watchdog to check for crash/pending after 130s
             std::thread check_pending_thread([&algo_id = algo_id, &uid = uid]() {
-                std::this_thread::sleep_for(std::chrono::seconds(130));
+                std::this_thread::sleep_for(
+                    std::chrono::seconds(LINT_ABSOLUTE_TIMEOUT_SECONDS)
+                );
 
                 // Check status from Firebase
                 nutc::client::LintingResultOption linting_status =
                     nutc::client::get_algo_status(uid, algo_id);
 
                 // If status is pending, force push a failure
-                if (linting_status == nutc::client::LintingResultOption::PENDING) {
-                    // Push failure
-                    std::string error_msg =
-                        "unknown runtime error: your code is syntactically correct but "
-                        "timed out (130 seconds) while linting";
+                switch (linting_status) {
+                    case nutc::client::LintingResultOption::PENDING:
+                        {
+                            // Push failure
+                            std::string error_msg = fmt::format(
+                                "unknown runtime error: your code is syntactically "
+                                "correct but timed out after {} seconds while linting",
+                                LINT_ABSOLUTE_TIMEOUT_SECONDS
+                            );
 
-                    nutc::client::set_lint_result(uid, algo_id, false);
-                    nutc::client::set_lint_failure(uid, algo_id, error_msg);
+                            nutc::client::set_lint_result(uid, algo_id, false);
+                            nutc::client::set_lint_failure(uid, algo_id, error_msg);
 
-                    log_e(
-                        main,
-                        "Algoid {} for uid {} still pending after 130s. FORCE PUSHING "
-                        "failure to "
-                        "Firebase.",
-                        algo_id,
-                        uid
-                    );
+                            log_e(
+                                main,
+                                "Algo id {} for uid {} still pending after {}s. FORCE "
+                                "PUSHING "
+                                "failure to Firebase.",
+                                algo_id,
+                                uid,
+                                LINT_ABSOLUTE_TIMEOUT_SECONDS
+                            );
+                            break;
+                        }
+                    case nutc::client::LintingResultOption::UNKNOWN:
+                        {
+                            // can add a push to firebase here
+                            log_e(
+                                main,
+                                "Algo id {} for uid {} unknown status after {}s.",
+                                algo_id,
+                                uid,
+                                LINT_ABSOLUTE_TIMEOUT_SECONDS
+                            );
+                            break;
+                        }
+                    default:
+                        {
+                            log_i(
+                                main,
+                                "Algo id {} for uid {} looks ok {}s.",
+                                algo_id,
+                                uid,
+                                LINT_ABSOLUTE_TIMEOUT_SECONDS
+                            );
+                            break;
+                        }
                 }
-
-                if (linting_status == nutc::client::LintingResultOption::UNKNOWN) {
-                    // can add a push to firebase here
-                    log_e(
-                        main,
-                        "Algoid {} for uid {} unknown status after 130s.",
-                        algo_id,
-                        uid
-                    );
-                }
-
-                std::exit(1);
             });
             check_pending_thread.detach();
 
