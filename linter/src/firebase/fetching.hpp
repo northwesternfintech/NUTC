@@ -15,11 +15,11 @@
 namespace nutc {
 namespace client {
 
-enum class LINTING_RESULT_OPTIONS { 
-    LRO_UNKNOWN = -1, 
-    LRO_FAILURE, 
-    LRO_SUCCESS, 
-    LRO_PENDING 
+enum class LINTING_RESULT_OPTIONS {
+    LRO_UNKNOWN = -1,
+    LRO_FAILURE,
+    LRO_SUCCESS,
+    LRO_PENDING
 };
 
 // database request - change name

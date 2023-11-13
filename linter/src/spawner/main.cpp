@@ -93,39 +93,6 @@ main(int argc, const char** argv)
     });
     timeout_thread.detach();
 
-    // Secondary watchdog to check for crash/pending after 130s
-    std::thread check_pending_thread([&ss = ss, &algoid = algoid, &uid = uid]() {
-        std::this_thread::sleep_for(std::chrono::seconds(130));
-
-        // Check status from Firebase
-        nutc::client::LINTING_RESULT_OPTIONS linting_status = nutc::client::get_algo_status(uid, algoid);
-
-        // If status is pending, force push a failure
-        if (linting_status == nutc::client::LINTING_RESULT_OPTIONS::LRO_PENDING) { // TODO: include branches for
-                                                           // LRO_UNKNOWN (?)
-            // Push failure
-            std::string error_msg =
-                "unknown runtime error: your code is syntactically correct but "
-                "timed out (130 seconds) while linting";
-
-            nutc::client::set_lint_result(uid, algoid, false);
-            nutc::client::set_lint_failure(uid, algoid, error_msg);
-        }
-
-        log_e(
-            main,
-            "Algoid {} for uid {} still pending after 130s. FORCE PUSHING failure to "
-            "Firebase.",
-            algoid,
-            uid
-        );
-        ss << "[linter] unknown runtime error for lint algo_id " << algoid
-           << " and uid " << uid << "\n";
-
-        std::exit(1);
-    });
-    check_pending_thread.detach();
-
     // Log this event
     log_i(main, "Linting algo_id: {} for user: {}", algoid, uid);
     ss << "[linter] starting to lint algo_id " << algoid << " for uid " << uid << "\n";

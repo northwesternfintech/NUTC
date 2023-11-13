@@ -170,7 +170,10 @@ get_algo_status(const std::string& uid, const std::string& algo_id)
     // check if this algo id has lint results
     if (!algo_info.contains("lintResults")) {
         log_w(
-            firebase, "User {} algoid {} has no lint result, assuming unknown.", uid, algo_id
+            firebase,
+            "User {} algoid {} has no lint result, assuming unknown.",
+            uid,
+            algo_id
         );
         return nutc::client::LINTING_RESULT_OPTIONS::LRO_UNKNOWN;
     }
