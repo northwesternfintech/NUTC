@@ -159,11 +159,22 @@ get_algo_status(const std::string& uid, const std::string& algo_id)
         );
         return nutc::client::LRO_UNKNOWN;
     }
+
+    // check if algo id exists
     if (!user_info["algos"].contains(algo_id)) {
         log_w(firebase, "User {} does not have algo id {}.", uid, algo_id);
         return nutc::client::LRO_UNKNOWN;
     }
     glz::json_t algo_info = user_info["algos"][algo_id];
+
+    // check if this algo id has lint results
+    if (!algo_info.contains("lintResults")) {
+        log_w(
+            firebase, "User {} algoid {} has no lint result, assuming unknown.", uid
+        );
+        return nutc::client::LRO_UNKNOWN;
+    }
+
     std::string linting_result = algo_info["lintResults"].get<std::string>();
 
     if (linting_result == "failure") {
