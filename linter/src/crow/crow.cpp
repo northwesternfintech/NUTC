@@ -31,13 +31,11 @@ get_server_thread()
                 std::this_thread::sleep_for(std::chrono::seconds(130));
 
                 // Check status from Firebase
-                nutc::client::LINTING_RESULT_OPTIONS linting_status =
+                nutc::client::LintingResultOption linting_status =
                     nutc::client::get_algo_status(uid, algo_id);
 
                 // If status is pending, force push a failure
-                if (linting_status
-                    == nutc::client::LINTING_RESULT_OPTIONS::LRO_PENDING) {
-                    // TODO: include branches for LRO_UNKNOWN (?)
+                if (linting_status == nutc::client::LintingResultOption::PENDING) {
                     // Push failure
                     std::string error_msg =
                         "unknown runtime error: your code is syntactically correct but "
@@ -45,16 +43,26 @@ get_server_thread()
 
                     nutc::client::set_lint_result(uid, algo_id, false);
                     nutc::client::set_lint_failure(uid, algo_id, error_msg);
+
+                    log_e(
+                        main,
+                        "Algoid {} for uid {} still pending after 130s. FORCE PUSHING "
+                        "failure to "
+                        "Firebase.",
+                        algo_id,
+                        uid
+                    );
                 }
 
-                log_e(
-                    main,
-                    "Algoid {} for uid {} still pending after 130s. FORCE PUSHING "
-                    "failure to "
-                    "Firebase.",
-                    algo_id,
-                    uid
-                );
+                if (linting_status == nutc::client::LintingResultOption::UNKNOWN) {
+                    // can add a push to firebase here
+                    log_e(
+                        main,
+                        "Algoid {} for uid {} unknown status after 130s.",
+                        algo_id,
+                        uid
+                    );
+                }
 
                 std::exit(1);
             });
