@@ -27,7 +27,8 @@ get_server_thread()
             std::string uid = req.url_params.get("uid");
             std::string algo_id = req.url_params.get("algo_id");
 
-            // Watchdog to check for crash/pending after 130s
+            // Watchdog to check for crash/pending after
+            // LINT_ABSOLUTE_TIMEOUT_SECONDS seconds (default 130s)
             std::thread check_pending_thread([&algo_id = algo_id, &uid = uid]() {
                 std::this_thread::sleep_for(
                     std::chrono::seconds(LINT_ABSOLUTE_TIMEOUT_SECONDS)
