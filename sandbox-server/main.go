@@ -2,17 +2,15 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 	"time"
+	"unicode"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
-
-const firebaseURL = "https://nutc-web-default-rtdb.firebaseio.com/"
 
 func main() {
 	server := http.Server{
@@ -36,7 +34,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !isValidUserAndAlgoID(user_id, algo_id) {
+	if !isValidID(user_id) || !isValidID(algo_id) {
 		http.Error(w, "Invalid user or algo ID", http.StatusBadRequest)
 		return
 	}
@@ -77,18 +75,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Container %s started successfully with user_id: %s and algo_id: %s\n", resp.ID, user_id, algo_id)
 }
 
-func isValidUserAndAlgoID(userID string, algoID string) bool {
-	resp, err := http.Get(fmt.Sprintf("%s/users/%s/algos/%s.json", firebaseURL, userID, algoID))
-	if err != nil {
-		return false
+func isValidID(id string) bool {
+	for _, char := range id {
+		if !unicode.IsLetter(char) && !unicode.IsDigit(char) && char != '-' && char != '_' {
+			return false
+		}
 	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return false
-	}
-
-	// If the user and algo id don't exist, Firebase returns "null"
-	return string(body) != "null"
+	return true
 }
