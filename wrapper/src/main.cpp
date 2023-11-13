@@ -74,7 +74,10 @@ process_arguments(int argc, const char** argv)
     }
 
     return std::make_tuple(
-        verbosity, program.get<std::string>("--uid"), program.get<std::string>("--algo_id"), program.get<bool>("--dev")
+        verbosity,
+        program.get<std::string>("--uid"),
+        program.get<std::string>("--algo_id"),
+        program.get<bool>("--dev")
     );
 }
 

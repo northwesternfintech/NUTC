@@ -32,7 +32,8 @@ private:
 
 public:
     void add_client(const std::string& uid, const std::string& algo_id);
-    void add_client(const std::string& uid, const std::string& algo_id, bool is_local_algo);
+    void
+    add_client(const std::string& uid, const std::string& algo_id, bool is_local_algo);
     void initialize_from_firebase(const glz::json_t::object_t& users);
     void set_active(const std::string& uid);
 
