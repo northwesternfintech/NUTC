@@ -75,30 +75,45 @@ main(int argc, const char** argv)
     // Move a string stream from the loop to this process
     std::stringstream ss;
 
-    // Watchdog to kill after 120s
-    std::thread timeout_thread([&ss, &algoid = algoid, &uid = uid]() {
-        std::this_thread::sleep_for(std::chrono::seconds(120));
+    // Watchdog to kill after LINT_AUTO_TIMEOUT_SECONDS (default 120)
+    std::thread timeout_thread([&ss = ss, &algoid = algoid, &uid = uid]() {
+        std::this_thread::sleep_for(std::chrono::seconds(LINT_AUTO_TIMEOUT_SECONDS));
+
         log_e(
             main,
-            "Timeout reached. Exiting process. Failed lint for algoid {} and uid {}.",
+            "Timeout reached ({}s). Exiting process. Failed lint for algoid {} and uid "
+            "{}.",
+            LINT_AUTO_TIMEOUT_SECONDS,
             algoid,
             uid
         );
-        nutc::client::set_lint_failure(uid, algoid, ss.str() + "Failure\n");
+        ss << fmt::format("[linter] FAILED to lint algo_id {} for uid {}", algoid, uid)
+           << "\n";
+
+        nutc::client::set_lint_failure(uid, algoid, ss.str() + "Failure!\n");
         std::exit(1);
     });
     timeout_thread.detach();
 
     // Log this event
     log_i(main, "Linting algo_id: {} for user: {}", algoid, uid);
+    ss << fmt::format("[linter] starting to lint algo_id {} for uid {}", algoid, uid)
+       << "\n";
 
     // Initialize py
     pybind11::initialize_interpreter();
 
     // Actually lint the algo and set success
-    std::string response = nutc::lint::lint(uid, algoid);
-    nutc::client::set_lint_success(uid, algoid, ss.str() + "Success\n");
+    std::string response = nutc::lint::lint(uid, algoid, ss);
+
     log_i(main, "Finished linting algo_id: {} for user: {}", algoid, uid);
+    ss << fmt::format(
+        "[linter] exited linting process and finished linting {} for uid {}",
+        algoid,
+        uid
+    ) << "\n";
+
+    nutc::client::set_lint_success(uid, algoid, ss.str() + "Success!\n");
 
     // Stop py
     pybind11::finalize_interpreter();

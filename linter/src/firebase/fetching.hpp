@@ -15,6 +15,8 @@
 namespace nutc {
 namespace client {
 
+enum class LintingResultOption { UNKNOWN = -1, FAILURE, SUCCESS, PENDING };
+
 // database request - change name
 glz::json_t firebase_request(
     const std::string& method, const std::string& url, const std::string& data = ""
@@ -34,6 +36,9 @@ void set_lint_success(
 );
 
 std::optional<std::string> get_algo(const std::string& uid, const std::string& algo_id);
+LintingResultOption get_algo_status(
+    const std::string& uid, const std::string& algo_id
+); // returns a LintingResultOption enum
 
 } // namespace client
 } // namespace nutc

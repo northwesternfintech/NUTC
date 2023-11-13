@@ -8,6 +8,7 @@ spawn_client(const std::string& uid, std::string& algoid)
 {
     std::replace(algoid.begin(), algoid.end(), '-', ' ');
     pid_t pid = fork();
+
     if (pid == 0) {
         std::vector<std::string> args = {
             "NUTC-linter-spawner", "--uid", uid, "--algoid", algoid
