@@ -92,7 +92,8 @@ get_server_thread()
 
             spawning::spawn_client(uid, algo_id);
 
-            return crow::response();
+            // TODO: continually check firebase until updated
+            return crow::response(200, "OK");
         });
         app.port(8080).run();
     });

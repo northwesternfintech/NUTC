@@ -191,7 +191,6 @@ firebase_request(
     CURL* curl;
     CURLcode res;
     std::string readBuffer;
-    log_i(main, "{}", url);
 
     curl = curl_easy_init();
     if (curl) {
@@ -217,7 +216,6 @@ firebase_request(
 
         curl_easy_cleanup(curl);
     }
-    log_i(firebase, "{}", readBuffer);
     glz::json_t json{};
     auto error = glz::read_json(json, readBuffer);
     if (error) {
