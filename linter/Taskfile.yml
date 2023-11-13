@@ -26,14 +26,20 @@ tasks:
     preconditions:
       - test -f CMakeUserPresets.json
     cmds:
-      - cmake --build --preset=dev
+      - cmake --build --preset=dev -j
 
-  run:
-    dir: '{{.USER_WORKING_DIR}}'
+  build-local-dev:
+    preconditions:
+      - test -f CMakeUserPresets.json
     cmds:
-      - task: build
-      - ./build/dev/{{.NAME}} #--uid "nsogzsFY6LVgnvC615TrbJ2XjXR2" --algo_id " NctlqykyJdbxjkljRZi"
+      - cmake --preset=dev -DNUTC_LINTER_LOCAL_DEV_MODE=ON
+      - cmake --build --preset=dev -j
 
+  run-dev:
+    cmds:
+      - task: build-local-dev
+      - sudo mv ./build/dev/{{.NAME}}-spawner /usr/local/bin/{{.NAME}}-spawner
+      - ./build/dev/{{.NAME}} 
   run-v:
     env:
       SPDLOG_LEVEL: trace
