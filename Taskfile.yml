@@ -72,7 +72,7 @@ tasks:
 
   exchange-docker-build:
     cmds:
-      - sudo docker build -t nutc-exchange:latest . -f exchange/Dockerfile
+      - docker build -t nutc-exchange:latest . -f exchange/Dockerfile
 
   format-exchange:
     dir: exchange

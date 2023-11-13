@@ -43,9 +43,9 @@ RUN cmake --preset=ci-docker \
 # Main stage for exchange
 FROM python:3.11-slim as run-exchange
 
-RUN apt update
-RUN apt install -y rabbitmq-server
-RUN pip install numpy pandas polars scipy scikit-learn
+RUN apt update \
+    && apt install -y rabbitmq-server \
+    && pip install numpy pandas polars scipy scikit-learn
 
 COPY --from=build-wrapper /app/wrapper/build/NUTC-client /bin/NUTC-client
 COPY --from=build-exchange /app/exchange/build/NUTC24 /bin/NUTC-exchange
