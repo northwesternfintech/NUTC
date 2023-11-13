@@ -88,9 +88,9 @@ main(int argc, const char** argv)
             uid
         );
         ss << fmt::format("[linter] FAILED to lint algo_id {} for uid {}", algoid, uid)
-           << "\n";
+           << "<br/>";
 
-        nutc::client::set_lint_failure(uid, algoid, ss.str() + "Failure!\n");
+        nutc::client::set_lint_failure(uid, algoid, ss.str() + "Failure!<br/>");
         std::exit(1);
     });
     timeout_thread.detach();
@@ -98,7 +98,7 @@ main(int argc, const char** argv)
     // Log this event
     log_i(main, "Linting algo_id: {} for user: {}", algoid, uid);
     ss << fmt::format("[linter] starting to lint algo_id {} for uid {}", algoid, uid)
-       << "\n";
+       << "<br/>\n";
 
     // Initialize py
     pybind11::initialize_interpreter();
@@ -111,9 +111,9 @@ main(int argc, const char** argv)
         "[linter] exited linting process and finished linting {} for uid {}",
         algoid,
         uid
-    ) << "\n";
+    ) << "<br/>";
 
-    nutc::client::set_lint_success(uid, algoid, ss.str() + "Success!\n");
+    nutc::client::set_lint_success(uid, algoid, ss.str() + "Success!<br/>");
 
     // Stop py
     pybind11::finalize_interpreter();
