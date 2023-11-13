@@ -331,7 +331,7 @@ export default function Dash(content: React.ReactNode) {
           </a>
         </div>
 
-        <main className="bg-gray-900 lg:pl-72">
+        <main className="bg-gray-900 lg:pl-72 min-h-screen">
           <div>{content}</div>
         </main>
       </div>

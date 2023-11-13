@@ -1,5 +1,6 @@
 "use client";
 import { CheckIcon, PaperClipIcon } from "@heroicons/react/24/solid";
+import { linterEndpoint } from "@/config";
 import axios from "axios";
 import { useRef, useState } from "react";
 import AlgorithmType from "@/app/dash/algoType";
@@ -300,8 +301,8 @@ export default function Submission() {
                   userInfo?.user?.uid || "",
                 ) //bad practice, fix later
               ) {
-                const res = axios.get(
-                  `https://nutc-linter-4oeeau4rxa-uc.a.run.app/?uid=${userInfo?.user?.uid}&algo_id=${algoRef.key}`,
+                await axios.get(
+                  linterEndpoint(userInfo?.user?.uid || "", algoRef.key),
                 );
                 Swal.fire({
                   title: "Algorithm submitted!",
@@ -312,7 +313,6 @@ export default function Submission() {
                     window.location.reload();
                   },
                 });
-                console.log(res);
               }
             }}
             className="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
