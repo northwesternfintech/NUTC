@@ -4,6 +4,10 @@
 #include "pywrapper/pywrapper.hpp"
 #include "rabbitmq/rabbitmq.hpp"
 
+#ifndef NO_GIT_VERSION_TRACKING
+#  include "git.h"
+#endif
+
 #include <argparse/argparse.hpp>
 #include <pybind11/pybind11.h>
 
