@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -11,6 +12,8 @@ import (
 	"github.com/docker/docker/client"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
+
+const dockerTimeout = 20
 
 func main() {
 	server := http.Server{
@@ -71,6 +74,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to start docker container", http.StatusInternalServerError)
 		return
 	}
+
+	go func() {
+		time.Sleep(dockerTimeout * time.Second)
+		err := cli.ContainerStop(context.Background(), resp.ID, container.StopOptions{})
+		if err != nil {
+			fmt.Printf("error stopping container: %s", err)
+		}
+	}()
 
 	fmt.Fprintf(w, "Container %s started successfully with user_id: %s and algo_id: %s\n", resp.ID, user_id, algo_id)
 }
