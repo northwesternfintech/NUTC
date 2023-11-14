@@ -13,7 +13,7 @@ import (
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
-const dockerTimeout = 20
+const dockerTimeout = 120
 
 func main() {
 	server := http.Server{
@@ -51,7 +51,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	config := &container.Config{
 		Image: "nutc-exchange",
-		// What happens if user or algo id start with "-" since it breaks arg parsing?
+		// What happens if user or algo id start with "-"? since it breaks arg parsing?
 		Cmd: []string{"--sandbox", user_id, algo_id},
 	}
 	hostConfig := &container.HostConfig{
@@ -77,13 +77,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	go func() {
 		time.Sleep(dockerTimeout * time.Second)
-		err := cli.ContainerStop(context.Background(), resp.ID, container.StopOptions{})
-		if err != nil {
-			fmt.Printf("error stopping container: %s", err)
-		}
+		cli.ContainerStop(context.Background(), resp.ID, container.StopOptions{})
 	}()
 
-	fmt.Fprintf(w, "Container %s started successfully with user_id: %s and algo_id: %s\n", resp.ID, user_id, algo_id)
+	fmt.Fprintf(w, "Container %s started successfully with user_id: %s and algo_id: %s\n", container_name, user_id, algo_id)
 }
 
 func isValidID(id string) bool {
