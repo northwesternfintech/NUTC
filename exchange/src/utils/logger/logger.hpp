@@ -11,6 +11,26 @@
 namespace nutc {
 namespace events {
 
+std::string timestamp_in_ms();
+
+template <typename T>
+concept MetaSpecialized = requires {
+    {
+        glz::meta<T>::value
+    } -> std::convertible_to<decltype(glz::meta<T>::value)>;
+};
+
+template <MetaSpecialized T>
+struct WithTimestamp {
+    T data;
+    std::string timestamp;
+
+    // Constructor to initialize the base data and timestamp
+    WithTimestamp(const T& data) :
+        data(data), timestamp(nutc::events::timestamp_in_ms())
+    {}
+};
+
 enum class MESSAGE_TYPE { // needs to be changed to something better, but I will leave
                           // this here for now
     MARKET_ORDER,
@@ -45,11 +65,11 @@ public:
     /**
      * @brief Log an event to this Logger's file
      *
-     * @param type the type of message this is, see `enum MessageType`
      * @param json_message the message to log
      * @param uid optional UID to log with this message
      */
-    void log_event(MESSAGE_TYPE type, const glz::json_t& json_message);
+    template <MetaSpecialized T>
+    void log_event(const T& json_message);
 
     /**
      * @brief Get the file name string
@@ -70,3 +90,12 @@ private:
 
 } // namespace events
 } // namespace nutc
+
+template <nutc::events::MetaSpecialized T>
+struct glz::meta<nutc::events::WithTimestamp<T>> {
+    static constexpr auto value = object(
+        "data", &nutc::events::WithTimestamp<T>::data, // Serialize the original data
+        "timestamp", &nutc::events::WithTimestamp<T>::timestamp // Serialize the
+                                                                // timestamp as a string
+    );
+};
