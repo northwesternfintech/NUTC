@@ -3,6 +3,16 @@
 namespace nutc {
 namespace client {
 
+static std::string
+get_firebase_endpoint(const std::string& params)
+{
+#ifdef NUTC_LINTER_LOCAL_DEV_MODE
+    return FIREBASE_URL + params + "?ns=nutc-web-default-rtdb";
+#else
+    return FIREBASE_URL + params;
+#endif
+}
+
 void
 print_algo_info(const glz::json_t& algo, const std::string& algo_id)
 {
@@ -18,15 +28,11 @@ set_lint_result(const std::string& uid, const std::string& algo_id, bool succeed
 {
     std::string success = "\"success\"";
     std::string failure = "\"failure\"";
+    std::string params =
+        fmt::format("users/{}/algos/{}/lintResults.json", uid, algo_id);
+
     glz::json_t res = firebase_request(
-        "PUT",
-        fmt::format(
-            "{}/users/{}/algos/{}/lintResults.json",
-            std::string(FIREBASE_URL),
-            uid,
-            algo_id
-        ),
-        succeeded ? success : failure
+        "PUT", get_firebase_endpoint(params), succeeded ? success : failure
     );
 }
 
@@ -46,22 +52,15 @@ set_lint_success(
 )
 {
     std::string json_success = "\"" + replaceDisallowedValues(success) + "\"";
-    log_e(main, "Seeing lint success: {}", json_success);
-    glz::json_t res = firebase_request(
-        "PUT",
-        fmt::format(
-            "{}/users/{}/algos/{}/lintSuccessMessage.json",
-            std::string(FIREBASE_URL),
-            uid,
-            algo_id
-        ),
-        json_success
-    );
-    glz::json_t res2 = firebase_request(
-        "PUT",
-        fmt::format("{}/users/{}/latestAlgoId.json", std::string(FIREBASE_URL), uid),
-        "\"" + algo_id + "\""
-    );
+    log_i(main, "Seeing lint success: {}", json_success);
+    std::string params1 =
+        fmt::format("users/{}/algos/{}/lintSuccessMessage.json", uid, algo_id);
+    std::string params2 = fmt::format("users/{}/latestAlgoId.json", uid);
+
+    glz::json_t res =
+        firebase_request("PUT", get_firebase_endpoint(params1), json_success);
+    glz::json_t res2 =
+        firebase_request("PUT", get_firebase_endpoint(params2), "\"" + algo_id + "\"");
 }
 
 void
@@ -71,23 +70,17 @@ set_lint_failure(
 {
     std::string json_failure = "\"" + replaceDisallowedValues(failure) + "\"";
     log_e(main, "Seeing lint failure: {}", json_failure);
-    glz::json_t res = firebase_request(
-        "PUT",
-        fmt::format(
-            "{}/users/{}/algos/{}/lintFailureMessage.json",
-            std::string(FIREBASE_URL),
-            uid,
-            algo_id
-        ),
-        json_failure
-    );
+    std::string params =
+        fmt::format("users/{}/algos/{}/lintFailureMessage.json", uid, algo_id);
+    glz::json_t res =
+        firebase_request("PUT", get_firebase_endpoint(params), json_failure);
 }
 
 glz::json_t
 get_user_info(const std::string& uid)
 {
-    auto url = fmt::format("{}/users/{}.json", std::string(FIREBASE_URL), uid);
-    return firebase_request("GET", url);
+    std::string url = fmt::format("users/{}.json", uid);
+    return firebase_request("GET", get_firebase_endpoint(url));
 }
 
 static size_t
@@ -148,6 +141,48 @@ get_algo(const std::string& uid, const std::string& algo_id)
     return algo_file;
 }
 
+nutc::client::LintingResultOption
+get_algo_status(const std::string& uid, const std::string& algo_id)
+{
+    glz::json_t user_info = get_user_info(uid);
+    // if not has "algos"
+    if (!user_info.contains("algos")) {
+        log_w(
+            firebase, "User {} has no algos. Will not participate in simulation.", uid
+        );
+        return nutc::client::LintingResultOption::UNKNOWN;
+    }
+
+    // check if algo id exists
+    if (!user_info["algos"].contains(algo_id)) {
+        log_w(firebase, "User {} does not have algo id {}.", uid, algo_id);
+        return nutc::client::LintingResultOption::UNKNOWN;
+    }
+    glz::json_t algo_info = user_info["algos"][algo_id];
+
+    // check if this algo id has lint results
+    if (!algo_info.contains("lintResults")) {
+        log_w(
+            firebase,
+            "User {} algoid {} has no lint result, assuming unknown.",
+            uid,
+            algo_id
+        );
+        return nutc::client::LintingResultOption::UNKNOWN;
+    }
+
+    std::string linting_result = algo_info["lintResults"].get<std::string>();
+
+    switch (linting_result[0]) {
+        case 'f':
+            return nutc::client::LintingResultOption::FAILURE;
+        case 's':
+            return nutc::client::LintingResultOption::SUCCESS;
+        default:
+            return nutc::client::LintingResultOption::PENDING;
+    }
+}
+
 glz::json_t
 firebase_request(
     const std::string& method, const std::string& url, const std::string& data
@@ -181,7 +216,6 @@ firebase_request(
 
         curl_easy_cleanup(curl);
     }
-
     glz::json_t json{};
     auto error = glz::read_json(json, readBuffer);
     if (error) {

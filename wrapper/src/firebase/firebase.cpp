@@ -59,19 +59,19 @@ storage_request(const std::string& firebase_url)
 }
 
 std::optional<std::string>
-get_most_recent_algo(const std::string& uid)
+get_algo(const std::string& uid, const std::string& algo_id)
 {
     glz::json_t user_info = get_user_info(uid);
-    if (!user_info.contains("algos") || !user_info.contains("latestAlgoId")) {
+    if (!user_info.contains("algos")) {
         return std::nullopt;
     }
 
-    std::string latestAlgoId = user_info["latestAlgoId"].get<std::string>();
-    if (!user_info["algos"].contains(latestAlgoId)) {
+    glz::json_t algos = user_info["algos"];
+    if (!algos.contains(algo_id)) {
         return std::nullopt;
     }
 
-    glz::json_t algo_info = user_info["algos"][latestAlgoId];
+    glz::json_t algo_info = algos[algo_id];
     if (!algo_info.contains("downloadURL")) {
         return std::nullopt;
     }

@@ -26,3 +26,7 @@ include(cmake/lint-targets.cmake)
 include(cmake/spell-targets.cmake)
 
 add_folders(Project)
+
+if(NUTC_LINTER_LOCAL_DEV_MODE)
+  add_definitions(-DNUTC_LINTER_LOCAL_DEV_MODE)
+endif()

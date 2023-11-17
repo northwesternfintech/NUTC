@@ -17,7 +17,7 @@ initialize_client_manager(manager::ClientManager& users)
         std::string uid = entry.path().filename().string();
         uid = uid.substr(0, uid.find(".py"));
         log_i(sandbox, "Adding client: {}", uid);
-        users.add_client(uid, true);
+        users.add_client(uid, uid, true);
         num_users += 1;
     }
     return num_users + 1;

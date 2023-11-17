@@ -123,8 +123,8 @@ main(int argc, const char** argv)
     else if (mode == Mode::SANDBOX) {
         log_t1(main, "Initializing NUTC in sandbox node");
         nutc::sandbox::create_sandbox_algo_files();
-        auto [uid, algo_id] = sandbox.value();
-        users.add_client(uid, false);
+        auto& [uid, algo_id] = sandbox.value();
+        users.add_client(uid, algo_id, false);
     }
 
     int num_clients = nutc::client::initialize(users, mode);

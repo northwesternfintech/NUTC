@@ -14,8 +14,8 @@ protected:
     void
     SetUp() override
     {
-        manager.add_client("ABC");
-        manager.add_client("DEF");
+        manager.add_client("ABC", "ABC");
+        manager.add_client("DEF", "DEF");
         manager.modify_holdings("ABC", "ETHUSD", 1000);
         manager.modify_holdings("DEF", "ETHUSD", 1000);
     }
@@ -90,10 +90,10 @@ TEST_F(InvalidOrders, MatchingInvalidFunds)
 
 TEST_F(InvalidOrders, SimpleManyInvalidOrder)
 {
-    manager.add_client("A");
-    manager.add_client("B");
-    manager.add_client("C");
-    manager.add_client("D");
+    manager.add_client("A", "A");
+    manager.add_client("B", "B");
+    manager.add_client("C", "C");
+    manager.add_client("D", "D");
     manager.modify_capital("B", -100000);
     manager.modify_holdings("A", "ETHUSD", 1000);
     manager.modify_holdings("B", "ETHUSD", 1000);

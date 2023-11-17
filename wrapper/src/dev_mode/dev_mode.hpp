@@ -15,6 +15,6 @@ bool file_exists(const std::string& filename) noexcept;
 
 std::string read_file_content(const std::string& filename);
 
-std::string get_algo_from_file(const std::string& uid);
+std::string get_algo_from_file(const std::string& algo_id);
 } // namespace dev_mode
 } // namespace nutc

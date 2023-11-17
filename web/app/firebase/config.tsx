@@ -20,7 +20,7 @@ var storage: any;
 var functions: any;
 const app = firebase.initializeApp(firebaseConfig);
 
-const isLocalhost = () => {
+export const isLocalhost = () => {
   return process && process.env.NODE_ENV === "development";
 };
 

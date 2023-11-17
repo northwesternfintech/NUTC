@@ -17,7 +17,8 @@ namespace client {
  * Forks and execve's a client process with the given uid
  * Spawns in the binary "NUTC-client", expecting it to be in the $PATH
  */
-void spawn_client(const std::string& uid, bool is_local_algo);
+void
+spawn_client(const std::string& uid, const std::string& algo_id, bool is_local_algo);
 
 /**
  * @brief Fetches all users from firebase

@@ -18,10 +18,8 @@ tasks:
 
   move-to-bin:
     dir: '{{.USER_WORKING_DIR}}'
-    preconditions:
-      - test -f CMakeUserPresets.json
     cmds:
-      - cmake --build --preset=dev
+      - task: build
       - sudo cp ./build/dev/{{.NAME}} /usr/local/bin/
 
   build:

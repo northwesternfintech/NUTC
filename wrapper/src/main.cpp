@@ -4,6 +4,10 @@
 #include "pywrapper/pywrapper.hpp"
 #include "rabbitmq/rabbitmq.hpp"
 
+#ifndef NO_GIT_VERSION_TRACKING
+#  include "git.h"
+#endif
+
 #include <argparse/argparse.hpp>
 #include <pybind11/pybind11.h>
 
@@ -13,11 +17,14 @@
 #include <string>
 #include <tuple>
 
-#ifndef NO_GIT_VERSION_TRACKING
-#  include "git.h"
-#endif
+struct wrapper_args {
+    uint8_t verbosity;
+    std::string uid;
+    std::string algo_id;
+    bool dev;
+};
 
-static std::tuple<uint8_t, std::string, bool>
+static wrapper_args
 process_arguments(int argc, const char** argv)
 {
     argparse::ArgumentParser program(
@@ -37,6 +44,15 @@ process_arguments(int argc, const char** argv)
             std::string uid = std::string(value);
             std::replace(uid.begin(), uid.end(), ' ', '-');
             return uid;
+        })
+        .required();
+
+    program.add_argument("-A", "--algo_id")
+        .help("set the algo ID")
+        .action([](const auto& value) {
+            std::string algo_id = std::string(value);
+            std::replace(algo_id.begin(), algo_id.end(), ' ', '-');
+            return algo_id;
         })
         .required();
 
@@ -67,9 +83,12 @@ process_arguments(int argc, const char** argv)
         exit(1); // NOLINT(concurrency-*)
     }
 
-    return std::make_tuple(
-        verbosity, program.get<std::string>("--uid"), program.get<bool>("--dev")
-    );
+    return {
+        verbosity,
+        program.get<std::string>("--uid"),
+        program.get<std::string>("--algo_id"),
+        program.get<bool>("--dev")
+    };
 }
 
 static void
@@ -94,7 +113,7 @@ int
 main(int argc, const char** argv)
 {
     // Parse args
-    auto [verbosity, uid, development_mode] = process_arguments(argc, argv);
+    auto [verbosity, uid, algo_id, development_mode] = process_arguments(argc, argv);
     pybind11::scoped_interpreter guard{};
 
     // Start logging and print build info
@@ -107,10 +126,10 @@ main(int argc, const char** argv)
 
     std::optional<std::string> algo;
     if (development_mode) {
-        algo = nutc::dev_mode::get_algo_from_file(uid);
+        algo = nutc::dev_mode::get_algo_from_file(algo_id);
     }
     else {
-        algo = nutc::firebase::get_most_recent_algo(uid);
+        algo = nutc::firebase::get_algo(uid, algo_id);
     }
 
     // Send message to exchange to let it know we successfully initialized
