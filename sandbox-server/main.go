@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 	"unicode"
@@ -15,21 +16,29 @@ import (
 
 const dockerTimeout = 120
 
+const port = "8080"
+
 func main() {
 	server := http.Server{
-		Addr:         ":8080",
+		Addr:         ":" + port,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  15 * time.Second,
 	}
-	http.HandleFunc("/", handler)
+	http.HandleFunc("/", algoTestingHandler)
 
+	log.Printf("Sandbox server listening on port %s\n", port)
 	if err := server.ListenAndServe(); err != nil {
-		fmt.Printf("Failed to start server\n")
+		log.Fatal("Failed to start server\n")
 	}
+
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
+// Is algoTestingHandler a good name? Doesn't this also handle normal requests?
+
+// algo testing handler takes in two url querys: user_id and algo_id
+// and will spawn the NUTC exchange container to test the algo
+func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 	user_id := r.URL.Query().Get("user_id")
 	algo_id := r.URL.Query().Get("algo_id")
 	if user_id == "" || algo_id == "" {
