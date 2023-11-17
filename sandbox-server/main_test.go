@@ -10,8 +10,8 @@ import (
 const validUserID = "123"
 const validAlgoID = "123"
 
-const invalidUserID = "123-"
-const invalidAlgoID = "123-"
+const invalidUserID = "123$"
+const invalidAlgoID = "123$"
 
 func MakeRequest(t *testing.T, userID, algoID string) (int, string) {
 	var url string
@@ -61,6 +61,11 @@ func TestMissingParameters(t *testing.T) {
 
 func TestInvalidIDs(t *testing.T) {
 	statusCode, errorMsg := MakeRequest(t, invalidUserID, invalidAlgoID)
+	if statusCode != http.StatusBadRequest {
+		t.Errorf("Expected status BadRequest, got %v with error message %s", statusCode, errorMsg)
+	}
+
+	statusCode, errorMsg = MakeRequest(t, validUserID, invalidAlgoID)
 	if statusCode != http.StatusBadRequest {
 		t.Errorf("Expected status BadRequest, got %v with error message %s", statusCode, errorMsg)
 	}
