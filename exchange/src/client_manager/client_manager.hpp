@@ -69,7 +69,6 @@ struct glz::meta<nutc::manager::Client> {
 template <>
 struct glz::meta<nutc::manager::ClientManager> {
     using T = nutc::manager::ClientManager;
-    static constexpr auto value = object(
-        "clients", [](auto&& self) -> auto& { return self.get_clients(); }
-    );
+    static constexpr auto value =
+        object("clients", [](auto&& self) -> auto& { return self.get_clients(); });
 };
