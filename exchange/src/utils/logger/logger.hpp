@@ -14,15 +14,15 @@ namespace events {
 std::string timestamp_in_ms();
 
 template <typename T>
-concept MetaSpecialized = requires {
+concept GlazeMetaSpecialized = requires {
     {
         glz::meta<T>::value
     } -> std::convertible_to<decltype(glz::meta<T>::value)>;
 };
 
-template <MetaSpecialized T>
+template <GlazeMetaSpecialized T>
 struct WithTimestamp {
-    T data;
+    const T& data;
     std::string timestamp;
 
     // Constructor to initialize the base data and timestamp
@@ -68,7 +68,7 @@ public:
      * @param json_message the message to log
      * @param uid optional UID to log with this message
      */
-    template <MetaSpecialized T>
+    template <GlazeMetaSpecialized T>
     void log_event(const T& json_message);
 
     /**
@@ -91,11 +91,13 @@ private:
 } // namespace events
 } // namespace nutc
 
-template <nutc::events::MetaSpecialized T>
+template <nutc::events::GlazeMetaSpecialized T>
 struct glz::meta<nutc::events::WithTimestamp<T>> {
+    using U = nutc::events::WithTimestamp<T>;
+    /* clang-format off */
     static constexpr auto value = object(
-        "data", &nutc::events::WithTimestamp<T>::data, // Serialize the original data
-        "timestamp", &nutc::events::WithTimestamp<T>::timestamp // Serialize the
-                                                                // timestamp as a string
+        "data", [](auto&& self) -> auto& { return self.data; }, // Serialize orig. data
+        "timestamp", [](auto&& self) -> auto& { return self.timestamp; } // Timestamp
     );
+    /* clang-format on */
 };

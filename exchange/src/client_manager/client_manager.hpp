@@ -59,16 +59,24 @@ private:
 template <>
 struct glz::meta<nutc::manager::Client> {
     using T = nutc::manager::Client;
+    /* clang-format off */
     static constexpr auto value = object(
-        "uid", &T::uid, "active", &T::active, "is_local_algo", &T::is_local_algo,
-        "capital_remaining", &T::capital_remaining, "holdings", &T::holdings
+        "uid", &T::uid, 
+        "active", &T::active, 
+        "is_local_algo", &T::is_local_algo,
+        "capital_remaining", &T::capital_remaining,
+        "holdings", &T::holdings
     );
+    /* clang-format */
 };
 
 /// \cond
 template <>
 struct glz::meta<nutc::manager::ClientManager> {
     using T = nutc::manager::ClientManager;
-    static constexpr auto value =
-        object("clients", [](auto&& self) -> auto& { return self.get_clients(); });
+    /* clang-format off */
+    static constexpr auto value = object(
+        "clients", [](auto&& self) -> auto& { return self.get_clients(); }
+    );
+    /* clang-format on */
 };

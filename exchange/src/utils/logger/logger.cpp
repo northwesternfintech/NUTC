@@ -3,6 +3,7 @@
 #include <fmt/chrono.h>
 #include <fmt/format.h>
 #include <glaze/glaze.hpp>
+#include <quill/Clock.h>
 
 #include <chrono>
 
@@ -23,23 +24,17 @@ timestamp_in_ms()
 {
     using namespace std::chrono;
 
-    auto now = system_clock::now();
+    // Get time from Quill
+    auto now = quill::Clock::now();
 
-    auto nowAsTimeT = system_clock::to_time_t(now);
+    // Get epoch time in milliseconds, and create time point
+    auto epoch_millis = duration_cast<milliseconds>(now.time_since_epoch());
+    auto system_now = time_point<system_clock>{epoch_millis};
 
-    auto nowAsTm = *std::localtime(&nowAsTimeT);
-
-    auto ms = duration_cast<milliseconds>(now.time_since_epoch()) % 1000;
-
-    // Use stringstream to format the time
-    std::ostringstream timestamp;
-    timestamp << std::put_time(&nowAsTm, "%Y-%m-%d %H:%M:%S");
-    timestamp << '.' << std::setfill('0') << std::setw(3) << ms.count();
-
-    return timestamp.str();
+    return fmt::format("{:%Y-%m-%d %H:%M:%S}", system_now).substr(0, 23);
 }
 
-template <MetaSpecialized T>
+template <GlazeMetaSpecialized T>
 void
 Logger::log_event(const T& json_message)
 {
