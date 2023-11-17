@@ -60,7 +60,7 @@ func TestMissingParameters(t *testing.T) {
 }
 
 func TestInvalidIDs(t *testing.T) {
-	statusCode, errorMsg := MakeRequest(t, invalidUserID, validAlgoID)
+	statusCode, errorMsg := MakeRequest(t, invalidUserID, invalidAlgoID)
 	if statusCode != http.StatusBadRequest {
 		t.Errorf("Expected status BadRequest, got %v with error message %s", statusCode, errorMsg)
 	}
