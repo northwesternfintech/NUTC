@@ -17,7 +17,14 @@
 #include <string>
 #include <tuple>
 
-static std::tuple<uint8_t, std::string, std::string, bool>
+struct wrapper_args {
+    uint8_t verbosity;
+    std::string uid;
+    std::string algo_id;
+    bool dev;
+};
+
+static wrapper_args
 process_arguments(int argc, const char** argv)
 {
     argparse::ArgumentParser program(
@@ -76,12 +83,12 @@ process_arguments(int argc, const char** argv)
         exit(1); // NOLINT(concurrency-*)
     }
 
-    return std::make_tuple(
+    return {
         verbosity,
         program.get<std::string>("--uid"),
         program.get<std::string>("--algo_id"),
         program.get<bool>("--dev")
-    );
+    };
 }
 
 static void

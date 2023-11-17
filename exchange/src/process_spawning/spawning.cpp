@@ -47,11 +47,10 @@ get_all_users()
 }
 
 std::string
-quote_id(const std::string& id)
+quote_id(std::string id)
 {
-    std::string quote_id = std::string(id);
-    std::replace(quote_id.begin(), quote_id.end(), '-', ' ');
-    return quote_id;
+    std::replace(id.begin(), id.end(), '-', ' ');
+    return id;
 }
 
 int
