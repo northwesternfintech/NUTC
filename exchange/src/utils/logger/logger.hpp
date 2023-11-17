@@ -49,10 +49,7 @@ public:
      * @param json_message the message to log
      * @param uid optional UID to log with this message
      */
-    void log_event(
-        MESSAGE_TYPE type, const std::string& json_message,
-        const std::optional<std::string>& uid = std::nullopt
-    );
+    void log_event(MESSAGE_TYPE type, const glz::json_t& json_message);
 
     /**
      * @brief Get the file name string
