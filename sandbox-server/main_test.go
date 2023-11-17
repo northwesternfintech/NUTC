@@ -36,38 +36,50 @@ func MakeRequest(t *testing.T, userID, algoID string) (int, string) {
 }
 
 func TestValidRequest(t *testing.T) {
-	statusCode, responseMsg := MakeRequest(t, validUserID, validAlgoID)
+	statusCode, errorMsg := MakeRequest(t, validUserID, validAlgoID)
 	if statusCode != http.StatusOK {
-		t.Errorf("Expected status OK, got %v with message %s", statusCode, responseMsg)
+		t.Errorf("Expected status OK, got %v with error message %s", statusCode, errorMsg)
 	}
 }
 
 func TestMissingParameters(t *testing.T) {
-	statusCode, responseMsg := MakeRequest(t, "", "")
+	statusCode, errorMsg := MakeRequest(t, "", "")
 	if statusCode != http.StatusBadRequest {
-		t.Errorf("Expected status BadRequest, got %v with message %s", statusCode, responseMsg)
+		t.Errorf("Expected status BadRequest, got %v with error message %s", statusCode, errorMsg)
 	}
 
-	statusCode, responseMsg = MakeRequest(t, validUserID, "")
+	statusCode, errorMsg = MakeRequest(t, validUserID, "")
 	if statusCode != http.StatusBadRequest {
-		t.Errorf("Expected status BadRequest, got %v with message %s", statusCode, responseMsg)
+		t.Errorf("Expected status BadRequest, got %v with error message %s", statusCode, errorMsg)
 	}
 
-	statusCode, responseMsg = MakeRequest(t, "", validAlgoID)
+	statusCode, errorMsg = MakeRequest(t, "", validAlgoID)
 	if statusCode != http.StatusBadRequest {
-		t.Errorf("Expected status BadRequest, got %v with message %s", statusCode, responseMsg)
+		t.Errorf("Expected status BadRequest, got %v with error message %s", statusCode, errorMsg)
 	}
 }
 
 func TestInvalidIDs(t *testing.T) {
-	statusCode, responseMsg := MakeRequest(t, invalidUserID, invalidAlgoID)
+	statusCode, errorMsg := MakeRequest(t, invalidUserID, invalidAlgoID)
 	if statusCode != http.StatusBadRequest {
-		t.Errorf("Expected status BadRequest, got %v with message %s", statusCode, responseMsg)
+		t.Errorf("Expected status BadRequest, got %v with error message %s", statusCode, errorMsg)
 	}
 
-	statusCode, responseMsg = MakeRequest(t, validUserID, invalidAlgoID)
+	statusCode, errorMsg = MakeRequest(t, validUserID, invalidAlgoID)
 	if statusCode != http.StatusBadRequest {
-		t.Errorf("Expected status BadRequest, got %v with message %s", statusCode, responseMsg)
+		t.Errorf("Expected status BadRequest, got %v with error message %s", statusCode, errorMsg)
+	}
+}
+
+func TestIdStartsWithDash(t *testing.T) {
+	statusCode, errorMsg := MakeRequest(t, "-"+validUserID, validAlgoID)
+	if statusCode != http.StatusOK {
+		t.Errorf("Expected Status OK, got %v, with error message %s", statusCode, errorMsg)
+	}
+
+	statusCode, errorMsg = MakeRequest(t, validUserID, "-"+validAlgoID)
+	if statusCode != http.StatusOK {
+		t.Errorf("Expected Status OK, got %v, with error message %s", statusCode, errorMsg)
 	}
 }
 
