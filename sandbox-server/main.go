@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 	"unicode"
 
@@ -34,10 +35,6 @@ func main() {
 
 }
 
-// Is algoTestingHandler a good name? Doesn't this also handle normal requests?
-
-// algo testing handler takes in two url querys: user_id and algo_id
-// and will spawn the NUTC exchange container to test the algo
 func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 	user_id := r.URL.Query().Get("user_id")
 	algo_id := r.URL.Query().Get("algo_id")
@@ -58,10 +55,18 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	cmd_user_id := user_id
+	cmd_algo_id := algo_id
+	if strings.HasPrefix(user_id, "-") {
+		cmd_user_id = " " + user_id[1:]
+	}
+	if strings.HasPrefix(algo_id, "-") {
+		cmd_algo_id = " " + algo_id[1:]
+	}
+
 	config := &container.Config{
 		Image: "nutc-exchange",
-		// What happens if user or algo id start with "-"? since it breaks arg parsing?
-		Cmd: []string{"--sandbox", user_id, algo_id},
+		Cmd:   []string{"--sandbox", cmd_user_id, cmd_algo_id},
 	}
 	hostConfig := &container.HostConfig{
 		AutoRemove: true,
@@ -70,12 +75,16 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 	nano_id, err := gonanoid.New(6)
 	if err != nil {
 		http.Error(w, "Failed to create docker container", http.StatusInternalServerError)
+		fmt.Printf("%s", err.Error())
 		return
 	}
-	container_name := fmt.Sprintf("%s-%s-%s", user_id, algo_id, nano_id)
+
+	// container name cannot contain spaces and cannot start with "-"
+	container_name := fmt.Sprintf("%s-%s-%s", strings.TrimSpace(cmd_user_id), strings.TrimSpace(cmd_algo_id), nano_id)
 	resp, err := cli.ContainerCreate(ctx, config, hostConfig, nil, nil, container_name)
 	if err != nil {
 		http.Error(w, "Failed to create docker container", http.StatusInternalServerError)
+		fmt.Printf("%s", err.Error())
 		return
 	}
 
