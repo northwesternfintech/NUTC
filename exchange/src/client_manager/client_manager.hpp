@@ -54,3 +54,22 @@ private:
 
 } // namespace manager
 } // namespace nutc
+
+/// \cond
+template <>
+struct glz::meta<nutc::manager::Client> {
+    using T = nutc::manager::Client;
+    static constexpr auto value = object(
+        "uid", &T::uid, "active", &T::active, "is_local_algo", &T::is_local_algo,
+        "capital_remaining", &T::capital_remaining, "holdings", &T::holdings
+    );
+};
+
+/// \cond
+template <>
+struct glz::meta<nutc::manager::ClientManager> {
+    using T = nutc::manager::ClientManager;
+    static constexpr auto value = object(
+        "clients", [](auto&& self) -> auto& { return self.get_clients(); }
+    );
+};
