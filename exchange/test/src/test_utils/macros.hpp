@@ -6,6 +6,7 @@
 
 using Engine = nutc::matching::Engine;
 using MarketOrder = nutc::messages::MarketOrder;
+using Logger = nutc::events::Logger;
 using ObUpdate = nutc::messages::ObUpdate;
 using ClientManager = nutc::manager::ClientManager;
 using SIDE = nutc::messages::SIDE;

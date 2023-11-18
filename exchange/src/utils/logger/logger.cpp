@@ -49,6 +49,9 @@ Logger::log_event(const T& json_message)
     // TODO: fix type
     std::string buffer = glz::write_json(json_message_with_ts);
 
+    // Log to the main log too
+    log_i(events, "Logging event {}", buffer);
+
     // Write start of JSON
     output_file_ << buffer << "\n";
 }
