@@ -51,9 +51,7 @@ COPY --from=build-wrapper /app/wrapper/build/NUTC-client /bin/NUTC-client
 COPY --from=build-exchange /app/exchange/build/NUTC24 /bin/NUTC-exchange
 COPY ./exchange/scripts/docker-start.sh /app/docker-start.sh
 
-RUN chmod +x /bin/NUTC-client
-RUN chmod +x /bin/NUTC-exchange
-RUN chmod +X /app/docker-start.sh
+RUN chmod +x /bin/NUTC-client /bin/NUTC-exchange /app/docker-start.sh
 
 ENV RABBITMQ_DEFAULT_USER="NUFT"
 ENV RABBITMQ_DEFAULT_PASS="ADMIN"
