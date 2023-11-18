@@ -3,8 +3,8 @@
 #include "lib.hpp"
 #include "matching/engine/engine.hpp"
 #include "test_utils/macros.hpp"
-#include "utils/messages.hpp"
 #include "utils/logger/logger.hpp"
+#include "utils/messages.hpp"
 
 #include <gtest/gtest.h>
 
@@ -25,7 +25,6 @@ protected:
     ClientManager manager;
     Engine engine;
 };
-
 
 TEST_F(LoggingOrders, LogMarketOrders)
 {
