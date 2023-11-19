@@ -33,7 +33,7 @@ func NewAPI(validator validator.Validate, jwtService jwt.Service, userRepo user.
 	}
 }
 
-func (api *API) HandleGoogleOauthCallback(w http.ResponseWriter, r *http.Request) {
+func (api *API) HandleGoogleOAuthCallback(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	code := query.Get("code")
 	state := query.Get("state")
@@ -92,7 +92,7 @@ func (api *API) HandleGoogleOauthCallback(w http.ResponseWriter, r *http.Request
 		endpoint.WriteWithError(w, http.StatusInternalServerError, endpoint.ErrMsgInternalServer)
 		return
 	}
-	
+
 	cookie := http.Cookie{
 		Name:     "token",
 		Value:    token,
@@ -109,6 +109,6 @@ func (api *API) HandleGoogleOauthCallback(w http.ResponseWriter, r *http.Request
 
 func (api *API) RegisterHandlers(r chi.Router) {
 	r.Route("/auth", func(r chi.Router) {
-		r.Post("/google/callback", api.HandleGoogleOauthCallback)
+		r.Post("/google/callback", api.HandleGoogleOAuthCallback)
 	})
 }
