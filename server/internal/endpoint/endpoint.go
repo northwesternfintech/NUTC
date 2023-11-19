@@ -12,6 +12,7 @@ const (
 	errMsgInvalidReq     = "Invalid request"
 	errMsgJSONDecode     = "Failed to decode json request"
 	ErrMsgInternalServer = "Internal server error"
+	ErrMsgBadRequest     = "Bad request"
 )
 
 type errResponse struct {

@@ -20,6 +20,12 @@ const (
 	ErrUserAlreadyExists = "user already exists"
 )
 
+func NewRepository(db *dynamo.DB) Repository {
+	return &repository{
+		db: db,
+	}
+}
+
 func (r *repository) CreateUser(user models.User) error {
 	return r.db.Table(userTableName).Put(user).Run()
 }

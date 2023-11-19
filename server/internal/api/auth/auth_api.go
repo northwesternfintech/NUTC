@@ -15,30 +15,36 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-type API struct {
-	validator  validator.Validate
-	jwtService jwt.Service
-	config     config.GoogleOAuthConfig
-	jwtMaxAge  int
-	userRepo   user.Repository
+type API interface {
+	HandleGoogleOAuthCallback(w http.ResponseWriter, r *http.Request)
+	RegisterHandlers(r chi.Router)
 }
 
-func NewAPI(validator validator.Validate, jwtService jwt.Service, userRepo user.Repository, config config.GoogleOAuthConfig, jwtMaxAge int) API {
-	return API{
-		validator:  validator,
-		config:     config,
-		jwtService: jwtService,
-		jwtMaxAge:  jwtMaxAge,
-		userRepo:   userRepo,
+type api struct {
+	validator     validator.Validate
+	jwtService    jwt.Service
+	config        config.GoogleOAuthConfig
+	jwtExpiration int
+	userRepo      user.Repository
+}
+
+func NewAPI(validator validator.Validate, jwtService jwt.Service, userRepo user.Repository, config config.GoogleOAuthConfig, jwtExpiration int) API {
+	return &api{
+		validator:     validator,
+		config:        config,
+		jwtService:    jwtService,
+		jwtExpiration: jwtExpiration,
+		userRepo:      userRepo,
 	}
 }
 
-func (api *API) HandleGoogleOAuthCallback(w http.ResponseWriter, r *http.Request) {
+func (api *api) HandleGoogleOAuthCallback(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	code := query.Get("code")
 	state := query.Get("state")
+	redirectURI := query.Get("redirect_uri")
 
-	if code == "" {
+	if code == "" || state == "" || redirectURI == "" {
 		endpoint.WriteWithError(w, http.StatusInternalServerError, endpoint.ErrMsgInternalServer)
 		return
 	}
@@ -97,17 +103,18 @@ func (api *API) HandleGoogleOAuthCallback(w http.ResponseWriter, r *http.Request
 		Name:     "token",
 		Value:    token,
 		Path:     "/",
-		MaxAge:   60 * api.jwtMaxAge,
+		MaxAge:   api.jwtExpiration,
 		HttpOnly: true,
 		Secure:   true,
 	}
 
 	http.SetCookie(w, &cookie)
+	redirectURIWithState := fmt.Sprintf("%s?state=%s", redirectURI, state)
 
-	http.Redirect(w, r, state, http.StatusFound)
+	http.Redirect(w, r, redirectURIWithState, http.StatusFound)
 }
 
-func (api *API) RegisterHandlers(r chi.Router) {
+func (api *api) RegisterHandlers(r chi.Router) {
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/google/callback", api.HandleGoogleOAuthCallback)
 	})
