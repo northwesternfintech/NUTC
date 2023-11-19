@@ -45,7 +45,6 @@ func (api *api) HandleGoogleOAuthCallback(w http.ResponseWriter, r *http.Request
 	query := r.URL.Query()
 	code := query.Get("code")
 	state := query.Get("state")
-	// redirectURI := query.Get("redirect_uri")
 
 	if code == "" || state == "" {
 		log.Println("Missing required query parameters")
