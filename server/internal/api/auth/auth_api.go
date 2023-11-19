@@ -106,13 +106,13 @@ func (api *api) HandleGoogleOAuthCallback(w http.ResponseWriter, r *http.Request
 	}
 
 	http.SetCookie(w, &cookie)
-	redirectURIWithState := fmt.Sprintf("%s?state=%s", "localhost:3000", state)
+	redirectURIWithState := fmt.Sprintf("%s?state=%s", "http://localhost:3000", state)
 
 	http.Redirect(w, r, redirectURIWithState, http.StatusFound)
 }
 
 func (api *api) RegisterHandlers(r chi.Router) {
 	r.Route("/auth", func(r chi.Router) {
-		r.Post("/google/callback", api.HandleGoogleOAuthCallback)
+		r.Get("/google/callback", api.HandleGoogleOAuthCallback)
 	})
 }
