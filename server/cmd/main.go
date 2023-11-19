@@ -2,23 +2,21 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"server/internal/config"
 	"server/internal/db"
+	"server/internal/models"
 	"time"
 
+	"server/internal/validator"
+
+	"github.com/go-chi/chi/v5"
 	"github.com/matoous/go-nanoid/v2"
-	// "server/internal/validator"
 )
 
-type user struct {
-	ID        string    `dynamo:"id,hash" index:"Seq-ID-index"`
-	CreatedAt time.Time `dynamo:"created_at"`
-	Name      string    `dynamo:"name"`
-	Email     string    `dynamo:"email"`
-}
 
 func main() {
-	// validator := validator.New()
+	validator := validator.New()
 
 	cfg, err := config.Load(".env")
 	if err != nil {
@@ -36,7 +34,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error generating ID: %v", err)
 	}
-	user := user{
+	user := models.User{
 		ID:        userID,
 		CreatedAt: time.Now(),
 		Name:      "John Doe",
@@ -49,4 +47,20 @@ func main() {
 	} else {
 		log.Println("User added successfully")
 	}
+
+	mux := chi.NewRouter()
+	r, handlers := setupHandler(mux, validator, cfg)
+	server := http.Server{
+		Addr:    cfg.ServerPort,
+		Handler: r,
+	}
+
+}
+
+func setupHandler(
+	r chi.Router,
+	v validator.Validate,
+	cfg *config.Config,
+) {
+
 }
