@@ -35,6 +35,7 @@ func main() {
 
 	mux := chi.NewRouter()
 	r := setupHandler(mux, validator, cfg, db)
+
 	server := http.Server{
 		Addr:    cfg.ServerPort,
 		Handler: r,
@@ -45,11 +46,11 @@ func main() {
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 
 	go func() {
+		log.Printf("Server listening on %s", cfg.ServerPort)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Could not start server: %s", err)
-		} else {
-			log.Printf("Server listening on %s", cfg.ServerPort)
 		}
+
 	}()
 
 	<-stop
