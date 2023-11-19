@@ -1,7 +1,9 @@
 package auth
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"server/internal/api/user"
 	"server/internal/config"
@@ -13,6 +15,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/guregu/dynamo"
 )
 
 type API interface {
@@ -42,44 +45,36 @@ func (api *api) HandleGoogleOAuthCallback(w http.ResponseWriter, r *http.Request
 	query := r.URL.Query()
 	code := query.Get("code")
 	state := query.Get("state")
-	redirectURI := query.Get("redirect_uri")
+	// redirectURI := query.Get("redirect_uri")
 
-	if code == "" || state == "" || redirectURI == "" {
+	if code == "" || state == "" {
+		log.Println("Missing required query parameters")
 		endpoint.WriteWithError(w, http.StatusInternalServerError, endpoint.ErrMsgInternalServer)
 		return
 	}
 	tokenResponse, err := auth.RequestToken(code, &api.config)
 	if err != nil {
+		log.Println(err)
 		endpoint.WriteWithError(w, http.StatusInternalServerError, endpoint.ErrMsgInternalServer)
 		return
 	}
 
 	googleUser, err := auth.GetGoogleUser(tokenResponse.AccessToken, tokenResponse.IDToken)
 	if err != nil {
-		endpoint.WriteWithError(w, http.StatusInternalServerError, endpoint.ErrMsgInternalServer)
-		return
-	}
-
-	fmt.Println(googleUser)
-
-	err = api.userRepo.CreateUser(models.User{
-		ID:        googleUser.ID,
-		Name:      googleUser.Name,
-		Email:     googleUser.Email,
-		CreatedAt: time.Now(),
-	})
-	if err != nil {
+		log.Println(err)
 		endpoint.WriteWithError(w, http.StatusInternalServerError, endpoint.ErrMsgInternalServer)
 		return
 	}
 
 	user, err := api.userRepo.GetUserByID(googleUser.ID)
-	if err != nil {
+	if err != nil && !errors.Is(err, dynamo.ErrNotFound) {
+		log.Printf("Error getting user: %v", err)
 		endpoint.WriteWithError(w, http.StatusInternalServerError, endpoint.ErrMsgInternalServer)
 		return
 	}
 
 	if user.ID == "" {
+		log.Printf("Creating user with ID: %s", googleUser.ID)
 		err = api.userRepo.CreateUser(models.User{
 			ID:        googleUser.ID,
 			Name:      googleUser.Name,
@@ -87,6 +82,7 @@ func (api *api) HandleGoogleOAuthCallback(w http.ResponseWriter, r *http.Request
 			CreatedAt: time.Now(),
 		})
 		if err != nil {
+			log.Printf("Error creating user: %v", err)
 			endpoint.WriteWithError(w, http.StatusInternalServerError, endpoint.ErrMsgInternalServer)
 			return
 		}
@@ -95,6 +91,7 @@ func (api *api) HandleGoogleOAuthCallback(w http.ResponseWriter, r *http.Request
 
 	token, err := api.jwtService.GenerateToken(user.ID)
 	if err != nil {
+		log.Println(err)
 		endpoint.WriteWithError(w, http.StatusInternalServerError, endpoint.ErrMsgInternalServer)
 		return
 	}
@@ -109,7 +106,7 @@ func (api *api) HandleGoogleOAuthCallback(w http.ResponseWriter, r *http.Request
 	}
 
 	http.SetCookie(w, &cookie)
-	redirectURIWithState := fmt.Sprintf("%s?state=%s", redirectURI, state)
+	redirectURIWithState := fmt.Sprintf("%s?state=%s", "localhost:3000", state)
 
 	http.Redirect(w, r, redirectURIWithState, http.StatusFound)
 }
