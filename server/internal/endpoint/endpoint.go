@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	ErrMsgInvalidReq     = "Invalid request"
-	ErrMsgJSONDecode     = "Failed to decode json request"
+	errMsgInvalidReq     = "Invalid request"
+	errMsgJSONDecode     = "Failed to decode json request"
 	ErrMsgInternalServer = "Internal server error"
 )
 
@@ -66,7 +66,7 @@ func buildDecodeErrorMsg(field string, want string, got string) string {
 // HandleDecodeErr responds with the appropriate decode error msg and sets
 // the http status to 400
 func HandleDecodeErr(w http.ResponseWriter, err error) {
-	errMsg := ErrMsgJSONDecode
+	errMsg := errMsgJSONDecode
 	if err, ok := err.(*json.UnmarshalTypeError); ok {
 		errMsg = buildDecodeErrorMsg(err.Field, err.Type.String(), err.Value)
 	}
@@ -77,7 +77,7 @@ func HandleDecodeErr(w http.ResponseWriter, err error) {
 // WriteValidationErr responds with the appropriate validation error msg and
 // sets the http status to 400
 func WriteValidationErr(w http.ResponseWriter, s interface{}, err error) {
-	errMsg := ErrMsgInvalidReq
+	errMsg := errMsgInvalidReq
 	validationErrMsg := validator.GetValidationErrMsg(s, err)
 	if validationErrMsg != "" {
 		errMsg = validationErrMsg

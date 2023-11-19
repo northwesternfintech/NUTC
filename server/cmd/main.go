@@ -14,7 +14,6 @@ import (
 	"github.com/matoous/go-nanoid/v2"
 )
 
-
 func main() {
 	validator := validator.New()
 
@@ -49,11 +48,13 @@ func main() {
 	}
 
 	mux := chi.NewRouter()
-	r, handlers := setupHandler(mux, validator, cfg)
+	r := setupHandler(mux, validator, cfg)
 	server := http.Server{
 		Addr:    cfg.ServerPort,
 		Handler: r,
 	}
+
+
 
 }
 
@@ -62,5 +63,5 @@ func setupHandler(
 	v validator.Validate,
 	cfg *config.Config,
 ) {
-
+	
 }
