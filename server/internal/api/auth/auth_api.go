@@ -101,7 +101,7 @@ func (api *api) HandleGoogleOAuthCallback(w http.ResponseWriter, r *http.Request
 		Path:     "/",
 		MaxAge:   api.jwtExpiration,
 		HttpOnly: true,
-		Secure:   true,
+		// Secure:   true, secure only send over https, so have to turn this off for local development
 	}
 
 	http.SetCookie(w, &cookie)

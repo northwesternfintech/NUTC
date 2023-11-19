@@ -6,7 +6,7 @@ import (
 	"server/internal/jwt"
 	"log"
 	"net/http"
-	"strings"
+	// "strings"
 )
 
 type userID int
@@ -26,22 +26,43 @@ func Auth(jwtService jwt.Service) func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
 			// logger := logger.FromContext(ctx)
-			authHeader := r.Header.Get("Authorization")
+			// authHeader := r.Header.Get("Authorization")
 
-			if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer") {
-				endpoint.WriteWithError(w, http.StatusUnauthorized, errMsgMissingToken)
-				return
-			}
+			// if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer") {
+			// 	endpoint.WriteWithError(w, http.StatusUnauthorized, errMsgMissingToken)
+			// 	return
+			// }
 
-			token := strings.TrimPrefix(authHeader, "Bearer ")
-			userID, err := jwtService.VerifyToken(token)
-			if err != nil {
-				log.Printf("handler: issue verifying jwt token: %v\n", err)
-				endpoint.WriteWithError(w, http.StatusUnauthorized, errMsgInvalidToken)
-				return
-			}
-			r = r.WithContext(withUser(ctx, userID))
-			next.ServeHTTP(w, r)
+			// token := strings.TrimPrefix(authHeader, "Bearer ")
+			// userID, err := jwtService.VerifyToken(token)
+			// if err != nil {
+			// 	log.Printf("handler: issue verifying jwt token: %v\n", err)
+			// 	endpoint.WriteWithError(w, http.StatusUnauthorized, errMsgInvalidToken)
+			// 	return
+			// }
+			// r = r.WithContext(withUser(ctx, userID))
+			// next.ServeHTTP(w, r)
+
+			cookie, err := r.Cookie("token")
+            if err != nil {
+                log.Printf("handler: error retrieving token from cookie: %v\n", err)
+                endpoint.WriteWithError(w, http.StatusUnauthorized, errMsgMissingToken)
+                return
+            }
+            token := cookie.Value
+
+            // Verify the JWT token
+            userID, err := jwtService.VerifyToken(token)
+            if err != nil {
+                log.Printf("handler: issue verifying jwt token: %v\n", err)
+                endpoint.WriteWithError(w, http.StatusUnauthorized, errMsgInvalidToken)
+                return
+            }
+
+            // Add user information to the context and proceed
+            r = r.WithContext(withUser(ctx, userID))
+            next.ServeHTTP(w, r)
+
 		})
 	}
 }

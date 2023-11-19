@@ -11,6 +11,7 @@ import (
 	"server/internal/config"
 	"server/internal/db"
 	"server/internal/jwt"
+	"server/internal/middleware"
 	"syscall"
 	"time"
 
@@ -74,10 +75,11 @@ func setupHandler(
 	userAPI := user.NewAPI(v, userRepo)
 
 	jwtService := jwt.NewService(cfg.JwtSecret, cfg.JwtExpiration)
+	authHandler := middleware.Auth(jwtService)
 
 	authAPI := auth.NewAPI(v, jwtService, userRepo, cfg.GoogleOAuth, cfg.JwtExpiration)
 
-	userAPI.RegisterHandlers(r)
+	userAPI.RegisterHandlers(r, authHandler)
 	authAPI.RegisterHandlers(r)
 
 	return r
