@@ -1,7 +1,8 @@
 package user
 
 import (
-	"log"
+	"errors"
+	"fmt"
 	"server/internal/models"
 
 	"github.com/guregu/dynamo"
@@ -17,8 +18,12 @@ type repository struct {
 }
 
 const (
-	userTableName        = "User"
-	ErrUserAlreadyExists = "user already exists"
+	userTableName = "User"
+)
+
+var (
+	ErrUserAlreadyExists = errors.New("repository: user already exists")
+	ErrUserNotFound      = errors.New("repository: user not found")
 )
 
 func NewRepository(db *dynamo.DB) Repository {
@@ -28,19 +33,21 @@ func NewRepository(db *dynamo.DB) Repository {
 }
 
 func (r *repository) CreateUser(user models.User) error {
-	return r.db.Table(userTableName).Put(user).Run()
+	err := r.db.Table(userTableName).Put(user).Run()
+	if err != nil {
+		return fmt.Errorf("repository: error creating user: %v", err)
+	}
+	return nil
 }
 
 func (r *repository) GetUserByID(userID string) (models.User, error) {
-    var user models.User
-    err := r.db.Table(userTableName).Get("id", userID).One(&user)
-    if err != nil {
-        if err == dynamo.ErrNotFound {
-            log.Printf("User not found: %v", err)
-            return models.User{}, dynamo.ErrNotFound
-        }
-        log.Printf("Error getting user in repo: %v", err)
-        return models.User{}, err
-    }
-    return user, nil
+	var user models.User
+	err := r.db.Table(userTableName).Get("id", userID).One(&user)
+	if err != nil {
+		if err == dynamo.ErrNotFound {
+			return models.User{}, ErrUserNotFound
+		}
+		return models.User{}, fmt.Errorf("repository: error getting user: %v", err)
+	}
+	return user, nil
 }

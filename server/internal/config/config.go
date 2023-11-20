@@ -84,7 +84,10 @@ func Load(file string) (*Config, error) {
 		JwtSecret:     jwtSecret,
 		JwtExpiration: jwtExpiration,
 	}
-	config.Validate()
+	err = config.Validate()
+	if err != nil {
+		return nil, fmt.Errorf("error validating config: %w", err)
+	}
 
 	return config, nil
 }

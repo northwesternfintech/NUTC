@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -11,6 +10,7 @@ import (
 	"server/internal/config"
 	"server/internal/db"
 	"server/internal/jwt"
+	"server/internal/logger"
 	"server/internal/middleware"
 	"syscall"
 	"time"
@@ -22,20 +22,21 @@ import (
 )
 
 func main() {
+	logger := logger.New()
 	validator := validator.New()
 
 	cfg, err := config.Load(".env")
 	if err != nil {
-		log.Fatalf("Could not load config: %v", err)
+		logger.Fatalf("Error loading config: %v", err)
 	}
 
 	db, err := db.New(cfg.DB)
 	if err != nil {
-		log.Fatalf("Error connecting to database: %v", err)
+		logger.Fatalf("Error connecting to database: %v", err)
 	}
 
 	mux := chi.NewRouter()
-	r := setupHandler(mux, validator, cfg, db)
+	r := setupHandler(mux, validator, cfg, db, logger)
 
 	server := http.Server{
 		Addr:    cfg.ServerPort,
@@ -47,9 +48,9 @@ func main() {
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 
 	go func() {
-		log.Printf("Server listening on %s", cfg.ServerPort)
+		logger.Infof("Server listening on %s", cfg.ServerPort)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Could not start server: %s", err)
+			logger.Fatalf("Could not start server: %s", err)
 		}
 
 	}()
@@ -60,9 +61,9 @@ func main() {
 	defer cancel()
 
 	if err := server.Shutdown(ctx); err != nil {
-		log.Fatalf("Server forced shutdown: %s", err)
+		logger.Fatalf("Server forced shutdown: %s", err)
 	}
-	log.Print("Server gracefully stopped")
+	logger.Infof("Server gracefully stopped")
 }
 
 func setupHandler(
@@ -70,7 +71,11 @@ func setupHandler(
 	v validator.Validate,
 	cfg *config.Config,
 	db *dynamo.DB,
+	logger logger.Logger,
 ) chi.Router {
+	r.Use(middleware.RequestLogger(logger))
+	r.Use(middleware.Cors())
+
 	userRepo := user.NewRepository(db)
 	userAPI := user.NewAPI(v, userRepo)
 
