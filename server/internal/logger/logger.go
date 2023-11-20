@@ -41,7 +41,10 @@ type logger struct {
 
 // New creates a new logger using the default configuration.
 func New() Logger {
-	l, _ := zap.NewProduction()
+	l, err := zap.NewProduction()
+	if err != nil {
+		panic(err)
+	}
 	return NewSugar(l)
 }
 

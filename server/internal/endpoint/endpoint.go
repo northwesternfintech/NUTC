@@ -3,7 +3,6 @@ package endpoint
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"server/internal/logger"
 	"server/internal/validator"
@@ -54,7 +53,7 @@ func WriteWithStatus(logger logger.Logger, w http.ResponseWriter, statusCode int
 		}
 	} else if statusCode == http.StatusOK {
 		if err := json.NewEncoder(w).Encode(successResponse{Message: "Success."}); err != nil {
-			log.Printf("handler: failed to encode data into JSON: %v", err)
+			logger.Errorf("handler: failed to encode data into JSON: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 	}
