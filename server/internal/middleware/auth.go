@@ -13,7 +13,7 @@ type userID int
 const (
 	keyUserID userID = -1
 
-	errMsgMissingToken = "Missing bearer token."
+	errMsgMissingCookie = "Missing authentication token."
 	errMsgInvalidToken = "Token is invalid."
 )
 
@@ -26,10 +26,12 @@ func Auth(jwtService jwt.Service) func(next http.Handler) http.Handler {
 			ctx := r.Context()
 			logger := logger.FromContext(ctx)
 
+			// logger.Infof("request cookie: %v\n", r.Cookies())
+
 			cookie, err := r.Cookie("token")
 			if err != nil {
 				logger.Errorf("handler: issue getting cookie: %v\n", err)
-				endpoint.WriteWithError(logger, w, http.StatusUnauthorized, errMsgMissingToken)
+				endpoint.WriteWithError(logger, w, http.StatusUnauthorized, errMsgMissingCookie)
 				return
 			}
 			token := cookie.Value
