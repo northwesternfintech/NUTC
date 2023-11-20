@@ -1,5 +1,7 @@
 #include "engine.hpp"
 
+#include "utils/logger/logger.hpp"
+
 #include <algorithm>
 #include <iostream>
 #include <vector>
@@ -151,9 +153,7 @@ Engine::attempt_matches(
         sell_order.quantity -= quantity_to_match;
 
         events::Logger& logger = events::Logger::get_logger();
-        std::string buf;
-        glz::write<glz::opts{}>(toMatch, buf);
-        logger.log_event(events::MESSAGE_TYPE::MATCH, buf);
+        logger.log_event(toMatch);
 
         result.matches.push_back(toMatch);
 

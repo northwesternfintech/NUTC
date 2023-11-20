@@ -2,6 +2,8 @@
 
 #include <fmt/chrono.h>
 #include <fmt/format.h>
+#include <glaze/glaze.hpp>
+#include <quill/Clock.h>
 
 #include <chrono>
 
@@ -17,11 +19,24 @@ Logger::get_logger()
     return logger;
 }
 
+std::string
+timestamp_in_ms()
+{
+    using namespace std::chrono;
+
+    // Get time from Quill
+    auto now = quill::Clock::now();
+
+    // Get epoch time in milliseconds, and create time point
+    auto epoch_millis = duration_cast<milliseconds>(now.time_since_epoch());
+    auto system_now = time_point<system_clock>{epoch_millis};
+
+    return fmt::format("{:%Y-%m-%d %H:%M:%S}", system_now).substr(0, 23);
+}
+
+template <GlazeMetaSpecialized T>
 void
-Logger::log_event(
-    MESSAGE_TYPE type, const std::string& json_message,
-    const std::optional<std::string>& uid
-)
+Logger::log_event(const T& json_message)
 {
     // If file is not open, throw an error to the error logger
     if (!output_file_.is_open()) [[unlikely]] {
@@ -29,23 +44,22 @@ Logger::log_event(
         return;
     }
 
+    WithTimestamp<T> json_message_with_ts = {json_message};
+
+    // TODO: fix type
+    std::string buffer = glz::write_json(json_message_with_ts);
+
+    // Log to the main log too
+    log_i(events, "Logging event {}", buffer);
+
     // Write start of JSON
-    output_file_ << "{ ";
-
-    // Write current GMT time
-    const auto now = std::chrono::system_clock::now();
-    output_file_ << fmt::format("\"time\": \"{:%FT%TZ}\", ", now);
-
-    // Add MessageType and JSON message (and opt UID) to file
-    output_file_ << "\"type\": " << static_cast<int>(type) << ", "; // add type
-    output_file_ << "\"message\": " << json_message;                // add message
-
-    if (uid.has_value()) {
-        output_file_ << ", \"uid\": " << uid.value(); // add uid if exists
-    }
-
-    output_file_ << " }\n"; // close the brace and end the line
+    output_file_ << buffer << "\n";
 }
+
+// Explicit instantiations
+template void
+Logger::log_event<messages::MarketOrder>(const messages::MarketOrder& json_message);
+template void Logger::log_event<messages::Match>(const messages::Match& json_message);
 
 } // namespace events
 } // namespace nutc

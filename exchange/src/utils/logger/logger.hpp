@@ -11,6 +11,26 @@
 namespace nutc {
 namespace events {
 
+std::string timestamp_in_ms();
+
+template <typename T>
+concept GlazeMetaSpecialized = requires {
+    {
+        glz::meta<T>::value
+    } -> std::convertible_to<decltype(glz::meta<T>::value)>;
+};
+
+template <GlazeMetaSpecialized T>
+struct WithTimestamp {
+    const T& data;
+    std::string timestamp;
+
+    // Constructor to initialize the base data and timestamp
+    WithTimestamp(const T& data) :
+        data(data), timestamp(nutc::events::timestamp_in_ms())
+    {}
+};
+
 enum class MESSAGE_TYPE { // needs to be changed to something better, but I will leave
                           // this here for now
     MARKET_ORDER,
@@ -45,14 +65,11 @@ public:
     /**
      * @brief Log an event to this Logger's file
      *
-     * @param type the type of message this is, see `enum MessageType`
      * @param json_message the message to log
      * @param uid optional UID to log with this message
      */
-    void log_event(
-        MESSAGE_TYPE type, const std::string& json_message,
-        const std::optional<std::string>& uid = std::nullopt
-    );
+    template <GlazeMetaSpecialized T>
+    void log_event(const T& json_message);
 
     /**
      * @brief Get the file name string
@@ -73,3 +90,14 @@ private:
 
 } // namespace events
 } // namespace nutc
+
+template <nutc::events::GlazeMetaSpecialized T>
+struct glz::meta<nutc::events::WithTimestamp<T>> {
+    using U = nutc::events::WithTimestamp<T>;
+    /* clang-format off */
+    static constexpr auto value = object(
+        "data", [](auto&& self) -> auto& { return self.data; }, // Serialize orig. data
+        "timestamp", [](auto&& self) -> auto& { return self.timestamp; } // Timestamp
+    );
+    /* clang-format on */
+};
