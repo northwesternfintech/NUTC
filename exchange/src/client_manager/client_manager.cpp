@@ -63,20 +63,25 @@ ClientManager::validate_match(const messages::Match& match) const
 void
 ClientManager::initialize_from_firebase(const glz::json_t::object_t& users)
 {
-    for (auto& [uid, _] : users)
-        add_client(uid, false);
+    for (auto& [uid, user] : users) {
+        if (!user.contains("latestAlgoId"))
+            continue;
+        add_client(uid, user["latestAlgoId"].get<std::string>(), false);
+    }
 }
 
 void
-ClientManager::add_client(const std::string& uid, bool is_local_algo)
+ClientManager::add_client(
+    const std::string& uid, const std::string& algo_id, bool is_local_algo
+)
 {
-    clients[uid] = Client{uid, false, is_local_algo, STARTING_CAPITAL, {}};
+    clients[uid] = Client{uid, algo_id, false, is_local_algo, STARTING_CAPITAL, {}};
 }
 
 void
-ClientManager::add_client(const std::string& uid)
+ClientManager::add_client(const std::string& uid, const std::string& algo_id)
 {
-    clients[uid] = Client{uid, false, false, STARTING_CAPITAL, {}};
+    clients[uid] = Client{uid, algo_id, false, false, STARTING_CAPITAL, {}};
 }
 
 void

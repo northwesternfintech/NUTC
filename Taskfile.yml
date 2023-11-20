@@ -69,3 +69,33 @@ tasks:
       - task: init-linter
       - task: init-analyzer
       - task: init-web
+
+  exchange-docker-build:
+    cmds:
+      - docker build -t nutc-exchange:latest . -f exchange/Dockerfile
+
+  format-exchange:
+    dir: exchange
+    cmds:
+      - cmake -D FIX=YES -P cmake/spell.cmake
+      - cmake -D FIX=YES -P cmake/lint.cmake
+
+  format-wrapper:
+    dir: wrapper
+    cmds:
+      - cmake -D FIX=YES -P cmake/spell.cmake
+      - cmake -D FIX=YES -P cmake/lint.cmake
+
+  format-linter:
+    dir: linter
+    cmds:
+      - cmake -D FIX=YES -P cmake/spell.cmake
+      - cmake -D FIX=YES -P cmake/lint.cmake
+
+  format-all:
+    cmds:
+      - task: format-exchange
+      - task: format-wrapper
+      - task: format-linter
+
+
