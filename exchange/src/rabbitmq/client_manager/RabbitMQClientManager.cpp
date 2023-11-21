@@ -10,7 +10,7 @@ namespace rabbitmq {
 
 void
 RabbitMQClientManager::waitForClients(
-    manager::ClientManager& clients, const int num_clients
+    manager::ClientManager& clients, size_t num_clients
 )
 {
     int num_running = 0;
@@ -42,7 +42,7 @@ RabbitMQClientManager::waitForClients(
         return true; // indicate that function should continue
     };
 
-    for (int i = 0; i < num_clients; i++) {
+    for (size_t i = 0; i < num_clients; i++) {
         auto data = RabbitMQConsumer::consumeMessage();
         if (!std::visit(processMessage, data)) {
             return;
@@ -60,7 +60,6 @@ RabbitMQClientManager::sendStartTime(
     const manager::ClientManager& manager, int wait_seconds
 )
 {
-    std::vector<manager::Client> active_clients = manager.get_clients(true);
     using time_point = std::chrono::high_resolution_clock::time_point;
     time_point time =
         std::chrono::high_resolution_clock::now() + std::chrono::seconds(wait_seconds);
@@ -70,13 +69,18 @@ RabbitMQClientManager::sendStartTime(
 
     messages::StartTime message{time_ns};
     std::string buf = glz::write_json(message);
-    auto send_to_client = [buf](const manager::Client& client) {
-        RabbitMQPublisher::publishMessage(client.uid, buf);
+
+    auto send_to_client = [buf](const std::pair<std::string, manager::Client>& pair) {
+        const auto& [uid, client] = pair;
+
+        if (!client.active)
+            return;
+
+        RabbitMQPublisher::publishMessage(uid, buf);
     };
 
-    for (const auto& client : active_clients) {
-        send_to_client(client);
-    }
+    const auto& clients = manager.get_clients();
+    std::for_each(clients.begin(), clients.end(), send_to_client);
 }
 
 } // namespace rabbitmq

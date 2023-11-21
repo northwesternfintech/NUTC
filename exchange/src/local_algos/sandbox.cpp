@@ -8,11 +8,11 @@
 
 namespace nutc {
 namespace sandbox {
-int
+size_t
 initialize_client_manager(manager::ClientManager& users)
 {
     // check number of algos in algos directory
-    int num_users = 0;
+    size_t num_users = 0;
     for (const auto& entry : std::filesystem::directory_iterator(ALGO_DIR)) {
         std::string uid = entry.path().filename().string();
         uid = uid.substr(0, uid.find(".py"));

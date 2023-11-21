@@ -38,15 +38,20 @@ RabbitMQPublisher::broadcastMatches(
     const manager::ClientManager& clients, const std::vector<messages::Match>& matches
 )
 {
-    auto broadcastToClient = [&](const auto& client) {
+    auto broadcastToClient = [&](const std::pair<std::string, manager::Client>& pair) {
         for (const auto& match : matches) {
+            const auto& [uid, client] = pair;
+
+            if (!client.active)
+                continue;
+
             std::string buffer;
             glz::write<glz::opts{}>(match, buffer);
-            publishMessage(client.uid, buffer);
+            publishMessage(uid, buffer);
         }
     };
 
-    const auto activeClients = clients.get_clients(true);
+    const auto& activeClients = clients.get_clients();
     std::for_each(activeClients.begin(), activeClients.end(), broadcastToClient);
 }
 
@@ -56,21 +61,21 @@ RabbitMQPublisher::broadcastObUpdates(
     const std::vector<messages::ObUpdate>& updates, const std::string& ignore_uid
 )
 {
-    auto broadcastToClient = [&](const auto& client) {
-        if (client.uid == ignore_uid) {
+    auto broadcastToClient = [&](const std::pair<std::string, manager::Client>& pair) {
+        const auto& [uid, client] = pair;
+
+        if (!client.active || uid == ignore_uid) {
             return;
         }
+
         for (const auto& update : updates) {
-            // if (update.quantity <= 1e-6f) {
-            // continue;
-            // }
             std::string buffer;
             glz::write<glz::opts{}>(update, buffer);
-            publishMessage(client.uid, buffer);
+            publishMessage(uid, buffer);
         }
     };
 
-    const auto activeClients = clients.get_clients(true);
+    const auto& activeClients = clients.get_clients();
     std::for_each(activeClients.begin(), activeClients.end(), broadcastToClient);
 }
 
@@ -79,14 +84,15 @@ RabbitMQPublisher::broadcastAccountUpdate(
     const manager::ClientManager& clients, const messages::Match& match
 )
 {
-    std::string buyer_uid = match.buyer_uid;
-    std::string seller_uid = match.seller_uid;
+    const std::string& buyer_uid = match.buyer_uid;
+    const std::string& seller_uid = match.seller_uid;
+
     messages::AccountUpdate buyer_update = {
-        clients.get_capital(match.buyer_uid), match.ticker, messages::SIDE::BUY,
-        match.price, match.quantity
+        clients.get_capital(buyer_uid), match.ticker, messages::SIDE::BUY, match.price,
+        match.quantity
     };
     messages::AccountUpdate seller_update = {
-        clients.get_capital(match.seller_uid), match.ticker, messages::SIDE::SELL,
+        clients.get_capital(seller_uid), match.ticker, messages::SIDE::SELL,
         match.price, match.quantity
     };
 

@@ -5,7 +5,7 @@
 namespace nutc {
 namespace sandbox {
 
-int initialize_client_manager(manager::ClientManager& users);
+size_t initialize_client_manager(manager::ClientManager& users);
 
 void create_sandbox_algo_files();
 

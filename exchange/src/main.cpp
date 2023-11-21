@@ -127,7 +127,7 @@ main(int argc, const char** argv)
         users.add_client(uid, algo_id, false);
     }
 
-    int num_clients = nutc::client::initialize(users, mode);
+    size_t num_clients = nutc::client::initialize(users, mode);
 
     engine_manager.add_engine("A");
     engine_manager.add_engine("B");
