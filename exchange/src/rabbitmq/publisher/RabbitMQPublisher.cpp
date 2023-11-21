@@ -38,15 +38,21 @@ RabbitMQPublisher::broadcastMatches(
     const manager::ClientManager& clients, const std::vector<messages::Match>& matches
 )
 {
-    auto broadcastToClient = [&](const auto& client) {
+    auto broadcastToClient = [&](const std::pair<std::string, manager::Client>& pair) {
         for (const auto& match : matches) {
+            const std::string& uid = pair.first;
+            const manager::Client& client = pair.second;
+
+            if (!client.active)
+                continue;
+
             std::string buffer;
             glz::write<glz::opts{}>(match, buffer);
-            publishMessage(client.uid, buffer);
+            publishMessage(uid, buffer);
         }
     };
 
-    const auto activeClients = clients.get_clients(true);
+    const auto& activeClients = clients.get_clients();
     std::for_each(activeClients.begin(), activeClients.end(), broadcastToClient);
 }
 
@@ -56,21 +62,22 @@ RabbitMQPublisher::broadcastObUpdates(
     const std::vector<messages::ObUpdate>& updates, const std::string& ignore_uid
 )
 {
-    auto broadcastToClient = [&](const auto& client) {
-        if (client.uid == ignore_uid) {
+    auto broadcastToClient = [&](const std::pair<std::string, manager::Client>& pair) {
+        const std::string& uid = pair.first;
+        const manager::Client& client = pair.second;
+
+        if (uid == ignore_uid || !client.active) {
             return;
         }
+
         for (const auto& update : updates) {
-            // if (update.quantity <= 1e-6f) {
-            // continue;
-            // }
             std::string buffer;
             glz::write<glz::opts{}>(update, buffer);
-            publishMessage(client.uid, buffer);
+            publishMessage(uid, buffer);
         }
     };
 
-    const auto activeClients = clients.get_clients(true);
+    const auto activeClients = clients.get_clients();
     std::for_each(activeClients.begin(), activeClients.end(), broadcastToClient);
 }
 

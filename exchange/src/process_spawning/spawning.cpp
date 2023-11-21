@@ -56,16 +56,29 @@ quote_id(std::string id)
 int
 spawn_all_clients(const nutc::manager::ClientManager& users)
 {
-    int clients = 0;
-    for (const auto& client : users.get_clients(false)) {
-        log_i(client_spawning, "Spawning client: {}", client.uid);
-        std::string quoted_user_id = quote_id(client.uid);
-        std::string quoted_algo_id = quote_id(client.algo_id);
+    int num_clients = 0;
+    auto spawn_one_client =
+        [&num_clients](const std::pair<std::string, manager::Client>& pair) {
+            const std::string& uid = pair.first;
+            const manager::Client& client = pair.second;
+            const std::string& algo_id = client.algo_id;
 
-        spawn_client(quoted_user_id, quoted_algo_id, client.is_local_algo);
-        clients++;
-    };
-    return clients;
+            if (client.active)
+                return;
+
+            log_i(client_spawning, "Spawning client: {}", uid);
+            std::string quoted_user_id = quote_id(uid);
+            std::string quoted_algo_id = quote_id(algo_id);
+
+            spawn_client(quoted_user_id, quoted_algo_id, client.is_local_algo);
+            num_clients++;
+        };
+
+    const auto& clients = users.get_clients();
+
+    std::for_each(clients.begin(), clients.end(), spawn_one_client);
+
+    return num_clients;
 }
 
 void

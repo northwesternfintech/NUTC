@@ -112,20 +112,10 @@ ClientManager::set_active(const std::string& uid)
 }
 
 // inefficient but who cares
-std::vector<Client>
-ClientManager::get_clients(bool active_status) const
+const std::unordered_map<std::string, Client>&
+ClientManager::get_clients() const
 {
-    std::vector<Client> client_vec;
-
-    auto add_client_to_vec = [&client_vec, &active_status](const auto& client) {
-        if (client.active == active_status)
-            client_vec.push_back(client);
-    };
-
-    for (auto& [_, client] : clients)
-        add_client_to_vec(client);
-
-    return client_vec;
+    return clients;
 }
 } // namespace manager
 } // namespace nutc
