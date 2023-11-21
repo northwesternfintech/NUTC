@@ -77,7 +77,7 @@ RabbitMQPublisher::broadcastObUpdates(
         }
     };
 
-    const auto activeClients = clients.get_clients();
+    const auto& activeClients = clients.get_clients();
     std::for_each(activeClients.begin(), activeClients.end(), broadcastToClient);
 }
 
