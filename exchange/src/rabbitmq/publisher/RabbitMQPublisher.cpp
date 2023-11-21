@@ -64,7 +64,7 @@ RabbitMQPublisher::broadcastObUpdates(
     auto broadcastToClient = [&](const std::pair<std::string, manager::Client>& pair) {
         const auto& [uid, client] = pair;
 
-        if (uid == ignore_uid || !client.active) {
+        if (!client.active || uid == ignore_uid) {
             return;
         }
 
