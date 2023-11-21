@@ -10,7 +10,7 @@ namespace rabbitmq {
 
 void
 RabbitMQClientManager::waitForClients(
-    manager::ClientManager& clients, const int num_clients
+    manager::ClientManager& clients, size_t num_clients
 )
 {
     int num_running = 0;
@@ -42,7 +42,7 @@ RabbitMQClientManager::waitForClients(
         return true; // indicate that function should continue
     };
 
-    for (int i = 0; i < num_clients; i++) {
+    for (size_t i = 0; i < num_clients; i++) {
         auto data = RabbitMQConsumer::consumeMessage();
         if (!std::visit(processMessage, data)) {
             return;
@@ -71,8 +71,7 @@ RabbitMQClientManager::sendStartTime(
     std::string buf = glz::write_json(message);
 
     auto send_to_client = [buf](const std::pair<std::string, manager::Client>& pair) {
-        const std::string& uid = pair.first;
-        const manager::Client& client = pair.second;
+        const auto& [uid, client] = pair;
 
         if (!client.active)
             return;

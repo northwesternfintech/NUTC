@@ -39,7 +39,12 @@ public:
 
     float get_capital(const std::string& uid) const;
     float get_holdings(const std::string& uid, const std::string& ticker) const;
-    const std::unordered_map<std::string, Client>& get_clients() const;
+
+    inline const std::unordered_map<std::string, Client>&
+    get_clients() const
+    {
+        return clients;
+    }
 
     void modify_capital(const std::string& uid, float change_in_capital);
     void modify_holdings(

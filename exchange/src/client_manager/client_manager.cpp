@@ -111,10 +111,5 @@ ClientManager::set_active(const std::string& uid)
     clients[uid].active = true;
 }
 
-const std::unordered_map<std::string, Client>&
-ClientManager::get_clients() const
-{
-    return clients;
-}
 } // namespace manager
 } // namespace nutc

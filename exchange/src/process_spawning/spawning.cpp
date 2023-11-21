@@ -9,10 +9,10 @@
 namespace nutc {
 namespace client {
 
-int
+size_t
 initialize(manager::ClientManager& users, Mode mode)
 {
-    int num_users;
+    size_t num_users;
     switch (mode) {
         case Mode::DEV:
             dev_mode::initialize_client_manager(users, DEBUG_NUM_USERS);
@@ -28,7 +28,7 @@ initialize(manager::ClientManager& users, Mode mode)
             users.initialize_from_firebase(firebase_users);
 
             // Spawn clients
-            const int num_clients = nutc::client::spawn_all_clients(users);
+            const size_t num_clients = nutc::client::spawn_all_clients(users);
 
             if (num_clients == 0) {
                 log_c(client_spawning, "Spawned 0 clients");
@@ -53,24 +53,21 @@ quote_id(std::string id)
     return id;
 }
 
-int
+size_t
 spawn_all_clients(const nutc::manager::ClientManager& users)
 {
-    int num_clients = 0;
+    size_t num_clients = 0;
     auto spawn_one_client =
         [&num_clients](const std::pair<std::string, manager::Client>& pair) {
-            const std::string& uid = pair.first;
-            const manager::Client& client = pair.second;
+            const auto& [uid, client] = pair;
             const std::string& algo_id = client.algo_id;
 
             if (client.active)
                 return;
 
             log_i(client_spawning, "Spawning client: {}", uid);
-            std::string quoted_user_id = quote_id(uid);
-            std::string quoted_algo_id = quote_id(algo_id);
 
-            spawn_client(quoted_user_id, quoted_algo_id, client.is_local_algo);
+            spawn_client(quote_id(uid), quote_id(algo_id), client.is_local_algo);
             num_clients++;
         };
 

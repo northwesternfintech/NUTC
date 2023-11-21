@@ -40,8 +40,7 @@ RabbitMQPublisher::broadcastMatches(
 {
     auto broadcastToClient = [&](const std::pair<std::string, manager::Client>& pair) {
         for (const auto& match : matches) {
-            const std::string& uid = pair.first;
-            const manager::Client& client = pair.second;
+            const auto& [uid, client] = pair;
 
             if (!client.active)
                 continue;
@@ -63,8 +62,7 @@ RabbitMQPublisher::broadcastObUpdates(
 )
 {
     auto broadcastToClient = [&](const std::pair<std::string, manager::Client>& pair) {
-        const std::string& uid = pair.first;
-        const manager::Client& client = pair.second;
+        const auto& [uid, client] = pair;
 
         if (uid == ignore_uid || !client.active) {
             return;
@@ -90,11 +88,11 @@ RabbitMQPublisher::broadcastAccountUpdate(
     const std::string& seller_uid = match.seller_uid;
 
     messages::AccountUpdate buyer_update = {
-        clients.get_capital(match.buyer_uid), match.ticker, messages::SIDE::BUY,
-        match.price, match.quantity
+        clients.get_capital(buyer_uid), match.ticker, messages::SIDE::BUY, match.price,
+        match.quantity
     };
     messages::AccountUpdate seller_update = {
-        clients.get_capital(match.seller_uid), match.ticker, messages::SIDE::SELL,
+        clients.get_capital(seller_uid), match.ticker, messages::SIDE::SELL,
         match.price, match.quantity
     };
 

@@ -47,8 +47,7 @@ RabbitMQConnectionManager::closeConnection(const manager::ClientManager& client_
 {
     // Handle client shutdown
     auto shutdownClient = [&](const std::pair<std::string, manager::Client>& pair) {
-        const std::string& uid = pair.first;
-        const manager::Client& client = pair.second;
+        const auto& [uid, client] = pair;
 
         if (!client.active)
             return;
