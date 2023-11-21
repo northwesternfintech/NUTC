@@ -86,8 +86,9 @@ RabbitMQPublisher::broadcastAccountUpdate(
     const manager::ClientManager& clients, const messages::Match& match
 )
 {
-    std::string buyer_uid = match.buyer_uid;
-    std::string seller_uid = match.seller_uid;
+    const std::string& buyer_uid = match.buyer_uid;
+    const std::string& seller_uid = match.seller_uid;
+
     messages::AccountUpdate buyer_update = {
         clients.get_capital(match.buyer_uid), match.ticker, messages::SIDE::BUY,
         match.price, match.quantity
