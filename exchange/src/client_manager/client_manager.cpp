@@ -111,7 +111,6 @@ ClientManager::set_active(const std::string& uid)
     clients[uid].active = true;
 }
 
-// inefficient but who cares
 const std::unordered_map<std::string, Client>&
 ClientManager::get_clients() const
 {
