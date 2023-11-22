@@ -72,6 +72,17 @@ Engine::match_order(MarketOrder& order, manager::ClientManager& manager)
 
     MatchResult res = attempt_matches(manager, order);
 
+    events::Logger& logger = events::Logger::get_logger();
+
+    // Log information from res
+    for (const auto& match : res.matches) {
+        logger.log_event(match);
+    }
+
+    for (const auto& ob_update : res.ob_updates) {
+        logger.log_event(ob_update);
+    }
+
     return res;
 }
 
