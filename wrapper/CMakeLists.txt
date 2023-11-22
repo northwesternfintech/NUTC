@@ -91,7 +91,6 @@ target_link_libraries(NUTC-client_exe PRIVATE CURL::libcurl)
 target_link_libraries(NUTC-client_exe PRIVATE glaze::glaze)
 target_link_libraries(NUTC-client_exe PRIVATE pybind11::pybind11)
 target_link_libraries(NUTC-client_exe PRIVATE Python::Python)
-message (STATUS "PYTHON_LIBRARIES: ${PYTHON_LIBRARIES}")
 target_link_libraries(NUTC-client_exe PRIVATE ${PYTHON_LIBRARIES})
 
 if(USE_GIT_VERSION_TRACKING)
