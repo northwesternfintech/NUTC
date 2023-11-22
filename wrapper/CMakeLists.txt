@@ -26,7 +26,8 @@ find_package(argparse REQUIRED)  # Argument parsing
 find_package(rabbitmq-c REQUIRED)
 find_package(CURL REQUIRED)
 find_package(glaze REQUIRED)
-find_package(Python COMPONENTS Interpreter Development REQUIRED)
+find_package(Python 3.10 COMPONENTS Interpreter Development EXACT REQUIRED)
+find_package(PythonLibs 3.10 EXACT REQUIRED)
 find_package(pybind11 REQUIRED)
 
 # Git version tracking
@@ -67,6 +68,8 @@ target_link_libraries(NUTC-client_lib PRIVATE CURL::libcurl)
 target_link_libraries(NUTC-client_lib PRIVATE glaze::glaze)
 target_link_libraries(NUTC-client_lib PRIVATE pybind11::pybind11)
 target_link_libraries(NUTC-client_lib PRIVATE Python::Python)
+target_link_libraries(NUTC-client_lib PRIVATE ${PYTHON_LIBRARIES})
+
 
 
 # ---- Declare executable ----
@@ -88,6 +91,7 @@ target_link_libraries(NUTC-client_exe PRIVATE CURL::libcurl)
 target_link_libraries(NUTC-client_exe PRIVATE glaze::glaze)
 target_link_libraries(NUTC-client_exe PRIVATE pybind11::pybind11)
 target_link_libraries(NUTC-client_exe PRIVATE Python::Python)
+target_link_libraries(NUTC-client_exe PRIVATE ${PYTHON_LIBRARIES})
 
 if(USE_GIT_VERSION_TRACKING)
   target_link_libraries(NUTC-client_exe PRIVATE cmake_git_version_tracking)
