@@ -72,6 +72,18 @@ Engine::match_order(MarketOrder& order, manager::ClientManager& manager)
 
     MatchResult res = attempt_matches(manager, order);
 
+    events::Logger& logger = events::Logger::get_logger();
+
+    // Log information from the 'matches' vector
+    for (const auto& match : res.matches) {
+        logger.log_event(match); // Assuming Match can be directly converted to JSON or has appropriate conversion defined
+    }
+
+    // Log information from the 'ob_updates' vector
+    for (const auto& obUpdate : res.ob_updates) {
+        logger.log_event(obUpdate); 
+    }
+    
     return res;
 }
 
