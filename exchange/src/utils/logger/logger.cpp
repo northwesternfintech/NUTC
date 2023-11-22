@@ -57,9 +57,9 @@ Logger::log_event(const T& json_message)
 }
 
 // Explicit instantiations
-template void
-Logger::log_event<messages::MarketOrder>(const messages::MarketOrder& json_message);
-template void Logger::log_event<messages::Match>(const messages::Match& json_message);
+template void Logger::log_event<messages::MarketOrder>(const messages::MarketOrder&);
+template void Logger::log_event<messages::Match>(const messages::Match&);
+template void Logger::log_event<messages::ObUpdate>(const messages::ObUpdate&)
 
 } // namespace events
 } // namespace nutc
