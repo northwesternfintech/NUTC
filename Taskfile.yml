@@ -3,8 +3,6 @@ version: '3'
 env:
   NAME: NUTC
 
-#todo: task will not work if alias is go-task. Maybe try to fix?
-
 tasks:
   init-default-user-presets:
     cmds:
