@@ -15,9 +15,9 @@ import (
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
-const dockerTimeout = 120
+const dockerTimeout = time.Minute * 10
 
-const port = "8080"
+const port = "8081"
 
 func main() {
 	server := http.Server{
@@ -94,7 +94,7 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go func() {
-		time.Sleep(dockerTimeout * time.Second)
+		time.Sleep(dockerTimeout)
 		cli.ContainerStop(context.Background(), resp.ID, container.StopOptions{})
 	}()
 
