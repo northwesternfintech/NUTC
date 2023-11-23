@@ -1,6 +1,5 @@
 #include "client_manager/client_manager.hpp"
 #include "config.h"
-#include "lib.hpp"
 #include "local_algos/dev_mode.hpp"
 #include "local_algos/sandbox.hpp"
 #include "logging.hpp"
