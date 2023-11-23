@@ -25,6 +25,9 @@ RabbitMQOrderHandler::handleIncomingMarketOrder(
     }
 
     log_i(rabbitmq, "Received market order: {}", buffer);
+    events::Logger& logger = events::Logger::get_logger();
+    logger.log_event(order);
+
     std::optional<std::reference_wrapper<Engine>> engine =
         engine_manager.get_engine(order.ticker);
     if (!engine.has_value()) {
