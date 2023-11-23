@@ -237,3 +237,22 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: build/docs/html
+
+  create-dockerimage:
+      needs: [lint]
+
+      runs-on: ubuntu-22.04
+      defaults:
+        run:
+          working-directory: linter
+
+      steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+
+      - name: Copy conan-profile.sh to linter directory
+        run: cp ../.github/scripts/conan-profile.sh conan-profile.sh
+
+      - name: Create Dockerimage
+        run: docker build -t nutc-linter:latest .
