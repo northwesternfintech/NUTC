@@ -73,6 +73,10 @@ jobs:
 
     - name: Install Python
       uses: actions/setup-python@v4
+      with: { python-version: "3.11" }
+
+    - name: Install Python Devel
+      uses: actions/setup-python@v4
       with: { python-version: "3.11-dev" }
 
     - name: Install LLVM 17
@@ -149,6 +153,10 @@ jobs:
         /usr/bin/clang-tidy-17 160
 
     - name: Install Python
+      uses: actions/setup-python@v4
+      with: { python-version: "3.11" }
+
+    - name: Install Python Devel
       uses: actions/setup-python@v4
       with: { python-version: "3.11-dev" }
     
