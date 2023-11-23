@@ -4,7 +4,7 @@ FROM python:3.11-slim as build
 RUN pip install conan numpy pandas polars scipy scikit-learn \
     # c++ stuff
     && apt update \
-    && apt install -y --no-install-recommends build-essential libssl-dev cmake git python3.11-dev
+    && apt install -y --no-install-recommends build-essential libssl-dev cmake git
 
 WORKDIR /app
 COPY ./conanfile.py /app/

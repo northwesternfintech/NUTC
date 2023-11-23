@@ -81,11 +81,8 @@ jobs:
 
     - name: Install Python
       uses: actions/setup-python@v4
-      with: { python-version: "3.11" }
+      with: { python-version: "3.11-dev" }
     
-    - name: Install Python Developer Headers
-      run: sudo apt install python3.11-dev
-
     - name: Install GCC 13
       run: |
         sudo add-apt-repository ppa:ubuntu-toolchain-r/test
@@ -146,10 +143,7 @@ jobs:
 
     - name: Install Python
       uses: actions/setup-python@v4
-      with: { python-version: "3.11" }
-
-    - name: Install Python Developer Headers
-      run: sudo apt install python3.11-dev
+      with: { python-version: "3.11-dev" }
 
     - name: Install LLVM 17
       run: |
@@ -226,10 +220,7 @@ jobs:
 
     - name: Install Python
       uses: actions/setup-python@v4
-      with: { python-version: "3.11" }
-
-    - name: Install Python Developer Headers
-      run: sudo apt install python3.11-dev
+      with: { python-version: "3.11-dev" }
 
     - name: Install dependencies
       shell: bash
