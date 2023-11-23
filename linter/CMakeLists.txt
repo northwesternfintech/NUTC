@@ -25,7 +25,8 @@ find_package(quill REQUIRED)     # Logging
 find_package(argparse REQUIRED)  # Argument parsing
 find_package(CURL REQUIRED)
 find_package(glaze REQUIRED)
-find_package(Python COMPONENTS Interpreter Development REQUIRED)
+find_package(Python 3.11 COMPONENTS Interpreter Development EXACT REQUIRED)
+find_package(PythonLibs 3.11 EXACT REQUIRED)
 find_package(pybind11 REQUIRED)
 find_package(Crow REQUIRED)
 
