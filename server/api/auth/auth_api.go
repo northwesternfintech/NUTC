@@ -4,13 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"server/api/database"
 	"server/internal/auth/jwt"
 	"server/internal/auth/oauth"
 	"server/internal/config"
+	"server/internal/database/queries"
+	"server/internal/database/schema"
 	"server/internal/http"
 	"server/internal/logger"
-	"server/internal/models"
 	"server/internal/validator"
 	"time"
 
@@ -28,10 +28,10 @@ type authAPI struct {
 	jwtService    jwt.TokenVerificationService
 	config        config.GoogleOAuthConfig
 	jwtExpiration int
-	userRepo      user_api.Repository
+	userRepo      db_queries.UserRepository
 }
 
-func NewAPI(validator validator.Validate, jwtService jwt.TokenVerificationService, userRepo user_api.Repository, config config.GoogleOAuthConfig, jwtExpiration int) GoogleAuthAPI {
+func NewAPI(validator validator.Validate, jwtService jwt.TokenVerificationService, userRepo db_queries.UserRepository, config config.GoogleOAuthConfig, jwtExpiration int) GoogleAuthAPI {
 	return &authAPI{
 		validator:     validator,
 		config:        config,
@@ -84,7 +84,7 @@ func (api *authAPI) HandleGoogleOAuthCallback(w http.ResponseWriter, r *http.Req
 
 	if user.ID == "" {
 		logger.Infof("Creating new user: %s", googleUser.ID)
-		err = api.userRepo.CreateUser(models.User{
+		err = api.userRepo.CreateUser(schema.User{
 			ID:        googleUser.ID,
 			Name:      googleUser.Name,
 			Email:     googleUser.Email,

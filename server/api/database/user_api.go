@@ -3,6 +3,7 @@ package user_api
 import (
 	"net/http"
 	"server/internal/auth/jwt"
+	"server/internal/database/queries"
 	"server/internal/http"
 	"server/internal/logger"
 	"server/internal/validator"
@@ -12,10 +13,10 @@ import (
 
 type API struct {
 	validator validator.Validate
-	userRepo  Repository
+	userRepo  db_queries.UserRepository
 }
 
-func NewAPI(validator validator.Validate, userRepo Repository) API {
+func NewAPI(validator validator.Validate, userRepo db_queries.UserRepository) API {
 	return API{
 		validator: validator,
 		userRepo:  userRepo,

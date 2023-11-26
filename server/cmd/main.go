@@ -10,6 +10,7 @@ import (
 	"server/internal/auth/jwt"
 	"server/internal/config"
 	"server/internal/database"
+	"server/internal/database/queries"
 	"server/internal/http"
 	"server/internal/logger"
 	"server/internal/validator"
@@ -74,7 +75,7 @@ func setupHandler(
 	r.Use(http_utils.RequestLogger(logger))
 	r.Use(http_utils.Cors())
 
-	userRepo := user_api.NewRepository(db)
+	userRepo := db_queries.NewRepository(db)
 	userAPI := user_api.NewAPI(v, userRepo)
 
 	jwtService := jwt.NewService(cfg.JwtSecret, cfg.JwtExpiration)

@@ -1,19 +1,19 @@
-package user_api
+package db_queries
 
 import (
 	"errors"
 	"fmt"
-	"server/internal/models"
+	"server/internal/database/schema"
 
 	"github.com/guregu/dynamo"
 )
 
-type Repository interface {
-	CreateUser(user models.User) error
-	GetUserByID(userID string) (models.User, error)
+type UserRepository interface {
+	CreateUser(user schema.User) error
+	GetUserByID(userID string) (schema.User, error)
 }
 
-type repository struct {
+type userRepository struct {
 	db *dynamo.DB
 }
 
@@ -26,13 +26,13 @@ var (
 	ErrUserNotFound      = errors.New("repository: user not found")
 )
 
-func NewRepository(db *dynamo.DB) Repository {
-	return &repository{
+func NewRepository(db *dynamo.DB) UserRepository {
+	return &userRepository{
 		db: db,
 	}
 }
 
-func (r *repository) CreateUser(user models.User) error {
+func (r *userRepository) CreateUser(user schema.User) error {
 	err := r.db.Table(userTableName).Put(user).Run()
 	if err != nil {
 		return fmt.Errorf("repository: error creating user: %v", err)
@@ -40,14 +40,14 @@ func (r *repository) CreateUser(user models.User) error {
 	return nil
 }
 
-func (r *repository) GetUserByID(userID string) (models.User, error) {
-	var user models.User
+func (r *userRepository) GetUserByID(userID string) (schema.User, error) {
+	var user schema.User
 	err := r.db.Table(userTableName).Get("id", userID).One(&user)
 	if err != nil {
 		if err == dynamo.ErrNotFound {
-			return models.User{}, ErrUserNotFound
+			return schema.User{}, ErrUserNotFound
 		}
-		return models.User{}, fmt.Errorf("repository: error getting user: %v", err)
+		return schema.User{}, fmt.Errorf("repository: error getting user: %v", err)
 	}
 	return user, nil
 }
