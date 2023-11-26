@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"net/http"
 	"server/api/user"
+	"server/internal/auth/jwt"
+	"server/internal/auth/oauth"
 	"server/internal/config"
 	"server/internal/endpoint"
-	"server/internal/auth/jwt"
 	"server/internal/logger"
 	"server/internal/models"
-	"server/internal/auth/oauth"
 	"server/internal/validator"
 	"time"
 
@@ -18,21 +18,21 @@ import (
 	"github.com/guregu/dynamo"
 )
 
-type API interface {
+type GoogleAuthAPI interface {
 	HandleGoogleOAuthCallback(w http.ResponseWriter, r *http.Request)
 	RegisterHandlers(r chi.Router)
 }
 
-type api struct {
+type authAPI struct {
 	validator     validator.Validate
-	jwtService    jwt.Service
+	jwtService    jwt.TokenVerificationService
 	config        config.GoogleOAuthConfig
 	jwtExpiration int
 	userRepo      user.Repository
 }
 
-func NewAPI(validator validator.Validate, jwtService jwt.Service, userRepo user.Repository, config config.GoogleOAuthConfig, jwtExpiration int) API {
-	return &api{
+func NewAPI(validator validator.Validate, jwtService jwt.TokenVerificationService, userRepo user.Repository, config config.GoogleOAuthConfig, jwtExpiration int) GoogleAuthAPI {
+	return &authAPI{
 		validator:     validator,
 		config:        config,
 		jwtService:    jwtService,
@@ -41,7 +41,7 @@ func NewAPI(validator validator.Validate, jwtService jwt.Service, userRepo user.
 	}
 }
 
-func (api *api) HandleGoogleOAuthCallback(w http.ResponseWriter, r *http.Request) {
+func (api *authAPI) HandleGoogleOAuthCallback(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := logger.FromContext(ctx)
 
@@ -118,7 +118,7 @@ func (api *api) HandleGoogleOAuthCallback(w http.ResponseWriter, r *http.Request
 	http.Redirect(w, r, redirectURIWithState, http.StatusFound)
 }
 
-func (api *api) RegisterHandlers(r chi.Router) {
+func (api *authAPI) RegisterHandlers(r chi.Router) {
 	r.Route("/auth", func(r chi.Router) {
 		r.Get("/google/callback", api.HandleGoogleOAuthCallback)
 	})

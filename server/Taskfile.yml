@@ -1,0 +1,18 @@
+version: '3'
+
+env:
+  NAME: NUTC-backend
+
+tasks:
+  deps:
+    cmds:
+      - go mod download
+      - go mod verify
+    
+  build:
+    cmds:
+      - go build -o {{.NAME}} ./cmd/main.go
+
+  run:
+    cmds:
+      - go run ./cmd/main.go

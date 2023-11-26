@@ -7,15 +7,14 @@ import (
 	"os/signal"
 	"server/api/auth"
 	"server/api/user"
+	"server/internal/auth/jwt"
 	"server/internal/config"
 	"server/internal/database"
-	"server/internal/auth/jwt"
 	"server/internal/logger"
 	"server/internal/middleware"
+	"server/internal/validator"
 	"syscall"
 	"time"
-
-	"server/internal/validator"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/guregu/dynamo"
@@ -52,7 +51,6 @@ func main() {
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			logger.Fatalf("Could not start server: %s", err)
 		}
-
 	}()
 
 	<-stop
@@ -80,7 +78,7 @@ func setupHandler(
 	userAPI := user.NewAPI(v, userRepo)
 
 	jwtService := jwt.NewService(cfg.JwtSecret, cfg.JwtExpiration)
-	authHandler := middleware.Auth(jwtService)
+	authHandler := jwt.AuthenticateToken(jwtService)
 
 	authAPI := auth.NewAPI(v, jwtService, userRepo, cfg.GoogleOAuth, cfg.JwtExpiration)
 

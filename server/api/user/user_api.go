@@ -2,9 +2,9 @@ package user
 
 import (
 	"net/http"
+	"server/internal/auth/jwt"
 	"server/internal/endpoint"
 	"server/internal/logger"
-	"server/internal/middleware"
 	"server/internal/validator"
 
 	"github.com/go-chi/chi/v5"
@@ -45,7 +45,7 @@ func (api *API) GetUser(w http.ResponseWriter, r *http.Request) {
 func (api *API) HandleGetMe(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := logger.FromContext(ctx)
-	userID := middleware.UserIDFromContext(ctx)
+	userID := jwt.UserIDFromContext(ctx)
 
 	if userID == "" {
 		logger.Errorf("handler: missing userID path parameter")
