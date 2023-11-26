@@ -23,11 +23,14 @@ def place_market_order(side: str, ticker: str, quantity: float, price: float) ->
 class Strategy:
     """Template for a strategy."""
 
-    def __init__(self) -> None:
+    def __init__(self, holdings) -> None:
         """Your initialization code goes here."""
+        self.holdings = holdings
 
-    def on_trade_update(self, ticker: str, side: str, price: float, quantity: float) -> None:
+    def on_trade_and_account_update(self, ticker: str, side: str, price: float, quantity: float, capital_remaining: float) -> None:
         """Called whenever two orders match. Could be one of your orders, or two other people's orders.
+
+        Also called when one of your orders is filled.
 
         Parameters
         ----------
@@ -40,7 +43,7 @@ class Strategy:
         quantity
             Volume traded
         """
-        print(f"Python Trade update: {ticker} {side} {price} {quantity}")
+        print(f"Python Trade/Account update: {ticker} {side} {price} {quantity} {capital_remaining}")
 
     def on_orderbook_update(
         self, ticker: str, side: str, price: float, quantity: float
@@ -60,29 +63,13 @@ class Strategy:
         """
         print(f"Python Orderbook update: {ticker} {side} {price} {quantity}")
 
-    def on_account_update(
-        self,
-        ticker: str,
-        side: str,
-        price: float,
-        quantity: float,
-        capital_remaining: float,
-    ) -> None:
-        """Called whenever one of your orders is filled.
+    def on_holding_change(
+        self
+    ):
+        """Called whenever there is a change in holdings
 
         Parameters
         ----------
-        ticker
-            Ticker of order that was fulfilled ("A", "B", or "C")
-        side
-            Side of order that was fulfilled ("BUY" or "SELL")
-        price
-            Price that order was fulfilled at
-        quantity
-            Volume of order that was fulfilled
-        capital_remaining
-            Ammount of capital after fulfilling order
+        idk fill this in later
         """
-        print(
-            f"Python Account update: {ticker} {side} {price} {quantity} {capital_remaining}"
-        )
+        print(f"Python Holding change")
