@@ -89,7 +89,7 @@ func CountMarketOrders(filename string) error {
 	cumulative_orders := make([]int, time_difference+1)
 
 	for _, entry := range log_entries {
-
+		fmt.Println(isMarketOrder(entry.Data))
 		if !isMarketOrder(entry.Data) {
 			continue
 		}
@@ -101,7 +101,7 @@ func CountMarketOrders(filename string) error {
 		}
 
 		seconds_diff := int(cur_time.Sub(start_time).Seconds())
-		fmt.Println(seconds_diff)
+		
 		cumulative_orders[seconds_diff]++
 	}
 
@@ -131,22 +131,20 @@ func CountMarketOrders(filename string) error {
 
 
 func isMarketOrder(data interface{}) bool {
-	// Create an instance of the Match struct
-	var marketorder MarketOrder
-
-	// Convert the map to JSON
-	jsonData, err := json.Marshal(data)
-	if err != nil {
-		fmt.Println("Error marshaling JSON:", err)
+	// Type assert the interface to a map
+	dataMap, ok := data.(map[string]interface{})
+	if !ok {
+		// Not a map
 		return false
 	}
 
-	// Unmarshal the JSON data into the Match struct
-	err = json.Unmarshal(jsonData, &marketorder)
-	if err != nil {
-		fmt.Println("Error unmarshaling JSON:", err)
-		return false
-	}
+	// Check if the required fields are present
+	_, clientUIDPresent := dataMap["client_uid"]
+	_, sidePresent := dataMap["side"]
+	_, tickerPresent := dataMap["ticker"]
+	_, quantityPresent := dataMap["quantity"]
+	_, pricePresent := dataMap["price"]
 
-	return true
+	// Check if all required fields are present
+	return clientUIDPresent && sidePresent && tickerPresent && quantityPresent && pricePresent
 }
