@@ -1,4 +1,4 @@
-package endpoint
+package http_utils
 
 import (
 	"encoding/json"

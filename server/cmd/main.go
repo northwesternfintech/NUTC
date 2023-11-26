@@ -6,12 +6,12 @@ import (
 	"os"
 	"os/signal"
 	"server/api/auth"
-	"server/api/user"
+	"server/api/database"
 	"server/internal/auth/jwt"
 	"server/internal/config"
 	"server/internal/database"
+	"server/internal/http"
 	"server/internal/logger"
-	"server/internal/middleware"
 	"server/internal/validator"
 	"syscall"
 	"time"
@@ -71,16 +71,16 @@ func setupHandler(
 	db *dynamo.DB,
 	logger logger.Logger,
 ) chi.Router {
-	r.Use(middleware.RequestLogger(logger))
-	r.Use(middleware.Cors())
+	r.Use(http_utils.RequestLogger(logger))
+	r.Use(http_utils.Cors())
 
-	userRepo := user.NewRepository(db)
-	userAPI := user.NewAPI(v, userRepo)
+	userRepo := user_api.NewRepository(db)
+	userAPI := user_api.NewAPI(v, userRepo)
 
 	jwtService := jwt.NewService(cfg.JwtSecret, cfg.JwtExpiration)
 	authHandler := jwt.AuthenticateToken(jwtService)
 
-	authAPI := auth.NewAPI(v, jwtService, userRepo, cfg.GoogleOAuth, cfg.JwtExpiration)
+	authAPI := auth_api.NewAPI(v, jwtService, userRepo, cfg.GoogleOAuth, cfg.JwtExpiration)
 
 	userAPI.RegisterHandlers(r, authHandler)
 	authAPI.RegisterHandlers(r)

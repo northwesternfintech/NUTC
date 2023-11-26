@@ -1,14 +1,14 @@
-package auth
+package auth_api
 
 import (
 	"errors"
 	"fmt"
 	"net/http"
-	"server/api/user"
+	"server/api/database"
 	"server/internal/auth/jwt"
 	"server/internal/auth/oauth"
 	"server/internal/config"
-	"server/internal/endpoint"
+	"server/internal/http"
 	"server/internal/logger"
 	"server/internal/models"
 	"server/internal/validator"
@@ -28,10 +28,10 @@ type authAPI struct {
 	jwtService    jwt.TokenVerificationService
 	config        config.GoogleOAuthConfig
 	jwtExpiration int
-	userRepo      user.Repository
+	userRepo      user_api.Repository
 }
 
-func NewAPI(validator validator.Validate, jwtService jwt.TokenVerificationService, userRepo user.Repository, config config.GoogleOAuthConfig, jwtExpiration int) GoogleAuthAPI {
+func NewAPI(validator validator.Validate, jwtService jwt.TokenVerificationService, userRepo user_api.Repository, config config.GoogleOAuthConfig, jwtExpiration int) GoogleAuthAPI {
 	return &authAPI{
 		validator:     validator,
 		config:        config,
@@ -41,6 +41,7 @@ func NewAPI(validator validator.Validate, jwtService jwt.TokenVerificationServic
 	}
 }
 
+// todo: should split up into other functions
 func (api *authAPI) HandleGoogleOAuthCallback(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := logger.FromContext(ctx)
@@ -51,33 +52,33 @@ func (api *authAPI) HandleGoogleOAuthCallback(w http.ResponseWriter, r *http.Req
 
 	if code == "" {
 		logger.Errorf("handler: missing code query parameter")
-		endpoint.WriteWithError(logger, w, http.StatusInternalServerError, endpoint.ErrMsgInternalServer)
+		http_utils.WriteWithError(logger, w, http.StatusInternalServerError, http_utils.ErrMsgInternalServer)
 		return
 	}
 	if state == "" {
 		logger.Errorf("handler: missing state query parameter")
-		endpoint.WriteWithError(logger, w, http.StatusInternalServerError, endpoint.ErrMsgInternalServer)
+		http_utils.WriteWithError(logger, w, http.StatusInternalServerError, http_utils.ErrMsgInternalServer)
 		return
 	}
 
 	tokenResponse, err := oauth.RequestToken(code, &api.config)
 	if err != nil {
 		logger.Errorf("handler: error requesting token: %v", err)
-		endpoint.WriteWithError(logger, w, http.StatusInternalServerError, endpoint.ErrMsgInternalServer)
+		http_utils.WriteWithError(logger, w, http.StatusInternalServerError, http_utils.ErrMsgInternalServer)
 		return
 	}
 
 	googleUser, err := oauth.GetGoogleUser(tokenResponse.AccessToken, tokenResponse.IDToken)
 	if err != nil {
 		logger.Errorf("handler: error getting google user: %v", err)
-		endpoint.WriteWithError(logger, w, http.StatusInternalServerError, endpoint.ErrMsgInternalServer)
+		http_utils.WriteWithError(logger, w, http.StatusInternalServerError, http_utils.ErrMsgInternalServer)
 		return
 	}
 
 	user, err := api.userRepo.GetUserByID(googleUser.ID)
 	if err != nil && !errors.Is(err, dynamo.ErrNotFound) {
 		logger.Errorf("handler: error getting user: %v", err)
-		endpoint.WriteWithError(logger, w, http.StatusInternalServerError, endpoint.ErrMsgInternalServer)
+		http_utils.WriteWithError(logger, w, http.StatusInternalServerError, http_utils.ErrMsgInternalServer)
 		return
 	}
 
@@ -91,7 +92,7 @@ func (api *authAPI) HandleGoogleOAuthCallback(w http.ResponseWriter, r *http.Req
 		})
 		if err != nil {
 			logger.Errorf("handler: error creating user: %v", err)
-			endpoint.WriteWithError(logger, w, http.StatusInternalServerError, endpoint.ErrMsgInternalServer)
+			http_utils.WriteWithError(logger, w, http.StatusInternalServerError, http_utils.ErrMsgInternalServer)
 			return
 		}
 		user.ID = googleUser.ID
@@ -100,7 +101,7 @@ func (api *authAPI) HandleGoogleOAuthCallback(w http.ResponseWriter, r *http.Req
 	token, err := api.jwtService.GenerateToken(user.ID)
 	if err != nil {
 		logger.Errorf("handler: error generating token: %v", err)
-		endpoint.WriteWithError(logger, w, http.StatusInternalServerError, endpoint.ErrMsgInternalServer)
+		http_utils.WriteWithError(logger, w, http.StatusInternalServerError, http_utils.ErrMsgInternalServer)
 		return
 	}
 

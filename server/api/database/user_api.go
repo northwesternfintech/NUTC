@@ -1,9 +1,9 @@
-package user
+package user_api
 
 import (
 	"net/http"
 	"server/internal/auth/jwt"
-	"server/internal/endpoint"
+	"server/internal/http"
 	"server/internal/logger"
 	"server/internal/validator"
 
@@ -29,17 +29,17 @@ func (api *API) GetUser(w http.ResponseWriter, r *http.Request) {
 	userID := chi.URLParam(r, "userID")
 	if userID == "" {
 		logger.Errorf("handler: missing userID path parameter")
-		endpoint.WriteWithError(logger, w, http.StatusBadRequest, endpoint.ErrMsgBadRequest)
+		http_utils.WriteWithError(logger, w, http.StatusBadRequest, http_utils.ErrMsgBadRequest)
 		return
 	}
 
 	user, err := api.userRepo.GetUserByID(userID)
 	if err != nil {
 		logger.Errorf("handler: error getting user: %v", err)
-		endpoint.WriteWithError(logger, w, http.StatusInternalServerError, endpoint.ErrMsgInternalServer)
+		http_utils.WriteWithError(logger, w, http.StatusInternalServerError, http_utils.ErrMsgInternalServer)
 		return
 	}
-	endpoint.WriteWithStatus(logger, w, http.StatusOK, user)
+	http_utils.WriteWithStatus(logger, w, http.StatusOK, user)
 }
 
 func (api *API) HandleGetMe(w http.ResponseWriter, r *http.Request) {
@@ -49,18 +49,18 @@ func (api *API) HandleGetMe(w http.ResponseWriter, r *http.Request) {
 
 	if userID == "" {
 		logger.Errorf("handler: missing userID path parameter")
-		endpoint.WriteWithError(logger, w, http.StatusBadRequest, endpoint.ErrMsgBadRequest)
+		http_utils.WriteWithError(logger, w, http.StatusBadRequest, http_utils.ErrMsgBadRequest)
 		return
 	}
 
 	user, err := api.userRepo.GetUserByID(userID)
 	if err != nil {
 		logger.Errorf("handler: error getting user: %v", err)
-		endpoint.WriteWithError(logger, w, http.StatusInternalServerError, endpoint.ErrMsgInternalServer)
+		http_utils.WriteWithError(logger, w, http.StatusInternalServerError, http_utils.ErrMsgInternalServer)
 		return
 	}
 
-	endpoint.WriteWithStatus(logger, w, http.StatusOK, user)
+	http_utils.WriteWithStatus(logger, w, http.StatusOK, user)
 }
 
 func (api *API) RegisterHandlers(r chi.Router, authHandler func(http.Handler) http.Handler) {

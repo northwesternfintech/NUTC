@@ -3,7 +3,7 @@ package jwt
 import (
 	"context"
 	"net/http"
-	"server/internal/endpoint"
+	"server/internal/http"
 	"server/internal/logger"
 )
 
@@ -21,16 +21,14 @@ const (
 // invalid, it will write an Unauthorized response.
 func AuthenticateToken(jwtService TokenVerificationService) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := r.Context()
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			ctx := req.Context()
 			logger := logger.FromContext(ctx)
 
-			// logger.Infof("request cookie: %v\n", r.Cookies())
-
-			cookie, err := r.Cookie("token")
+			cookie, err := req.Cookie("token")
 			if err != nil {
 				logger.Errorf("handler: issue getting cookie: %v\n", err)
-				endpoint.WriteWithError(logger, w, http.StatusUnauthorized, errMsgMissingCookie)
+				http_utils.WriteWithError(logger, w, http.StatusUnauthorized, errMsgMissingCookie)
 				return
 			}
 			token := cookie.Value
@@ -39,13 +37,13 @@ func AuthenticateToken(jwtService TokenVerificationService) func(next http.Handl
 			userID, err := jwtService.VerifyToken(token)
 			if err != nil {
 				logger.Errorf("handler: issue verifying token: %v\n", err)
-				endpoint.WriteWithError(logger, w, http.StatusUnauthorized, errMsgInvalidToken)
+				http_utils.WriteWithError(logger, w, http.StatusUnauthorized, errMsgInvalidToken)
 				return
 			}
 
 			// Add user information to the context and proceed
-			r = r.WithContext(withUser(ctx, userID))
-			next.ServeHTTP(w, r)
+			req = req.WithContext(withUser(ctx, userID))
+			next.ServeHTTP(w, req)
 		})
 	}
 }
