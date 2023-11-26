@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"server/internal/api/auth"
-	"server/internal/api/user"
+	"server/api/auth"
+	"server/api/user"
 	"server/internal/config"
-	"server/internal/db"
-	"server/internal/jwt"
+	"server/internal/database"
+	"server/internal/auth/jwt"
 	"server/internal/logger"
 	"server/internal/middleware"
 	"syscall"
@@ -30,7 +30,7 @@ func main() {
 		logger.Fatalf("Error loading config: %v", err)
 	}
 
-	db, err := db.New(cfg.DB)
+	db, err := database.New(cfg.DB)
 	if err != nil {
 		logger.Fatalf("Error connecting to database: %v", err)
 	}

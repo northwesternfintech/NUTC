@@ -4,13 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"server/internal/api/user"
+	"server/api/user"
 	"server/internal/config"
 	"server/internal/endpoint"
-	"server/internal/jwt"
+	"server/internal/auth/jwt"
 	"server/internal/logger"
 	"server/internal/models"
-	auth "server/internal/oauth"
+	"server/internal/auth/oauth"
 	"server/internal/validator"
 	"time"
 
@@ -60,14 +60,14 @@ func (api *api) HandleGoogleOAuthCallback(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	tokenResponse, err := auth.RequestToken(code, &api.config)
+	tokenResponse, err := oauth.RequestToken(code, &api.config)
 	if err != nil {
 		logger.Errorf("handler: error requesting token: %v", err)
 		endpoint.WriteWithError(logger, w, http.StatusInternalServerError, endpoint.ErrMsgInternalServer)
 		return
 	}
 
-	googleUser, err := auth.GetGoogleUser(tokenResponse.AccessToken, tokenResponse.IDToken)
+	googleUser, err := oauth.GetGoogleUser(tokenResponse.AccessToken, tokenResponse.IDToken)
 	if err != nil {
 		logger.Errorf("handler: error getting google user: %v", err)
 		endpoint.WriteWithError(logger, w, http.StatusInternalServerError, endpoint.ErrMsgInternalServer)
@@ -105,10 +105,10 @@ func (api *api) HandleGoogleOAuthCallback(w http.ResponseWriter, r *http.Request
 	}
 
 	cookie := http.Cookie{
-		Name:     "token",
-		Value:    token,
-		Path:     "/",
-		MaxAge:   api.jwtExpiration,
+		Name:   "token",
+		Value:  token,
+		Path:   "/",
+		MaxAge: api.jwtExpiration,
 		// Secure:   true, secure only send over https, so have to turn this off for local development
 	}
 

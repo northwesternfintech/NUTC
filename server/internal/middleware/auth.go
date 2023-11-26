@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 	"server/internal/endpoint"
-	"server/internal/jwt"
+	"server/internal/auth/jwt"
 	"server/internal/logger"
 )
 
