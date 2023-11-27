@@ -88,8 +88,10 @@ func CountMarketOrders(filename string) error {
 	//count up the market orders for every second
 	cumulative_orders := make([]int, time_difference+1)
 
+	count := 0
+	lastCount := 0
+
 	for _, entry := range log_entries {
-		fmt.Println(isMarketOrder(entry.Data))
 		if !isMarketOrder(entry.Data) {
 			continue
 		}
@@ -101,8 +103,20 @@ func CountMarketOrders(filename string) error {
 		}
 
 		seconds_diff := int(cur_time.Sub(start_time).Seconds())
-		
-		cumulative_orders[seconds_diff]++
+
+		// Update count for all seconds between lastCount and seconds_diff
+		for i := lastCount + 1; i <= seconds_diff; i++ {
+			cumulative_orders[i] = count
+		}
+	
+		count++
+		cumulative_orders[seconds_diff] = count
+		lastCount = seconds_diff
+	}
+
+	// Fill in the remaining seconds if any
+	for i := lastCount + 1; i <= time_difference; i++ {
+		cumulative_orders[i] = count
 	}
 
 	//create CSV file
