@@ -29,21 +29,7 @@ const py::object get_ob_update_function();
  * Designed to be triggered by the rabbitmq class when a trade or account update is
  * received
  */
-const py::object get_on_trade_and_account_update();
-
-/**
- * @brief Gets the callback function for trade updates
- *
- * Some backwards compatibility, but returns on_trade_and_account_update()
- */
-const py::object get_trade_update_function();
-
-/**
- * @brief Gets the callback function for account updates
- *
- * Some backwards compatibility, but returns on_trade_and_account_update()
- */
-const py::object get_account_update_function();
+const py::object get_trade_and_account_update_function();
 
 /**
  * @brief Creates the Python API module

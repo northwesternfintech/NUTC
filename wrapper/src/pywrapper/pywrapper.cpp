@@ -33,19 +33,6 @@ get_trade_and_account_update_function()
     return py::globals()["strategy"].attr("on_trade_and_account_update");
 }
 
-// A tiny amount of backwards compatibility
-const py::object
-get_trade_update_function()
-{
-    return py::globals()["strategy"].attr("on_trade_and_account_update");
-}
-
-const py::object
-get_account_update_function()
-{
-    return py::globals()["strategy"].attr("on_trade_and_account_update");
-}
-
 void
 run_code_init(const std::string& py_code)
 {
