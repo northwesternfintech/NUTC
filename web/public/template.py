@@ -27,7 +27,7 @@ class Strategy:
         """Your initialization code goes here."""
         self.holdings = holdings
 
-    def on_trade_and_account_update(self, ticker: str, side: str, price: float, quantity: float, capital_remaining: float) -> None:
+    def on_trade_and_account_update(self, ticker: str, side: str, price: float, quantity: float, capital_remaining: float=None) -> None:
         """Called whenever two orders match. Could be one of your orders, or two other people's orders.
 
         Also called when one of your orders is filled.
@@ -42,6 +42,8 @@ class Strategy:
             Price that trade was executed at
         quantity
             Volume traded
+        capital_remaining (default None)
+            Remaining capital
         """
         print(f"Python Trade/Account update: {ticker} {side} {price} {quantity} {capital_remaining}")
 
