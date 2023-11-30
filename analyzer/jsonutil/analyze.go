@@ -120,7 +120,7 @@ func CountMarketOrders(filename string) error {
 	}
 
 	//create CSV file
-	csv_file, err := os.Create("output.csv")
+	csv_file, err := os.Create("market_order.csv")
 	if err != nil {
 		return err
 	}
@@ -139,10 +139,110 @@ func CountMarketOrders(filename string) error {
 		}
 	}
 
-	fmt.Println("CSV file 'output.csv' generated successfully.")
+	fmt.Println("CSV file 'market_order.csv' generated successfully.")
 	return nil
 }
 
+func CountMatch(filename string) error {
+	file, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	var log_entries []LogEntry
+
+	for scanner.Scan() {
+		var entry LogEntry
+		if err := json.Unmarshal([]byte(scanner.Text()), &entry); err != nil {
+			return err
+		}
+		log_entries = append(log_entries, entry)
+	}
+
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+
+	num_entries := len(log_entries)
+	if num_entries == 0 {
+		fmt.Println("empty file")
+		return nil
+	}
+
+	//get start and end time to calculate the timespan of the logger
+	start_time, err := time.Parse("2006-01-02 15:04:05.999", log_entries[0].Timestamp)
+    if err != nil {
+        fmt.Println("Error parsing start time:", err)
+        return nil
+	}
+
+	end_time, err := time.Parse("2006-01-02 15:04:05.999", log_entries[num_entries-1].Timestamp)
+    if err != nil {
+        fmt.Println("Error parsing end time:", err)
+        return nil
+	}
+
+	time_difference := int(end_time.Sub(start_time).Seconds())
+
+	//count up the matches for every second
+	cumulative_matches := make([]int, time_difference+1)
+
+	count := 0
+	lastCount := 0
+
+	for _, entry := range log_entries {
+		if !isMatch(entry.Data) {
+			continue
+		}
+
+		cur_time, err := time.Parse("2006-01-02 15:04:05.999", entry.Timestamp)
+		if err != nil {
+			fmt.Println("Error parsing end time:", err)
+			return nil
+		}
+
+		seconds_diff := int(cur_time.Sub(start_time).Seconds())
+
+		// Update count for all seconds between lastCount and seconds_diff
+		for i := lastCount + 1; i <= seconds_diff; i++ {
+			cumulative_matches[i] = count
+		}
+	
+		count++
+		cumulative_matches[seconds_diff] = count
+		lastCount = seconds_diff
+	}
+
+	// Fill in the remaining seconds if any
+	for i := lastCount + 1; i <= time_difference; i++ {
+		cumulative_matches[i] = count
+	}
+
+	//create CSV file
+	csv_file, err := os.Create("matches.csv")
+	if err != nil {
+		return err
+	}
+	defer csv_file.Close()
+
+	writer := csv.NewWriter(csv_file)
+	defer writer.Flush()
+
+	if err := writer.Write([]string{"time", "cum_matches"}); err != nil {
+		return err
+	}
+
+	for seconds, cum_matches := range cumulative_matches {
+		if err := writer.Write([]string{fmt.Sprintf("%ds", seconds), strconv.Itoa(cum_matches)}); err != nil {
+			return err
+		}
+	}
+
+	fmt.Println("CSV file 'matches.csv' generated successfully.")
+	return nil
+}
 
 func isMarketOrder(data interface{}) bool {
 	// Type assert the interface to a map
@@ -161,4 +261,25 @@ func isMarketOrder(data interface{}) bool {
 
 	// Check if all required fields are present
 	return clientUIDPresent && sidePresent && tickerPresent && quantityPresent && pricePresent
+}
+
+func isMatch(data interface{}) bool {
+	// Type assert the interface to a map
+	dataMap, ok := data.(map[string]interface{})
+	if !ok {
+		// Not a map
+		return false
+	}
+
+	// Check if the required fields are present
+	_, tickerPresent := dataMap["ticker"]
+	_, buyerUIDPresent := dataMap["buyer_uid"]
+	_, sellerUIDPresent := dataMap["seller_uid"]
+	_, sidePresent := dataMap["side"]
+	_, pricePresent := dataMap["price"]
+	_, quantityPresent := dataMap["quantity"]
+
+
+	// Check if all required fields are present
+	return tickerPresent && buyerUIDPresent && sellerUIDPresent && sidePresent && quantityPresent && pricePresent
 }
