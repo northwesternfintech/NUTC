@@ -43,24 +43,9 @@ func Analyze(filename string) error {
 }
 
 func CountMarketOrders(filename string) error {
-	file, err := os.Open(filename)
+	log_entries, err := readAndParseLogEntries(filename)
 	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	var log_entries []LogEntry
-
-	for scanner.Scan() {
-		var entry LogEntry
-		if err := json.Unmarshal([]byte(scanner.Text()), &entry); err != nil {
-			return err
-		}
-		log_entries = append(log_entries, entry)
-	}
-
-	if err := scanner.Err(); err != nil {
+		fmt.Println("Error reading and parsing log entries:", err)
 		return err
 	}
 
@@ -70,56 +55,12 @@ func CountMarketOrders(filename string) error {
 		return nil
 	}
 
-	//get start and end time to calculate the timespan of the logger
-	start_time, err := time.Parse("2006-01-02 15:04:05.999", log_entries[0].Timestamp)
-    if err != nil {
-        fmt.Println("Error parsing start time:", err)
-        return nil
+	cumulative_orders, err := calculateCumulativeCounts(log_entries, isMarketOrder)
+	if err != nil {
+		fmt.Println("Error calculating cumulative counts for market orders:", err)
+		return err
 	}
 
-	end_time, err := time.Parse("2006-01-02 15:04:05.999", log_entries[num_entries-1].Timestamp)
-    if err != nil {
-        fmt.Println("Error parsing end time:", err)
-        return nil
-	}
-
-	time_difference := int(end_time.Sub(start_time).Seconds())
-
-	//count up the market orders for every second
-	cumulative_orders := make([]int, time_difference+1)
-
-	count := 0
-	lastCount := 0
-
-	for _, entry := range log_entries {
-		if !isMarketOrder(entry.Data) {
-			continue
-		}
-
-		cur_time, err := time.Parse("2006-01-02 15:04:05.999", entry.Timestamp)
-		if err != nil {
-			fmt.Println("Error parsing end time:", err)
-			return nil
-		}
-
-		seconds_diff := int(cur_time.Sub(start_time).Seconds())
-
-		// Update count for all seconds between lastCount and seconds_diff
-		for i := lastCount + 1; i <= seconds_diff; i++ {
-			cumulative_orders[i] = count
-		}
-	
-		count++
-		cumulative_orders[seconds_diff] = count
-		lastCount = seconds_diff
-	}
-
-	// Fill in the remaining seconds if any
-	for i := lastCount + 1; i <= time_difference; i++ {
-		cumulative_orders[i] = count
-	}
-
-	//create CSV file
 	csv_file, err := os.Create("market_order.csv")
 	if err != nil {
 		return err
@@ -144,24 +85,9 @@ func CountMarketOrders(filename string) error {
 }
 
 func CountMatch(filename string) error {
-	file, err := os.Open(filename)
+	log_entries, err := readAndParseLogEntries(filename)
 	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	var log_entries []LogEntry
-
-	for scanner.Scan() {
-		var entry LogEntry
-		if err := json.Unmarshal([]byte(scanner.Text()), &entry); err != nil {
-			return err
-		}
-		log_entries = append(log_entries, entry)
-	}
-
-	if err := scanner.Err(); err != nil {
+		fmt.Println("Error reading and parsing log entries:", err)
 		return err
 	}
 
@@ -171,53 +97,10 @@ func CountMatch(filename string) error {
 		return nil
 	}
 
-	//get start and end time to calculate the timespan of the logger
-	start_time, err := time.Parse("2006-01-02 15:04:05.999", log_entries[0].Timestamp)
-    if err != nil {
-        fmt.Println("Error parsing start time:", err)
-        return nil
-	}
-
-	end_time, err := time.Parse("2006-01-02 15:04:05.999", log_entries[num_entries-1].Timestamp)
-    if err != nil {
-        fmt.Println("Error parsing end time:", err)
-        return nil
-	}
-
-	time_difference := int(end_time.Sub(start_time).Seconds())
-
-	//count up the matches for every second
-	cumulative_matches := make([]int, time_difference+1)
-
-	count := 0
-	lastCount := 0
-
-	for _, entry := range log_entries {
-		if !isMatch(entry.Data) {
-			continue
-		}
-
-		cur_time, err := time.Parse("2006-01-02 15:04:05.999", entry.Timestamp)
-		if err != nil {
-			fmt.Println("Error parsing end time:", err)
-			return nil
-		}
-
-		seconds_diff := int(cur_time.Sub(start_time).Seconds())
-
-		// Update count for all seconds between lastCount and seconds_diff
-		for i := lastCount + 1; i <= seconds_diff; i++ {
-			cumulative_matches[i] = count
-		}
-	
-		count++
-		cumulative_matches[seconds_diff] = count
-		lastCount = seconds_diff
-	}
-
-	// Fill in the remaining seconds if any
-	for i := lastCount + 1; i <= time_difference; i++ {
-		cumulative_matches[i] = count
+	cumulative_matches, err := calculateCumulativeCounts(log_entries, isMatch)
+	if err != nil {
+		fmt.Println("Error calculating cumulative counts for matches:", err)
+		return err
 	}
 
 	//create CSV file
@@ -246,40 +129,116 @@ func CountMatch(filename string) error {
 
 func isMarketOrder(data interface{}) bool {
 	// Type assert the interface to a map
-	dataMap, ok := data.(map[string]interface{})
+	data_map, ok := data.(map[string]interface{})
 	if !ok {
 		// Not a map
 		return false
 	}
 
 	// Check if the required fields are present
-	_, clientUIDPresent := dataMap["client_uid"]
-	_, sidePresent := dataMap["side"]
-	_, tickerPresent := dataMap["ticker"]
-	_, quantityPresent := dataMap["quantity"]
-	_, pricePresent := dataMap["price"]
+	_, clientUID_present := data_map["client_uid"]
+	_, side_present := data_map["side"]
+	_, ticker_present := data_map["ticker"]
+	_, quantity_present := data_map["quantity"]
+	_, price_present := data_map["price"]
 
 	// Check if all required fields are present
-	return clientUIDPresent && sidePresent && tickerPresent && quantityPresent && pricePresent
+	return clientUID_present && side_present && ticker_present && quantity_present && price_present
 }
 
 func isMatch(data interface{}) bool {
 	// Type assert the interface to a map
-	dataMap, ok := data.(map[string]interface{})
+	data_map, ok := data.(map[string]interface{})
 	if !ok {
 		// Not a map
 		return false
 	}
 
 	// Check if the required fields are present
-	_, tickerPresent := dataMap["ticker"]
-	_, buyerUIDPresent := dataMap["buyer_uid"]
-	_, sellerUIDPresent := dataMap["seller_uid"]
-	_, sidePresent := dataMap["side"]
-	_, pricePresent := dataMap["price"]
-	_, quantityPresent := dataMap["quantity"]
+	_, ticker_present := data_map["ticker"]
+	_, buyerUID_present := data_map["buyer_uid"]
+	_, sellerUID_present := data_map["seller_uid"]
+	_, side_present := data_map["side"]
+	_, price_present := data_map["price"]
+	_, quantity_present := data_map["quantity"]
 
 
 	// Check if all required fields are present
-	return tickerPresent && buyerUIDPresent && sellerUIDPresent && sidePresent && quantityPresent && pricePresent
+	return ticker_present && buyerUID_present && sellerUID_present && side_present && quantity_present && price_present
+}
+
+func readAndParseLogEntries(filename string) ([]LogEntry, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var log_entries []LogEntry
+	scanner := bufio.NewScanner(file)
+
+	for scanner.Scan() {
+		var entry LogEntry
+		if err := json.Unmarshal([]byte(scanner.Text()), &entry); err != nil {
+			return nil, err
+		}
+		log_entries = append(log_entries, entry)
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return log_entries, nil
+}
+
+func calculateCumulativeCounts(log_entries []LogEntry, isEntryValid func(interface{}) bool) ([]int, error) {
+	//get start and end time to calculate the timespan of the logger
+	startTime, err := time.Parse("2006-01-02 15:04:05.999", log_entries[0].Timestamp)
+	if err != nil {
+		return nil, fmt.Errorf("Error parsing start time: %v", err)
+	}
+
+	numEntries := len(log_entries)
+	endTime, err := time.Parse("2006-01-02 15:04:05.999", log_entries[numEntries-1].Timestamp)
+	if err != nil {
+		return nil, fmt.Errorf("Error parsing end time: %v", err)
+	}
+
+	timeDifference := int(endTime.Sub(startTime).Seconds())
+
+	//count up the entries for every second
+	cumulativeCounts := make([]int, timeDifference+1)
+
+	count := 0
+	lastCount := 0
+
+	for _, entry := range log_entries {
+		if !isEntryValid(entry.Data) {
+			continue
+		}
+
+		curTime, err := time.Parse("2006-01-02 15:04:05.999", entry.Timestamp)
+		if err != nil {
+			return nil, fmt.Errorf("Error parsing end time: %v", err)
+		}
+
+		secondsDiff := int(curTime.Sub(startTime).Seconds())
+
+		// Update count for all seconds between lastCount and secondsDiff
+		for i := lastCount + 1; i <= secondsDiff; i++ {
+			cumulativeCounts[i] = count
+		}
+
+		count++
+		cumulativeCounts[secondsDiff] = count
+		lastCount = secondsDiff
+	}
+
+	// Fill in the remaining seconds if any
+	for i := lastCount + 1; i <= timeDifference; i++ {
+		cumulativeCounts[i] = count
+	}
+
+	return cumulativeCounts, nil
 }
