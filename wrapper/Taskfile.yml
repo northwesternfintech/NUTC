@@ -16,6 +16,11 @@ tasks:
     cmds:
       - cmake --preset=dev
 
+  format:
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - cmake -D FIX=YES -P cmake/lint.cmake
+
   move-to-bin:
     dir: '{{.USER_WORKING_DIR}}'
     cmds:
