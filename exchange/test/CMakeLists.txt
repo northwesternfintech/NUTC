@@ -14,12 +14,19 @@ include(GoogleTest)
 # ---- Tests ----
 
 add_executable(NUTC24_test 
-  src/basic_matching.cpp
-  src/invalid_orders.cpp
-  src/many_orders.cpp
-  src/logging_orders.cpp
+  src/matching/basic_matching.cpp
+  src/matching/invalid_orders.cpp
+  src/matching/many_orders.cpp
+  src/logging/logging_orders.cpp
   src/test_utils/macros.cpp 
   )
+
+target_include_directories(
+  NUTC24_test ${warning_guard}
+  PUBLIC
+  "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
+)
+
 target_link_libraries(
     NUTC24_test PRIVATE
     NUTC24_lib
