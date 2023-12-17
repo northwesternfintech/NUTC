@@ -19,13 +19,13 @@ RabbitMQ::connectToRabbitMQ(
     amqp_socket_t* socket = amqp_tcp_socket_new(conn);
 
     if (!socket) {
-        log_e(rabbitmq, "Cannot create TCP socket");
+        log_e(wrapper_rabbitmq, "Cannot create TCP socket");
         return false;
     }
 
     int status = amqp_socket_open(socket, hostname.c_str(), port);
     if (status) {
-        log_e(rabbitmq, "Cannot open socket");
+        log_e(wrapper_rabbitmq, "Cannot open socket");
         return false;
     }
 
@@ -40,7 +40,7 @@ RabbitMQ::connectToRabbitMQ(
         password.c_str()
     );
     if (reply.reply_type != AMQP_RESPONSE_NORMAL) {
-        log_e(rabbitmq, "Login failed");
+        log_e(wrapper_rabbitmq, "Login failed");
         return false;
     }
 
@@ -48,38 +48,18 @@ RabbitMQ::connectToRabbitMQ(
 }
 
 // todo: split into helpers
-std::variant<ShutdownMessage, RMQError>
+void
 RabbitMQ::handleIncomingMessages()
 {
     bool keep_running = true;
     while (keep_running) {
-        auto data = consumeMessage();
-        std::optional<std::variant<ShutdownMessage, RMQError>> res = std::visit(
+        std::variant<StartTime, ObUpdate, Match, AccountUpdate> data = consumeMessage();
+        std::visit(
             [&](auto&& arg) {
                 using T = std::decay_t<decltype(arg)>;
-                std::optional<std::variant<ShutdownMessage, RMQError>> nothing =
-                    std::nullopt;
-                if constexpr (std::is_same_v<T, ShutdownMessage>) {
-                    log_w(
-                        rabbitmq,
-                        "Received shutdown message: {}",
-                        std::get<ShutdownMessage>(data).shutdown_reason
-                    );
-                    std::optional<std::variant<ShutdownMessage, RMQError>> var = arg;
-                    return var;
-                }
-                else if constexpr (std::is_same_v<T, RMQError>) {
-                    log_e(
-                        rabbitmq,
-                        "Failed to consume message: {}",
-                        std::get<RMQError>(data).message
-                    );
-                    std::optional<std::variant<ShutdownMessage, RMQError>> var = arg;
-                    return var;
-                }
-                else if constexpr (std::is_same_v<T, ObUpdate>) {
+                if constexpr (std::is_same_v<T, ObUpdate>) {
                     log_i(
-                        rabbitmq,
+                        wrapper_rabbitmq,
                         "Received order book update: {}",
                         glz::write_json(std::get<ObUpdate>(data))
                     );
@@ -87,13 +67,13 @@ RabbitMQ::handleIncomingMessages()
                     std::string side =
                         update.side == messages::SIDE::BUY ? "BUY" : "SELL";
                     nutc::pywrapper::get_ob_update_function()(
-                        update.security, side, update.price, update.quantity
+                        update.ticker, side, update.price, update.quantity
                     );
-                    return nothing;
+                    return;
                 }
                 else if constexpr (std::is_same_v<T, Match>) {
                     log_i(
-                        rabbitmq,
+                        wrapper_rabbitmq,
                         "Received match: {}",
                         glz::write_json(std::get<Match>(data))
                     );
@@ -103,12 +83,12 @@ RabbitMQ::handleIncomingMessages()
                     nutc::pywrapper::get_trade_update_function()(
                         match.ticker, side, match.price, match.quantity
                     );
-                    return nothing;
+                    return;
                 }
                 else if constexpr (std::is_same_v<T, AccountUpdate>) {
                     AccountUpdate update = std::get<AccountUpdate>(data);
                     log_i(
-                        rabbitmq,
+                        wrapper_rabbitmq,
                         "Received account update with capital remaining: {}",
                         update.capital_remaining
                     );
@@ -121,24 +101,20 @@ RabbitMQ::handleIncomingMessages()
                         update.quantity,
                         update.capital_remaining
                     );
-                    return nothing;
+                    return;
                 }
                 else {
-                    return nothing;
+                    return;
                 }
             },
             data
         );
-        if (res.has_value()) {
-            return res.value();
-        }
     }
-    return ShutdownMessage{"Received shutdown message."};
 }
 
 bool
 RabbitMQ::publishMarketOrder(
-    const std::string& client_uid,
+    const std::string& client_id,
     const std::string& side,
     const std::string& ticker,
     float quantity,
@@ -149,7 +125,7 @@ RabbitMQ::publishMarketOrder(
         return false;
     }
     MarketOrder order{
-        client_uid,
+        client_id,
         side == "BUY" ? messages::SIDE::BUY : messages::SIDE::SELL,
         ticker,
         quantity,
@@ -157,7 +133,7 @@ RabbitMQ::publishMarketOrder(
     };
     std::string message = glz::write_json(order);
 
-    log_i(rabbitmq, "Publishing order: {}", message);
+    log_i(wrapper_rabbitmq, "Publishing order: {}", message);
     return publishMessage("market_order", message);
 }
 
@@ -177,27 +153,28 @@ RabbitMQ::publishMessage(const std::string& queueName, const std::string& messag
 
     amqp_rpc_reply_t res = amqp_get_rpc_reply(conn);
     if (res.reply_type != AMQP_RESPONSE_NORMAL) {
-        log_e(rabbitmq, "Failed to publish message.");
+        log_e(wrapper_rabbitmq, "Failed to publish message.");
         return false;
     }
 
     return true;
 }
 
-std::variant<StartTime, ShutdownMessage, RMQError, ObUpdate, Match, AccountUpdate>
+std::variant<StartTime, ObUpdate, Match, AccountUpdate>
 RabbitMQ::consumeMessage()
 {
     std::string buf = consumeMessageAsString();
     if (buf == "") {
-        return RMQError{"Failed to consume message."};
+        log_e(wrapper_rabbitmq, "Failed to consume message.");
+        exit(1);
     }
 
-    std::variant<StartTime, ShutdownMessage, RMQError, ObUpdate, Match, AccountUpdate>
-        data{};
+    std::variant<StartTime, ObUpdate, Match, AccountUpdate> data{};
     auto err = glz::read_json(data, buf);
     if (err) {
         std::string error = glz::format_error(err, buf);
-        return RMQError{error};
+        log_e(wrapper_rabbitmq, "Failed to parse message: {}", error);
+        exit(1);
     }
     return data;
 }
@@ -211,7 +188,7 @@ RabbitMQ::consumeMessageAsString()
     amqp_rpc_reply_t res = amqp_consume_message(conn, &envelope, NULL, 0);
 
     if (res.reply_type != AMQP_RESPONSE_NORMAL) {
-        log_e(rabbitmq, "Failed to consume message.");
+        log_e(wrapper_rabbitmq, "Failed to consume message.");
         return "";
     }
 
@@ -226,13 +203,13 @@ bool
 RabbitMQ::initializeConnection(const std::string& queueName)
 {
     if (!connectToRabbitMQ("localhost", 5672, "NUFT", "ADMIN")) {
-        log_c(rabbitmq, "Failed to connect to RabbitMQ");
+        log_c(wrapper_rabbitmq, "Failed to connect to RabbitMQ");
         return false;
     }
     amqp_channel_open(conn, 1);
     amqp_rpc_reply_t res = amqp_get_rpc_reply(conn);
     if (res.reply_type != AMQP_RESPONSE_NORMAL) {
-        log_e(rabbitmq, "Failed to open channel.");
+        log_e(wrapper_rabbitmq, "Failed to open channel.");
         return false;
     }
 
@@ -244,7 +221,7 @@ RabbitMQ::initializeConnection(const std::string& queueName)
         return false;
     }
 
-    log_i(rabbitmq, "Connection established");
+    log_i(wrapper_rabbitmq, "Connection established");
 
     return true;
 }
@@ -265,21 +242,21 @@ RabbitMQ::initializeConsume(const std::string& queueName)
 
     amqp_rpc_reply_t res = amqp_get_rpc_reply(conn);
     if (res.reply_type != AMQP_RESPONSE_NORMAL) {
-        log_e(rabbitmq, "Failed to consume message.");
+        log_e(wrapper_rabbitmq, "Failed to consume message.");
         return false;
     }
 
     return true;
 }
 
-RabbitMQ::RabbitMQ(const std::string& uid)
+RabbitMQ::RabbitMQ(const std::string& id)
 {
-    if (!initializeConnection(uid)) {
-        log_c(rabbitmq, "Failed to initialize connection to RabbitMQ");
+    if (!initializeConnection(id)) {
+        log_c(wrapper_rabbitmq, "Failed to initialize connection to RabbitMQ");
         // attempt to say we didn't init correctly
-        bool published_init = publishInit(uid, false);
+        bool published_init = publishInit(id, false);
         if (!published_init) {
-            log_e(rabbitmq, "Failed to publish init message");
+            log_e(wrapper_rabbitmq, "Failed to publish init message");
         }
 
         exit(1);
@@ -287,12 +264,12 @@ RabbitMQ::RabbitMQ(const std::string& uid)
 }
 
 std::function<bool(const std::string&, const std::string&, float, float)>
-RabbitMQ::getMarketFunc(const std::string& uid)
+RabbitMQ::getMarketFunc(const std::string& id)
 {
     return std::bind(
         &RabbitMQ::publishMarketOrder,
         this,
-        uid,
+        id,
         std::placeholders::_1,
         std::placeholders::_2,
         std::placeholders::_3,
@@ -301,10 +278,10 @@ RabbitMQ::getMarketFunc(const std::string& uid)
 }
 
 bool
-RabbitMQ::publishInit(const std::string& uid, bool ready)
+RabbitMQ::publishInit(const std::string& id, bool ready)
 {
-    std::string message = glz::write_json(InitMessage{uid, ready});
-    log_i(rabbitmq, "Publishing init message: {}", message);
+    std::string message = glz::write_json(InitMessage{id, ready});
+    log_i(wrapper_rabbitmq, "Publishing init message: {}", message);
     bool rVal = publishMessage("market_order", message);
     return rVal;
 }
@@ -320,7 +297,7 @@ RabbitMQ::waitForStartTime()
                 std::chrono::nanoseconds(start.start_time_ns)
             );
         std::this_thread::sleep_until(wait_until);
-        log_i(rabbitmq, "Received start time: {}", start.start_time_ns);
+        log_i(wrapper_rabbitmq, "Received start time: {}", start.start_time_ns);
         return;
     }
 }
@@ -334,10 +311,10 @@ RabbitMQ::initializeQueue(const std::string& queueName)
 
     amqp_rpc_reply_t res = amqp_get_rpc_reply(conn);
     if (res.reply_type != AMQP_RESPONSE_NORMAL) {
-        log_e(rabbitmq, "Failed to declare queue.");
+        log_e(wrapper_rabbitmq, "Failed to declare queue.");
         return false;
     }
-    log_d(rabbitmq, "Declared queue: {}", queueName);
+    log_d(wrapper_rabbitmq, "Declared queue: {}", queueName);
 
     return true;
 }

@@ -25,8 +25,6 @@ RabbitMQOrderHandler::handleIncomingMarketOrder(
     }
 
     log_i(rabbitmq, "Received market order: {}", buffer);
-    events::Logger& logger = events::Logger::get_logger();
-    logger.log_event(order);
 
     std::optional<std::reference_wrapper<Engine>> engine =
         engine_manager.get_engine(order.ticker);
@@ -39,8 +37,8 @@ RabbitMQOrderHandler::handleIncomingMarketOrder(
     }
     auto [matches, ob_updates] = engine.value().get().match_order(order, clients);
     for (const auto& match : matches) {
-        std::string buyer_uid = match.buyer_uid;
-        std::string seller_uid = match.seller_uid;
+        std::string buyer_id = match.buyer_id;
+        std::string seller_id = match.seller_id;
         RabbitMQPublisher::broadcastAccountUpdate(clients, match);
         log_i(
             matching, "Matched order with price {} and quantity {}", match.price,
@@ -50,7 +48,7 @@ RabbitMQOrderHandler::handleIncomingMarketOrder(
     for (const auto& update : ob_updates) {
         log_i(
             rabbitmq, "New ObUpdate with ticker {} price {} quantity {} side {}",
-            update.security, update.price, update.quantity,
+            update.ticker, update.price, update.quantity,
             update.side == messages::SIDE::BUY ? "BUY" : "ASK"
         );
     }
@@ -58,7 +56,7 @@ RabbitMQOrderHandler::handleIncomingMarketOrder(
         RabbitMQPublisher::broadcastMatches(clients, matches);
     }
     if (ob_updates.size() > 0) {
-        RabbitMQPublisher::broadcastObUpdates(clients, ob_updates, order.client_uid);
+        RabbitMQPublisher::broadcastObUpdates(clients, ob_updates, order.client_id);
     }
 }
 

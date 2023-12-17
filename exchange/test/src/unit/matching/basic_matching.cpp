@@ -8,7 +8,7 @@
 using nutc::messages::SIDE::BUY;
 using nutc::messages::SIDE::SELL;
 
-class BasicMatching : public ::testing::Test {
+class UnitBasicMatching : public ::testing::Test {
 protected:
     void
     SetUp() override
@@ -23,7 +23,7 @@ protected:
     Engine engine;
 };
 
-TEST_F(BasicMatching, SimpleMatch)
+TEST_F(UnitBasicMatching, SimpleMatch)
 {
     MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
     MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
@@ -39,7 +39,7 @@ TEST_F(BasicMatching, SimpleMatch)
     EXPECT_EQ_MATCH(matches2.at(0), "ETHUSD", "ABC", "DEF", SELL, 1, 1);
 }
 
-TEST_F(BasicMatching, CorrectBuyPricingOrder)
+TEST_F(UnitBasicMatching, CorrectBuyPricingOrder)
 {
     MarketOrder buy1{"ABC", BUY, "ETHUSD", 1, 1};
     MarketOrder buy2{"ABC", BUY, "ETHUSD", 1, 2};
@@ -76,7 +76,7 @@ TEST_F(BasicMatching, CorrectBuyPricingOrder)
     EXPECT_EQ_OB_UPDATE(ob_updates6.at(0), "ETHUSD", BUY, 3, 0);
 }
 
-TEST_F(BasicMatching, NoMatchThenMatchBuy)
+TEST_F(UnitBasicMatching, NoMatchThenMatchBuy)
 {
     MarketOrder order1{"ABC", SELL, "ETHUSD", 1, 1000};
     MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
@@ -89,7 +89,7 @@ TEST_F(BasicMatching, NoMatchThenMatchBuy)
     EXPECT_EQ(matches3.size(), 1);
 }
 
-TEST_F(BasicMatching, NoMatchThenMatchSell)
+TEST_F(UnitBasicMatching, NoMatchThenMatchSell)
 {
     MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
     MarketOrder order2{"DEF", BUY, "ETHUSD", 1, 1000};
@@ -105,7 +105,7 @@ TEST_F(BasicMatching, NoMatchThenMatchSell)
     EXPECT_EQ(matches4.size(), 1);
 }
 
-TEST_F(BasicMatching, PassivePriceMatch)
+TEST_F(UnitBasicMatching, PassivePriceMatch)
 {
     MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 2};
     MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
@@ -121,7 +121,7 @@ TEST_F(BasicMatching, PassivePriceMatch)
     EXPECT_EQ_MATCH(matches2.at(0), "ETHUSD", "ABC", "DEF", SELL, 2, 1);
 }
 
-TEST_F(BasicMatching, PartialFill)
+TEST_F(UnitBasicMatching, PartialFill)
 {
     MarketOrder order1{"ABC", BUY, "ETHUSD", 2, 1};
     MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
@@ -138,7 +138,7 @@ TEST_F(BasicMatching, PartialFill)
     EXPECT_EQ_OB_UPDATE(ob_updates2.at(1), "ETHUSD", BUY, 1, 1);
 }
 
-TEST_F(BasicMatching, MultipleFill)
+TEST_F(UnitBasicMatching, MultipleFill)
 {
     MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
     MarketOrder order2{"ABC", BUY, "ETHUSD", 1, 1};
@@ -162,7 +162,7 @@ TEST_F(BasicMatching, MultipleFill)
     EXPECT_EQ_OB_UPDATE(ob_updates3.at(1), "ETHUSD", BUY, 1, 0);
 }
 
-TEST_F(BasicMatching, MultiplePartialFill)
+TEST_F(UnitBasicMatching, MultiplePartialFill)
 {
     MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
     MarketOrder order2{"ABC", BUY, "ETHUSD", 1, 1};
@@ -187,7 +187,7 @@ TEST_F(BasicMatching, MultiplePartialFill)
     EXPECT_EQ_OB_UPDATE(ob_updates3.at(2), "ETHUSD", SELL, 1, 1);
 }
 
-TEST_F(BasicMatching, SimpleMatchReversed)
+TEST_F(UnitBasicMatching, SimpleMatchReversed)
 {
     MarketOrder order1{"ABC", SELL, "ETHUSD", 1, 1};
     MarketOrder order2{"DEF", BUY, "ETHUSD", 1, 1};
@@ -202,7 +202,7 @@ TEST_F(BasicMatching, SimpleMatchReversed)
     EXPECT_EQ_MATCH(matches2.at(0), "ETHUSD", "DEF", "ABC", BUY, 1, 1);
 }
 
-TEST_F(BasicMatching, PassivePriceMatchReversed)
+TEST_F(UnitBasicMatching, PassivePriceMatchReversed)
 {
     MarketOrder order1{"ABC", SELL, "ETHUSD", 1, 1};
     MarketOrder order2{"DEF", BUY, "ETHUSD", 1, 2};
@@ -219,7 +219,7 @@ TEST_F(BasicMatching, PassivePriceMatchReversed)
     EXPECT_EQ_MATCH(matches2.at(0), "ETHUSD", "DEF", "ABC", BUY, 1, 1);
 }
 
-TEST_F(BasicMatching, PartialFillReversed)
+TEST_F(UnitBasicMatching, PartialFillReversed)
 {
     MarketOrder order1{"ABC", SELL, "ETHUSD", 2, 1};
     MarketOrder order2{"DEF", BUY, "ETHUSD", 1, 1};
@@ -235,7 +235,7 @@ TEST_F(BasicMatching, PartialFillReversed)
     EXPECT_EQ_OB_UPDATE(ob_updates2.at(1), "ETHUSD", SELL, 1, 1);
 }
 
-TEST_F(BasicMatching, MultipleFillReversed)
+TEST_F(UnitBasicMatching, MultipleFillReversed)
 {
     MarketOrder order1{"ABC", SELL, "ETHUSD", 1, 1};
     MarketOrder order2{"ABC", SELL, "ETHUSD", 1, 1};
@@ -259,7 +259,7 @@ TEST_F(BasicMatching, MultipleFillReversed)
     EXPECT_EQ_OB_UPDATE(ob_updates3.at(1), "ETHUSD", SELL, 1, 0);
 }
 
-TEST_F(BasicMatching, MultiplePartialFillReversed)
+TEST_F(UnitBasicMatching, MultiplePartialFillReversed)
 {
     MarketOrder order1{"ABC", SELL, "ETHUSD", 1, 1};
     MarketOrder order2{"ABC", SELL, "ETHUSD", 1, 1};

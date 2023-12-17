@@ -47,15 +47,12 @@ RabbitMQConnectionManager::closeConnection(const manager::ClientManager& client_
 {
     // Handle client shutdown
     auto shutdownClient = [&](const std::pair<std::string, manager::Client>& pair) {
-        const auto& [uid, client] = pair;
+        const auto& [id, client] = pair;
 
         if (!client.active)
             return;
 
         log_i(rabbitmq, "Shutting down client {}", client.uid);
-        messages::ShutdownMessage shutdown{uid};
-        auto messageStr = glz::write_json(shutdown);
-        RabbitMQPublisher::publishMessage(uid, messageStr);
     };
 
     // Iterate over clients and shut them down

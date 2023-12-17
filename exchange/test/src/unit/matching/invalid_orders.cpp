@@ -8,7 +8,7 @@
 using nutc::messages::SIDE::BUY;
 using nutc::messages::SIDE::SELL;
 
-class InvalidOrders : public ::testing::Test {
+class UnitInvalidOrders : public ::testing::Test {
 protected:
     void
     SetUp() override
@@ -23,16 +23,16 @@ protected:
     Engine engine;
 };
 
-TEST_F(InvalidOrders, SimpleInvalidFunds)
+TEST_F(UnitInvalidOrders, SimpleInvalidFunds)
 {
     manager.modify_capital("ABC", -100000);
     std::optional<SIDE> err =
-        manager.validate_match(Match{"ETHUSD", "ABC", "DEF", SELL, 1, 1});
+        manager.validate_match(Match{"ETHUSD", SELL, 1, 1, "ABC", "DEF"});
     EXPECT_TRUE(err.has_value());
     EXPECT_EQ(err.value(), BUY);
 }
 
-TEST_F(InvalidOrders, RemoveThenAddFunds)
+TEST_F(UnitInvalidOrders, RemoveThenAddFunds)
 {
     manager.modify_capital("ABC", -100000);
 
@@ -68,7 +68,7 @@ TEST_F(InvalidOrders, RemoveThenAddFunds)
 
 // TODO: valid when first added, then invalid due to reducing capital
 
-TEST_F(InvalidOrders, MatchingInvalidFunds)
+TEST_F(UnitInvalidOrders, MatchingInvalidFunds)
 {
     manager.modify_capital("ABC", -100000);
 
@@ -87,7 +87,7 @@ TEST_F(InvalidOrders, MatchingInvalidFunds)
     EXPECT_EQ_OB_UPDATE(ob_updates2[0], "ETHUSD", SELL, 1, 1);
 }
 
-TEST_F(InvalidOrders, SimpleManyInvalidOrder)
+TEST_F(UnitInvalidOrders, SimpleManyInvalidOrder)
 {
     manager.add_client("A", "A");
     manager.add_client("B", "B");

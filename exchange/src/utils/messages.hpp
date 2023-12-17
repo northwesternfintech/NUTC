@@ -16,25 +16,11 @@ namespace messages {
 enum class SIDE { BUY, SELL };
 
 /**
- * @brief Sent by the exchange to initiate client shutdowns
- */
-struct ShutdownMessage {
-    std::string shutdown_reason;
-};
-
-/**
- * @brief Returned by functions to indicate an issue with RMQ communication
- */
-struct RMQError {
-    std::string message; // todo: make enum?
-};
-
-/**
  * @brief Sent by clients to the exchange to indicate they're initialized and may or may
  * not be participating in the competition
  */
 struct InitMessage {
-    std::string client_uid;
+    std::string client_id;
     bool ready;
 };
 
@@ -47,11 +33,11 @@ struct StartTime {
  */
 struct Match {
     std::string ticker;
-    std::string buyer_uid;
-    std::string seller_uid;
     SIDE side;
     float price;
     float quantity;
+    std::string buyer_id;
+    std::string seller_id;
 };
 
 inline constexpr bool
@@ -62,15 +48,15 @@ is_close_to_zero(float value, float epsilon = 1e-6f)
 
 /**
  * @brief Sent by clients to the exchange to place an order
- * TODO: client_uid=="SIMULATED" indicates simulated order with no actual
+ * TODO: client_id=="SIMULATED" indicates simulated order with no actual
  * owner, but this is improper. Instead, it should be an optional
  */
 struct MarketOrder {
-    std::string client_uid;
-    SIDE side;
+    std::string client_id;
     std::string ticker;
-    float quantity;
+    SIDE side;
     float price;
+    float quantity;
 
     // Used to sort orders by time created
     long long order_index;
@@ -85,11 +71,11 @@ struct MarketOrder {
     }
 
     MarketOrder(
-        const std::string& client_uid, SIDE side, const std::string& ticker,
+        const std::string& client_id, SIDE side, const std::string& ticker,
         float quantity, float price
     ) :
-        client_uid(client_uid),
-        side(side), ticker(ticker), quantity(quantity), price(price)
+        client_id(client_id),
+        ticker(ticker), side(side), price(price), quantity(quantity)
     {
         order_index = get_and_increment_global_index();
     }
@@ -100,9 +86,9 @@ struct MarketOrder {
     {
         std::string side_str = side == SIDE::BUY ? "BUY" : "SELL";
         return fmt::format(
-            "MarketOrder(client_uid={}, side={}, ticker={}, quantity={}, "
+            "MarketOrder(client_id={}, side={}, ticker={}, quantity={}, "
             "price={})",
-            client_uid, side_str, ticker, quantity, price
+            client_id, side_str, ticker, quantity, price
         );
     }
 
@@ -143,10 +129,10 @@ struct MarketOrder {
         return true;
     }
 
-    // To ensure we don't increment the client_uid
+    // To ensure we don't increment the client_id
     MarketOrder(const MarketOrder& other) : order_index(other.order_index)
     {
-        this->client_uid = other.client_uid;
+        this->client_id = other.client_id;
         this->side = other.side;
         this->ticker = other.ticker;
         this->quantity = other.quantity;
@@ -161,7 +147,7 @@ struct MarketOrder {
         }
 
         this->order_index = other.order_index;
-        this->client_uid = other.client_uid;
+        this->client_id = other.client_id;
         this->side = other.side;
         this->ticker = other.ticker;
         this->quantity = other.quantity;
@@ -175,7 +161,7 @@ struct MarketOrder {
  * @brief Sent by exchange to clients to indicate an orderbook update
  */
 struct ObUpdate {
-    std::string security;
+    std::string ticker;
     SIDE side;
     float price;
     float quantity;
@@ -186,11 +172,11 @@ struct ObUpdate {
  * This is only sent to the two clients that participated in the trade
  */
 struct AccountUpdate {
-    float capital_remaining;
     std::string ticker;
     SIDE side;
     float price;
     float quantity;
+    float capital_remaining;
 };
 
 } // namespace messages
@@ -201,7 +187,7 @@ template <>
 struct glz::meta<nutc::messages::ObUpdate> {
     using T = nutc::messages::ObUpdate;
     static constexpr auto value = object(
-        "security", &T::security, "side", &T::side, "price", &T::price, "quantity",
+        "security", &T::ticker, "side", &T::side, "price", &T::price, "quantity",
         &T::quantity
     );
 };
@@ -221,7 +207,7 @@ template <>
 struct glz::meta<nutc::messages::Match> {
     using T = nutc::messages::Match;
     static constexpr auto value = object(
-        "ticker", &T::ticker, "buyer_uid", &T::buyer_uid, "seller_uid", &T::seller_uid,
+        "ticker", &T::ticker, "buyer_id", &T::buyer_id, "seller_id", &T::seller_id,
         "side", &T::side, "price", &T::price, "quantity", &T::quantity
     );
 };
@@ -235,18 +221,11 @@ struct glz::meta<nutc::messages::StartTime> {
 
 /// \cond
 template <>
-struct glz::meta<nutc::messages::ShutdownMessage> {
-    using T = nutc::messages::ShutdownMessage;
-    static constexpr auto value = object("shutdown_reason", &T::shutdown_reason);
-};
-
-/// \cond
-template <>
 struct glz::meta<nutc::messages::MarketOrder> {
     using T = nutc::messages::MarketOrder;
     static constexpr auto value = object(
-        "client_uid", &T::client_uid, "side", &T::side, "ticker", &T::ticker,
-        "quantity", &T::quantity, "price", &T::price
+        "client_id", &T::client_id, "side", &T::side, "ticker", &T::ticker, "quantity",
+        &T::quantity, "price", &T::price
     );
 };
 
@@ -255,5 +234,5 @@ template <>
 struct glz::meta<nutc::messages::InitMessage> {
     using T = nutc::messages::InitMessage;
     static constexpr auto value =
-        object("client_uid", &T::client_uid, "ready", &T::ready);
+        object("client_id", &T::client_id, "ready", &T::ready);
 };

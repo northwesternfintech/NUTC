@@ -12,9 +12,7 @@ namespace rabbitmq {
 
 class RabbitMQConsumer {
 public:
-    static std::variant<
-        messages::InitMessage, messages::MarketOrder, messages::RMQError>
-    consumeMessage();
+    static std::variant<messages::InitMessage, messages::MarketOrder> consumeMessage();
 
     /**
      * @brief Main event loop, handles incoming messages from exchange

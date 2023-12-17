@@ -40,14 +40,14 @@ RabbitMQPublisher::broadcastMatches(
 {
     auto broadcastToClient = [&](const std::pair<std::string, manager::Client>& pair) {
         for (const auto& match : matches) {
-            const auto& [uid, client] = pair;
+            const auto& [id, client] = pair;
 
             if (!client.active)
                 continue;
 
             std::string buffer;
             glz::write<glz::opts{}>(match, buffer);
-            publishMessage(uid, buffer);
+            publishMessage(id, buffer);
         }
     };
 
@@ -58,20 +58,20 @@ RabbitMQPublisher::broadcastMatches(
 void
 RabbitMQPublisher::broadcastObUpdates(
     const manager::ClientManager& clients,
-    const std::vector<messages::ObUpdate>& updates, const std::string& ignore_uid
+    const std::vector<messages::ObUpdate>& updates, const std::string& ignore_id
 )
 {
     auto broadcastToClient = [&](const std::pair<std::string, manager::Client>& pair) {
-        const auto& [uid, client] = pair;
+        const auto& [id, client] = pair;
 
-        if (!client.active || uid == ignore_uid) {
+        if (!client.active || id == ignore_id) {
             return;
         }
 
         for (const auto& update : updates) {
             std::string buffer;
             glz::write<glz::opts{}>(update, buffer);
-            publishMessage(uid, buffer);
+            publishMessage(id, buffer);
         }
     };
 
@@ -84,24 +84,24 @@ RabbitMQPublisher::broadcastAccountUpdate(
     const manager::ClientManager& clients, const messages::Match& match
 )
 {
-    const std::string& buyer_uid = match.buyer_uid;
-    const std::string& seller_uid = match.seller_uid;
+    const std::string& buyer_id = match.buyer_id;
+    const std::string& seller_id = match.seller_id;
 
     messages::AccountUpdate buyer_update = {
-        clients.get_capital(buyer_uid), match.ticker, messages::SIDE::BUY, match.price,
-        match.quantity
+        match.ticker,   messages::SIDE::BUY,           match.price,
+        match.quantity, clients.get_capital(buyer_id),
     };
     messages::AccountUpdate seller_update = {
-        clients.get_capital(seller_uid), match.ticker, messages::SIDE::SELL,
-        match.price, match.quantity
+        match.ticker,   messages::SIDE::SELL,           match.price,
+        match.quantity, clients.get_capital(seller_id),
     };
 
     std::string buyer_buffer;
     std::string seller_buffer;
     glz::write<glz::opts{}>(buyer_update, buyer_buffer);
     glz::write<glz::opts{}>(seller_update, seller_buffer);
-    publishMessage(buyer_uid, buyer_buffer);
-    publishMessage(seller_uid, seller_buffer);
+    publishMessage(buyer_id, buyer_buffer);
+    publishMessage(seller_id, seller_buffer);
 }
 
 } // namespace rabbitmq
