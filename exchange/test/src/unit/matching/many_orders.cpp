@@ -6,7 +6,7 @@
 using nutc::messages::SIDE::BUY;
 using nutc::messages::SIDE::SELL;
 
-class ManyOrders : public ::testing::Test {
+class UnitManyOrders : public ::testing::Test {
 protected:
     void
     SetUp() override
@@ -25,7 +25,7 @@ protected:
     Engine engine;
 };
 
-TEST_F(ManyOrders, CorrectTimePriority)
+TEST_F(UnitManyOrders, CorrectTimePriority)
 {
     MarketOrder order1{"A", BUY, "ETHUSD", 1, 1};
     MarketOrder order2{"B", BUY, "ETHUSD", 1, 1};
@@ -52,7 +52,7 @@ TEST_F(ManyOrders, CorrectTimePriority)
     EXPECT_EQ_MATCH(matches3[0], "ETHUSD", "A", "C", SELL, 1, 1);
 }
 
-TEST_F(ManyOrders, OnlyMatchesOne)
+TEST_F(UnitManyOrders, OnlyMatchesOne)
 {
     MarketOrder order1{"A", BUY, "ETHUSD", 1, 1};
     MarketOrder order2{"B", SELL, "ETHUSD", 1, 1};
@@ -71,7 +71,7 @@ TEST_F(ManyOrders, OnlyMatchesOne)
     EXPECT_EQ_OB_UPDATE(updates3[0], "ETHUSD", BUY, 1, 0);
 }
 
-TEST_F(ManyOrders, SimpleManyOrder)
+TEST_F(UnitManyOrders, SimpleManyOrder)
 {
     MarketOrder order1{"A", BUY, "ETHUSD", 1, 1};
     MarketOrder order2{"B", BUY, "ETHUSD", 1, 1};
@@ -102,7 +102,7 @@ TEST_F(ManyOrders, SimpleManyOrder)
     EXPECT_EQ_OB_UPDATE(updates4[2], "ETHUSD", BUY, 1, 0);
 }
 
-TEST_F(ManyOrders, PassiveAndAggressivePartial)
+TEST_F(UnitManyOrders, PassiveAndAggressivePartial)
 {
     MarketOrder order1{"A", SELL, "ETHUSD", 1, 1};
     MarketOrder order2{"B", SELL, "ETHUSD", 10, 1};

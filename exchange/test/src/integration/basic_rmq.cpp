@@ -7,7 +7,7 @@
 
 namespace rmq = nutc::rabbitmq;
 
-class BasicIntegration : public ::testing::Test {
+class IntegrationBasic : public ::testing::Test {
 protected:
     // TODO: teardown of rmq connection if necessary
     void
@@ -31,7 +31,7 @@ protected:
     nutc::manager::ClientManager users;
 };
 
-TEST_F(BasicIntegration, InitialLiquidity)
+TEST_F(IntegrationBasic, InitialLiquidity)
 {
     nutc::dev_mode::create_mt_algo_files(1);
     size_t num_clients = nutc::client::initialize(users, Mode::DEV, 1);

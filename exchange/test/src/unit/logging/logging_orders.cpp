@@ -9,7 +9,7 @@
 using nutc::messages::SIDE::BUY;
 using nutc::messages::SIDE::SELL;
 
-class LoggingOrders : public ::testing::Test {
+class UnitLoggingOrders : public ::testing::Test {
 protected:
     void
     SetUp() override
@@ -24,7 +24,7 @@ protected:
     Engine engine;
 };
 
-TEST_F(LoggingOrders, LogMarketOrders)
+TEST_F(UnitLoggingOrders, LogMarketOrders)
 {
     manager.modify_capital("ABC", -100000);
 
@@ -37,7 +37,7 @@ TEST_F(LoggingOrders, LogMarketOrders)
     EXPECT_NO_FATAL_FAILURE(logger.log_event(order2));
 }
 
-TEST_F(LoggingOrders, LogMatches)
+TEST_F(UnitLoggingOrders, LogMatches)
 {
     MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
     MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
