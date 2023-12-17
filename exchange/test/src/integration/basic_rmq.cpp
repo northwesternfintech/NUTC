@@ -9,7 +9,7 @@ namespace rmq = nutc::rabbitmq;
 
 class BasicIntegration : public ::testing::Test {
 protected:
-    // TODO: teardown if necessary
+    // TODO: teardown of rmq connection if necessary
     void
     SetUp() override
     {
@@ -25,6 +25,7 @@ protected:
     TearDown() override
     {
         nutc::testing_utils::kill_all_processes(users);
+        rmq::RabbitMQConnectionManager::resetInstance();
     }
 
     nutc::manager::ClientManager users;

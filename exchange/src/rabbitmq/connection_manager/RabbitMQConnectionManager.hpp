@@ -10,6 +10,9 @@ namespace nutc {
 namespace rabbitmq {
 
 class RabbitMQConnectionManager {
+    // Only allow the singleton instance to create the connection
+    RabbitMQConnectionManager& operator=(RabbitMQConnectionManager&&) = default;
+
 public:
     // Delete the copy constructor and assignment operator
     RabbitMQConnectionManager(const RabbitMQConnectionManager&) = delete;
@@ -17,7 +20,8 @@ public:
 
     // Delete the move constructor and assignment operator
     RabbitMQConnectionManager(RabbitMQConnectionManager&&) = delete;
-    RabbitMQConnectionManager& operator=(RabbitMQConnectionManager&&) = delete;
+
+    RabbitMQConnectionManager& operator=(RabbitMQConnectionManager&) = delete;
 
     // Public method to access the singleton instance
     static RabbitMQConnectionManager&
@@ -25,6 +29,13 @@ public:
     {
         static RabbitMQConnectionManager instance;
         return instance;
+    }
+
+    // For testing purposes
+    static void
+    resetInstance()
+    {
+        getInstance() = RabbitMQConnectionManager();
     }
 
     bool connectToRabbitMQ(
