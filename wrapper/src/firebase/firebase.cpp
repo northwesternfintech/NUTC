@@ -6,11 +6,11 @@ namespace firebase {
 void
 print_algo_info(const glz::json_t& algo, const std::string& algo_id)
 {
-    log_i(firebase, "Running {}", algo["name"].get<std::string>());
-    log_i(firebase, "Description: {}", algo["description"].get<std::string>());
-    log_i(firebase, "Upload date: {}", algo["uploadDate"].get<std::string>());
-    log_d(firebase, "Downloading at url {}", algo["downloadURL"].get<std::string>());
-    log_i(firebase, "Algo id: {}", algo_id);
+    log_i(wrapper_firebase, "Running {}", algo["name"].get<std::string>());
+    log_i(wrapper_firebase, "Description: {}", algo["description"].get<std::string>());
+    log_i(wrapper_firebase, "Upload date: {}", algo["uploadDate"].get<std::string>());
+    log_d(wrapper_firebase, "Downloading at url {}", algo["downloadURL"].get<std::string>());
+    log_i(wrapper_firebase, "Algo id: {}", algo_id);
 }
 
 glz::json_t
@@ -111,7 +111,7 @@ firebase_request(
 
     res = curl_easy_perform(curl);
     if (res != CURLE_OK) {
-        log_e(firebase, "curl_easy_perform() failed: {}", curl_easy_strerror(res));
+        log_e(wrapper_firebase, "curl_easy_perform() failed: {}", curl_easy_strerror(res));
     }
 
     curl_easy_cleanup(curl);
@@ -120,7 +120,7 @@ firebase_request(
     auto error = glz::read_json(json, readBuffer);
     if (error) {
         std::string descriptive_error = glz::format_error(error, readBuffer);
-        log_e(firebase, "glz::read_json() failed: {}", descriptive_error);
+        log_e(wrapper_firebase, "glz::read_json() failed: {}", descriptive_error);
     }
     return json;
 }

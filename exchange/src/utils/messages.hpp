@@ -187,7 +187,7 @@ template <>
 struct glz::meta<nutc::messages::ObUpdate> {
     using T = nutc::messages::ObUpdate;
     static constexpr auto value = object(
-        "ticker", &T::ticker, "side", &T::side, "price", &T::price, "quantity",
+        "security", &T::ticker, "side", &T::side, "price", &T::price, "quantity",
         &T::quantity
     );
 };

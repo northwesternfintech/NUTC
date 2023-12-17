@@ -91,12 +91,12 @@ get_main_logger()
     class ____dummy_##category // makes you add a semicolon
 
 // Create loggers here for every category
-CREATE_LOG_CATEGORY(py_runtime);
-CREATE_LOG_CATEGORY(redis);
-CREATE_LOG_CATEGORY(web);
-CREATE_LOG_CATEGORY(libcurl);
-CREATE_LOG_CATEGORY(rabbitmq);
-CREATE_LOG_CATEGORY(firebase);
+CREATE_LOG_CATEGORY(wrapper_py_runtime);
+CREATE_LOG_CATEGORY(wrapper_redis);
+CREATE_LOG_CATEGORY(wrapper_web);
+CREATE_LOG_CATEGORY(wrapper_libcurl);
+CREATE_LOG_CATEGORY(wrapper_rabbitmq);
+CREATE_LOG_CATEGORY(wrapper_firebase);
 
 #undef CREATE_LOG_CATEGORY
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
