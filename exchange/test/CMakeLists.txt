@@ -14,10 +14,10 @@ include(GoogleTest)
 # ---- Tests ----
 
 add_executable(NUTC24_test 
-  src/matching/basic_matching.cpp
-  src/matching/invalid_orders.cpp
-  src/matching/many_orders.cpp
-  src/logging/logging_orders.cpp
+  src/unit/matching/basic_matching.cpp
+  src/unit/matching/invalid_orders.cpp
+  src/unit/matching/many_orders.cpp
+  src/unit/logging/logging_orders.cpp
   src/test_utils/macros.cpp 
   )
 
