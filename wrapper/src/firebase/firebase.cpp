@@ -9,7 +9,11 @@ print_algo_info(const glz::json_t& algo, const std::string& algo_id)
     log_i(wrapper_firebase, "Running {}", algo["name"].get<std::string>());
     log_i(wrapper_firebase, "Description: {}", algo["description"].get<std::string>());
     log_i(wrapper_firebase, "Upload date: {}", algo["uploadDate"].get<std::string>());
-    log_d(wrapper_firebase, "Downloading at url {}", algo["downloadURL"].get<std::string>());
+    log_d(
+        wrapper_firebase,
+        "Downloading at url {}",
+        algo["downloadURL"].get<std::string>()
+    );
     log_i(wrapper_firebase, "Algo id: {}", algo_id);
 }
 
@@ -111,7 +115,9 @@ firebase_request(
 
     res = curl_easy_perform(curl);
     if (res != CURLE_OK) {
-        log_e(wrapper_firebase, "curl_easy_perform() failed: {}", curl_easy_strerror(res));
+        log_e(
+            wrapper_firebase, "curl_easy_perform() failed: {}", curl_easy_strerror(res)
+        );
     }
 
     curl_easy_cleanup(curl);

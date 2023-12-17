@@ -64,6 +64,16 @@ tasks:
       - task: build
       - ctest --preset=dev
 
+  utest:
+    cmds:
+      - task: build
+      - ctest --preset=dev -R "Unit*"
+
+  itest:
+    cmds:
+      - task: build
+      - ctest --preset=dev -R "Integration*"
+
   docs:
     dir: '{{.USER_WORKING_DIR}}'
     cmds:
