@@ -27,9 +27,6 @@ RabbitMQConsumer::handleIncomingMessages(
                     log_e(rabbitmq, "Not expecting initialization message");
                     exit(1);
                 }
-                else if constexpr (std::is_same_v<T, messages::RMQError>) {
-                    log_e(rabbitmq, "Received RMQError: {}", arg.message);
-                }
                 else if constexpr (std::is_same_v<T, messages::MarketOrder>) {
                     RabbitMQOrderHandler::handleIncomingMarketOrder(
                         engine_manager, clients, arg
@@ -63,18 +60,18 @@ RabbitMQConsumer::consumeMessageAsString()
     return message;
 }
 
-std::variant<messages::InitMessage, messages::MarketOrder, messages::RMQError>
+std::variant<messages::InitMessage, messages::MarketOrder>
 RabbitMQConsumer::consumeMessage()
 {
     std::optional<std::string> buf = consumeMessageAsString();
     if (!buf.has_value()) {
-        return messages::RMQError{"Failed to consume message."};
+        exit(1); // TODO: more helpful exit message?
     }
 
-    std::variant<messages::InitMessage, messages::MarketOrder, messages::RMQError> data;
+    std::variant<messages::InitMessage, messages::MarketOrder> data;
     auto err = glz::read_json(data, buf.value());
     if (err) {
-        return messages::RMQError{glz::format_error(err, buf.value())};
+        exit(1); // todo: more helpful exit message
     }
     return data;
 }

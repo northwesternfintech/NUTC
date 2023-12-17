@@ -16,9 +16,7 @@
 
 using InitMessage = nutc::messages::InitMessage;
 using MarketOrder = nutc::messages::MarketOrder;
-using RMQError = nutc::messages::RMQError;
 using ObUpdate = nutc::messages::ObUpdate;
-using ShutdownMessage = nutc::messages::ShutdownMessage;
 using Match = nutc::messages::Match;
 using AccountUpdate = nutc::messages::AccountUpdate;
 using StartTime = nutc::messages::StartTime;
@@ -100,7 +98,7 @@ public:
      *
      * @returns A shutdown or error message
      */
-    std::variant<ShutdownMessage, RMQError> handleIncomingMessages();
+    void handleIncomingMessages();
 
 private:
     rate_limiter::RateLimiter limiter;
@@ -126,8 +124,7 @@ private:
     );
 
     std::string consumeMessageAsString();
-    std::variant<StartTime, ShutdownMessage, RMQError, ObUpdate, Match, AccountUpdate>
-    consumeMessage();
+    std::variant<StartTime, ObUpdate, Match, AccountUpdate> consumeMessage();
 };
 
 } // namespace rabbitmq

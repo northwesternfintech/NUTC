@@ -27,7 +27,7 @@ TEST_F(InvalidOrders, SimpleInvalidFunds)
 {
     manager.modify_capital("ABC", -100000);
     std::optional<SIDE> err =
-        manager.validate_match(Match{"ETHUSD", "ABC", "DEF", SELL, 1, 1});
+        manager.validate_match(Match{"ETHUSD", SELL, 1, 1, "ABC", "DEF"});
     EXPECT_TRUE(err.has_value());
     EXPECT_EQ(err.value(), BUY);
 }

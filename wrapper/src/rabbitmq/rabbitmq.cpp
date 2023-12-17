@@ -48,36 +48,16 @@ RabbitMQ::connectToRabbitMQ(
 }
 
 // todo: split into helpers
-std::variant<ShutdownMessage, RMQError>
+void
 RabbitMQ::handleIncomingMessages()
 {
     bool keep_running = true;
     while (keep_running) {
-        auto data = consumeMessage();
-        std::optional<std::variant<ShutdownMessage, RMQError>> res = std::visit(
+        std::variant<StartTime, ObUpdate, Match, AccountUpdate> data = consumeMessage();
+        std::visit(
             [&](auto&& arg) {
                 using T = std::decay_t<decltype(arg)>;
-                std::optional<std::variant<ShutdownMessage, RMQError>> nothing =
-                    std::nullopt;
-                if constexpr (std::is_same_v<T, ShutdownMessage>) {
-                    log_w(
-                        rabbitmq,
-                        "Received shutdown message: {}",
-                        std::get<ShutdownMessage>(data).shutdown_reason
-                    );
-                    std::optional<std::variant<ShutdownMessage, RMQError>> var = arg;
-                    return var;
-                }
-                else if constexpr (std::is_same_v<T, RMQError>) {
-                    log_e(
-                        rabbitmq,
-                        "Failed to consume message: {}",
-                        std::get<RMQError>(data).message
-                    );
-                    std::optional<std::variant<ShutdownMessage, RMQError>> var = arg;
-                    return var;
-                }
-                else if constexpr (std::is_same_v<T, ObUpdate>) {
+                if constexpr (std::is_same_v<T, ObUpdate>) {
                     log_i(
                         rabbitmq,
                         "Received order book update: {}",
@@ -87,9 +67,9 @@ RabbitMQ::handleIncomingMessages()
                     std::string side =
                         update.side == messages::SIDE::BUY ? "BUY" : "SELL";
                     nutc::pywrapper::get_ob_update_function()(
-                        update.security, side, update.price, update.quantity
+                        update.ticker, side, update.price, update.quantity
                     );
-                    return nothing;
+                    return;
                 }
                 else if constexpr (std::is_same_v<T, Match>) {
                     log_i(
@@ -103,7 +83,7 @@ RabbitMQ::handleIncomingMessages()
                     nutc::pywrapper::get_trade_update_function()(
                         match.ticker, side, match.price, match.quantity
                     );
-                    return nothing;
+                    return;
                 }
                 else if constexpr (std::is_same_v<T, AccountUpdate>) {
                     AccountUpdate update = std::get<AccountUpdate>(data);
@@ -121,24 +101,20 @@ RabbitMQ::handleIncomingMessages()
                         update.quantity,
                         update.capital_remaining
                     );
-                    return nothing;
+                    return;
                 }
                 else {
-                    return nothing;
+                    return;
                 }
             },
             data
         );
-        if (res.has_value()) {
-            return res.value();
-        }
     }
-    return ShutdownMessage{"Received shutdown message."};
 }
 
 bool
 RabbitMQ::publishMarketOrder(
-    const std::string& client_uid,
+    const std::string& client_id,
     const std::string& side,
     const std::string& ticker,
     float quantity,
@@ -149,7 +125,7 @@ RabbitMQ::publishMarketOrder(
         return false;
     }
     MarketOrder order{
-        client_uid,
+        client_id,
         side == "BUY" ? messages::SIDE::BUY : messages::SIDE::SELL,
         ticker,
         quantity,
@@ -184,20 +160,21 @@ RabbitMQ::publishMessage(const std::string& queueName, const std::string& messag
     return true;
 }
 
-std::variant<StartTime, ShutdownMessage, RMQError, ObUpdate, Match, AccountUpdate>
+std::variant<StartTime, ObUpdate, Match, AccountUpdate>
 RabbitMQ::consumeMessage()
 {
     std::string buf = consumeMessageAsString();
     if (buf == "") {
-        return RMQError{"Failed to consume message."};
+        log_e(rabbitmq, "Failed to consume message.");
+        exit(1);
     }
 
-    std::variant<StartTime, ShutdownMessage, RMQError, ObUpdate, Match, AccountUpdate>
-        data{};
+    std::variant<StartTime, ObUpdate, Match, AccountUpdate> data{};
     auto err = glz::read_json(data, buf);
     if (err) {
         std::string error = glz::format_error(err, buf);
-        return RMQError{error};
+        log_e(rabbitmq, "Failed to parse message: {}", error);
+        exit(1);
     }
     return data;
 }
@@ -272,12 +249,12 @@ RabbitMQ::initializeConsume(const std::string& queueName)
     return true;
 }
 
-RabbitMQ::RabbitMQ(const std::string& uid)
+RabbitMQ::RabbitMQ(const std::string& id)
 {
-    if (!initializeConnection(uid)) {
+    if (!initializeConnection(id)) {
         log_c(rabbitmq, "Failed to initialize connection to RabbitMQ");
         // attempt to say we didn't init correctly
-        bool published_init = publishInit(uid, false);
+        bool published_init = publishInit(id, false);
         if (!published_init) {
             log_e(rabbitmq, "Failed to publish init message");
         }
@@ -287,12 +264,12 @@ RabbitMQ::RabbitMQ(const std::string& uid)
 }
 
 std::function<bool(const std::string&, const std::string&, float, float)>
-RabbitMQ::getMarketFunc(const std::string& uid)
+RabbitMQ::getMarketFunc(const std::string& id)
 {
     return std::bind(
         &RabbitMQ::publishMarketOrder,
         this,
-        uid,
+        id,
         std::placeholders::_1,
         std::placeholders::_2,
         std::placeholders::_3,
@@ -301,9 +278,9 @@ RabbitMQ::getMarketFunc(const std::string& uid)
 }
 
 bool
-RabbitMQ::publishInit(const std::string& uid, bool ready)
+RabbitMQ::publishInit(const std::string& id, bool ready)
 {
-    std::string message = glz::write_json(InitMessage{uid, ready});
+    std::string message = glz::write_json(InitMessage{id, ready});
     log_i(rabbitmq, "Publishing init message: {}", message);
     bool rVal = publishMessage("market_order", message);
     return rVal;

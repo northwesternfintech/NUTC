@@ -21,19 +21,19 @@ create_api_module(
     py::exec(R"(import nutc_api)");
 }
 
-const py::object
+py::object
 get_ob_update_function()
 {
     return py::globals()["strategy"].attr("on_orderbook_update");
 }
 
-const py::object
+py::object
 get_trade_update_function()
 {
     return py::globals()["strategy"].attr("on_trade_update");
 }
 
-const py::object
+py::object
 get_account_update_function()
 {
     return py::globals()["strategy"].attr("on_account_update");

@@ -17,13 +17,7 @@ RabbitMQClientManager::waitForClients(
 
     auto processMessage = [&](const auto& message) {
         using T = std::decay_t<decltype(message)>;
-        if constexpr (std::is_same_v<T, messages::RMQError>) {
-            log_e(
-                rabbitmq, "Failed to consume message with error {}.", message.message
-            );
-            return false;
-        }
-        else if constexpr (std::is_same_v<T, messages::MarketOrder>) {
+        if constexpr (std::is_same_v<T, messages::MarketOrder>) {
             log_i(
                 rabbitmq,
                 "Received market order before initialization complete. Ignoring..."
@@ -32,10 +26,10 @@ RabbitMQClientManager::waitForClients(
         else if constexpr (std::is_same_v<T, messages::InitMessage>) {
             log_i(
                 rabbitmq, "Received init message from client {} with status {}",
-                message.client_uid, message.ready ? "ready" : "not ready"
+                message.client_id, message.ready ? "ready" : "not ready"
             );
             if (message.ready) {
-                clients.set_active(message.client_uid);
+                clients.set_active(message.client_id);
                 num_running++;
             }
         }
@@ -71,12 +65,12 @@ RabbitMQClientManager::sendStartTime(
     std::string buf = glz::write_json(message);
 
     auto send_to_client = [buf](const std::pair<std::string, manager::Client>& pair) {
-        const auto& [uid, client] = pair;
+        const auto& [id, client] = pair;
 
         if (!client.active)
             return;
 
-        RabbitMQPublisher::publishMessage(uid, buf);
+        RabbitMQPublisher::publishMessage(id, buf);
     };
 
     const auto& clients = manager.get_clients();

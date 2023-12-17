@@ -20,7 +20,7 @@ Engine::add_order_without_matching(MarketOrder order)
     }
 }
 
-constexpr ObUpdate
+ObUpdate
 create_ob_update(const MarketOrder& order, float quantity)
 {
     return ObUpdate{order.ticker, order.side, order.price, quantity};
@@ -43,7 +43,7 @@ Engine::insufficient_capital(
     const MarketOrder& order, const manager::ClientManager& manager
 )
 {
-    float capital = manager.get_capital(order.client_uid);
+    float capital = manager.get_capital(order.client_id);
     float order_value = order.price * order.quantity;
     return order.side == SIDE::BUY && order_value > capital;
 }
@@ -51,7 +51,7 @@ Engine::insufficient_capital(
 bool
 insufficient_holdings(const MarketOrder& order, const manager::ClientManager& manager)
 {
-    float holdings = manager.get_holdings(order.client_uid, order.ticker);
+    float holdings = manager.get_holdings(order.client_id, order.ticker);
     return order.side == SIDE::SELL && order.quantity > holdings;
 }
 
@@ -107,11 +107,11 @@ Engine::get_match_quantity(
 }
 
 std::string
-Engine::get_client_uid(
+Engine::get_client_id(
     SIDE side, const MarketOrder& aggressive, const MarketOrder& passive
 )
 {
-    return side == aggressive.side ? aggressive.client_uid : passive.client_uid;
+    return side == aggressive.side ? aggressive.client_id : passive.client_id;
 }
 
 SIDE
@@ -139,11 +139,11 @@ Engine::attempt_matches(
         float price_to_match =
             aggressive_side == SIDE::BUY ? sell_order.price : buy_order.price;
 
-        std::string buyer_uid = buy_order.client_uid;
-        std::string seller_uid = sell_order.client_uid;
+        std::string buyer_id = buy_order.client_id;
+        std::string seller_id = sell_order.client_id;
 
-        Match toMatch = Match{sell_order.ticker, buyer_uid,      seller_uid,
-                              aggressive_side,   price_to_match, quantity_to_match};
+        Match toMatch{sell_order.ticker, aggressive_side, price_to_match,
+                      quantity_to_match, buyer_id,        seller_id};
 
         std::optional<SIDE> match_failure = manager.validate_match(toMatch);
         if (match_failure.has_value()) {
@@ -193,10 +193,10 @@ Engine::attempt_matches(
             asks.push(sell_order);
         }
 
-        manager.modify_capital(buyer_uid, -quantity_to_match * price_to_match);
-        manager.modify_capital(seller_uid, quantity_to_match * price_to_match);
-        manager.modify_holdings(seller_uid, buy_order.ticker, -quantity_to_match);
-        manager.modify_holdings(buyer_uid, buy_order.ticker, quantity_to_match);
+        manager.modify_capital(buyer_id, -quantity_to_match * price_to_match);
+        manager.modify_capital(seller_id, quantity_to_match * price_to_match);
+        manager.modify_holdings(seller_id, buy_order.ticker, -quantity_to_match);
+        manager.modify_holdings(buyer_id, buy_order.ticker, quantity_to_match);
     }
 
     if (aggressive_quantity > 0) {

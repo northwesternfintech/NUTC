@@ -13,12 +13,12 @@ isNearlyEqual(float a, float b, float epsilon)
 
 bool
 validateMatch(
-    const Match& match, const std::string& ticker, const std::string& buyer_uid,
-    const std::string& seller_uid, messages::SIDE side, float price, float quantity
+    const Match& match, const std::string& ticker, const std::string& buyer_id,
+    const std::string& seller_id, messages::SIDE side, float price, float quantity
 )
 {
-    return match.ticker == ticker && match.buyer_uid == buyer_uid
-           && match.seller_uid == seller_uid && match.side == side
+    return match.ticker == ticker && match.buyer_id == buyer_id
+           && match.seller_id == seller_id && match.side == side
            && isNearlyEqual(match.price, price)
            && isNearlyEqual(match.quantity, quantity);
 }
@@ -29,7 +29,7 @@ validateObUpdate(
     float quantity
 )
 {
-    return update.security == ticker && update.side == side
+    return update.ticker == ticker && update.side == side
            && isNearlyEqual(update.price, price)
            && isNearlyEqual(update.quantity, quantity);
 }

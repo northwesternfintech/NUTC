@@ -13,12 +13,12 @@ namespace nutc {
 namespace client {
 
 /**
- * @brief Spawns a client process with the given uid
- * Forks and execve's a client process with the given uid
+ * @brief Spawns a client process with the given id
+ * Forks and execve's a client process with the given id
  * Spawns in the binary "NUTC-client", expecting it to be in the $PATH
  */
 void
-spawn_client(const std::string& uid, const std::string& algo_id, bool is_local_algo);
+spawn_client(const std::string& id, const std::string& algo_id, bool is_local_algo);
 
 /**
  * @brief Fetches all users from firebase
