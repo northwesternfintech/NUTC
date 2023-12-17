@@ -69,7 +69,8 @@ spawn_all_clients(nutc::manager::ClientManager& users)
 
             log_i(client_spawning, "Spawning client: {}", id);
 
-            pid_t pid = spawn_client(quote_id(id), quote_id(algo_id), client.is_local_algo);
+            pid_t pid =
+                spawn_client(quote_id(id), quote_id(algo_id), client.is_local_algo);
             users.set_client_pid(id, pid);
             num_clients++;
         };
@@ -108,7 +109,7 @@ spawn_client(const std::string& id, const std::string& algo_id, bool is_local_al
         log_e(client_spawning, "Failed to fork");
         exit(1);
     }
-  return pid;
+    return pid;
 }
 } // namespace client
 } // namespace nutc

@@ -32,7 +32,9 @@ glz::json_t::object_t get_all_users();
  */
 size_t spawn_all_clients(nutc::manager::ClientManager& users);
 
-size_t initialize(manager::ClientManager& users, Mode mode, size_t num_local_algos=DEBUG_NUM_USERS);
+size_t initialize(
+    manager::ClientManager& users, Mode mode, size_t num_local_algos = DEBUG_NUM_USERS
+);
 
 } // namespace client
 } // namespace nutc
