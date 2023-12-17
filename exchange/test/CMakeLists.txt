@@ -12,56 +12,34 @@ find_package(GTest REQUIRED)
 include(GoogleTest)
 
 # ---- Tests ----
-
-add_library(
-  NUTC_test_lib OBJECT
+add_executable(NUTC_tests
   src/test_utils/macros.cpp 
   src/test_utils/process.cpp
-  )
 
-add_executable(NUTC_unit_tests
   src/unit/matching/basic_matching.cpp
   src/unit/matching/invalid_orders.cpp
   src/unit/matching/many_orders.cpp
 
   src/unit/logging/logging_orders.cpp
-  )
 
-add_executable(NUTC_integration_tests
   src/integration/basic_rmq.cpp
   )
 
 target_include_directories(
-  NUTC_test_lib ${warning_guard}
+  NUTC_tests ${warning_guard}
   PUBLIC
   "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
 )
 
 target_link_libraries(
-  NUTC_test_lib PRIVATE
-  NUTC24_lib
-)
-
-target_link_libraries(
-  NUTC_unit_tests PRIVATE
-  NUTC_test_lib
+  NUTC_tests PRIVATE
   NUTC24_lib
   GTest::gtest_main
 )
 
-target_link_libraries(
-  NUTC_integration_tests PRIVATE 
-  NUTC_test_lib
-  NUTC24_lib
-  GTest::gtest_main
-)
+target_compile_features(NUTC_tests PRIVATE cxx_std_20)
 
-target_compile_features(NUTC_test_lib PRIVATE cxx_std_20)
-target_compile_features(NUTC_unit_tests PRIVATE cxx_std_20)
-target_compile_features(NUTC_integration_tests PRIVATE cxx_std_20)
-
-gtest_discover_tests(NUTC_unit_tests)
-gtest_discover_tests(NUTC_integration_tests)
+gtest_discover_tests(NUTC_tests)
 
 # ---- End-of-file commands ----
 
