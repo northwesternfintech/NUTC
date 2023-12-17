@@ -19,6 +19,7 @@ namespace manager {
 
 struct Client {
     std::string uid;
+    pid_t pid;
     std::string algo_id;
     bool active;
     bool is_local_algo;
@@ -32,6 +33,7 @@ private:
 
 public:
     void add_client(const std::string& uid, const std::string& algo_id);
+    void set_client_pid(const std::string& uid, pid_t pid);
     void
     add_client(const std::string& uid, const std::string& algo_id, bool is_local_algo);
     void initialize_from_firebase(const glz::json_t::object_t& users);

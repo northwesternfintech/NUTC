@@ -17,7 +17,7 @@ namespace client {
  * Forks and execve's a client process with the given id
  * Spawns in the binary "NUTC-client", expecting it to be in the $PATH
  */
-void
+pid_t
 spawn_client(const std::string& id, const std::string& algo_id, bool is_local_algo);
 
 /**
@@ -30,9 +30,9 @@ glz::json_t::object_t get_all_users();
  * @param users The ClientManager to spawn clients for
  * @returns the number of clients spawned
  */
-size_t spawn_all_clients(const nutc::manager::ClientManager& users);
+size_t spawn_all_clients(nutc::manager::ClientManager& users);
 
-size_t initialize(manager::ClientManager& users, Mode mode);
+size_t initialize(manager::ClientManager& users, Mode mode, size_t num_local_algos=DEBUG_NUM_USERS);
 
 } // namespace client
 } // namespace nutc

@@ -14,11 +14,15 @@ include(GoogleTest)
 # ---- Tests ----
 
 add_executable(NUTC24_test 
+  src/integration/basic_rmq.cpp
+
   src/unit/matching/basic_matching.cpp
   src/unit/matching/invalid_orders.cpp
   src/unit/matching/many_orders.cpp
   src/unit/logging/logging_orders.cpp
+
   src/test_utils/macros.cpp 
+  src/test_utils/process.cpp
   )
 
 target_include_directories(

@@ -3,13 +3,22 @@
 namespace nutc {
 namespace manager {
 
-inline bool
+bool
 ClientManager::user_exists(const std::string& id) const
 {
     return clients.find(id) != clients.end();
 }
 
-inline bool
+void
+ClientManager::set_client_pid(const std::string& id, pid_t pid)
+{
+    if (!user_exists(id))
+        return;
+
+    clients[id].pid = pid;
+}
+
+bool
 ClientManager::user_holds_stock(const std::string& id, const std::string& ticker) const
 {
     if (!user_exists(id)) [[unlikely]]
@@ -75,13 +84,13 @@ ClientManager::add_client(
     const std::string& id, const std::string& algo_id, bool is_local_algo
 )
 {
-    clients[id] = Client{id, algo_id, false, is_local_algo, STARTING_CAPITAL, {}};
+    clients[id] = Client{id, {}, algo_id, false, is_local_algo, STARTING_CAPITAL, {}};
 }
 
 void
 ClientManager::add_client(const std::string& id, const std::string& algo_id)
 {
-    clients[id] = Client{id, algo_id, false, false, STARTING_CAPITAL, {}};
+    clients[id] = Client{id, {}, algo_id, false, false, STARTING_CAPITAL, {}};
 }
 
 void

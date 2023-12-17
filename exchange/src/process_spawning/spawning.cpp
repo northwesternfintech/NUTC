@@ -10,14 +10,16 @@ namespace nutc {
 namespace client {
 
 size_t
-initialize(manager::ClientManager& users, Mode mode)
+initialize(manager::ClientManager& users, Mode mode, size_t num_local_algos)
 {
     size_t num_users;
     switch (mode) {
         case Mode::DEV:
-            dev_mode::initialize_client_manager(users, DEBUG_NUM_USERS);
+            dev_mode::initialize_client_manager(
+                users, static_cast<int>(num_local_algos)
+            );
             spawn_all_clients(users);
-            return DEBUG_NUM_USERS;
+            return num_local_algos;
         case Mode::SANDBOX:
             num_users = sandbox::initialize_client_manager(users);
             spawn_all_clients(users);
@@ -54,11 +56,11 @@ quote_id(std::string id)
 }
 
 size_t
-spawn_all_clients(const nutc::manager::ClientManager& users)
+spawn_all_clients(nutc::manager::ClientManager& users)
 {
     size_t num_clients = 0;
     auto spawn_one_client =
-        [&num_clients](const std::pair<std::string, manager::Client>& pair) {
+        [&num_clients, &users](const std::pair<std::string, manager::Client>& pair) {
             const auto& [id, client] = pair;
             const std::string& algo_id = client.algo_id;
 
@@ -67,7 +69,8 @@ spawn_all_clients(const nutc::manager::ClientManager& users)
 
             log_i(client_spawning, "Spawning client: {}", id);
 
-            spawn_client(quote_id(id), quote_id(algo_id), client.is_local_algo);
+            pid_t pid = spawn_client(quote_id(id), quote_id(algo_id), client.is_local_algo);
+            users.set_client_pid(id, pid);
             num_clients++;
         };
 
@@ -78,7 +81,7 @@ spawn_all_clients(const nutc::manager::ClientManager& users)
     return num_clients;
 }
 
-void
+pid_t
 spawn_client(const std::string& id, const std::string& algo_id, bool is_local_algo)
 {
     pid_t pid = fork();
@@ -105,6 +108,7 @@ spawn_client(const std::string& id, const std::string& algo_id, bool is_local_al
         log_e(client_spawning, "Failed to fork");
         exit(1);
     }
+  return pid;
 }
 } // namespace client
 } // namespace nutc
