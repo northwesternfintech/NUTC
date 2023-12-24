@@ -80,6 +80,14 @@ struct MarketOrder {
         order_index = get_and_increment_global_index();
     }
 
+    bool
+    operator==(const MarketOrder& other) const
+    {
+        return client_id == other.client_id && ticker == other.ticker
+               && side == other.side && is_close_to_zero(price - other.price)
+               && is_close_to_zero(quantity - other.quantity);
+    }
+
     // toString
     std::string
     to_string() const

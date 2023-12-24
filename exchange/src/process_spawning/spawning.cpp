@@ -3,6 +3,7 @@
 #include "config.h"
 #include "curl/curl.hpp"
 #include "local_algos/dev_mode.hpp"
+#include "local_algos/file_management.hpp"
 #include "local_algos/sandbox.hpp"
 #include "logging.hpp"
 
@@ -85,6 +86,10 @@ spawn_all_clients(nutc::manager::ClientManager& users)
 pid_t
 spawn_client(const std::string& id, const std::string& algo_id, bool is_local_algo)
 {
+    if (is_local_algo) {
+        std::string filepath = algo_id + ".py";
+        assert(file_mgmt::file_exists(filepath));
+    }
     pid_t pid = fork();
     if (pid == 0) {
         std::vector<std::string> args = {
