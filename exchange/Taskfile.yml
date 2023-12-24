@@ -62,8 +62,8 @@ tasks:
     dir: '{{.USER_WORKING_DIR}}'
     cmds:
       - task: build
-      - task: check-and-start-services
-      - ctest --preset=dev
+      - task: utest
+      - task: itest
 
   utest:
     cmds:
@@ -74,6 +74,7 @@ tasks:
     cmds:
       - task: build
       - task: check-and-start-services
+      - cp -r test/algos build/dev/test/test_algos
       - ctest --preset=dev -R "Integration*"
 
   docs:
