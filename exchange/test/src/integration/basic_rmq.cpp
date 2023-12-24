@@ -33,7 +33,8 @@ protected:
 
 TEST_F(IntegrationBasic, InitialLiquidity)
 {
-    nutc::dev_mode::create_mt_algo_files(1);
+    bool algo_success = nutc::dev_mode::create_mt_algo_files(1);
+    EXPECT_TRUE(algo_success);
     size_t num_clients = nutc::client::initialize(users, Mode::DEV, 1);
     EXPECT_EQ(num_clients, 1);
 }
