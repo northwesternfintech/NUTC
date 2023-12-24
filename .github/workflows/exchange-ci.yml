@@ -108,7 +108,7 @@ jobs:
         UBSAN_OPTIONS: print_stacktrace=1
       run: ctest --output-on-failure --no-tests=error -j 2 -R "Unit*"
 
-  test:
+  unit-test:
     needs: [lint]
 
     strategy:
@@ -182,9 +182,100 @@ jobs:
       working-directory: exchange/build
       run: ctest --output-on-failure --no-tests=error -C Release -j 2 -R "Unit*"
 
+  integration-test:
+    needs: [lint]
+
+    strategy:
+      matrix:
+        os: [ubuntu-22.04]
+
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: exchange
+
+
+    env:
+      CC: clang-17
+      CXX: clang++-17
+      CLANG_DIR: '/usr/lib/llvm-17/lib/cmake/clang'
+      LLVM_DIR: '/usr/lib/llvm-17/lib/cmake/llvm'
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+
+    - name: Install LLVM 17
+      run: |
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+          sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main"
+          sudo apt update
+          sudo apt install llvm-17 llvm-17-dev llvm-17-tools clang-17 clang-tidy-17 clang-tools-17 libclang-17-dev -y
+
+    - name: Install static analyzers
+      if: matrix.os == 'ubuntu-22.04'
+      run: >-
+        sudo apt install cppcheck -y -q
+
+        sudo update-alternatives --install
+        /usr/bin/clang-tidy clang-tidy
+        /usr/bin/clang-tidy-17 160
+
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with: { python-version: "3.11" }
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        pip3 install conan
+        
+        sudo apt install libssl-dev rabbitmq-server -y
+        
+        bash < ../.github/scripts/conan-profile.sh
+        conan install . -s build_type=Release -b missing
+
+    # todo: use secrets
+    - name: Configure RabbitMQ
+      run: |
+        sudo rabbitmqctl add_user NUFT ADMIN
+        sudo rabbitmqctl set_permissions -p / NUFT ".*" ".*" ".*"
+        sudo rabbitmqctl set_user_tags NUFT administrator
+
+    - name: Start RabbitMQ
+      run: |
+        sudo systemctl start rabbitmq-server
+        sudo rabbitmqctl status
+
+    - name: Configure RabbitMQ Port
+      run: |
+        echo "listeners.tcp.default = 5672" | sudo tee -a /etc/rabbitmq/rabbitmq.conf
+        sudo systemctl restart rabbitmq-server
+
+    - name: Setup MultiToolTask
+      if: matrix.os == 'windows-2022'
+      run: |
+        Add-Content "$env:GITHUB_ENV" 'UseMultiToolTask=true'
+        Add-Content "$env:GITHUB_ENV" 'EnforceProcessCountAcrossBuilds=true'
+
+    - name: Configure
+      shell: pwsh
+      run: cmake "--preset=ci-$("${{ matrix.os }}".split("-")[0])"
+
+    - name: Build
+      run: cmake --build build --config Release -j 2
+
+    - name: Install
+      run: cmake --install build --config Release --prefix prefix
+
+    - name: Test
+      working-directory: exchange/build
+      run: ctest --output-on-failure --no-tests=error -C Release -j 2 -R "Integration*"
+
   docs:
     # Deploy docs only when builds succeed
-    needs: [sanitize, test]
+    needs: [sanitize, unit-test, integration-test]
 
     runs-on: ubuntu-22.04
     defaults:
