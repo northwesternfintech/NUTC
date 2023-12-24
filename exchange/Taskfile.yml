@@ -62,6 +62,7 @@ tasks:
     dir: '{{.USER_WORKING_DIR}}'
     cmds:
       - task: build
+      - task: check-and-start-services
       - ctest --preset=dev
 
   utest:
@@ -72,6 +73,7 @@ tasks:
   itest:
     cmds:
       - task: build
+      - task: check-and-start-services
       - ctest --preset=dev -R "Integration*"
 
   docs:
