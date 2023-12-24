@@ -25,6 +25,8 @@ To initialize and build all repos, follow the steps below
 - `dnf install go-task`
 - `dnf install perl`
 - `conan profile detect`
+- `dnf install python3.11`
+- `dnf install python3.11-devel`
 - Copy `.conan2/profiles/default` to `.conan2/profiles/cpp20` 
 - Change compiler.cppstd from gnu14 to gnu20
 - Change compiler.version from 8 to 13 on Linux, or to 16 on Mac
