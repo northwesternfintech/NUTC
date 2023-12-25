@@ -6,12 +6,14 @@ on:
       - main
     paths:
       - 'exchange/**'
+      - '.github/workflows/exchange-ci.yml'
 
   pull_request:
     branches:
       - main
     paths:
       - 'exchange/**'
+      - '.github/workflows/exchange-ci.yml'
 
   workflow_dispatch:
 
