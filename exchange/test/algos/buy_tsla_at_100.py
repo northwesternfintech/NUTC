@@ -1,5 +1,5 @@
 def place_market_order(side: str, ticker: str, quantity: float, price: float) -> None:
-    """Place a market order - DO NOT MODIFY"""
+    """Place a market order - DO NOT MODIFY""" 
 
 class Strategy:
     """Template for a strategy."""
