@@ -11,7 +11,7 @@ namespace dev_mode {
 void initialize_client_manager(manager::ClientManager& users, int num_users);
 
 void init_client_manager_from_filenames(
-    manager::ClientManager& users, std::vector<std::string>& names
+    manager::ClientManager& users, const std::vector<std::string>& names
 );
 
 } // namespace dev_mode

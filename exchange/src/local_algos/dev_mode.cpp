@@ -48,10 +48,10 @@ create_mt_algo_files(int num_users)
 
 void
 init_client_manager_from_filenames(
-    manager::ClientManager& users, std::vector<std::string>& names
+    manager::ClientManager& users, const std::vector<std::string>& names
 )
 {
-    for (std::string& name : names)
+    for (const std::string& name : names)
         users.add_client(name, name, true);
 }
 

@@ -37,14 +37,10 @@ protected:
 TEST_F(IntegrationBasicAlgo, InitialLiquidity)
 {
     std::vector<std::string> names{"test_algos/buy_tsla_at_100"};
-    nutc::dev_mode::init_client_manager_from_filenames(users, names);
-    nutc::client::spawn_all_clients(users);
+    nutc::testing_utils::initialize_testing_clients(users, names);
 
     // want to see if it buys
     engine_manager.add_engine("TSLA");
-
-    rmq::RabbitMQClientManager::waitForClients(users, 1);
-    rmq::RabbitMQClientManager::sendStartTime(users, CLIENT_WAIT_SECS);
     rmq::RabbitMQOrderHandler::addLiquidityToTicker(
         users, engine_manager, "TSLA", 100, 100
     );
