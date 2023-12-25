@@ -34,7 +34,7 @@ RabbitMQConnectionManager::connect_to_rabbitmq(
         connection_state_, "/", 0, FRAME_MAX, 0, AMQP_SASL_METHOD_PLAIN,
         username.c_str(), password.c_str()
     );
-  
+
     if (reply.reply_type != AMQP_RESPONSE_NORMAL) {
         log_e(rabbitmq, "{}", "Failed to login to RabbitMQ.");
         return false;

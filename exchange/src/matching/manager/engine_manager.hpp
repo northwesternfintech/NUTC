@@ -4,7 +4,6 @@
 #include <optional>
 #include <string>
 
-using Engine = nutc::matching::Engine;
 using engine_ref = std::reference_wrapper<nutc::matching::Engine>;
 
 namespace nutc {

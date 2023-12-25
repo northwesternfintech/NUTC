@@ -17,7 +17,7 @@ initialize_client_manager(manager::ClientManager& users)
         std::string algo_id = entry.path().filename().string();
         algo_id = algo_id.substr(0, algo_id.find(".py"));
         log_i(sandbox, "Adding client: {}", algo_id);
-        users.add_client(algo_id, algo_id, true);
+        users.add_client(algo_id, algo_id, /*is_local_algo=*/true);
         num_users += 1;
     }
     return num_users + 1;

@@ -120,13 +120,13 @@ Engine::get_aggressive_side(const MarketOrder& order1, const MarketOrder& order2
 }
 
 match_result
-Engine::attempt_matches_(
+Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
     manager::ClientManager& manager, const MarketOrder& aggressive_order
 )
 {
     match_result result;
     float aggressive_quantity = aggressive_order.quantity;
-    long long aggressive_index = aggressive_order.order_index;
+    int64_t aggressive_index = aggressive_order.order_index;
 
     while (!bids_.empty() && !asks_.empty() && bids_.top().can_match(asks_.top())) {
         MarketOrder sell_order = asks_.top();

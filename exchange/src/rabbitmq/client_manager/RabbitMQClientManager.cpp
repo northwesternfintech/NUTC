@@ -58,8 +58,8 @@ RabbitMQClientManager::send_start_time(
     time_point time =
         std::chrono::high_resolution_clock::now() + std::chrono::seconds(wait_seconds);
     int64_t time_ns = std::chrono::time_point_cast<std::chrono::nanoseconds>(time)
-                            .time_since_epoch()
-                            .count();
+                          .time_since_epoch()
+                          .count();
 
     messages::StartTime message{time_ns};
     std::string buf = glz::write_json(message);

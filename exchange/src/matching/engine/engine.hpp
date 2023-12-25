@@ -24,7 +24,6 @@ struct match_result {
 
 class Engine {
 public:
-
     /**
      * @brief Matches the given order against the current order book.
      * @param aggressive_order The order to match against the order book.
@@ -48,8 +47,9 @@ private:
 
     std::priority_queue<MarketOrder>& get_orders_(SIDE side);
 
-   match_result 
-    attempt_matches_(manager::ClientManager& manager, const MarketOrder& aggressive);
+    match_result attempt_matches_(
+        manager::ClientManager& manager, const MarketOrder& aggressive_order
+    );
     static SIDE
     get_aggressive_side(const MarketOrder& order1, const MarketOrder& order2);
     static bool insufficient_capital(

@@ -51,7 +51,9 @@ ClientManager::initialize_from_firebase(const glz::json_t::object_t& users)
     for (const auto& [id, user] : users) {
         if (!user.contains("latestAlgoId"))
             continue;
-        add_client(id, user["latestAlgoId"].get<std::string>(), false);
+        add_client(
+            id, user["latestAlgoId"].get<std::string>(), /*is_local_algo=*/false
+        );
     }
 }
 

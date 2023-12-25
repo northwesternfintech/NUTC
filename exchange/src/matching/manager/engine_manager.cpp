@@ -7,7 +7,7 @@ Manager::get_engine(const std::string& ticker)
 {
     auto engine = engines_.find(ticker);
     if (engine != engines_.end()) {
-        return std::reference_wrapper<Engine>(engine->second);
+        return std::reference_wrapper<nutc::matching::Engine>(engine->second);
     }
     return std::nullopt;
 }
