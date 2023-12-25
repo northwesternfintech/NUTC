@@ -40,7 +40,7 @@ std::optional<std::string>
 RabbitMQConsumer::consumeMessageAsString()
 {
     const auto& connection_state =
-        RabbitMQConnectionManager::getInstance().get_connection_state();
+        RabbitMQConnectionManager::get_instance().get_connection_state();
 
     amqp_envelope_t envelope;
     amqp_maybe_release_buffers(connection_state);

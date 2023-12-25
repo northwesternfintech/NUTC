@@ -23,8 +23,8 @@ initialize_testing_clients(
 {
     dev_mode::init_client_manager_from_filenames(users, algo_filenames);
     size_t num_users = nutc::client::spawn_all_clients(users);
-    rabbitmq::RabbitMQClientManager::waitForClients(users, num_users);
-    rabbitmq::RabbitMQClientManager::sendStartTime(users, CLIENT_WAIT_SECS);
+    rabbitmq::RabbitMQClientManager::wait_for_clients(users, num_users);
+    rabbitmq::RabbitMQClientManager::send_start_time(users, CLIENT_WAIT_SECS);
 }
 } // namespace testing_utils
 } // namespace nutc

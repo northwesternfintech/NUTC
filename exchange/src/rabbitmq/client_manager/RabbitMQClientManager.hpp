@@ -4,8 +4,6 @@
 
 namespace nutc {
 namespace rabbitmq {
-// TODO: refactor to client_manager?
-
 class RabbitMQClientManager {
 public:
     /**
@@ -14,9 +12,9 @@ public:
      * This ensures that all clients are connected to the exchange and have successfully
      * started (vs a RMQ or firebase error)
      */
-    static void waitForClients(manager::ClientManager& manager, size_t num_clients);
+    static void wait_for_clients(manager::ClientManager& manager, size_t num_clients);
 
-    static void sendStartTime(const manager::ClientManager& manager, int wait_seconds);
+    static void send_start_time(const manager::ClientManager& manager, int wait_seconds);
 };
 } // namespace rabbitmq
 } // namespace nutc

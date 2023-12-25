@@ -13,6 +13,9 @@ class RabbitMQConnectionManager {
     // Only allow the singleton instance to create the connection
     RabbitMQConnectionManager& operator=(RabbitMQConnectionManager&&) = default;
 
+    // TODO(stevenewald): consider RAII?
+    ~RabbitMQConnectionManager() = default;
+
 public:
     // Delete the copy constructor and assignment operator
     RabbitMQConnectionManager(const RabbitMQConnectionManager&) = delete;
@@ -25,7 +28,7 @@ public:
 
     // Public method to access the singleton instance
     static RabbitMQConnectionManager&
-    getInstance()
+    get_instance()
     {
         static RabbitMQConnectionManager instance;
         return instance;
@@ -33,30 +36,28 @@ public:
 
     // For testing purposes
     static void
-    resetInstance()
+    reset_instance()
     {
-        getInstance() = RabbitMQConnectionManager();
+        get_instance() = RabbitMQConnectionManager();
     }
 
-    bool connectToRabbitMQ(
+    bool connect_to_rabbitmq(
         const std::string& hostname, int port, const std::string& username,
         const std::string& password
     );
-    void closeConnection(const manager::ClientManager& client_manager);
-    bool connectedToRMQ();
+    void close_connection();
+    [[nodiscard]] bool connected_to_rabbitmq() const;
     amqp_connection_state_t get_connection_state();
 
 private:
-    amqp_connection_state_t connection_state;
-    bool connected;
+    amqp_connection_state_t connection_state_;
+    bool connected_;
 
-    bool initializeConnection();
+    bool initialize_connection_();
 
-    RabbitMQConnectionManager()
-    {
-        connection_state = amqp_new_connection();
-        connected = initializeConnection();
-    }
+    RabbitMQConnectionManager() :
+        connection_state_(amqp_new_connection()), connected_(initialize_connection_())
+    {}
 };
 
 } // namespace rabbitmq

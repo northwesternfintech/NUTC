@@ -107,10 +107,10 @@ main(int argc, const char** argv)
     // Initialize signal handler
     signal(SIGINT, handle_sigint);
 
-    auto& rmq_conn = rmq::RabbitMQConnectionManager::getInstance();
+    auto& rmq_conn = rmq::RabbitMQConnectionManager::get_instance();
 
     // Connect to RabbitMQ
-    if (!rmq_conn.connectedToRMQ()) {
+    if (!rmq_conn.connected_to_rabbitmq()) {
         log_e(rabbitmq, "Failed to initialize connection");
         return 1;
     }
@@ -133,8 +133,8 @@ main(int argc, const char** argv)
     engine_manager.add_engine("C");
 
     // Run exchange
-    rmq::RabbitMQClientManager::waitForClients(users, num_clients);
-    rmq::RabbitMQClientManager::sendStartTime(users, CLIENT_WAIT_SECS);
+    rmq::RabbitMQClientManager::wait_for_clients(users, num_clients);
+    rmq::RabbitMQClientManager::send_start_time(users, CLIENT_WAIT_SECS);
     rmq::RabbitMQOrderHandler::addLiquidityToTicker(
         users, engine_manager, "A", 1000, 100
     );

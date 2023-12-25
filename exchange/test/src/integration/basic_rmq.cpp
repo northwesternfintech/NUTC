@@ -12,9 +12,9 @@ protected:
     void
     SetUp() override
     {
-        auto& rmq_conn = rmq::RabbitMQConnectionManager::getInstance();
+        auto& rmq_conn = rmq::RabbitMQConnectionManager::get_instance();
 
-        if (!rmq_conn.connectedToRMQ()) {
+        if (!rmq_conn.connected_to_rabbitmq()) {
             FAIL() << "Failed to connect to rabbitmq";
         }
     }
@@ -23,7 +23,7 @@ protected:
     TearDown() override
     {
         nutc::testing_utils::kill_all_processes(users_);
-        rmq::RabbitMQConnectionManager::resetInstance();
+        rmq::RabbitMQConnectionManager::reset_instance();
     }
 
     nutc::manager::ClientManager users_; // NOLINT (*)

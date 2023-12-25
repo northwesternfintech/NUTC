@@ -9,27 +9,27 @@ namespace nutc {
 namespace rabbitmq {
 
 void
-RabbitMQClientManager::waitForClients(
-    manager::ClientManager& clients, size_t num_clients
+RabbitMQClientManager::wait_for_clients(
+    manager::ClientManager& manager, size_t num_clients
 )
 {
     int num_running = 0;
 
-    auto processMessage = [&](const auto& message) {
-        using T = std::decay_t<decltype(message)>;
-        if constexpr (std::is_same_v<T, messages::MarketOrder>) {
+    auto process_message = [&](const auto& message) {
+        using t = std::decay_t<decltype(message)>;
+        if constexpr (std::is_same_v<t, messages::MarketOrder>) {
             log_i(
                 rabbitmq,
                 "Received market order before initialization complete. Ignoring..."
             );
         }
-        else if constexpr (std::is_same_v<T, messages::InitMessage>) {
+        else if constexpr (std::is_same_v<t, messages::InitMessage>) {
             log_i(
                 rabbitmq, "Received init message from client {} with status {}",
                 message.client_id, message.ready ? "ready" : "not ready"
             );
             if (message.ready) {
-                clients.set_active(message.client_id);
+                manager.set_active(message.client_id);
                 num_running++;
             }
         }
@@ -38,7 +38,7 @@ RabbitMQClientManager::waitForClients(
 
     for (size_t i = 0; i < num_clients; i++) {
         auto data = RabbitMQConsumer::consumeMessage();
-        if (!std::visit(processMessage, data)) {
+        if (!std::visit(process_message, data)) {
             return;
         }
     }
@@ -50,14 +50,14 @@ RabbitMQClientManager::waitForClients(
 }
 
 void
-RabbitMQClientManager::sendStartTime(
+RabbitMQClientManager::send_start_time(
     const manager::ClientManager& manager, int wait_seconds
 )
 {
     using time_point = std::chrono::high_resolution_clock::time_point;
     time_point time =
         std::chrono::high_resolution_clock::now() + std::chrono::seconds(wait_seconds);
-    long long time_ns = std::chrono::time_point_cast<std::chrono::nanoseconds>(time)
+    int64_t time_ns = std::chrono::time_point_cast<std::chrono::nanoseconds>(time)
                             .time_since_epoch()
                             .count();
 
