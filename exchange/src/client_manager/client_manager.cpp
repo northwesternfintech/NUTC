@@ -4,28 +4,28 @@ namespace nutc {
 namespace manager {
 
 void
-ClientManager::set_client_pid(const std::string& id, pid_t pid)
+ClientManager::set_client_pid(const std::string& user_id, pid_t pid)
 {
-    if (!user_exists(id))
+    if (!user_exists_(user_id))
         return;
 
-    clients[id].pid = pid;
+    clients_[user_id].pid = pid;
 }
 
 void
 ClientManager::modify_holdings(
-    const std::string& id, const std::string& ticker, float change_in_holdings
+    const std::string& user_id, const std::string& ticker, float change_in_holdings
 )
 {
-    if (!user_exists(id))
+    if (!user_exists_(user_id))
         return;
 
-    if (!user_holds_stock(id, ticker)) {
-        clients[id].holdings[ticker] = change_in_holdings;
+    if (!user_holds_stock_(user_id, ticker)) {
+        clients_[user_id].holdings[ticker] = change_in_holdings;
         return;
     }
 
-    clients[id].holdings[ticker] += change_in_holdings;
+    clients_[user_id].holdings[ticker] += change_in_holdings;
 }
 
 std::optional<messages::SIDE>
@@ -48,7 +48,7 @@ ClientManager::validate_match(const messages::Match& match) const
 void
 ClientManager::initialize_from_firebase(const glz::json_t::object_t& users)
 {
-    for (auto& [id, user] : users) {
+    for (const auto& [id, user] : users) {
         if (!user.contains("latestAlgoId"))
             continue;
         add_client(id, user["latestAlgoId"].get<std::string>(), false);
@@ -56,12 +56,12 @@ ClientManager::initialize_from_firebase(const glz::json_t::object_t& users)
 }
 
 void
-ClientManager::set_active(const std::string& id)
+ClientManager::set_active(const std::string& user_id)
 {
-    if (!user_exists(id))
+    if (!user_exists_(user_id))
         return;
 
-    clients[id].active = true;
+    clients_[user_id].active = true;
 }
 
 } // namespace manager
