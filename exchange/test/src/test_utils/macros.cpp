@@ -34,5 +34,16 @@ validateObUpdate(
            && isNearlyEqual(update.quantity, quantity);
 }
 
+bool
+validateMarketOrder(
+    const MarketOrder& update, const std::string& client_id, const std::string& ticker,
+    messages::SIDE side, float price, float quantity
+)
+{
+    return update.client_id == client_id && update.ticker == ticker
+           && update.side == side && isNearlyEqual(update.price, price)
+           && isNearlyEqual(update.quantity, quantity);
+}
+
 } // namespace testing_utils
 } // namespace nutc

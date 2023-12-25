@@ -12,7 +12,7 @@ logs/
 compile_commands.json
 html
 latex
-algos/
+/algos/
 Testing/
 algos.zip
 conan-profile.sh

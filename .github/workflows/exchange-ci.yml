@@ -6,12 +6,14 @@ on:
       - main
     paths:
       - 'exchange/**'
+      - '.github/workflows/exchange-ci.yml'
 
   pull_request:
     branches:
       - main
     paths:
       - 'exchange/**'
+      - '.github/workflows/exchange-ci.yml'
 
   workflow_dispatch:
 
@@ -268,6 +270,9 @@ jobs:
 
     - name: Install
       run: cmake --install build --config Release --prefix prefix
+
+    - name: Move test algo files
+      run: cp -r test/algos build/test/test_algos
 
     - name: Test
       working-directory: exchange/build

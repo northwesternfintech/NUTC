@@ -23,6 +23,7 @@ add_executable(NUTC_tests
   src/unit/logging/logging_orders.cpp
 
   src/integration/basic_rmq.cpp
+  src/integration/basic_algo.cpp
   )
 
 target_include_directories(

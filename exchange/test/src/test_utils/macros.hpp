@@ -26,6 +26,11 @@ bool validateObUpdate(
     float quantity
 );
 
+bool validateMarketOrder(
+    const MarketOrder& update, const std::string& client_id, const std::string& ticker,
+    messages::SIDE side, float price, float quantity
+);
+
 } // namespace testing_utils
 } // namespace nutc
 
@@ -58,6 +63,20 @@ bool validateObUpdate(
             << "Expected update with ticker = " << (ticker_)                           \
             << ", side = " << static_cast<int>(side_) << ", price = " << (price_)      \
             << ", quantity = " << (quantity_)                                          \
+            << ". Actual update: ticker = " << (update).ticker                         \
+            << ", side = " << static_cast<int>((update).side)                          \
+            << ", price = " << (update).price << ", quantity = " << (update).quantity; \
+    } while (0)
+
+#define EXPECT_EQ_MARKET_ORDER(update, client_id_, ticker_, side_, price_, quantity_)  \
+    do {                                                                               \
+        bool isUpdateValid = nutc::testing_utils::validateMarketOrder(                 \
+            (update), (client_id_), (ticker_), (side_), (price_), (quantity_)          \
+        );                                                                             \
+        EXPECT_TRUE(isUpdateValid)                                                     \
+            << "Expected market order with client_id = " << (client_id_)               \
+            << ", ticker =" << (ticker_) << ", side = " << static_cast<int>(side_)     \
+            << ", price = " << (price_) << ", quantity = " << (quantity_)              \
             << ". Actual update: ticker = " << (update).ticker                         \
             << ", side = " << static_cast<int>((update).side)                          \
             << ", price = " << (update).price << ", quantity = " << (update).quantity; \
