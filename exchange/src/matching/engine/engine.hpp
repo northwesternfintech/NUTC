@@ -22,15 +22,13 @@ namespace nutc {
  */
 namespace matching {
 
-struct MatchResult {
+struct match_result {
     std::vector<Match> matches;
     std::vector<ObUpdate> ob_updates;
 };
 
 class Engine {
 public:
-    std::priority_queue<MarketOrder> bids;
-    std::priority_queue<MarketOrder> asks;
 
     /**
      * @brief Matches the given order against the current order book.
@@ -40,23 +38,26 @@ public:
      * @return a MatchResult containing all matches and a vector containing the
      * orderbook updates
      */
-    MatchResult
-    match_order(MarketOrder& aggressive_order, manager::ClientManager& manager);
+    match_result match_order(MarketOrder& order, manager::ClientManager& manager);
 
-    void add_order_without_matching(MarketOrder aggressive_order);
+    void add_order_without_matching(const MarketOrder& order);
 
 private:
-    float last_sell_price;
+    std::priority_queue<MarketOrder> bids_;
+    std::priority_queue<MarketOrder> asks_;
     static std::string
     get_client_id(SIDE side, const MarketOrder& aggressive, const MarketOrder& passive);
-    float get_match_quantity(const MarketOrder& passive, const MarketOrder& aggressive);
+    static float get_match_quantity(
+        const MarketOrder& passive_order, const MarketOrder& aggressive_order
+    );
 
-    std::priority_queue<MarketOrder>& get_orders(SIDE side);
+    std::priority_queue<MarketOrder>& get_orders_(SIDE side);
 
-    MatchResult
-    attempt_matches(manager::ClientManager& manager, const MarketOrder& aggressive);
-    SIDE get_aggressive_side(const MarketOrder& order1, const MarketOrder& order2);
-    bool insufficient_capital(
+   match_result 
+    attempt_matches_(manager::ClientManager& manager, const MarketOrder& aggressive);
+    static SIDE
+    get_aggressive_side(const MarketOrder& order1, const MarketOrder& order2);
+    static bool insufficient_capital(
         const MarketOrder& order, const manager::ClientManager& manager
     );
 };
