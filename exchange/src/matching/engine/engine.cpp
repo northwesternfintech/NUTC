@@ -84,13 +84,15 @@ Engine::match_order(MarketOrder& order, manager::ClientManager& manager)
 }
 
 constexpr bool
-is_close_to_zero(float value, float epsilon = 1e-6f)
+is_close_to_zero(float value, float epsilon = std::numeric_limits<float>::epsilon())
 {
     return std::fabs(value) < epsilon;
 }
 
 constexpr bool
-is_same_value(float value1, float value2, float epsilon = 1e-6f)
+is_same_value(
+    float value1, float value2, float epsilon = std::numeric_limits<float>::epsilon()
+)
 {
     return std::fabs(value1 - value2) < epsilon;
 }
@@ -140,7 +142,7 @@ Engine::attempt_matches_(
         std::string seller_id = sell_order.client_id;
 
         Match to_match{sell_order.ticker, aggressive_side, price_to_match,
-                      quantity_to_match, buyer_id,        seller_id};
+                       quantity_to_match, buyer_id,        seller_id};
 
         std::optional<SIDE> match_failure = manager.validate_match(to_match);
         if (match_failure.has_value()) {
@@ -163,8 +165,8 @@ Engine::attempt_matches_(
 
         result.matches.push_back(to_match);
 
-        bool sell_aggressive = sell_order.order_index==aggressive_index;
-        bool buy_aggressive = buy_order.order_index==aggressive_index;
+        bool sell_aggressive = sell_order.order_index == aggressive_index;
+        bool buy_aggressive = buy_order.order_index == aggressive_index;
 
         if (buy_aggressive)
             aggressive_quantity -= quantity_to_match;

@@ -1,5 +1,6 @@
 #include "RabbitMQOrderHandler.hpp"
 
+#include "logging.hpp"
 #include "rabbitmq/publisher/RabbitMQPublisher.hpp"
 
 namespace nutc {

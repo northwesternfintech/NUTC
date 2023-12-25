@@ -1,6 +1,5 @@
 #include "matching/engine/engine.hpp"
-
-#include <cmath>
+#include "utils/logger/logger.hpp"
 
 #include <limits>
 
@@ -13,20 +12,21 @@ using SIDE = nutc::messages::SIDE;
 
 namespace nutc {
 namespace testing_utils {
-bool
-isNearlyEqual(float a, float b, float epsilon = std::numeric_limits<float>::epsilon());
+bool is_nearly_equal(
+    float f_a, float f_b, float epsilon = std::numeric_limits<float>::epsilon()
+);
 
-bool validateMatch(
+bool validate_match(
     const Match& match, const std::string& ticker, const std::string& buyer_id,
     const std::string& seller_id, messages::SIDE side, float price, float quantity
 );
 
-bool validateObUpdate(
+bool validate_ob_update(
     const ObUpdate& update, const std::string& ticker, messages::SIDE side, float price,
     float quantity
 );
 
-bool validateMarketOrder(
+bool validate_market_order(
     const MarketOrder& update, const std::string& client_id, const std::string& ticker,
     messages::SIDE side, float price, float quantity
 );
@@ -38,7 +38,7 @@ bool validateMarketOrder(
     match, ticker_, buyer_id_, seller_id_, side_, price_, quantity_                    \
 )                                                                                      \
     do {                                                                               \
-        bool isMatchValid = nutc::testing_utils::validateMatch(                        \
+        bool isMatchValid = nutc::testing_utils::validate_match(                       \
             (match), (ticker_), (buyer_id_), (seller_id_), (side_), (price_),          \
             (quantity_)                                                                \
         );                                                                             \
@@ -56,7 +56,7 @@ bool validateMarketOrder(
 
 #define EXPECT_EQ_OB_UPDATE(update, ticker_, side_, price_, quantity_)                 \
     do {                                                                               \
-        bool isUpdateValid = nutc::testing_utils::validateObUpdate(                    \
+        bool isUpdateValid = nutc::testing_utils::validate_ob_update(                  \
             (update), (ticker_), (side_), (price_), (quantity_)                        \
         );                                                                             \
         EXPECT_TRUE(isUpdateValid)                                                     \
@@ -70,7 +70,7 @@ bool validateMarketOrder(
 
 #define EXPECT_EQ_MARKET_ORDER(update, client_id_, ticker_, side_, price_, quantity_)  \
     do {                                                                               \
-        bool isUpdateValid = nutc::testing_utils::validateMarketOrder(                 \
+        bool isUpdateValid = nutc::testing_utils::validate_market_order(               \
             (update), (client_id_), (ticker_), (side_), (price_), (quantity_)          \
         );                                                                             \
         EXPECT_TRUE(isUpdateValid)                                                     \

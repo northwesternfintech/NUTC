@@ -1,13 +1,8 @@
 #pragma once
 
 #include "client_manager/client_manager.hpp"
-#include "logging.hpp"
-#include "utils/logger/logger.hpp"
 #include "utils/messages.hpp"
 
-#include <chrono>
-
-#include <optional>
 #include <queue>
 #include <vector>
 

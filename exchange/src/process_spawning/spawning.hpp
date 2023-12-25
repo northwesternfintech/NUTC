@@ -18,7 +18,7 @@ namespace client {
  * Spawns in the binary "NUTC-client", expecting it to be in the $PATH
  */
 pid_t
-spawn_client(const std::string& id, const std::string& algo_id, bool is_local_algo);
+spawn_client(const std::string& user_id, const std::string& algo_id, bool is_local_algo);
 
 /**
  * @brief Fetches all users from firebase

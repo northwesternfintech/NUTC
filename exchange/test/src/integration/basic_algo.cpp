@@ -1,6 +1,6 @@
-#include "local_algos/dev_mode.hpp"
-#include "process_spawning/spawning.hpp"
-#include "rabbitmq/rabbitmq.hpp"
+#include "rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
+#include "rabbitmq/consumer/RabbitMQConsumer.hpp"
+#include "rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
 #include "test_utils/macros.hpp"
 #include "test_utils/process.hpp"
 #include "utils/messages.hpp"
@@ -11,38 +11,36 @@ namespace rmq = nutc::rabbitmq;
 
 class IntegrationBasicAlgo : public ::testing::Test {
 protected:
-    // TODO: teardown of rmq connection if necessary
     void
     SetUp() override
     {
         auto& rmq_conn = rmq::RabbitMQConnectionManager::getInstance();
 
         if (!rmq_conn.connectedToRMQ()) {
-            log_e(rabbitmq, "Failed to initialize connection");
-            exit(1);
+            FAIL() << "Failed to connect to rabbitmq";
         }
     }
 
     void
     TearDown() override
     {
-        nutc::testing_utils::kill_all_processes(users);
+        nutc::testing_utils::kill_all_processes(users_);
         rmq::RabbitMQConnectionManager::resetInstance();
     }
 
-    nutc::manager::ClientManager users;
-    nutc::engine_manager::Manager engine_manager;
+    nutc::manager::ClientManager users_;           // NOLINT(*)
+    nutc::engine_manager::Manager engine_manager_; // NOLINT(*)
 };
 
 TEST_F(IntegrationBasicAlgo, InitialLiquidity)
 {
     std::vector<std::string> names{"test_algos/buy_tsla_at_100"};
-    nutc::testing_utils::initialize_testing_clients(users, names);
+    nutc::testing_utils::initialize_testing_clients(users_, names);
 
     // want to see if it buys
-    engine_manager.add_engine("TSLA");
+    engine_manager_.add_engine("TSLA");
     rmq::RabbitMQOrderHandler::addLiquidityToTicker(
-        users, engine_manager, "TSLA", 100, 100
+        users_, engine_manager_, "TSLA", 100, 100
     );
 
     auto mess = rmq::RabbitMQConsumer::consumeMessage();

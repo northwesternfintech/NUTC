@@ -13,7 +13,7 @@ namespace client {
 size_t
 initialize(manager::ClientManager& users, Mode mode, size_t num_local_algos)
 {
-    size_t num_users;
+    size_t num_users; // NOLINT(cppcoreguidelines-init-variables)
     switch (mode) {
         case Mode::DEV:
             dev_mode::initialize_client_manager(
@@ -31,13 +31,13 @@ initialize(manager::ClientManager& users, Mode mode, size_t num_local_algos)
             users.initialize_from_firebase(firebase_users);
 
             // Spawn clients
-            const size_t num_clients = nutc::client::spawn_all_clients(users);
+            num_users = nutc::client::spawn_all_clients(users);
 
-            if (num_clients == 0) {
+            if (num_users == 0) {
                 log_c(client_spawning, "Spawned 0 clients");
-                exit(1);
+                std::abort();
             };
-            return num_clients;
+            return num_users;
     }
 }
 
@@ -50,10 +50,10 @@ get_all_users()
 }
 
 std::string
-quote_id(std::string id)
+quote_id(std::string user_id)
 {
-    std::replace(id.begin(), id.end(), '-', ' ');
-    return id;
+    std::replace(user_id.begin(), user_id.end(), '-', ' ');
+    return user_id;
 }
 
 size_t
@@ -84,7 +84,7 @@ spawn_all_clients(nutc::manager::ClientManager& users)
 }
 
 pid_t
-spawn_client(const std::string& id, const std::string& algo_id, bool is_local_algo)
+spawn_client(const std::string& user_id, const std::string& algo_id, bool is_local_algo)
 {
     if (is_local_algo) {
         std::string filepath = algo_id + ".py";
@@ -93,26 +93,29 @@ spawn_client(const std::string& id, const std::string& algo_id, bool is_local_al
     pid_t pid = fork();
     if (pid == 0) {
         std::vector<std::string> args = {
-            "NUTC-client", "--uid", id, "--algo_id", algo_id
+            "NUTC-client", "--uid", user_id, "--algo_id", algo_id
         };
         if (is_local_algo) {
-            args.push_back("--dev");
+            args.emplace_back("--dev");
         }
 
         std::vector<char*> c_args;
-        for (auto& arg : args)
-            c_args.push_back(arg.data());
+        for (auto& arg : args) {
+            c_args.emplace_back( // NOLINT(performance-inefficient-vector-operation)
+                arg.data()
+            );
+        }
         c_args.push_back(nullptr);
 
         execvp(c_args[0], c_args.data());
 
         log_e(client_spawning, "Failed to execute NUTC-client");
 
-        exit(1);
+        std::abort();
     }
     else if (pid < 0) {
         log_e(client_spawning, "Failed to fork");
-        exit(1);
+        std::abort();
     }
     return pid;
 }
