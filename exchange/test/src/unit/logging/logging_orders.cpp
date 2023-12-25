@@ -1,3 +1,4 @@
+#include "config.h"
 #include "matching/engine/engine.hpp"
 #include "test_utils/macros.hpp"
 #include "utils/messages.hpp"
@@ -9,13 +10,15 @@ using nutc::messages::SIDE::SELL;
 
 class UnitLoggingOrders : public ::testing::Test {
 protected:
+    static constexpr const int DEFAULT_QUANTITY = 1000;
+
     void
     SetUp() override
     {
         manager_.add_client("ABC", "ABC");
         manager_.add_client("DEF", "DEF");
-        manager_.modify_holdings("ABC", "ETHUSD", 1000); // NOLINT (magic-number-*)
-        manager_.modify_holdings("DEF", "ETHUSD", 1000); // NOLINT (magic-number-*)
+        manager_.modify_holdings("ABC", "ETHUSD", DEFAULT_QUANTITY);
+        manager_.modify_holdings("DEF", "ETHUSD", DEFAULT_QUANTITY);
     }
 
     ClientManager manager_; // NOLINT(*)
@@ -24,7 +27,7 @@ protected:
 
 TEST_F(UnitLoggingOrders, LogMarketOrders)
 {
-    manager_.modify_capital("ABC", -100000); // NOLINT (magic-number-*)
+    manager_.modify_capital("ABC", -STARTING_CAPITAL);
 
     MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
     MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
