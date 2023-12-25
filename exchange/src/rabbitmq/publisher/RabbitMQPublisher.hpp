@@ -10,20 +10,19 @@ namespace rabbitmq {
 
 class RabbitMQPublisher {
 public:
-    // TODO: should take in variant of messages
     static bool
-    publishMessage(const std::string& queueName, const std::string& message);
-    static void broadcastMatches(
+    publish_message(const std::string& queue_name, const std::string& message);
+    static void broadcast_matches(
         const manager::ClientManager& clients,
         const std::vector<messages::Match>& matches
     );
 
-    // ignore uid because we shouldn't send ob update to user who placed order
-    static void broadcastObUpdates(
+    // ignore id because we shouldn't send ob update to user who placed order
+    static void broadcast_ob_updates(
         const manager::ClientManager& clients,
         const std::vector<messages::ObUpdate>& updates, const std::string& ignore_uid
     );
-    static void broadcastAccountUpdate(
+    static void broadcast_account_update(
         const manager::ClientManager& clients, const messages::Match& match
     );
 };

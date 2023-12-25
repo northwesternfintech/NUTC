@@ -70,7 +70,7 @@ RabbitMQClientManager::sendStartTime(
         if (!client.active)
             return;
 
-        RabbitMQPublisher::publishMessage(id, buf);
+        RabbitMQPublisher::publish_message(id, buf);
     };
 
     const auto& clients = manager.get_clients();
