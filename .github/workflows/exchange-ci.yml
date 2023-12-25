@@ -269,6 +269,9 @@ jobs:
     - name: Install
       run: cmake --install build --config Release --prefix prefix
 
+    - name: Move test algo files
+      run: cp -r exchange/test/algos exchange/build/test/test_algos
+
     - name: Test
       working-directory: exchange/build
       run: ctest --output-on-failure --no-tests=error -C Release -j 2 -R "Integration*"
