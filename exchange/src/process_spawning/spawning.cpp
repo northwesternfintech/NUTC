@@ -61,7 +61,7 @@ spawn_all_clients(nutc::manager::ClientManager& users)
 {
     size_t num_clients = 0;
     auto spawn_one_client =
-        [&num_clients, &users](const std::pair<std::string, manager::Client>& pair) {
+        [&num_clients, &users](const std::pair<std::string, manager::client>& pair) {
             const auto& [id, client] = pair;
             const std::string& algo_id = client.algo_id;
 

@@ -5,7 +5,6 @@
 
 #include <glaze/glaze.hpp>
 
-#include <iostream>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -17,7 +16,7 @@ namespace nutc {
  */
 namespace manager {
 
-struct Client {
+struct client {
     std::string uid;
     pid_t pid;
     std::string algo_id;
@@ -28,21 +27,20 @@ struct Client {
 };
 
 class ClientManager {
-private:
-    std::unordered_map<std::string, Client> clients;
+    std::unordered_map<std::string, client> clients;
 
 public:
     void
     add_client(const std::string& id, const std::string& algo_id, bool is_local_algo)
     {
         clients[id] =
-            Client{id, {}, algo_id, false, is_local_algo, STARTING_CAPITAL, {}};
+            client{id, {}, algo_id, false, is_local_algo, STARTING_CAPITAL, {}};
     }
 
     void
     add_client(const std::string& id, const std::string& algo_id)
     {
-        clients[id] = Client{id, {}, algo_id, false, false, STARTING_CAPITAL, {}};
+        clients[id] = client{id, {}, algo_id, false, false, STARTING_CAPITAL, {}};
     }
 
     void
@@ -76,7 +74,7 @@ public:
         return clients.at(id).holdings.at(ticker);
     }
 
-    inline const std::unordered_map<std::string, Client>&
+    inline const std::unordered_map<std::string, client>&
     get_clients() const
     {
         return clients;
@@ -111,8 +109,8 @@ private:
 
 /// \cond
 template <>
-struct glz::meta<nutc::manager::Client> {
-    using T = nutc::manager::Client;
+struct glz::meta<nutc::manager::client> {
+    using T = nutc::manager::client;
     /* clang-format off */
     static constexpr auto value = object(
         "uid", &T::uid, 
