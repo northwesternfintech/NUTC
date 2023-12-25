@@ -2,8 +2,6 @@
 
 #include <glaze/glaze.hpp>
 
-#include <iostream>
-#include <map>
 #include <string>
 
 namespace nutc {
@@ -12,13 +10,12 @@ namespace nutc {
  */
 namespace curl {
 
-// TODO: better name
 std::string request_to_string(
     const std::string& method, const std::string& url, const std::string& data = ""
 );
 
 void request_to_file(
-    const std::string& method, const std::string& url, const std::string& filename,
+    const std::string& method, const std::string& url, const std::string& filepath,
     const std::string& data = ""
 );
 
