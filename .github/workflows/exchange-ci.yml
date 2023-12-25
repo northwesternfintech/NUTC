@@ -182,7 +182,7 @@ jobs:
 
     - name: Test
       working-directory: exchange/build
-      run: ctest --output-on-failure --no-tests=error -C Release -j 2 -R "Unit*"
+      run: ctest --output-on-failure --no-tests=error -C Release -R "Unit*"
 
   integration-test:
     needs: [lint]
