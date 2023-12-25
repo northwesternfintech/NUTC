@@ -15,7 +15,6 @@ namespace file_mgmt {
 void
 unzip_file(const std::string& src, const std::string& dest)
 {
-    // TODO: handle properly
     if (!file_exists(src)) {
         log_e(dev_mode, "Zip file {} does not exist.", src);
         return;
@@ -23,8 +22,8 @@ unzip_file(const std::string& src, const std::string& dest)
 
     int err = 0;
     log_i(dev_mode, "Unzipping file {}", src);
-    zip* z = zip_open(src.c_str(), 0, &err);
-    if (z == nullptr) {
+    zip* zipfile = zip_open(src.c_str(), 0, &err);
+    if (zipfile == nullptr) {
         zip_error_t error;
         zip_error_init_with_code(&error, err);
         log_e(dev_mode, "Error opening zip file: {}", zip_error_strerror(&error));
@@ -32,42 +31,43 @@ unzip_file(const std::string& src, const std::string& dest)
         return;
     }
 
-    zip_uint64_t num_entries = static_cast<zip_uint64_t>(zip_get_num_entries(z, 0));
+    auto num_entries = static_cast<zip_uint64_t>(zip_get_num_entries(zipfile, 0));
     for (zip_uint64_t i = 0; i < num_entries; i++) {
-        struct zip_stat st;
-        zip_stat_index(z, i, 0, &st);
+        struct zip_stat zstat {};
 
-        zip_file* f = zip_fopen_index(z, i, 0);
-        if (f == nullptr) {
-            log_e(dev_mode, "Error opening file in zip: {}", zip_strerror(z));
+        zip_stat_index(zipfile, i, 0, &zstat);
+
+        zip_file* finto = zip_fopen_index(zipfile, i, 0);
+        if (finto == nullptr) {
+            log_e(dev_mode, "Error opening file in zip: {}", zip_strerror(zipfile));
             return;
         }
 
-        char* contents = new char[st.size];
-        zip_fread(f, contents, st.size);
+        char* contents = new char[zstat.size];
+        zip_fread(finto, contents, zstat.size);
 
         // Construct the full path for the unzipped file
-        std::string full_path = dest + "/" + st.name;
+        std::string full_path = dest + "/" + zstat.name;
 
         // Write the file data to the destination directory
         std::ofstream out_file(full_path, std::ios::binary);
-        out_file.write(contents, static_cast<zip_int64_t>(st.size));
+        out_file.write(contents, static_cast<zip_int64_t>(zstat.size));
         out_file.close();
 
         delete[] contents;
 
-        zip_fclose(f);
+        zip_fclose(finto);
     }
-    zip_close(z);
+    zip_close(zipfile);
 }
 
 bool
-create_directory(const std::string& dir_name)
+create_directory(const std::string& dir)
 {
-    std::filesystem::path dir_path{dir_name};
+    std::filesystem::path dir_path{dir};
     if (!std::filesystem::exists(dir_path)) {
         if (!std::filesystem::create_directory(dir_path)) {
-            std::cerr << "Failed to create directory." << std::endl;
+            log_e(dev_mode, "Failed to create directory");
             return false;
         }
     }

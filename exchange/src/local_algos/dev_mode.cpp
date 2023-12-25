@@ -11,8 +11,8 @@ void
 initialize_client_manager(manager::ClientManager& users, int num_users)
 {
     for (int i = 0; i < num_users; i++) {
-        std::string id = std::string(ALGO_DIR) + "/algo_" + std::to_string(i);
-        users.add_client(id, id, true);
+        std::string algo_id = std::string(ALGO_DIR) + "/algo_" + std::to_string(i);
+        users.add_client(algo_id, algo_id, true);
     }
 }
 

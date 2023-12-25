@@ -14,10 +14,10 @@ initialize_client_manager(manager::ClientManager& users)
     // check number of algos in algos directory
     size_t num_users = 0;
     for (const auto& entry : std::filesystem::directory_iterator(ALGO_DIR)) {
-        std::string id = entry.path().filename().string();
-        id = id.substr(0, id.find(".py"));
-        log_i(sandbox, "Adding client: {}", id);
-        users.add_client(id, id, true);
+        std::string algo_id = entry.path().filename().string();
+        algo_id = algo_id.substr(0, algo_id.find(".py"));
+        log_i(sandbox, "Adding client: {}", algo_id);
+        users.add_client(algo_id, algo_id, true);
         num_users += 1;
     }
     return num_users + 1;
