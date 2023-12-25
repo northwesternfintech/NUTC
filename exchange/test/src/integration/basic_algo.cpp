@@ -39,11 +39,11 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
 
     // want to see if it buys
     engine_manager_.add_engine("TSLA");
-    rmq::RabbitMQOrderHandler::addLiquidityToTicker(
-        users_, engine_manager_, "TSLA", 100, 100
+    rmq::RabbitMQOrderHandler::add_liquidity_to_ticker(
+        users_, engine_manager_, "TSLA", 100, 100 // NOLINT (magic-number-*)
     );
 
-    auto mess = rmq::RabbitMQConsumer::consumeMessage();
+    auto mess = rmq::RabbitMQConsumer::consume_message();
     EXPECT_TRUE(std::holds_alternative<nutc::messages::MarketOrder>(mess));
 
     nutc::messages::MarketOrder actual = std::get<nutc::messages::MarketOrder>(mess);

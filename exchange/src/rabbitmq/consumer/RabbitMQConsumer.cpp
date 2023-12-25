@@ -10,12 +10,12 @@ namespace nutc {
 namespace rabbitmq {
 
 void
-RabbitMQConsumer::handleIncomingMessages(
+RabbitMQConsumer::handle_incoming_messages(
     manager::ClientManager& clients, engine_manager::Manager& engine_manager
 )
 {
     while (true) {
-        auto incoming_message = consumeMessage();
+        auto incoming_message = consume_message();
 
         // Use std::visit to deal with the variant
         std::visit(
@@ -26,7 +26,7 @@ RabbitMQConsumer::handleIncomingMessages(
                     std::abort();
                 }
                 else if constexpr (std::is_same_v<t, messages::MarketOrder>) {
-                    RabbitMQOrderHandler::handleIncomingMarketOrder(
+                    RabbitMQOrderHandler::handle_incoming_market_order(
                         engine_manager, clients, arg
                     );
                 }
@@ -37,7 +37,7 @@ RabbitMQConsumer::handleIncomingMessages(
 }
 
 std::optional<std::string>
-RabbitMQConsumer::consumeMessageAsString()
+RabbitMQConsumer::consume_message_as_string()
 {
     const auto& connection_state =
         RabbitMQConnectionManager::get_instance().get_connection_state();
@@ -60,9 +60,9 @@ RabbitMQConsumer::consumeMessageAsString()
 }
 
 std::variant<messages::InitMessage, messages::MarketOrder>
-RabbitMQConsumer::consumeMessage()
+RabbitMQConsumer::consume_message()
 {
-    std::optional<std::string> buf = consumeMessageAsString();
+    std::optional<std::string> buf = consume_message_as_string();
     if (!buf.has_value()) {
         // todo: throw exception instead
         std::abort();

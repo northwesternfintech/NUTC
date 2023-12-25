@@ -77,11 +77,11 @@ RabbitMQConnectionManager::initialize_connection_()
         return false;
     }
 
-    if (!RabbitMQQueueManager::initializeQueue(connection_state_, "market_order")) {
+    if (!RabbitMQQueueManager::initialize_queue(connection_state_, "market_order")) {
         log_e(rabbitmq, "Failed to initialize queue.");
         return false;
     }
-    if (!RabbitMQQueueManager::initializeConsume(connection_state_, "market_order")) {
+    if (!RabbitMQQueueManager::initialize_consume(connection_state_, "market_order")) {
         log_e(rabbitmq, "Failed to initialize consume.");
         return false;
     }

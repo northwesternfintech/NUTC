@@ -34,8 +34,9 @@ bool validate_market_order(
 } // namespace testing_utils
 } // namespace nutc
 
-#define EXPECT_EQ_MATCH(                                                               \
-    match, ticker_, buyer_id_, seller_id_, side_, price_, quantity_                    \
+#define EXPECT_EQ_MATCH(/* NOLINT(cppcoreguidelines-macro-usage) */                    \
+                        match, ticker_, buyer_id_, seller_id_, side_, price_,          \
+                        quantity_                                                      \
 )                                                                                      \
     do {                                                                               \
         bool isMatchValid = nutc::testing_utils::validate_match(                       \
@@ -54,7 +55,9 @@ bool validate_market_order(
             << ", price = " << (match).price << ", quantity = " << (match).quantity;   \
     } while (0)
 
-#define EXPECT_EQ_OB_UPDATE(update, ticker_, side_, price_, quantity_)                 \
+#define EXPECT_EQ_OB_UPDATE(/* NOLINT(cppcoreguidelines-macro-usage) */                \
+                            update, ticker_, side_, price_, quantity_                  \
+)                                                                                      \
     do {                                                                               \
         bool isUpdateValid = nutc::testing_utils::validate_ob_update(                  \
             (update), (ticker_), (side_), (price_), (quantity_)                        \
@@ -68,7 +71,9 @@ bool validate_market_order(
             << ", price = " << (update).price << ", quantity = " << (update).quantity; \
     } while (0)
 
-#define EXPECT_EQ_MARKET_ORDER(update, client_id_, ticker_, side_, price_, quantity_)  \
+#define EXPECT_EQ_MARKET_ORDER(/* NOLINT (cppcoreguidelines-macro-usage) */            \
+                               update, client_id_, ticker_, side_, price_, quantity_   \
+)                                                                                      \
     do {                                                                               \
         bool isUpdateValid = nutc::testing_utils::validate_market_order(               \
             (update), (client_id_), (ticker_), (side_), (price_), (quantity_)          \

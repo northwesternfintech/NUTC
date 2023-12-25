@@ -135,16 +135,16 @@ main(int argc, const char** argv)
     // Run exchange
     rmq::RabbitMQClientManager::wait_for_clients(users, num_clients);
     rmq::RabbitMQClientManager::send_start_time(users, CLIENT_WAIT_SECS);
-    rmq::RabbitMQOrderHandler::addLiquidityToTicker(
+    rmq::RabbitMQOrderHandler::add_liquidity_to_ticker(
         users, engine_manager, "A", 1000, 100
     );
-    rmq::RabbitMQOrderHandler::addLiquidityToTicker(
+    rmq::RabbitMQOrderHandler::add_liquidity_to_ticker(
         users, engine_manager, "B", 2000, 200
     );
-    rmq::RabbitMQOrderHandler::addLiquidityToTicker(
+    rmq::RabbitMQOrderHandler::add_liquidity_to_ticker(
         users, engine_manager, "C", 3000, 300
     );
-    rmq::RabbitMQConsumer::handleIncomingMessages(users, engine_manager);
+    rmq::RabbitMQConsumer::handle_incoming_messages(users, engine_manager);
 
     return 0;
 }

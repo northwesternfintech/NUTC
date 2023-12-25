@@ -37,7 +37,7 @@ RabbitMQClientManager::wait_for_clients(
     };
 
     for (size_t i = 0; i < num_clients; i++) {
-        auto data = RabbitMQConsumer::consumeMessage();
+        auto data = RabbitMQConsumer::consume_message();
         if (!std::visit(process_message, data)) {
             return;
         }
