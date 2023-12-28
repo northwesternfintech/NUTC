@@ -257,6 +257,9 @@ jobs:
     - name: Install exchange
       working-directory: exchange
       run: cmake --install build --config Release --prefix prefix
+
+    - name: Install Python Developer Headers
+      run: sudo apt install python3.11-dev
       
       # TODO: cache wrapper
     - name: Configure wrapper 
