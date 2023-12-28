@@ -234,7 +234,6 @@ jobs:
         bash < .github/scripts/conan-profile.sh
 
     - name: Install dependencies
-      working-directory: exchange
       shell: bash
       run: |
         conan install exchange -s build_type=Release -b missing
