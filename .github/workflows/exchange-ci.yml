@@ -231,7 +231,7 @@ jobs:
         
         sudo apt install libssl-dev rabbitmq-server -y
         
-        bash < ../.github/scripts/conan-profile.sh
+        bash < .github/scripts/conan-profile.sh
 
     - name: Install dependencies
       working-directory: exchange
