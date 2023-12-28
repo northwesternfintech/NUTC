@@ -4,7 +4,7 @@
 #include <optional>
 #include <string>
 
-using engine_ref = std::reference_wrapper<nutc::matching::Engine>;
+using engine_ref_t = std::reference_wrapper<nutc::matching::Engine>;
 
 namespace nutc {
 /**
@@ -24,7 +24,7 @@ public:
      * @param ticker The ticker of the engine to return
      * @return A reference to the engine with the given ticker, if it exists
      */
-    std::optional<engine_ref> get_engine(const std::string& ticker);
+    std::optional<engine_ref_t> get_engine(const std::string& ticker);
 
     /**
      * @brief Adds an engine with the given ticker

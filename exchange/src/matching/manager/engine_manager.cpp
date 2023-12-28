@@ -2,7 +2,7 @@
 
 namespace nutc {
 namespace engine_manager {
-std::optional<engine_ref>
+std::optional<engine_ref_t>
 Manager::get_engine(const std::string& ticker)
 {
     auto engine = engines_.find(ticker);

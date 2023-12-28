@@ -17,7 +17,7 @@ namespace nutc {
  */
 namespace matching {
 
-struct match_result {
+struct match_result_t {
     std::vector<Match> matches;
     std::vector<ObUpdate> ob_updates;
 };
@@ -32,7 +32,7 @@ public:
      * @return a MatchResult containing all matches and a vector containing the
      * orderbook updates
      */
-    match_result match_order(MarketOrder& order, manager::ClientManager& manager);
+    match_result_t match_order(MarketOrder& order, manager::ClientManager& manager);
 
     void add_order_without_matching(const MarketOrder& order);
 
@@ -47,7 +47,7 @@ private:
 
     std::priority_queue<MarketOrder>& get_orders_(SIDE side);
 
-    match_result attempt_matches_(
+    match_result_t attempt_matches_(
         manager::ClientManager& manager, const MarketOrder& aggressive_order
     );
     static SIDE

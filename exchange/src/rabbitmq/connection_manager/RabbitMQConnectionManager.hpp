@@ -44,8 +44,18 @@ public:
         const std::string& password
     );
     void close_connection();
-    [[nodiscard]] bool connected_to_rabbitmq() const;
-    amqp_connection_state_t get_connection_state();
+
+    [[nodiscard]] bool
+    connected_to_rabbitmq() const
+    {
+        return connected_;
+    }
+
+    amqp_connection_state_t
+    get_connection_state()
+    {
+        return connection_state_;
+    }
 
 private:
     amqp_connection_state_t connection_state_;

@@ -53,18 +53,6 @@ RabbitMQConnectionManager::close_connection()
 }
 
 bool
-RabbitMQConnectionManager::connected_to_rabbitmq() const
-{
-    return connected_;
-}
-
-amqp_connection_state_t
-RabbitMQConnectionManager::get_connection_state()
-{
-    return connection_state_;
-}
-
-bool
 RabbitMQConnectionManager::initialize_connection_()
 {
     if (!connect_to_rabbitmq("localhost", RABBITMQ_PORT, "NUFT", "ADMIN"))

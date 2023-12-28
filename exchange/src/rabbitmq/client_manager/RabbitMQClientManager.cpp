@@ -64,7 +64,7 @@ RabbitMQClientManager::send_start_time(
     messages::StartTime message{time_ns};
     std::string buf = glz::write_json(message);
 
-    auto send_to_client = [buf](const std::pair<std::string, manager::client>& pair) {
+    auto send_to_client = [buf](const std::pair<std::string, manager::client_t>& pair) {
         const auto& [id, client] = pair;
 
         if (!client.active)

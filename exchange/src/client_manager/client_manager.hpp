@@ -16,7 +16,7 @@ namespace nutc {
  */
 namespace manager {
 
-struct client {
+struct client_t {
     std::string uid;
     pid_t pid;
     std::string algo_id;
@@ -27,7 +27,7 @@ struct client {
 };
 
 class ClientManager {
-    std::unordered_map<std::string, client> clients_;
+    std::unordered_map<std::string, client_t> clients_;
 
 public:
     void
@@ -36,14 +36,14 @@ public:
     )
     {
         clients_[user_id] =
-            client{user_id, {}, algo_id, false, is_local_algo, STARTING_CAPITAL, {}};
+            client_t{user_id, {}, algo_id, false, is_local_algo, STARTING_CAPITAL, {}};
     }
 
     void
     add_client(const std::string& user_id, const std::string& algo_id)
     {
         clients_[user_id] =
-            client{user_id, {}, algo_id, false, false, STARTING_CAPITAL, {}};
+            client_t{user_id, {}, algo_id, false, false, STARTING_CAPITAL, {}};
     }
 
     void
@@ -77,7 +77,7 @@ public:
         return clients_.at(user_id).holdings.at(ticker);
     }
 
-    inline const std::unordered_map<std::string, client>&
+    inline const std::unordered_map<std::string, client_t>&
     get_clients() const
     {
         return clients_;
@@ -112,8 +112,8 @@ private:
 
 /// \cond
 template <>
-struct glz::meta<nutc::manager::client> {
-    using t = nutc::manager::client;
+struct glz::meta<nutc::manager::client_t> {
+    using t = nutc::manager::client_t;
     static constexpr auto value = object( // NOLINT (*)
         "uid", &t::uid, "active", &t::active, "is_local_algo", &t::is_local_algo,
         "capital_remaining", &t::capital_remaining, "holdings", &t::holdings

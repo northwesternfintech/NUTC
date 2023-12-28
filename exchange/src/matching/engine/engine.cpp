@@ -52,10 +52,10 @@ insufficient_holdings(const MarketOrder& order, const manager::ClientManager& ma
     return order.side == SIDE::SELL && order.quantity > holdings;
 }
 
-match_result
+match_result_t
 Engine::match_order(MarketOrder& order, manager::ClientManager& manager)
 {
-    match_result result;
+    match_result_t result;
 
     if (insufficient_capital(order, manager)) {
         return result;
@@ -67,7 +67,7 @@ Engine::match_order(MarketOrder& order, manager::ClientManager& manager)
 
     get_orders_(order.side).push(order);
 
-    match_result res = attempt_matches_(manager, order);
+    match_result_t res = attempt_matches_(manager, order);
 
     events::Logger& logger = events::Logger::get_logger();
 
@@ -119,12 +119,12 @@ Engine::get_aggressive_side(const MarketOrder& order1, const MarketOrder& order2
     return order1.order_index > order2.order_index ? order1.side : order2.side;
 }
 
-match_result
+match_result_t
 Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
     manager::ClientManager& manager, const MarketOrder& aggressive_order
 )
 {
-    match_result result;
+    match_result_t result;
     float aggressive_quantity = aggressive_order.quantity;
     int64_t aggressive_index = aggressive_order.order_index;
 

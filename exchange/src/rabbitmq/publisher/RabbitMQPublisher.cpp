@@ -38,7 +38,7 @@ RabbitMQPublisher::broadcast_matches(
     const manager::ClientManager& clients, const std::vector<messages::Match>& matches
 )
 {
-    auto broadcast_to_client = [&](const std::pair<std::string, manager::client>& pair
+    auto broadcast_to_client = [&](const std::pair<std::string, manager::client_t>& pair
                                ) {
         for (const auto& match : matches) {
             const auto& [id, client] = pair;
@@ -62,7 +62,7 @@ RabbitMQPublisher::broadcast_ob_updates(
     const std::vector<messages::ObUpdate>& updates, const std::string& ignore_uid
 )
 {
-    auto broadcast_to_client = [&](const std::pair<std::string, manager::client>& pair
+    auto broadcast_to_client = [&](const std::pair<std::string, manager::client_t>& pair
                                ) {
         const auto& [id, client] = pair;
 
