@@ -107,10 +107,10 @@ main(int argc, const char** argv)
     // Initialize signal handler
     signal(SIGINT, handle_sigint);
 
-    auto& rmq_conn = rmq::RabbitMQConnectionManager::getInstance();
+    auto& rmq_conn = rmq::RabbitMQConnectionManager::get_instance();
 
     // Connect to RabbitMQ
-    if (!rmq_conn.connectedToRMQ()) {
+    if (!rmq_conn.connected_to_rabbitmq()) {
         log_e(rabbitmq, "Failed to initialize connection");
         return 1;
     }
@@ -133,18 +133,18 @@ main(int argc, const char** argv)
     engine_manager.add_engine("C");
 
     // Run exchange
-    rmq::RabbitMQClientManager::waitForClients(users, num_clients);
-    rmq::RabbitMQClientManager::sendStartTime(users, CLIENT_WAIT_SECS);
-    rmq::RabbitMQOrderHandler::addLiquidityToTicker(
+    rmq::RabbitMQClientManager::wait_for_clients(users, num_clients);
+    rmq::RabbitMQClientManager::send_start_time(users, CLIENT_WAIT_SECS);
+    rmq::RabbitMQOrderHandler::add_liquidity_to_ticker(
         users, engine_manager, "A", 1000, 100
     );
-    rmq::RabbitMQOrderHandler::addLiquidityToTicker(
+    rmq::RabbitMQOrderHandler::add_liquidity_to_ticker(
         users, engine_manager, "B", 2000, 200
     );
-    rmq::RabbitMQOrderHandler::addLiquidityToTicker(
+    rmq::RabbitMQOrderHandler::add_liquidity_to_ticker(
         users, engine_manager, "C", 3000, 300
     );
-    rmq::RabbitMQConsumer::handleIncomingMessages(users, engine_manager);
+    rmq::RabbitMQConsumer::handle_incoming_messages(users, engine_manager);
 
     return 0;
 }

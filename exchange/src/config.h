@@ -18,6 +18,8 @@
 
 // firebase
 #define FIREBASE_URL "https://nutc-web-default-rtdb.firebaseio.com/"
+
+#define RABBITMQ_PORT 5672
 // #define FIREBASE_URL "127.0.0.1:9000"
 //
 #define ALGO_DIR "algos"

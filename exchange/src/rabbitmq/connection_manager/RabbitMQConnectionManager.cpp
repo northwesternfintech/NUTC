@@ -1,9 +1,7 @@
 #include "RabbitMQConnectionManager.hpp"
 
 #include "logging.hpp"
-#include "rabbitmq/publisher/RabbitMQPublisher.hpp"
 #include "rabbitmq/queue_manager/RabbitMQQueueManager.hpp"
-#include "utils/messages.hpp"
 
 #include <glaze/glaze.hpp>
 
@@ -13,27 +11,30 @@ namespace nutc {
 namespace rabbitmq {
 
 bool
-RabbitMQConnectionManager::connectToRabbitMQ(
+RabbitMQConnectionManager::connect_to_rabbitmq(
     const std::string& hostname, int port, const std::string& username,
     const std::string& password
 )
 {
-    amqp_socket_t* socket = amqp_tcp_socket_new(connection_state);
+    amqp_socket_t* socket = amqp_tcp_socket_new(connection_state_);
 
-    if (!socket) {
+    if (socket == nullptr) {
         log_e(rabbitmq, "{}", "Failed to create TCP socket.");
     }
-    amqp_status_enum status =
+    auto status =
         static_cast<amqp_status_enum>(amqp_socket_open(socket, hostname.c_str(), port));
     if (status != AMQP_STATUS_OK) {
         log_e(rabbitmq, "Failed to open TCP socket: {}", amqp_error_string2(status));
         return false;
     }
 
-    amqp_rpc_reply_t reply = amqp_login(
-        connection_state, "/", 0, 131072, 0, AMQP_SASL_METHOD_PLAIN, username.c_str(),
-        password.c_str()
+    constexpr int FRAME_MAX = 131072;
+
+    amqp_rpc_reply_t reply = amqp_login( // NOLINT (cppcoreguidelines-pro-type-vararg)
+        connection_state_, "/", 0, FRAME_MAX, 0, AMQP_SASL_METHOD_PLAIN,
+        username.c_str(), password.c_str()
     );
+
     if (reply.reply_type != AMQP_RESPONSE_NORMAL) {
         log_e(rabbitmq, "{}", "Failed to login to RabbitMQ.");
         return false;
@@ -43,58 +44,32 @@ RabbitMQConnectionManager::connectToRabbitMQ(
 }
 
 void
-RabbitMQConnectionManager::closeConnection(const manager::ClientManager& client_manager)
+RabbitMQConnectionManager::close_connection()
 {
-    // Handle client shutdown
-    auto shutdownClient = [&](const std::pair<std::string, manager::Client>& pair) {
-        const auto& [id, client] = pair;
-
-        if (!client.active)
-            return;
-
-        log_i(rabbitmq, "Shutting down client {}", client.uid);
-    };
-
-    // Iterate over clients and shut them down
-    const auto& clients = client_manager.get_clients();
-    std::for_each(clients.begin(), clients.end(), shutdownClient);
-
     // Close channel and connection, then destroy connection
-    amqp_channel_close(connection_state, 1, AMQP_REPLY_SUCCESS);
-    amqp_connection_close(connection_state, AMQP_REPLY_SUCCESS);
-    amqp_destroy_connection(connection_state);
+    amqp_channel_close(connection_state_, 1, AMQP_REPLY_SUCCESS);
+    amqp_connection_close(connection_state_, AMQP_REPLY_SUCCESS);
+    amqp_destroy_connection(connection_state_);
 }
 
 bool
-RabbitMQConnectionManager::connectedToRMQ()
+RabbitMQConnectionManager::initialize_connection_()
 {
-    return connected;
-}
-
-amqp_connection_state_t
-RabbitMQConnectionManager::get_connection_state()
-{
-    return connection_state;
-}
-
-bool
-RabbitMQConnectionManager::initializeConnection()
-{
-    if (!connectToRabbitMQ("localhost", 5672, "NUFT", "ADMIN"))
+    if (!connect_to_rabbitmq("localhost", RABBITMQ_PORT, "NUFT", "ADMIN"))
         return false;
 
-    amqp_channel_open(connection_state, 1);
-    amqp_rpc_reply_t res = amqp_get_rpc_reply(connection_state);
+    amqp_channel_open(connection_state_, 1);
+    amqp_rpc_reply_t res = amqp_get_rpc_reply(connection_state_);
     if (res.reply_type != AMQP_RESPONSE_NORMAL) {
         log_e(rabbitmq, "Failed to open channel.");
         return false;
     }
 
-    if (!RabbitMQQueueManager::initializeQueue(connection_state, "market_order")) {
+    if (!RabbitMQQueueManager::initialize_queue(connection_state_, "market_order")) {
         log_e(rabbitmq, "Failed to initialize queue.");
         return false;
     }
-    if (!RabbitMQQueueManager::initializeConsume(connection_state, "market_order")) {
+    if (!RabbitMQQueueManager::initialize_consume(connection_state_, "market_order")) {
         log_e(rabbitmq, "Failed to initialize consume.");
         return false;
     }

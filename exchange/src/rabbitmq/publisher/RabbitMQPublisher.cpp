@@ -7,38 +7,39 @@ namespace nutc {
 namespace rabbitmq {
 
 bool
-RabbitMQPublisher::publishMessage(
-    const std::string& queueName, const std::string& message
+RabbitMQPublisher::publish_message(
+    const std::string& queue_name, const std::string& message
 )
 {
-    auto checkReply = [&](amqp_rpc_reply_t reply, const char* errorMsg) -> bool {
+    auto check_reply = [&](amqp_rpc_reply_t reply, const char* error_msg) -> bool {
         if (reply.reply_type != AMQP_RESPONSE_NORMAL) {
-            log_e(rabbitmq, "{}", errorMsg);
+            log_e(rabbitmq, "{}", error_msg);
             return false;
         }
         return true;
     };
 
-    const auto& conn = RabbitMQConnectionManager::getInstance().get_connection_state();
+    const auto& conn = RabbitMQConnectionManager::get_instance().get_connection_state();
 
-    if (!checkReply(amqp_get_rpc_reply(conn), "Failed to declare queue.")) {
+    if (!check_reply(amqp_get_rpc_reply(conn), "Failed to declare queue.")) {
         return false;
     }
 
     amqp_basic_publish(
-        conn, 1, amqp_cstring_bytes(""), amqp_cstring_bytes(queueName.c_str()), 0, 0,
+        conn, 1, amqp_cstring_bytes(""), amqp_cstring_bytes(queue_name.c_str()), 0, 0,
         nullptr, amqp_cstring_bytes(message.c_str())
     );
 
-    return checkReply(amqp_get_rpc_reply(conn), "Failed to publish message.");
+    return check_reply(amqp_get_rpc_reply(conn), "Failed to publish message.");
 }
 
 void
-RabbitMQPublisher::broadcastMatches(
+RabbitMQPublisher::broadcast_matches(
     const manager::ClientManager& clients, const std::vector<messages::Match>& matches
 )
 {
-    auto broadcastToClient = [&](const std::pair<std::string, manager::Client>& pair) {
+    auto broadcast_to_client = [&](const std::pair<std::string, manager::client_t>& pair
+                               ) {
         for (const auto& match : matches) {
             const auto& [id, client] = pair;
 
@@ -47,40 +48,41 @@ RabbitMQPublisher::broadcastMatches(
 
             std::string buffer;
             glz::write<glz::opts{}>(match, buffer);
-            publishMessage(id, buffer);
+            publish_message(id, buffer);
         }
     };
 
-    const auto& activeClients = clients.get_clients();
-    std::for_each(activeClients.begin(), activeClients.end(), broadcastToClient);
+    const auto& active_clients = clients.get_clients();
+    std::for_each(active_clients.begin(), active_clients.end(), broadcast_to_client);
 }
 
 void
-RabbitMQPublisher::broadcastObUpdates(
+RabbitMQPublisher::broadcast_ob_updates(
     const manager::ClientManager& clients,
-    const std::vector<messages::ObUpdate>& updates, const std::string& ignore_id
+    const std::vector<messages::ObUpdate>& updates, const std::string& ignore_uid
 )
 {
-    auto broadcastToClient = [&](const std::pair<std::string, manager::Client>& pair) {
+    auto broadcast_to_client = [&](const std::pair<std::string, manager::client_t>& pair
+                               ) {
         const auto& [id, client] = pair;
 
-        if (!client.active || id == ignore_id) {
+        if (!client.active || id == ignore_uid) {
             return;
         }
 
         for (const auto& update : updates) {
             std::string buffer;
             glz::write<glz::opts{}>(update, buffer);
-            publishMessage(id, buffer);
+            publish_message(id, buffer);
         }
     };
 
-    const auto& activeClients = clients.get_clients();
-    std::for_each(activeClients.begin(), activeClients.end(), broadcastToClient);
+    const auto& active_clients = clients.get_clients();
+    std::for_each(active_clients.begin(), active_clients.end(), broadcast_to_client);
 }
 
 void
-RabbitMQPublisher::broadcastAccountUpdate(
+RabbitMQPublisher::broadcast_account_update(
     const manager::ClientManager& clients, const messages::Match& match
 )
 {
@@ -100,8 +102,8 @@ RabbitMQPublisher::broadcastAccountUpdate(
     std::string seller_buffer;
     glz::write<glz::opts{}>(buyer_update, buyer_buffer);
     glz::write<glz::opts{}>(seller_update, seller_buffer);
-    publishMessage(buyer_id, buyer_buffer);
-    publishMessage(seller_id, seller_buffer);
+    publish_message(buyer_id, buyer_buffer);
+    publish_message(seller_id, seller_buffer);
 }
 
 } // namespace rabbitmq

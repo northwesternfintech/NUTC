@@ -182,7 +182,7 @@ jobs:
 
     - name: Test
       working-directory: exchange/build
-      run: ctest --output-on-failure --no-tests=error -C Release -j 2 -R "Unit*"
+      run: ctest --output-on-failure --no-tests=error -C Release -R "Unit*"
 
   integration-test:
     needs: [lint]
@@ -192,10 +192,6 @@ jobs:
         os: [ubuntu-22.04]
 
     runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        working-directory: exchange
-
 
     env:
       CC: clang-17
@@ -228,17 +224,62 @@ jobs:
       uses: actions/setup-python@v4
       with: { python-version: "3.11" }
 
-    - name: Install dependencies
+    - name: Setup conan
       shell: bash
       run: |
         pip3 install conan
         
         sudo apt install libssl-dev rabbitmq-server -y
         
-        bash < ../.github/scripts/conan-profile.sh
-        conan install . -s build_type=Release -b missing
+        bash < .github/scripts/conan-profile.sh
 
-    # todo: use secrets
+    - name: Install dependencies
+      shell: bash
+      run: |
+        conan install exchange -s build_type=Release -b missing
+        conan install wrapper -s build_type=Release -b missing
+
+    - name: Setup MultiToolTask
+      if: matrix.os == 'windows-2022'
+      run: |
+        Add-Content "$env:GITHUB_ENV" 'UseMultiToolTask=true'
+        Add-Content "$env:GITHUB_ENV" 'EnforceProcessCountAcrossBuilds=true'
+
+    - name: Configure exchange
+      shell: pwsh
+      working-directory: exchange
+      run: cmake "--preset=ci-$("${{ matrix.os }}".split("-")[0])"
+
+    - name: Build exchange
+      working-directory: exchange
+      run: cmake --build build --config Release -j 2
+
+    - name: Install exchange
+      working-directory: exchange
+      run: cmake --install build --config Release --prefix prefix
+
+    - name: Install Python Developer Headers
+      run: sudo apt install python3.11-dev
+      
+      # TODO: cache wrapper
+    - name: Configure wrapper 
+      shell: pwsh
+      working-directory: wrapper
+      run: cmake "--preset=ci-$("${{ matrix.os }}".split("-")[0])"
+
+    - name: Build wrapper
+      working-directory: wrapper
+      run: cmake --build build --config Release -j 2
+
+    - name: Install wrapper
+      working-directory: wrapper
+      run: sudo cmake --install build --config Release --prefix /usr/local
+
+    - name: Move test algo files
+      working-directory: exchange
+      run: cp -r test/algos build/test/test_algos
+      
+    # TODO: use secrets
     - name: Configure RabbitMQ
       run: |
         sudo rabbitmqctl add_user NUFT ADMIN
@@ -255,26 +296,7 @@ jobs:
         echo "listeners.tcp.default = 5672" | sudo tee -a /etc/rabbitmq/rabbitmq.conf
         sudo systemctl restart rabbitmq-server
 
-    - name: Setup MultiToolTask
-      if: matrix.os == 'windows-2022'
-      run: |
-        Add-Content "$env:GITHUB_ENV" 'UseMultiToolTask=true'
-        Add-Content "$env:GITHUB_ENV" 'EnforceProcessCountAcrossBuilds=true'
-
-    - name: Configure
-      shell: pwsh
-      run: cmake "--preset=ci-$("${{ matrix.os }}".split("-")[0])"
-
-    - name: Build
-      run: cmake --build build --config Release -j 2
-
-    - name: Install
-      run: cmake --install build --config Release --prefix prefix
-
-    - name: Move test algo files
-      run: cp -r test/algos build/test/test_algos
-
-    - name: Test
+    - name: Test exchange
       working-directory: exchange/build
       run: ctest --output-on-failure --no-tests=error -C Release -j 2 -R "Integration*"
 

@@ -11,8 +11,8 @@ void
 initialize_client_manager(manager::ClientManager& users, int num_users)
 {
     for (int i = 0; i < num_users; i++) {
-        std::string id = std::string(ALGO_DIR) + "/algo_" + std::to_string(i);
-        users.add_client(id, id, true);
+        std::string algo_id = std::string(ALGO_DIR) + "/algo_" + std::to_string(i);
+        users.add_client(algo_id, algo_id, /*is_local_algo=*/true);
     }
 }
 
@@ -52,7 +52,7 @@ init_client_manager_from_filenames(
 )
 {
     for (const std::string& name : names)
-        users.add_client(name, name, true);
+        users.add_client(name, name, /*is_local_algo=*/true);
 }
 
 } // namespace dev_mode

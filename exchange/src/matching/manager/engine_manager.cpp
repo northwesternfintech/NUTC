@@ -2,12 +2,12 @@
 
 namespace nutc {
 namespace engine_manager {
-std::optional<EngineRef>
+std::optional<engine_ref_t>
 Manager::get_engine(const std::string& ticker)
 {
-    auto it = engines.find(ticker);
-    if (it != engines.end()) {
-        return std::reference_wrapper<Engine>(it->second);
+    auto engine = engines_.find(ticker);
+    if (engine != engines_.end()) {
+        return std::reference_wrapper<nutc::matching::Engine>(engine->second);
     }
     return std::nullopt;
 }
@@ -16,17 +16,17 @@ void
 Manager::add_initial_liquidity(const std::string& ticker, float quantity, float price)
 {
     MarketOrder to_add{"SIMULATED", messages::SIDE::SELL, ticker, quantity, price};
-    auto it = engines.find(ticker);
-    if (it != engines.end()) {
-        it->second.add_order_without_matching(to_add);
+    auto engine = engines_.find(ticker);
+    if (engine != engines_.end()) {
+        engine->second.add_order_without_matching(to_add);
     }
 }
 
 void
 Manager::add_engine(const std::string& ticker)
 {
-    if (engines.find(ticker) == engines.end()) {
-        engines.emplace(ticker, matching::Engine());
+    if (engines_.find(ticker) == engines_.end()) {
+        engines_.emplace(ticker, matching::Engine());
     }
 }
 

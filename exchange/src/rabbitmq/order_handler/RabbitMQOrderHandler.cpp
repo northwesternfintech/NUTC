@@ -1,12 +1,13 @@
 #include "RabbitMQOrderHandler.hpp"
 
+#include "logging.hpp"
 #include "rabbitmq/publisher/RabbitMQPublisher.hpp"
 
 namespace nutc {
 namespace rabbitmq {
 
 void
-RabbitMQOrderHandler::handleIncomingMarketOrder(
+RabbitMQOrderHandler::handle_incoming_market_order(
     engine_manager::Manager& engine_manager, manager::ClientManager& clients,
     MarketOrder& order
 )
@@ -26,7 +27,7 @@ RabbitMQOrderHandler::handleIncomingMarketOrder(
 
     log_i(rabbitmq, "Received market order: {}", buffer);
 
-    std::optional<std::reference_wrapper<Engine>> engine =
+    std::optional<std::reference_wrapper<matching::Engine>> engine =
         engine_manager.get_engine(order.ticker);
     if (!engine.has_value()) {
         log_w(
@@ -39,7 +40,7 @@ RabbitMQOrderHandler::handleIncomingMarketOrder(
     for (const auto& match : matches) {
         std::string buyer_id = match.buyer_id;
         std::string seller_id = match.seller_id;
-        RabbitMQPublisher::broadcastAccountUpdate(clients, match);
+        RabbitMQPublisher::broadcast_account_update(clients, match);
         log_i(
             matching, "Matched order with price {} and quantity {}", match.price,
             match.quantity
@@ -52,16 +53,16 @@ RabbitMQOrderHandler::handleIncomingMarketOrder(
             update.side == messages::SIDE::BUY ? "BUY" : "ASK"
         );
     }
-    if (matches.size() > 0) {
-        RabbitMQPublisher::broadcastMatches(clients, matches);
+    if (!matches.empty()) {
+        RabbitMQPublisher::broadcast_matches(clients, matches);
     }
-    if (ob_updates.size() > 0) {
-        RabbitMQPublisher::broadcastObUpdates(clients, ob_updates, order.client_id);
+    if (!ob_updates.empty()) {
+        RabbitMQPublisher::broadcast_ob_updates(clients, ob_updates, order.client_id);
     }
 }
 
 void
-RabbitMQOrderHandler::addLiquidityToTicker(
+RabbitMQOrderHandler::add_liquidity_to_ticker(
     manager::ClientManager& clients, engine_manager::Manager& engine_manager,
     const std::string& ticker, float quantity, float price
 )
@@ -70,7 +71,7 @@ RabbitMQOrderHandler::addLiquidityToTicker(
     messages::ObUpdate update{ticker, messages::SIDE::SELL, price, quantity};
     std::vector<messages::ObUpdate> vec{};
     vec.push_back(update);
-    RabbitMQPublisher::broadcastObUpdates(clients, vec, "");
+    RabbitMQPublisher::broadcast_ob_updates(clients, vec, "");
 }
 
 } // namespace rabbitmq

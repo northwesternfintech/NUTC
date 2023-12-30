@@ -7,8 +7,6 @@
 
 #include <chrono>
 
-#include <iostream>
-
 namespace nutc {
 namespace events {
 
@@ -22,7 +20,7 @@ Logger::get_logger()
 std::string
 timestamp_in_ms()
 {
-    using namespace std::chrono;
+    using std::chrono::milliseconds, std::chrono::system_clock, std::chrono::time_point;
 
     // Get time from Quill
     auto now = quill::Clock::now();
@@ -31,7 +29,9 @@ timestamp_in_ms()
     auto epoch_millis = duration_cast<milliseconds>(now.time_since_epoch());
     auto system_now = time_point<system_clock>{epoch_millis};
 
-    return fmt::format("{:%Y-%m-%d %H:%M:%S}", system_now).substr(0, 23);
+    static constexpr int HOURS = 23;
+
+    return fmt::format("{:%Y-%m-%d %H:%M:%S}", system_now).substr(0, HOURS);
 }
 
 template <GlazeMetaSpecialized T>
@@ -46,7 +46,7 @@ Logger::log_event(const T& json_message)
 
     WithTimestamp<T> json_message_with_ts = {json_message};
 
-    // TODO: fix type
+    // TODO(andrlime): fix type
     std::string buffer = glz::write_json(json_message_with_ts);
 
     // Log to the main log too
