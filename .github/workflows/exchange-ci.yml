@@ -273,7 +273,7 @@ jobs:
 
     - name: Install wrapper
       working-directory: wrapper
-      run: sudo cmake --install build --config Release --prefix /usr/bin
+      run: sudo cmake --install build --config Release --prefix /usr/local
 
     - name: Move test algo files
       working-directory: exchange
