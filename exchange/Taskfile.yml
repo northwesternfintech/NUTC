@@ -74,6 +74,7 @@ tasks:
     cmds:
       - task: build
       - task: check-and-start-services
+      - mkdir -p build/dev/test/test_algos
       - cp -r test/test_algos/* build/dev/test/test_algos
       - ctest --timeout 3 --preset=dev -R "Integration*"
 
