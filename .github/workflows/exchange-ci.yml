@@ -182,7 +182,7 @@ jobs:
 
     - name: Test
       working-directory: exchange/build
-      run: ctest --output-on-failure --no-tests=error -C Release -R "Unit*"
+      run: ctest --output-on-failure --no-tests=error -C Release -j 2 -R "Unit*"
 
   integration-test:
     needs: [lint]
@@ -277,7 +277,7 @@ jobs:
 
     - name: Move test algo files
       working-directory: exchange
-      run: cp -r test/algos build/test/test_algos
+      run: cp -r test/test_algos build/test/test_algos
       
     # TODO: use secrets
     - name: Configure RabbitMQ
@@ -298,7 +298,7 @@ jobs:
 
     - name: Test exchange
       working-directory: exchange/build
-      run: ctest --output-on-failure --no-tests=error -C Release -j 2 -R "Integration*"
+      run: ctest --output-on-failure --no-tests=error --timeout 10 -C Release -R "Integration*"
 
   docs:
     # Deploy docs only when builds succeed

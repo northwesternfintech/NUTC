@@ -74,8 +74,8 @@ tasks:
     cmds:
       - task: build
       - task: check-and-start-services
-      - cp -r test/algos build/dev/test/test_algos
-      - ctest --preset=dev -R "Integration*"
+      - cp -r test/test_algos/* build/dev/test/test_algos
+      - ctest --timeout 3 --preset=dev -R "Integration*"
 
   docs:
     dir: '{{.USER_WORKING_DIR}}'
