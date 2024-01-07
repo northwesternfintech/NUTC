@@ -4,6 +4,8 @@
 #include "process_spawning/spawning.hpp"
 #include "rabbitmq/client_manager/RabbitMQClientManager.hpp"
 
+#include <signal.h>
+
 namespace nutc {
 namespace testing_utils {
 
