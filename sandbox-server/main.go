@@ -3,11 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 	"unicode"
+
+	"archive/tar"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -32,7 +36,6 @@ func main() {
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal("Failed to start server\n")
 	}
-
 }
 
 func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
@@ -95,6 +98,30 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 
 	go func() {
 		time.Sleep(dockerTimeout)
+		reader, _, err := cli.CopyFromContainer(context.Background(), resp.ID, "logs/app.log")
+		if err != nil {
+			fmt.Printf("%s", err.Error())
+		}
+		defer reader.Close()
+
+		tarReader := tar.NewReader(reader)
+
+		_, err = tarReader.Next()
+		if err != nil {
+			fmt.Printf("%s", err.Error())
+		}
+
+		dstFile, err := os.Create("out")
+		if err != nil {
+			fmt.Printf("%s", err.Error())
+		}
+		defer dstFile.Close()
+
+		_, err = io.Copy(dstFile, tarReader)
+		if err != nil {
+			fmt.Printf("%s", err.Error())
+		}
+
 		cli.ContainerStop(context.Background(), resp.ID, container.StopOptions{})
 	}()
 
