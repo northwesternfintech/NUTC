@@ -19,15 +19,15 @@ namespace stochastic {
 double
 BrownianMotion::generate_next_price()
 {
-    double current_price = this->cur_value;
+    double current_price = cur_value_;
     std::normal_distribution<double> distribution(
-        -cur_value / 1000, BROWNIAN_MOTION_DEVIATION
+        -cur_value_ / 1000, BROWNIAN_MOTION_DEVIATION
     );
 
-    double delta_current_price = distribution(random_number_generator);
+    double delta_current_price = distribution(random_number_generator_);
     double new_price = current_price + delta_current_price;
 
-    cur_value = new_price;
+    cur_value_ = new_price;
     return new_price;
 }
 
