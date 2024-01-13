@@ -22,7 +22,7 @@ class BrownianMotion {
     std::mt19937 random_number_generator_;
 
 public:
-    // dConstructor for BrownianMotion, takes nothing
+    // Default constructor for BrownianMotion, takes nothing
     explicit BrownianMotion() : cur_value_(0)
     {
         std::random_device rd;
@@ -54,7 +54,7 @@ public:
 
     // Force set the seed to something else
     void
-    force_set_seed(unsigned int new_seed)
+    set_seed(unsigned int new_seed)
     {
         random_number_generator_ = std::mt19937(new_seed);
     }
