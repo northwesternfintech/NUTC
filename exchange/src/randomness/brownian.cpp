@@ -11,23 +11,25 @@
 
 #include "brownian.hpp"
 
+const double BROWNIAN_MOTION_DEVIATION = 0.4;
+
 namespace nutc {
-namespace brownian {
+namespace stochastic {
 
 double
 BrownianMotion::generate_next_price()
 {
     double current_price = this->cur_value;
     std::normal_distribution<double> distribution(
-        -this->cur_value / 1000, BROWNIAN_MOTION_DEVIATION
+        -cur_value / 1000, BROWNIAN_MOTION_DEVIATION
     );
 
-    double delta_current_price = distribution(this->random_number_generator);
+    double delta_current_price = distribution(random_number_generator);
     double new_price = current_price + delta_current_price;
 
-    this->cur_value = new_price;
+    cur_value = new_price;
     return new_price;
 }
 
-} // namespace brownian
+} // namespace stochastic
 } // namespace nutc

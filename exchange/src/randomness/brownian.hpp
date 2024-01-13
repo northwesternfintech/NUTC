@@ -12,13 +12,10 @@
 #pragma once
 
 #include <random>
-#include <vector>
 
 namespace nutc {
 
-namespace brownian {
-
-const double BROWNIAN_MOTION_DEVIATION = 0.4;
+namespace stochastic {
 
 class BrownianMotion {
     unsigned int seed;
@@ -28,31 +25,31 @@ class BrownianMotion {
 
 public:
     // dConstructor for BrownianMotion, takes nothing
-    BrownianMotion()
+    explicit BrownianMotion() : cur_value(0)
     {
         std::random_device rd;
         random_number_generator = std::mt19937(rd());
     }
 
     // Constructor for BrownianMotion, takes a seed
-    BrownianMotion(const unsigned int seed) : seed(seed)
+    explicit BrownianMotion(const unsigned int seed) : seed(seed), cur_value(0)
     {
         random_number_generator = std::mt19937(seed);
     }
 
     // Constructor for BrownianMotion, takes a seed and initial value
-    BrownianMotion(const unsigned int seed, const double initial_value) :
+    explicit BrownianMotion(const unsigned int seed, const double initial_value) :
         seed(seed), cur_value(initial_value)
     {
         random_number_generator = std::mt19937(seed);
     }
 
     // Generates and returns the next price based on previous prices
-    double generate_next_price();
+    [[nodiscard]] double generate_next_price();
 
     // Force set the current price
     void
-    inject_price(double new_price)
+    set_price(double new_price)
     {
         cur_value = new_price;
     }
@@ -62,8 +59,9 @@ public:
     force_set_seed(unsigned int new_seed)
     {
         seed = new_seed;
+        random_number_generator = std::mt19937(new_seed);
     }
 };
 
-} // namespace brownian
+} // namespace stochastic
 } // namespace nutc
