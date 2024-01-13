@@ -11,42 +11,61 @@
 
 #pragma once
 
+#include <random>
 #include <vector>
 
 namespace nutc {
 
 namespace brownian {
 
+const double BROWNIAN_MOTION_DEVIATION = 0.4;
+
 class BrownianMotion {
-    std::vector<float> previous;
     int seed;
+    double cur_value;
+    double deviation;
+
+    std::mt19937 random_number_generator;
 
 public:
+    // dConstructor for BrownianMotion, takes nothing
+    BrownianMotion() : deviation(BROWNIAN_MOTION_DEVIATION) {
+        std::random_device rd;
+        random_number_generator = std::mt19937(rd());
+    };
+
     // Constructor for BrownianMotion, takes a seed
-    BrownianMotion(const int seed) : seed(seed) {};
+    BrownianMotion(const int seed) : seed(seed), deviation(BROWNIAN_MOTION_DEVIATION) {
+        random_number_generator = std::mt19937(seed);
+    };
+
+    // Constructor for BrownianMotion, takes a seed and initial value
+    BrownianMotion(const int seed, const double initial_value) : seed(seed), cur_value(initial_value), deviation(BROWNIAN_MOTION_DEVIATION) {
+        random_number_generator = std::mt19937(seed);
+    };
 
     // Generates and returns the next price based on previous prices
-    float
+    double
     generate_next_price();
 
-    // Force push a new price into the stack to affect
-    // the rng used to generate the next float
+    // Force set the current price
     void
     inject_price(
-        float new_price
+        double new_price
     )
     {
-        this->previous.push_back(new_price);
+        cur_value = new_price;
     }
 
-    // Force change the seed to something else
+    // Force set the seed to something else
     void
     force_set_seed(
         int new_seed
     )
     {
-        this->seed = new_seed;
+        seed = new_seed;
     }
+
 };
 
 } // namespace brownian
