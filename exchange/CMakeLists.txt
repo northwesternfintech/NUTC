@@ -33,6 +33,7 @@ add_library(
     src/matching/engine/engine.cpp
     src/client_manager/client_manager.cpp
     src/utils/logger/logger.cpp
+    src/randomness/brownian.cpp
 )
 
 target_include_directories(
