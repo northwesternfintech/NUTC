@@ -10,7 +10,7 @@ class Recipe(ConanFile):
 
     def requirements(self):
         self.requires("zlib/1.3", override=True)
-        self.requires("fmt/10.0.0", override=True)    # string parsing
+        self.requires("fmt/[^10.1.0]")    # string parsing
         self.requires("quill/3.3.1")   # logging
         self.requires("libcurl/8.2.1")
         self.requires("glaze/[^1.3.5]")
