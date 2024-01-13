@@ -11,7 +11,7 @@
 
 #include "brownian.hpp"
 
-const double BROWNIAN_MOTION_DEVIATION = 0.4;
+constexpr double BROWNIAN_MOTION_DEVIATION = 0.4;
 
 namespace nutc {
 namespace stochastic {
