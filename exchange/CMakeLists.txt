@@ -17,22 +17,32 @@ include(cmake/variables.cmake)
 
 add_library(
     NUTC24_lib OBJECT
-    src/local_algos/sandbox.cpp
-    src/local_algos/dev_mode.cpp
-    src/local_algos/file_management.cpp
-    src/matching/manager/engine_manager.cpp
+    
+    src/algos/sandbox_mode/sandbox_mode.cpp
+    src/algos/dev_mode/dev_mode.cpp
+    src/algos/normal_mode/normal_mode.cpp
+    
     src/logging.cpp
+
     src/curl/curl.cpp
+    
     src/process_spawning/spawning.cpp
+    
     src/rabbitmq/client_manager/RabbitMQClientManager.cpp
     src/rabbitmq/connection_manager/RabbitMQConnectionManager.cpp
     src/rabbitmq/consumer/RabbitMQConsumer.cpp
     src/rabbitmq/order_handler/RabbitMQOrderHandler.cpp
     src/rabbitmq/publisher/RabbitMQPublisher.cpp
     src/rabbitmq/queue_manager/RabbitMQQueueManager.cpp
+    
     src/matching/engine/engine.cpp
+    src/matching/manager/engine_manager.cpp
+    
     src/client_manager/client_manager.cpp
+    
     src/utils/logger/logger.cpp
+    src/utils/file_operations/file_operations.cpp
+    
     src/randomness/brownian.cpp
 )
 

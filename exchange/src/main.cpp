@@ -1,11 +1,16 @@
+#include "algos/dev_mode/dev_mode.hpp"
+#include "algos/management_interface.hpp"
+#include "algos/normal_mode/normal_mode.hpp"
+#include "algos/sandbox_mode/sandbox_mode.hpp"
 #include "client_manager/client_manager.hpp"
 #include "config.h"
-#include "local_algos/dev_mode.hpp"
-#include "local_algos/sandbox.hpp"
 #include "logging.hpp"
-#include "matching/engine/engine.hpp"
+#include "matching/manager/engine_manager.hpp"
 #include "process_spawning/spawning.hpp"
-#include "rabbitmq/rabbitmq.hpp"
+#include "rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
+#include "rabbitmq/client_manager/RabbitMQClientManager.hpp"
+#include "rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
+#include "rabbitmq/consumer/RabbitMQConsumer.hpp"
 
 #include <argparse/argparse.hpp>
 
@@ -16,7 +21,6 @@
 
 namespace rmq = nutc::rabbitmq;
 
-nutc::manager::ClientManager users;
 nutc::engine_manager::Manager engine_manager;
 
 struct algorithm {
@@ -88,24 +92,25 @@ process_arguments(int argc, const char** argv)
     return std::make_tuple(get_mode(), algo);
 }
 
-void
-handle_sigint(int sig)
+size_t
+initialize_algo_manager(
+    nutc::algo_mgmt::AlgoManager& algo_manager,
+    nutc::manager::ClientManager& client_manager
+)
 {
-    log_i(rabbitmq, "Caught SIGINT, closing connection");
-    sleep(1);
-    exit(sig);
+    algo_manager.initialize_files();
+    algo_manager.initialize_client_manager(client_manager);
+    return algo_manager.get_num_clients();
 }
 
 int
 main(int argc, const char** argv)
 {
+    nutc::manager::ClientManager users;
     auto [mode, sandbox] = process_arguments(argc, argv);
 
     // Set up logging
     nutc::logging::init(quill::LogLevel::TraceL3);
-
-    // Initialize signal handler
-    signal(SIGINT, handle_sigint);
 
     auto& rmq_conn = rmq::RabbitMQConnectionManager::get_instance();
 
@@ -115,18 +120,29 @@ main(int argc, const char** argv)
         return 1;
     }
 
+    size_t num_clients{};
+
     if (mode == Mode::DEV) {
         log_t1(main, "Initializing NUTC in development mode");
-        nutc::dev_mode::create_mt_algo_files(DEBUG_NUM_USERS);
+        nutc::algo_mgmt::DevModeAlgoManager manager =
+            nutc::algo_mgmt::DevModeAlgoManager(DEBUG_NUM_USERS);
+        num_clients = initialize_algo_manager(manager, users);
     }
     else if (mode == Mode::SANDBOX) {
-        log_t1(main, "Initializing NUTC in sandbox node");
-        nutc::sandbox::create_sandbox_algo_files();
+        log_t1(main, "Initializing NUTC in sandbox mode");
         auto& [uid, algo_id] = sandbox.value();
-        users.add_client(uid, algo_id, false);
+        nutc::algo_mgmt::SandboxAlgoManager manager =
+            nutc::algo_mgmt::SandboxAlgoManager(uid, algo_id);
+        num_clients = initialize_algo_manager(manager, users);
+    }
+    else if (mode == Mode::PROD) {
+        log_t1(main, "Initializing NUTC in normal mode");
+        nutc::algo_mgmt::NormalModeAlgoManager manager =
+            nutc::algo_mgmt::NormalModeAlgoManager();
+        num_clients = initialize_algo_manager(manager, users);
     }
 
-    size_t num_clients = nutc::client::initialize(users, mode);
+    nutc::client::spawn_all_clients(users);
 
     engine_manager.add_engine("A");
     engine_manager.add_engine("B");
