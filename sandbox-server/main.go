@@ -20,7 +20,7 @@ import (
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
-const dockerTimeout = time.Minute * 1
+const dockerTimeout = time.Minute * 10
 const firebaseStorageUrl = "https://firebasestorage.googleapis.com/v0/b/nutc-web.appspot.com/o"
 const firebaseApiKey = "AIzaSyCo2l3x2DMhg5CaNy1Pyvknk_GK8v34iUc"
 
