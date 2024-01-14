@@ -22,20 +22,11 @@ pid_t spawn_client(
 );
 
 /**
- * @brief Fetches all users from firebase
- */
-glz::json_t::object_t get_all_users();
-
-/**
  * @brief Spawns all clients in the given ClientManager
  * @param users The ClientManager to spawn clients for
  * @returns the number of clients spawned
  */
 size_t spawn_all_clients(nutc::manager::ClientManager& users);
-
-size_t initialize(
-    manager::ClientManager& users, Mode mode, size_t num_local_algos = DEBUG_NUM_USERS
-);
 
 } // namespace client
 } // namespace nutc

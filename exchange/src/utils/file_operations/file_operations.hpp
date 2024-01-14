@@ -3,7 +3,7 @@
 #include <string>
 
 namespace nutc {
-namespace file_mgmt {
+namespace file_ops {
 
 void unzip_file(const std::string& src, const std::string& dest);
 
@@ -13,5 +13,5 @@ std::string read_file_content(const std::string& filename);
 
 [[nodiscard]] bool create_directory(const std::string& dir);
 
-} // namespace file_mgmt
+} // namespace file_ops
 } // namespace nutc
