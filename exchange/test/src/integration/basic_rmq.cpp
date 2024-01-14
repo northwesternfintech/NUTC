@@ -1,4 +1,5 @@
-#include "local_algos/dev_mode.hpp"
+// #include "local_algos/dev_mode.hpp"
+#include "algos/dev_mode/dev_mode.hpp"
 #include "process_spawning/spawning.hpp"
 #include "rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
 #include "test_utils/process.hpp"
@@ -31,8 +32,9 @@ protected:
 
 TEST_F(IntegrationBasic, InitialLiquidity)
 {
-    bool algo_success = nutc::dev_mode::create_mt_algo_files(1);
-    EXPECT_TRUE(algo_success);
-    size_t num_clients = nutc::client::initialize(users_, Mode::DEV, 1);
-    EXPECT_EQ(num_clients, 1);
+    nutc::algo_mgmt::DevModeAlgoManager algo_manager =
+        nutc::algo_mgmt::DevModeAlgoManager(1);
+    algo_manager.initialize_files();
+    algo_manager.initialize_client_manager(users_);
+    nutc::client::spawn_all_clients(users_);
 }

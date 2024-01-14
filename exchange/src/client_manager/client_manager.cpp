@@ -46,18 +46,6 @@ ClientManager::validate_match(const messages::Match& match) const
 }
 
 void
-ClientManager::initialize_from_firebase(const glz::json_t::object_t& users)
-{
-    for (const auto& [id, user] : users) {
-        if (!user.contains("latestAlgoId"))
-            continue;
-        add_client(
-            id, user["latestAlgoId"].get<std::string>(), /*is_local_algo=*/false
-        );
-    }
-}
-
-void
 ClientManager::set_active(const std::string& user_id)
 {
     if (!user_exists_(user_id))

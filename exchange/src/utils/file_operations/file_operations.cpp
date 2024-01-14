@@ -1,4 +1,4 @@
-#include "file_management.hpp"
+#include "file_operations.hpp"
 
 #include "logging.hpp"
 
@@ -9,8 +9,9 @@
 #include <iostream>
 #include <sstream>
 
+// Low level file operations. Decoupled from functionality of exchange
 namespace nutc {
-namespace file_mgmt {
+namespace file_ops {
 
 void
 unzip_file(const std::string& src, const std::string& dest)
@@ -96,5 +97,5 @@ read_file_content(const std::string& filename)
     return buffer.str();
 }
 
-} // namespace file_mgmt
+} // namespace file_ops
 } // namespace nutc
