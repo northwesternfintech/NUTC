@@ -286,19 +286,35 @@ RabbitMQ::publishInit(const std::string& id, bool ready)
     return rVal;
 }
 
+// If wait_blocking is disabled, we block until we *receive* the message, but not after
+// Otherwise, we block until the start time
 void
-RabbitMQ::waitForStartTime()
+RabbitMQ::waitForStartTime(bool skip_start_wait)
 {
     auto message = consumeMessage();
     if (std::holds_alternative<StartTime>(message)) {
+        if (skip_start_wait) {
+            return;
+        }
+
         StartTime start = std::get<StartTime>(message);
+        log_i(
+            wrapper_rabbitmq,
+            "Received start time: {}, sleeping until then.",
+            start.start_time_ns
+        );
+
         std::chrono::high_resolution_clock::time_point wait_until =
             std::chrono::high_resolution_clock::time_point(
                 std::chrono::nanoseconds(start.start_time_ns)
             );
         std::this_thread::sleep_until(wait_until);
-        log_i(wrapper_rabbitmq, "Received start time: {}", start.start_time_ns);
+
         return;
+    }
+    else {
+        log_e(wrapper_rabbitmq, "Received unexpected message type");
+        exit(1);
     }
 }
 
