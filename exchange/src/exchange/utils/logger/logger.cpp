@@ -64,6 +64,7 @@ Logger::log_event(const T& json_message)
 
     // Write start of JSON
     output_file_ << buffer << "\n";
+    output_file_.flush();
 }
 
 // Explicit instantiations
