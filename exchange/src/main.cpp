@@ -7,10 +7,10 @@
 #include "logging.hpp"
 #include "matching/manager/engine_manager.hpp"
 #include "process_spawning/spawning.hpp"
-#include "rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
 #include "rabbitmq/client_manager/RabbitMQClientManager.hpp"
-#include "rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
+#include "rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
 #include "rabbitmq/consumer/RabbitMQConsumer.hpp"
+#include "rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
 
 #include <argparse/argparse.hpp>
 
