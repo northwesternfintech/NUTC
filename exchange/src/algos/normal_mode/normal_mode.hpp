@@ -1,6 +1,6 @@
 #pragma once
 
-#include "algos/management_interface.hpp"
+#include "algos/algo_manager.hpp"
 
 namespace nutc {
 namespace algo_mgmt {
@@ -18,7 +18,7 @@ public:
 
     // WARNING!! not initialized until initialize_client_manager is run
     size_t
-    get_num_clients() override
+    get_num_clients() const override
     {
         return num_clients_;
     }
