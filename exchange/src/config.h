@@ -31,4 +31,4 @@
 #define SKEW_SCALE                       20000 // Factor by which the market wants to return to baseline (larger = less)
 #define SKEW_FACTOR                      4 // How much more market events skew than normal
 
-enum class Mode { SANDBOX, DEV, PROD };
+enum class Mode { SANDBOX, DEV, NORMAL };
