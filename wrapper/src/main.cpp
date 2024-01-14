@@ -21,7 +21,8 @@ struct wrapper_args {
     uint8_t verbosity;
     std::string uid;
     std::string algo_id;
-    bool dev;
+    bool dev_mode;
+    bool no_start_delay;
 };
 
 static wrapper_args
@@ -56,6 +57,13 @@ process_arguments(int argc, const char** argv)
         })
         .required();
 
+    program.add_argument("--no-start-delay")
+        .help("Disable the start time delay. Start running immediately after "
+              "initialization message")
+        .default_value(false)
+        .implicit_value(true)
+        .nargs(0);
+
     program.add_argument("-V", "--version")
         .help("prints version information and exits")
         .action([&](const auto& /* unused */) {
@@ -87,7 +95,8 @@ process_arguments(int argc, const char** argv)
         verbosity,
         program.get<std::string>("--uid"),
         program.get<std::string>("--algo_id"),
-        program.get<bool>("--dev")
+        program.get<bool>("--dev"),
+        program.get<bool>("--no-start-delay")
     };
 }
 
@@ -113,7 +122,8 @@ int
 main(int argc, const char** argv)
 {
     // Parse args
-    auto [verbosity, uid, algo_id, development_mode] = process_arguments(argc, argv);
+    auto [verbosity, uid, algo_id, development_mode, no_start_delay] =
+        process_arguments(argc, argv);
     pybind11::scoped_interpreter guard{};
 
     // Start logging and print build info
@@ -141,7 +151,7 @@ main(int argc, const char** argv)
     if (!algo.has_value()) {
         return 0;
     }
-    conn.waitForStartTime();
+    conn.waitForStartTime(no_start_delay);
 
     // Initialize the algorithm. For now, only designed for py
     nutc::pywrapper::create_api_module(conn.getMarketFunc(uid));

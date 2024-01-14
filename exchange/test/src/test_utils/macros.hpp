@@ -1,3 +1,4 @@
+#include "client_manager/client_manager.hpp"
 #include "matching/engine/engine.hpp"
 #include "utils/logger/logger.hpp"
 
@@ -30,6 +31,8 @@ bool validate_market_order(
     const MarketOrder& update, const std::string& client_id, const std::string& ticker,
     messages::SIDE side, float price, float quantity
 );
+
+void add_client_simple(manager::ClientManager& manager, const std::string& client_id);
 
 } // namespace testing_utils
 } // namespace nutc

@@ -45,5 +45,11 @@ validate_market_order(
            && is_nearly_equal(update.quantity, quantity);
 }
 
+void
+add_client_simple(manager::ClientManager& manager, const std::string& client_id)
+{
+    manager.add_client(client_id, client_id, manager::ClientLocation::LOCAL);
+}
+
 } // namespace testing_utils
 } // namespace nutc

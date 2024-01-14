@@ -8,6 +8,8 @@ namespace algo_mgmt {
 void
 NormalModeAlgoManager::initialize_client_manager(manager::ClientManager& users)
 {
+    using manager::ClientLocation;
+
     num_clients_ = 0;
 
     glz::json_t::object_t firebase_users = get_all_users();
@@ -15,7 +17,7 @@ NormalModeAlgoManager::initialize_client_manager(manager::ClientManager& users)
         if (!user.contains("latestAlgoId"))
             continue;
         users.add_client(
-            id, user["latestAlgoId"].get<std::string>(), /*is_local_algo=*/false
+            id, user["latestAlgoId"].get<std::string>(), ClientLocation::REMOTE
         );
         num_clients_ += 1;
     }

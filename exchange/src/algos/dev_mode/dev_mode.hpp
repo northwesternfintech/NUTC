@@ -1,6 +1,6 @@
 #pragma once
 
-#include "algos/management_interface.hpp"
+#include "algos/algo_manager.hpp"
 #include "client_manager/client_manager.hpp"
 
 #include <vector>
@@ -27,7 +27,7 @@ public:
     void initialize_files() const override;
 
     size_t
-    get_num_clients() override
+    get_num_clients() const override
     {
         return num_clients_;
     }

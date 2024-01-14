@@ -14,8 +14,11 @@ protected:
     void
     SetUp() override
     {
-        manager_.add_client("ABC", "ABC");
-        manager_.add_client("DEF", "ABC");
+        using nutc::testing_utils::add_client_simple;
+
+        add_client_simple(manager_, "ABC");
+        add_client_simple(manager_, "DEF");
+
         manager_.modify_holdings("ABC", "ETHUSD", DEFAULT_QUANTITY);
         manager_.modify_holdings("DEF", "ETHUSD", DEFAULT_QUANTITY);
     }
