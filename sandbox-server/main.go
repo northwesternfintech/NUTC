@@ -1,12 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
 	"log"
+	"mime/multipart"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 	"unicode"
@@ -19,7 +20,9 @@ import (
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
-const dockerTimeout = time.Minute * 10
+const dockerTimeout = time.Minute * 1
+const firebaseStorageUrl = "https://firebasestorage.googleapis.com/v0/b/nutc-web.appspot.com/o"
+const firebaseApiKey = "AIzaSyCo2l3x2DMhg5CaNy1Pyvknk_GK8v34iUc"
 
 const port = "8081"
 
@@ -97,10 +100,14 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go func() {
+		defer cli.ContainerStop(context.Background(), resp.ID, container.StopOptions{})
+
 		time.Sleep(dockerTimeout)
-		reader, _, err := cli.CopyFromContainer(context.Background(), resp.ID, "logs/app.log")
+
+		reader, _, err := cli.CopyFromContainer(context.Background(), resp.ID, "logs/structured.log")
 		if err != nil {
 			fmt.Printf("%s", err.Error())
+			return
 		}
 		defer reader.Close()
 
@@ -109,20 +116,12 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 		_, err = tarReader.Next()
 		if err != nil {
 			fmt.Printf("%s", err.Error())
+			return
 		}
 
-		dstFile, err := os.Create("out")
-		if err != nil {
+		if err := uploadLogFile(user_id, algo_id, firebaseApiKey, tarReader); err != nil {
 			fmt.Printf("%s", err.Error())
 		}
-		defer dstFile.Close()
-
-		_, err = io.Copy(dstFile, tarReader)
-		if err != nil {
-			fmt.Printf("%s", err.Error())
-		}
-
-		cli.ContainerStop(context.Background(), resp.ID, container.StopOptions{})
 	}()
 
 	fmt.Fprintf(w, "Container %s started successfully with user_id: %s and algo_id: %s\n", container_name, user_id, algo_id)
@@ -135,4 +134,46 @@ func isValidID(id string) bool {
 		}
 	}
 	return true
+}
+
+func uploadLogFile(user_id, algo_id, apiKey string, reader io.Reader) error {
+	var buffer bytes.Buffer
+
+	writer := multipart.NewWriter(&buffer)
+
+	fileName := fmt.Sprintf("logs/%s/%s.log", user_id, algo_id)
+
+	part, err := writer.CreateFormFile("file", fileName)
+	if err != nil {
+		return fmt.Errorf("writer.CreateFormFile: %v", err)
+	}
+
+	if _, err := io.Copy(part, reader); err != nil {
+		return fmt.Errorf("io.Copy: %v", err)
+	}
+
+	if err := writer.Close(); err != nil {
+		return fmt.Errorf("writer.Close: %v", err)
+	}
+
+	req, err := http.NewRequest("POST", firebaseStorageUrl+"?uploadType=media&name="+fileName, &buffer)
+	if err != nil {
+		return fmt.Errorf("http.NewRequest: %v", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+apiKey)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("client.Do: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("upload failed with status: %v", resp.Status)
+	}
+
+	return nil
 }
