@@ -87,7 +87,7 @@ public:
     std::function<bool(const std::string&, const std::string&, float, float)>
     getMarketFunc(const std::string& uid);
 
-    void waitForStartTime();
+    void waitForStartTime(bool skip_start_wait);
 
     /**
      * @brief Main event loop; handles incoming messages from exchange
