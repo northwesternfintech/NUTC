@@ -22,10 +22,13 @@ initialize_testing_clients(
     nutc::manager::ClientManager& users, const std::vector<std::string>& algo_filenames
 )
 {
-    algo_mgmt::DevModeAlgoManager algo_manager =
-        algo_mgmt::DevModeAlgoManager(algo_filenames.size(), algo_filenames);
+    using algo_mgmt::DevModeAlgoManager;
+    using nutc::client::SpawnMode;
+
+    DevModeAlgoManager algo_manager =
+        DevModeAlgoManager(algo_filenames.size(), algo_filenames);
     algo_manager.initialize_client_manager(users);
-    size_t num_users = nutc::client::spawn_all_clients(users);
+    size_t num_users = spawn_all_clients(users, SpawnMode::TESTING);
     rabbitmq::RabbitMQClientManager::wait_for_clients(users, num_users);
     rabbitmq::RabbitMQClientManager::send_start_time(users, CLIENT_WAIT_SECS);
 }

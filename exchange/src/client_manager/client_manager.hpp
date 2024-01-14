@@ -16,12 +16,14 @@ namespace nutc {
  */
 namespace manager {
 
+enum class ClientLocation { LOCAL, REMOTE };
+
 struct client_t {
     std::string uid;
     pid_t pid;
     std::string algo_id;
     bool active;
-    bool is_local_algo;
+    ClientLocation algo_location;
     float capital_remaining;
     std::unordered_map<std::string, float> holdings;
 };
@@ -32,18 +34,12 @@ class ClientManager {
 public:
     void
     add_client(
-        const std::string& user_id, const std::string& algo_id, bool is_local_algo
+        const std::string& user_id, const std::string& algo_id,
+        ClientLocation algo_location
     )
     {
         clients_[user_id] =
-            client_t{user_id, {}, algo_id, false, is_local_algo, STARTING_CAPITAL, {}};
-    }
-
-    void
-    add_client(const std::string& user_id, const std::string& algo_id)
-    {
-        clients_[user_id] =
-            client_t{user_id, {}, algo_id, false, false, STARTING_CAPITAL, {}};
+            client_t{user_id, {}, algo_id, false, algo_location, STARTING_CAPITAL, {}};
     }
 
     void
@@ -64,6 +60,7 @@ public:
         return clients_.at(user_id).capital_remaining;
     }
 
+    void set_client_test(const std::string& user_id);
     void set_client_pid(const std::string& user_id, pid_t pid);
     void initialize_from_firebase(const glz::json_t::object_t& users);
     void set_active(const std::string& user_id);
@@ -110,6 +107,8 @@ private:
 } // namespace manager
 } // namespace nutc
 
+/* I don't think we should need this? It was already here and I don't want to break
+anything
 /// \cond
 template <>
 struct glz::meta<nutc::manager::client_t> {
@@ -127,3 +126,4 @@ struct glz::meta<nutc::manager::ClientManager> {
         "clients", [](auto&& self) { return self.get_clients(); }
     );
 };
+*/
