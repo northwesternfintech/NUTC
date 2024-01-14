@@ -131,7 +131,8 @@ main(int argc, const char** argv)
         }
     };
 
-    auto initialize_sandbox_mode = [&]() {
+    // Weird name because of shadowing
+    auto initialize_sandbox_mode = [&, &sandbox = sandbox]() {
         log_t1(main, "Initializing NUTC in sandbox mode");
         auto& [uid, algo_id] = sandbox.value(); // NOLINT (unchecked-*)
         algo_mgmt::SandboxAlgoManager manager =
