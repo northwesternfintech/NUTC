@@ -1,5 +1,5 @@
+#include "algos/algo_manager.hpp"
 #include "algos/dev_mode/dev_mode.hpp"
-#include "algos/management_interface.hpp"
 #include "algos/normal_mode/normal_mode.hpp"
 #include "algos/sandbox_mode/sandbox_mode.hpp"
 #include "client_manager/client_manager.hpp"
@@ -18,8 +18,6 @@
 #include <string>
 
 #include <rabbitmq-c/amqp.h>
-
-nutc::engine_manager::Manager engine_manager;
 
 struct algorithm {
     std::string uid;
@@ -84,21 +82,10 @@ process_arguments(int argc, const char** argv)
             return Mode::DEV;
         if (algo.has_value())
             return Mode::SANDBOX;
-        return Mode::PROD;
+        return Mode::NORMAL;
     };
 
     return std::make_tuple(get_mode(), algo);
-}
-
-size_t
-initialize_algo_manager(
-    nutc::algo_mgmt::AlgoManager& algo_manager,
-    nutc::manager::ClientManager& client_manager
-)
-{
-    algo_manager.initialize_files();
-    algo_manager.initialize_client_manager(client_manager);
-    return algo_manager.get_num_clients();
 }
 
 int
@@ -106,11 +93,13 @@ main(int argc, const char** argv)
 {
     using namespace nutc; // NOLINT(*)
 
-    manager::ClientManager users;
-    auto [mode, sandbox] = process_arguments(argc, argv);
-
     // Set up logging
     logging::init(quill::LogLevel::TraceL3);
+
+    manager::ClientManager users;
+    nutc::engine_manager::Manager engine_manager;
+
+    auto [mode, sandbox] = process_arguments(argc, argv);
 
     auto& rmq_conn = rabbitmq::RabbitMQConnectionManager::get_instance();
 
@@ -121,29 +110,32 @@ main(int argc, const char** argv)
     }
 
     size_t num_clients{};
+    using algo_mgmt::AlgoManager;
 
     auto initialize_dev_mode = [&]() {
-        {
-            log_t1(main, "Initializing NUTC in development mode");
-            algo_mgmt::DevModeAlgoManager manager =
-                algo_mgmt::DevModeAlgoManager(DEBUG_NUM_USERS);
-            num_clients = initialize_algo_manager(manager, users);
-        }
+        log_t1(main, "Initializing NUTC in development mode");
+        using algo_mgmt::DevModeAlgoManager;
+
+        DevModeAlgoManager manager = DevModeAlgoManager(DEBUG_NUM_USERS);
+        num_clients = AlgoManager::initialize_algo_management(manager, users);
     };
 
     // Weird name because of shadowing
     auto initialize_sandbox_mode = [&, &sandbox = sandbox]() {
         log_t1(main, "Initializing NUTC in sandbox mode");
+        using algo_mgmt::SandboxAlgoManager;
+
         auto& [uid, algo_id] = sandbox.value(); // NOLINT (unchecked-*)
-        algo_mgmt::SandboxAlgoManager manager =
-            algo_mgmt::SandboxAlgoManager(uid, algo_id);
-        num_clients = initialize_algo_manager(manager, users);
+        SandboxAlgoManager manager = SandboxAlgoManager(uid, algo_id);
+        num_clients = AlgoManager::initialize_algo_management(manager, users);
     };
 
     auto initialize_normal_mode = [&]() {
         log_t1(main, "Initializing NUTC in normal mode");
-        algo_mgmt::NormalModeAlgoManager manager = algo_mgmt::NormalModeAlgoManager();
-        num_clients = initialize_algo_manager(manager, users);
+        using algo_mgmt::NormalModeAlgoManager;
+
+        NormalModeAlgoManager manager = NormalModeAlgoManager();
+        num_clients = AlgoManager::initialize_algo_management(manager, users);
     };
 
     switch (mode) {
@@ -153,29 +145,31 @@ main(int argc, const char** argv)
         case Mode::SANDBOX:
             initialize_sandbox_mode();
             break;
-        case Mode::PROD:
+        case Mode::NORMAL:
             initialize_normal_mode();
     }
 
     client::spawn_all_clients(users);
 
-    ::engine_manager.add_engine("A");
-    ::engine_manager.add_engine("B");
-    ::engine_manager.add_engine("C");
+    engine_manager.add_engine("A");
+    engine_manager.add_engine("B");
+    engine_manager.add_engine("C");
 
     // Run exchange
     rabbitmq::RabbitMQClientManager::wait_for_clients(users, num_clients);
     rabbitmq::RabbitMQClientManager::send_start_time(users, CLIENT_WAIT_SECS);
     rabbitmq::RabbitMQOrderHandler::add_liquidity_to_ticker(
-        users, ::engine_manager, "A", 1000, 100
+        users, engine_manager, "A", 1000, 100
     );
     rabbitmq::RabbitMQOrderHandler::add_liquidity_to_ticker(
-        users, ::engine_manager, "B", 2000, 200
+        users, engine_manager, "B", 2000, 200
     );
     rabbitmq::RabbitMQOrderHandler::add_liquidity_to_ticker(
-        users, ::engine_manager, "C", 3000, 300
+        users, engine_manager, "C", 3000, 300
     );
-    rabbitmq::RabbitMQConsumer::handle_incoming_messages(users, ::engine_manager);
+
+    // Main event loop
+    rabbitmq::RabbitMQConsumer::handle_incoming_messages(users, engine_manager);
 
     return 0;
 }
