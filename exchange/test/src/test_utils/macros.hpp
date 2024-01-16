@@ -89,3 +89,5 @@ void add_client_simple(manager::ClientManager& manager, const std::string& clien
             << ", side = " << static_cast<int>((update).side)                          \
             << ", price = " << (update).price << ", quantity = " << (update).quantity; \
     } while (0)
+
+static constexpr float MAX_TIME_TOLERANCE_SECONDS = 0.5;
