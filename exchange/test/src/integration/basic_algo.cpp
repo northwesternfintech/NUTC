@@ -7,6 +7,8 @@
 
 #include <gtest/gtest.h>
 
+#include <chrono>
+
 namespace rmq = nutc::rabbitmq;
 
 class IntegrationBasicAlgo : public ::testing::Test {
@@ -37,6 +39,8 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
     std::vector<std::string> names{"test_algos/buy_tsla_at_100"};
     nutc::testing_utils::initialize_testing_clients(users_, names);
 
+    auto start = std::chrono::high_resolution_clock::now();
+
     // want to see if it buys
     engine_manager_.add_engine("TSLA");
     rmq::RabbitMQOrderHandler::add_liquidity_to_ticker(
@@ -45,6 +49,16 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
 
     auto mess = rmq::RabbitMQConsumer::consume_message();
     EXPECT_TRUE(std::holds_alternative<nutc::messages::MarketOrder>(mess));
+
+    auto end = std::chrono::high_resolution_clock::now();
+    double duration_ms =
+        std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    double wait_time_ms = CLIENT_WAIT_SECS * 1000;
+    double tolerance_ms = MAX_TIME_TOLERANCE_SECONDS * 1000;
+    EXPECT_TRUE(
+        std::abs(duration_ms - wait_time_ms) < tolerance_ms
+        || duration_ms < tolerance_ms
+    );
 
     nutc::messages::MarketOrder actual = std::get<nutc::messages::MarketOrder>(mess);
     EXPECT_EQ_MARKET_ORDER(
@@ -60,6 +74,8 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
     engine_manager_.add_engine("TSLA");
     engine_manager_.add_engine("APPL");
 
+    auto start = std::chrono::high_resolution_clock::now();
+
     rmq::RabbitMQOrderHandler::add_liquidity_to_ticker(
         users_, engine_manager_, "TSLA", 100, 100 // NOLINT (magic-number-*)
     );
@@ -67,6 +83,16 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
     // obupdate triggers one user to place a BUY order of 10 TSLA at 100
     auto mess1 = rmq::RabbitMQConsumer::consume_message();
     EXPECT_TRUE(std::holds_alternative<nutc::messages::MarketOrder>(mess1));
+
+    auto end = std::chrono::high_resolution_clock::now();
+    double duration_ms =
+        std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    double wait_time_ms = CLIENT_WAIT_SECS * 1000;
+    double tolerance_ms = MAX_TIME_TOLERANCE_SECONDS * 1000;
+    EXPECT_TRUE(
+        std::abs(duration_ms - wait_time_ms) < tolerance_ms
+        || duration_ms < tolerance_ms
+    );
 
     nutc::messages::MarketOrder actual_mo =
         std::get<nutc::messages::MarketOrder>(mess1);
