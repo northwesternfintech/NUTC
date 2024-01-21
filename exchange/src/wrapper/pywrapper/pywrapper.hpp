@@ -1,7 +1,7 @@
 #pragma once
 
 #include "wrapper/logging.hpp"
-#include "wrapper/util/messages.hpp"
+#include "shared/messages.hpp"
 
 #include <pybind11/embed.h>
 #include <pybind11/pybind11.h>

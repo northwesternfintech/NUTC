@@ -1,7 +1,7 @@
 #pragma once
 // keep track of active users and account information
 #include "exchange/config.h"
-#include "exchange/utils/messages.hpp"
+#include "shared/messages.hpp"
 
 #include <glaze/glaze.hpp>
 

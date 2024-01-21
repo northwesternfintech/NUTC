@@ -1,7 +1,7 @@
 #include "exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
 #include "exchange/rabbitmq/consumer/RabbitMQConsumer.hpp"
 #include "exchange/rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
-#include "exchange/utils/messages.hpp"
+#include "shared/messages.hpp"
 #include "test_utils/macros.hpp"
 #include "test_utils/process.hpp"
 

@@ -1,4 +1,4 @@
-#include "exchange/utils/messages.hpp"
+#include "shared/messages.hpp"
 #include "test_utils/macros.hpp"
 
 #include <gtest/gtest.h>

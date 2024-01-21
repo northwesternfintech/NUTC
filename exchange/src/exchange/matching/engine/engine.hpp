@@ -1,7 +1,7 @@
 #pragma once
 
 #include "exchange/client_manager/client_manager.hpp"
-#include "exchange/utils/messages.hpp"
+#include "shared/messages.hpp"
 
 #include <queue>
 #include <vector>
