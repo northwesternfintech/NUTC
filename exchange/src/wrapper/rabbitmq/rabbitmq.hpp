@@ -2,7 +2,7 @@
 
 #include "wrapper/pywrapper/pywrapper.hpp"
 #include "wrapper/pywrapper/rate_limiter.hpp"
-#include "wrapper/util/messages.hpp"
+#include "shared/messages.hpp"
 
 #include <unistd.h>
 

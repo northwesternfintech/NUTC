@@ -2,7 +2,7 @@
 
 #include "exchange/config.h"
 #include "exchange/logging.hpp"
-#include "exchange/utils/messages.hpp" // TYPE should be an enum {AccountUpdate, OrderbookUpdate, TradeUpdate, MarketOrder}
+#include "shared/messages.hpp" // TYPE should be an enum {AccountUpdate, OrderbookUpdate, TradeUpdate, MarketOrder}
 
 #include <fstream>
 #include <optional>

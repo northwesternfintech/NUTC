@@ -2,7 +2,7 @@
 
 #include "exchange/client_manager/client_manager.hpp"
 #include "exchange/matching/manager/engine_manager.hpp"
-#include "exchange/utils/messages.hpp"
+#include "shared/messages.hpp"
 
 #include <string>
 
