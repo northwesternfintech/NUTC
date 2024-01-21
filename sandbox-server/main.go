@@ -8,6 +8,7 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
+	"sandbox-server/analyzer"
 	"strings"
 	"time"
 	"unicode"
@@ -119,7 +120,13 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if err := uploadLogFile(user_id, algo_id, firebaseApiKey, tarReader); err != nil {
+		out_file, err := analyzer.Analyze(tarReader)
+
+		if err != nil {
+			fmt.Printf("%s", err.Error())
+		}
+
+		if err := uploadLogFile(user_id, algo_id, firebaseApiKey, out_file); err != nil {
 			fmt.Printf("%s", err.Error())
 		}
 	}()
@@ -136,7 +143,8 @@ func isValidID(id string) bool {
 	return true
 }
 
-func uploadLogFile(user_id, algo_id, apiKey string, reader io.Reader) error {
+func uploadLogFile(user_id, algo_id, apiKey, file_str string) error {
+	reader := strings.NewReader(file_str)
 	var buffer bytes.Buffer
 
 	writer := multipart.NewWriter(&buffer)
