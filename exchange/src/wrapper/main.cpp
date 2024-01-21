@@ -88,10 +88,8 @@ process_arguments(int argc, const char** argv)
     }
 
     return {
-        verbosity,
-        program.get<std::string>("--uid"),
-        program.get<std::string>("--algo_id"),
-        program.get<bool>("--dev"),
+        verbosity, program.get<std::string>("--uid"),
+        program.get<std::string>("--algo_id"), program.get<bool>("--dev"),
         program.get<bool>("--no-start-delay")
     };
 }

@@ -105,9 +105,7 @@ private:
     [[nodiscard]] bool initializeConnection(const std::string& queueName);
     [[nodiscard]] bool initializeConsume(const std::string& queueName);
     [[nodiscard]] bool connectToRabbitMQ(
-        const std::string& hostname,
-        int port,
-        const std::string& username,
+        const std::string& hostname, int port, const std::string& username,
         const std::string& password
     );
 
@@ -116,11 +114,8 @@ private:
     publishMessage(const std::string& queueName, const std::string& message);
     [[nodiscard]] bool initializeQueue(const std::string& queueName);
     [[nodiscard]] bool publishMarketOrder(
-        const std::string& client_uid,
-        const std::string& side,
-        const std::string& ticker,
-        float quantity,
-        float price
+        const std::string& client_uid, const std::string& side,
+        const std::string& ticker, float quantity, float price
     );
 
     std::string consumeMessageAsString();

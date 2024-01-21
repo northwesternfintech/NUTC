@@ -9,9 +9,7 @@ namespace rabbitmq {
 
 bool
 RabbitMQ::connectToRabbitMQ(
-    const std::string& hostname,
-    int port,
-    const std::string& username,
+    const std::string& hostname, int port, const std::string& username,
     const std::string& password
 )
 {
@@ -30,13 +28,7 @@ RabbitMQ::connectToRabbitMQ(
     }
 
     amqp_rpc_reply_t reply = amqp_login(
-        conn,
-        "/",
-        0,
-        131072,
-        0,
-        AMQP_SASL_METHOD_PLAIN,
-        username.c_str(),
+        conn, "/", 0, 131072, 0, AMQP_SASL_METHOD_PLAIN, username.c_str(),
         password.c_str()
     );
     if (reply.reply_type != AMQP_RESPONSE_NORMAL) {
@@ -59,8 +51,7 @@ RabbitMQ::handleIncomingMessages()
                 using T = std::decay_t<decltype(arg)>;
                 if constexpr (std::is_same_v<T, ObUpdate>) {
                     log_i(
-                        wrapper_rabbitmq,
-                        "Received order book update: {}",
+                        wrapper_rabbitmq, "Received order book update: {}",
                         glz::write_json(std::get<ObUpdate>(data))
                     );
                     ObUpdate update = std::get<ObUpdate>(data);
@@ -73,8 +64,7 @@ RabbitMQ::handleIncomingMessages()
                 }
                 else if constexpr (std::is_same_v<T, Match>) {
                     log_i(
-                        wrapper_rabbitmq,
-                        "Received match: {}",
+                        wrapper_rabbitmq, "Received match: {}",
                         glz::write_json(std::get<Match>(data))
                     );
                     Match match = std::get<Match>(data);
@@ -95,10 +85,7 @@ RabbitMQ::handleIncomingMessages()
                     std::string side =
                         update.side == messages::SIDE::BUY ? "BUY" : "SELL";
                     nutc::pywrapper::get_account_update_function()(
-                        update.ticker,
-                        side,
-                        update.price,
-                        update.quantity,
+                        update.ticker, side, update.price, update.quantity,
                         update.capital_remaining
                     );
                     return;
@@ -114,22 +101,16 @@ RabbitMQ::handleIncomingMessages()
 
 bool
 RabbitMQ::publishMarketOrder(
-    const std::string& client_id,
-    const std::string& side,
-    const std::string& ticker,
-    float quantity,
-    float price
+    const std::string& client_id, const std::string& side, const std::string& ticker,
+    float quantity, float price
 )
 {
     if (limiter.should_rate_limit()) {
         return false;
     }
     MarketOrder order{
-        client_id,
-        side == "BUY" ? messages::SIDE::BUY : messages::SIDE::SELL,
-        ticker,
-        quantity,
-        price
+        client_id, side == "BUY" ? messages::SIDE::BUY : messages::SIDE::SELL, ticker,
+        quantity, price
     };
     std::string message = glz::write_json(order);
 
@@ -141,14 +122,8 @@ bool
 RabbitMQ::publishMessage(const std::string& queueName, const std::string& message)
 {
     amqp_basic_publish(
-        conn,
-        1,
-        amqp_cstring_bytes(""),
-        amqp_cstring_bytes(queueName.c_str()),
-        0,
-        0,
-        NULL,
-        amqp_cstring_bytes(message.c_str())
+        conn, 1, amqp_cstring_bytes(""), amqp_cstring_bytes(queueName.c_str()), 0, 0,
+        NULL, amqp_cstring_bytes(message.c_str())
     );
 
     amqp_rpc_reply_t res = amqp_get_rpc_reply(conn);
@@ -230,13 +205,7 @@ bool
 RabbitMQ::initializeConsume(const std::string& queueName)
 {
     amqp_basic_consume(
-        conn,
-        1,
-        amqp_cstring_bytes(queueName.c_str()),
-        amqp_empty_bytes,
-        0,
-        1,
-        0,
+        conn, 1, amqp_cstring_bytes(queueName.c_str()), amqp_empty_bytes, 0, 1, 0,
         amqp_empty_table
     );
 
@@ -267,13 +236,8 @@ std::function<bool(const std::string&, const std::string&, float, float)>
 RabbitMQ::getMarketFunc(const std::string& id)
 {
     return std::bind(
-        &RabbitMQ::publishMarketOrder,
-        this,
-        id,
-        std::placeholders::_1,
-        std::placeholders::_2,
-        std::placeholders::_3,
-        std::placeholders::_4
+        &RabbitMQ::publishMarketOrder, this, id, std::placeholders::_1,
+        std::placeholders::_2, std::placeholders::_3, std::placeholders::_4
     );
 }
 
@@ -299,8 +263,7 @@ RabbitMQ::waitForStartTime(bool skip_start_wait)
 
         StartTime start = std::get<StartTime>(message);
         log_i(
-            wrapper_rabbitmq,
-            "Received start time: {}, sleeping until then.",
+            wrapper_rabbitmq, "Received start time: {}, sleeping until then.",
             start.start_time_ns
         );
 

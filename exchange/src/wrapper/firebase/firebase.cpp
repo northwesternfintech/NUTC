@@ -10,8 +10,7 @@ print_algo_info(const glz::json_t& algo, const std::string& algo_id)
     log_i(wrapper_firebase, "Description: {}", algo["description"].get<std::string>());
     log_i(wrapper_firebase, "Upload date: {}", algo["uploadDate"].get<std::string>());
     log_d(
-        wrapper_firebase,
-        "Downloading at url {}",
+        wrapper_firebase, "Downloading at url {}",
         algo["downloadURL"].get<std::string>()
     );
     log_i(wrapper_firebase, "Algo id: {}", algo_id);

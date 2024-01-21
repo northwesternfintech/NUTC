@@ -21,7 +21,8 @@ enum class SpawnMode { NORMAL, TESTING };
  */
 pid_t spawn_client(
     const std::string& user_id, const std::string& algo_id,
-    manager::ClientLocation algo_location, SpawnMode spawn_mode
+    manager::ClientLocation algo_location, SpawnMode spawn_mode,
+    const std::string& binary_path
 );
 
 /**
