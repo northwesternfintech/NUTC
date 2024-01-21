@@ -1,6 +1,6 @@
 #include "RabbitMQConsumer.hpp"
 
-#include "logging.hpp"
+#include "exchange/logging.hpp"
 #include "exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
 #include "exchange/rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
 

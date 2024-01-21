@@ -1,6 +1,6 @@
 #include "RabbitMQQueueManager.hpp"
 
-#include "logging.hpp"
+#include "exchange/logging.hpp"
 
 namespace nutc {
 namespace rabbitmq {
