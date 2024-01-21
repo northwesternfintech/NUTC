@@ -2,8 +2,8 @@
 
 // Common headers
 
-#include "config.h"
-#include "logging.hpp"
+#include "wrapper/config.h"
+#include "wrapper/logging.hpp"
 
 #include <cassert>
 #include <cinttypes>
