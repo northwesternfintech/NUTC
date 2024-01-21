@@ -22,7 +22,7 @@ add_library(
     src/exchange/algos/dev_mode/dev_mode.cpp
     src/exchange/algos/normal_mode/normal_mode.cpp
     
-    src/logging.cpp
+    src/exchange/logging.cpp
 
     src/exchange/curl/curl.cpp
     

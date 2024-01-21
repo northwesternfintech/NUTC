@@ -1,7 +1,7 @@
 #include "dev_mode.hpp"
 
-#include "config.h"
-#include "logging.hpp"
+#include "exchange/config.h"
+#include "exchange/logging.hpp"
 #include "exchange/utils/file_operations/file_operations.hpp"
 
 #include <stdexcept>

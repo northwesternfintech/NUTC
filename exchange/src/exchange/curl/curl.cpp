@@ -1,6 +1,6 @@
 #include "curl.hpp"
 
-#include "logging.hpp"
+#include "exchange/logging.hpp"
 
 #include <curl/curl.h>
 

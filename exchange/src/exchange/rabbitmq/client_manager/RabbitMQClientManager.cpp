@@ -1,7 +1,7 @@
 #include "RabbitMQClientManager.hpp"
 
 #include "exchange/client_manager/client_manager.hpp"
-#include "logging.hpp"
+#include "exchange/logging.hpp"
 #include "exchange/rabbitmq/consumer/RabbitMQConsumer.hpp"
 #include "exchange/rabbitmq/publisher/RabbitMQPublisher.hpp"
 
