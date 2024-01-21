@@ -138,8 +138,7 @@ target_include_directories(
     "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
 )
 
-find_package(Python 3.12 COMPONENTS Interpreter Development EXACT REQUIRED)
-find_package(PythonLibs 3.12 EXACT REQUIRED)
+find_package(Python3 3.12 COMPONENTS Interpreter Development EXACT REQUIRED)
 find_package(pybind11 REQUIRED)
 
 target_link_libraries(WRAPPER_lib PUBLIC fmt::fmt)
@@ -150,8 +149,8 @@ target_link_libraries(WRAPPER_lib PUBLIC rabbitmq::rabbitmq-static)
 target_link_libraries(WRAPPER_lib PUBLIC CURL::libcurl)
 target_link_libraries(WRAPPER_lib PUBLIC glaze::glaze)
 target_link_libraries(WRAPPER_lib PUBLIC pybind11::pybind11)
-target_link_libraries(WRAPPER_lib PUBLIC Python::Python)
-target_link_libraries(WRAPPER_lib PUBLIC ${PYTHON_LIBRARIES})
+target_link_libraries(WRAPPER_lib PUBLIC Python3::Python)
+target_link_libraries(WRAPPER_lib PUBLIC ${Python3_LIBRARIES})
 
 add_executable(WRAPPER_exe src/wrapper/main.cpp)
 add_executable(WRAPPER::exe ALIAS WRAPPER_exe)
@@ -169,8 +168,8 @@ target_link_libraries(WRAPPER_exe PRIVATE rabbitmq::rabbitmq-static)
 target_link_libraries(WRAPPER_exe PRIVATE CURL::libcurl)
 target_link_libraries(WRAPPER_exe PRIVATE glaze::glaze)
 target_link_libraries(WRAPPER_exe PRIVATE pybind11::pybind11)
-target_link_libraries(WRAPPER_exe PRIVATE Python::Python)
-target_link_libraries(WRAPPER_exe PRIVATE ${PYTHON_LIBRARIES})
+target_link_libraries(WRAPPER_exe PRIVATE Python3::Python)
+target_link_libraries(WRAPPER_exe PRIVATE ${Python3_LIBRARIES})
 
 # ---- Install rules ----
 
