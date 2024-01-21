@@ -1,9 +1,9 @@
-#include "rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
-#include "rabbitmq/consumer/RabbitMQConsumer.hpp"
-#include "rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
+#include "exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
+#include "exchange/rabbitmq/consumer/RabbitMQConsumer.hpp"
+#include "exchange/rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
 #include "test_utils/macros.hpp"
 #include "test_utils/process.hpp"
-#include "utils/messages.hpp"
+#include "exchange/utils/messages.hpp"
 
 #include <gtest/gtest.h>
 

@@ -1,8 +1,8 @@
 #include "process.hpp"
 
-#include "algos/dev_mode/dev_mode.hpp"
-#include "process_spawning/spawning.hpp"
-#include "rabbitmq/client_manager/RabbitMQClientManager.hpp"
+#include "exchange/algos/dev_mode/dev_mode.hpp"
+#include "exchange/process_spawning/spawning.hpp"
+#include "exchange/rabbitmq/client_manager/RabbitMQClientManager.hpp"
 
 #include <signal.h>
 

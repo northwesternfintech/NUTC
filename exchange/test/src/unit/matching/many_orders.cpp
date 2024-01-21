@@ -1,5 +1,5 @@
 #include "test_utils/macros.hpp"
-#include "utils/messages.hpp"
+#include "exchange/utils/messages.hpp"
 
 #include <gtest/gtest.h>
 
