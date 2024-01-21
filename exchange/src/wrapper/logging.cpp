@@ -1,7 +1,7 @@
-#include "logging.hpp"
+#include "wrapper/logging.hpp"
 
-#include "common.hpp"
-#include "config.h"
+#include "wrapper/common.hpp"
+#include "wrapper/config.h"
 
 #include <quill/handlers/RotatingFileHandler.h>
 #include <quill/Quill.h>

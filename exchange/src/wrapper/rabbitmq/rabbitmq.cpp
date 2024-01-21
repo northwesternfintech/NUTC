@@ -1,6 +1,6 @@
 #include "rabbitmq.hpp"
 
-#include "logging.hpp"
+#include "wrapper/logging.hpp"
 
 #include <chrono>
 

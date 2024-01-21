@@ -1,12 +1,8 @@
-#include "common.hpp"
-#include "dev_mode/dev_mode.hpp"
-#include "firebase/firebase.hpp"
-#include "pywrapper/pywrapper.hpp"
-#include "rabbitmq/rabbitmq.hpp"
-
-#ifndef NO_GIT_VERSION_TRACKING
-#  include "git.h"
-#endif
+#include "wrapper/common.hpp"
+#include "wrapper/dev_mode/dev_mode.hpp"
+#include "wrapper/firebase/firebase.hpp"
+#include "wrapper/pywrapper/pywrapper.hpp"
+#include "wrapper/rabbitmq/rabbitmq.hpp"
 
 #include <argparse/argparse.hpp>
 #include <pybind11/pybind11.h>
@@ -100,24 +96,6 @@ process_arguments(int argc, const char** argv)
     };
 }
 
-static void
-log_build_info()
-{
-    log_i(main, "NUTC Client: Interface to the NUFT Trading Competition");
-
-#ifndef NO_GIT_VERSION_TRACKING
-
-    // Git info
-    log_i(main, "Built from {} on {}", git_Describe(), git_Branch());
-    log_d(main, "Commit: \"{}\" at {}", git_CommitSubject(), git_CommitDate());
-    log_d(main, "Author: {} <{}>", git_AuthorName(), git_AuthorEmail());
-
-    if (git_AnyUncommittedChanges())
-        log_w(main, "Built from dirty commit!");
-
-#endif
-}
-
 int
 main(int argc, const char** argv)
 {
@@ -128,7 +106,6 @@ main(int argc, const char** argv)
 
     // Start logging and print build info
     nutc::logging::init(verbosity, uid);
-    log_build_info();
     log_i(main, "Starting NUTC Client for UID {}", uid);
 
     // Initialize the RMQ connection to the exchange

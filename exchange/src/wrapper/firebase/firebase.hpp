@@ -1,7 +1,7 @@
 #pragma once
 
-#include "config.h"
-#include "logging.hpp"
+#include "wrapper/config.h"
+#include "wrapper/logging.hpp"
 
 #include <curl/curl.h>
 #include <glaze/glaze.hpp>
