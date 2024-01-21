@@ -80,11 +80,6 @@ jobs:
     - name: Install Python
       uses: actions/setup-python@v4
       with: { python-version: "3.12-dev" }
-        
-    - name: Configure Environment Variables for Python
-      run: |
-        echo "PYTHON_INCLUDE_DIR=$(python -c 'from distutils.sysconfig import get_python_inc; print(get_python_inc())')" >> $GITHUB_ENV
-        echo "PYTHON_LIBRARY=$(python -c 'import os.path, distutils.sysconfig as ds; print(os.path.join(ds.get_config_var("LIBDIR"), ds.get_config_var("LDLIBRARY")))' )" >> $GITHUB_ENV
 
     - name: Install LLVM 17
       run: |
@@ -166,11 +161,6 @@ jobs:
     - name: Install Python
       uses: actions/setup-python@v4
       with: { python-version: "3.12-dev" }
-        
-    - name: Configure Environment Variables for Python
-      run: |
-        echo "PYTHON_INCLUDE_DIR=$(python -c 'from distutils.sysconfig import get_python_inc; print(get_python_inc())')" >> $GITHUB_ENV
-        echo "PYTHON_LIBRARY=$(python -c 'import os.path, distutils.sysconfig as ds; print(os.path.join(ds.get_config_var("LIBDIR"), ds.get_config_var("LDLIBRARY")))' )" >> $GITHUB_ENV
 
     - name: Install dependencies
       shell: bash
@@ -249,11 +239,6 @@ jobs:
     - name: Install Python
       uses: actions/setup-python@v4
       with: { python-version: "3.12-dev" }
-      
-    - name: Configure Environment Variables for Python
-      run: |
-        echo "PYTHON_INCLUDE_DIR=$(python -c 'from distutils.sysconfig import get_python_inc; print(get_python_inc())')" >> $GITHUB_ENV
-        echo "PYTHON_LIBRARY=$(python -c 'import os.path, distutils.sysconfig as ds; print(os.path.join(ds.get_config_var("LIBDIR"), ds.get_config_var("LDLIBRARY")))' )" >> $GITHUB_ENV
 
     - name: Install dependencies
       shell: bash
