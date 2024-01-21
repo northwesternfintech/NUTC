@@ -19,14 +19,14 @@ size_t
 spawn_all_clients(nutc::manager::ClientManager& users, SpawnMode mode)
 {
     const char* wrapper_binary_location = std::getenv("NUTC_WRAPPER_BINARY_PATH");
-    if (wrapper_binary_location == nullptr) {
+    if (wrapper_binary_location == nullptr) [[unlikely]] {
         log_e(
             client_spawning,
             "Failed to get NUTC_WRAPPER_BINARY_PATH from environment variable"
         );
         exit(1);
     }
-    const std::string wrapper_binary_path = wrapper_binary_location;
+    const std::string wrapper_binary_path(wrapper_binary_location);
 
     size_t num_clients = 0;
     auto spawn_one_client = [&](const std::pair<std::string, manager::client_t>& pair) {
