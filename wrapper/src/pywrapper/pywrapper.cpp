@@ -28,15 +28,22 @@ get_ob_update_function()
 }
 
 py::object
+get_trade_and_account_update_function()
+{
+    return py::globals()["strategy"].attr("on_trade_and_account_update");
+}
+
+// A tiny amount of backwards compatability
+py::object
 get_trade_update_function()
 {
-    return py::globals()["strategy"].attr("on_trade_update");
+    return py::globals()["strategy"].attr("on_trade_and_account_update");
 }
 
 py::object
 get_account_update_function()
 {
-    return py::globals()["strategy"].attr("on_account_update");
+    return py::globals()["strategy"].attr("on_trade_and_account_update");
 }
 
 void
