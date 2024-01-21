@@ -1,7 +1,7 @@
 // #include "local_algos/dev_mode.hpp"
-#include "algos/dev_mode/dev_mode.hpp"
-#include "process_spawning/spawning.hpp"
-#include "rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
+#include "exchange/algos/dev_mode/dev_mode.hpp"
+#include "exchange/process_spawning/spawning.hpp"
+#include "exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
 #include "test_utils/process.hpp"
 
 #include <gtest/gtest.h>
