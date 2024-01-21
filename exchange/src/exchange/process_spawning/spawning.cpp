@@ -38,8 +38,10 @@ spawn_all_clients(nutc::manager::ClientManager& users, SpawnMode mode)
 
         log_i(client_spawning, "Spawning client: {}", id);
 
-        pid_t pid =
-            spawn_client(quote_id(id), quote_id(algo_id), client.algo_location, mode, wrapper_binary_path);
+        pid_t pid = spawn_client(
+            quote_id(id), quote_id(algo_id), client.algo_location, mode,
+            wrapper_binary_path
+        );
         users.set_client_pid(id, pid);
         num_clients++;
     };

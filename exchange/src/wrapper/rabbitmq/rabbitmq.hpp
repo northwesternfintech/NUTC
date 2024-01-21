@@ -1,8 +1,8 @@
 #pragma once
 
+#include "shared/messages.hpp"
 #include "wrapper/pywrapper/pywrapper.hpp"
 #include "wrapper/pywrapper/rate_limiter.hpp"
-#include "shared/messages.hpp"
 
 #include <unistd.h>
 
