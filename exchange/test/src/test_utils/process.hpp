@@ -1,6 +1,6 @@
 #pragma once
 
-#include "client_manager/client_manager.hpp"
+#include "exchange/client_manager/client_manager.hpp"
 
 namespace nutc {
 namespace testing_utils {

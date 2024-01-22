@@ -34,7 +34,7 @@ target_include_directories(
 
 target_link_libraries(
   NUTC_tests PRIVATE
-  NUTC24_lib
+  EXCHANGE_lib 
   GTest::gtest_main
 )
 
