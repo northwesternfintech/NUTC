@@ -45,9 +45,9 @@ add_library(
     src/exchange/utils/logger/logger.cpp
     src/exchange/utils/file_operations/file_operations.cpp
     
-    src/tick_manager_randomness/brownian.cpp
+    src/exchange/randomness/brownian.cpp
     
-    src/tick_manager/tick_manager.cpp
+    src/exchange/tick_manager/tick_manager.cpp
 )
 
 target_include_directories(
