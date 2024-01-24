@@ -2,6 +2,7 @@
 #include "algos/dev_mode/dev_mode.hpp"
 #include "algos/normal_mode/normal_mode.hpp"
 #include "algos/sandbox_mode/sandbox_mode.hpp"
+#include "bot_framework/bot_container.hpp"
 #include "client_manager/client_manager.hpp"
 #include "config.h"
 #include "exchange/randomness/brownian_tick_listener.hpp"
