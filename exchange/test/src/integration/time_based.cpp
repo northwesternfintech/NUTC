@@ -1,4 +1,3 @@
-#include "../../../src/config.h"
 #include "rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
 #include "rabbitmq/consumer/RabbitMQConsumer.hpp"
 #include "rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
@@ -54,11 +53,6 @@ TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
     const double wait_time_ms = CLIENT_WAIT_SECS * 1000;
     const double tolerance_ms = MAX_TIME_TOLERANCE_SECONDS * 1000;
 
-    EXPECT_THAT(
-        duration_ms,
-        AnyOf(
-            Le(tolerance_ms),
-            AllOf(Ge(tolerance_ms - wait_time_ms), Le(tolerance_ms + wait_time_ms))
-        )
-    );
+    EXPECT_GE(duration_ms, tolerance_ms - wait_time_ms);
+    EXPECT_LE(duration_ms, tolerance_ms + wait_time_ms);
 }
