@@ -20,18 +20,28 @@ func (ct *Timestamp) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-type Message struct {
-	Data      Transaction `json:"data"`
-	Timestamp Timestamp   `json:"timestamp"`
+type Match struct {
+	Ticker   string  `json:"ticker"`
+	BuyerId  string  `json:"buyer_id"`
+	SellerId string  `json:"seller_id"`
+	Side     int     `json:"side"`
+	Price    float64 `json:"price"`
+	Quantity float64 `json:"quantity"`
 }
 
-type Transaction struct {
+type ObUpdate struct {
 	Security string  `json:"security"`
 	Side     int     `json:"side"`
 	Price    float64 `json:"price"`
-	Quantity int     `json:"quantity"`
+	Quantity float64 `json:"quantity"`
 }
 
-type TransactionsWrapper struct {
-	Transactions []Transaction `json:"transactions"`
+type LogEntry struct {
+	Timestamp Timestamp   `json:"timestamp"`
+	Data      interface{} `json:"data"`
+}
+
+type LogResult struct {
+	Matches   []LogEntry `json:"matches"`
+	ObUpdates []LogEntry `json:"ob_updates"`
 }
