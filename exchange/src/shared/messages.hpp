@@ -25,7 +25,7 @@ struct InitMessage {
 };
 
 struct StartTime {
-    long long start_time_ns;
+    int64_t start_time_ns;
 };
 
 /**

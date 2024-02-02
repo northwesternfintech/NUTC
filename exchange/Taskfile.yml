@@ -1,8 +1,8 @@
 version: '3'
 
 env:
-  NAME: NUTC24
-  NUTC_WRAPPER_BINARY_PATH: "{{.USER_WORKING_DIR}}/build/dev/WRAPPER"
+  NAME: NUTC
+  NUTC_WRAPPER_BINARY_PATH: "./build/dev/WRAPPER"
 
 tasks:
   deps:
