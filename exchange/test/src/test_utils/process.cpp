@@ -1,10 +1,5 @@
 #include "process.hpp"
 
-#include <cstdlib>
-#ifdef _WIN32
-#  include <windows.h>
-#endif
-
 #include "exchange/algos/dev_mode/dev_mode.hpp"
 #include "exchange/rabbitmq/client_manager/RabbitMQClientManager.hpp"
 
@@ -29,12 +24,6 @@ initialize_testing_clients(
 {
     using algo_mgmt::DevModeAlgoManager;
     using nutc::client::SpawnMode;
-
-#ifdef _WIN32
-    SetEnvironmentVariable("MY_VARIABLE", "value");
-#else
-    setenv("NUTC_WRAPPER_BINARY_PATH", "../WRAPPER", 1);
-#endif
 
     DevModeAlgoManager algo_manager =
         DevModeAlgoManager(algo_filenames.size(), algo_filenames);
