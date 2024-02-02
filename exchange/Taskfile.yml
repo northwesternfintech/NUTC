@@ -2,7 +2,6 @@ version: '3'
 
 env:
   NAME: NUTC
-  NUTC_WRAPPER_BINARY_PATH: "./build/dev/WRAPPER"
 
 tasks:
   deps:
@@ -36,18 +35,24 @@ tasks:
 
   run:
     dir: '{{.USER_WORKING_DIR}}'
+    env:
+      NUTC_WRAPPER_BINARY_PATH: "./build/dev/WRAPPER"
     cmds:
       - task: build
       - task: check-and-start-services
       - ./build/dev/{{.NAME}} 
 
   dev:
+    env:
+      NUTC_WRAPPER_BINARY_PATH: "./build/dev/WRAPPER"
     cmds:
       - task: build
       - task: check-and-start-services
       - ./build/dev/{{.NAME}} --dev
 
   sandbox:
+    env:
+      NUTC_WRAPPER_BINARY_PATH: "./build/dev/WRAPPER"
     cmds:
       - task: build
       - task: check-and-start-services
@@ -72,6 +77,8 @@ tasks:
       - ctest --preset=dev -R "Unit*"
 
   itest:
+    env:
+      NUTC_WRAPPER_BINARY_PATH: "../WRAPPER"
     cmds:
       - task: build
       - task: check-and-start-services
@@ -93,7 +100,6 @@ tasks:
   default:
     cmds:
       - task: run
-
 
   lint:
     cmds:
