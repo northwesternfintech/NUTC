@@ -1,8 +1,7 @@
 version: '3'
 
 env:
-  NAME: NUTC24
-  NUTC_WRAPPER_BINARY_PATH: "{{.USER_WORKING_DIR}}/build/dev/WRAPPER"
+  NAME: NUTC
 
 tasks:
   deps:
@@ -36,18 +35,24 @@ tasks:
 
   run:
     dir: '{{.USER_WORKING_DIR}}'
+    env:
+      NUTC_WRAPPER_BINARY_PATH: "./build/dev/WRAPPER"
     cmds:
       - task: build
       - task: check-and-start-services
       - ./build/dev/{{.NAME}} 
 
   dev:
+    env:
+      NUTC_WRAPPER_BINARY_PATH: "./build/dev/WRAPPER"
     cmds:
       - task: build
       - task: check-and-start-services
       - ./build/dev/{{.NAME}} --dev
 
   sandbox:
+    env:
+      NUTC_WRAPPER_BINARY_PATH: "./build/dev/WRAPPER"
     cmds:
       - task: build
       - task: check-and-start-services
@@ -72,12 +77,14 @@ tasks:
       - ctest --preset=dev -R "Unit*"
 
   itest:
+    env:
+      NUTC_WRAPPER_BINARY_PATH: "../WRAPPER"
     cmds:
       - task: build
       - task: check-and-start-services
       - mkdir -p build/dev/test/test_algos
       - cp -r test/test_algos/* build/dev/test/test_algos
-      - ctest --timeout 3 --preset=dev -R "Integration*"
+      - ctest --timeout 4 --preset=dev -R "Integration*"
 
   docs:
     dir: '{{.USER_WORKING_DIR}}'
@@ -93,7 +100,6 @@ tasks:
   default:
     cmds:
       - task: run
-
 
   lint:
     cmds:

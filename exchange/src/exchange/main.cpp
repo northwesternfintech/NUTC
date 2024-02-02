@@ -11,8 +11,10 @@
 #include "rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
 #include "rabbitmq/consumer/RabbitMQConsumer.hpp"
 #include "rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
+#include "utils/logger/logger.hpp"
 
 #include <argparse/argparse.hpp>
+#include <signal.h>
 
 #include <iostream>
 #include <string>
@@ -88,6 +90,13 @@ process_arguments(int argc, const char** argv)
     return std::make_tuple(get_mode(), algo);
 }
 
+void
+flush_log(int sig) // NOLINT(*)
+{
+    nutc::events::Logger::get_logger().flush();
+    std::exit(0);
+}
+
 int
 main(int argc, const char** argv)
 {
@@ -95,6 +104,8 @@ main(int argc, const char** argv)
 
     // Set up logging
     logging::init(quill::LogLevel::TraceL3);
+
+    std::signal(SIGINT, flush_log);
 
     manager::ClientManager users;
     nutc::engine_manager::Manager engine_manager;

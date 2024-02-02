@@ -43,8 +43,7 @@ RabbitMQ::connectToRabbitMQ(
 void
 RabbitMQ::handleIncomingMessages()
 {
-    bool keep_running = true;
-    while (keep_running) {
+    while (true) {
         std::variant<StartTime, ObUpdate, Match, AccountUpdate> data = consumeMessage();
         std::visit(
             [&](auto&& arg) {
@@ -139,7 +138,7 @@ std::variant<StartTime, ObUpdate, Match, AccountUpdate>
 RabbitMQ::consumeMessage()
 {
     std::string buf = consumeMessageAsString();
-    if (buf == "") {
+    if (buf.empty()) {
         log_e(wrapper_rabbitmq, "Failed to consume message.");
         exit(1);
     }
