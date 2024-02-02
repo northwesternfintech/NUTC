@@ -120,7 +120,7 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		out_file, err := analyzer.Analyze(tarReader)
+		out_file, err := analyzer.Analyze(tarReader, user_id)
 
 		if err != nil {
 			fmt.Printf("%s", err.Error())
