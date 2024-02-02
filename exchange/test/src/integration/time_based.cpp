@@ -1,9 +1,8 @@
-#include "rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
-#include "rabbitmq/consumer/RabbitMQConsumer.hpp"
-#include "rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
+#include "exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
+#include "exchange/rabbitmq/consumer/RabbitMQConsumer.hpp"
+#include "exchange/rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
 #include "test_utils/macros.hpp"
 #include "test_utils/process.hpp"
-#include "utils/messages.hpp"
 
 #include <gtest/gtest.h>
 
@@ -37,7 +36,9 @@ protected:
 TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
 {
     std::vector<std::string> names{"test_algos/buy_tsla_at_100"};
-    nutc::testing_utils::initialize_testing_clients(users_, names);
+    nutc::testing_utils::initialize_testing_clients(
+        users_, names, nutc::client::SpawnMode::NORMAL
+    );
 
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -48,11 +49,10 @@ TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
     auto mess = rmq::RabbitMQConsumer::consume_message();
 
     auto end = std::chrono::high_resolution_clock::now();
-    const double duration_ms =
+    const int64_t duration_ms =
         std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     const double wait_time_ms = CLIENT_WAIT_SECS * 1000;
-    const double tolerance_ms = MAX_TIME_TOLERANCE_SECONDS * 1000;
 
-    EXPECT_GE(duration_ms, tolerance_ms - wait_time_ms);
-    EXPECT_LE(duration_ms, tolerance_ms + wait_time_ms);
+    EXPECT_GE(duration_ms, wait_time_ms);
+    EXPECT_LE(duration_ms, wait_time_ms + 1000);
 }
