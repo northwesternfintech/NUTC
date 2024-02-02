@@ -17,6 +17,12 @@ Logger::get_logger()
     return logger;
 }
 
+void
+Logger::flush()
+{
+    output_file_.flush();
+}
+
 std::string
 timestamp_in_ms()
 {

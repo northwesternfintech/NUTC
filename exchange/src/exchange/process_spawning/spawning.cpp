@@ -27,6 +27,8 @@ spawn_all_clients(nutc::manager::ClientManager& users, SpawnMode mode)
         exit(1);
     }
     const std::string wrapper_binary_path(wrapper_binary_location);
+    // log_i(client_spawning, "Spawning clients with binary location: {}",
+    // wrapper_binary_path);
 
     size_t num_clients = 0;
     auto spawn_one_client = [&](const std::pair<std::string, manager::client_t>& pair) {

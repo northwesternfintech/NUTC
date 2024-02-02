@@ -57,6 +57,8 @@ public:
 
     static Logger& get_logger();
 
+    void flush();
+
     // Logger(const Logger&) = delete;
     // Logger(Logger&&) = delete;
     // Logger& operator=(const Logger&) = delete;
