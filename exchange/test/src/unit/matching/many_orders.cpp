@@ -1,5 +1,5 @@
+#include "shared/messages.hpp"
 #include "test_utils/macros.hpp"
-#include "utils/messages.hpp"
 
 #include <gtest/gtest.h>
 
@@ -13,10 +13,13 @@ protected:
     void
     SetUp() override
     {
-        manager_.add_client("A", "A");
-        manager_.add_client("B", "B");
-        manager_.add_client("C", "C");
-        manager_.add_client("D", "D");
+        using nutc::testing_utils::add_client_simple;
+
+        add_client_simple(manager_, "A");
+        add_client_simple(manager_, "B");
+        add_client_simple(manager_, "C");
+        add_client_simple(manager_, "D");
+
         manager_.modify_holdings("A", "ETHUSD", DEFAULT_QUANTITY);
         manager_.modify_holdings("B", "ETHUSD", DEFAULT_QUANTITY);
         manager_.modify_holdings("C", "ETHUSD", DEFAULT_QUANTITY);
