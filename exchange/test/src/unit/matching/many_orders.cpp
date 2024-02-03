@@ -29,10 +29,12 @@ protected:
 
     ClientManager manager_{}; // NOLINT (*)
     Engine engine_{};         // NOLINT (*)
-  
-  nutc::matching::match_result_t add_to_engine_(MarketOrder order) {
-    return engine_.match_order(std::move(order), manager_);
-  }
+
+    nutc::matching::match_result_t
+    add_to_engine_(MarketOrder order)
+    {
+        return engine_.match_order(std::move(order), manager_);
+    }
 };
 
 TEST_F(UnitManyOrders, CorrectTimePriority)

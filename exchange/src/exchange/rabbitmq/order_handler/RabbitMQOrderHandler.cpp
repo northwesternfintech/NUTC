@@ -37,7 +37,8 @@ RabbitMQOrderHandler::handle_incoming_market_order(
         return;
     }
     std::string client_id = order.client_id;
-    auto [matches, ob_updates] = engine.value().get().match_order(std::move(order), clients);
+    auto [matches, ob_updates] =
+        engine.value().get().match_order(std::move(order), clients);
     for (const auto& match : matches) {
         std::string buyer_id = match.buyer_id;
         std::string seller_id = match.seller_id;
