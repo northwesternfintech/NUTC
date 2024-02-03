@@ -21,7 +21,6 @@ struct StoredOrder {
     SIDE side;
     float price;
     float quantity;
-    uint64_t tick_created;
 
     // Used to sort orders by time created
     uint64_t order_index;
@@ -35,19 +34,18 @@ struct StoredOrder {
 
     StoredOrder(
         std::string client_id, SIDE side, std::string ticker, float quantity,
-        float price, uint64_t tick_created = 0
+        float price
     ) :
         client_id(std::move(client_id)),
         ticker(std::move(ticker)), side(side), price(price), quantity(quantity),
-        tick_created(tick_created), order_index(get_and_increment_global_index())
-    {
-    }
+        order_index(get_and_increment_global_index())
+    {}
 
-    explicit StoredOrder(messages::MarketOrder&& other, uint64_t tick_created = 0) :
+    explicit StoredOrder(messages::MarketOrder&& other) :
 
         client_id(std::move(other.client_id)), ticker(std::move(other.ticker)),
         side(other.side), price(other.price), quantity(other.quantity),
-        tick_created(tick_created), order_index(get_and_increment_global_index())
+        order_index(get_and_increment_global_index())
     {}
 
     bool
@@ -107,7 +105,6 @@ struct StoredOrder {
         return true;
     }
 
-    // To ensure we don't increment the client_id
     StoredOrder(const StoredOrder& other) = default;
 
     StoredOrder&
@@ -118,7 +115,6 @@ struct StoredOrder {
         }
 
         this->order_index = other.order_index;
-        this->tick_created = other.tick_created;
         this->client_id = other.client_id;
         this->side = other.side;
         this->ticker = other.ticker;
@@ -126,6 +122,36 @@ struct StoredOrder {
         this->price = other.price;
 
         return *this;
+    }
+};
+
+// Want highest first
+struct bid_comparator {
+    bool
+    operator()(
+        const std::pair<float, uint64_t>& lhs, const std::pair<float, uint64_t>& rhs
+    ) const
+    {
+        if (lhs.first != rhs.first) {
+            return lhs.first > rhs.first; 
+        }
+        return lhs.second
+               < rhs.second; 
+    }
+};
+
+// Want lowest first
+struct ask_comparator {
+    bool
+    operator()(
+        const std::pair<float, uint64_t>& lhs, const std::pair<float, uint64_t>& rhs
+    ) const
+    {
+        if (lhs.first != rhs.first) {
+            return lhs.first < rhs.first;
+        }
+        return lhs.second
+               < rhs.second;
     }
 };
 } // namespace matching

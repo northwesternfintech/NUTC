@@ -46,21 +46,21 @@ TEST_F(UnitManyOrders, CorrectTimePriority)
 
     auto [matches1, updates1] = add_to_engine_(order1);
     auto [matches2, updates2] = add_to_engine_(order2);
-    engine_.add_order_without_matching(order3);
+    engine_.add_order(order3);
     auto [matches3, updates3] = add_to_engine_(order4);
-    EXPECT_EQ(matches1.size(), 0);
-    EXPECT_EQ(updates1.size(), 1);
-    EXPECT_EQ_OB_UPDATE(updates1[0], "ETHUSD", BUY, 1, 1);
-    EXPECT_EQ(matches2.size(), 0);
-    EXPECT_EQ(updates2.size(), 1);
-    EXPECT_EQ_OB_UPDATE(updates2[0], "ETHUSD", BUY, 1, 1);
+    ASSERT_EQ(matches1.size(), 0);
+    ASSERT_EQ(updates1.size(), 1);
+    ASSERT_EQ_OB_UPDATE(updates1[0], "ETHUSD", BUY, 1, 1);
+    ASSERT_EQ(matches2.size(), 0);
+    ASSERT_EQ(updates2.size(), 1);
+    ASSERT_EQ_OB_UPDATE(updates2[0], "ETHUSD", BUY, 1, 1);
 
-    EXPECT_EQ(matches3.size(), 1);
-    EXPECT_EQ(updates3.size(), 3);
-    EXPECT_EQ_OB_UPDATE(updates3[0], "ETHUSD", BUY, 1, 0);
-    EXPECT_EQ_OB_UPDATE(updates3[1], "ETHUSD", SELL, 1, 0);
-    EXPECT_EQ_OB_UPDATE(updates3[2], "ETHUSD", BUY, 1, 1);
-    EXPECT_EQ_MATCH(matches3[0], "ETHUSD", "A", "C", SELL, 1, 1);
+    ASSERT_EQ(matches3.size(), 1);
+    ASSERT_EQ(updates3.size(), 3);
+    ASSERT_EQ_OB_UPDATE(updates3[0], "ETHUSD", BUY, 1, 0);
+    ASSERT_EQ_OB_UPDATE(updates3[1], "ETHUSD", SELL, 1, 0);
+    ASSERT_EQ_OB_UPDATE(updates3[2], "ETHUSD", BUY, 1, 1);
+    ASSERT_EQ_MATCH(matches3[0], "ETHUSD", "A", "C", SELL, 1, 1);
 }
 
 TEST_F(UnitManyOrders, OnlyMatchesOne)
@@ -70,16 +70,16 @@ TEST_F(UnitManyOrders, OnlyMatchesOne)
 
     auto [matches1, updates1] = add_to_engine_(order1);
     auto [matches2, updates2] = add_to_engine_(order1);
-    EXPECT_EQ(matches1.size(), 0);
-    EXPECT_EQ(updates1.size(), 1);
-    EXPECT_EQ(matches2.size(), 0);
-    EXPECT_EQ(updates2.size(), 1);
+    ASSERT_EQ(matches1.size(), 0);
+    ASSERT_EQ(updates1.size(), 1);
+    ASSERT_EQ(matches2.size(), 0);
+    ASSERT_EQ(updates2.size(), 1);
 
     auto [matches3, updates3] = add_to_engine_(order2);
-    EXPECT_EQ(matches3.size(), 1);
-    EXPECT_EQ(updates3.size(), 1);
-    EXPECT_EQ_MATCH(matches3[0], "ETHUSD", "A", "B", SELL, 1, 1);
-    EXPECT_EQ_OB_UPDATE(updates3[0], "ETHUSD", BUY, 1, 0);
+    ASSERT_EQ(matches3.size(), 1);
+    ASSERT_EQ(updates3.size(), 1);
+    ASSERT_EQ_MATCH(matches3[0], "ETHUSD", "A", "B", SELL, 1, 1);
+    ASSERT_EQ_OB_UPDATE(updates3[0], "ETHUSD", BUY, 1, 0);
 }
 
 TEST_F(UnitManyOrders, SimpleManyOrder)
@@ -93,24 +93,24 @@ TEST_F(UnitManyOrders, SimpleManyOrder)
     auto [matches2, updates2] = add_to_engine_(order2);
     auto [matches3, updates3] = add_to_engine_(order3);
 
-    EXPECT_EQ(matches1.size(), 0);
-    EXPECT_EQ(updates1.size(), 1);
-    EXPECT_EQ(matches2.size(), 0);
-    EXPECT_EQ(updates2.size(), 1);
-    EXPECT_EQ(matches3.size(), 0);
-    EXPECT_EQ(updates3.size(), 1);
+    ASSERT_EQ(matches1.size(), 0);
+    ASSERT_EQ(updates1.size(), 1);
+    ASSERT_EQ(matches2.size(), 0);
+    ASSERT_EQ(updates2.size(), 1);
+    ASSERT_EQ(matches3.size(), 0);
+    ASSERT_EQ(updates3.size(), 1);
 
     auto [matches4, updates4] = add_to_engine_(order4);
-    EXPECT_EQ(matches4.size(), 3);
-    EXPECT_EQ(updates4.size(), 3);
+    ASSERT_EQ(matches4.size(), 3);
+    ASSERT_EQ(updates4.size(), 3);
 
-    EXPECT_EQ_MATCH(matches4[0], "ETHUSD", "A", "D", SELL, 1, 1);
-    EXPECT_EQ_MATCH(matches4[1], "ETHUSD", "B", "D", SELL, 1, 1);
-    EXPECT_EQ_MATCH(matches4[2], "ETHUSD", "C", "D", SELL, 1, 1);
+    ASSERT_EQ_MATCH(matches4[0], "ETHUSD", "A", "D", SELL, 1, 1);
+    ASSERT_EQ_MATCH(matches4[1], "ETHUSD", "B", "D", SELL, 1, 1);
+    ASSERT_EQ_MATCH(matches4[2], "ETHUSD", "C", "D", SELL, 1, 1);
 
-    EXPECT_EQ_OB_UPDATE(updates4[0], "ETHUSD", BUY, 1, 0);
-    EXPECT_EQ_OB_UPDATE(updates4[1], "ETHUSD", BUY, 1, 0);
-    EXPECT_EQ_OB_UPDATE(updates4[2], "ETHUSD", BUY, 1, 0);
+    ASSERT_EQ_OB_UPDATE(updates4[0], "ETHUSD", BUY, 1, 0);
+    ASSERT_EQ_OB_UPDATE(updates4[1], "ETHUSD", BUY, 1, 0);
+    ASSERT_EQ_OB_UPDATE(updates4[2], "ETHUSD", BUY, 1, 0);
 }
 
 TEST_F(UnitManyOrders, PassiveAndAggressivePartial)
@@ -125,22 +125,22 @@ TEST_F(UnitManyOrders, PassiveAndAggressivePartial)
     auto [matches3, updates3] = add_to_engine_(order3);
     auto [matches4, updates4] = add_to_engine_(order4);
 
-    EXPECT_EQ(matches1.size(), 0);
-    EXPECT_EQ(updates1.size(), 1);
-    EXPECT_EQ(matches2.size(), 0);
-    EXPECT_EQ(updates2.size(), 1);
-    EXPECT_EQ(matches3.size(), 2);
-    EXPECT_EQ(updates3.size(), 3);
-    EXPECT_EQ(matches4.size(), 1);
-    EXPECT_EQ(updates4.size(), 2);
+    ASSERT_EQ(matches1.size(), 0);
+    ASSERT_EQ(updates1.size(), 1);
+    ASSERT_EQ(matches2.size(), 0);
+    ASSERT_EQ(updates2.size(), 1);
+    ASSERT_EQ(matches3.size(), 2);
+    ASSERT_EQ(updates3.size(), 3);
+    ASSERT_EQ(matches4.size(), 1);
+    ASSERT_EQ(updates4.size(), 2);
 
-    EXPECT_EQ_MATCH(matches3[0], "ETHUSD", "C", "A", BUY, 1, 1);
-    EXPECT_EQ_MATCH(matches3[1], "ETHUSD", "C", "B", BUY, 1, 1);
-    EXPECT_EQ_OB_UPDATE(updates3[0], "ETHUSD", SELL, 1, 0);
-    EXPECT_EQ_OB_UPDATE(updates3[1], "ETHUSD", SELL, 1, 0);
-    EXPECT_EQ_OB_UPDATE(updates3[2], "ETHUSD", SELL, 1, 9);
+    ASSERT_EQ_MATCH(matches3[0], "ETHUSD", "C", "A", BUY, 1, 1);
+    ASSERT_EQ_MATCH(matches3[1], "ETHUSD", "C", "B", BUY, 1, 1);
+    ASSERT_EQ_OB_UPDATE(updates3[0], "ETHUSD", SELL, 1, 0);
+    ASSERT_EQ_OB_UPDATE(updates3[1], "ETHUSD", SELL, 1, 0);
+    ASSERT_EQ_OB_UPDATE(updates3[2], "ETHUSD", SELL, 1, 9);
 
-    EXPECT_EQ_MATCH(matches4[0], "ETHUSD", "D", "B", BUY, 1, 9);
-    EXPECT_EQ_OB_UPDATE(updates4[0], "ETHUSD", SELL, 1, 0);
-    EXPECT_EQ_OB_UPDATE(updates4[1], "ETHUSD", BUY, 4, 1);
+    ASSERT_EQ_MATCH(matches4[0], "ETHUSD", "D", "B", BUY, 1, 9);
+    ASSERT_EQ_OB_UPDATE(updates4[0], "ETHUSD", SELL, 1, 0);
+    ASSERT_EQ_OB_UPDATE(updates4[1], "ETHUSD", BUY, 4, 1);
 }

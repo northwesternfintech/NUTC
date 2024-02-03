@@ -71,6 +71,12 @@ tasks:
       - task: utest
       - task: itest
 
+
+  utest-with-gdb:
+    cmds:
+      - task: build
+      - gdb --args ./build/dev/test/NUTC_tests --preset=dev -R "Unit*"
+
   utest:
     cmds:
       - task: build

@@ -37,7 +37,7 @@ void add_client_simple(manager::ClientManager& manager, const std::string& clien
 } // namespace testing_utils
 } // namespace nutc
 
-#define EXPECT_EQ_MATCH(/* NOLINT(cppcoreguidelines-macro-usage) */                    \
+#define ASSERT_EQ_MATCH(/* NOLINT(cppcoreguidelines-macro-usage) */                    \
                         match, ticker_, buyer_id_, seller_id_, side_, price_,          \
                         quantity_                                                      \
 )                                                                                      \
@@ -58,7 +58,7 @@ void add_client_simple(manager::ClientManager& manager, const std::string& clien
             << ", price = " << (match).price << ", quantity = " << (match).quantity;   \
     } while (0)
 
-#define EXPECT_EQ_OB_UPDATE(/* NOLINT(cppcoreguidelines-macro-usage) */                \
+#define ASSERT_EQ_OB_UPDATE(/* NOLINT(cppcoreguidelines-macro-usage) */                \
                             update, ticker_, side_, price_, quantity_                  \
 )                                                                                      \
     do {                                                                               \
@@ -74,7 +74,7 @@ void add_client_simple(manager::ClientManager& manager, const std::string& clien
             << ", price = " << (update).price << ", quantity = " << (update).quantity; \
     } while (0)
 
-#define EXPECT_EQ_MARKET_ORDER(/* NOLINT (cppcoreguidelines-macro-usage) */            \
+#define ASSERT_EQ_MARKET_ORDER(/* NOLINT (cppcoreguidelines-macro-usage) */            \
                                update, client_id_, ticker_, side_, price_, quantity_   \
 )                                                                                      \
     do {                                                                               \
