@@ -10,27 +10,9 @@ namespace nutc {
 namespace matching {
 
 void
-Engine::add_order_without_matching(const MarketOrder& order)
-{
-    StoredOrder stored_order{
-        order.client_id, order.side, order.ticker, order.quantity, order.price
-    };
-    if (order.side == SIDE::BUY)
-        bids_.push(std::move(stored_order));
-    else
-        asks_.push(std::move(stored_order));
-}
-
-void
-add_ob_update(std::vector<ObUpdate>& vec, const StoredOrder& order, float quantity)
+add_ob_update(std::vector<ObUpdate>& vec, StoredOrder& order, float quantity)
 {
     vec.push_back(ObUpdate{order.ticker, order.side, order.price, quantity});
-}
-
-std::priority_queue<StoredOrder>&
-Engine::get_orders_(SIDE side)
-{
-    return side == SIDE::SELL ? this->asks_ : this->bids_;
 }
 
 bool
@@ -61,7 +43,7 @@ Engine::match_order(MarketOrder&& order, manager::ClientManager& manager)
         return result;
     }
 
-    get_orders_(order.side).push(stored_order);
+    add_order(stored_order);
 
     match_result_t res = attempt_matches_(manager, stored_order);
 
@@ -115,16 +97,16 @@ get_aggressive_side(const StoredOrder& order1, const StoredOrder& order2)
 
 match_result_t
 Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
-    manager::ClientManager& manager, const StoredOrder& aggressive_order
+    manager::ClientManager& manager, StoredOrder& aggressive_order
 )
 {
     match_result_t result;
     float aggressive_quantity = aggressive_order.quantity;
-   uint64_t aggressive_index = aggressive_order.order_index;
+    uint64_t aggressive_index = aggressive_order.order_index;
 
-    while (!bids_.empty() && !asks_.empty() && bids_.top().can_match(asks_.top())) {
-        StoredOrder sell_order = asks_.top();
-        StoredOrder buy_order = bids_.top();
+    while (!bids_.empty() && !asks_.empty() && get_top_order_(SIDE::BUY).can_match(get_top_order_(SIDE::SELL))) {
+        StoredOrder& sell_order = get_top_order_(SIDE::SELL);
+        StoredOrder& buy_order = get_top_order_(SIDE::BUY);
 
         float quantity_to_match = get_match_quantity(buy_order, sell_order);
         SIDE aggressive_side = get_aggressive_side(sell_order, buy_order);
@@ -142,14 +124,14 @@ Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
         if (match_failure.has_value()) {
             SIDE side = match_failure.value();
             if (side == SIDE::BUY)
-                bids_.pop();
+                bids_.erase(bids_.begin());
             else
-                asks_.pop();
+                asks_.erase(asks_.begin());
             continue;
         }
 
-        bids_.pop();
-        asks_.pop();
+        bids_.erase(bids_.begin());
+        asks_.erase(asks_.begin());
 
         buy_order.quantity -= quantity_to_match;
         sell_order.quantity -= quantity_to_match;
@@ -175,13 +157,13 @@ Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
         if (!is_close_to_zero(buy_order.quantity)) {
             if (!buy_aggressive)
                 add_ob_update(result.ob_updates, buy_order, buy_order.quantity);
-            bids_.push(buy_order);
+            add_order(buy_order);
         }
 
         if (!is_close_to_zero(sell_order.quantity)) {
             if (!sell_aggressive)
                 add_ob_update(result.ob_updates, sell_order, sell_order.quantity);
-            asks_.push(sell_order);
+            add_order(sell_order);
         }
 
         manager.modify_capital(buyer_id, -quantity_to_match * price_to_match);
