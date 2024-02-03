@@ -39,67 +39,75 @@ public:
      */
     match_result_t match_order(MarketOrder&& order, manager::ClientManager& manager);
 
-    std::vector<MarketOrder&> flag_orders_up_to_tick(uint64_t tick);
-
     void
     add_order(const MarketOrder& order)
     {
         return add_order(StoredOrder(
-            order.client_id, order.side, order.ticker, order.quantity, order.price
+            order.client_id, order.side, order.ticker, order.quantity, order.price,
+            this->current_tick_
         ));
     }
 
     void
     add_order(StoredOrder stored_order)
     {
-        if (stored_order.side == SIDE::BUY) {
-            bids_.insert(
-                std::pair<float, uint64_t>(stored_order.price, stored_order.order_index)
-            );
-        }
-        else {
-            asks_.insert(
-                std::pair<float, uint64_t>(stored_order.price, stored_order.order_index)
-            );
+        switch (stored_order.side) {
+            case SIDE::BUY:
+                bids_.insert(std::pair<float, uint64_t>(
+                    stored_order.price, stored_order.order_index
+                ));
+                break;
+            case SIDE::SELL:
+                asks_.insert(std::pair<float, uint64_t>(
+                    stored_order.price, stored_order.order_index
+                ));
         }
 
         orders_by_id_.insert({stored_order.order_index, std::move(stored_order)});
     }
 
+  // Called every tick
+    std::vector<StoredOrder> remove_old_orders(uint64_t new_tick, uint64_t removed_tick_age);
 private:
     // both map/sort price, order_index
     std::set<std::pair<float, uint64_t>, bid_comparator> bids_;
     std::set<std::pair<float, uint64_t>, ask_comparator> asks_;
+
+    // order index -> order
     std::unordered_map<uint64_t, StoredOrder> orders_by_id_;
 
-    std::map<uint64_t, std::queue<StoredOrder*>> orders_by_tick_;
+    // tick -> queue of order ids
+    std::map<uint64_t, std::queue<uint64_t>> orders_by_tick_;
+
+    uint64_t current_tick_ = 0;
 
     match_result_t
     attempt_matches_(manager::ClientManager& manager, StoredOrder& aggressive_order);
 
+    template <typename Comparator>
+    StoredOrder&
+    get_order_from_set_(std::set<std::pair<float, uint64_t>, Comparator>& order_set)
+    {
+        assert(!order_set.empty());
+        auto order_id = order_set.begin()->second;
+        while (orders_by_id_.find(order_id) == orders_by_id_.end()) {
+            order_set.erase(order_set.begin());
+            assert(!order_set.empty());
+            order_id = order_set.begin()->second;
+        }
+        return orders_by_id_.at(order_id);
+    }
+
     StoredOrder&
     get_top_order_(SIDE side)
     {
-        uint64_t order_id; // NOLINT(*)
         switch (side) {
             case SIDE::BUY:
-                assert(!bids_.empty());
-                order_id = bids_.begin()->second;
-                while (orders_by_id_.find(order_id) == orders_by_id_.end()) {
-                    bids_.erase(bids_.begin());
-                    assert(!bids_.empty());
-                    order_id = bids_.begin()->second;
-                }
-                return orders_by_id_.at(bids_.begin()->second);
+                return get_order_from_set_(bids_);
             case SIDE::SELL:
-                assert(!asks_.empty());
-                order_id = asks_.begin()->second;
-                while (orders_by_id_.find(order_id) == orders_by_id_.end()) {
-                    asks_.erase(asks_.begin());
-                    assert(!asks_.empty());
-                    order_id = asks_.begin()->second;
-                }
-                return orders_by_id_.at(asks_.begin()->second);
+                return get_order_from_set_(asks_);
+            default:
+                throw std::invalid_argument("Unknown side");
         }
     }
 };

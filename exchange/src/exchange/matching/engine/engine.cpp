@@ -9,6 +9,35 @@
 namespace nutc {
 namespace matching {
 
+std::vector<StoredOrder>
+Engine::remove_old_orders(uint64_t new_tick, uint64_t removed_tick_age)
+{
+    current_tick_ = new_tick;
+    std::vector<StoredOrder> removed_orders;
+    removed_orders.reserve(bids_.size() + asks_.size());
+
+    while (!orders_by_tick_.empty()) {
+      uint64_t earliest_tick = orders_by_tick_.begin()->first;
+      if (current_tick_ - earliest_tick < removed_tick_age) {
+          break;
+      }
+      std::queue<uint64_t>& order_ids = orders_by_tick_[earliest_tick];
+      while (!order_ids.empty()) {
+          uint64_t order_id = order_ids.front();
+          order_ids.pop();
+      
+          if(orders_by_id_.find(order_id) == orders_by_id_.end()) {
+              continue;
+          }
+      
+          removed_orders.push_back(std::move(orders_by_id_[order_id]));
+          orders_by_id_.erase(order_id);
+      }
+    }
+
+    return removed_orders;
+}
+
 void
 add_ob_update(std::vector<ObUpdate>& vec, StoredOrder& order, float quantity)
 {
@@ -34,7 +63,7 @@ match_result_t
 Engine::match_order(MarketOrder&& order, manager::ClientManager& manager)
 {
     match_result_t result;
-    StoredOrder stored_order(std::move(order));
+    StoredOrder stored_order(std::move(order), current_tick_);
     if (insufficient_capital(stored_order, manager)) {
         return result;
     }
@@ -104,7 +133,8 @@ Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
     float aggressive_quantity = aggressive_order.quantity;
     uint64_t aggressive_index = aggressive_order.order_index;
 
-    while (!bids_.empty() && !asks_.empty() && get_top_order_(SIDE::BUY).can_match(get_top_order_(SIDE::SELL))) {
+    while (!bids_.empty() && !asks_.empty()
+           && get_top_order_(SIDE::BUY).can_match(get_top_order_(SIDE::SELL))) {
         StoredOrder& sell_order = get_top_order_(SIDE::SELL);
         StoredOrder& buy_order = get_top_order_(SIDE::BUY);
 
