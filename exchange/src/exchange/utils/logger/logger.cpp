@@ -1,4 +1,6 @@
 #include "exchange/utils/logger/logger.hpp" // includes fstream, string, optional
+#include "shared/messages_exchange_to_wrapper.hpp"
+#include "shared/messages_wrapper_to_exchange.hpp"
 
 #include <fmt/chrono.h>
 #include <fmt/format.h>

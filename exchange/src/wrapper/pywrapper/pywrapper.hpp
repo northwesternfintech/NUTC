@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shared/messages.hpp"
+#include "shared/messages_wrapper_to_exchange.hpp"
 #include "wrapper/logging.hpp"
 
 #include <pybind11/embed.h>
