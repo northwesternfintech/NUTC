@@ -1,19 +1,12 @@
 #pragma once
 
+#include "util.hpp"
+
 #include <fmt/format.h>
 #include <glaze/glaze.hpp>
 
-#include <iostream>
-
 namespace nutc {
-
-/**
- * @brief Contains all types used by glaze and the exchange for orders, matching,
- * communication, etc
- */
 namespace messages {
-
-enum class SIDE { BUY, SELL };
 
 /**
  * @brief Sent by clients to the exchange to indicate they're initialized and may or may
@@ -23,28 +16,6 @@ struct InitMessage {
     std::string client_id;
     bool ready;
 };
-
-struct StartTime {
-    int64_t start_time_ns;
-};
-
-/**
- * @brief Sent by exchange to a client to indicate a match has occurred
- */
-struct Match {
-    std::string ticker;
-    SIDE side;
-    float price;
-    float quantity;
-    std::string buyer_id;
-    std::string seller_id;
-};
-
-inline constexpr bool
-is_close_to_zero(float value, float epsilon = 1e-6f)
-{
-    return std::fabs(value) < epsilon;
-}
 
 /**
  * @brief Sent by clients to the exchange to place an order
@@ -84,8 +55,8 @@ struct MarketOrder {
     operator==(const MarketOrder& other) const
     {
         return client_id == other.client_id && ticker == other.ticker
-               && side == other.side && is_close_to_zero(price - other.price)
-               && is_close_to_zero(quantity - other.quantity);
+               && side == other.side && util::is_close_to_zero(price - other.price)
+               && util::is_close_to_zero(quantity - other.quantity);
     }
 
     // toString
@@ -105,7 +76,7 @@ struct MarketOrder {
     {
         // assuming both sides are same
         // otherwise, this shouldn't even be called
-        if (is_close_to_zero(this->price - other.price)) {
+        if (util::is_close_to_zero(this->price - other.price)) {
             return this->order_index > other.order_index;
         }
         else if (this->side == SIDE::BUY) {
@@ -165,67 +136,8 @@ struct MarketOrder {
     }
 };
 
-/**
- * @brief Sent by exchange to clients to indicate an orderbook update
- */
-struct ObUpdate {
-    std::string ticker;
-    SIDE side;
-    float price;
-    float quantity;
-};
-
-/**
- * @brief Sent by exchange to clients to indicate an update with their specific account
- * This is only sent to the two clients that participated in the trade
- */
-struct AccountUpdate {
-    std::string ticker;
-    SIDE side;
-    float price;
-    float quantity;
-    float capital_remaining;
-};
-
 } // namespace messages
 } // namespace nutc
-
-/// \cond
-template <>
-struct glz::meta<nutc::messages::ObUpdate> {
-    using T = nutc::messages::ObUpdate;
-    static constexpr auto value = object(
-        "security", &T::ticker, "side", &T::side, "price", &T::price, "quantity",
-        &T::quantity
-    );
-};
-
-/// \cond
-template <>
-struct glz::meta<nutc::messages::AccountUpdate> {
-    using T = nutc::messages::AccountUpdate;
-    static constexpr auto value = object(
-        "capital_remaining", &T::capital_remaining, "ticker", &T::ticker, "side",
-        &T::side, "price", &T::price, "quantity", &T::quantity
-    );
-};
-
-/// \cond
-template <>
-struct glz::meta<nutc::messages::Match> {
-    using T = nutc::messages::Match;
-    static constexpr auto value = object(
-        "ticker", &T::ticker, "buyer_id", &T::buyer_id, "seller_id", &T::seller_id,
-        "side", &T::side, "price", &T::price, "quantity", &T::quantity
-    );
-};
-
-/// \cond
-template <>
-struct glz::meta<nutc::messages::StartTime> {
-    using T = nutc::messages::StartTime;
-    static constexpr auto value = object("start_time_ns", &T::start_time_ns);
-};
 
 /// \cond
 template <>

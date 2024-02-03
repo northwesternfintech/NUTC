@@ -2,7 +2,8 @@
 
 #include "exchange/config.h"
 #include "exchange/logging.hpp"
-#include "shared/messages.hpp" // TYPE should be an enum {AccountUpdate, OrderbookUpdate, TradeUpdate, MarketOrder}
+
+#include <glaze/glaze.hpp>
 
 #include <fstream>
 #include <optional>
