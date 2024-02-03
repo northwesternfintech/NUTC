@@ -21,9 +21,12 @@ struct StoredOrder {
     SIDE side;
     float price;
     float quantity;
+    uint64_t tick;
 
     // Used to sort orders by time created
     uint64_t order_index;
+
+    StoredOrder() = default;
 
     static uint64_t
     get_and_increment_global_index()
@@ -34,17 +37,17 @@ struct StoredOrder {
 
     StoredOrder(
         std::string client_id, SIDE side, std::string ticker, float quantity,
-        float price
+        float price, uint64_t tick
     ) :
         client_id(std::move(client_id)),
         ticker(std::move(ticker)), side(side), price(price), quantity(quantity),
-        order_index(get_and_increment_global_index())
+        tick(tick), order_index(get_and_increment_global_index())
     {}
 
-    explicit StoredOrder(messages::MarketOrder&& other) :
+    explicit StoredOrder(messages::MarketOrder&& other, uint64_t tick) :
 
         client_id(std::move(other.client_id)), ticker(std::move(other.ticker)),
-        side(other.side), price(other.price), quantity(other.quantity),
+        side(other.side), price(other.price), quantity(other.quantity), tick(tick),
         order_index(get_and_increment_global_index())
     {}
 
@@ -115,6 +118,7 @@ struct StoredOrder {
         }
 
         this->order_index = other.order_index;
+        this->tick = other.tick;
         this->client_id = other.client_id;
         this->side = other.side;
         this->ticker = other.ticker;
@@ -133,10 +137,9 @@ struct bid_comparator {
     ) const
     {
         if (lhs.first != rhs.first) {
-            return lhs.first > rhs.first; 
+            return lhs.first > rhs.first;
         }
-        return lhs.second
-               < rhs.second; 
+        return lhs.second < rhs.second;
     }
 };
 
@@ -150,8 +153,7 @@ struct ask_comparator {
         if (lhs.first != rhs.first) {
             return lhs.first < rhs.first;
         }
-        return lhs.second
-               < rhs.second;
+        return lhs.second < rhs.second;
     }
 };
 } // namespace matching
