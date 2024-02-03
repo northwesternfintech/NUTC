@@ -1,6 +1,6 @@
 #include "exchange/config.h"
+#include "shared/messages_wrapper_to_exchange.hpp"
 #include "exchange/matching/engine/engine.hpp"
-#include "shared/messages.hpp"
 #include "test_utils/macros.hpp"
 
 #include <gtest/gtest.h>
