@@ -1,5 +1,6 @@
 #include "engine.hpp"
 
+#include "exchange/matching/engine/order_storage.hpp"
 #include "exchange/utils/logger/logger.hpp"
 
 #include <algorithm>
@@ -11,33 +12,30 @@ namespace matching {
 void
 Engine::add_order_without_matching(const MarketOrder& order)
 {
+    StoredOrder stored_order{
+        order.client_id, order.side, order.ticker, order.quantity, order.price
+    };
     if (order.side == SIDE::BUY)
-        bids_.push(order);
+        bids_.push(std::move(stored_order));
     else
-        asks_.push(order);
-}
-
-ObUpdate
-create_ob_update(const MarketOrder& order, float quantity)
-{
-    return ObUpdate{order.ticker, order.side, order.price, quantity};
+        asks_.push(std::move(stored_order));
 }
 
 void
-add_ob_update(std::vector<ObUpdate>& vec, const MarketOrder& order, float quantity)
+add_ob_update(std::vector<ObUpdate>& vec, const StoredOrder& order, float quantity)
 {
-    vec.push_back(create_ob_update(order, quantity));
+    vec.push_back(ObUpdate{order.ticker, order.side, order.price, quantity});
 }
 
-std::priority_queue<MarketOrder>&
+std::priority_queue<StoredOrder>&
 Engine::get_orders_(SIDE side)
 {
     return side == SIDE::SELL ? this->asks_ : this->bids_;
 }
 
 bool
-Engine::insufficient_capital(
-    const MarketOrder& order, const manager::ClientManager& manager
+insufficient_capital(
+    const StoredOrder& order, const manager::ClientManager& manager
 )
 {
     float capital = manager.get_capital(order.client_id);
@@ -46,28 +44,29 @@ Engine::insufficient_capital(
 }
 
 bool
-insufficient_holdings(const MarketOrder& order, const manager::ClientManager& manager)
+insufficient_holdings(const StoredOrder& order, const manager::ClientManager& manager)
 {
     float holdings = manager.get_holdings(order.client_id, order.ticker);
     return order.side == SIDE::SELL && order.quantity > holdings;
 }
 
 match_result_t
-Engine::match_order(MarketOrder& order, manager::ClientManager& manager)
+Engine::match_order(MarketOrder&& order, manager::ClientManager& manager)
 {
     match_result_t result;
-
-    if (insufficient_capital(order, manager)) {
+    StoredOrder stored_order(std::move(order));
+    if (insufficient_capital(stored_order, manager)) {
         return result;
     }
 
-    if (insufficient_holdings(order, manager)) {
+    if (insufficient_holdings(stored_order, manager)) {
         return result;
     }
 
-    get_orders_(order.side).push(order);
 
-    match_result_t res = attempt_matches_(manager, order);
+    get_orders_(order.side).push(stored_order);
+
+    match_result_t res = attempt_matches_(manager, stored_order);
 
     events::Logger& logger = events::Logger::get_logger();
 
@@ -98,30 +97,30 @@ is_same_value(
 }
 
 float
-Engine::get_match_quantity(
-    const MarketOrder& passive_order, const MarketOrder& aggressive_order
+get_match_quantity(
+    const StoredOrder& passive_order, const StoredOrder& aggressive_order
 )
 {
     return std::min(passive_order.quantity, aggressive_order.quantity);
 }
 
 std::string
-Engine::get_client_id(
-    SIDE side, const MarketOrder& aggressive, const MarketOrder& passive
+get_client_id(
+    SIDE side, const StoredOrder& aggressive, const StoredOrder& passive
 )
 {
     return side == aggressive.side ? aggressive.client_id : passive.client_id;
 }
 
 SIDE
-Engine::get_aggressive_side(const MarketOrder& order1, const MarketOrder& order2)
+get_aggressive_side(const StoredOrder& order1, const StoredOrder& order2)
 {
     return order1.order_index > order2.order_index ? order1.side : order2.side;
 }
 
 match_result_t
 Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
-    manager::ClientManager& manager, const MarketOrder& aggressive_order
+    manager::ClientManager& manager, const StoredOrder& aggressive_order
 )
 {
     match_result_t result;
@@ -129,8 +128,8 @@ Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
     int64_t aggressive_index = aggressive_order.order_index;
 
     while (!bids_.empty() && !asks_.empty() && bids_.top().can_match(asks_.top())) {
-        MarketOrder sell_order = asks_.top();
-        MarketOrder buy_order = bids_.top();
+        StoredOrder sell_order = asks_.top();
+        StoredOrder buy_order = bids_.top();
 
         float quantity_to_match = get_match_quantity(buy_order, sell_order);
         SIDE aggressive_side = get_aggressive_side(sell_order, buy_order);

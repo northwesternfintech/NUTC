@@ -76,7 +76,7 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
     );
 
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(
-        engine_manager_, users_, actual_mo
+        engine_manager_, users_, std::move(actual_mo)
     );
 
     // on_trade_match triggers one user to place a BUY order of 1 TSLA at 100
@@ -114,7 +114,7 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdate)
     );
 
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(
-        engine_manager_, users_, actual_mo
+        engine_manager_, users_, std::move(actual_mo)
     );
 
     // on_trade_match triggers one user to place a BUY order of 1 TSLA at 100

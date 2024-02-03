@@ -1,6 +1,7 @@
 #pragma once
 
 #include "exchange/client_manager/client_manager.hpp"
+#include "order_storage.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
@@ -33,28 +34,17 @@ public:
      * @return a MatchResult containing all matches and a vector containing the
      * orderbook updates
      */
-    match_result_t match_order(MarketOrder& order, manager::ClientManager& manager);
+    match_result_t match_order(MarketOrder&& order, manager::ClientManager& manager);
 
     void add_order_without_matching(const MarketOrder& order);
 
 private:
-    std::priority_queue<MarketOrder> bids_;
-    std::priority_queue<MarketOrder> asks_;
-    static std::string
-    get_client_id(SIDE side, const MarketOrder& aggressive, const MarketOrder& passive);
-    static float get_match_quantity(
-        const MarketOrder& passive_order, const MarketOrder& aggressive_order
-    );
-
-    std::priority_queue<MarketOrder>& get_orders_(SIDE side);
+    std::priority_queue<StoredOrder> bids_;
+    std::priority_queue<StoredOrder> asks_;
+    std::priority_queue<StoredOrder>& get_orders_(SIDE side);
 
     match_result_t attempt_matches_(
-        manager::ClientManager& manager, const MarketOrder& aggressive_order
-    );
-    static SIDE
-    get_aggressive_side(const MarketOrder& order1, const MarketOrder& order2);
-    static bool insufficient_capital(
-        const MarketOrder& order, const manager::ClientManager& manager
+        manager::ClientManager& manager, const StoredOrder& aggressive_order
     );
 };
 } // namespace matching

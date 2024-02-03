@@ -1,7 +1,7 @@
 #include "exchange/config.h"
 #include "exchange/matching/engine/engine.hpp"
-#include "shared/messages_wrapper_to_exchange.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
+#include "shared/messages_wrapper_to_exchange.hpp"
 #include "test_utils/macros.hpp"
 
 #include <gtest/gtest.h>
@@ -24,8 +24,12 @@ protected:
         manager_.modify_holdings("DEF", "ETHUSD", DEFAULT_QUANTITY);
     }
 
-    ClientManager manager_; // NOLINT (*)
-    Engine engine_;         // NOLINT (*)
+    ClientManager manager_{}; // NOLINT (*)
+    Engine engine_{};         // NOLINT (*)
+  
+  nutc::matching::match_result_t add_to_engine_(MarketOrder order) {
+    return engine_.match_order(std::move(order), manager_);
+  }
 };
 
 TEST_F(UnitInvalidOrders, SimpleInvalidFunds)
@@ -48,12 +52,12 @@ TEST_F(UnitInvalidOrders, RemoveThenAddFunds)
     MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
 
     // Thrown out
-    auto [matches, ob_updates] = engine_.match_order(order1, manager_);
+    auto [matches, ob_updates] = add_to_engine_(order1);
     EXPECT_EQ(matches.size(), 0);
     EXPECT_EQ(ob_updates.size(), 0);
 
     // Kept, but not matched
-    auto [matches2, ob_updates2] = engine_.match_order(order2, manager_);
+    auto [matches2, ob_updates2] = add_to_engine_(order2);
     EXPECT_EQ(matches2.size(), 0);
     EXPECT_EQ(ob_updates2.size(), 1);
     EXPECT_EQ_OB_UPDATE(ob_updates2[0], "ETHUSD", SELL, 1, 1);
@@ -61,13 +65,13 @@ TEST_F(UnitInvalidOrders, RemoveThenAddFunds)
     manager_.modify_capital("ABC", STARTING_CAPITAL);
 
     // Kept, but not matched
-    auto [matches3, ob_updates3] = engine_.match_order(order2, manager_);
+    auto [matches3, ob_updates3] = add_to_engine_(order2);
     EXPECT_EQ(matches3.size(), 0);
     EXPECT_EQ(ob_updates3.size(), 1);
     EXPECT_EQ_OB_UPDATE(ob_updates3[0], "ETHUSD", SELL, 1, 1);
 
     // Kept and matched
-    auto [matches4, ob_updates4] = engine_.match_order(order1, manager_);
+    auto [matches4, ob_updates4] = add_to_engine_(order1);
     EXPECT_EQ(matches4.size(), 1);
     EXPECT_EQ(ob_updates4.size(), 1);
     EXPECT_EQ_OB_UPDATE(ob_updates4[0], "ETHUSD", SELL, 1, 0);
@@ -82,12 +86,12 @@ TEST_F(UnitInvalidOrders, MatchingInvalidFunds)
     MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
 
     // Thrown out
-    auto [matches, ob_updates] = engine_.match_order(order1, manager_);
+    auto [matches, ob_updates] = add_to_engine_(order1);
     EXPECT_EQ(matches.size(), 0);
     EXPECT_EQ(ob_updates.size(), 0);
 
     // Kept, but not matched
-    auto [matches2, ob_updates2] = engine_.match_order(order2, manager_);
+    auto [matches2, ob_updates2] = add_to_engine_(order2);
     EXPECT_EQ(matches2.size(), 0);
     EXPECT_EQ(ob_updates2.size(), 1);
     EXPECT_EQ_OB_UPDATE(ob_updates2[0], "ETHUSD", SELL, 1, 1);
@@ -113,9 +117,9 @@ TEST_F(UnitInvalidOrders, SimpleManyInvalidOrder)
     MarketOrder order3{"C", BUY, "ETHUSD", 1, 1};
     MarketOrder order4{"D", SELL, "ETHUSD", 3, 1};
 
-    auto [matches1, updates1] = engine_.match_order(order1, manager_);
-    auto [matches2, updates2] = engine_.match_order(order2, manager_);
-    auto [matches3, updates3] = engine_.match_order(order3, manager_);
+    auto [matches1, updates1] = add_to_engine_(order1);
+    auto [matches2, updates2] = add_to_engine_(order2);
+    auto [matches3, updates3] = add_to_engine_(order3);
 
     EXPECT_EQ(matches1.size(), 0);
     EXPECT_EQ(updates1.size(), 1);
@@ -125,7 +129,7 @@ TEST_F(UnitInvalidOrders, SimpleManyInvalidOrder)
     EXPECT_EQ(updates3.size(), 1);
 
     // Should match two orders and throw out the invalid order (2)
-    auto [matches4, updates4] = engine_.match_order(order4, manager_);
+    auto [matches4, updates4] = add_to_engine_(order4);
     EXPECT_EQ(matches4.size(), 2);
     EXPECT_EQ(updates4.size(), 3);
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "shared/messages_wrapper_to_exchange.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
+#include "shared/messages_wrapper_to_exchange.hpp"
 #include "wrapper/pywrapper/pywrapper.hpp"
 #include "wrapper/pywrapper/rate_limiter.hpp"
 

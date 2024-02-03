@@ -9,7 +9,7 @@ namespace rabbitmq {
 void
 RabbitMQOrderHandler::handle_incoming_market_order(
     engine_manager::Manager& engine_manager, manager::ClientManager& clients,
-    MarketOrder& order
+    MarketOrder&& order
 )
 {
     std::string buffer;
@@ -36,7 +36,8 @@ RabbitMQOrderHandler::handle_incoming_market_order(
         );
         return;
     }
-    auto [matches, ob_updates] = engine.value().get().match_order(order, clients);
+    std::string client_id = order.client_id;
+    auto [matches, ob_updates] = engine.value().get().match_order(std::move(order), clients);
     for (const auto& match : matches) {
         std::string buyer_id = match.buyer_id;
         std::string seller_id = match.seller_id;
@@ -57,7 +58,7 @@ RabbitMQOrderHandler::handle_incoming_market_order(
         RabbitMQPublisher::broadcast_matches(clients, matches);
     }
     if (!ob_updates.empty()) {
-        RabbitMQPublisher::broadcast_ob_updates(clients, ob_updates, order.client_id);
+        RabbitMQPublisher::broadcast_ob_updates(clients, ob_updates, client_id);
     }
 }
 

@@ -16,7 +16,7 @@ public:
     );
     static void handle_incoming_market_order(
         engine_manager::Manager& engine_manager, manager::ClientManager& clients,
-        messages::MarketOrder& order
+        messages::MarketOrder&& order
     );
 };
 
