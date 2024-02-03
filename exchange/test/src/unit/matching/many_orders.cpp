@@ -1,5 +1,6 @@
-#include "shared/messages.hpp"
 #include "test_utils/macros.hpp"
+#include "shared/messages_wrapper_to_exchange.hpp"
+#include "shared/messages_exchange_to_wrapper.hpp"
 
 #include <gtest/gtest.h>
 
