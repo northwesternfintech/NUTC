@@ -21,36 +21,35 @@ struct StoredOrder {
     SIDE side;
     float price;
     float quantity;
+    uint64_t tick_created;
 
     // Used to sort orders by time created
-    long long order_index;
+    uint64_t order_index;
 
-    StoredOrder() { order_index = get_and_increment_global_index(); }
-
-    static long long
+    static uint64_t
     get_and_increment_global_index()
     {
-        static long long global_index = 0;
+        static uint64_t global_index = 0;
         return global_index++;
     }
 
     StoredOrder(
-        const std::string& client_id, SIDE side, const std::string& ticker,
-        float quantity, float price
+        std::string client_id, SIDE side, std::string ticker, float quantity,
+        float price, uint64_t tick_created = 0
     ) :
-        client_id(client_id),
-        ticker(ticker), side(side), price(price), quantity(quantity)
+        client_id(std::move(client_id)),
+        ticker(std::move(ticker)), side(side), price(price), quantity(quantity),
+        tick_created(tick_created), order_index(get_and_increment_global_index())
     {
-        order_index = get_and_increment_global_index();
     }
 
-    explicit StoredOrder(messages::MarketOrder&& other)  :
-        
+    explicit StoredOrder(messages::MarketOrder&& other, uint64_t tick_created = 0) :
+
         client_id(std::move(other.client_id)), ticker(std::move(other.ticker)),
-        side(other.side), price(other.price), quantity(other.quantity), order_index(get_and_increment_global_index())
-    {
-    }
-  
+        side(other.side), price(other.price), quantity(other.quantity),
+        tick_created(tick_created), order_index(get_and_increment_global_index())
+    {}
+
     bool
     operator==(const StoredOrder& other) const
     {
@@ -90,7 +89,7 @@ struct StoredOrder {
         }
     }
 
-    bool
+    [[nodiscard]] bool
     can_match(const StoredOrder& other) const
     {
         if (this->side == other.side) [[unlikely]] {
@@ -109,14 +108,7 @@ struct StoredOrder {
     }
 
     // To ensure we don't increment the client_id
-    StoredOrder(const StoredOrder& other) : order_index(other.order_index)
-    {
-        this->client_id = other.client_id;
-        this->side = other.side;
-        this->ticker = other.ticker;
-        this->quantity = other.quantity;
-        this->price = other.price;
-    }
+    StoredOrder(const StoredOrder& other) = default;
 
     StoredOrder&
     operator=(const StoredOrder& other)
@@ -126,6 +118,7 @@ struct StoredOrder {
         }
 
         this->order_index = other.order_index;
+        this->tick_created = other.tick_created;
         this->client_id = other.client_id;
         this->side = other.side;
         this->ticker = other.ticker;
