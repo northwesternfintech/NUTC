@@ -4,6 +4,8 @@
 #include "exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
 #include "exchange/rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
 
+#include <utility>
+
 #include <rabbitmq-c/amqp.h>
 
 namespace nutc {
@@ -27,7 +29,7 @@ RabbitMQConsumer::handle_incoming_messages(
                 }
                 else if constexpr (std::is_same_v<t, messages::MarketOrder>) {
                     RabbitMQOrderHandler::handle_incoming_market_order(
-                        engine_manager, clients, arg
+                        engine_manager, clients, std::forward<t>(arg)
                     );
                 }
             },

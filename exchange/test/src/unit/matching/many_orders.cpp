@@ -1,6 +1,6 @@
-#include "test_utils/macros.hpp"
-#include "shared/messages_wrapper_to_exchange.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
+#include "shared/messages_wrapper_to_exchange.hpp"
+#include "test_utils/macros.hpp"
 
 #include <gtest/gtest.h>
 
@@ -27,8 +27,12 @@ protected:
         manager_.modify_holdings("D", "ETHUSD", DEFAULT_QUANTITY);
     }
 
-    ClientManager manager_; // NOLINT (*)
-    Engine engine_;         // NOLINT (*)
+    ClientManager manager_{}; // NOLINT (*)
+    Engine engine_{};         // NOLINT (*)
+  
+  nutc::matching::match_result_t add_to_engine_(MarketOrder order) {
+    return engine_.match_order(std::move(order), manager_);
+  }
 };
 
 TEST_F(UnitManyOrders, CorrectTimePriority)
@@ -38,10 +42,10 @@ TEST_F(UnitManyOrders, CorrectTimePriority)
     MarketOrder order3{"C", SELL, "ETHUSD", 1, 1};
     MarketOrder order4{"D", BUY, "ETHUSD", 1, 1};
 
-    auto [matches1, updates1] = engine_.match_order(order1, manager_);
-    auto [matches2, updates2] = engine_.match_order(order2, manager_);
+    auto [matches1, updates1] = add_to_engine_(order1);
+    auto [matches2, updates2] = add_to_engine_(order2);
     engine_.add_order_without_matching(order3);
-    auto [matches3, updates3] = engine_.match_order(order4, manager_);
+    auto [matches3, updates3] = add_to_engine_(order4);
     EXPECT_EQ(matches1.size(), 0);
     EXPECT_EQ(updates1.size(), 1);
     EXPECT_EQ_OB_UPDATE(updates1[0], "ETHUSD", BUY, 1, 1);
@@ -62,14 +66,14 @@ TEST_F(UnitManyOrders, OnlyMatchesOne)
     MarketOrder order1{"A", BUY, "ETHUSD", 1, 1};
     MarketOrder order2{"B", SELL, "ETHUSD", 1, 1};
 
-    auto [matches1, updates1] = engine_.match_order(order1, manager_);
-    auto [matches2, updates2] = engine_.match_order(order1, manager_);
+    auto [matches1, updates1] = add_to_engine_(order1);
+    auto [matches2, updates2] = add_to_engine_(order1);
     EXPECT_EQ(matches1.size(), 0);
     EXPECT_EQ(updates1.size(), 1);
     EXPECT_EQ(matches2.size(), 0);
     EXPECT_EQ(updates2.size(), 1);
 
-    auto [matches3, updates3] = engine_.match_order(order2, manager_);
+    auto [matches3, updates3] = add_to_engine_(order2);
     EXPECT_EQ(matches3.size(), 1);
     EXPECT_EQ(updates3.size(), 1);
     EXPECT_EQ_MATCH(matches3[0], "ETHUSD", "A", "B", SELL, 1, 1);
@@ -83,9 +87,9 @@ TEST_F(UnitManyOrders, SimpleManyOrder)
     MarketOrder order3{"C", BUY, "ETHUSD", 1, 1};
     MarketOrder order4{"D", SELL, "ETHUSD", 3, 1};
 
-    auto [matches1, updates1] = engine_.match_order(order1, manager_);
-    auto [matches2, updates2] = engine_.match_order(order2, manager_);
-    auto [matches3, updates3] = engine_.match_order(order3, manager_);
+    auto [matches1, updates1] = add_to_engine_(order1);
+    auto [matches2, updates2] = add_to_engine_(order2);
+    auto [matches3, updates3] = add_to_engine_(order3);
 
     EXPECT_EQ(matches1.size(), 0);
     EXPECT_EQ(updates1.size(), 1);
@@ -94,7 +98,7 @@ TEST_F(UnitManyOrders, SimpleManyOrder)
     EXPECT_EQ(matches3.size(), 0);
     EXPECT_EQ(updates3.size(), 1);
 
-    auto [matches4, updates4] = engine_.match_order(order4, manager_);
+    auto [matches4, updates4] = add_to_engine_(order4);
     EXPECT_EQ(matches4.size(), 3);
     EXPECT_EQ(updates4.size(), 3);
 
@@ -114,10 +118,10 @@ TEST_F(UnitManyOrders, PassiveAndAggressivePartial)
     MarketOrder order3{"C", BUY, "ETHUSD", 2, 3};
     MarketOrder order4{"D", BUY, "ETHUSD", 10, 4}; // NOLINT (*)
 
-    auto [matches1, updates1] = engine_.match_order(order1, manager_);
-    auto [matches2, updates2] = engine_.match_order(order2, manager_);
-    auto [matches3, updates3] = engine_.match_order(order3, manager_);
-    auto [matches4, updates4] = engine_.match_order(order4, manager_);
+    auto [matches1, updates1] = add_to_engine_(order1);
+    auto [matches2, updates2] = add_to_engine_(order2);
+    auto [matches3, updates3] = add_to_engine_(order3);
+    auto [matches4, updates4] = add_to_engine_(order4);
 
     EXPECT_EQ(matches1.size(), 0);
     EXPECT_EQ(updates1.size(), 1);

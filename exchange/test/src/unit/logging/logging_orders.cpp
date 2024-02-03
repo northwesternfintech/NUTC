@@ -1,6 +1,6 @@
 #include "exchange/config.h"
-#include "shared/messages_wrapper_to_exchange.hpp"
 #include "exchange/matching/engine/engine.hpp"
+#include "shared/messages_wrapper_to_exchange.hpp"
 #include "test_utils/macros.hpp"
 
 #include <gtest/gtest.h>
@@ -26,6 +26,10 @@ protected:
 
     ClientManager manager_; // NOLINT(*)
     Engine engine_;         // NOLINT(*)
+
+  nutc::matching::match_result_t add_to_engine_(MarketOrder order) {
+    return engine_.match_order(std::move(order), manager_);
+  }
 };
 
 TEST_F(UnitLoggingOrders, LogMarketOrders)
@@ -46,8 +50,8 @@ TEST_F(UnitLoggingOrders, LogMatches)
     MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
     MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
 
-    auto [matches, ob_updates] = engine_.match_order(order1, manager_);
-    auto [matches2, ob_updates2] = engine_.match_order(order2, manager_);
+    auto [matches, ob_updates] = add_to_engine_(order1);
+    auto [matches2, ob_updates2] = add_to_engine_(order2);
 
     auto& logger = Logger::get_logger();
     EXPECT_NO_FATAL_FAILURE(logger.log_event(matches2.at(0)));
