@@ -129,17 +129,22 @@ struct StoredOrder {
     }
 };
 
+struct order_index {
+    float price;
+    uint64_t index;
+};
+
 // Want highest first
 struct bid_comparator {
     bool
     operator()(
-        const std::pair<float, uint64_t>& lhs, const std::pair<float, uint64_t>& rhs
+        const order_index& lhs, const order_index& rhs
     ) const
     {
-        if (lhs.first != rhs.first) {
-            return lhs.first > rhs.first;
+        if (lhs.price != rhs.price) {
+            return lhs.price > rhs.price;
         }
-        return lhs.second < rhs.second;
+        return lhs.index < rhs.index;
     }
 };
 
@@ -147,13 +152,13 @@ struct bid_comparator {
 struct ask_comparator {
     bool
     operator()(
-        const std::pair<float, uint64_t>& lhs, const std::pair<float, uint64_t>& rhs
+        const order_index& lhs, const order_index& rhs
     ) const
     {
-        if (lhs.first != rhs.first) {
-            return lhs.first < rhs.first;
+        if (lhs.price != rhs.price) {
+            return lhs.price < rhs.price;
         }
-        return lhs.second < rhs.second;
+        return lhs.index < rhs.index;
     }
 };
 } // namespace matching
