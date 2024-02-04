@@ -1,7 +1,7 @@
 #include "exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
 #include "exchange/rabbitmq/consumer/RabbitMQConsumer.hpp"
 #include "exchange/rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
-#include "shared/messages.hpp"
+#include "shared/messages_wrapper_to_exchange.hpp"
 #include "test_utils/macros.hpp"
 #include "test_utils/process.hpp"
 
@@ -47,7 +47,7 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
     EXPECT_TRUE(std::holds_alternative<nutc::messages::MarketOrder>(mess));
 
     nutc::messages::MarketOrder actual = std::get<nutc::messages::MarketOrder>(mess);
-    EXPECT_EQ_MARKET_ORDER(
+    ASSERT_EQ_MARKET_ORDER(
         actual, "test_algos/buy_tsla_at_100", "TSLA", nutc::messages::SIDE::BUY, 100, 10
     );
 }
@@ -70,13 +70,13 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
 
     nutc::messages::MarketOrder actual_mo =
         std::get<nutc::messages::MarketOrder>(mess1);
-    EXPECT_EQ_MARKET_ORDER(
+    ASSERT_EQ_MARKET_ORDER(
         actual_mo, "test_algos/buy_tsla_on_trade", "TSLA", nutc::messages::SIDE::BUY,
         102, 10
     );
 
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(
-        engine_manager_, users_, actual_mo
+        engine_manager_, users_, std::move(actual_mo)
     );
 
     // on_trade_match triggers one user to place a BUY order of 1 TSLA at 100
@@ -84,7 +84,7 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
     EXPECT_TRUE(std::holds_alternative<nutc::messages::MarketOrder>(mess2));
 
     nutc::messages::MarketOrder actual2 = std::get<nutc::messages::MarketOrder>(mess2);
-    EXPECT_EQ_MARKET_ORDER(
+    ASSERT_EQ_MARKET_ORDER(
         actual2, "test_algos/buy_tsla_on_trade", "APPL", nutc::messages::SIDE::BUY, 100,
         1
     );
@@ -108,13 +108,13 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdate)
 
     nutc::messages::MarketOrder actual_mo =
         std::get<nutc::messages::MarketOrder>(mess1);
-    EXPECT_EQ_MARKET_ORDER(
+    ASSERT_EQ_MARKET_ORDER(
         actual_mo, "test_algos/buy_tsla_on_account", "TSLA", nutc::messages::SIDE::BUY,
         102, 10
     );
 
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(
-        engine_manager_, users_, actual_mo
+        engine_manager_, users_, std::move(actual_mo)
     );
 
     // on_trade_match triggers one user to place a BUY order of 1 TSLA at 100
@@ -122,7 +122,7 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdate)
     EXPECT_TRUE(std::holds_alternative<nutc::messages::MarketOrder>(mess2));
 
     nutc::messages::MarketOrder actual2 = std::get<nutc::messages::MarketOrder>(mess2);
-    EXPECT_EQ_MARKET_ORDER(
+    ASSERT_EQ_MARKET_ORDER(
         actual2, "test_algos/buy_tsla_on_account", "APPL", nutc::messages::SIDE::BUY,
         100, 1
     );

@@ -1,5 +1,6 @@
-#include "exchange/config.h"
 #include "exchange/matching/engine/engine.hpp"
+#include "exchange/matching/engine/order_storage.hpp"
+#include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 #include "test_utils/macros.hpp"
 
@@ -8,7 +9,7 @@
 using nutc::messages::SIDE::BUY;
 using nutc::messages::SIDE::SELL;
 
-class UnitLoggingOrders : public ::testing::Test {
+class UnitOrderExpiration : public ::testing::Test {
 protected:
     static constexpr const int DEFAULT_QUANTITY = 1000;
 
@@ -24,8 +25,8 @@ protected:
         manager_.modify_holdings("DEF", "ETHUSD", DEFAULT_QUANTITY);
     }
 
-    ClientManager manager_; // NOLINT(*)
-    Engine engine_;         // NOLINT(*)
+    ClientManager manager_{}; // NOLINT (*)
+    Engine engine_{};         // NOLINT (*)
 
     nutc::matching::match_result_t
     add_to_engine_(MarketOrder order)
@@ -34,27 +35,30 @@ protected:
     }
 };
 
-TEST_F(UnitLoggingOrders, LogMarketOrders)
+TEST_F(UnitOrderExpiration, SimpleNoMatch)
 {
-    manager_.modify_capital("ABC", -STARTING_CAPITAL);
-
-    MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
     MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
+    MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
+    auto [matches, ob_updates] = add_to_engine_(order1);
+    ASSERT_EQ(matches.size(), 0);
+    ASSERT_EQ(ob_updates.size(), 1);
+    ASSERT_EQ_OB_UPDATE(ob_updates.at(0), "ETHUSD", BUY, 1, 1);
 
-    auto& logger = Logger::get_logger();
+    ASSERT_EQ(1, engine_.remove_old_orders(1, 0).size());
 
-    EXPECT_NO_FATAL_FAILURE(logger.log_event(order1));
-    EXPECT_NO_FATAL_FAILURE(logger.log_event(order2));
+    auto [matches2, ob_updates2] = add_to_engine_(order2);
+    ASSERT_EQ(matches2.size(), 0);
+    ASSERT_EQ(ob_updates2.size(), 1);
+    ASSERT_EQ_OB_UPDATE(ob_updates2.at(0), "ETHUSD", SELL, 1, 1);
 }
 
-TEST_F(UnitLoggingOrders, LogMatches)
+TEST_F(UnitOrderExpiration, IncrementTick)
 {
+    engine_.remove_old_orders(1, 0);
+
     MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
     MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
 
     auto [matches, ob_updates] = add_to_engine_(order1);
-    auto [matches2, ob_updates2] = add_to_engine_(order2);
-
-    auto& logger = Logger::get_logger();
-    EXPECT_NO_FATAL_FAILURE(logger.log_event(matches2.at(0)));
+    ASSERT_EQ(1, engine_.remove_old_orders(2, 1).size());
 }
