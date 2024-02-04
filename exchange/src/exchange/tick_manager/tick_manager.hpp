@@ -1,6 +1,7 @@
 #pragma once
 
 #include "tick_observer.hpp"
+#include <chrono>
 
 #include <list>
 #include <thread>
@@ -10,35 +11,23 @@ namespace ticks {
 
 class TickManager {
 public:
-    TickManager(const TickManager&) = delete;
-    TickManager(TickManager&&) = delete;
-    TickManager& operator=(const TickManager&) = delete;
-    TickManager& operator=(TickManager&&) = delete;
-
-    static TickManager&
-    get_instance(size_t start_tick_rate)
-    {
-        static TickManager tm(start_tick_rate);
-        return tm;
-    }
-
     void
     attach(TickObserver* observer)
     {
-        observers.push_back(observer);
+        observers_.push_back(observer);
     }
 
     void
     detach(TickObserver* observer)
     {
-        observers.remove(observer);
+        observers_.remove(observer);
     }
 
     void
     start()
     {
         running_ = true;
-        tick_thread_ = std::thread(&TickManager::run, this);
+        tick_thread_ = std::thread(&TickManager::run_, this);
     }
 
     void
@@ -49,15 +38,31 @@ public:
     }
 
 private:
-    size_t hz_;
+  std::chrono::milliseconds delay_time_;
     std::atomic<bool> running_;
     std::thread tick_thread_;
-    std::list<TickObserver*> observers;
+    std::list<TickObserver*> observers_;
+    static constexpr uint16_t MS_PER_SECOND = 1000;
 
-    TickManager(size_t start_tick_rate) : hz_(start_tick_rate) {}
+    explicit TickManager(uint16_t start_tick_rate) : delay_time_(std::chrono::milliseconds(MS_PER_SECOND / start_tick_rate)) {}
 
-    void notify_tick();
-    void run();
+    void notify_tick_();
+    void run_();
+
+    ~TickManager() { stop(); }
+
+public:
+    TickManager(const TickManager&) = delete;
+    TickManager(TickManager&&) = delete;
+    TickManager& operator=(const TickManager&) = delete;
+    TickManager& operator=(TickManager&&) = delete;
+
+    static TickManager&
+    get_instance(uint16_t start_tick_rate)
+    {
+        static TickManager manager(start_tick_rate);
+        return manager;
+    }
 };
 
 } // namespace ticks
