@@ -8,6 +8,8 @@ import {
   BarChart,
   CartesianGrid,
   Legend,
+  Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -117,7 +119,7 @@ const sandboxOutput = {
       },
     },
     {
-      timestamp: "2024-02-02T04:32:03.963Z",
+      timestamp: "2024-02-02T04:32:04.963Z",
       data: {
         buyer_id: "HPl7qB7JXVPr8whA5CdeHkiIJgy2",
         price: 100,
@@ -258,7 +260,48 @@ const sandboxOutput = {
   ],
 } satisfies SandboxData;
 
-function VolumeByTickerGraph(props: { data: SandboxData }) {
+function MatchesPerSecondChart(props: { data: SandboxData }) {
+  const dataForChart = useMemo(() => {
+    // Initialize an empty object to hold the count of matches per second
+    const matchesPerSecond = new Map();
+
+    props.data.matches.forEach(match => {
+      // Convert timestamp to date and then back to a string without milliseconds for grouping
+      const date = new Date(match.timestamp);
+      const second = date.toISOString().split(".")[0] + "Z"; // Remove milliseconds
+      // Count the occurrences
+      matchesPerSecond.set(second, (matchesPerSecond.get(second) || 0) + 1);
+    });
+
+    // Convert the map to an array of objects suitable for Recharts
+    const dataForChart = Array.from(matchesPerSecond, ([timestamp, count]) => ({
+      timestamp,
+      count,
+    }));
+
+    return dataForChart;
+  }, [props.data]);
+
+  const formatXAxis = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return date.toISOString().split("T")[1].split(".")[0];
+  };
+
+  return (
+    <ResponsiveContainer width="100%" height={300}>
+      <LineChart data={dataForChart}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="timestamp" tickFormatter={formatXAxis} />
+        <YAxis />
+        <Tooltip />
+        <Legend />
+        <Line type="monotone" dataKey="count" stroke="#ff0000" />
+      </LineChart>
+    </ResponsiveContainer>
+  );
+}
+
+function VolumeByTickerChart(props: { data: SandboxData }) {
   const volumeByTickerData = useMemo(() => {
     const volumeByTicker: { [key: string]: number } = {};
 
@@ -293,7 +336,7 @@ function VolumeByTickerGraph(props: { data: SandboxData }) {
   );
 }
 
-const AverageTradePriceByTickerGraph = (props: { data: SandboxData }) => {
+function AverageTradePriceByTickerChart(props: { data: SandboxData }) {
   const averageTradePriceByTicker = useMemo(() => {
     const sums: Record<string, number> = {};
     const quantities: Record<string, number> = {};
@@ -323,7 +366,7 @@ const AverageTradePriceByTickerGraph = (props: { data: SandboxData }) => {
       </BarChart>
     </ResponsiveContainer>
   );
-};
+}
 
 export default function Page({ params }: { params: { id: string } }) {
   const userInfo = useUserInfo();
@@ -400,7 +443,7 @@ export default function Page({ params }: { params: { id: string } }) {
             <div className="px-4 py-5 sm:p-6">
               <dl>
                 <dt className="text-sm font-medium text-gray-500 truncate">
-                  Sandbox Duration (s)
+                  Trial time (s)
                 </dt>
                 <dd className="mt-1 text-3xl font-semibold text-gray-900">
                   {duration}
@@ -413,11 +456,15 @@ export default function Page({ params }: { params: { id: string } }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <h3 className="font-semibold">Volume Traded by Ticker</h3>
-            <VolumeByTickerGraph data={sandboxOutput} />
+            <VolumeByTickerChart data={sandboxOutput} />
           </div>
           <div>
             <h3 className="font-semibold">Average Trade Price by Ticker</h3>
-            <AverageTradePriceByTickerGraph data={sandboxOutput} />
+            <AverageTradePriceByTickerChart data={sandboxOutput} />
+          </div>
+          <div>
+            <h3 className="font-semibold">Matches per Second</h3>
+            <MatchesPerSecondChart data={sandboxOutput} />
           </div>
         </div>
       </div>
