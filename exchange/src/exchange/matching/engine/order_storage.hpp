@@ -137,9 +137,7 @@ struct order_index {
 // Want highest first
 struct bid_comparator {
     bool
-    operator()(
-        const order_index& lhs, const order_index& rhs
-    ) const
+    operator()(const order_index& lhs, const order_index& rhs) const
     {
         if (lhs.price != rhs.price) {
             return lhs.price > rhs.price;
@@ -151,9 +149,7 @@ struct bid_comparator {
 // Want lowest first
 struct ask_comparator {
     bool
-    operator()(
-        const order_index& lhs, const order_index& rhs
-    ) const
+    operator()(const order_index& lhs, const order_index& rhs) const
     {
         if (lhs.price != rhs.price) {
             return lhs.price < rhs.price;

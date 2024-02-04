@@ -4,6 +4,7 @@
 #include "algos/sandbox_mode/sandbox_mode.hpp"
 #include "client_manager/client_manager.hpp"
 #include "config.h"
+#include "exchange/tick_manager/tick_manager.hpp"
 #include "logging.hpp"
 #include "matching/manager/engine_manager.hpp"
 #include "process_spawning/spawning.hpp"
