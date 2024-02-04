@@ -42,6 +42,22 @@ tasks:
       - task: check-and-start-services
       - ./build/dev/{{.NAME}} 
 
+  bots:
+    env:
+      NUTC_WRAPPER_BINARY_PATH: "./build/dev/WRAPPER"
+    cmds:
+      - task: build
+      - ./build/dev/{{.NAME}} --bots-only
+
+  run-with-gdb:
+    dir: '{{.USER_WORKING_DIR}}'
+    env:
+      NUTC_WRAPPER_BINARY_PATH: "./build/dev/WRAPPER"
+    cmds:
+      - task: build
+      - task: check-and-start-services
+      - gdb ./build/dev/{{.NAME}} 
+      
   dev:
     env:
       NUTC_WRAPPER_BINARY_PATH: "./build/dev/WRAPPER"

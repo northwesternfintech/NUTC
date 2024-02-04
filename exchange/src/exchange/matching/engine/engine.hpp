@@ -40,6 +40,8 @@ public:
      */
     match_result_t match_order(MarketOrder&& order, manager::ClientManager& manager);
 
+    float get_midprice() const;
+
     void
     add_order(const MarketOrder& order)
     {
@@ -50,7 +52,7 @@ public:
     }
 
     void
-    add_order(StoredOrder stored_order)
+    add_order(const StoredOrder& stored_order)
     {
         switch (stored_order.side) {
             case SIDE::BUY:

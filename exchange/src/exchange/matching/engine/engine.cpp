@@ -9,6 +9,15 @@
 namespace nutc {
 namespace matching {
 
+float
+Engine::get_midprice() const
+{
+    if (asks_.empty() || bids_.empty()) {
+        return 0;
+    }
+    return (asks_.begin()->price + bids_.rbegin()->price) / 2;
+}
+
 std::vector<StoredOrder>
 Engine::remove_old_orders(uint64_t new_tick, uint64_t removed_tick_age)
 {

@@ -27,4 +27,4 @@
 //
 #define ALGO_DIR "algos"
 
-enum class Mode { SANDBOX, DEV, NORMAL };
+enum class Mode { SANDBOX, DEV, NORMAL, BOTS_ONLY };
