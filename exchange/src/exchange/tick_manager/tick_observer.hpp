@@ -5,9 +5,9 @@ namespace ticks {
 
 class TickObserver {
 public:
-    virtual ~TickObserver() {}
+    virtual ~TickObserver() = default;
 
-    virtual void onTick() = 0;
+    virtual void on_tick() = 0;
 };
 } // namespace ticks
 } // namespace nutc
