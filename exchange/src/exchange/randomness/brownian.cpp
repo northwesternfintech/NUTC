@@ -28,7 +28,7 @@ BrownianMotion::generate_next_price()
     double new_price = current_price + delta_current_price;
 
     cur_value_ = new_price;
-  return new_price;
+    return new_price;
 }
 
 } // namespace stochastic

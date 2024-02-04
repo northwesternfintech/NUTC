@@ -8,7 +8,7 @@ namespace rabbitmq {
 
 void
 RabbitMQOrderHandler::handle_incoming_market_order(
-    engine_manager::Manager& engine_manager, manager::ClientManager& clients,
+    engine_manager::EngineManager& engine_manager, manager::ClientManager& clients,
     MarketOrder&& order
 )
 {
@@ -65,7 +65,7 @@ RabbitMQOrderHandler::handle_incoming_market_order(
 
 void
 RabbitMQOrderHandler::add_liquidity_to_ticker(
-    manager::ClientManager& clients, engine_manager::Manager& engine_manager,
+    manager::ClientManager& clients, engine_manager::EngineManager& engine_manager,
     const std::string& ticker, float quantity, float price
 )
 {

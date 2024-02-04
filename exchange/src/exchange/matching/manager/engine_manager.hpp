@@ -17,7 +17,7 @@ namespace engine_manager {
  * @details This class is responsible for creating and managing all matching engines for
  * different tickers
  */
-class Manager {
+class EngineManager {
 public:
     /**
      * @brief Returns a reference to the engine with the given ticker, if it exists
@@ -40,6 +40,22 @@ public:
 
 private:
     std::map<std::string, matching::Engine> engines_;
+    EngineManager() = default;
+
+public:
+    // fuck it, everything's a singleton
+
+    static EngineManager&
+    get_instance()
+    {
+        static EngineManager instance;
+        return instance;
+    }
+
+    EngineManager(EngineManager const&) = delete;
+    EngineManager operator=(EngineManager const&) = delete;
+    EngineManager(EngineManager&&) = delete;
+    EngineManager operator=(EngineManager&&) = delete;
 };
 } // namespace engine_manager
 } // namespace nutc

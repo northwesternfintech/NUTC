@@ -40,6 +40,8 @@ public:
      */
     match_result_t match_order(MarketOrder&& order, manager::ClientManager& manager);
 
+    float get_midprice() const;
+
     void
     add_order(const MarketOrder& order)
     {

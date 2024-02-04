@@ -1,9 +1,8 @@
 #pragma once
 #include "shared/messages_wrapper_to_exchange.hpp"
 
-#include <vector>
-
 #include <iostream>
+#include <vector>
 
 namespace nutc {
 namespace bots {
@@ -15,9 +14,11 @@ public:
     // Do something better later
     MarketMakerBot() : capital_limit_(1000) {}
 
-    std::vector<messages::MarketOrder> take_action(float new_theo) {
-    std::cout << "Taking action with new theo " << new_theo << "\n";
-  }
+    std::vector<messages::MarketOrder>
+    take_action(float new_theo)
+    {
+        std::cout << "Taking action with new theo " << new_theo << "\n";
+    }
 
     void
     modify_short_capital(float delta)

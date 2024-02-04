@@ -14,7 +14,8 @@ using Match = messages::Match;
 
 class BotContainer : public ticks::TickObserver {
 public:
-    void on_tick() override
+    void
+    on_tick() override
     {
         auto theo = theo_generator_.generate_next_price();
         // std::cout << "Theo: " << theo << "\n";
@@ -32,7 +33,7 @@ public:
     {
         std::vector<MarketOrder> orders;
         for (auto& [id, bot] : market_makers_) {
-      std::vector<messages::MarketOrder> bot_orders = bot.take_action(new_theo);
+            std::vector<messages::MarketOrder> bot_orders = bot.take_action(new_theo);
             orders.insert(orders.end(), bot_orders.begin(), bot_orders.end());
         }
         return orders;

@@ -122,7 +122,6 @@ main(int argc, const char** argv)
     std::signal(SIGINT, flush_log);
 
     manager::ClientManager users;
-    nutc::engine_manager::Manager engine_manager;
 
     auto [mode, sandbox] = process_arguments(argc, argv);
 
@@ -175,6 +174,9 @@ main(int argc, const char** argv)
     }
 
     client::spawn_all_clients(users);
+
+    engine_manager::EngineManager& engine_manager =
+        engine_manager::EngineManager::get_instance();
 
     engine_manager.add_engine("A");
     engine_manager.add_engine("B");
