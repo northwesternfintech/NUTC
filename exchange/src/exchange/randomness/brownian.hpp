@@ -36,14 +36,20 @@ public:
     }
 
     // Constructor for BrownianMotion, takes a seed and initial value
-    explicit BrownianMotion(const unsigned int seed, const double initial_value) :
-        cur_value_(initial_value)
+    explicit BrownianMotion(const double initial_value) : cur_value_(initial_value)
     {
-        random_number_generator_ = std::mt19937(seed);
+        std::random_device rd;
+        random_number_generator_ = std::mt19937(rd());
     }
 
     // Generates and returns the next price based on previous prices
-    [[nodiscard]] double generate_next_price();
+    void generate_next_price();
+
+    [[nodiscard]] double
+    get_current_price() const
+    {
+        return cur_value_;
+    }
 
     // Force set the current price
     void
