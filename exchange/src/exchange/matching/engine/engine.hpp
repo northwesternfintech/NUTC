@@ -54,14 +54,10 @@ public:
     {
         switch (stored_order.side) {
             case SIDE::BUY:
-                bids_.insert(std::pair<float, uint64_t>(
-                    stored_order.price, stored_order.order_index
-                ));
+                bids_.insert({stored_order.price, stored_order.order_index});
                 break;
             case SIDE::SELL:
-                asks_.insert(std::pair<float, uint64_t>(
-                    stored_order.price, stored_order.order_index
-                ));
+                asks_.insert({stored_order.price, stored_order.order_index});
         }
 
         orders_by_id_[stored_order.order_index] = stored_order;
@@ -73,9 +69,14 @@ public:
     remove_old_orders(uint64_t new_tick, uint64_t removed_tick_age);
 
 private:
+    uint64_t current_tick_ = 0;
+
+    match_result_t
+    attempt_matches_(manager::ClientManager& manager, StoredOrder& aggressive_order);
+
     // both map/sort price, order_index
-    std::set<std::pair<float, uint64_t>, bid_comparator> bids_;
-    std::set<std::pair<float, uint64_t>, ask_comparator> asks_;
+    std::set<order_index, bid_comparator> bids_;
+    std::set<order_index, ask_comparator> asks_;
 
     // order index -> order
     std::unordered_map<uint64_t, StoredOrder> orders_by_id_;
@@ -83,27 +84,22 @@ private:
     // tick -> queue of order ids
     std::map<uint64_t, std::queue<uint64_t>> orders_by_tick_;
 
-    uint64_t current_tick_ = 0;
-
-    match_result_t
-    attempt_matches_(manager::ClientManager& manager, StoredOrder& aggressive_order);
-
     template <typename Comparator>
     std::optional<std::reference_wrapper<StoredOrder>>
-    get_order_from_set_(std::set<std::pair<float, uint64_t>, Comparator>& order_set)
+    get_order_from_set_(std::set<order_index, Comparator>& order_set)
     {
         if (order_set.empty()) {
             return std::nullopt;
         }
 
-        auto order_id = order_set.begin()->second;
+        auto order_id = order_set.begin()->index;
         while (orders_by_id_.find(order_id) == orders_by_id_.end()) {
             order_set.erase(order_set.begin());
             if (order_set.empty()) {
                 return std::nullopt;
             }
             assert(!order_set.empty());
-            order_id = order_set.begin()->second;
+            order_id = order_set.begin()->index;
         }
         return orders_by_id_.at(order_id);
     }
