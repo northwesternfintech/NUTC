@@ -42,6 +42,13 @@ process_arguments(int argc, const char** argv)
         .implicit_value(true)
         .nargs(0);
 
+    program.add_argument("--bots-only")
+        .help("No algos spawned in, just bots")
+        .action([](const auto& /* unused */) {})
+        .default_value(false)
+        .implicit_value(true)
+        .nargs(0);
+
     program.add_argument("-S", "--sandbox").help("Provide a sandbox algo id").nargs(2);
 
     program.add_argument("-V", "--version")
@@ -81,11 +88,14 @@ process_arguments(int argc, const char** argv)
     }
 
     bool dev_mode = program.get<bool>("--dev");
+    bool bots_only = program.get<bool>("--bots-only");
     auto get_mode = [&]() -> Mode {
         if (dev_mode)
             return Mode::DEV;
         if (algo.has_value())
             return Mode::SANDBOX;
+        if (bots_only)
+            return Mode::BOTS_ONLY;
         return Mode::NORMAL;
     };
 
@@ -100,13 +110,18 @@ flush_log(int sig) // NOLINT(*)
 }
 
 // Initializes tick manager with brownian motion
-// TODO(stevenewald): make this init an entire ticker, vs just the bots for a ticker
 void
-initialize_ticker(const std::string& ticker)
+initialize_ticker(const std::string& ticker, float starting_price)
 {
-    auto& tick_listener = nutc::bots::BotContainerMapper::get_instance(ticker);
-    auto& tick_manager = nutc::ticks::TickManager::get_instance();
-    nutc::engine_manager::EngineManager::get_instance().add_engine(ticker);
+    using nutc::bots::BotContainerMapper;
+    using nutc::engine_manager::EngineManager;
+    using nutc::ticks::TickManager;
+
+    auto& tick_manager = TickManager::get_instance();
+    EngineManager::get_instance().add_engine(ticker);
+    EngineManager::get_instance().set_initial_price(ticker, starting_price);
+
+    auto& tick_listener = BotContainerMapper::get_instance(ticker, starting_price);
     tick_manager.attach(&tick_listener);
 }
 
@@ -120,14 +135,17 @@ main(int argc, const char** argv)
     // Set up logging
     logging::init(quill::LogLevel::TraceL3);
 
-    static constexpr uint16_t TICK_HZ = 10;
+    static constexpr uint16_t TICK_HZ = 5;
     nutc::ticks::TickManager::get_instance(TICK_HZ);
 
-    initialize_ticker("A");
-    initialize_ticker("B");
-    initialize_ticker("C");
+    initialize_ticker("A", 100);
+    initialize_ticker("B", 200);
+    initialize_ticker("C", 300);
 
-    nutc::ticks::TickManager::get_instance().start();
+    bots::MarketMakerBot bot1{5000};
+    bots::BotContainerMapper::get_instance("A").add_mm_bot("MM_BOT_1", bot1);
+
+    ticks::TickManager::get_instance().start();
 
     manager::ClientManager users;
 
@@ -179,6 +197,9 @@ main(int argc, const char** argv)
             break;
         case Mode::NORMAL:
             initialize_normal_mode();
+            break;
+        case Mode::BOTS_ONLY:
+            break;
     }
 
     client::spawn_all_clients(users);
@@ -189,15 +210,6 @@ main(int argc, const char** argv)
     // Run exchange
     rabbitmq::RabbitMQClientManager::wait_for_clients(users, num_clients);
     rabbitmq::RabbitMQClientManager::send_start_time(users, CLIENT_WAIT_SECS);
-    rabbitmq::RabbitMQOrderHandler::add_liquidity_to_ticker(
-        users, engine_manager, "A", 1000, 100
-    );
-    rabbitmq::RabbitMQOrderHandler::add_liquidity_to_ticker(
-        users, engine_manager, "B", 2000, 200
-    );
-    rabbitmq::RabbitMQOrderHandler::add_liquidity_to_ticker(
-        users, engine_manager, "C", 3000, 300
-    );
 
     // Main event loop
     rabbitmq::RabbitMQConsumer::handle_incoming_messages(users, engine_manager);

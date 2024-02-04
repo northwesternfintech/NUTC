@@ -1,7 +1,7 @@
 #pragma once
+#include "exchange/logging.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
-#include <iostream>
 #include <vector>
 
 namespace nutc {
@@ -12,12 +12,13 @@ public:
     explicit MarketMakerBot(float capital_limit) : capital_limit_(capital_limit) {}
 
     // Do something better later
-    MarketMakerBot() : capital_limit_(1000) {}
+    MarketMakerBot() = default;
 
     std::vector<messages::MarketOrder>
-    take_action(float new_theo)
+    take_action(float new_theo, float current)
     {
-        std::cout << "Taking action with new theo " << new_theo << "\n";
+        log_i(main, "Taking action with new theo/current {}/{}", new_theo, current);
+        return {};
     }
 
     void

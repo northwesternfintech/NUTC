@@ -1,10 +1,10 @@
 #pragma once
 #include "exchange/bot_framework/bots/mm.hpp"
+#include "exchange/logging.hpp"
+#include "exchange/matching/manager/engine_manager.hpp"
 #include "exchange/randomness/brownian.hpp"
 #include "exchange/tick_manager/tick_observer.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
-
-#include "exchange/logging.hpp"
 
 namespace nutc {
 
@@ -18,22 +18,28 @@ public:
     on_tick() override
     {
         auto theo = theo_generator_.generate_next_price();
-        log_i(main, "Theo for engine {} is {}", ticker_, theo);
-        auto orders = BotContainer::on_new_theo(static_cast<float>(theo));
+        auto current =
+            engine_manager::EngineManager::get_instance().get_engine(ticker_);
+        assert(current.has_value());
+        auto current_price = current.value().get().get_midprice();
+        // log_i(main, "Theo/current for engine {} is {}/{}", ticker_, theo, current);
+        auto orders =
+            BotContainer::on_new_theo(static_cast<float>(theo), current_price);
     }
 
     void
-    add_mm_bot(std::string& bot_id, MarketMakerBot&& bot)
+    add_mm_bot(const std::string& bot_id, const MarketMakerBot& bot)
     {
-        market_makers_[bot_id] = std::move(bot);
+        market_makers_[bot_id] = bot;
     }
 
     std::vector<MarketOrder>
-    on_new_theo(float new_theo)
+    on_new_theo(float new_theo, float current)
     {
         std::vector<MarketOrder> orders;
         for (auto& [id, bot] : market_makers_) {
-            std::vector<messages::MarketOrder> bot_orders = bot.take_action(new_theo);
+            std::vector<messages::MarketOrder> bot_orders =
+                bot.take_action(new_theo, current);
             orders.insert(orders.end(), bot_orders.begin(), bot_orders.end());
         }
         return orders;
@@ -56,14 +62,17 @@ public:
     }
 
     BotContainer() = default;
-    explicit BotContainer(std::string ticker) : ticker_(std::move(ticker)) {}
+
+    explicit BotContainer(std::string ticker, float starting_price) :
+        ticker_(std::move(ticker)), theo_generator_(static_cast<double>(starting_price))
+    {}
 
 private:
     // TODO(stevenewald): make more elegant than string UUID
     std::unordered_map<std::string, MarketMakerBot> market_makers_;
     std::string ticker_;
 
-    stochastic::BrownianMotion theo_generator_{};
+    stochastic::BrownianMotion theo_generator_;
 };
 } // namespace bots
 } // namespace nutc
