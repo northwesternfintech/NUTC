@@ -70,7 +70,11 @@ BrownianMotion::generate_next_price()
     }
 =======
     cur_value_ = new_price;
+<<<<<<< HEAD
 >>>>>>> 179d8d9 (Added brownian to tick manager)
+=======
+  return new_price;
+>>>>>>> 31104fd (Moved theo generation to bot container)
 }
 
 } // namespace stochastic
