@@ -14,25 +14,26 @@ Engine::remove_old_orders(uint64_t new_tick, uint64_t removed_tick_age)
 {
     current_tick_ = new_tick;
     std::vector<StoredOrder> removed_orders;
-    removed_orders.reserve(bids_.size() + asks_.size());
+    // Maybe we can reserve space?
 
     while (!orders_by_tick_.empty()) {
-      uint64_t earliest_tick = orders_by_tick_.begin()->first;
-      if (current_tick_ - earliest_tick < removed_tick_age) {
-          break;
-      }
-      std::queue<uint64_t>& order_ids = orders_by_tick_[earliest_tick];
-      while (!order_ids.empty()) {
-          uint64_t order_id = order_ids.front();
-          order_ids.pop();
-      
-          if(orders_by_id_.find(order_id) == orders_by_id_.end()) {
-              continue;
-          }
-      
-          removed_orders.push_back(std::move(orders_by_id_[order_id]));
-          orders_by_id_.erase(order_id);
-      }
+        uint64_t earliest_tick = orders_by_tick_.begin()->first;
+        if (earliest_tick > removed_tick_age) {
+            break;
+        }
+        std::queue<uint64_t>& order_ids = orders_by_tick_[earliest_tick];
+        while (!order_ids.empty()) {
+            uint64_t order_id = order_ids.front();
+            order_ids.pop();
+
+            if (orders_by_id_.find(order_id) == orders_by_id_.end()) {
+                continue;
+            }
+
+            removed_orders.push_back(std::move(orders_by_id_[order_id]));
+            orders_by_id_.erase(order_id);
+        }
+        orders_by_tick_.erase(earliest_tick);
     }
 
     return removed_orders;
@@ -133,33 +134,46 @@ Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
     float aggressive_quantity = aggressive_order.quantity;
     uint64_t aggressive_index = aggressive_order.order_index;
 
-    while (!bids_.empty() && !asks_.empty()
-           && get_top_order_(SIDE::BUY).can_match(get_top_order_(SIDE::SELL))) {
-        StoredOrder& sell_order = get_top_order_(SIDE::SELL);
-        StoredOrder& buy_order = get_top_order_(SIDE::BUY);
+    while (can_match_orders_()) {
+        StoredOrder& sell_order_ref =
+            get_top_order_(SIDE::SELL).value().get(); // NOLINT(*)
+        StoredOrder& buy_order_ref =
+            get_top_order_(SIDE::BUY).value().get(); // NOLINT(*)
 
-        float quantity_to_match = get_match_quantity(buy_order, sell_order);
-        SIDE aggressive_side = get_aggressive_side(sell_order, buy_order);
+        float quantity_to_match = get_match_quantity(buy_order_ref, sell_order_ref);
+        SIDE aggressive_side = get_aggressive_side(sell_order_ref, buy_order_ref);
 
         float price_to_match =
-            aggressive_side == SIDE::BUY ? sell_order.price : buy_order.price;
+            aggressive_side == SIDE::BUY ? sell_order_ref.price : buy_order_ref.price;
 
-        std::string buyer_id = buy_order.client_id;
-        std::string seller_id = sell_order.client_id;
+        std::string buyer_id = buy_order_ref.client_id;
+        std::string seller_id = sell_order_ref.client_id;
 
-        Match to_match{sell_order.ticker, aggressive_side, price_to_match,
-                       quantity_to_match, buyer_id,        seller_id};
+        Match to_match{sell_order_ref.ticker, aggressive_side, price_to_match,
+                       quantity_to_match,     buyer_id,        seller_id};
 
         std::optional<SIDE> match_failure = manager.validate_match(to_match);
         if (match_failure.has_value()) {
             SIDE side = match_failure.value();
-            if (side == SIDE::BUY)
+            if (side == SIDE::BUY) {
                 bids_.erase(bids_.begin());
-            else
+                orders_by_id_.erase(buy_order_ref.order_index);
+            }
+            else {
                 asks_.erase(asks_.begin());
+                orders_by_id_.erase(sell_order_ref.order_index);
+            }
             continue;
         }
 
+        // Now that we know the match is valid, we can make copies of the order and
+        // delete them from the tables
+        // This could be optimized, but it's good for now
+        StoredOrder sell_order = sell_order_ref;
+        StoredOrder buy_order = buy_order_ref;
+
+        orders_by_id_.erase(buy_order_ref.order_index);
+        orders_by_id_.erase(sell_order_ref.order_index);
         bids_.erase(bids_.begin());
         asks_.erase(asks_.begin());
 
