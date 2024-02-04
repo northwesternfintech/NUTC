@@ -3,11 +3,13 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"sandbox-server/analyzer"
 	"strings"
 	"time"
@@ -21,7 +23,7 @@ import (
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
-const dockerTimeout = time.Minute * 10
+const dockerTimeout = time.Minute * 1
 const firebaseStorageUrl = "https://firebasestorage.googleapis.com/v0/b/nutc-web.appspot.com/o"
 const firebaseApiKey = "AIzaSyCo2l3x2DMhg5CaNy1Pyvknk_GK8v34iUc"
 
@@ -126,7 +128,15 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Printf("%s", err.Error())
 		}
 
-		if err := uploadLogFile(user_id, algo_id, firebaseApiKey, out_file); err != nil {
+		download_token, err := uploadLogFile(user_id, algo_id, firebaseApiKey, out_file)
+		if err != nil {
+			fmt.Printf("%s", err.Error())
+		}
+
+		file_url := fmt.Sprintf("%s/%s?alt=media&token=%s", firebaseStorageUrl, url.PathEscape("logs/"+user_id+"/"+algo_id+".log"), download_token)
+
+		err = addLogFileUrlToUser(user_id, algo_id, file_url)
+		if err != nil {
 			fmt.Printf("%s", err.Error())
 		}
 	}()
@@ -143,7 +153,7 @@ func isValidID(id string) bool {
 	return true
 }
 
-func uploadLogFile(user_id, algo_id, apiKey, file_str string) error {
+func uploadLogFile(user_id, algo_id, apiKey, file_str string) (string, error) {
 	reader := strings.NewReader(file_str)
 	var buffer bytes.Buffer
 
@@ -153,20 +163,20 @@ func uploadLogFile(user_id, algo_id, apiKey, file_str string) error {
 
 	part, err := writer.CreateFormFile("file", fileName)
 	if err != nil {
-		return fmt.Errorf("writer.CreateFormFile: %v", err)
+		return "", fmt.Errorf("writer.CreateFormFile: %v", err)
 	}
 
 	if _, err := io.Copy(part, reader); err != nil {
-		return fmt.Errorf("io.Copy: %v", err)
+		return "", fmt.Errorf("io.Copy: %v", err)
 	}
 
 	if err := writer.Close(); err != nil {
-		return fmt.Errorf("writer.Close: %v", err)
+		return "", fmt.Errorf("writer.Close: %v", err)
 	}
 
 	req, err := http.NewRequest("POST", firebaseStorageUrl+"?uploadType=media&name="+fileName, &buffer)
 	if err != nil {
-		return fmt.Errorf("http.NewRequest: %v", err)
+		return "", fmt.Errorf("http.NewRequest: %v", err)
 	}
 
 	req.Header.Set("Authorization", "Bearer "+apiKey)
@@ -175,8 +185,59 @@ func uploadLogFile(user_id, algo_id, apiKey, file_str string) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
+		return "", fmt.Errorf("client.Do: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("upload failed with status: %v", resp.Status)
+	}
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("ioutil.ReadAll: %v", err)
+	}
+
+	// Unmarshal the JSON response
+	var jsonResponse map[string]interface{}
+	if err := json.Unmarshal(bodyBytes, &jsonResponse); err != nil {
+		return "", fmt.Errorf("json.Unmarshal: %v", err)
+	}
+
+	downloadToken, ok := jsonResponse["downloadTokens"].(string)
+	if !ok {
+		return "", fmt.Errorf("download token not found in response")
+	}
+
+	return downloadToken, nil
+}
+
+// Add log file url to user algo in firebase database
+func addLogFileUrlToUser(user_id, algo_id, file_url string) error {
+	type UserData struct {
+		SandboxLogFileUrl string `json:"sandboxLogFileURL"`
+	}
+
+	data := UserData{file_url}
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("json.Marshal: %v", err)
+	}
+
+	req, err := http.NewRequest("PATCH", "https://nutc-web-default-rtdb.firebaseio.com/users/"+user_id+"/algos/"+algo_id+".json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return fmt.Errorf("http.NewRequest: %v", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
 		return fmt.Errorf("client.Do: %v", err)
 	}
+
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
