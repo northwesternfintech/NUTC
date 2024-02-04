@@ -2,7 +2,7 @@
 #include "algos/dev_mode/dev_mode.hpp"
 #include "algos/normal_mode/normal_mode.hpp"
 #include "algos/sandbox_mode/sandbox_mode.hpp"
-#include "bot_framework/bot_container.hpp"
+#include "bot_framework/bot_container_mapper.hpp"
 #include "client_manager/client_manager.hpp"
 #include "config.h"
 #include "exchange/tick_manager/tick_manager.hpp"
@@ -100,26 +100,34 @@ flush_log(int sig) // NOLINT(*)
 }
 
 // Initializes tick manager with brownian motion
+// TODO(stevenewald): make this init an entire ticker, vs just the bots for a ticker
 void
-initialize_tick_manager()
+initialize_ticker(const std::string& ticker)
 {
-    auto& tick_listener = nutc::bots::BotContainer::get_instance();
-    auto& tick_manager = nutc::ticks::TickManager::get_instance(10);
+    auto& tick_listener = nutc::bots::BotContainerMapper::get_instance(ticker);
+    auto& tick_manager = nutc::ticks::TickManager::get_instance();
+    nutc::engine_manager::EngineManager::get_instance().add_engine(ticker);
     tick_manager.attach(&tick_listener);
-    tick_manager.start();
 }
 
 int
 main(int argc, const char** argv)
 {
-    using namespace nutc; // NOLINT(*)
+    std::signal(SIGINT, flush_log);
 
-    initialize_tick_manager();
+    using namespace nutc; // NOLINT(*)
 
     // Set up logging
     logging::init(quill::LogLevel::TraceL3);
 
-    std::signal(SIGINT, flush_log);
+    static constexpr uint16_t TICK_HZ = 10;
+    nutc::ticks::TickManager::get_instance(TICK_HZ);
+
+    initialize_ticker("A");
+    initialize_ticker("B");
+    initialize_ticker("C");
+
+    nutc::ticks::TickManager::get_instance().start();
 
     manager::ClientManager users;
 
@@ -176,11 +184,7 @@ main(int argc, const char** argv)
     client::spawn_all_clients(users);
 
     engine_manager::EngineManager& engine_manager =
-        engine_manager::EngineManager::get_instance();
-
-    engine_manager.add_engine("A");
-    engine_manager.add_engine("B");
-    engine_manager.add_engine("C");
+        nutc::engine_manager::EngineManager::get_instance();
 
     // Run exchange
     rabbitmq::RabbitMQClientManager::wait_for_clients(users, num_clients);
