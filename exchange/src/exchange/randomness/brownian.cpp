@@ -43,6 +43,7 @@ BrownianMotion::generate_next_price()
     std::uniform_real_distribution<double> zero_to_one_nd(0.0, 1.0);
     double random_number = zero_to_one_nd(random_number_generator_);
 
+<<<<<<< HEAD
     if (random_number >= probability_) {
         std::normal_distribution<double> distribution(
             BROWNIAN_MOTION_MEAN_SIZE_EVENT, BROWNIAN_MOTION_STDEV_EVENT_SIZE
@@ -67,6 +68,9 @@ BrownianMotion::generate_next_price()
         );
         return cur_value_;
     }
+=======
+    cur_value_ = new_price;
+>>>>>>> 179d8d9 (Added brownian to tick manager)
 }
 
 } // namespace stochastic

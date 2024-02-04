@@ -44,7 +44,13 @@ public:
     }
 
     // Generates and returns the next price based on previous prices
-    [[nodiscard]] double generate_next_price();
+    void generate_next_price();
+
+    [[nodiscard]] double
+    get_current_price() const
+    {
+        return cur_value_;
+    }
 
     // Force set the current price
     void

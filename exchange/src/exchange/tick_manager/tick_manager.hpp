@@ -2,6 +2,7 @@
 
 #include "tick_observer.hpp"
 
+#include <cassert>
 #include <chrono>
 
 #include <list>
@@ -59,8 +60,14 @@ public:
     TickManager& operator=(TickManager&&) = delete;
 
     static TickManager&
-    get_instance(uint16_t start_tick_rate)
+    get_instance(uint16_t start_tick_rate = 0)
     {
+        static bool has_been_initialized = false;
+        if (start_tick_rate == 0) {
+            assert(has_been_initialized);
+        }
+        has_been_initialized = true;
+
         static TickManager manager(start_tick_rate);
         return manager;
     }
