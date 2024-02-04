@@ -1,5 +1,6 @@
 #pragma once
 #include "exchange/matching/engine/engine.hpp"
+#include "exchange/tick_manager/tick_observer.hpp"
 
 #include <optional>
 #include <string>
@@ -19,23 +20,13 @@ namespace engine_manager {
  */
 class EngineManager {
 public:
-    /**
-     * @brief Returns a reference to the engine with the given ticker, if it exists
-     * @param ticker The ticker of the engine to return
-     * @return A reference to the engine with the given ticker, if it exists
-     */
     std::optional<engine_ref_t> get_engine(const std::string& ticker);
 
-    /**
-     * @brief Adds an engine with the given ticker
-     * @param ticker The ticker of the engine to add
-     * @return A reference to the engine with the given ticker
-     */
     void add_engine(const std::string& ticker);
 
-    /** @brief Adds initial liquidity by creating fake sell orders for a given ticker at
-     * a given quantity/price
-     */
+    void set_initial_price(const std::string& ticker, float price);
+
+    // deprecated?
     void add_initial_liquidity(const std::string& ticker, float quantity, float price);
 
 private:

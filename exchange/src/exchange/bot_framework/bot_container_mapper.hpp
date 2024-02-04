@@ -12,10 +12,11 @@ class BotContainerMapper {
     BotContainerMapper() = default;
 
     BotContainer&
-    get_container_(const std::string& ticker)
+    get_container_(const std::string& ticker, float starting_price)
     {
-        if (instances_.find(ticker) == instances_.end()) {
-            instances_[ticker] = BotContainer(ticker);
+        auto it = instances_.find(ticker);
+        if (it == instances_.end()) {
+            instances_[ticker] = BotContainer(ticker, starting_price);
         }
         return instances_[ticker];
     }
@@ -24,10 +25,10 @@ class BotContainerMapper {
 
 public:
     static BotContainer&
-    get_instance(const std::string& ticker = "DEFAULT")
+    get_instance(const std::string& ticker = "DEFAULT", float starting_price = 1000.0f)
     {
         static BotContainerMapper instances;
-        return instances.get_container_(ticker);
+        return instances.get_container_(ticker, starting_price);
     }
 
     BotContainerMapper(BotContainerMapper const&) = delete;

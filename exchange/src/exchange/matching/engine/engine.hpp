@@ -52,7 +52,7 @@ public:
     }
 
     void
-    add_order(StoredOrder stored_order)
+    add_order(const StoredOrder& stored_order)
     {
         switch (stored_order.side) {
             case SIDE::BUY:
