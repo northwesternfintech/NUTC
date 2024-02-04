@@ -4,6 +4,7 @@
 #include "algos/sandbox_mode/sandbox_mode.hpp"
 #include "client_manager/client_manager.hpp"
 #include "config.h"
+#include "exchange/randomness/brownian_tick_listener.hpp"
 #include "exchange/tick_manager/tick_manager.hpp"
 #include "logging.hpp"
 #include "matching/manager/engine_manager.hpp"
@@ -98,10 +99,22 @@ flush_log(int sig) // NOLINT(*)
     std::exit(0);
 }
 
+// Initializes tick manager with brownian motion
+void
+initialize_tick_manager()
+{
+    auto& tick_listener = nutc::stochastic::BrownianTickListener::get_instance(100);
+    auto& tick_manager = nutc::ticks::TickManager::get_instance(10);
+    tick_manager.attach(&tick_listener);
+    tick_manager.start();
+}
+
 int
 main(int argc, const char** argv)
 {
     using namespace nutc; // NOLINT(*)
+
+    initialize_tick_manager();
 
     // Set up logging
     logging::init(quill::LogLevel::TraceL3);
