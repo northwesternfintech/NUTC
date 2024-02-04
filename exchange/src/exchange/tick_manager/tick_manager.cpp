@@ -19,7 +19,7 @@ void
 TickManager::notify_tick_()
 {
     for (TickObserver* observer : observers_) {
-        observer->onTick();
+        observer->on_tick();
     }
 }
 
