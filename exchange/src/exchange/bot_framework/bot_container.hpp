@@ -4,7 +4,7 @@
 #include "exchange/tick_manager/tick_observer.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
 
-#include <iostream>
+#include "exchange/logging.hpp"
 
 namespace nutc {
 
@@ -18,7 +18,7 @@ public:
     on_tick() override
     {
         auto theo = theo_generator_.generate_next_price();
-        // std::cout << "Theo: " << theo << "\n";
+        log_i(main, "Theo for engine {} is {}", ticker_, theo);
         auto orders = BotContainer::on_new_theo(static_cast<float>(theo));
     }
 
@@ -55,28 +55,15 @@ public:
         }
     }
 
+    BotContainer() = default;
+    explicit BotContainer(std::string ticker) : ticker_(std::move(ticker)) {}
+
 private:
     // TODO(stevenewald): make more elegant than string UUID
     std::unordered_map<std::string, MarketMakerBot> market_makers_;
+    std::string ticker_;
 
     stochastic::BrownianMotion theo_generator_{};
-
-    BotContainer() = default;
-    ~BotContainer() override = default;
-
-public:
-    // Singleton functionality
-    static BotContainer&
-    get_instance()
-    {
-        static BotContainer instance;
-        return instance;
-    }
-
-    BotContainer(BotContainer const&) = delete;
-    BotContainer(BotContainer&&) = delete;
-    BotContainer& operator=(BotContainer&&) = delete;
-    BotContainer& operator=(BotContainer const&) = delete;
 };
 } // namespace bots
 } // namespace nutc
