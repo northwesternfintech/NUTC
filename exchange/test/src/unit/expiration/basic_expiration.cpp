@@ -52,14 +52,13 @@ TEST_F(UnitOrderExpiration, SimpleNoMatch)
     ASSERT_EQ_OB_UPDATE(ob_updates2.at(0), "ETHUSD", SELL, 1, 1);
 }
 
-/*TEST_F(UnitOrderExpiration, IncrementTick)
+TEST_F(UnitOrderExpiration, IncrementTick)
 {
-  engine_.remove_old_orders(1, 0);
+    engine_.remove_old_orders(1, 0);
 
     MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
     MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
-    engine_.remove_old_orders(2, 1);
+
     auto [matches, ob_updates] = add_to_engine_(order1);
-    ASSERT_EQ(matches.size(), 0);
-    ASSERT_EQ(ob_updates.size(), 0);
-}*/
+    ASSERT_EQ(1, engine_.remove_old_orders(2, 1).size());
+}
