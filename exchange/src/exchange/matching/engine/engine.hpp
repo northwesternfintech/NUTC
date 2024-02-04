@@ -7,6 +7,7 @@
 
 #include <cassert>
 
+#include <functional>
 #include <queue>
 #include <set>
 #include <vector>
@@ -63,11 +64,14 @@ public:
                 ));
         }
 
-        orders_by_id_.insert({stored_order.order_index, std::move(stored_order)});
+        orders_by_id_[stored_order.order_index] = stored_order;
+        orders_by_tick_[stored_order.tick].push(stored_order.order_index);
     }
 
-  // Called every tick
-    std::vector<StoredOrder> remove_old_orders(uint64_t new_tick, uint64_t removed_tick_age);
+    // Called every tick
+    std::vector<StoredOrder>
+    remove_old_orders(uint64_t new_tick, uint64_t removed_tick_age);
+
 private:
     // both map/sort price, order_index
     std::set<std::pair<float, uint64_t>, bid_comparator> bids_;
@@ -85,20 +89,26 @@ private:
     attempt_matches_(manager::ClientManager& manager, StoredOrder& aggressive_order);
 
     template <typename Comparator>
-    StoredOrder&
+    std::optional<std::reference_wrapper<StoredOrder>>
     get_order_from_set_(std::set<std::pair<float, uint64_t>, Comparator>& order_set)
     {
-        assert(!order_set.empty());
+        if (order_set.empty()) {
+            return std::nullopt;
+        }
+
         auto order_id = order_set.begin()->second;
         while (orders_by_id_.find(order_id) == orders_by_id_.end()) {
             order_set.erase(order_set.begin());
+            if (order_set.empty()) {
+                return std::nullopt;
+            }
             assert(!order_set.empty());
             order_id = order_set.begin()->second;
         }
         return orders_by_id_.at(order_id);
     }
 
-    StoredOrder&
+    std::optional<std::reference_wrapper<StoredOrder>>
     get_top_order_(SIDE side)
     {
         switch (side) {
@@ -109,6 +119,17 @@ private:
             default:
                 throw std::invalid_argument("Unknown side");
         }
+    }
+
+    bool
+    can_match_orders_()
+    {
+        auto bid_order = get_top_order_(SIDE::BUY);
+        auto ask_order = get_top_order_(SIDE::SELL);
+        if (!bid_order.has_value() || !ask_order.has_value()) {
+            return false;
+        }
+        return bid_order.value().get().can_match(ask_order.value().get());
     }
 };
 } // namespace matching
