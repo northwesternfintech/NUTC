@@ -13,7 +13,7 @@ namespace rabbitmq {
 
 void
 RabbitMQConsumer::handle_incoming_messages(
-    manager::ClientManager& clients, engine_manager::Manager& engine_manager
+    manager::ClientManager& clients, engine_manager::EngineManager& engine_manager
 )
 {
     while (true) {

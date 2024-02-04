@@ -3,7 +3,7 @@
 namespace nutc {
 namespace engine_manager {
 std::optional<engine_ref_t>
-Manager::get_engine(const std::string& ticker)
+EngineManager::get_engine(const std::string& ticker)
 {
     auto engine = engines_.find(ticker);
     if (engine != engines_.end()) {
@@ -13,7 +13,9 @@ Manager::get_engine(const std::string& ticker)
 }
 
 void
-Manager::add_initial_liquidity(const std::string& ticker, float quantity, float price)
+EngineManager::add_initial_liquidity(
+    const std::string& ticker, float quantity, float price
+)
 {
     MarketOrder to_add{"SIMULATED", messages::SIDE::SELL, ticker, quantity, price};
     auto engine = engines_.find(ticker);
@@ -23,7 +25,7 @@ Manager::add_initial_liquidity(const std::string& ticker, float quantity, float 
 }
 
 void
-Manager::add_engine(const std::string& ticker)
+EngineManager::add_engine(const std::string& ticker)
 {
     if (engines_.find(ticker) == engines_.end()) {
         engines_.emplace(ticker, matching::Engine());
