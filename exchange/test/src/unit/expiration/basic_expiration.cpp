@@ -25,8 +25,8 @@ protected:
         manager_.modify_holdings("DEF", "ETHUSD", DEFAULT_QUANTITY);
     }
 
-    ClientManager manager_{}; // NOLINT (*)
-    Engine engine_{};         // NOLINT (*)
+    ClientManager& manager_ = nutc::manager::ClientManager::get_instance(); // NOLINT(*)
+    Engine engine_{}; // NOLINT (*)
 
     nutc::matching::match_result_t
     add_to_engine_(MarketOrder order)

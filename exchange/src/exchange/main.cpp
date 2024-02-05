@@ -145,14 +145,14 @@ main(int argc, const char** argv)
     initialize_ticker("B", 200);
     initialize_ticker("C", 300);
 
-    bots::MarketMakerBot bot1{5000};
+    bots::MarketMakerBot bot1{"bot_1", 5000}; //NOLINT(*)
     bots::BotContainerMapper::get_instance("A").add_mm_bot("MM_BOT_1", bot1);
 
     auto& engine_manager = engine_manager::EngineManager::get_instance();
     ticks::TickManager::get_instance().attach(&engine_manager, ticks::PRIORITY::first);
     ticks::TickManager::get_instance().start();
 
-    manager::ClientManager users;
+    manager::ClientManager& users = manager::ClientManager::get_instance();
 
     auto [mode, sandbox] = process_arguments(argc, argv);
 

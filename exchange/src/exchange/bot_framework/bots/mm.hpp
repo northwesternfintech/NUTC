@@ -9,7 +9,9 @@ namespace bots {
 
 class MarketMakerBot {
 public:
-    explicit MarketMakerBot(float capital_limit) : capital_limit_(capital_limit) {}
+    explicit MarketMakerBot(std::string bot_id, float capital_limit) :
+        capital_limit_(capital_limit), bot_id_(std::move(bot_id))
+    {}
 
     static constexpr float BASE_SPREAD = 0.16f;
 
@@ -22,8 +24,8 @@ public:
         static constexpr uint8_t LEVELS = 6;
         std::vector<messages::MarketOrder> orders(LEVELS);
 
-        std::array<float, LEVELS> quantities = {1 / 12, 1 / 6, 1 / 4,
-                                                1 / 4,  1 / 6, 1 / 12};
+        std::array<float, LEVELS> quantities = {1.0f / 12, 1.0f / 6, 1.0f / 4,
+                                                1.0f / 4,  1.0f / 6, 1.0f / 12};
 
         std::array<float, LEVELS> prices = {
             new_theo - BASE_SPREAD - .10f, new_theo - BASE_SPREAD - .05f,
@@ -45,10 +47,8 @@ public:
         float total_quantity = LEVELS * capital_tolerance / avg_price;
 
         for (size_t i = 0; i < LEVELS; ++i) {
-            orders[i].price = prices[i];
-            orders[i].quantity = total_quantity * quantities[i];
-            orders[i].side =
-                (i < LEVELS / 2) ? messages::SIDE::BUY : messages::SIDE::SELL;
+      messages::SIDE side = (i < LEVELS / 2) ? messages::SIDE::BUY : messages::SIDE::SELL;
+            orders[i] = messages::MarketOrder{bot_id_, side, "", total_quantity * quantities[i], prices[i]};
         }
 
         return orders;
@@ -86,6 +86,8 @@ private:
     float short_capital_ = 0;
 
     float capital_limit_;
+
+    std::string bot_id_;
 
     [[nodiscard]] float
     compute_net_exposure_() const
