@@ -5,6 +5,16 @@
 
 #include <cmath>
 
+double
+generate_gaussian_noise(double mean, double stddev)
+{
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::normal_distribution<> distr(mean, stddev); // Define the normal distribution
+
+    return distr(gen);
+}
+
 namespace nutc {
 
 namespace bots {
@@ -43,7 +53,8 @@ BotContainer::on_new_theo(float new_theo, float current)
 {
     std::vector<MarketOrder> orders;
     for (auto& [id, bot] : market_makers_) {
-        std::vector<messages::MarketOrder> bot_orders = bot.take_action(new_theo);
+        float noised_theo = new_theo + generate_gaussian_noise(0, .02);
+        std::vector<messages::MarketOrder> bot_orders = bot.take_action(noised_theo);
         orders.insert(orders.end(), bot_orders.begin(), bot_orders.end());
     }
     return orders;
