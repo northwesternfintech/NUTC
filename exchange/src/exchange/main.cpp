@@ -146,6 +146,8 @@ main(int argc, const char** argv)
     initialize_ticker("C", 300);
 
     bots::BotContainerMapper::get_instance("A").add_mm_bot("1", 50000);
+    bots::BotContainerMapper::get_instance("A").add_mm_bot("2", 50000);
+    bots::BotContainerMapper::get_instance("A").add_mm_bot("3", 50000);
 
     auto& engine_manager = engine_manager::EngineManager::get_instance();
     ticks::TickManager::get_instance().attach(&engine_manager, ticks::PRIORITY::first);
