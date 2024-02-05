@@ -36,6 +36,8 @@ add_library(
     src/exchange/rabbitmq/order_handler/RabbitMQOrderHandler.cpp
     src/exchange/rabbitmq/publisher/RabbitMQPublisher.cpp
     src/exchange/rabbitmq/queue_manager/RabbitMQQueueManager.cpp
+
+    src/exchange/bot_framework/bot_container.cpp
     
     src/exchange/matching/engine/engine.cpp
     src/exchange/matching/manager/engine_manager.cpp
