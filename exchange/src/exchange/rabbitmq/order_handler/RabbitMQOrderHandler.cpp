@@ -1,5 +1,6 @@
 #include "RabbitMQOrderHandler.hpp"
 
+#include "exchange/bot_framework/bot_container_mapper.hpp"
 #include "exchange/logging.hpp"
 #include "exchange/rabbitmq/publisher/RabbitMQPublisher.hpp"
 
@@ -57,6 +58,13 @@ RabbitMQOrderHandler::handle_incoming_market_order(
     }
     if (!matches.empty()) {
         RabbitMQPublisher::broadcast_matches(clients, matches);
+        for (const auto& match : matches) {
+            if (match.buyer_id.find("bot_") != std::string::npos
+                || match.seller_id.find("bot_") != std::string::npos) {
+                bots::BotContainerMapper::get_instance(match.ticker)
+                    .process_bot_match(match);
+            }
+        }
     }
     if (!ob_updates.empty()) {
         RabbitMQPublisher::broadcast_ob_updates(clients, ob_updates, client_id);

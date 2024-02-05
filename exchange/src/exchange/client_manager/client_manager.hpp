@@ -16,7 +16,8 @@ namespace nutc {
  */
 namespace manager {
 
-enum class ClientLocation { LOCAL, REMOTE };
+// Bots are not spawned in
+enum class ClientLocation { LOCAL, REMOTE, BOT };
 
 struct client_t {
     std::string uid;

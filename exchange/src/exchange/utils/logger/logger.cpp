@@ -49,7 +49,8 @@ Logger::log_event(const T& json_message)
 {
     // If file is not open, throw an error to the error logger
     if (!output_file_.is_open()) [[unlikely]] {
-        // log_e(events, "Output file {} not open, unable to log event", get_file_name());
+        // log_e(events, "Output file {} not open, unable to log event",
+        // get_file_name());
         return;
     }
 

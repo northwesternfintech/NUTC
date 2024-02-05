@@ -1,9 +1,5 @@
 #pragma once
 #include "exchange/bot_framework/bots/mm.hpp"
-#include "exchange/matching/manager/engine_manager.hpp"
-#include "exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
-#include "exchange/rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
-#include "exchange/rabbitmq/publisher/RabbitMQPublisher.hpp"
 #include "exchange/randomness/brownian.hpp"
 #include "exchange/tick_manager/tick_observer.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
@@ -16,59 +12,17 @@ using Match = messages::Match;
 
 class BotContainer : public ticks::TickObserver {
 public:
-    void
-    on_tick(uint64_t) override
-    {
-        auto theo = theo_generator_.generate_next_price();
-        auto current =
-            engine_manager::EngineManager::get_instance().get_engine(ticker_);
-        assert(current.has_value());
-        auto current_price = current.value().get().get_midprice();
-        auto orders =
-            BotContainer::on_new_theo(static_cast<float>(theo), current_price);
+    void on_tick(uint64_t) override;
 
-        for (auto& order : orders) {
-            order.ticker = ticker_;
-            rabbitmq::RabbitMQOrderHandler::handle_incoming_market_order(
-                engine_manager::EngineManager::get_instance(),
-                manager::ClientManager::get_instance(), std::move(order)
-            );
-        }
-    }
+    void add_mm_bot(const std::string& bot_id, float starting_capital);
 
-    void
-    add_mm_bot(const std::string& bot_id, const MarketMakerBot& bot)
-    {
-        market_makers_[bot_id] = bot;
-    }
+    std::vector<MarketOrder> on_new_theo(float new_theo, float current);
 
-    std::vector<MarketOrder>
-    on_new_theo(float new_theo, float current)
-    {
-        std::vector<MarketOrder> orders;
-        for (auto& [id, bot] : market_makers_) {
-            std::vector<messages::MarketOrder> bot_orders =
-                bot.take_action(new_theo, current);
-            orders.insert(orders.end(), bot_orders.begin(), bot_orders.end());
-        }
-        return orders;
-    }
+    void process_bot_match(const Match& match);
 
-    void
-    process_bot_match(const Match& match)
-    {
-        auto match1 = market_makers_.find(match.buyer_id);
-        auto match2 = market_makers_.find(match.seller_id);
-        float total_cap = match.price * match.quantity;
-
-        // Both have reduced their positions
-        if (match1 != market_makers_.end()) {
-            match1->second.modify_long_capital(-total_cap);
-        }
-        if (match2 != market_makers_.end()) {
-            match2->second.modify_short_capital(-total_cap);
-        }
-    }
+    void process_order_expiration(
+        const std::string& bot_id, messages::SIDE side, float total_cap
+    );
 
     BotContainer() = default;
 

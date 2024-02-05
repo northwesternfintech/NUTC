@@ -1,5 +1,6 @@
 #pragma once
 
+#include "exchange/bot_framework/bot_container_mapper.hpp"
 #include "exchange/config.h"
 #include "exchange/matching/engine/engine.hpp"
 #include "exchange/tick_manager/tick_observer.hpp"
@@ -29,7 +30,16 @@ public:
         if (new_tick < ORDER_EXPIRATION_TIME)
             return;
         for (auto& [ticker, engine] : engines_) {
-            engine.remove_old_orders(new_tick, new_tick - ORDER_EXPIRATION_TIME);
+            auto removed =
+                engine.remove_old_orders(new_tick, new_tick - ORDER_EXPIRATION_TIME);
+            for (auto& order : removed) {
+                if (order.client_id.find("bot_") != std::string::npos) {
+                    bots::BotContainerMapper::get_instance(order.ticker)
+                        .process_order_expiration(
+                            order.client_id, order.side, order.price * order.quantity
+                        );
+                }
+            }
         }
     }
 

@@ -145,8 +145,7 @@ main(int argc, const char** argv)
     initialize_ticker("B", 200);
     initialize_ticker("C", 300);
 
-    bots::MarketMakerBot bot1{"bot_1", 5000}; //NOLINT(*)
-    bots::BotContainerMapper::get_instance("A").add_mm_bot("MM_BOT_1", bot1);
+    bots::BotContainerMapper::get_instance("A").add_mm_bot("1", 50000);
 
     auto& engine_manager = engine_manager::EngineManager::get_instance();
     ticks::TickManager::get_instance().attach(&engine_manager, ticks::PRIORITY::first);
