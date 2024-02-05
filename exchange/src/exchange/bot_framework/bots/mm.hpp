@@ -11,14 +11,60 @@ class MarketMakerBot {
 public:
     explicit MarketMakerBot(float capital_limit) : capital_limit_(capital_limit) {}
 
+    static constexpr float BASE_SPREAD = 0.16f;
+
     // Do something better later
     MarketMakerBot() = default;
 
     std::vector<messages::MarketOrder>
     take_action(float new_theo, float current)
     {
-        log_i(main, "Taking action with new theo/current {}/{}", new_theo, current);
-        return {};
+        static constexpr uint8_t LEVELS = 6;
+        std::vector<messages::MarketOrder> orders(LEVELS);
+
+        std::array<float, LEVELS> quantities = {1 / 12, 1 / 6, 1 / 4,
+                                                1 / 4,  1 / 6, 1 / 12};
+
+        std::array<float, LEVELS> prices = {
+            new_theo - BASE_SPREAD - .10f, new_theo - BASE_SPREAD - .05f,
+            new_theo - BASE_SPREAD,        new_theo + BASE_SPREAD,
+            new_theo + BASE_SPREAD + .05f, new_theo + BASE_SPREAD * .10f,
+        };
+
+        float capital_tolerance = compute_capital_tolerance_();
+        float lean = compute_net_exposure_() / capital_tolerance / 8;
+        for (auto& price : prices) {
+            price += lean;
+        }
+
+        float avg_price = 0;
+        for (size_t i = 0; i < LEVELS; ++i) {
+            avg_price += prices[i] * quantities[i];
+        }
+
+        float total_quantity = LEVELS * capital_tolerance / avg_price;
+
+        for (size_t i = 0; i < LEVELS; ++i) {
+            orders[i].price = prices[i];
+            orders[i].quantity = total_quantity * quantities[i];
+            orders[i].side =
+                (i < LEVELS / 2) ? messages::SIDE::BUY : messages::SIDE::SELL;
+        }
+
+        return orders;
+
+        /**
+         * best bid and best ask is theo +/- base_spread/2
+         * change price based on which side to move towards
+         * do like 5 cent increments, if the levels arent getting hit
+         *
+         * in theory: cap tolerance is num money we'll spend on that tick
+         * take net exposure, divide by cap limit, then divide by 8, thatll give how
+         * much we should lean move all of the levels up that many cents base spread has
+         * to be bigger than 16 cents
+         *
+         *
+         */
     }
 
     void
@@ -56,8 +102,7 @@ private:
     float
     compute_capital_tolerance_()
     {
-        return (-1 * compute_net_exposure_())
-               * (1 + (1 - compute_capital_util_()) * capital_limit_ / 2);
+        return (1 - compute_capital_util_()) * capital_limit_ / 3;
     }
 };
 

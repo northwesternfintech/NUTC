@@ -1,6 +1,9 @@
 #pragma once
 #include "exchange/bot_framework/bots/mm.hpp"
 #include "exchange/matching/manager/engine_manager.hpp"
+#include "exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
+#include "exchange/rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
+#include "exchange/rabbitmq/publisher/RabbitMQPublisher.hpp"
 #include "exchange/randomness/brownian.hpp"
 #include "exchange/tick_manager/tick_observer.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
@@ -23,6 +26,13 @@ public:
         auto current_price = current.value().get().get_midprice();
         auto orders =
             BotContainer::on_new_theo(static_cast<float>(theo), current_price);
+        auto& state =
+            rabbitmq::RabbitMQConnectionManager::get_instance().get_connection_state();
+
+        for (auto& order : orders) {
+      // rabbitmq::RabbitMQOrderHandler::handle_incoming_market_order(
+          // engine_manager::EngineManager::get_instance(), order);
+        }
     }
 
     void

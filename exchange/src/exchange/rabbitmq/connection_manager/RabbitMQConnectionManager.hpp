@@ -51,7 +51,7 @@ public:
         return connected_;
     }
 
-    amqp_connection_state_t
+    amqp_connection_state_t&
     get_connection_state()
     {
         return connection_state_;
