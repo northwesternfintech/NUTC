@@ -26,12 +26,13 @@ public:
         auto current_price = current.value().get().get_midprice();
         auto orders =
             BotContainer::on_new_theo(static_cast<float>(theo), current_price);
-        auto& state =
-            rabbitmq::RabbitMQConnectionManager::get_instance().get_connection_state();
 
         for (auto& order : orders) {
-      // rabbitmq::RabbitMQOrderHandler::handle_incoming_market_order(
-          // engine_manager::EngineManager::get_instance(), order);
+            order.ticker = ticker_;
+            rabbitmq::RabbitMQOrderHandler::handle_incoming_market_order(
+                engine_manager::EngineManager::get_instance(),
+                manager::ClientManager::get_instance(), std::move(order)
+            );
         }
     }
 

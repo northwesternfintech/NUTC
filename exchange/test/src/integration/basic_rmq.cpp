@@ -26,7 +26,8 @@ protected:
         rmq::RabbitMQConnectionManager::reset_instance();
     }
 
-    nutc::manager::ClientManager users_; // NOLINT (*)
+    nutc::manager::ClientManager& users_ =
+        nutc::manager::ClientManager::get_instance(); // NOLINT(*)
 };
 
 TEST_F(IntegrationBasic, InitialLiquidity)

@@ -102,21 +102,23 @@ private:
 
         return clients_.at(user_id).holdings.contains(ticker);
     }
-  ClientManager() = default;
+
+    ClientManager() = default;
+
 public:
-  // Singleton
-  static ClientManager& get_instance()
-  {
-      static ClientManager instance;
-      return instance;
-  }
+    // Singleton
+    static ClientManager&
+    get_instance()
+    {
+        static ClientManager instance;
+        return instance;
+    }
 
-  ClientManager(const ClientManager&) = delete;
-  ClientManager(ClientManager&&) = delete;
-  ClientManager& operator=(const ClientManager&) = delete;
-  ClientManager& operator=(ClientManager&&) = delete;
+    ClientManager(const ClientManager&) = delete;
+    ClientManager(ClientManager&&) = delete;
+    ClientManager& operator=(const ClientManager&) = delete;
+    ClientManager& operator=(ClientManager&&) = delete;
 };
-
 
 } // namespace manager
 } // namespace nutc
