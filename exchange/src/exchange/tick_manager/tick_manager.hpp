@@ -11,18 +11,34 @@
 namespace nutc {
 namespace ticks {
 
+enum class PRIORITY { first, second };
+
 class TickManager {
 public:
     void
-    attach(TickObserver* observer)
+    attach(TickObserver* observer, PRIORITY priority)
     {
-        observers_.push_back(observer);
+        switch (priority) {
+            case PRIORITY::first:
+                first_observers_.push_back(observer);
+                break;
+            case PRIORITY::second:
+                second_observers_.push_back(observer);
+                break;
+        }
     }
 
     void
-    detach(TickObserver* observer)
+    detach(TickObserver* observer, PRIORITY priority)
     {
-        observers_.remove(observer);
+        switch (priority) {
+            case PRIORITY::first:
+                first_observers_.remove(observer);
+                break;
+            case PRIORITY::second:
+                second_observers_.remove(observer);
+                break;
+        }
     }
 
     void
@@ -43,7 +59,8 @@ private:
     std::chrono::milliseconds delay_time_;
     std::atomic<bool> running_;
     std::thread tick_thread_;
-    std::list<TickObserver*> observers_;
+    std::list<TickObserver*> first_observers_;
+    std::list<TickObserver*> second_observers_;
     static constexpr uint16_t MS_PER_SECOND = 1000;
 
     explicit TickManager(uint16_t start_tick_rate) :
@@ -71,7 +88,9 @@ public:
         static TickManager manager(start_tick_rate);
         return manager;
     }
-};
 
+private:
+    uint64_t current_tick_ = 0;
+};
 } // namespace ticks
 } // namespace nutc

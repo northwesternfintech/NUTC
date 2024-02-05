@@ -115,14 +115,17 @@ initialize_ticker(const std::string& ticker, float starting_price)
 {
     using nutc::bots::BotContainerMapper;
     using nutc::engine_manager::EngineManager;
+    using nutc::ticks::PRIORITY;
     using nutc::ticks::TickManager;
 
     auto& tick_manager = TickManager::get_instance();
     EngineManager::get_instance().add_engine(ticker);
     EngineManager::get_instance().set_initial_price(ticker, starting_price);
 
-    auto& tick_listener = BotContainerMapper::get_instance(ticker, starting_price);
-    tick_manager.attach(&tick_listener);
+    auto& bot_container = BotContainerMapper::get_instance(ticker, starting_price);
+
+    // Should run after stale order removal, so they can react to removed orders
+    tick_manager.attach(&bot_container, PRIORITY::second);
 }
 
 int
@@ -142,12 +145,15 @@ main(int argc, const char** argv)
     initialize_ticker("B", 200);
     initialize_ticker("C", 300);
 
-    bots::MarketMakerBot bot1{5000};
-    bots::BotContainerMapper::get_instance("A").add_mm_bot("MM_BOT_1", bot1);
+    bots::BotContainerMapper::get_instance("A").add_mm_bot("1", 50000);
+    bots::BotContainerMapper::get_instance("A").add_mm_bot("2", 50000);
+    bots::BotContainerMapper::get_instance("A").add_mm_bot("3", 50000);
 
+    auto& engine_manager = engine_manager::EngineManager::get_instance();
+    ticks::TickManager::get_instance().attach(&engine_manager, ticks::PRIORITY::first);
     ticks::TickManager::get_instance().start();
 
-    manager::ClientManager users;
+    manager::ClientManager& users = manager::ClientManager::get_instance();
 
     auto [mode, sandbox] = process_arguments(argc, argv);
 
@@ -203,9 +209,6 @@ main(int argc, const char** argv)
     }
 
     client::spawn_all_clients(users);
-
-    engine_manager::EngineManager& engine_manager =
-        nutc::engine_manager::EngineManager::get_instance();
 
     // Run exchange
     rabbitmq::RabbitMQClientManager::wait_for_clients(users, num_clients);

@@ -38,6 +38,9 @@ spawn_all_clients(nutc::manager::ClientManager& users, SpawnMode mode)
         if (client.active)
             return;
 
+        if (client.algo_location == manager::ClientLocation::BOT)
+            return;
+
         log_i(client_spawning, "Spawning client: {}", id);
 
         pid_t pid = spawn_client(

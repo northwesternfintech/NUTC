@@ -28,7 +28,7 @@ protected:
         rmq::RabbitMQConnectionManager::reset_instance();
     }
 
-    nutc::manager::ClientManager users_; // NOLINT(*)
+    ClientManager& users_ = nutc::manager::ClientManager::get_instance(); // NOLINT(*)
     nutc::engine_manager::EngineManager& engine_manager_ =
         nutc::engine_manager::EngineManager::get_instance(); // NOLINT(*)
 };

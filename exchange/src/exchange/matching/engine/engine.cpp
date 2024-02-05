@@ -1,5 +1,6 @@
 #include "engine.hpp"
 
+#include "exchange/logging.hpp"
 #include "exchange/matching/engine/order_storage.hpp"
 #include "exchange/utils/logger/logger.hpp"
 
@@ -8,15 +9,6 @@
 
 namespace nutc {
 namespace matching {
-
-float
-Engine::get_midprice() const
-{
-    if (asks_.empty() || bids_.empty()) {
-        return 0;
-    }
-    return (asks_.begin()->price + bids_.rbegin()->price) / 2;
-}
 
 std::vector<StoredOrder>
 Engine::remove_old_orders(uint64_t new_tick, uint64_t removed_tick_age)
@@ -40,6 +32,10 @@ Engine::remove_old_orders(uint64_t new_tick, uint64_t removed_tick_age)
             }
 
             removed_orders.push_back(std::move(orders_by_id_[order_id]));
+            if (orders_by_id_[order_id].side == SIDE::BUY)
+                bids_.erase(order_index{orders_by_id_[order_id].price, order_id});
+            else
+                asks_.erase(order_index{orders_by_id_[order_id].price, order_id});
             orders_by_id_.erase(order_id);
         }
         orders_by_tick_.erase(earliest_tick);

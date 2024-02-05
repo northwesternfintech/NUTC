@@ -1,4 +1,7 @@
 #pragma once
+
+#include "exchange/bot_framework/bot_container_mapper.hpp"
+#include "exchange/config.h"
 #include "exchange/matching/engine/engine.hpp"
 #include "exchange/tick_manager/tick_observer.hpp"
 
@@ -8,17 +11,9 @@
 using engine_ref_t = std::reference_wrapper<nutc::matching::Engine>;
 
 namespace nutc {
-/**
- * @brief Manages all matching engines for arbitrary tickers
- */
 namespace engine_manager {
-/**
- * @class Manager
- * @brief Manages all matching engines for arbitrary tickers
- * @details This class is responsible for creating and managing all matching engines for
- * different tickers
- */
-class EngineManager {
+
+class EngineManager : public nutc::ticks::TickObserver {
 public:
     std::optional<engine_ref_t> get_engine(const std::string& ticker);
 
@@ -28,6 +23,25 @@ public:
 
     // deprecated?
     void add_initial_liquidity(const std::string& ticker, float quantity, float price);
+
+    void
+    on_tick(uint64_t new_tick) override
+    {
+        if (new_tick < ORDER_EXPIRATION_TIME)
+            return;
+        for (auto& [ticker, engine] : engines_) {
+            auto removed =
+                engine.remove_old_orders(new_tick, new_tick - ORDER_EXPIRATION_TIME);
+            for (auto& order : removed) {
+                if (order.client_id.find("bot_") != std::string::npos) {
+                    bots::BotContainerMapper::get_instance(order.ticker)
+                        .process_order_expiration(
+                            order.client_id, order.side, order.price * order.quantity
+                        );
+                }
+            }
+        }
+    }
 
 private:
     std::map<std::string, matching::Engine> engines_;

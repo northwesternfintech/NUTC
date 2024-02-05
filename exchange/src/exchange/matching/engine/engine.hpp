@@ -40,7 +40,14 @@ public:
      */
     match_result_t match_order(MarketOrder&& order, manager::ClientManager& manager);
 
-    float get_midprice() const;
+    float
+    get_midprice() const
+    {
+        if (asks_.empty() || bids_.empty()) [[unlikely]] {
+            return 0;
+        }
+        return (asks_.begin()->price + bids_.rbegin()->price) / 2;
+    }
 
     void
     add_order(const MarketOrder& order)

@@ -49,7 +49,8 @@ Logger::log_event(const T& json_message)
 {
     // If file is not open, throw an error to the error logger
     if (!output_file_.is_open()) [[unlikely]] {
-        log_e(events, "Output file {} not open, unable to log event", get_file_name());
+        // log_e(events, "Output file {} not open, unable to log event",
+        // get_file_name());
         return;
     }
 
@@ -59,7 +60,7 @@ Logger::log_event(const T& json_message)
     std::string buffer = glz::write_json(json_message_with_ts);
 
     // Log to the main log too
-    log_i(events, "Logging event {}", buffer);
+    // log_i(events, "Logging event {}", buffer);
 
     // Write start of JSON
     output_file_ << buffer << "\n";
