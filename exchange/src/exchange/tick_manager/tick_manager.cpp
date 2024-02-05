@@ -11,6 +11,7 @@ TickManager::run_()
     while (running_) {
         next_tick += milliseconds(delay_time_);
         std::this_thread::sleep_until(next_tick);
+        current_tick_++;
         notify_tick_();
     }
 }
@@ -18,8 +19,12 @@ TickManager::run_()
 void
 TickManager::notify_tick_()
 {
-    for (TickObserver* observer : observers_) {
-        observer->on_tick();
+    for (TickObserver* observer : first_observers_) {
+        observer->on_tick(current_tick_);
+    }
+
+    for (TickObserver* observer : second_observers_) {
+        observer->on_tick(current_tick_);
     }
 }
 

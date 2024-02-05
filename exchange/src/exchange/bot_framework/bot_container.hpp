@@ -1,6 +1,5 @@
 #pragma once
 #include "exchange/bot_framework/bots/mm.hpp"
-#include "exchange/logging.hpp"
 #include "exchange/matching/manager/engine_manager.hpp"
 #include "exchange/randomness/brownian.hpp"
 #include "exchange/tick_manager/tick_observer.hpp"
@@ -15,14 +14,13 @@ using Match = messages::Match;
 class BotContainer : public ticks::TickObserver {
 public:
     void
-    on_tick() override
+    on_tick(uint64_t) override
     {
         auto theo = theo_generator_.generate_next_price();
         auto current =
             engine_manager::EngineManager::get_instance().get_engine(ticker_);
         assert(current.has_value());
         auto current_price = current.value().get().get_midprice();
-        // log_i(main, "Theo/current for engine {} is {}/{}", ticker_, theo, current);
         auto orders =
             BotContainer::on_new_theo(static_cast<float>(theo), current_price);
     }
