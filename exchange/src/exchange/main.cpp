@@ -2,19 +2,18 @@
 #include "algos/dev_mode/dev_mode.hpp"
 #include "algos/normal_mode/normal_mode.hpp"
 #include "algos/sandbox_mode/sandbox_mode.hpp"
-#include "bot_framework/bot_container_mapper.hpp"
-#include "client_manager/client_manager.hpp"
 #include "config.h"
 #include "dashboard/dashboard.hpp"
+#include "exchange/bots/bot_container.hpp"
 #include "exchange/dashboard/state/global_metrics.hpp"
-#include "exchange/dashboard/state/ticker_state.hpp"
 #include "exchange/tick_manager/tick_manager.hpp"
 #include "logging.hpp"
-#include "matching/manager/engine_manager.hpp"
 #include "process_spawning/spawning.hpp"
 #include "rabbitmq/client_manager/RabbitMQClientManager.hpp"
 #include "rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
 #include "rabbitmq/consumer/RabbitMQConsumer.hpp"
+#include "tickers/manager/ticker_manager.hpp"
+#include "traders/trader_manager.hpp"
 #include "utils/logger/logger.hpp"
 
 #include <argparse/argparse.hpp>
@@ -117,17 +116,16 @@ flush_log(int sig) // NOLINT(*)
 void
 initialize_ticker(const std::string& ticker, float starting_price)
 {
-    using nutc::bots::BotContainerMapper;
     using nutc::dashboard::DashboardState;
     using nutc::engine_manager::EngineManager;
     using nutc::ticks::PRIORITY;
     using nutc::ticks::TickManager;
 
     auto& tick_manager = TickManager::get_instance();
-    EngineManager::get_instance().add_engine(ticker);
-    EngineManager::get_instance().set_initial_price(ticker, starting_price);
+    EngineManager::get_instance().add_engine(ticker, starting_price);
 
-    auto& bot_container = BotContainerMapper::get_instance(ticker, starting_price);
+    nutc::bots::BotContainer& bot_container =
+        EngineManager::get_instance().get_bot_container(ticker);
 
     // Should run after stale order removal, so they can react to removed orders
     tick_manager.attach(&bot_container, PRIORITY::second);
@@ -162,15 +160,21 @@ main(int argc, const char** argv)
         &dashboard, nutc::ticks::PRIORITY::fourth
     );
 
-    bots::BotContainerMapper::get_instance("ETH").add_mm_bot("1a", 50000);
-    bots::BotContainerMapper::get_instance("ETH").add_mm_bot("2a", 50000);
-    bots::BotContainerMapper::get_instance("ETH").add_mm_bot("3a", 50000);
-    bots::BotContainerMapper::get_instance("BTC").add_mm_bot("1b", 50000);
-    bots::BotContainerMapper::get_instance("BTC").add_mm_bot("2b", 50000);
-    bots::BotContainerMapper::get_instance("USD").add_mm_bot("1c", 50000);
+    bots::BotContainer& eth =
+        engine_manager::EngineManager::get_instance().get_bot_container("ETH");
+    bots::BotContainer& btc =
+        engine_manager::EngineManager::get_instance().get_bot_container("BTC");
+    bots::BotContainer& usd =
+        engine_manager::EngineManager::get_instance().get_bot_container("USD");
+    eth.add_mm_bot(50000);
+    eth.add_mm_bot(50000);
+    eth.add_mm_bot(50000);
+    btc.add_mm_bot(50000);
+    btc.add_mm_bot(50000);
+    usd.add_mm_bot(50000);
 
     nutc::dashboard::init();
-  
+
     auto& engine_manager = engine_manager::EngineManager::get_instance();
     ticks::TickManager::get_instance().attach(&engine_manager, ticks::PRIORITY::first);
     ticks::TickManager::get_instance().start();
@@ -230,7 +234,7 @@ main(int argc, const char** argv)
             break;
     }
 
-    client::spawn_all_clients(users);
+    spawning::spawn_all_clients(users);
 
     // Run exchange
     rabbitmq::RabbitMQClientManager::wait_for_clients(users, num_clients);

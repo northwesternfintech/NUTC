@@ -1,7 +1,8 @@
 #include "bot_container.hpp"
 
-#include "exchange/matching/manager/engine_manager.hpp"
 #include "exchange/rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
+#include "exchange/tickers/manager/ticker_manager.hpp"
+#include "exchange/traders/trader_manager.hpp"
 
 #include <cmath>
 
@@ -37,15 +38,17 @@ BotContainer::on_tick(uint64_t)
 }
 
 void
-BotContainer::add_mm_bot(const std::string& bot_id, float starting_capital)
+BotContainer::add_mm_bot(float starting_capital)
 {
-    std::string new_bot_id = "bot_" + bot_id;
-    market_makers_[new_bot_id] = MarketMakerBot(new_bot_id, starting_capital);
-
     manager::ClientManager& users = nutc::manager::ClientManager::get_instance();
-    users.add_client(new_bot_id, ticker_, nutc::manager::ClientLocation::BOT);
-    users.modify_capital(new_bot_id, starting_capital);
-    users.modify_holdings(new_bot_id, ticker_, INFINITY);
+    std::string bot_id = users.add_client(manager::bot_trader_t{});
+
+    market_makers_[bot_id] = MarketMakerBot(bot_id, starting_capital);
+    manager::trader_t& bot = users.get_client(bot_id);
+    assert(std::holds_alternative<manager::bot_trader_t>(bot));
+    auto& bot_trader = std::get<manager::bot_trader_t>(bot);
+    bot_trader.set_capital(starting_capital);
+    bot_trader.modify_holdings(ticker_, INFINITY);
 }
 
 std::vector<MarketOrder>

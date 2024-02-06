@@ -2,6 +2,7 @@
 
 #include "exchange/curl/curl.hpp"
 #include "exchange/logging.hpp"
+#include "exchange/traders/trader_types.hpp"
 #include "exchange/utils/file_operations/file_operations.hpp"
 
 #include <glaze/glaze.hpp>
@@ -11,20 +12,17 @@ namespace algo_mgmt {
 void
 SandboxAlgoManager::initialize_client_manager(manager::ClientManager& users)
 {
-    using manager::ClientLocation;
-
     num_clients_ = 0;
 
     // check number of algos in algos directory
     for (const auto& entry : std::filesystem::directory_iterator(ALGO_DIR)) {
         std::string algo_id = entry.path().filename().string();
         algo_id = algo_id.substr(0, algo_id.find(".py"));
-        log_i(sandbox, "Adding client: {}", algo_id);
-        users.add_client(algo_id, algo_id, ClientLocation::LOCAL);
+        users.add_client(manager::local_trader_t{algo_id});
         num_clients_ += 1;
     }
 
-    users.add_client(user_id_, algo_id_, ClientLocation::REMOTE);
+    users.add_client(manager::remote_trader_t{user_id_, algo_id_});
     num_clients_ += 1;
 }
 

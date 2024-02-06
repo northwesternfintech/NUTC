@@ -1,7 +1,7 @@
 #include "ticker_state.hpp"
 
-#include "exchange/bot_framework/bot_container.hpp"
-#include "exchange/matching/manager/engine_manager.hpp"
+#include "exchange/bots/bot_container.hpp"
+#include "exchange/tickers/manager/ticker_manager.hpp"
 
 namespace nutc {
 namespace dashboard {
@@ -9,7 +9,8 @@ namespace dashboard {
 void
 TickerState::on_tick(uint64_t)
 {
-    bots::BotContainer& bot_container = bots::BotContainerMapper::get_instance(TICKER);
+    bots::BotContainer& bot_container =
+        engine_manager::EngineManager::get_instance().get_bot_container(TICKER);
 
     std::optional<engine_ref_t> engine =
         engine_manager::EngineManager::get_instance().get_engine(TICKER);

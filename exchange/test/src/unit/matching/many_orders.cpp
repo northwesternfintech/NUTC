@@ -15,16 +15,17 @@ protected:
     SetUp() override
     {
         using nutc::testing_utils::add_client_simple;
+        using nutc::testing_utils::modify_holdings_simple;
 
         add_client_simple(manager_, "A");
         add_client_simple(manager_, "B");
         add_client_simple(manager_, "C");
         add_client_simple(manager_, "D");
 
-        manager_.modify_holdings("A", "ETHUSD", DEFAULT_QUANTITY);
-        manager_.modify_holdings("B", "ETHUSD", DEFAULT_QUANTITY);
-        manager_.modify_holdings("C", "ETHUSD", DEFAULT_QUANTITY);
-        manager_.modify_holdings("D", "ETHUSD", DEFAULT_QUANTITY);
+        modify_holdings_simple(manager_, "A", "ETHUSD", DEFAULT_QUANTITY);
+        modify_holdings_simple(manager_, "B", "ETHUSD", DEFAULT_QUANTITY);
+        modify_holdings_simple(manager_, "C", "ETHUSD", DEFAULT_QUANTITY);
+        modify_holdings_simple(manager_, "D", "ETHUSD", DEFAULT_QUANTITY);
     }
 
     ClientManager& manager_ = nutc::manager::ClientManager::get_instance(); // NOLINT(*)

@@ -37,17 +37,17 @@ add_library(
     src/exchange/rabbitmq/publisher/RabbitMQPublisher.cpp
     src/exchange/rabbitmq/queue_manager/RabbitMQQueueManager.cpp
 
-    src/exchange/bot_framework/bot_container.cpp
+    src/exchange/bots/bot_container.cpp
 
-    src/exchange/matching/engine/engine.cpp
-    src/exchange/matching/manager/engine_manager.cpp
+    src/exchange/tickers/engine/engine.cpp
+    src/exchange/tickers/manager/ticker_manager.cpp
     
-    src/exchange/client_manager/client_manager.cpp
+    src/exchange/traders/trader_manager.cpp
     
     src/exchange/utils/logger/logger.cpp
     src/exchange/utils/file_operations/file_operations.cpp
     
-    src/exchange/randomness/brownian.cpp
+    src/exchange/theo/brownian.cpp
     
     src/exchange/tick_manager/tick_manager.cpp
     

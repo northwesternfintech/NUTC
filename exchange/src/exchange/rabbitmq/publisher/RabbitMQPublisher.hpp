@@ -1,6 +1,6 @@
 #pragma once
 
-#include "exchange/client_manager/client_manager.hpp"
+#include "exchange/traders/trader_manager.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
 
 #include <string>

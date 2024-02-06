@@ -1,8 +1,8 @@
 #include "RabbitMQOrderHandler.hpp"
 
-#include "exchange/bot_framework/bot_container_mapper.hpp"
 #include "exchange/logging.hpp"
 #include "exchange/rabbitmq/publisher/RabbitMQPublisher.hpp"
+#include "exchange/tickers/manager/ticker_manager.hpp"
 
 namespace nutc {
 namespace rabbitmq {
@@ -61,7 +61,8 @@ RabbitMQOrderHandler::handle_incoming_market_order(
         for (const auto& match : matches) {
             if (match.buyer_id.find("bot_") != std::string::npos
                 || match.seller_id.find("bot_") != std::string::npos) {
-                bots::BotContainerMapper::get_instance(match.ticker)
+                engine_manager::EngineManager::get_instance()
+                    .get_bot_container(match.ticker)
                     .process_bot_match(match);
             }
         }

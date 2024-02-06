@@ -1,7 +1,7 @@
 #include "engine.hpp"
 
 #include "exchange/logging.hpp"
-#include "exchange/matching/engine/order_storage.hpp"
+#include "exchange/tickers/engine/order_storage.hpp"
 #include "exchange/utils/logger/logger.hpp"
 
 #include <algorithm>
@@ -215,10 +215,31 @@ Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
             add_order(sell_order);
         }
 
-        manager.modify_capital(buyer_id, -quantity_to_match * price_to_match);
-        manager.modify_capital(seller_id, quantity_to_match * price_to_match);
-        manager.modify_holdings(seller_id, buy_order.ticker, -quantity_to_match);
-        manager.modify_holdings(buyer_id, buy_order.ticker, quantity_to_match);
+        auto update_traders = [&](const std::string& trader_id, SIDE side) {
+            if (trader_id == "SIMULATED")
+                return;
+            auto& trader = manager.get_client(trader_id);
+            if (side == SIDE::BUY) {
+                std::visit(
+                    [&](auto&& trader) {
+                        trader.modify_capital(-quantity_to_match * price_to_match);
+                        trader.modify_holdings(buy_order.ticker, quantity_to_match);
+                    },
+                    trader
+                );
+            }
+            else {
+                std::visit(
+                    [&](auto&& trader) {
+                        trader.modify_capital(quantity_to_match * price_to_match);
+                        trader.modify_holdings(buy_order.ticker, -quantity_to_match);
+                    },
+                    trader
+                );
+            }
+        };
+        update_traders(buy_order.client_id, SIDE::BUY);
+        update_traders(sell_order.client_id, SIDE::SELL);
     }
 
     if (aggressive_quantity > 0) {

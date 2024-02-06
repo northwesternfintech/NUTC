@@ -1,6 +1,6 @@
 #pragma once
 
-#include "exchange/client_manager/client_manager.hpp"
+#include "exchange/traders/trader_manager.hpp"
 
 namespace nutc {
 namespace rabbitmq {
