@@ -1,6 +1,6 @@
 #pragma once
-#include "exchange/bot_framework/bots/mm.hpp"
-#include "exchange/randomness/brownian.hpp"
+#include "exchange/bots/market_maker.hpp"
+#include "exchange/theo/brownian.hpp"
 #include "exchange/tick_manager/tick_observer.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
 
@@ -26,7 +26,7 @@ public:
         return market_makers_.size();
     }
 
-    void add_mm_bot(const std::string& bot_id, float starting_capital);
+    void add_mm_bot(float starting_capital);
 
     std::vector<MarketOrder> on_new_theo(float new_theo, float current);
 

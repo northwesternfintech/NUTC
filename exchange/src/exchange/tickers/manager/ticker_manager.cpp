@@ -1,4 +1,4 @@
-#include "engine_manager.hpp"
+#include "ticker_manager.hpp"
 
 namespace nutc {
 namespace engine_manager {
@@ -13,7 +13,7 @@ EngineManager::get_engine(const std::string& ticker)
 }
 
 void
-EngineManager::set_initial_price(const std::string& ticker, float price)
+EngineManager::set_initial_price_(const std::string& ticker, float price)
 {
     MarketOrder to_add1{
         "SIMULATED", messages::SIDE::SELL, ticker, 1, static_cast<float>(price * 1.01)
@@ -41,11 +41,19 @@ EngineManager::add_initial_liquidity(
 }
 
 void
+EngineManager::add_engine(const std::string& ticker, float starting_price)
+{
+    engines_.emplace(ticker, matching::Engine());
+    set_initial_price_(ticker, starting_price);
+    bot_containers_.emplace(
+        ticker, bots::BotContainer(ticker, static_cast<double>(starting_price))
+    );
+}
+
+void
 EngineManager::add_engine(const std::string& ticker)
 {
-    if (engines_.find(ticker) == engines_.end()) {
-        engines_.emplace(ticker, matching::Engine());
-    }
+    engines_.emplace(ticker, matching::Engine());
 }
 
 } // namespace engine_manager

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "exchange/algos/algo_manager.hpp"
-#include "exchange/client_manager/client_manager.hpp"
+#include "exchange/traders/trader_manager.hpp"
 
 namespace nutc {
 namespace algo_mgmt {
@@ -20,7 +20,7 @@ public:
 
     void initialize_files() const override;
 
-    size_t
+    [[nodiscard]] size_t
     get_num_clients() const override
     {
         return num_clients_;

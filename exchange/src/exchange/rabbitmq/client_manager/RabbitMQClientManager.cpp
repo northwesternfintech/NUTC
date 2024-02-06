@@ -1,9 +1,9 @@
 #include "RabbitMQClientManager.hpp"
 
-#include "exchange/client_manager/client_manager.hpp"
 #include "exchange/logging.hpp"
 #include "exchange/rabbitmq/consumer/RabbitMQConsumer.hpp"
 #include "exchange/rabbitmq/publisher/RabbitMQPublisher.hpp"
+#include "exchange/traders/trader_manager.hpp"
 
 namespace nutc {
 namespace rabbitmq {
@@ -29,7 +29,10 @@ RabbitMQClientManager::wait_for_clients(
                 message.client_id, message.ready ? "ready" : "not ready"
             );
             if (message.ready) {
-                manager.set_active(message.client_id);
+                auto set_active = [&](auto&& trader) {
+                    trader.set_active(/*active=*/true);
+                };
+                std::visit(set_active, manager.get_client(message.client_id));
                 num_running++;
             }
         }
@@ -64,17 +67,17 @@ RabbitMQClientManager::send_start_time(
     messages::StartTime message{time_ns};
     std::string buf = glz::write_json(message);
 
-    auto send_to_client = [buf](const std::pair<std::string, manager::client_t>& pair) {
-        const auto& [id, client] = pair;
-
-        if (!client.active)
+    auto send_to_client = [buf](auto&& trader) {
+        if (!trader.is_active())
             return;
 
-        RabbitMQPublisher::publish_message(id, buf);
+        RabbitMQPublisher::publish_message(trader.get_id(), buf);
     };
 
-    const auto& clients = manager.get_clients();
-    std::for_each(clients.begin(), clients.end(), send_to_client);
+    const auto& clients = manager.get_clients_const();
+    std::for_each(clients.begin(), clients.end(), [&](auto&& pair) {
+        std::visit(send_to_client, pair.second);
+    });
 }
 
 } // namespace rabbitmq

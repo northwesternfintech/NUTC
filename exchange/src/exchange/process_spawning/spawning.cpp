@@ -1,12 +1,13 @@
 #include "spawning.hpp"
 
 #include "exchange/logging.hpp"
+#include "exchange/traders/trader_types.hpp"
 #include "exchange/utils/file_operations/file_operations.hpp"
 
 #include <cstdlib>
 
 namespace nutc {
-namespace client {
+namespace spawning {
 
 std::string
 quote_id(std::string user_id)
@@ -15,73 +16,35 @@ quote_id(std::string user_id)
     return user_id;
 }
 
-size_t
-spawn_all_clients(nutc::manager::ClientManager& users, SpawnMode mode)
-{
-    const char* wrapper_binary_location = std::getenv("NUTC_WRAPPER_BINARY_PATH");
-    if (wrapper_binary_location == nullptr) [[unlikely]] {
-        log_e(
-            client_spawning,
-            "Failed to get NUTC_WRAPPER_BINARY_PATH from environment variable"
-        );
-        exit(1);
-    }
-    const std::string wrapper_binary_path(wrapper_binary_location);
-    // log_i(client_spawning, "Spawning clients with binary location: {}",
-    // wrapper_binary_path);
-
-    size_t num_clients = 0;
-    auto spawn_one_client = [&](const std::pair<std::string, manager::client_t>& pair) {
-        const auto& [id, client] = pair;
-        const std::string& algo_id = client.algo_id;
-
-        if (client.active)
-            return;
-
-        if (client.algo_location == manager::ClientLocation::BOT)
-            return;
-
-        log_i(client_spawning, "Spawning client: {}", id);
-
-        pid_t pid = spawn_client(
-            quote_id(id), quote_id(algo_id), client.algo_location, mode,
-            wrapper_binary_path
-        );
-        users.set_client_pid(id, pid);
-        num_clients++;
-    };
-
-    const auto& clients = users.get_clients();
-
-    std::for_each(clients.begin(), clients.end(), spawn_one_client);
-
-    return num_clients;
-}
-
 pid_t
-spawn_client(
-    const std::string& user_id, const std::string& algo_id,
-    manager::ClientLocation algo_location, SpawnMode spawn_mode,
-    const std::string& binary_path
-)
+spawn_client(auto& trader, const std::string& binary_path)
 {
-    using manager::ClientLocation;
-
-    if (algo_location == ClientLocation::LOCAL) {
-        std::string filepath = algo_id + ".py";
+    using t = std::decay_t<decltype(trader)>;
+    if constexpr (std::is_same_v<t, nutc::manager::local_trader_t>) {
+        std::string filepath = trader.get_algo_path() + ".py";
         assert(file_ops::file_exists(filepath));
     }
+
     pid_t pid = fork();
     if (pid == 0) {
-        std::vector<std::string> args = {
-            binary_path, "--uid", user_id, "--algo_id", algo_id
-        };
-        if (algo_location == ClientLocation::LOCAL) {
-            args.emplace_back("--dev");
+        std::vector<std::string> args;
+        if constexpr (std::is_same_v<t, nutc::manager::local_trader_t>) {
+            args = {binary_path,
+                    "--uid",
+                    trader.get_id(),
+                    "--algo_id",
+                    trader.get_algo_path(),
+                    "--dev"};
         }
-        if (spawn_mode == SpawnMode::TESTING) {
-            args.emplace_back("--no-start-delay");
+        else {
+            args = {
+                binary_path, "--uid", trader.get_id(), "--algo_id", trader.get_algo_id()
+            };
         }
+
+        // if (spawn_mode == SpawnMode::TESTING) {
+        // args.emplace_back("--no-start-delay");
+        // }
 
         std::vector<char*> c_args;
         for (auto& arg : args) {
@@ -103,5 +66,43 @@ spawn_client(
     }
     return pid;
 }
-} // namespace client
+
+size_t
+spawn_all_clients(nutc::manager::ClientManager& users, SpawnMode mode)
+{
+    const char* wrapper_binary_location = std::getenv("NUTC_WRAPPER_BINARY_PATH");
+    if (wrapper_binary_location == nullptr) [[unlikely]] {
+        log_e(
+            client_spawning,
+            "Failed to get NUTC_WRAPPER_BINARY_PATH from environment variable"
+        );
+        exit(1);
+    }
+    const std::string wrapper_binary_path(wrapper_binary_location);
+
+    size_t num_clients = 0;
+    auto spawn_one_client = [&](auto&& arg) {
+        using t = std::decay_t<decltype(arg)>;
+
+        if (arg.is_active())
+            return;
+
+        if constexpr (!std::is_same_v<t, nutc::manager::bot_trader_t>) {
+            const std::string& trader_id = arg.get_id();
+            log_i(client_spawning, "Spawning client: {}", trader_id);
+
+            std::string algo_id;
+            arg.set_pid(spawn_client(arg, wrapper_binary_path));
+        }
+        num_clients++;
+    };
+
+    for (auto& [id, client] : users.get_clients()) {
+        std::visit(spawn_one_client, client);
+    }
+
+    return num_clients;
+}
+
+} // namespace spawning
 } // namespace nutc

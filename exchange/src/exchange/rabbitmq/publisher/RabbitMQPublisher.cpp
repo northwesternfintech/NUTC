@@ -38,22 +38,21 @@ RabbitMQPublisher::broadcast_matches(
     const manager::ClientManager& clients, const std::vector<messages::Match>& matches
 )
 {
-    auto broadcast_to_client = [&](const std::pair<std::string, manager::client_t>& pair
-                               ) {
+    auto broadcast_to_client = [&](auto&& trader) {
         for (const auto& match : matches) {
-            const auto& [id, client] = pair;
-
-            if (!client.active)
+            if (!trader.is_active())
                 continue;
 
             std::string buffer;
             glz::write<glz::opts{}>(match, buffer);
-            publish_message(id, buffer);
+            publish_message(trader.get_id(), buffer);
         }
     };
 
-    const auto& active_clients = clients.get_clients();
-    std::for_each(active_clients.begin(), active_clients.end(), broadcast_to_client);
+    const auto& active_clients = clients.get_clients_const();
+    std::for_each(active_clients.begin(), active_clients.end(), [&](auto&& arg) {
+        std::visit(broadcast_to_client, arg.second);
+    });
 }
 
 void
@@ -62,23 +61,22 @@ RabbitMQPublisher::broadcast_ob_updates(
     const std::vector<messages::ObUpdate>& updates, const std::string& ignore_uid
 )
 {
-    auto broadcast_to_client = [&](const std::pair<std::string, manager::client_t>& pair
-                               ) {
-        const auto& [id, client] = pair;
-
-        if (!client.active || id == ignore_uid) {
+    auto broadcast_to_client = [&](auto&& trader) {
+        if (!trader.is_active() || trader.get_id() == ignore_uid) {
             return;
         }
 
         for (const auto& update : updates) {
             std::string buffer;
             glz::write<glz::opts{}>(update, buffer);
-            publish_message(id, buffer);
+            publish_message(trader.get_id(), buffer);
         }
     };
 
-    const auto& active_clients = clients.get_clients();
-    std::for_each(active_clients.begin(), active_clients.end(), broadcast_to_client);
+    const auto& active_clients = clients.get_clients_const();
+    std::for_each(active_clients.begin(), active_clients.end(), [&](auto&& arg) {
+        std::visit(broadcast_to_client, arg.second);
+    });
 }
 
 void
@@ -89,21 +87,20 @@ RabbitMQPublisher::broadcast_account_update(
     const std::string& buyer_id = match.buyer_id;
     const std::string& seller_id = match.seller_id;
 
-    messages::AccountUpdate buyer_update = {
-        match.ticker,   messages::SIDE::BUY,           match.price,
-        match.quantity, clients.get_capital(buyer_id),
-    };
-    messages::AccountUpdate seller_update = {
-        match.ticker,   messages::SIDE::SELL,           match.price,
-        match.quantity, clients.get_capital(seller_id),
+    auto send_message = [&](const std::string& trader_id, messages::SIDE side) {
+        if (trader_id == "SIMULATED")
+            return;
+        messages::AccountUpdate update = {
+            match.ticker, side, match.price, match.quantity,
+            clients.get_capital(trader_id)
+        };
+        std::string buffer;
+        glz::write<glz::opts{}>(update, buffer);
+        publish_message(trader_id, buffer);
     };
 
-    std::string buyer_buffer;
-    std::string seller_buffer;
-    glz::write<glz::opts{}>(buyer_update, buyer_buffer);
-    glz::write<glz::opts{}>(seller_update, seller_buffer);
-    publish_message(buyer_id, buyer_buffer);
-    publish_message(seller_id, seller_buffer);
+    send_message(buyer_id, messages::SIDE::BUY);
+    send_message(seller_id, messages::SIDE::SELL);
 }
 
 } // namespace rabbitmq

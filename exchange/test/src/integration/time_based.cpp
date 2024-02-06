@@ -39,7 +39,7 @@ TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
 {
     std::vector<std::string> names{"test_algos/buy_tsla_at_100"};
     nutc::testing_utils::initialize_testing_clients(
-        users_, names, nutc::client::SpawnMode::NORMAL
+        users_, names, nutc::spawning::SpawnMode::NORMAL
     );
 
     auto start = std::chrono::high_resolution_clock::now();
