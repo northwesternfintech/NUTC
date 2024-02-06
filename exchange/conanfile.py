@@ -17,6 +17,7 @@ class Recipe(ConanFile):
         self.requires("argparse/2.9")
         self.requires("glaze/1.3.5")
         self.requires("libzip/1.10.1")
+        self.requires("ncurses/6.4")
 
         # Wrapper
         self.requires("pybind11/2.10.4")
