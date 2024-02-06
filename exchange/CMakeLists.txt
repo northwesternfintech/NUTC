@@ -50,6 +50,8 @@ add_library(
     src/exchange/randomness/brownian.cpp
     
     src/exchange/tick_manager/tick_manager.cpp
+    
+    src/exchange/dashboard/state/ticker_state.cpp
 )
 
 target_include_directories(
@@ -58,15 +60,13 @@ target_include_directories(
     "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
 )
 
+
 target_compile_features(EXCHANGE_lib PUBLIC cxx_std_20)
 
 # argparse
 find_package(argparse REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC argparse::argparse)
 
-# ncurses 
-find_package(Curses REQUIRED)
-# target_link_libraries(EXCHANGE_lib PUBLIC Curses::Curses)
 
 # libzip
 find_package(libzip REQUIRED)
@@ -92,6 +92,24 @@ target_link_libraries(EXCHANGE_lib PUBLIC CURL::libcurl)
 find_package(glaze REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC glaze::glaze)
 
+# ---- DASHBOARD ----------
+add_library(
+    DASHBOARD_lib OBJECT
+    src/exchange/dashboard/dashboard.cpp
+)
+
+target_include_directories(
+    DASHBOARD_lib ${warning_guard}
+    PUBLIC
+    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
+)
+
+# ncurses 
+find_package(Curses REQUIRED)
+target_link_libraries(DASHBOARD_lib PUBLIC Curses::Curses)
+
+target_compile_features(DASHBOARD_lib PUBLIC cxx_std_20)
+
 # ---- Declare executable ----
 
 add_executable(EXCHANGE_exe src/exchange/main.cpp)
@@ -102,6 +120,7 @@ set_property(TARGET EXCHANGE_exe PROPERTY OUTPUT_NAME NUTC)
 target_compile_features(EXCHANGE_exe PRIVATE cxx_std_20)
 
 target_link_libraries(EXCHANGE_exe PRIVATE EXCHANGE_lib)
+target_link_libraries(EXCHANGE_exe PRIVATE DASHBOARD_lib)
 
 # quill
 target_link_libraries(EXCHANGE_exe PRIVATE quill::quill)

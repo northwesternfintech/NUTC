@@ -22,6 +22,12 @@ class BrownianMotion {
     std::mt19937 random_number_generator_;
 
 public:
+    [[nodiscard]] double
+    get_price() const
+    {
+        return cur_value_;
+    }
+
     // Default constructor for BrownianMotion, takes nothing
     explicit BrownianMotion() : cur_value_(0)
     {
