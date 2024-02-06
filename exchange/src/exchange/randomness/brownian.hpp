@@ -30,6 +30,12 @@ class BrownianMotion {
     Signedness signedness = Signedness::DoesntMatter;
 
 public:
+    [[nodiscard]] double
+    get_price() const
+    {
+        return cur_value_;
+    }
+
     // Default constructor for BrownianMotion, takes nothing
     explicit BrownianMotion() : cur_value_(0)
     {

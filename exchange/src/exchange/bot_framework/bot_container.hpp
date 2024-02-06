@@ -14,6 +14,18 @@ class BotContainer : public ticks::TickObserver {
 public:
     void on_tick(uint64_t) override;
 
+    double
+    get_theo() const
+    {
+        return brownian_offset_ + theo_generator_.get_price();
+    }
+
+    size_t
+    get_num_mm_bots() const
+    {
+        return market_makers_.size();
+    }
+
     void add_mm_bot(const std::string& bot_id, float starting_capital);
 
     std::vector<MarketOrder> on_new_theo(float new_theo, float current);
@@ -32,10 +44,10 @@ public:
 
 private:
     // TODO(stevenewald): make more elegant than string UUID
-    std::unordered_map<std::string, MarketMakerBot> market_makers_;
+    std::unordered_map<std::string, MarketMakerBot> market_makers_{};
     std::string ticker_;
 
-    stochastic::BrownianMotion theo_generator_;
+    stochastic::BrownianMotion theo_generator_{};
     double brownian_offset_ = 0.0;
 };
 } // namespace bots

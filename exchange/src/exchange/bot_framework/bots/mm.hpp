@@ -1,8 +1,5 @@
 #pragma once
-#include "exchange/logging.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
-
-#include <vector>
 
 namespace nutc {
 namespace bots {
@@ -12,6 +9,12 @@ public:
     explicit MarketMakerBot(std::string bot_id, float interest_limit) :
         interest_limit_(interest_limit), bot_id_(std::move(bot_id))
     {}
+
+    bool
+    operator==(const MarketMakerBot& other) const
+    {
+        return bot_id_ == other.bot_id_;
+    }
 
     static constexpr float BASE_SPREAD = 0.16f;
 

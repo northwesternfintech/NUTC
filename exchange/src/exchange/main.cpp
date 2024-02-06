@@ -5,6 +5,9 @@
 #include "bot_framework/bot_container_mapper.hpp"
 #include "client_manager/client_manager.hpp"
 #include "config.h"
+#include "dashboard/dashboard.hpp"
+#include "exchange/dashboard/state/global_metrics.hpp"
+#include "exchange/dashboard/state/ticker_state.hpp"
 #include "exchange/tick_manager/tick_manager.hpp"
 #include "logging.hpp"
 #include "matching/manager/engine_manager.hpp"
@@ -15,6 +18,7 @@
 #include "utils/logger/logger.hpp"
 
 #include <argparse/argparse.hpp>
+
 #include <csignal>
 
 #include <iostream>
@@ -105,6 +109,7 @@ void
 flush_log(int sig) // NOLINT(*)
 {
     nutc::events::Logger::get_logger().flush();
+    nutc::dashboard::close();
     std::exit(0);
 }
 
@@ -113,6 +118,7 @@ void
 initialize_ticker(const std::string& ticker, float starting_price)
 {
     using nutc::bots::BotContainerMapper;
+    using nutc::dashboard::DashboardState;
     using nutc::engine_manager::EngineManager;
     using nutc::ticks::PRIORITY;
     using nutc::ticks::TickManager;
@@ -125,8 +131,15 @@ initialize_ticker(const std::string& ticker, float starting_price)
 
     // Should run after stale order removal, so they can react to removed orders
     tick_manager.attach(&bot_container, PRIORITY::second);
+
+    auto& metrics_manager = DashboardState::get_instance();
+    metrics_manager.add_ticker(ticker, starting_price);
+
+    auto& ticker_state = metrics_manager.get_ticker_state(ticker);
+    tick_manager.attach(&ticker_state, PRIORITY::third);
 }
 
+// todo: please god clean this up
 int
 main(int argc, const char** argv)
 {
@@ -135,19 +148,29 @@ main(int argc, const char** argv)
     using namespace nutc; // NOLINT(*)
 
     // Set up logging
-    logging::init(quill::LogLevel::TraceL3);
+    logging::init(quill::LogLevel::Error);
 
-    static constexpr uint16_t TICK_HZ = 5;
+    static constexpr uint16_t TICK_HZ = 30;
     nutc::ticks::TickManager::get_instance(TICK_HZ);
 
-    initialize_ticker("A", 100);
-    initialize_ticker("B", 200);
-    initialize_ticker("C", 300);
+    initialize_ticker("ETH", 100);
+    initialize_ticker("BTC", 200);
+    initialize_ticker("USD", 300);
 
-    bots::BotContainerMapper::get_instance("A").add_mm_bot("1", 50000);
-    bots::BotContainerMapper::get_instance("A").add_mm_bot("2", 50000);
-    bots::BotContainerMapper::get_instance("A").add_mm_bot("3", 50000);
+    auto& dashboard = nutc::dashboard::Dashboard::get_instance();
+    nutc::ticks::TickManager::get_instance().attach(
+        &dashboard, nutc::ticks::PRIORITY::fourth
+    );
 
+    bots::BotContainerMapper::get_instance("ETH").add_mm_bot("1a", 50000);
+    bots::BotContainerMapper::get_instance("ETH").add_mm_bot("2a", 50000);
+    bots::BotContainerMapper::get_instance("ETH").add_mm_bot("3a", 50000);
+    bots::BotContainerMapper::get_instance("BTC").add_mm_bot("1b", 50000);
+    bots::BotContainerMapper::get_instance("BTC").add_mm_bot("2b", 50000);
+    bots::BotContainerMapper::get_instance("USD").add_mm_bot("1c", 50000);
+
+    nutc::dashboard::init();
+  
     auto& engine_manager = engine_manager::EngineManager::get_instance();
     ticks::TickManager::get_instance().attach(&engine_manager, ticks::PRIORITY::first);
     ticks::TickManager::get_instance().start();

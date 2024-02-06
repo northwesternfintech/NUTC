@@ -21,7 +21,7 @@ namespace bots {
 void
 BotContainer::on_tick(uint64_t)
 {
-    auto theo = fabs(theo_generator_.generate_next_price()+brownian_offset_);
+    auto theo = fabs(theo_generator_.generate_next_price() + brownian_offset_);
     auto current = engine_manager::EngineManager::get_instance().get_engine(ticker_);
     assert(current.has_value());
     auto current_price = current.value().get().get_midprice();
@@ -65,7 +65,6 @@ BotContainer::process_bot_match(const Match& match)
 {
     auto match1 = market_makers_.find(match.buyer_id);
     auto match2 = market_makers_.find(match.seller_id);
-    log_i(main, "Processing bot match");
     float total_cap = match.price * match.quantity;
 
     // Both have reduced their positions
@@ -82,7 +81,6 @@ BotContainer::process_order_expiration(
     const std::string& bot_id, messages::SIDE side, float total_cap
 )
 {
-    log_i(main, "Processing bot cancellation {}", bot_id);
     auto match1 = market_makers_.find(bot_id);
 
     // Both have reduced their positions
