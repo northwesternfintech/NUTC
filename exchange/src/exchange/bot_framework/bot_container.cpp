@@ -21,7 +21,7 @@ namespace bots {
 void
 BotContainer::on_tick(uint64_t)
 {
-    auto theo = theo_generator_.generate_next_price();
+    auto theo = fabs(theo_generator_.generate_next_price()+brownian_offset_);
     auto current = engine_manager::EngineManager::get_instance().get_engine(ticker_);
     assert(current.has_value());
     auto current_price = current.value().get().get_midprice();

@@ -12,11 +12,10 @@
 #include "rabbitmq/client_manager/RabbitMQClientManager.hpp"
 #include "rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
 #include "rabbitmq/consumer/RabbitMQConsumer.hpp"
-#include "rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
 #include "utils/logger/logger.hpp"
 
 #include <argparse/argparse.hpp>
-#include <signal.h>
+#include <csignal>
 
 #include <iostream>
 #include <string>

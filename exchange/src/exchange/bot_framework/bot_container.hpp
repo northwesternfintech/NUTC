@@ -26,8 +26,8 @@ public:
 
     BotContainer() = default;
 
-    explicit BotContainer(std::string ticker, float starting_price) :
-        ticker_(std::move(ticker)), theo_generator_(static_cast<double>(starting_price))
+    explicit BotContainer(std::string ticker, double starting_price) :
+        ticker_(std::move(ticker)), brownian_offset_(starting_price)
     {}
 
 private:
@@ -36,6 +36,7 @@ private:
     std::string ticker_;
 
     stochastic::BrownianMotion theo_generator_;
+    double brownian_offset_ = 0.0;
 };
 } // namespace bots
 } // namespace nutc

@@ -38,7 +38,7 @@ add_library(
     src/exchange/rabbitmq/queue_manager/RabbitMQQueueManager.cpp
 
     src/exchange/bot_framework/bot_container.cpp
-    
+
     src/exchange/matching/engine/engine.cpp
     src/exchange/matching/manager/engine_manager.cpp
     
@@ -63,6 +63,10 @@ target_compile_features(EXCHANGE_lib PUBLIC cxx_std_20)
 # argparse
 find_package(argparse REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC argparse::argparse)
+
+# ncurses 
+find_package(Curses REQUIRED)
+# target_link_libraries(EXCHANGE_lib PUBLIC Curses::Curses)
 
 # libzip
 find_package(libzip REQUIRED)
@@ -101,6 +105,9 @@ target_link_libraries(EXCHANGE_exe PRIVATE EXCHANGE_lib)
 
 # quill
 target_link_libraries(EXCHANGE_exe PRIVATE quill::quill)
+
+# ncurses
+target_link_libraries(EXCHANGE_exe PRIVATE Curses::Curses)
 
 # fmt
 target_link_libraries(EXCHANGE_exe PRIVATE fmt::fmt)

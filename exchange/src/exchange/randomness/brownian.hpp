@@ -35,13 +35,6 @@ public:
         random_number_generator_ = std::mt19937(seed);
     }
 
-    // Constructor for BrownianMotion, takes a seed and initial value
-    explicit BrownianMotion(const double initial_value) : cur_value_(initial_value)
-    {
-        std::random_device rd;
-        random_number_generator_ = std::mt19937(rd());
-    }
-
     // Generates and returns the next price based on previous prices
     double generate_next_price();
 
