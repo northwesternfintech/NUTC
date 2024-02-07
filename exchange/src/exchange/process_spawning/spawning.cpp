@@ -19,50 +19,46 @@ quote_id(std::string user_id)
 pid_t
 spawn_client(auto& trader, const std::string& binary_path)
 {
-    using t = std::decay_t<decltype(trader)>;
-    if constexpr (std::is_same_v<t, nutc::manager::local_trader_t>) {
-        std::string filepath = trader.get_algo_path() + ".py";
+    using trader_type = std::decay_t<decltype(trader)>;
+    if constexpr (std::is_same_v<trader_type, nutc::manager::local_trader_t>) {
+        const std::string filepath = trader.get_algo_path() + ".py";
         assert(file_ops::file_exists(filepath));
     }
 
     pid_t pid = fork();
     if (pid == 0) {
-        std::vector<std::string> args;
-        if constexpr (std::is_same_v<t, nutc::manager::local_trader_t>) {
-            args = {binary_path,
-                    "--uid",
-                    trader.get_id(),
-                    "--algo_id",
-                    trader.get_algo_path(),
-                    "--dev"};
+        std::vector<std::string> args = {
+            binary_path, "--uid", trader.get_id(), "--algo_id"
+        };
+
+        if constexpr (std::is_same_v<trader_type, nutc::manager::local_trader_t>) {
+            args.emplace_back(trader.get_algo_path());
+            args.emplace_back("--dev");
         }
         else {
-            args = {
-                binary_path, "--uid", trader.get_id(), "--algo_id", trader.get_algo_id()
-            };
+            args.emplace_back(trader.get_algo_id());
         }
 
-        if (!trader.has_start_delay())
+        if (!trader.has_start_delay()) {
             args.emplace_back("--no-start-delay");
+        }
 
         std::vector<char*> c_args;
+        c_args.reserve(args.size() + 1);
         for (auto& arg : args) {
-            c_args.emplace_back( // NOLINT(performance-inefficient-vector-operation)
-                arg.data()
-            );
+            c_args.push_back(arg.data());
         }
         c_args.push_back(nullptr);
 
         execvp(c_args[0], c_args.data());
-
         log_e(client_spawning, "Failed to execute NUTC-client");
-
         std::abort();
     }
-    else if (pid < 0) {
+    else if (pid < 0) { // Fork failed
         log_e(client_spawning, "Failed to fork");
         std::abort();
     }
+
     return pid;
 }
 
