@@ -42,9 +42,8 @@ spawn_client(auto& trader, const std::string& binary_path)
             };
         }
 
-        // if (spawn_mode == SpawnMode::TESTING) {
-        // args.emplace_back("--no-start-delay");
-        // }
+        if (!trader.has_start_delay())
+            args.emplace_back("--no-start-delay");
 
         std::vector<char*> c_args;
         for (auto& arg : args) {
@@ -68,7 +67,7 @@ spawn_client(auto& trader, const std::string& binary_path)
 }
 
 size_t
-spawn_all_clients(nutc::manager::ClientManager& users, SpawnMode mode)
+spawn_all_clients(nutc::manager::ClientManager& users)
 {
     const char* wrapper_binary_location = std::getenv("NUTC_WRAPPER_BINARY_PATH");
     if (wrapper_binary_location == nullptr) [[unlikely]] {

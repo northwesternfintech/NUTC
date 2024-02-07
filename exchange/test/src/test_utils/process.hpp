@@ -10,7 +10,7 @@ void kill_all_processes(const manager::ClientManager& users);
 
 void initialize_testing_clients(
     nutc::manager::ClientManager& users, const std::vector<std::string>& algo_filenames,
-    spawning::SpawnMode mode = spawning::SpawnMode::TESTING
+    bool has_delay = false
 );
 
 } // namespace testing_utils
