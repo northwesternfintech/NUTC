@@ -32,6 +32,18 @@ struct generic_trader_t {
         is_active_ = active;
     }
 
+    bool
+    has_start_delay() const
+    {
+        return has_start_delay_;
+    }
+
+    void
+    set_start_delay(bool start_delay)
+    {
+        has_start_delay_ = start_delay;
+    }
+
     float
     get_holdings(const std::string& ticker) const
     {
@@ -66,6 +78,7 @@ private:
     const std::string USER_ID;
     float capital_ = 0;
     bool is_active_ = false;
+    bool has_start_delay_ = true;
     std::unordered_map<std::string, float> holdings_{};
 };
 
