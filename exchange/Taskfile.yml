@@ -47,6 +47,7 @@ tasks:
       NUTC_WRAPPER_BINARY_PATH: "./build/dev/WRAPPER"
     cmds:
       - task: build
+      - task: check-and-start-services
       - ./build/dev/{{.NAME}} --bots-only
 
   run-with-gdb:

@@ -160,28 +160,21 @@ main(int argc, const char** argv)
         &dashboard, nutc::ticks::PRIORITY::fourth
     );
 
-    bots::BotContainer& eth =
-        engine_manager::EngineManager::get_instance().get_bot_container("ETH");
-    bots::BotContainer& btc =
-        engine_manager::EngineManager::get_instance().get_bot_container("BTC");
-    bots::BotContainer& usd =
-        engine_manager::EngineManager::get_instance().get_bot_container("USD");
-    eth.add_mm_bot(50000);
-    eth.add_mm_bot(50000);
-    eth.add_mm_bot(50000);
-    btc.add_mm_bot(50000);
-    btc.add_mm_bot(50000);
-    usd.add_mm_bot(50000);
+    auto& engine_manager = engine_manager::EngineManager::get_instance();
+
+    engine_manager.get_bot_container("ETH").add_mm_bots({50000, 25000, 25000, 10000, 10000, 5000}); //NOLINT(*)
+    engine_manager.get_bot_container("BTC").add_mm_bots({50000, 1000}); //NOLINT(*)
+    engine_manager.get_bot_container("USD").add_mm_bots({100000, 100000, 100000, 25000, 25000, 10000, 5000, 5000, 5000, 5000}); //NOLINT(*)
 
     nutc::dashboard::init();
 
-    auto& engine_manager = engine_manager::EngineManager::get_instance();
     ticks::TickManager::get_instance().attach(&engine_manager, ticks::PRIORITY::first);
     ticks::TickManager::get_instance().start();
 
     manager::ClientManager& users = manager::ClientManager::get_instance();
 
     auto [mode, sandbox] = process_arguments(argc, argv);
+
 
     auto& rmq_conn = rabbitmq::RabbitMQConnectionManager::get_instance();
 
@@ -190,6 +183,8 @@ main(int argc, const char** argv)
         log_e(rabbitmq, "Failed to initialize connection");
         return 1;
     }
+  
+    while(mode==Mode::BOTS_ONLY) {} //spin forever, but keep rmq running. maybe remove this later?
 
     size_t num_clients{};
     using algo_mgmt::AlgoManager;

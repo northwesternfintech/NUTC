@@ -23,10 +23,7 @@ void
 BotContainer::on_tick(uint64_t)
 {
     auto theo = fabs(theo_generator_.generate_next_price() + brownian_offset_);
-    auto current = engine_manager::EngineManager::get_instance().get_engine(ticker_);
-    assert(current.has_value());
-    auto current_price = current.value().get().get_midprice();
-    auto orders = BotContainer::on_new_theo(static_cast<float>(theo), current_price);
+    auto orders = BotContainer::on_new_theo(static_cast<float>(theo));
 
     for (auto& order : orders) {
         order.ticker = ticker_;
@@ -37,8 +34,14 @@ BotContainer::on_tick(uint64_t)
     }
 }
 
+    void BotContainer::add_mm_bots(const std::vector<float>& starting_capitals) {
+  for(float capital : starting_capitals) {
+    add_mm_bot_(capital);
+  }
+      
+}
 void
-BotContainer::add_mm_bot(float starting_capital)
+BotContainer::add_mm_bot_(float starting_capital)
 {
     manager::ClientManager& users = nutc::manager::ClientManager::get_instance();
     std::string bot_id = users.add_client(manager::bot_trader_t{});
@@ -52,7 +55,7 @@ BotContainer::add_mm_bot(float starting_capital)
 }
 
 std::vector<MarketOrder>
-BotContainer::on_new_theo(float new_theo, float current)
+BotContainer::on_new_theo(float new_theo)
 {
     std::vector<MarketOrder> orders;
     for (auto& [id, bot] : market_makers_) {
