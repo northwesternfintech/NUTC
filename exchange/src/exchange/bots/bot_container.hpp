@@ -26,15 +26,16 @@ public:
         return market_makers_.size();
     }
 
-    void add_mm_bot(float starting_capital);
 
-    std::vector<MarketOrder> on_new_theo(float new_theo, float current);
+    std::vector<MarketOrder> on_new_theo(float new_theo);
 
     void process_bot_match(const Match& match);
 
     void process_order_expiration(
         const std::string& bot_id, messages::SIDE side, float total_cap
     );
+
+    void add_mm_bots(const std::vector<float>& starting_capitals);
 
     BotContainer() = default;
 
@@ -43,6 +44,7 @@ public:
     {}
 
 private:
+    void add_mm_bot_(float starting_capital);
     // TODO(stevenewald): make more elegant than string UUID
     std::unordered_map<std::string, MarketMakerBot> market_makers_{};
     std::string ticker_;
