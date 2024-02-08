@@ -85,7 +85,7 @@ BotContainer::process_bot_match(const Match& match)
     }
     if (match2 != market_makers_.end()) {
         match2->second.modify_short_capital(-total_cap);
-            match2->second.modify_open_asks(-1);
+        match2->second.modify_open_asks(-1);
     }
 }
 
