@@ -170,7 +170,7 @@ private:
     static std::string
     generate_user_id()
     {
-        return "LOCAL_" + std::to_string(get_and_increment_user_id());
+        return "BOT_" + std::to_string(get_and_increment_user_id());
     }
 };
 

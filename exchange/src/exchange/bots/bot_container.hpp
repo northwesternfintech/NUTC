@@ -1,5 +1,5 @@
 #pragma once
-#include "exchange/bots/market_maker.hpp"
+#include "exchange/bots/bot_types/market_maker.hpp"
 #include "exchange/theo/brownian.hpp"
 #include "exchange/tick_manager/tick_observer.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
@@ -20,12 +20,11 @@ public:
         return brownian_offset_ + theo_generator_.get_price();
     }
 
-    size_t
-    get_num_mm_bots() const
+    const std::unordered_map<std::string, MarketMakerBot>&
+    get_market_makers() const
     {
-        return market_makers_.size();
+        return market_makers_;
     }
-
 
     std::vector<MarketOrder> on_new_theo(float new_theo);
 

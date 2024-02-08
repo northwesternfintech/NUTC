@@ -38,7 +38,7 @@ public:
             auto removed =
                 engine.remove_old_orders(new_tick, new_tick - ORDER_EXPIRATION_TIME);
             for (auto& order : removed) {
-                if (order.client_id.find("bot_") != std::string::npos) {
+                if (order.client_id.find("BOT_") != std::string::npos) {
                     bot_containers_.at(order.ticker)
                         .process_order_expiration(
                             order.client_id, order.side, order.price * order.quantity

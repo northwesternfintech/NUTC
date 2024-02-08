@@ -130,10 +130,9 @@ initialize_ticker(const std::string& ticker, float starting_price)
     // Should run after stale order removal, so they can react to removed orders
     tick_manager.attach(&bot_container, PRIORITY::second);
 
-    auto& metrics_manager = DashboardState::get_instance();
-    metrics_manager.add_ticker(ticker, starting_price);
+    DashboardState::get_instance().add_ticker(ticker, starting_price);
 
-    auto& ticker_state = metrics_manager.get_ticker_state(ticker);
+    auto& ticker_state = DashboardState::get_instance().get_ticker_state(ticker);
     tick_manager.attach(&ticker_state, PRIORITY::third);
 }
 
@@ -148,7 +147,7 @@ main(int argc, const char** argv)
     // Set up logging
     logging::init(quill::LogLevel::Error);
 
-    static constexpr uint16_t TICK_HZ = 30;
+    static constexpr uint16_t TICK_HZ = 10;
     nutc::ticks::TickManager::get_instance(TICK_HZ);
 
     initialize_ticker("ETH", 100);
@@ -162,9 +161,13 @@ main(int argc, const char** argv)
 
     auto& engine_manager = engine_manager::EngineManager::get_instance();
 
-    engine_manager.get_bot_container("ETH").add_mm_bots({50000, 25000, 25000, 10000, 10000, 5000}); //NOLINT(*)
-    engine_manager.get_bot_container("BTC").add_mm_bots({50000, 1000}); //NOLINT(*)
-    engine_manager.get_bot_container("USD").add_mm_bots({100000, 100000, 100000, 25000, 25000, 10000, 5000, 5000, 5000, 5000}); //NOLINT(*)
+    engine_manager.get_bot_container("ETH").add_mm_bots(
+        {50000, 25000, 25000, 10000, 10000, 5000}
+    );                                                                  // NOLINT(*)
+    engine_manager.get_bot_container("BTC").add_mm_bots({50000, 1000}); // NOLINT(*)
+    engine_manager.get_bot_container("USD").add_mm_bots(
+        {100000, 100000, 100000, 25000, 25000, 10000, 5000, 5000, 5000, 5000}
+    ); // NOLINT(*)
 
     nutc::dashboard::init();
 
@@ -175,7 +178,6 @@ main(int argc, const char** argv)
 
     auto [mode, sandbox] = process_arguments(argc, argv);
 
-
     auto& rmq_conn = rabbitmq::RabbitMQConnectionManager::get_instance();
 
     // Connect to RabbitMQ
@@ -183,8 +185,9 @@ main(int argc, const char** argv)
         log_e(rabbitmq, "Failed to initialize connection");
         return 1;
     }
-  
-    while(mode==Mode::BOTS_ONLY) {} //spin forever, but keep rmq running. maybe remove this later?
+
+    while (mode == Mode::BOTS_ONLY) {
+    } // spin forever, but keep rmq running. maybe remove this later?
 
     size_t num_clients{};
     using algo_mgmt::AlgoManager;

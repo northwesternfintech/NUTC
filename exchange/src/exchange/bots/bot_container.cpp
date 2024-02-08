@@ -34,19 +34,21 @@ BotContainer::on_tick(uint64_t)
     }
 }
 
-    void BotContainer::add_mm_bots(const std::vector<float>& starting_capitals) {
-  for(float capital : starting_capitals) {
-    add_mm_bot_(capital);
-  }
-      
+void
+BotContainer::add_mm_bots(const std::vector<float>& starting_capitals)
+{
+    for (float capital : starting_capitals) {
+        add_mm_bot_(capital);
+    }
 }
+
 void
 BotContainer::add_mm_bot_(float starting_capital)
 {
     manager::ClientManager& users = nutc::manager::ClientManager::get_instance();
     std::string bot_id = users.add_client(manager::bot_trader_t{});
 
-    market_makers_[bot_id] = MarketMakerBot(bot_id, starting_capital);
+    market_makers_.emplace(bot_id, MarketMakerBot(bot_id, starting_capital));
     manager::trader_t& bot = users.get_client(bot_id);
     assert(std::holds_alternative<manager::bot_trader_t>(bot));
     auto& bot_trader = std::get<manager::bot_trader_t>(bot);
@@ -57,7 +59,7 @@ BotContainer::add_mm_bot_(float starting_capital)
 std::vector<MarketOrder>
 BotContainer::on_new_theo(float new_theo)
 {
-    std::vector<MarketOrder> orders;
+    std::vector<MarketOrder> orders{};
     for (auto& [id, bot] : market_makers_) {
         float noised_theo = new_theo + generate_gaussian_noise(0, .02);
         std::vector<messages::MarketOrder> bot_orders = bot.take_action(noised_theo);
@@ -71,14 +73,19 @@ BotContainer::process_bot_match(const Match& match)
 {
     auto match1 = market_makers_.find(match.buyer_id);
     auto match2 = market_makers_.find(match.seller_id);
+
+    // TODO: we expect that the price of a match will not be the same as when we sent
+    // out the order
     float total_cap = match.price * match.quantity;
 
     // Both have reduced their positions
     if (match1 != market_makers_.end()) {
         match1->second.modify_long_capital(-total_cap);
+        match1->second.modify_open_bids(-1);
     }
     if (match2 != market_makers_.end()) {
         match2->second.modify_short_capital(-total_cap);
+            match2->second.modify_open_asks(-1);
     }
 }
 
@@ -93,9 +100,11 @@ BotContainer::process_order_expiration(
     assert(match1 != market_makers_.end());
     if (side == messages::SIDE::BUY) {
         match1->second.modify_long_capital(-total_cap);
+        match1->second.modify_open_bids(-1);
     }
     else {
         match1->second.modify_short_capital(-total_cap);
+        match1->second.modify_open_asks(-1);
     }
 }
 

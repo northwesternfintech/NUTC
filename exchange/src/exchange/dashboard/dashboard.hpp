@@ -1,8 +1,8 @@
 #pragma once
 
+#include "exchange/bots/bot_types/market_maker.hpp"
 #include "exchange/dashboard/state/global_metrics.hpp"
 #include "exchange/dashboard/state/ticker_state.hpp"
-#include "exchange/logging.hpp"
 #include "exchange/tick_manager/tick_observer.hpp"
 
 #include <ncurses.h>
@@ -12,12 +12,6 @@ namespace nutc {
 namespace dashboard {
 
 // NOLINTBEGIN
-
-struct MarketMakerBot {
-    float longCapital = 50000.0;
-    float shortCapital = 30000.0;
-    // Add more fields as necessary
-};
 
 void
 drawLayout()
@@ -50,7 +44,6 @@ int
 displayStockTickerData(int startY, int startX, const TickerState& ticker)
 {
     mvprintw(startY, startX, "Ticker: %s", ticker.TICKER.c_str());
-    mvprintw(startY + 1, startX, "Num MM Bots: %d", ticker.num_mm_bots_);
     mvprintw(startY + 2, startX, "Midprice: %.2f", ticker.midprice_);
     mvprintw(startY + 3, startX, "Theo Price: %.2f", ticker.theo_);
     mvprintw(
@@ -63,12 +56,22 @@ displayStockTickerData(int startY, int startX, const TickerState& ticker)
     return startY + 7;
 }
 
-void
-displayMarketMakerBotData(int startY, int startX, const MarketMakerBot& bot)
+int
+displayMarketMakerBotsData(int startY, int startX, const TickerState& bots)
 {
-    mvprintw(startY, startX, "Long Capital: %.2f", bot.longCapital);
-    mvprintw(startY + 1, startX, "Short Capital: %.2f", bot.shortCapital);
-    // Add more metrics here
+    for (int i = 0; i < bots.mm_open_bids_.size(); i++) {
+        mvprintw(startY, startX, "Bot: %d", i);
+        mvprintw(
+            startY + 1, startX, "Num open bids/asks: %d %d", bots.mm_open_bids_[i],
+            bots.mm_open_asks_[i]
+        );
+        mvprintw(
+            startY + 2, startX, "$ open bids/asks: %.2f %.2f", bots.mm_bid_interest_[i],
+            bots.mm_ask_interest_[i]
+        );
+        startY += 4;
+    }
+    return startY;
 }
 
 void
@@ -77,8 +80,6 @@ mainLoop()
     int xMax, yMax;
     getmaxyx(stdscr, yMax, xMax);
     int middle = xMax / 2;
-
-    MarketMakerBot bot;
 
     // Clear previous content
     clear();
@@ -89,9 +90,11 @@ mainLoop()
     int starty = 1;
     for (auto& [ticker, state] :
          dashboard::DashboardState::get_instance().get_ticker_states()) {
-        starty = displayStockTickerData(starty, 1, state);
+        starty = std::max(
+            displayStockTickerData(starty, 1, state),
+            displayMarketMakerBotsData(starty, middle + 2, state)
+        );
     }
-    displayMarketMakerBotData(1, middle + 2, bot);
     // Refresh the screen to show updates
     refresh();
 }
