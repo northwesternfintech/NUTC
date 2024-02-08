@@ -2,6 +2,7 @@
 
 #include "exchange/logging.hpp"
 #include "exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
+#include "exchange/tickers/manager/ticker_manager.hpp"
 
 namespace nutc {
 namespace rabbitmq {
@@ -90,6 +91,9 @@ RabbitMQPublisher::broadcast_account_update(
     auto send_message = [&](const std::string& trader_id, messages::SIDE side) {
         if (trader_id == "SIMULATED")
             return;
+        if (trader_id.find("BOT_") != std::string::npos) {
+            return;
+        }
         messages::AccountUpdate update = {
             match.ticker, side, match.price, match.quantity,
             clients.get_capital(trader_id)
@@ -98,6 +102,13 @@ RabbitMQPublisher::broadcast_account_update(
         glz::write<glz::opts{}>(update, buffer);
         publish_message(trader_id, buffer);
     };
+
+    if (buyer_id.find("BOT_") != std::string::npos
+        || seller_id.find("BOT_") != std::string::npos) {
+        engine_manager::EngineManager::get_instance()
+            .get_bot_container(match.ticker)
+            .process_bot_match(match);
+    }
 
     send_message(buyer_id, messages::SIDE::BUY);
     send_message(seller_id, messages::SIDE::SELL);

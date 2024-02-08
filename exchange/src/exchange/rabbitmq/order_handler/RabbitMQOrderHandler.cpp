@@ -30,13 +30,7 @@ RabbitMQOrderHandler::handle_incoming_market_order(
 
     std::optional<std::reference_wrapper<matching::Engine>> engine =
         engine_manager.get_engine(order.ticker);
-    if (!engine.has_value()) {
-        log_w(
-            matching, "Received order for unknown ticker {}. Discarding order",
-            order.ticker
-        );
-        return;
-    }
+    assert(engine.has_value()); // TODO: FOR TESTING PURPOSES ONLY
     std::string client_id = order.client_id;
     auto [matches, ob_updates] =
         engine.value().get().match_order(std::move(order), clients);

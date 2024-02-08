@@ -24,7 +24,16 @@ TickerState::on_tick(uint64_t)
     num_bids_ = bids;
 
     theo_ = static_cast<float>(bot_container.get_theo());
-    num_mm_bots_ = static_cast<uint>(bot_container.get_num_mm_bots());
+    mm_open_bids_.clear();
+    mm_open_asks_.clear();
+    mm_bid_interest_.clear();
+    mm_ask_interest_.clear();
+    for (const auto& [id, bot] : bot_container.get_market_makers()) {
+        mm_open_bids_.push_back(bot.get_open_bids());
+        mm_open_asks_.push_back(bot.get_open_asks());
+        mm_bid_interest_.push_back(bot.get_bid_interest());
+        mm_ask_interest_.push_back(bot.get_ask_interest());
+    }
 }
 
 } // namespace dashboard

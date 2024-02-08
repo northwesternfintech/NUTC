@@ -2,6 +2,7 @@
 
 #include "exchange/logging.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
+#include "exchange/tickers/manager/ticker_manager.hpp"
 #include "exchange/utils/logger/logger.hpp"
 
 #include <algorithm>
@@ -31,11 +32,13 @@ Engine::remove_old_orders(uint64_t new_tick, uint64_t removed_tick_age)
                 continue;
             }
 
+            float p = orders_by_id_[order_id].price;
+            SIDE s = orders_by_id_[order_id].side;
             removed_orders.push_back(std::move(orders_by_id_[order_id]));
-            if (orders_by_id_[order_id].side == SIDE::BUY)
-                bids_.erase(order_index{orders_by_id_[order_id].price, order_id});
+            if (s == SIDE::BUY)
+                bids_.erase(order_index{p, order_id});
             else
-                asks_.erase(order_index{orders_by_id_[order_id].price, order_id});
+                asks_.erase(order_index{p, order_id});
             orders_by_id_.erase(order_id);
         }
         orders_by_tick_.erase(earliest_tick);
