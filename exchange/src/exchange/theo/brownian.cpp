@@ -1,7 +1,7 @@
 /**
  * @file brownian.cpp
  * @author Andrew Li (andrewli@u.northwestern.edu)
- * @brief Brownian motion randomness to simulate market chaos
+ * @brief Brownian motion theo to simulate market chaos
  * @version 0.1
  * @date 2024-01-12
  *

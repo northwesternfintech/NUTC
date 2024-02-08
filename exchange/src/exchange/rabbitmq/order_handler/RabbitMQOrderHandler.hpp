@@ -1,7 +1,7 @@
 #pragma once
 
-#include "exchange/client_manager/client_manager.hpp"
-#include "exchange/matching/manager/engine_manager.hpp"
+#include "exchange/tickers/manager/ticker_manager.hpp"
+#include "exchange/traders/trader_manager.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
 #include <string>

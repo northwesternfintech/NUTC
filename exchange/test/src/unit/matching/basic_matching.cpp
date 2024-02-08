@@ -1,4 +1,4 @@
-#include "exchange/matching/engine/engine.hpp"
+#include "exchange/tickers/engine/engine.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 #include "test_utils/macros.hpp"
@@ -16,12 +16,21 @@ protected:
     SetUp() override
     {
         using nutc::testing_utils::add_client_simple;
+        using nutc::testing_utils::modify_capital_simple;
+        using nutc::testing_utils::modify_holdings_simple;
 
         add_client_simple(manager_, "ABC");
         add_client_simple(manager_, "DEF");
 
-        manager_.modify_holdings("ABC", "ETHUSD", DEFAULT_QUANTITY);
-        manager_.modify_holdings("DEF", "ETHUSD", DEFAULT_QUANTITY);
+        modify_holdings_simple(manager_, "ABC", "ETHUSD", DEFAULT_QUANTITY);
+        modify_holdings_simple(manager_, "DEF", "ETHUSD", DEFAULT_QUANTITY);
+    }
+
+    void
+    TearDown() override
+    {
+        manager_.reset();
+        SetUp();
     }
 
     ClientManager& manager_ = nutc::manager::ClientManager::get_instance(); // NOLINT(*)
@@ -30,9 +39,19 @@ protected:
     nutc::matching::match_result_t
     add_to_engine_(MarketOrder order)
     {
-        return engine_.match_order(std::move(order), manager_);
+        return engine_.match_order(std::move(order), manager_); // NOLINT(*)
     }
 };
+
+TEST_F(UnitBasicMatching, SimpleAddRemove)
+{
+    using nutc::testing_utils::get_capital_simple;
+    using nutc::testing_utils::modify_capital_simple;
+    float capital_1 = get_capital_simple(manager_, "ABC");
+    modify_capital_simple(manager_, "ABC", 100);
+    float capital_2 = get_capital_simple(manager_, "ABC");
+    ASSERT_EQ(capital_1 + 100, capital_2);
+}
 
 TEST_F(UnitBasicMatching, SimpleMatch)
 {
@@ -95,6 +114,9 @@ TEST_F(UnitBasicMatching, NoMatchThenMatchBuy)
     auto [matches, ob_updates] = add_to_engine_(order1);
     auto [matches2, ob_updates2] = add_to_engine_(order2);
     auto [matches3, ob_updates3] = add_to_engine_(order3);
+    ASSERT_EQ(ob_updates.size(), 1);
+    ASSERT_EQ(ob_updates2.size(), 1);
+    // ASSERT_EQ(ob_updates3.size(), 1);
     ASSERT_EQ(matches.size(), 0);
     ASSERT_EQ(matches2.size(), 0);
     ASSERT_EQ(matches3.size(), 1);

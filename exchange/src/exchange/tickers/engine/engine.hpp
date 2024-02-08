@@ -1,6 +1,6 @@
 #pragma once
 
-#include "exchange/client_manager/client_manager.hpp"
+#include "exchange/traders/trader_manager.hpp"
 #include "order_storage.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
@@ -39,6 +39,21 @@ public:
      * orderbook updates
      */
     match_result_t match_order(MarketOrder&& order, manager::ClientManager& manager);
+
+    std::pair<uint, uint>
+    get_spread_nums() const
+    {
+        return {asks_.size(), bids_.size()};
+    }
+
+    std::pair<float, float>
+    get_spread() const
+    {
+        if (asks_.empty() || bids_.empty()) {
+            return {0, 0};
+        }
+        return {asks_.begin()->price, bids_.rbegin()->price};
+    }
 
     float
     get_midprice() const

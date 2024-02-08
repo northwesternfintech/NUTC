@@ -1,5 +1,5 @@
 #include "exchange/config.h"
-#include "exchange/matching/engine/engine.hpp"
+#include "exchange/tickers/engine/engine.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 #include "test_utils/macros.hpp"
 
@@ -16,12 +16,13 @@ protected:
     SetUp() override
     {
         using nutc::testing_utils::add_client_simple;
+        using nutc::testing_utils::modify_holdings_simple;
 
         add_client_simple(manager_, "ABC");
         add_client_simple(manager_, "DEF");
 
-        manager_.modify_holdings("ABC", "ETHUSD", DEFAULT_QUANTITY);
-        manager_.modify_holdings("DEF", "ETHUSD", DEFAULT_QUANTITY);
+        modify_holdings_simple(manager_, "ABC", "ETHUSD", DEFAULT_QUANTITY);
+        modify_holdings_simple(manager_, "DEF", "ETHUSD", DEFAULT_QUANTITY);
     }
 
     ClientManager& manager_ = nutc::manager::ClientManager::get_instance(); // NOLINT(*)
@@ -36,7 +37,7 @@ protected:
 
 TEST_F(UnitLoggingOrders, LogMarketOrders)
 {
-    manager_.modify_capital("ABC", -STARTING_CAPITAL);
+    nutc::testing_utils::modify_capital_simple(manager_, "ABC", -STARTING_CAPITAL);
 
     MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
     MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};

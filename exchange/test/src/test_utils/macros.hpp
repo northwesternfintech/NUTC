@@ -1,5 +1,6 @@
-#include "exchange/client_manager/client_manager.hpp"
-#include "exchange/matching/engine/engine.hpp"
+#include "exchange/tickers/engine/engine.hpp"
+#include "exchange/tickers/manager/ticker_manager.hpp"
+#include "exchange/traders/trader_manager.hpp"
 #include "exchange/utils/logger/logger.hpp"
 
 #include <limits>
@@ -9,6 +10,7 @@ using MarketOrder = nutc::messages::MarketOrder;
 using Logger = nutc::events::Logger;
 using ObUpdate = nutc::messages::ObUpdate;
 using ClientManager = nutc::manager::ClientManager;
+using EngineManager = nutc::engine_manager::EngineManager;
 using SIDE = nutc::messages::SIDE;
 
 namespace nutc {
@@ -32,7 +34,20 @@ bool validate_market_order(
     messages::SIDE side, float price, float quantity
 );
 
-void add_client_simple(manager::ClientManager& manager, const std::string& client_id);
+void add_client_simple(
+    manager::ClientManager& manager, const std::string& client_id,
+    float capital = STARTING_CAPITAL
+);
+void modify_holdings_simple(
+    manager::ClientManager& manager, const std::string& client_id,
+    const std::string& ticker, float quantity
+);
+
+void modify_capital_simple(
+    manager::ClientManager& manager, const std::string& client_id, float capital_change
+);
+
+float get_capital_simple(manager::ClientManager& manager, const std::string& client_id);
 
 } // namespace testing_utils
 } // namespace nutc

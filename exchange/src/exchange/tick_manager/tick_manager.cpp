@@ -26,6 +26,14 @@ TickManager::notify_tick_()
     for (TickObserver* observer : second_observers_) {
         observer->on_tick(current_tick_);
     }
+
+    for (TickObserver* observer : third_observers_) {
+        observer->on_tick(current_tick_);
+    }
+
+    for (TickObserver* observer : fourth_observers_) {
+        observer->on_tick(current_tick_);
+    }
 }
 
 } // namespace ticks

@@ -17,7 +17,7 @@ public:
     {}
 
     // WARNING!! not initialized until initialize_client_manager is run
-    size_t
+    [[nodiscard]] size_t
     get_num_clients() const override
     {
         return num_clients_;

@@ -1,6 +1,6 @@
 #pragma once
-#include "exchange/bot_framework/bots/mm.hpp"
-#include "exchange/randomness/brownian.hpp"
+#include "exchange/bots/market_maker.hpp"
+#include "exchange/theo/brownian.hpp"
 #include "exchange/tick_manager/tick_observer.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
 
@@ -14,7 +14,19 @@ class BotContainer : public ticks::TickObserver {
 public:
     void on_tick(uint64_t) override;
 
-    void add_mm_bot(const std::string& bot_id, float starting_capital);
+    double
+    get_theo() const
+    {
+        return brownian_offset_ + theo_generator_.get_price();
+    }
+
+    size_t
+    get_num_mm_bots() const
+    {
+        return market_makers_.size();
+    }
+
+    void add_mm_bot(float starting_capital);
 
     std::vector<MarketOrder> on_new_theo(float new_theo, float current);
 
@@ -26,16 +38,17 @@ public:
 
     BotContainer() = default;
 
-    explicit BotContainer(std::string ticker, float starting_price) :
-        ticker_(std::move(ticker)), theo_generator_(static_cast<double>(starting_price))
+    explicit BotContainer(std::string ticker, double starting_price) :
+        ticker_(std::move(ticker)), brownian_offset_(starting_price)
     {}
 
 private:
     // TODO(stevenewald): make more elegant than string UUID
-    std::unordered_map<std::string, MarketMakerBot> market_makers_;
+    std::unordered_map<std::string, MarketMakerBot> market_makers_{};
     std::string ticker_;
 
-    stochastic::BrownianMotion theo_generator_;
+    stochastic::BrownianMotion theo_generator_{};
+    double brownian_offset_ = 0.0;
 };
 } // namespace bots
 } // namespace nutc

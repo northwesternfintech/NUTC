@@ -1,6 +1,6 @@
 #pragma once
 
-#include "exchange/client_manager/client_manager.hpp"
+#include "exchange/traders/trader_manager.hpp"
 
 namespace nutc {
 namespace algo_mgmt {
@@ -30,7 +30,7 @@ public:
 
     virtual void initialize_client_manager(manager::ClientManager& manager) = 0;
 
-    virtual size_t get_num_clients() const = 0;
+    [[nodiscard]] virtual size_t get_num_clients() const = 0;
 
     virtual ~AlgoManager() = default;
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "exchange/algos/algo_manager.hpp"
-#include "exchange/client_manager/client_manager.hpp"
+#include "exchange/traders/trader_manager.hpp"
 
 #include <vector>
 
@@ -15,18 +15,15 @@ class DevModeAlgoManager : public AlgoManager {
 public:
     explicit DevModeAlgoManager(size_t num_clients) : num_clients_(num_clients) {}
 
-    explicit DevModeAlgoManager(
-        size_t num_clients, const std::vector<std::string>& filenames
-    ) :
-        num_clients_(num_clients),
-        algo_filenames_(filenames)
+    explicit DevModeAlgoManager(const std::vector<std::string>& filenames) :
+        num_clients_(filenames.size()), algo_filenames_(filenames)
     {}
 
     void initialize_client_manager(manager::ClientManager& users) override;
 
     void initialize_files() const override;
 
-    size_t
+    [[nodiscard]] size_t
     get_num_clients() const override
     {
         return num_clients_;

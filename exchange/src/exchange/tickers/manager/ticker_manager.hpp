@@ -1,9 +1,9 @@
 #pragma once
 
-#include "exchange/bot_framework/bot_container_mapper.hpp"
+#include "exchange/bots/bot_container.hpp"
 #include "exchange/config.h"
-#include "exchange/matching/engine/engine.hpp"
 #include "exchange/tick_manager/tick_observer.hpp"
+#include "exchange/tickers/engine/engine.hpp"
 
 #include <optional>
 #include <string>
@@ -17,9 +17,14 @@ class EngineManager : public nutc::ticks::TickObserver {
 public:
     std::optional<engine_ref_t> get_engine(const std::string& ticker);
 
-    void add_engine(const std::string& ticker);
+    bots::BotContainer&
+    get_bot_container(const std::string& ticker)
+    {
+        return bot_containers_.at(ticker);
+    }
 
-    void set_initial_price(const std::string& ticker, float price);
+    void add_engine(const std::string& ticker, float starting_price);
+    void add_engine(const std::string& ticker);
 
     // deprecated?
     void add_initial_liquidity(const std::string& ticker, float quantity, float price);
@@ -34,7 +39,7 @@ public:
                 engine.remove_old_orders(new_tick, new_tick - ORDER_EXPIRATION_TIME);
             for (auto& order : removed) {
                 if (order.client_id.find("bot_") != std::string::npos) {
-                    bots::BotContainerMapper::get_instance(order.ticker)
+                    bot_containers_.at(order.ticker)
                         .process_order_expiration(
                             order.client_id, order.side, order.price * order.quantity
                         );
@@ -43,9 +48,19 @@ public:
         }
     }
 
+    // For testing
+    void
+    reset()
+    {
+        engines_.clear();
+        bot_containers_.clear();
+    }
+
 private:
     std::map<std::string, matching::Engine> engines_;
+    std::unordered_map<std::string, bots::BotContainer> bot_containers_;
     EngineManager() = default;
+    void set_initial_price_(const std::string& ticker, float price);
 
 public:
     // fuck it, everything's a singleton
