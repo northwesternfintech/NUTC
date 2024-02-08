@@ -121,10 +121,10 @@ public:
     }
 
 private:
-  float long_interest_ = 0;
-  float short_interest_ = 0;
+    float long_interest_ = 0;
+    float short_interest_ = 0;
 
-     const std::string BOT_ID;
+    const std::string BOT_ID;
 
     int open_bids_ = 0; // for stats, not the strategy
     int open_asks_ = 0;

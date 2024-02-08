@@ -71,23 +71,33 @@ struct StoredOrder {
         );
     }
 
-    bool
-    operator<(const StoredOrder& other) const
+    int
+    operator<=>(const StoredOrder& other) const
     {
         // assuming both sides are same
         // otherwise, this shouldn't even be called
         if (util::is_close_to_zero(this->price - other.price)) {
-            return this->order_index > other.order_index;
+            if (this->order_index > other.order_index)
+                return -1;
+            if (this->order_index < other.order_index)
+                return 1;
+            return 0;
         }
-        else if (this->side == SIDE::BUY) {
-            return this->price < other.price;
+        if (this->side == SIDE::BUY) {
+            if(this->price < other.price)
+                return -1;
+            if(this->price > other.price)
+                return 1;
+            return 0;
         }
-        else if (this->side == SIDE::SELL) {
-            return this->price > other.price;
+        if (this->side == SIDE::SELL) {
+            if(this->price > other.price)
+                return -1;
+            if(this->price < other.price)
+                return 1;
+            return 0;
         }
-        else {
-            return false;
-        }
+    return 0;
     }
 
     [[nodiscard]] bool
