@@ -120,6 +120,11 @@ public:
         open_asks_ += delta;
     }
 
+    float get_utilization() const
+    {
+        return compute_capital_util_();
+    }
+
 private:
     float long_interest_ = 0;
     float short_interest_ = 0;

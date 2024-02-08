@@ -23,6 +23,7 @@ struct TickerState : public ticks::TickObserver {
     std::vector<int> mm_open_asks_{};
     std::vector<float> mm_bid_interest_{};
     std::vector<float> mm_ask_interest_{};
+    std::vector<float> mm_utilization_{};
 
     TickerState(std::string ticker, float starting_price) :
         TICKER(std::move(ticker)), STARTING_PRICE(starting_price)

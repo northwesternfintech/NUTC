@@ -69,23 +69,21 @@ BotContainer::on_new_theo(float new_theo)
 }
 
 void
-BotContainer::process_bot_match(const Match& match)
+BotContainer::process_order_add(
+    const std::string& bot_id, messages::SIDE side, float total_cap
+)
 {
-    auto match1 = market_makers_.find(match.buyer_id);
-    auto match2 = market_makers_.find(match.seller_id);
-
-    // TODO: we expect that the price of a match will not be the same as when we sent
-    // out the order
-    float total_cap = match.price * match.quantity;
+    auto match1 = market_makers_.find(bot_id);
 
     // Both have reduced their positions
-    if (match1 != market_makers_.end()) {
-        match1->second.modify_long_capital(-total_cap);
-        match1->second.modify_open_bids(-1);
+    assert(match1 != market_makers_.end());
+    if (side == messages::SIDE::BUY) {
+        match1->second.modify_long_capital(total_cap);
+        match1->second.modify_open_bids(1);
     }
-    if (match2 != market_makers_.end()) {
-        match2->second.modify_short_capital(-total_cap);
-        match2->second.modify_open_asks(-1);
+    else {
+        match1->second.modify_short_capital(total_cap);
+        match1->second.modify_open_asks(1);
     }
 }
 
