@@ -28,9 +28,10 @@ public:
 
     std::vector<MarketOrder> on_new_theo(float new_theo);
 
-    void process_bot_match(const Match& match);
-
     void process_order_expiration(
+        const std::string& bot_id, messages::SIDE side, float total_cap
+    );
+    void process_order_add(
         const std::string& bot_id, messages::SIDE side, float total_cap
     );
 

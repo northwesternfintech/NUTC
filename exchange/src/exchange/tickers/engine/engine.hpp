@@ -89,7 +89,7 @@ public:
     }
 
     // Called every tick
-    std::vector<StoredOrder>
+  std::pair<std::vector<StoredOrder>, std::vector<StoredOrder>>
     remove_old_orders(uint64_t new_tick, uint64_t removed_tick_age);
 
 private:
@@ -108,6 +108,9 @@ private:
     // tick -> queue of order ids
     std::map<uint64_t, std::queue<uint64_t>> orders_by_tick_;
 
+    std::vector<StoredOrder> removed_orders_{};
+    std::vector<StoredOrder> added_orders_{};
+
     template <typename Comparator>
     std::optional<std::reference_wrapper<StoredOrder>>
     get_order_from_set_(std::set<order_index, Comparator>& order_set)
@@ -122,7 +125,6 @@ private:
             if (order_set.empty()) {
                 return std::nullopt;
             }
-            assert(!order_set.empty());
             order_id = order_set.begin()->index;
         }
         return orders_by_id_.at(order_id);

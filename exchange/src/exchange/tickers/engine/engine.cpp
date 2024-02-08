@@ -11,11 +11,10 @@
 namespace nutc {
 namespace matching {
 
-std::vector<StoredOrder>
+std::pair<std::vector<StoredOrder>, std::vector<StoredOrder>>
 Engine::remove_old_orders(uint64_t new_tick, uint64_t removed_tick_age)
 {
     current_tick_ = new_tick;
-    std::vector<StoredOrder> removed_orders;
     // Maybe we can reserve space?
 
     while (!orders_by_tick_.empty()) {
@@ -34,7 +33,7 @@ Engine::remove_old_orders(uint64_t new_tick, uint64_t removed_tick_age)
 
             float p = orders_by_id_[order_id].price;
             SIDE s = orders_by_id_[order_id].side;
-            removed_orders.push_back(std::move(orders_by_id_[order_id]));
+            removed_orders_.push_back(orders_by_id_[order_id]);
             if (s == SIDE::BUY)
                 bids_.erase(order_index{p, order_id});
             else
@@ -44,7 +43,13 @@ Engine::remove_old_orders(uint64_t new_tick, uint64_t removed_tick_age)
         orders_by_tick_.erase(earliest_tick);
     }
 
-    return removed_orders;
+    std::vector<StoredOrder> return_vec = removed_orders_;
+    removed_orders_ = std::vector<StoredOrder>{};
+
+    std::vector<StoredOrder> added_orders = added_orders_;
+    added_orders_ = std::vector<StoredOrder>{};
+
+    return {return_vec, added_orders};
 }
 
 void
@@ -74,10 +79,12 @@ Engine::match_order(MarketOrder&& order, manager::ClientManager& manager)
     match_result_t result;
     StoredOrder stored_order(std::move(order), current_tick_);
     if (insufficient_capital(stored_order, manager)) {
+        removed_orders_.push_back(stored_order);
         return result;
     }
 
     if (insufficient_holdings(stored_order, manager)) {
+        removed_orders_.push_back(stored_order);
         return result;
     }
 
@@ -166,10 +173,12 @@ Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
             if (side == SIDE::BUY) {
                 bids_.erase(bids_.begin());
                 orders_by_id_.erase(buy_order_ref.order_index);
+                removed_orders_.push_back(buy_order_ref);
             }
             else {
                 asks_.erase(asks_.begin());
                 orders_by_id_.erase(sell_order_ref.order_index);
+                removed_orders_.push_back(sell_order_ref);
             }
             continue;
         }
@@ -179,6 +188,9 @@ Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
         // This could be optimized, but it's good for now
         StoredOrder sell_order = sell_order_ref;
         StoredOrder buy_order = buy_order_ref;
+        
+        removed_orders_.push_back(sell_order);
+        removed_orders_.push_back(buy_order);
 
         orders_by_id_.erase(buy_order_ref.order_index);
         orders_by_id_.erase(sell_order_ref.order_index);
@@ -210,12 +222,14 @@ Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
             if (!buy_aggressive)
                 add_ob_update(result.ob_updates, buy_order, buy_order.quantity);
             add_order(buy_order);
+            added_orders_.push_back(buy_order);
         }
 
         if (!is_close_to_zero(sell_order.quantity)) {
             if (!sell_aggressive)
                 add_ob_update(result.ob_updates, sell_order, sell_order.quantity);
             add_order(sell_order);
+            added_orders_.push_back(sell_order);
         }
 
         auto update_traders = [&](const std::string& trader_id, SIDE side) {

@@ -28,11 +28,13 @@ TickerState::on_tick(uint64_t)
     mm_open_asks_.clear();
     mm_bid_interest_.clear();
     mm_ask_interest_.clear();
+  mm_utilization_.clear();
     for (const auto& [id, bot] : bot_container.get_market_makers()) {
         mm_open_bids_.push_back(bot.get_open_bids());
         mm_open_asks_.push_back(bot.get_open_asks());
         mm_bid_interest_.push_back(bot.get_bid_interest());
         mm_ask_interest_.push_back(bot.get_ask_interest());
+        mm_utilization_.push_back(bot.get_utilization());
     }
 }
 

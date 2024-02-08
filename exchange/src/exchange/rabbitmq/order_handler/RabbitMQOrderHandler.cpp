@@ -52,14 +52,6 @@ RabbitMQOrderHandler::handle_incoming_market_order(
     }
     if (!matches.empty()) {
         RabbitMQPublisher::broadcast_matches(clients, matches);
-        for (const auto& match : matches) {
-            if (match.buyer_id.find("bot_") != std::string::npos
-                || match.seller_id.find("bot_") != std::string::npos) {
-                engine_manager::EngineManager::get_instance()
-                    .get_bot_container(match.ticker)
-                    .process_bot_match(match);
-            }
-        }
     }
     if (!ob_updates.empty()) {
         RabbitMQPublisher::broadcast_ob_updates(clients, ob_updates, client_id);
