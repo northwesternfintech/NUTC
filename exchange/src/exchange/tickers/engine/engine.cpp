@@ -1,8 +1,6 @@
 #include "engine.hpp"
 
-#include "exchange/logging.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
-#include "exchange/tickers/manager/ticker_manager.hpp"
 #include "exchange/utils/logger/logger.hpp"
 
 #include <algorithm>
@@ -11,11 +9,12 @@
 namespace nutc {
 namespace matching {
 
-std::pair<std::vector<StoredOrder>, std::vector<StoredOrder>>
-Engine::remove_old_orders(uint64_t new_tick, uint64_t removed_tick_age)
+// TODO(anyone): unit test for added orders
+on_tick_result_t
+Engine::on_tick(uint64_t new_tick, uint8_t order_expire_age)
 {
     current_tick_ = new_tick;
-    // Maybe we can reserve space?
+    uint64_t removed_tick_age = new_tick - order_expire_age;
 
     while (!orders_by_tick_.empty()) {
         uint64_t earliest_tick = orders_by_tick_.begin()->first;
@@ -31,22 +30,22 @@ Engine::remove_old_orders(uint64_t new_tick, uint64_t removed_tick_age)
                 continue;
             }
 
-            float p = orders_by_id_[order_id].price;
-            SIDE s = orders_by_id_[order_id].side;
-            removed_orders_.push_back(orders_by_id_[order_id]);
-            if (s == SIDE::BUY)
-                bids_.erase(order_index{p, order_id});
+            float price = orders_by_id_[order_id].price;
+            SIDE side = orders_by_id_[order_id].side;
+            if (side == SIDE::BUY)
+                bids_.erase(order_index{price, order_id});
             else
-                asks_.erase(order_index{p, order_id});
+                asks_.erase(order_index{price, order_id});
+            removed_orders_.push_back(std::move(orders_by_id_[order_id]));
             orders_by_id_.erase(order_id);
         }
         orders_by_tick_.erase(earliest_tick);
     }
 
-    std::vector<StoredOrder> return_vec = removed_orders_;
+    std::vector<StoredOrder> return_vec = std::move(removed_orders_);
     removed_orders_ = std::vector<StoredOrder>{};
 
-    std::vector<StoredOrder> added_orders = added_orders_;
+    std::vector<StoredOrder> added_orders = std::move(added_orders_);
     added_orders_ = std::vector<StoredOrder>{};
 
     return {return_vec, added_orders};
@@ -78,6 +77,7 @@ Engine::match_order(MarketOrder&& order, manager::ClientManager& manager)
 {
     match_result_t result;
     StoredOrder stored_order(std::move(order), current_tick_);
+
     if (insufficient_capital(stored_order, manager)) {
         removed_orders_.push_back(stored_order);
         return result;
@@ -188,7 +188,7 @@ Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
         // This could be optimized, but it's good for now
         StoredOrder sell_order = sell_order_ref;
         StoredOrder buy_order = buy_order_ref;
-        
+
         removed_orders_.push_back(sell_order);
         removed_orders_.push_back(buy_order);
 

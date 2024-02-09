@@ -1,7 +1,4 @@
 #include "exchange/tickers/engine/engine.hpp"
-#include "exchange/tickers/engine/order_storage.hpp"
-#include "shared/messages_exchange_to_wrapper.hpp"
-#include "shared/messages_wrapper_to_exchange.hpp"
 #include "test_utils/macros.hpp"
 
 #include <gtest/gtest.h>
@@ -45,7 +42,7 @@ TEST_F(UnitOrderExpiration, SimpleNoMatch)
     ASSERT_EQ(ob_updates.size(), 1);
     ASSERT_EQ_OB_UPDATE(ob_updates.at(0), "ETHUSD", BUY, 1, 1);
 
-    ASSERT_EQ(1, engine_.remove_old_orders(1, 0).first.size());
+    ASSERT_EQ(1, engine_.on_tick(1, 1).removed_orders.size());
 
     auto [matches2, ob_updates2] = add_to_engine_(order2);
     ASSERT_EQ(matches2.size(), 0);
@@ -55,11 +52,11 @@ TEST_F(UnitOrderExpiration, SimpleNoMatch)
 
 TEST_F(UnitOrderExpiration, IncrementTick)
 {
-    engine_.remove_old_orders(1, 0);
+    engine_.on_tick(1, 10);
 
     MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
     MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
 
     auto [matches, ob_updates] = add_to_engine_(order1);
-    ASSERT_EQ(1, engine_.remove_old_orders(2, 1).first.size());
+    ASSERT_EQ(1, engine_.on_tick(2, 1).removed_orders.size());
 }

@@ -31,9 +31,8 @@ public:
     void process_order_expiration(
         const std::string& bot_id, messages::SIDE side, float total_cap
     );
-    void process_order_add(
-        const std::string& bot_id, messages::SIDE side, float total_cap
-    );
+    void
+    process_order_add(const std::string& bot_id, messages::SIDE side, float total_cap);
 
     void add_mm_bots(const std::vector<float>& starting_capitals);
 

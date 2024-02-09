@@ -105,7 +105,7 @@ RabbitMQPublisher::broadcast_account_update(
 
     if (buyer_id.find("BOT_") != std::string::npos
         && seller_id.find("BOT_") != std::string::npos) {
-          return; //no need to broadcast this
+        return; // no need to broadcast this
     }
 
     send_message(buyer_id, messages::SIDE::BUY);

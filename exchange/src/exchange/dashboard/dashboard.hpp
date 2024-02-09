@@ -69,9 +69,7 @@ displayMarketMakerBotsData(int startY, int startX, const TickerState& bots)
             startY + 2, startX, "$ open bids/asks: %.2f %.2f", bots.mm_bid_interest_[i],
             bots.mm_ask_interest_[i]
         );
-        mvprintw(
-            startY + 3, startX, "Utilization: %.2f", bots.mm_utilization_[i]
-        );
+        mvprintw(startY + 3, startX, "Utilization: %.2f", bots.mm_utilization_[i]);
         startY += 5;
     }
     return startY;
