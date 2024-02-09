@@ -73,7 +73,6 @@ BotContainer::process_order_add(
     const std::string& bot_id, messages::SIDE side, float total_cap
 )
 {
-  if(bot_id=="SIMULATED") return;
     auto match1 = market_makers_.find(bot_id);
 
     // Both have reduced their positions
@@ -93,7 +92,6 @@ BotContainer::process_order_expiration(
     const std::string& bot_id, messages::SIDE side, float total_cap
 )
 {
-  if(bot_id=="SIMULATED") return;
     auto match1 = market_makers_.find(bot_id);
 
     // Both have reduced their positions

@@ -24,7 +24,8 @@ kill_all_processes(const manager::ClientManager& users)
             },
             client
         );
-        kill(pid, SIGKILL);
+        if (pid != -1)
+            kill(pid, SIGKILL);
     }
 }
 

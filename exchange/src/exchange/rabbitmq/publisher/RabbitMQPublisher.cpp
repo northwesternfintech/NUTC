@@ -2,7 +2,6 @@
 
 #include "exchange/logging.hpp"
 #include "exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
-#include "exchange/tickers/manager/ticker_manager.hpp"
 
 namespace nutc {
 namespace rabbitmq {
@@ -89,8 +88,6 @@ RabbitMQPublisher::broadcast_account_update(
     const std::string& seller_id = match.seller_id;
 
     auto send_message = [&](const std::string& trader_id, messages::SIDE side) {
-        if (trader_id == "SIMULATED")
-            return;
         if (trader_id.find("BOT_") != std::string::npos) {
             return;
         }

@@ -12,11 +12,6 @@ namespace matching {
 
 using SIDE = messages::SIDE;
 
-/**
- * @brief Sent by clients to the exchange to place an order
- * TODO: client_id=="SIMULATED" indicates simulated order with no actual
- * owner, but this is improper. Instead, it should be an optional
- */
 struct StoredOrder {
     const manager::generic_trader_t* trader;
     std::string ticker;

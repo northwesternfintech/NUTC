@@ -1,5 +1,6 @@
 #include "macros.hpp"
 
+#include "exchange/traders/trader_manager.hpp"
 #include "exchange/traders/trader_types.hpp"
 
 #include <iostream>

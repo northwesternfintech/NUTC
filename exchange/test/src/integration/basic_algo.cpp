@@ -26,6 +26,7 @@ protected:
     {
         nutc::testing_utils::kill_all_processes(users_);
         rmq::RabbitMQConnectionManager::reset_instance();
+        users_.reset();
     }
 
     ClientManager& users_ = nutc::manager::ClientManager::get_instance(); // NOLINT(*)
@@ -40,9 +41,16 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
 
     // want to see if it buys
     engine_manager_.add_engine("TSLA");
-    rmq::RabbitMQOrderHandler::add_liquidity_to_ticker(
-        users_, engine_manager_, "TSLA", 100, 100 // NOLINT (magic-number-*)
-    );
+
+    std::string user_id = users_.add_client(nutc::manager::bot_trader_t{});
+    users_.get_generic_trader(user_id)->modify_holdings("TSLA", 1000); // NOLINT
+
+    rmq::RabbitMQOrderHandler::handle_incoming_market_order(
+        engine_manager_, users_,
+        nutc::messages::MarketOrder{
+            user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100
+        }
+    ); // NOLINT
 
     auto mess = rmq::RabbitMQConsumer::consume_message();
     EXPECT_TRUE(std::holds_alternative<nutc::messages::MarketOrder>(mess));
@@ -61,9 +69,15 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
     engine_manager_.add_engine("TSLA");
     engine_manager_.add_engine("APPL");
 
-    rmq::RabbitMQOrderHandler::add_liquidity_to_ticker(
-        users_, engine_manager_, "TSLA", 100, 100 // NOLINT (magic-number-*)
-    );
+    std::string user_id = users_.add_client(nutc::manager::bot_trader_t{});
+    users_.get_generic_trader(user_id)->modify_holdings("TSLA", 1000); // NOLINT
+
+    rmq::RabbitMQOrderHandler::handle_incoming_market_order(
+        engine_manager_, users_,
+        nutc::messages::MarketOrder{
+            user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100
+        }
+    ); // NOLINT
 
     // obupdate triggers one user to place a BUY order of 10 TSLA at 100
     auto mess1 = rmq::RabbitMQConsumer::consume_message();
@@ -99,9 +113,15 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdate)
     engine_manager_.add_engine("TSLA");
     engine_manager_.add_engine("APPL");
 
-    rmq::RabbitMQOrderHandler::add_liquidity_to_ticker(
-        users_, engine_manager_, "TSLA", 100, 100 // NOLINT (magic-number-*)
-    );
+    std::string user_id = users_.add_client(nutc::manager::bot_trader_t{});
+    users_.get_generic_trader(user_id)->modify_holdings("TSLA", 1000); // NOLINT
+
+    rmq::RabbitMQOrderHandler::handle_incoming_market_order(
+        engine_manager_, users_,
+        nutc::messages::MarketOrder{
+            user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100
+        }
+    ); // NOLINT
 
     // obupdate triggers one user to place a BUY order of 10 TSLA at 102
     auto mess1 = rmq::RabbitMQConsumer::consume_message();

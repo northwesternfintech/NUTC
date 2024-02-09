@@ -27,9 +27,6 @@ public:
     void add_engine(const std::string& ticker, float starting_price);
     void add_engine(const std::string& ticker);
 
-    // deprecated?
-    void add_initial_liquidity(const std::string& ticker, float quantity, float price);
-
     void
     on_tick(uint64_t new_tick) override
     {
