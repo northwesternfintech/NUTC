@@ -1,5 +1,6 @@
 #include "normal_mode.hpp"
 
+#include "exchange/config.h"
 #include "exchange/curl/curl.hpp"
 #include "exchange/traders/trader_types.hpp"
 

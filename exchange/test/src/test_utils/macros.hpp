@@ -100,7 +100,8 @@ float get_capital_simple(manager::ClientManager& manager, const std::string& cli
             << "Expected market order with client_id = " << (client_id_)               \
             << ", ticker =" << (ticker_) << ", side = " << static_cast<int>(side_)     \
             << ", price = " << (price_) << ", quantity = " << (quantity_)              \
-            << ". Actual update: ticker = " << (update).ticker                         \
+            << ". Actual update: client_id = " << (update).client_id                   \
+            << ", ticker = " << (update).ticker                                        \
             << ", side = " << static_cast<int>((update).side)                          \
             << ", price = " << (update).price << ", quantity = " << (update).quantity; \
     } while (0)

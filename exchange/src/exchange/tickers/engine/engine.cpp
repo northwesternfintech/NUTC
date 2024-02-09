@@ -1,6 +1,7 @@
 #include "engine.hpp"
 
 #include "exchange/tickers/engine/order_storage.hpp"
+#include "exchange/traders/trader_types.hpp"
 #include "exchange/utils/logger/logger.hpp"
 
 #include <algorithm>
@@ -21,7 +22,7 @@ Engine::on_tick(uint64_t new_tick, uint8_t order_expire_age)
         if (earliest_tick > removed_tick_age) {
             break;
         }
-        std::queue<uint64_t>& order_ids = orders_by_tick_[earliest_tick];
+        std::queue<uint64_t>& order_ids = orders_by_tick_.at(earliest_tick);
         while (!order_ids.empty()) {
             uint64_t order_id = order_ids.front();
             order_ids.pop();
@@ -30,13 +31,13 @@ Engine::on_tick(uint64_t new_tick, uint8_t order_expire_age)
                 continue;
             }
 
-            float price = orders_by_id_[order_id].price;
-            SIDE side = orders_by_id_[order_id].side;
+            float price = orders_by_id_.at(order_id).price;
+            SIDE side = orders_by_id_.at(order_id).side;
             if (side == SIDE::BUY)
                 bids_.erase(order_index{price, order_id});
             else
                 asks_.erase(order_index{price, order_id});
-            removed_orders_.push_back(std::move(orders_by_id_[order_id]));
+            removed_orders_.push_back(std::move(orders_by_id_.at(order_id)));
             orders_by_id_.erase(order_id);
         }
         orders_by_tick_.erase(earliest_tick);
@@ -58,17 +59,17 @@ add_ob_update(std::vector<ObUpdate>& vec, StoredOrder& order, float quantity)
 }
 
 bool
-insufficient_capital(const StoredOrder& order, const manager::ClientManager& manager)
+insufficient_capital(const StoredOrder& order)
 {
-    float capital = manager.get_capital(order.client_id);
+    float capital = order.trader->get_capital();
     float order_value = order.price * order.quantity;
     return order.side == SIDE::BUY && order_value > capital;
 }
 
 bool
-insufficient_holdings(const StoredOrder& order, const manager::ClientManager& manager)
+insufficient_holdings(const StoredOrder& order)
 {
-    float holdings = manager.get_holdings(order.client_id, order.ticker);
+    float holdings = order.trader->get_holdings(order.ticker);
     return order.side == SIDE::SELL && order.quantity > holdings;
 }
 
@@ -78,12 +79,12 @@ Engine::match_order(MarketOrder&& order, manager::ClientManager& manager)
     match_result_t result;
     StoredOrder stored_order(std::move(order), current_tick_);
 
-    if (insufficient_capital(stored_order, manager)) {
+    if (insufficient_capital(stored_order)) {
         removed_orders_.push_back(stored_order);
         return result;
     }
 
-    if (insufficient_holdings(stored_order, manager)) {
+    if (insufficient_holdings(stored_order)) {
         removed_orders_.push_back(stored_order);
         return result;
     }
@@ -128,12 +129,6 @@ get_match_quantity(
     return std::min(passive_order.quantity, aggressive_order.quantity);
 }
 
-std::string
-get_client_id(SIDE side, const StoredOrder& aggressive, const StoredOrder& passive)
-{
-    return side == aggressive.side ? aggressive.client_id : passive.client_id;
-}
-
 SIDE
 get_aggressive_side(const StoredOrder& order1, const StoredOrder& order2)
 {
@@ -161,8 +156,8 @@ Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
         float price_to_match =
             aggressive_side == SIDE::BUY ? sell_order_ref.price : buy_order_ref.price;
 
-        std::string buyer_id = buy_order_ref.client_id;
-        std::string seller_id = sell_order_ref.client_id;
+        std::string buyer_id = buy_order_ref.trader->get_id();
+        std::string seller_id = sell_order_ref.trader->get_id();
 
         Match to_match{sell_order_ref.ticker, aggressive_side, price_to_match,
                        quantity_to_match,     buyer_id,        seller_id};
@@ -232,31 +227,23 @@ Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
             added_orders_.push_back(sell_order);
         }
 
-        auto update_traders = [&](const std::string& trader_id, SIDE side) {
-            if (trader_id == "SIMULATED")
-                return;
-            auto& trader = manager.get_client(trader_id);
+        auto update_traders = [&](manager::generic_trader_t* trader, SIDE side) {
             if (side == SIDE::BUY) {
-                std::visit(
-                    [&](auto&& trader) {
-                        trader.modify_capital(-quantity_to_match * price_to_match);
-                        trader.modify_holdings(buy_order.ticker, quantity_to_match);
-                    },
-                    trader
-                );
+                trader->modify_capital(-quantity_to_match * price_to_match);
+                trader->modify_holdings(buy_order.ticker, quantity_to_match);
             }
             else {
-                std::visit(
-                    [&](auto&& trader) {
-                        trader.modify_capital(quantity_to_match * price_to_match);
-                        trader.modify_holdings(buy_order.ticker, -quantity_to_match);
-                    },
-                    trader
-                );
+                trader->modify_capital(quantity_to_match * price_to_match);
+                trader->modify_holdings(buy_order.ticker, -quantity_to_match);
             }
         };
-        update_traders(buy_order.client_id, SIDE::BUY);
-        update_traders(sell_order.client_id, SIDE::SELL);
+
+        update_traders(
+            const_cast<manager::generic_trader_t*>(buy_order.trader), SIDE::BUY
+        );
+        update_traders(
+            const_cast<manager::generic_trader_t*>(sell_order.trader), SIDE::SELL
+        );
     }
 
     if (aggressive_quantity > 0) {
