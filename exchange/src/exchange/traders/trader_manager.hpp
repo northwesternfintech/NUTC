@@ -1,6 +1,5 @@
 #pragma once
 // keep track of active users and account information
-#include "exchange/config.h"
 #include "shared/messages_exchange_to_wrapper.hpp"
 #include "trader_types.hpp"
 
@@ -10,15 +9,31 @@
 #include <string>
 #include <unordered_map>
 
+#include <iostream>
+
 namespace nutc {
 namespace manager {
 
 using trader_t = std::variant<remote_trader_t, local_trader_t, bot_trader_t>;
 
 class ClientManager {
-    std::unordered_map<std::string, trader_t> traders_{};
+    std::unordered_map<std::string, trader_t> traders_;
 
 public:
+    // TODO: unit test to see if this could be an issue
+    const generic_trader_t*
+    get_generic_trader(const std::string& user_id) const
+    {
+    if(!user_exists_(user_id)){
+      std::cout << "User does not exist " << user_id << std::endl;
+    }
+        assert(user_exists_(user_id));
+        return std::visit(
+            [](auto&& trader) { return static_cast<const generic_trader_t*>(&trader); },
+            get_client_const(user_id)
+        );
+    }
+
     [[nodiscard]] std::string
     add_client(const trader_t& trader)
     {

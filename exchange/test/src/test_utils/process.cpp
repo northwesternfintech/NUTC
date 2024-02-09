@@ -1,6 +1,7 @@
 #include "process.hpp"
 
 #include "exchange/algos/dev_mode/dev_mode.hpp"
+#include "exchange/config.h"
 #include "exchange/rabbitmq/client_manager/RabbitMQClientManager.hpp"
 #include "exchange/traders/trader_types.hpp"
 

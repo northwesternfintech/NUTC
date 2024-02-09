@@ -73,10 +73,11 @@ BotContainer::process_order_add(
     const std::string& bot_id, messages::SIDE side, float total_cap
 )
 {
+  if(bot_id=="SIMULATED") return;
     auto match1 = market_makers_.find(bot_id);
 
     // Both have reduced their positions
-    assert(match1 != market_makers_.end());
+    // assert(match1 != market_makers_.end());
     if (side == messages::SIDE::BUY) {
         match1->second.modify_long_capital(total_cap);
         match1->second.modify_open_bids(1);
@@ -92,6 +93,7 @@ BotContainer::process_order_expiration(
     const std::string& bot_id, messages::SIDE side, float total_cap
 )
 {
+  if(bot_id=="SIMULATED") return;
     auto match1 = market_makers_.find(bot_id);
 
     // Both have reduced their positions

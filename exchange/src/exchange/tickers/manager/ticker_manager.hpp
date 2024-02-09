@@ -4,6 +4,7 @@
 #include "exchange/config.h"
 #include "exchange/tick_manager/tick_observer.hpp"
 #include "exchange/tickers/engine/engine.hpp"
+#include "exchange/tickers/engine/order_storage.hpp"
 
 #include <optional>
 #include <string>
@@ -37,20 +38,20 @@ public:
         for (auto& [ticker, engine] : engines_) {
             auto [removed, added] = engine.on_tick(new_tick, ORDER_EXPIRATION_TIME);
 
-            for (auto& order : removed) {
-                if (order.client_id.find("BOT_") == std::string::npos)
+            for (matching::StoredOrder& order : removed) {
+                if (order.trader->get_type() != manager::TraderType::BOT)
                     continue;
                 bot_containers_.at(order.ticker)
                     .process_order_expiration(
-                        order.client_id, order.side, order.price * order.quantity
+                        order.trader->get_id(), order.side, order.price * order.quantity
                     );
             }
-            for (auto& order : added) {
-                if (order.client_id.find("BOT_") == std::string::npos)
+            for (matching::StoredOrder& order : added) {
+                if (order.trader->get_type() != manager::TraderType::BOT)
                     continue;
                 bot_containers_.at(order.ticker)
                     .process_order_add(
-                        order.client_id, order.side, order.price * order.quantity
+                        order.trader->get_id(), order.side, order.price * order.quantity
                     );
             }
         }

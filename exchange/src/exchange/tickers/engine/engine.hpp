@@ -75,7 +75,7 @@ public:
     add_order(const MarketOrder& order)
     {
         return add_order(StoredOrder(
-            order.client_id, order.side, order.ticker, order.quantity, order.price,
+            manager::ClientManager::get_instance().get_generic_trader(order.client_id), order.side, order.ticker, order.quantity, order.price,
             this->current_tick_
         ));
     }
@@ -91,7 +91,7 @@ public:
                 asks_.insert({stored_order.price, stored_order.order_index});
         }
 
-        orders_by_id_[stored_order.order_index] = stored_order;
+        orders_by_id_.emplace(stored_order.order_index, stored_order);
         orders_by_tick_[stored_order.tick].push(stored_order.order_index);
     }
 

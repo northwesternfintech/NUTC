@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <variant>
@@ -7,12 +8,22 @@
 namespace nutc {
 namespace manager {
 
+enum TraderType { REMOTE, LOCAL, BOT };
+
 struct generic_trader_t {
     std::string
     get_id() const
     {
         return USER_ID;
     }
+
+    virtual TraderType
+    get_type() const
+    {
+        throw std::runtime_error("Not implemented");
+    }
+
+    virtual ~generic_trader_t() = default;
 
     float
     get_capital() const
@@ -87,6 +98,12 @@ struct remote_trader_t : public generic_trader_t {
         generic_trader_t(std::move(user_id)), algo_id_(std::move(algo_id))
     {}
 
+    TraderType
+    get_type() const override
+    {
+        return TraderType::REMOTE;
+    }
+
     void
     set_pid(pid_t pid)
     {
@@ -114,6 +131,12 @@ struct local_trader_t : public generic_trader_t {
     explicit local_trader_t(std::string algo_path) :
         generic_trader_t(generate_user_id()), ALGO_PATH(std::move(algo_path))
     {}
+
+    TraderType
+    get_type() const override
+    {
+        return TraderType::LOCAL;
+    }
 
     // FOR TESTING PURPOSES ONLY
     explicit local_trader_t(std::string user_id, std::string algo_path) :
@@ -160,6 +183,12 @@ struct bot_trader_t : public generic_trader_t {
     bot_trader_t() : generic_trader_t(generate_user_id()) {}
 
 private:
+    TraderType
+    get_type() const override
+    {
+        return TraderType::BOT;
+    }
+
     static uint
     get_and_increment_user_id()
     {
