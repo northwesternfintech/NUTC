@@ -58,18 +58,5 @@ RabbitMQOrderHandler::handle_incoming_market_order(
     }
 }
 
-void
-RabbitMQOrderHandler::add_liquidity_to_ticker(
-    manager::ClientManager& clients, engine_manager::EngineManager& engine_manager,
-    const std::string& ticker, float quantity, float price
-)
-{
-    engine_manager.add_initial_liquidity(ticker, quantity, price);
-    messages::ObUpdate update{ticker, messages::SIDE::SELL, price, quantity};
-    std::vector<messages::ObUpdate> vec{};
-    vec.push_back(update);
-    RabbitMQPublisher::broadcast_ob_updates(clients, vec, "");
-}
-
 } // namespace rabbitmq
 } // namespace nutc

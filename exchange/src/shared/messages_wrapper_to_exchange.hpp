@@ -17,11 +17,6 @@ struct InitMessage {
     bool ready;
 };
 
-/**
- * @brief Sent by clients to the exchange to place an order
- * TODO: client_id=="SIMULATED" indicates simulated order with no actual
- * owner, but this is improper. Instead, it should be an optional
- */
 struct MarketOrder {
     std::string client_id;
     SIDE side;

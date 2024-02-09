@@ -66,7 +66,7 @@ public:
     get_midprice() const
     {
         if (asks_.empty() || bids_.empty()) [[unlikely]] {
-            return 0;
+            return initial_price_;
         }
         return (asks_.begin()->price + bids_.rbegin()->price) / 2;
     }
@@ -75,9 +75,15 @@ public:
     add_order(const MarketOrder& order)
     {
         return add_order(StoredOrder(
-            manager::ClientManager::get_instance().get_generic_trader(order.client_id), order.side, order.ticker, order.quantity, order.price,
-            this->current_tick_
+            manager::ClientManager::get_instance().get_generic_trader(order.client_id),
+            order.side, order.ticker, order.quantity, order.price, this->current_tick_
         ));
+    }
+
+    void
+    set_initial_price(float price)
+    {
+        initial_price_ = price;
     }
 
     void
@@ -100,6 +106,7 @@ public:
 
 private:
     uint64_t current_tick_ = 0;
+    float initial_price_;
 
     match_result_t
     attempt_matches_(manager::ClientManager& manager, StoredOrder& aggressive_order);

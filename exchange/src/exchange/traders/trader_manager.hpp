@@ -5,11 +5,10 @@
 
 #include <glaze/glaze.hpp>
 
+#include <iostream>
 #include <optional>
 #include <string>
 #include <unordered_map>
-
-#include <iostream>
 
 namespace nutc {
 namespace manager {
@@ -24,13 +23,21 @@ public:
     const generic_trader_t*
     get_generic_trader(const std::string& user_id) const
     {
-    if(!user_exists_(user_id)){
-      std::cout << "User does not exist " << user_id << std::endl;
-    }
         assert(user_exists_(user_id));
         return std::visit(
             [](auto&& trader) { return static_cast<const generic_trader_t*>(&trader); },
             get_client_const(user_id)
+        );
+    }
+
+    // FOR TESTING ONLY
+    generic_trader_t*
+    get_generic_trader(const std::string& user_id)
+    {
+        assert(user_exists_(user_id));
+        return std::visit(
+            [](auto&& trader) { return static_cast<generic_trader_t*>(&trader); },
+            get_client(user_id)
         );
     }
 

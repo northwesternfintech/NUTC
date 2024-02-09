@@ -43,9 +43,16 @@ TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
     auto start = std::chrono::high_resolution_clock::now();
 
     engine_manager_.add_engine("TSLA");
-    rmq::RabbitMQOrderHandler::add_liquidity_to_ticker(
-        users_, engine_manager_, "TSLA", 100, 100 // NOLINT (magic-number-*)
-    );
+    std::string user_id = users_.add_client(nutc::manager::bot_trader_t{});
+    users_.get_generic_trader(user_id)->modify_holdings("TSLA", 1000); // NOLINT
+
+    rmq::RabbitMQOrderHandler::handle_incoming_market_order(
+        engine_manager_, users_,
+        nutc::messages::MarketOrder{
+            user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100
+        }
+    ); // NOLINT
+
     auto mess = rmq::RabbitMQConsumer::consume_message();
 
     auto end = std::chrono::high_resolution_clock::now();

@@ -10,8 +10,7 @@ ClientManager::validate_match(const messages::Match& match) const
     float remaining_capital = get_capital(match.buyer_id) - trade_value;
 
     bool insufficient_holdings =
-        match.seller_id != "SIMULATED"
-        && get_holdings(match.seller_id, match.ticker) - match.quantity < 0;
+        get_holdings(match.seller_id, match.ticker) - match.quantity < 0;
 
     if (remaining_capital < 0) [[unlikely]]
         return messages::SIDE::BUY;
