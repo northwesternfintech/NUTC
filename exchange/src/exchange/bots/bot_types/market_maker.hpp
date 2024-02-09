@@ -120,7 +120,8 @@ public:
         open_asks_ += delta;
     }
 
-    float get_utilization() const
+    float
+    get_utilization() const
     {
         return compute_capital_util_();
     }

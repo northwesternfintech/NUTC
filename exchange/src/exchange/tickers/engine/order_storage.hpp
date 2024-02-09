@@ -84,20 +84,20 @@ struct StoredOrder {
             return 0;
         }
         if (this->side == SIDE::BUY) {
-            if(this->price < other.price)
+            if (this->price < other.price)
                 return -1;
-            if(this->price > other.price)
+            if (this->price > other.price)
                 return 1;
             return 0;
         }
         if (this->side == SIDE::SELL) {
-            if(this->price > other.price)
+            if (this->price > other.price)
                 return -1;
-            if(this->price < other.price)
+            if (this->price < other.price)
                 return 1;
             return 0;
         }
-    return 0;
+        return 0;
     }
 
     [[nodiscard]] bool

@@ -5,8 +5,6 @@
 #include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
-#include <cassert>
-
 #include <functional>
 #include <queue>
 #include <set>
@@ -17,6 +15,10 @@ using ObUpdate = nutc::messages::ObUpdate;
 using Match = nutc::messages::Match;
 using SIDE = nutc::messages::SIDE;
 
+// this class is very messy and should be refactored at some point
+// there's minimal abstraction to support high performance, but this makes the code look
+// like garbage
+
 namespace nutc {
 /**
  * @brief Handles matching for an arbitrary ticker
@@ -26,6 +28,11 @@ namespace matching {
 struct match_result_t {
     std::vector<Match> matches;
     std::vector<ObUpdate> ob_updates;
+};
+
+struct on_tick_result_t {
+    std::vector<StoredOrder> removed_orders;
+    std::vector<StoredOrder> added_orders;
 };
 
 class Engine {
@@ -49,7 +56,7 @@ public:
     std::pair<float, float>
     get_spread() const
     {
-        if (asks_.empty() || bids_.empty()) {
+        if (asks_.empty() || bids_.empty()) [[unlikely]] {
             return {0, 0};
         }
         return {asks_.begin()->price, bids_.rbegin()->price};
@@ -89,8 +96,7 @@ public:
     }
 
     // Called every tick
-  std::pair<std::vector<StoredOrder>, std::vector<StoredOrder>>
-    remove_old_orders(uint64_t new_tick, uint64_t removed_tick_age);
+    on_tick_result_t on_tick(uint64_t new_tick, uint8_t order_expire_age);
 
 private:
     uint64_t current_tick_ = 0;

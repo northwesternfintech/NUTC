@@ -28,7 +28,7 @@ TickerState::on_tick(uint64_t)
     mm_open_asks_.clear();
     mm_bid_interest_.clear();
     mm_ask_interest_.clear();
-  mm_utilization_.clear();
+    mm_utilization_.clear();
     for (const auto& [id, bot] : bot_container.get_market_makers()) {
         mm_open_bids_.push_back(bot.get_open_bids());
         mm_open_asks_.push_back(bot.get_open_asks());

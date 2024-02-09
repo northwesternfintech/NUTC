@@ -163,7 +163,7 @@ main(int argc, const char** argv)
 
     engine_manager.get_bot_container("ETH").add_mm_bots(
         {50000, 25000, 25000, 10000, 10000, 5000}
-    );                                                                  // NOLINT(*)
+    );                                                            // NOLINT(*)
     engine_manager.get_bot_container("BTC").add_mm_bots({50000}); // NOLINT(*)
     engine_manager.get_bot_container("USD").add_mm_bots(
         {100000, 100000, 100000, 25000, 25000, 10000, 5000, 5000, 5000, 5000}

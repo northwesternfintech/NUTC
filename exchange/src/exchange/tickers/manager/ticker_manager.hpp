@@ -35,23 +35,23 @@ public:
         if (new_tick < ORDER_EXPIRATION_TIME)
             return;
         for (auto& [ticker, engine] : engines_) {
-            auto [removed, added] =
-                engine.remove_old_orders(new_tick, new_tick - ORDER_EXPIRATION_TIME);
+            auto [removed, added] = engine.on_tick(new_tick, ORDER_EXPIRATION_TIME);
+
             for (auto& order : removed) {
-                if (order.client_id.find("BOT_") != std::string::npos) {
-                    bot_containers_.at(order.ticker)
-                        .process_order_expiration(
-                            order.client_id, order.side, order.price * order.quantity
-                        );
-                }
+                if (order.client_id.find("BOT_") == std::string::npos)
+                    continue;
+                bot_containers_.at(order.ticker)
+                    .process_order_expiration(
+                        order.client_id, order.side, order.price * order.quantity
+                    );
             }
             for (auto& order : added) {
-                if (order.client_id.find("BOT_") != std::string::npos) {
-                    bot_containers_.at(order.ticker)
-                        .process_order_add(
-                            order.client_id, order.side, order.price * order.quantity
-                        );
-                }
+                if (order.client_id.find("BOT_") == std::string::npos)
+                    continue;
+                bot_containers_.at(order.ticker)
+                    .process_order_add(
+                        order.client_id, order.side, order.price * order.quantity
+                    );
             }
         }
     }
