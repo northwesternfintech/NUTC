@@ -63,8 +63,8 @@ private:
         mm_min_open_asks_ = INFINITY;
         mm_max_open_bids_ = -INFINITY;
         mm_max_open_asks_ = -INFINITY;
-        mm_min_utilization_ = INFINITY;
-        mm_max_utilization_ = -INFINITY;
+        mm_min_utilization_ = static_cast<float>(INFINITY);
+        mm_max_utilization_ = -static_cast<float>(INFINITY);
         mm_avg_open_bids_ = 0;
         mm_avg_open_asks_ = 0;
         mm_avg_bid_interest_ = 0;
