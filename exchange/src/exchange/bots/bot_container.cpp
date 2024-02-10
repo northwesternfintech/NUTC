@@ -61,7 +61,8 @@ BotContainer::on_new_theo(float new_theo)
 {
     std::vector<MarketOrder> orders{};
     for (auto& [id, bot] : market_makers_) {
-        float noised_theo = new_theo + generate_gaussian_noise(0, .02);
+        float noised_theo =
+            new_theo + static_cast<float>(generate_gaussian_noise(0, .02));
         std::vector<messages::MarketOrder> bot_orders = bot.take_action(noised_theo);
         orders.insert(orders.end(), bot_orders.begin(), bot_orders.end());
     }

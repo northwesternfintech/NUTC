@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cassert>
+
 #include <string>
 
 namespace nutc {
@@ -10,8 +12,8 @@ class GenericBot {
     float short_interest_ = 0;
     float long_interest_ = 0;
 
-    int open_bids_ = 0; // for stats, not the strategy
-    int open_asks_ = 0;
+    size_t open_bids_ = 0; // for stats, not the strategy
+    size_t open_asks_ = 0;
 
     float interest_limit_;
 
@@ -52,13 +54,13 @@ public:
         return short_interest_;
     }
 
-    [[nodiscard]] int
+    [[nodiscard]] size_t
     get_open_bids() const
     {
         return open_bids_;
     }
 
-    [[nodiscard]] int
+    [[nodiscard]] size_t
     get_open_asks() const
     {
         return open_asks_;
@@ -67,13 +69,25 @@ public:
     void
     modify_open_bids(int delta)
     {
-        open_bids_ += delta;
+        if (delta < 0) {
+            assert(open_bids_ >= static_cast<size_t>(std::abs(delta)));
+            open_bids_ -= static_cast<size_t>(std::abs(delta));
+        }
+        else {
+            open_bids_ += static_cast<size_t>(delta);
+        }
     }
 
     void
     modify_open_asks(int delta)
     {
-        open_asks_ += delta;
+        if (delta < 0) {
+            assert(open_asks_ >= static_cast<size_t>(std::abs(delta)));
+            open_asks_ -= static_cast<size_t>(std::abs(delta));
+        }
+        else {
+            open_asks_ += static_cast<size_t>(delta);
+        }
     }
 
     [[nodiscard]] virtual float get_utilization() const = 0;
