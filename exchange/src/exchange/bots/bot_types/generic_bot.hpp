@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include <string>
+#include <iostream>
 
 namespace nutc {
 namespace bots {

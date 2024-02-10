@@ -34,20 +34,21 @@ public:
             return;
         for (auto& [ticker, engine] : engines_) {
             auto [removed, added] = engine.on_tick(new_tick, ORDER_EXPIRATION_TIME);
+      
+            for (matching::StoredOrder& order : added) {
+                if (order.trader->get_type() != manager::TraderType::BOT)
+                    continue;
+                bot_containers_.at(order.ticker)
+                    .process_order_add(
+                        order.trader->get_id(), order.side, order.price * order.quantity
+                    );
+            }
 
             for (matching::StoredOrder& order : removed) {
                 if (order.trader->get_type() != manager::TraderType::BOT)
                     continue;
                 bot_containers_.at(order.ticker)
                     .process_order_expiration(
-                        order.trader->get_id(), order.side, order.price * order.quantity
-                    );
-            }
-            for (matching::StoredOrder& order : added) {
-                if (order.trader->get_type() != manager::TraderType::BOT)
-                    continue;
-                bot_containers_.at(order.ticker)
-                    .process_order_add(
                         order.trader->get_id(), order.side, order.price * order.quantity
                     );
             }
