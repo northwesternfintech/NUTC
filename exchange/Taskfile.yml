@@ -14,8 +14,12 @@ tasks:
     cmds:
       - cmake -D FIX=YES -P cmake/lint.cmake
 
+  new-log-dir:
+    cmds:
+      - rm -rf logs
+      - mkdir logs
+
   init:
-    dir: '{{.USER_WORKING_DIR}}'
     preconditions:
       - test -f CMakeUserPresets.json
     cmds:
@@ -34,12 +38,12 @@ tasks:
       - cmake --build --preset=dev -j
 
   run:
-    dir: '{{.USER_WORKING_DIR}}'
     env:
       NUTC_WRAPPER_BINARY_PATH: "./build/dev/WRAPPER"
     cmds:
       - task: build
       - task: check-and-start-services
+      - task: new-log-dir
       - ./build/dev/{{.NAME}} 
 
   bots:
@@ -48,15 +52,16 @@ tasks:
     cmds:
       - task: build
       - task: check-and-start-services
+      - task: new-log-dir
       - ./build/dev/{{.NAME}} --bots-only
 
   run-with-gdb:
-    dir: '{{.USER_WORKING_DIR}}'
     env:
       NUTC_WRAPPER_BINARY_PATH: "./build/dev/WRAPPER"
     cmds:
       - task: build
       - task: check-and-start-services
+      - task: new-log-dir
       - gdb ./build/dev/{{.NAME}} 
       
   dev:

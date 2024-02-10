@@ -30,6 +30,12 @@ public:
         return ticker_states_;
     }
 
+    size_t
+    num_tickers() const
+    {
+        return ticker_states_.size();
+    }
+
     static DashboardState&
     get_instance()
     {
