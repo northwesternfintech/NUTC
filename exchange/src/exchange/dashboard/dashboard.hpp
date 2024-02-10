@@ -1,6 +1,5 @@
 #pragma once
 
-#include "exchange/bots/bot_types/market_maker.hpp"
 #include "exchange/dashboard/state/global_metrics.hpp"
 #include "exchange/dashboard/state/ticker_state.hpp"
 #include "exchange/tick_manager/tick_observer.hpp"

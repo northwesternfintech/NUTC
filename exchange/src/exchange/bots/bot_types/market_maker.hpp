@@ -1,4 +1,5 @@
 #pragma once
+#include "generic_bot.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
 #include <sys/types.h>
@@ -6,16 +7,10 @@
 namespace nutc {
 namespace bots {
 
-class MarketMakerBot {
+class MarketMakerBot : public GenericBot {
 public:
-    [[nodiscard]] const std::string&
-    get_id() const
-    {
-        return BOT_ID;
-    }
-
-    explicit MarketMakerBot(std::string bot_id, float interest_limit) :
-        BOT_ID(std::move(bot_id)), interest_limit_(interest_limit)
+    MarketMakerBot(std::string bot_id, float interest_limit) :
+        GenericBot(std::move(bot_id), interest_limit)
     {}
 
     static constexpr float BASE_SPREAD = 0.16f;
@@ -23,6 +18,11 @@ public:
     std::vector<messages::MarketOrder>
     take_action(float new_theo)
     {
+        float long_interest = get_long_interest();
+        float short_interest = get_short_interest();
+
+        float interest_limit = get_interest_limit();
+
         static constexpr uint8_t LEVELS = 6;
         std::vector<messages::MarketOrder> orders(LEVELS);
 
@@ -37,11 +37,10 @@ public:
 
         float capital_tolerance = compute_capital_tolerance_();
         float lean =
-            -1
-            * ((long_interest_ - short_interest_) / (long_interest_ + short_interest_))
-            * interest_limit_ * 2.7; // NOLINT(*)
+            -1 * ((long_interest - short_interest) / (long_interest + short_interest))
+            * interest_limit * 2.7; // NOLINT(*)
 
-        if (true || long_interest_ + short_interest_ == 0)
+        if (true || long_interest + short_interest == 0)
             lean = 0;
         for (auto& price : prices) {
             price += lean;
@@ -57,7 +56,8 @@ public:
         for (size_t i = 0; i < LEVELS; ++i) {
             auto side = (i < LEVELS / 2) ? messages::SIDE::BUY : messages::SIDE::SELL;
             orders[i] = messages::MarketOrder{
-                BOT_ID, side, "", total_quantity * quantities[i], prices[i]
+                GenericBot::get_id(), side, "", total_quantity * quantities[i],
+                prices[i]
             };
             if (side == messages::SIDE::BUY) {
                 modify_long_capital(total_quantity * quantities[i] * prices[i]);
@@ -66,93 +66,29 @@ public:
                 modify_short_capital(total_quantity * quantities[i] * prices[i]);
             }
         }
-        open_bids_ += LEVELS / 2;
-        open_asks_ += LEVELS / 2;
+        modify_open_bids(LEVELS / 2);
+        modify_open_asks(LEVELS / 2);
 
         return orders;
     }
 
-    void
-    modify_short_capital(float delta)
-    {
-        short_interest_ += delta;
-    }
-
-    void
-    modify_long_capital(float delta)
-    {
-        long_interest_ += delta;
-    }
-
     [[nodiscard]] float
-    get_bid_interest() const
+    get_utilization() const override
     {
-        return long_interest_;
-    }
-
-    [[nodiscard]] float
-    get_ask_interest() const
-    {
-        return short_interest_;
-    }
-
-    [[nodiscard]] int
-    get_open_bids() const
-    {
-        return open_bids_;
-    }
-
-    [[nodiscard]] int
-    get_open_asks() const
-    {
-        return open_asks_;
-    }
-
-    void
-    modify_open_bids(int delta)
-    {
-        open_bids_ += delta;
-    }
-
-    void
-    modify_open_asks(int delta)
-    {
-        open_asks_ += delta;
-    }
-
-    float
-    get_utilization() const
-    {
-        return compute_capital_util_();
+        return (get_long_interest() + get_short_interest()) / get_interest_limit();
     }
 
 private:
-    float long_interest_ = 0;
-    float short_interest_ = 0;
-
-    const std::string BOT_ID;
-
-    int open_bids_ = 0; // for stats, not the strategy
-    int open_asks_ = 0;
-
-    float interest_limit_;
-
     [[nodiscard]] float
     compute_net_exposure_() const
     {
-        return (long_interest_ - short_interest_);
-    }
-
-    [[nodiscard]] float
-    compute_capital_util_() const
-    {
-        return (long_interest_ + short_interest_) / interest_limit_;
+        return (get_long_interest() - get_short_interest());
     }
 
     float
     compute_capital_tolerance_()
     {
-        return (1 - compute_capital_util_()) * (interest_limit_ / 3);
+        return (1 - get_utilization()) * (get_interest_limit() / 3);
     }
 };
 
