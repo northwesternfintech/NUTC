@@ -104,7 +104,9 @@ process_arguments(int argc, const char** argv)
     return std::make_tuple(get_mode(), algo);
 }
 
-void print_file_contents(const std::string& filepath) {
+void
+print_file_contents(const std::string& filepath)
+{
     std::ifstream file(filepath);
 
     if (!file) {
@@ -113,16 +115,16 @@ void print_file_contents(const std::string& filepath) {
 
     std::string line;
     while (std::getline(file, line)) {
-        std::cout << line << std::endl; //NOLINT
+        std::cout << line << std::endl; // NOLINT
     }
 }
+
 void
 flush_log(int sig) // NOLINT(*)
 {
     nutc::events::Logger::get_logger().flush();
-      nutc::dashboard::Dashboard::get_instance().clear_screen();
     nutc::dashboard::Dashboard::get_instance().close();
-  print_file_contents("logs/error_log.txt");
+    print_file_contents("logs/error_log.txt");
     std::exit(0);
 }
 
@@ -158,9 +160,8 @@ main(int argc, const char** argv)
     std::signal(SIGABRT, flush_log);
 
     using namespace nutc; // NOLINT(*)
-
     // Set up logging
-    logging::init(quill::LogLevel::Error);
+    logging::init(quill::LogLevel::Info);
 
     static constexpr uint16_t TICK_HZ = 10;
     nutc::ticks::TickManager::get_instance(TICK_HZ);
@@ -183,8 +184,6 @@ main(int argc, const char** argv)
     engine_manager.get_bot_container("USD").add_mm_bots(
         {100000, 100000, 100000, 25000, 25000, 10000, 5000, 5000, 5000, 5000}
     ); // NOLINT(*)
-
-    nutc::dashboard::Dashboard::get_instance().init();
 
     ticks::TickManager::get_instance().attach(&engine_manager, ticks::PRIORITY::first);
     ticks::TickManager::get_instance().start();

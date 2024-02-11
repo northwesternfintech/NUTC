@@ -98,6 +98,8 @@ add_library(
     src/exchange/dashboard/dashboard.cpp
 )
 
+target_link_libraries(DASHBOARD_lib PUBLIC quill::quill)
+
 target_include_directories(
     DASHBOARD_lib ${warning_guard}
     PUBLIC
