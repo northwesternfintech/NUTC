@@ -85,7 +85,7 @@ public:
      * @param uid The unique identifier for the client
      * @returns A function that takes the order parameters and publishes the order
      */
-    std::function<bool(const std::string&, const std::string&, float, float)>
+    std::function<bool(const std::string&, const std::string&, double, double)>
     getMarketFunc(const std::string& uid);
 
     void waitForStartTime(bool skip_start_wait);
@@ -116,7 +116,7 @@ private:
     [[nodiscard]] bool initializeQueue(const std::string& queueName);
     [[nodiscard]] bool publishMarketOrder(
         const std::string& client_uid, const std::string& side,
-        const std::string& ticker, float quantity, float price
+        const std::string& ticker, double quantity, double price
     );
 
     std::string consumeMessageAsString();

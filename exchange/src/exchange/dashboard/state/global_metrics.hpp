@@ -13,7 +13,7 @@ class DashboardState {
 
 public:
     void
-    add_ticker(std::string ticker, float starting_price)
+    add_ticker(std::string ticker, double starting_price)
     {
         ticker_states_.emplace(std::move(ticker), TickerState{ticker, starting_price});
     }

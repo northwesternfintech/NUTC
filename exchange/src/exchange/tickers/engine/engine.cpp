@@ -31,7 +31,7 @@ Engine::on_tick(uint64_t new_tick, uint8_t order_expire_age)
                 continue;
             }
 
-            float price = orders_by_id_.at(order_id).price;
+            double price = orders_by_id_.at(order_id).price;
             SIDE side = orders_by_id_.at(order_id).side;
             if (side == SIDE::BUY)
                 bids_.erase(order_index{price, order_id});
@@ -56,7 +56,7 @@ Engine::on_tick(uint64_t new_tick, uint8_t order_expire_age)
 }
 
 void
-add_ob_update(std::vector<ObUpdate>& vec, StoredOrder& order, float quantity)
+add_ob_update(std::vector<ObUpdate>& vec, StoredOrder& order, double quantity)
 {
     vec.push_back(ObUpdate{order.ticker, order.side, order.price, quantity});
 }
@@ -64,15 +64,15 @@ add_ob_update(std::vector<ObUpdate>& vec, StoredOrder& order, float quantity)
 bool
 insufficient_capital(const StoredOrder& order)
 {
-    float capital = order.trader->get_capital();
-    float order_value = order.price * order.quantity;
+    double capital = order.trader->get_capital();
+    double order_value = order.price * order.quantity;
     return order.side == SIDE::BUY && order_value > capital;
 }
 
 bool
 insufficient_holdings(const StoredOrder& order)
 {
-    float holdings = order.trader->get_holdings(order.ticker);
+    double holdings = order.trader->get_holdings(order.ticker);
     return order.side == SIDE::SELL && order.quantity > holdings;
 }
 
@@ -111,20 +111,21 @@ Engine::match_order(MarketOrder&& order, manager::ClientManager& manager)
 }
 
 constexpr bool
-is_close_to_zero(float value, float epsilon = std::numeric_limits<float>::epsilon())
+is_close_to_zero(double value, double epsilon = std::numeric_limits<double>::epsilon())
 {
     return std::fabs(value) < epsilon;
 }
 
 constexpr bool
 is_same_value(
-    float value1, float value2, float epsilon = std::numeric_limits<float>::epsilon()
+    double value1, double value2,
+    double epsilon = std::numeric_limits<double>::epsilon()
 )
 {
     return std::fabs(value1 - value2) < epsilon;
 }
 
-float
+double
 get_match_quantity(
     const StoredOrder& passive_order, const StoredOrder& aggressive_order
 )
@@ -144,7 +145,7 @@ Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
 )
 {
     match_result_t result;
-    float aggressive_quantity = aggressive_order.quantity;
+    double aggressive_quantity = aggressive_order.quantity;
     uint64_t aggressive_index = aggressive_order.order_index;
 
     while (can_match_orders_()) {
@@ -153,10 +154,10 @@ Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
         StoredOrder& buy_order_ref =
             get_top_order_(SIDE::BUY).value().get(); // NOLINT(*)
 
-        float quantity_to_match = get_match_quantity(buy_order_ref, sell_order_ref);
+        double quantity_to_match = get_match_quantity(buy_order_ref, sell_order_ref);
         SIDE aggressive_side = get_aggressive_side(sell_order_ref, buy_order_ref);
 
-        float price_to_match =
+        double price_to_match =
             aggressive_side == SIDE::BUY ? sell_order_ref.price : buy_order_ref.price;
 
         std::string buyer_id = buy_order_ref.trader->get_id();

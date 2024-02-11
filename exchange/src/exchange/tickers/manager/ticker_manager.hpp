@@ -24,7 +24,7 @@ public:
         return bot_containers_.at(ticker);
     }
 
-    void add_engine(const std::string& ticker, float starting_price);
+    void add_engine(const std::string& ticker, double starting_price);
     void add_engine(const std::string& ticker);
 
     void
@@ -73,7 +73,7 @@ private:
     std::map<std::string, matching::Engine> engines_;
     std::unordered_map<std::string, bots::BotContainer> bot_containers_;
     EngineManager() = default;
-    void set_initial_price_(const std::string& ticker, float price);
+    void set_initial_price_(const std::string& ticker, double price);
 
 public:
     // fuck it, everything's a singleton

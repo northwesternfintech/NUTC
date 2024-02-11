@@ -55,6 +55,8 @@ private:
     WINDOW* log_window_;
     WINDOW* leaderboard_window_;
 
+    std::streampos log_pos_ = std::ios::beg;
+
     char current_window_ = '1';
 
     std::ifstream log_file_;

@@ -9,34 +9,34 @@ namespace bots {
 
 class MarketMakerBot : public GenericBot {
 public:
-    MarketMakerBot(std::string bot_id, float interest_limit) :
+    MarketMakerBot(std::string bot_id, double interest_limit) :
         GenericBot(std::move(bot_id), interest_limit)
     {}
 
-    static constexpr float BASE_SPREAD = 0.16f;
+    static constexpr double BASE_SPREAD = 0.16f;
 
     std::vector<messages::MarketOrder>
-    take_action(float new_theo)
+    take_action(double new_theo)
     {
-        float long_interest = get_long_interest();
-        float short_interest = get_short_interest();
+        double long_interest = get_long_interest();
+        double short_interest = get_short_interest();
 
-        float interest_limit = get_interest_limit();
+        double interest_limit = get_interest_limit();
 
         static constexpr uint8_t LEVELS = 6;
         std::vector<messages::MarketOrder> orders(LEVELS);
 
-        std::array<float, LEVELS> quantities = {1.0f / 12, 1.0f / 6, 1.0f / 4,
-                                                1.0f / 4,  1.0f / 6, 1.0f / 12};
+        std::array<double, LEVELS> quantities = {1.0f / 12, 1.0f / 6, 1.0f / 4,
+                                                 1.0f / 4,  1.0f / 6, 1.0f / 12};
 
-        std::array<float, LEVELS> prices = {
+        std::array<double, LEVELS> prices = {
             new_theo - BASE_SPREAD - .10f, new_theo - BASE_SPREAD - .05f,
             new_theo - BASE_SPREAD,        new_theo + BASE_SPREAD,
             new_theo + BASE_SPREAD + .05f, new_theo + BASE_SPREAD * .10f,
         };
 
-        float capital_tolerance = compute_capital_tolerance_();
-        float lean =
+        double capital_tolerance = compute_capital_tolerance_();
+        double lean =
             -1 * ((long_interest - short_interest) / (long_interest + short_interest))
             * interest_limit * 2.7; // NOLINT(*)
 
@@ -46,12 +46,12 @@ public:
             price += lean;
         }
 
-        float avg_price = 0;
+        double avg_price = 0;
         for (size_t i = 0; i < LEVELS; ++i) {
             avg_price += prices[i] * quantities[i];
         }
 
-        float total_quantity = capital_tolerance / avg_price;
+        double total_quantity = capital_tolerance / avg_price;
 
         for (size_t i = 0; i < LEVELS; ++i) {
             auto side = (i < LEVELS / 2) ? messages::SIDE::BUY : messages::SIDE::SELL;
@@ -73,13 +73,13 @@ public:
     }
 
 private:
-    [[nodiscard]] float
+    [[nodiscard]] double
     compute_net_exposure_() const
     {
         return (get_long_interest() - get_short_interest());
     }
 
-    float
+    double
     compute_capital_tolerance_()
     {
         return (1 - get_capital_utilization()) * (get_interest_limit() / 3);

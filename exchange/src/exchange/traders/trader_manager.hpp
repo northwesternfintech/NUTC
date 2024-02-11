@@ -57,7 +57,7 @@ public:
         return traders_.at(user_id);
     }
 
-    [[nodiscard]] float
+    [[nodiscard]] double
     get_holdings(const std::string& user_id, const std::string& ticker) const
     {
         assert(user_exists_(user_id));
@@ -67,7 +67,7 @@ public:
         );
     }
 
-    [[nodiscard]] float
+    [[nodiscard]] double
     get_capital(const std::string& user_id) const
     {
         assert(user_exists_(user_id));

@@ -25,7 +25,7 @@ struct generic_trader_t {
 
     virtual ~generic_trader_t() = default;
 
-    float
+    double
     get_capital() const
     {
         return capital_;
@@ -55,7 +55,7 @@ struct generic_trader_t {
         has_start_delay_ = start_delay;
     }
 
-    float
+    double
     get_holdings(const std::string& ticker) const
     {
         if (!holdings_.contains(ticker))
@@ -64,21 +64,21 @@ struct generic_trader_t {
         return holdings_.at(ticker);
     }
 
-    float
-    modify_holdings(const std::string& ticker, float change_in_holdings)
+    double
+    modify_holdings(const std::string& ticker, double change_in_holdings)
     {
         holdings_[ticker] += change_in_holdings;
         return holdings_[ticker];
     }
 
     void
-    set_capital(float capital)
+    set_capital(double capital)
     {
         capital_ = capital;
     }
 
     void
-    modify_capital(float change_in_capital)
+    modify_capital(double change_in_capital)
     {
         capital_ += change_in_capital;
     }
@@ -87,10 +87,10 @@ struct generic_trader_t {
 
 private:
     const std::string USER_ID;
-    float capital_ = 0;
+    double capital_ = 0;
     bool is_active_ = false;
     bool has_start_delay_ = true;
-    std::unordered_map<std::string, float> holdings_{};
+    std::unordered_map<std::string, double> holdings_{};
 };
 
 struct remote_trader_t : public generic_trader_t {

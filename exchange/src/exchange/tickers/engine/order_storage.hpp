@@ -16,8 +16,8 @@ struct StoredOrder {
     const manager::generic_trader_t* trader;
     std::string ticker;
     SIDE side;
-    float price;
-    float quantity;
+    double price;
+    double quantity;
     uint64_t tick;
 
     // Used to sort orders by time created
@@ -34,7 +34,7 @@ struct StoredOrder {
 
     StoredOrder(
         const manager::generic_trader_t* trader, SIDE side, std::string ticker,
-        float quantity, float price, uint64_t tick
+        double quantity, double price, uint64_t tick
     ) :
         trader(trader),
         ticker(std::move(ticker)), side(side), price(price), quantity(quantity),
@@ -121,7 +121,7 @@ struct StoredOrder {
 };
 
 struct order_index {
-    float price;
+    double price;
     uint64_t index;
 };
 

@@ -101,7 +101,7 @@ RabbitMQ::handleIncomingMessages()
 bool
 RabbitMQ::publishMarketOrder(
     const std::string& client_id, const std::string& side, const std::string& ticker,
-    float quantity, float price
+    double quantity, double price
 )
 {
     if (limiter.should_rate_limit()) {
@@ -231,7 +231,7 @@ RabbitMQ::RabbitMQ(const std::string& id)
     }
 }
 
-std::function<bool(const std::string&, const std::string&, float, float)>
+std::function<bool(const std::string&, const std::string&, double, double)>
 RabbitMQ::getMarketFunc(const std::string& id)
 {
     return std::bind(

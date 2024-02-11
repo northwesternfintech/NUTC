@@ -81,7 +81,7 @@ private:
         delay_time_(std::chrono::milliseconds(MS_PER_SECOND / start_tick_rate))
     {}
 
-    void notify_tick_();
+    auto notify_tick_();
     void run_();
 
 public:

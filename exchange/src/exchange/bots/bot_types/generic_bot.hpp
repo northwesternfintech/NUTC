@@ -9,37 +9,37 @@ namespace bots {
 
 class GenericBot {
     const std::string BOT_ID;
-    float short_interest_ = 0;
-    float long_interest_ = 0;
+    double short_interest_ = 0;
+    double long_interest_ = 0;
 
     size_t open_bids_ = 0; // for stats, not the strategy
     size_t open_asks_ = 0;
 
-    const float INTEREST_LIMIT;
-    float capital_ = 0;
-    float held_stock_ = 0;
+    const double INTEREST_LIMIT;
+    double capital_ = 0;
+    double held_stock_ = 0;
 
 public:
-    [[nodiscard]] float
+    [[nodiscard]] double
     get_capital() const
     {
         return capital_;
     }
 
     void
-    modify_capital(float delta)
+    modify_capital(double delta)
     {
         capital_ += delta;
     }
 
-    [[nodiscard]] float
+    [[nodiscard]] double
     get_held_stock() const
     {
         return held_stock_;
     }
 
     void
-    modify_held_stock(float delta)
+    modify_held_stock(double delta)
     {
         held_stock_ += delta;
     }
@@ -51,30 +51,30 @@ public:
     }
 
     void
-    modify_short_capital(float delta)
+    modify_short_capital(double delta)
     {
         short_interest_ += delta;
     }
 
     void
-    modify_long_capital(float delta)
+    modify_long_capital(double delta)
     {
         long_interest_ += delta;
     }
 
-    [[nodiscard]] float
+    [[nodiscard]] double
     get_long_interest() const
     {
         return long_interest_;
     }
 
-    [[nodiscard]] float
+    [[nodiscard]] double
     get_interest_limit() const
     {
         return INTEREST_LIMIT;
     }
 
-    [[nodiscard]] float
+    [[nodiscard]] double
     get_short_interest() const
     {
         return short_interest_;
@@ -92,7 +92,7 @@ public:
         return open_asks_;
     }
 
-    [[nodiscard]] float
+    [[nodiscard]] double
     get_capital_utilization() const
     {
         return (get_long_interest() + get_short_interest()) / get_interest_limit();
@@ -124,7 +124,7 @@ public:
 
     virtual ~GenericBot() = default;
 
-    GenericBot(std::string bot_id, float interest_limit) :
+    GenericBot(std::string bot_id, double interest_limit) :
         BOT_ID(std::move(bot_id)), INTEREST_LIMIT(interest_limit)
     {}
 
