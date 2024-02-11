@@ -49,7 +49,10 @@ Engine::on_tick(uint64_t new_tick, uint8_t order_expire_age)
     std::vector<StoredOrder> added_orders = std::move(added_orders_);
     added_orders_ = std::vector<StoredOrder>{};
 
-    return {return_vec, added_orders};
+    std::vector<Match> matched_orders = std::move(matched_orders_);
+    matched_orders_ = std::vector<Match>{};
+
+    return {return_vec, added_orders, matched_orders};
 }
 
 void
@@ -186,6 +189,10 @@ Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
 
         removed_orders_.push_back(sell_order);
         removed_orders_.push_back(buy_order);
+
+        matched_orders_.push_back(Match{
+            "", aggressive_side, price_to_match, quantity_to_match, buyer_id, seller_id
+        });
 
         orders_by_id_.erase(buy_order_ref.order_index);
         orders_by_id_.erase(sell_order_ref.order_index);

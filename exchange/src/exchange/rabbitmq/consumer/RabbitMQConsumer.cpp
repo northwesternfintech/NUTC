@@ -24,7 +24,7 @@ RabbitMQConsumer::handle_incoming_messages(
             [&](auto&& arg) {
                 using t = std::decay_t<decltype(arg)>;
                 if constexpr (std::is_same_v<t, messages::InitMessage>) {
-                    log_e(rabbitmq, "Not expecting initialization message");
+                    log_c(rabbitmq, "Not expecting initialization message");
                     std::abort();
                 }
                 else if constexpr (std::is_same_v<t, messages::MarketOrder>) {
