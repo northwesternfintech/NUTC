@@ -29,7 +29,7 @@ Dashboard::Dashboard() : err_file_(freopen("logs/error_log.txt", "w", stderr))
     cbreak();
     keypad(stdscr, TRUE);
 
-    //make our calls to get input non blocking
+    // make our calls to get input non blocking
     nodelay(stdscr, TRUE);
 
     int x_max{};
@@ -67,8 +67,13 @@ Dashboard::close()
     endwin();
 }
 
-void draw_generic_text(WINDOW* window, int start_y) {
-  mvwprintw(window, start_y++, window->_maxx/2 - 38, "Press '1' for Ticker Window, '2' for Log Window, '3' for Leaderboard Window");
+void
+draw_generic_text(WINDOW* window, int start_y)
+{
+    mvwprintw(
+        window, start_y++, window->_maxx / 2 - 38,
+        "Press '1' for Ticker Window, '2' for Log Window, '3' for Leaderboard Window"
+    );
 }
 
 void
@@ -96,12 +101,9 @@ Dashboard::drawTickerLayout(WINDOW* window, int start_y, size_t num_tickers)
     }
 
     attron(COLOR_PAIR(2));
-    mvwprintw(
-        window, start_y, x_max / 2 - 3, "Tickers"
-    );
+    mvwprintw(window, start_y, x_max / 2 - 3, "Tickers");
     attroff(COLOR_PAIR(2));
 }
-
 
 void
 Dashboard::displayStockTickerData(
@@ -158,27 +160,26 @@ Dashboard::displayStockTickers(WINDOW* window, int start_y)
     }
 }
 
-void Dashboard::displayLeaderboard(WINDOW* window, int start_y) {
-    mvwprintw(
-        window, start_y, window->_maxx / 2 - 5,
-        "Leaderboard"
-    );
-  
-  manager::ClientManager &client_manager = manager::ClientManager::get_instance();
-  for(auto& [user_id, trader_variant] : client_manager.get_clients_const()) {
-    const manager::generic_trader_t& trader = std::visit([](auto&& arg) -> const manager::generic_trader_t& { return arg; }, trader_variant); //NOLINT
-    mvwprintw(window, start_y++, 2, "User: %s", user_id.c_str());
-      mvwprintw(window, start_y++, 2, "  Capital: %.2f",trader.get_capital());
-  }
+void
+Dashboard::displayLeaderboard(WINDOW* window, int start_y)
+{
+    mvwprintw(window, start_y, window->_maxx / 2 - 5, "Leaderboard");
+
+    manager::ClientManager& client_manager = manager::ClientManager::get_instance();
+    for (auto& [user_id, trader_variant] : client_manager.get_clients_const()) {
+        const manager::generic_trader_t& trader = std::visit(
+            [](auto&& arg) -> const manager::generic_trader_t& { return arg; },
+            trader_variant
+        ); // NOLINT
+        mvwprintw(window, start_y++, 2, "User: %s", user_id.c_str());
+        mvwprintw(window, start_y++, 2, "  Capital: %.2f", trader.get_capital());
+    }
 }
 
 void
 Dashboard::displayLog(WINDOW* window, int start_y)
 {
-    mvwprintw(
-        window, start_y, window->_maxx / 2 - 2,
-        "Logs"
-    );
+    mvwprintw(window, start_y, window->_maxx / 2 - 2, "Logs");
     std::string line;
     log_file_ = std::ifstream("logs/app.log", std::ios::in);
 
@@ -199,8 +200,8 @@ Dashboard::displayLog(WINDOW* window, int start_y)
         mvwprintw(window, y++, 2, line.c_str());
     }
 
-    //this is a bit hacky, but prevents the log file from getting too big
-  std::ofstream("logs/app.log");
+    // this is a bit hacky, but prevents the log file from getting too big
+    std::ofstream("logs/app.log");
 }
 
 void

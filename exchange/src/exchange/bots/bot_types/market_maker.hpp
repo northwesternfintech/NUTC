@@ -72,12 +72,6 @@ public:
         return orders;
     }
 
-    [[nodiscard]] float
-    get_utilization() const override
-    {
-        return (get_long_interest() + get_short_interest()) / get_interest_limit();
-    }
-
 private:
     [[nodiscard]] float
     compute_net_exposure_() const
@@ -88,7 +82,7 @@ private:
     float
     compute_capital_tolerance_()
     {
-        return (1 - get_utilization()) * (get_interest_limit() / 3);
+        return (1 - get_capital_utilization()) * (get_interest_limit() / 3);
     }
 };
 

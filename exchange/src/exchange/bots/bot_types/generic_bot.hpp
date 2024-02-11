@@ -67,6 +67,12 @@ public:
         return open_asks_;
     }
 
+    [[nodiscard]] float
+    get_capital_utilization() const
+    {
+        return (get_long_interest() + get_short_interest()) / get_interest_limit();
+    }
+
     void
     modify_open_bids(int delta)
     {
@@ -90,8 +96,6 @@ public:
             open_asks_ += static_cast<size_t>(delta);
         }
     }
-
-    [[nodiscard]] virtual float get_utilization() const = 0;
 
     virtual ~GenericBot() = default;
 

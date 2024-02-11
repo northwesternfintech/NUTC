@@ -1,5 +1,6 @@
 #pragma once
 #include "exchange/bots/bot_types/market_maker.hpp"
+#include "exchange/bots/bot_types/retail.hpp"
 #include "exchange/theo/brownian.hpp"
 #include "exchange/tick_manager/tick_observer.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
@@ -26,7 +27,13 @@ public:
         return market_makers_;
     }
 
-    std::vector<MarketOrder> on_new_theo(float new_theo);
+    const std::unordered_map<std::string, RetailBot>&
+    get_retail_traders() const
+    {
+        return retail_bots_;
+    }
+
+    std::vector<MarketOrder> on_new_theo(float new_theo, float current);
 
     void process_order_expiration(
         const std::string& bot_id, messages::SIDE side, float total_cap
@@ -35,6 +42,7 @@ public:
     process_order_add(const std::string& bot_id, messages::SIDE side, float total_cap);
 
     void add_mm_bots(const std::vector<float>& starting_capitals);
+    void add_retail_bots(float mean_capital, float stddev_capital, int num_bots);
 
     BotContainer() = default;
 
@@ -44,7 +52,8 @@ public:
 
 private:
     void add_mm_bot_(float starting_capital);
-    // TODO(stevenewald): make more elegant than string UUID
+    void add_retail_bot_(float starting_capital);
+    std::unordered_map<std::string, RetailBot> retail_bots_{};
     std::unordered_map<std::string, MarketMakerBot> market_makers_{};
     std::string ticker_;
 
