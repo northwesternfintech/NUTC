@@ -28,12 +28,12 @@ TickerState::on_tick(uint64_t tick)
     num_asks_ = asks;
     num_bids_ = bids;
 
-    theo_ = static_cast<float>(bot_container.get_theo());
+    theo_ = bot_container.get_theo();
 
     auto calculate_pnl = [&engine_ref](const bots::GenericBot& bot) {
-        float capital = bot.get_capital();
-        float held_stock = bot.get_held_stock();
-        float stock_value = engine_ref.get_midprice() * held_stock;
+        double capital = bot.get_capital();
+        double held_stock = bot.get_held_stock();
+        double stock_value = engine_ref.get_midprice() * held_stock;
         return capital + stock_value;
     };
 
@@ -51,19 +51,19 @@ TickerState::on_tick(uint64_t tick)
             state.min_pnl_ = std::min(state.min_pnl_, calculate_pnl(bot));
             state.max_pnl_ = std::max(state.max_pnl_, calculate_pnl(bot));
 
-            state.avg_open_bids_ += bot.get_open_bids();
-            state.avg_open_asks_ += bot.get_open_asks();
+            state.avg_open_bids_ += static_cast<double>(bot.get_open_bids());
+            state.avg_open_asks_ += static_cast<double>(bot.get_open_asks());
             state.avg_bid_interest_ += bot.get_long_interest();
             state.avg_ask_interest_ += bot.get_short_interest();
             state.avg_utilization_ += bot.get_capital_utilization();
             state.avg_pnl_ += calculate_pnl(bot);
         }
-        state.avg_open_bids_ /= state.num_bots_;
-        state.avg_open_asks_ /= state.num_bots_;
-        state.avg_bid_interest_ /= static_cast<float>(state.num_bots_);
-        state.avg_ask_interest_ /= static_cast<float>(state.num_bots_);
-        state.avg_utilization_ /= static_cast<float>(state.num_bots_);
-        state.avg_pnl_ /= static_cast<float>(state.num_bots_);
+        state.avg_open_bids_ /= static_cast<double>(state.num_bots_);
+        state.avg_open_asks_ /= static_cast<double>(state.num_bots_);
+        state.avg_bid_interest_ /= static_cast<double>(state.num_bots_);
+        state.avg_ask_interest_ /= static_cast<double>(state.num_bots_);
+        state.avg_utilization_ /= static_cast<double>(state.num_bots_);
+        state.avg_pnl_ /= static_cast<double>(state.num_bots_);
     };
     update_bot_state(bot_container.get_market_makers(), mm_state_);
     update_bot_state(bot_container.get_retail_traders(), retail_state_);

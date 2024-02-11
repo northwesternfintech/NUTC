@@ -111,54 +111,44 @@ Dashboard::displayStockTickerData(
 )
 {
     mvwprintw(window, start_y++, start_x, "Ticker: %s", ticker.TICKER.c_str());
+    mvwprintw(window, start_y++, start_x, "Midprice: %.2f", ticker.midprice_);
+    mvwprintw(window, start_y++, start_x, "Theo Price: %.2f", ticker.theo_);
     mvwprintw(
-        window, start_y++, start_x, "Midprice: %.2f",
-        static_cast<double>(ticker.midprice_)
-    );
-    mvwprintw(
-        window, start_y++, start_x, "Theo Price: %.2f",
-        static_cast<double>(ticker.theo_)
-    );
-    mvwprintw(
-        window, start_y++, start_x, "Spread: %.2f %.2f",
-        static_cast<double>(ticker.spread_.first),
-        static_cast<double>(ticker.spread_.second)
+        window, start_y++, start_x, "Spread: %.2f %.2f", ticker.spread_.first,
+        ticker.spread_.second
     );
     mvwprintw(
         window, start_y++, start_x, "Bids/asks: %lu %lu", ticker.num_bids_,
         ticker.num_asks_
     );
     start_y++;
-  
+
     auto display_bot_stats = [&](const BotStates& state, const char* bot_type) {
         mvwprintw(
             window, start_y++, start_x, "%s bots: %lu", bot_type, state.num_bots_
         );
         mvwprintw(
-            window, start_y++, start_x, "%s min/max/avg num bids: %lu %lu %lu",
+            window, start_y++, start_x, "%s min/max/avg num bids: %lu %lu %.2f",
             bot_type, state.min_open_bids_, state.max_open_bids_, state.avg_open_bids_
         );
         mvwprintw(
-            window, start_y++, start_x, "%s min/max/avg num asks: %lu %lu %lu",
+            window, start_y++, start_x, "%s min/max/avg num asks: %lu %lu %.2f",
             bot_type, state.min_open_asks_, state.max_open_asks_, state.avg_open_asks_
         );
         mvwprintw(
             window, start_y++, start_x, "%s min/max/avg utilization: %.2f %.2f %.2f",
-            bot_type, static_cast<double>(state.min_utilization_),
-            static_cast<double>(state.max_utilization_),
-            static_cast<double>(state.avg_utilization_)
+            bot_type, state.min_utilization_, state.max_utilization_,
+            state.avg_utilization_
         );
         mvwprintw(
-            window, start_y++, start_x, "%s min/max/avg PnL: %.2f %.2f %.2f",
-            bot_type, static_cast<double>(state.min_pnl_),
-            static_cast<double>(state.max_pnl_),
-            static_cast<double>(state.avg_pnl_)
+            window, start_y++, start_x, "%s min/max/avg PnL: %.2f %.2f %.2f", bot_type,
+            state.min_pnl_, state.max_pnl_, state.avg_pnl_
         );
-    start_y++;
+        start_y++;
     };
 
-  display_bot_stats(ticker.mm_state_, "MM");
-  display_bot_stats(ticker.retail_state_, "Retail");
+    display_bot_stats(ticker.mm_state_, "MM");
+    display_bot_stats(ticker.retail_state_, "Retail");
 }
 
 void
@@ -197,15 +187,18 @@ Dashboard::displayLog(WINDOW* window, int start_y)
 {
     mvwprintw(window, start_y, window->_maxx / 2 - 2, "Logs");
     std::string line;
-    log_file_ = std::ifstream("logs/app.log", std::ios::in);
 
     if (log_file_.eof()) {
         log_file_.clear();
+        // log_file_.seekg(log_pos_);
     }
 
-    int y = start_y + 2;
+    int y = start_y + 3;
     while (std::getline(log_file_, line)) {
         log_queue_.push_back(line);
+        if(log_file_.peek() == EOF)
+          break;
+        // log_pos_ = log_file_.tellg();
     }
 
     while (log_queue_.size() > (window->_maxy - start_y - 1)) {
@@ -217,7 +210,7 @@ Dashboard::displayLog(WINDOW* window, int start_y)
     }
 
     // this is a bit hacky, but prevents the log file from getting too big
-    std::ofstream("logs/app.log");
+    // std::ofstream("logs/app.log");
 }
 
 void

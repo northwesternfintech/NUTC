@@ -130,7 +130,7 @@ flush_log(int sig) // NOLINT(*)
 
 // Initializes tick manager with brownian motion
 void
-initialize_ticker(const std::string& ticker, float starting_price)
+initialize_ticker(const std::string& ticker, double starting_price)
 {
     using nutc::dashboard::DashboardState;
     using nutc::engine_manager::EngineManager;

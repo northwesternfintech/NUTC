@@ -13,7 +13,7 @@ EngineManager::get_engine(const std::string& ticker)
 }
 
 void
-EngineManager::set_initial_price_(const std::string& ticker, float price)
+EngineManager::set_initial_price_(const std::string& ticker, double price)
 {
     auto engine = engines_.find(ticker);
     assert(engine != engines_.end());
@@ -21,15 +21,17 @@ EngineManager::set_initial_price_(const std::string& ticker, float price)
 }
 
 void
-EngineManager::add_engine(const std::string& ticker, float starting_price)
+EngineManager::add_engine(const std::string& ticker, double starting_price)
 {
     engines_.emplace(ticker, matching::Engine());
     set_initial_price_(ticker, starting_price);
     bot_containers_.emplace(
-        ticker, bots::BotContainer(ticker, static_cast<double>(starting_price))
+        std::piecewise_construct, std::forward_as_tuple(ticker),
+        std::forward_as_tuple(ticker, starting_price)
     );
 }
 
+// for testing
 void
 EngineManager::add_engine(const std::string& ticker)
 {

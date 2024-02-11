@@ -8,22 +8,25 @@ namespace nutc {
 namespace bots {
 
 class RetailBot : public GenericBot {
-    std::random_device rd;
-    std::mt19937 gen;
-    std::poisson_distribution<> poisson_dist;
+    std::random_device rd{};
+    std::mt19937 gen{};
+    std::poisson_distribution<> poisson_dist{};
 
 public:
-    RetailBot(std::string bot_id, float interest_limit) :
-        GenericBot(std::move(bot_id), interest_limit)
+    RetailBot(std::string bot_id, double interest_limit) :
+        GenericBot(std::move(bot_id), interest_limit),
+        AGGRESSIVENESS(std::normal_distribution<>{50, 2000}(gen))
     {}
 
-    std::optional<messages::MarketOrder> take_action(float current, float theo);
+    std::optional<messages::MarketOrder> take_action(double current, double theo);
 
 private:
-    static float calculate_order_price(
-        messages::SIDE side, float current_price, float theo_price,
-        float buffer_percent = 0.02f
+    static double calculate_order_price(
+        messages::SIDE side, double current_price, double theo_price,
+        double buffer_percent = 0.02
     );
+
+    const double AGGRESSIVENESS;
 };
 
 } // namespace bots

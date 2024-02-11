@@ -55,7 +55,7 @@ public:
         return {asks_.size(), bids_.size()};
     }
 
-    std::pair<float, float>
+    std::pair<double, double>
     get_spread() const
     {
         if (asks_.empty() || bids_.empty()) [[unlikely]] {
@@ -64,7 +64,7 @@ public:
         return {asks_.begin()->price, bids_.rbegin()->price};
     }
 
-    float
+    double
     get_midprice()
     {
         if (asks_.empty() || bids_.empty()) [[unlikely]] {
@@ -84,7 +84,7 @@ public:
     }
 
     void
-    set_initial_price(float price)
+    set_initial_price(double price)
     {
         last_midprice_ = price;
     }
@@ -109,7 +109,7 @@ public:
 
 private:
     uint64_t current_tick_ = 0;
-    float last_midprice_;
+    double last_midprice_;
 
     match_result_t
     attempt_matches_(manager::ClientManager& manager, StoredOrder& aggressive_order);

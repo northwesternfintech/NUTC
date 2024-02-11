@@ -27,12 +27,10 @@ void
 BotContainer::on_tick(uint64_t)
 {
     auto theo = fabs(theo_generator_.generate_next_price() + brownian_offset_);
-    float current = engine_manager::EngineManager::get_instance()
-                        .get_engine(ticker_)
-                        .value()
-                        .get()
-                        .get_midprice();
-    auto orders = BotContainer::on_new_theo(static_cast<float>(theo), current);
+    auto ticker = engine_manager::EngineManager::get_instance().get_engine(ticker_);
+    assert(ticker.has_value());
+    double current = ticker.value().get().get_midprice();
+    auto orders = BotContainer::on_new_theo(theo, current);
 
     for (auto& order : orders) {
         order.ticker = ticker_;
@@ -44,28 +42,28 @@ BotContainer::on_tick(uint64_t)
 }
 
 void
-BotContainer::add_mm_bots(const std::vector<float>& starting_capitals)
+BotContainer::add_mm_bots(const std::vector<double>& starting_capitals)
 {
-    for (float capital : starting_capitals) {
+    for (double capital : starting_capitals) {
         add_mm_bot_(capital);
     }
 }
 
 void
-BotContainer::add_retail_bots(float mean_capital, float stddev_capital, int num_bots)
+BotContainer::add_retail_bots(double mean_capital, double stddev_capital, int num_bots)
 {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::normal_distribution<> distr(mean_capital, stddev_capital);
     for (int i = 0; i < num_bots; i++) {
-        auto capital = static_cast<float>(distr(gen));
+        auto capital = distr(gen);
         capital = std::abs(capital);
         add_retail_bot_(capital);
     }
 }
 
 void
-BotContainer::add_retail_bot_(float starting_capital)
+BotContainer::add_retail_bot_(double starting_capital)
 {
     manager::ClientManager& users = nutc::manager::ClientManager::get_instance();
     std::string bot_id = users.add_client(manager::bot_trader_t{});
@@ -82,7 +80,7 @@ BotContainer::add_retail_bot_(float starting_capital)
 }
 
 void
-BotContainer::add_mm_bot_(float starting_capital)
+BotContainer::add_mm_bot_(double starting_capital)
 {
     manager::ClientManager& users = nutc::manager::ClientManager::get_instance();
     std::string bot_id = users.add_client(manager::bot_trader_t{});
@@ -99,11 +97,11 @@ BotContainer::add_mm_bot_(float starting_capital)
 }
 
 std::vector<MarketOrder>
-BotContainer::on_new_theo(float new_theo, float current)
+BotContainer::on_new_theo(double new_theo, double current)
 {
     auto mm_new_theo = [new_theo](auto&& mm_trader, std::vector<MarketOrder>& orders) {
-        float noised_theo =
-            new_theo + static_cast<float>(generate_gaussian_noise(0, .02));
+        double noised_theo =
+            new_theo + static_cast<double>(generate_gaussian_noise(0, .02));
         std::vector<messages::MarketOrder> mm_orders =
             mm_trader.take_action(noised_theo);
         orders.insert(orders.end(), mm_orders.begin(), mm_orders.end());
@@ -111,8 +109,8 @@ BotContainer::on_new_theo(float new_theo, float current)
 
     auto retail_new_theo =
         [new_theo, current](auto&& retail_trader, std::vector<MarketOrder>& orders) {
-            float noised_theo =
-                new_theo + static_cast<float>(generate_gaussian_noise(0, .1));
+            double noised_theo =
+                new_theo + static_cast<double>(generate_gaussian_noise(0, .1));
             auto bot_order = retail_trader.take_action(current, noised_theo);
             if (bot_order.has_value())
                 orders.push_back(bot_order.value());
@@ -157,7 +155,7 @@ BotContainer::process_order_match(Match& match)
 
 void
 BotContainer::process_order_add(
-    const std::string& bot_id, messages::SIDE side, float total_cap
+    const std::string& bot_id, messages::SIDE side, double total_cap
 )
 {
     auto process_order_add = [side, total_cap](auto&& match) {
@@ -186,7 +184,7 @@ BotContainer::process_order_add(
 
 void
 BotContainer::process_order_expiration(
-    const std::string& bot_id, messages::SIDE side, float total_cap
+    const std::string& bot_id, messages::SIDE side, double total_cap
 )
 {
     auto process_order_expiration = [side, total_cap](auto match) {

@@ -33,17 +33,17 @@ public:
         return retail_bots_;
     }
 
-    std::vector<MarketOrder> on_new_theo(float new_theo, float current);
+    std::vector<MarketOrder> on_new_theo(double new_theo, double current);
 
     void process_order_expiration(
-        const std::string& bot_id, messages::SIDE side, float total_cap
+        const std::string& bot_id, messages::SIDE side, double total_cap
     );
     void
-    process_order_add(const std::string& bot_id, messages::SIDE side, float total_cap);
+    process_order_add(const std::string& bot_id, messages::SIDE side, double total_cap);
     void process_order_match(Match& match);
 
-    void add_mm_bots(const std::vector<float>& starting_capitals);
-    void add_retail_bots(float mean_capital, float stddev_capital, int num_bots);
+    void add_mm_bots(const std::vector<double>& starting_capitals);
+    void add_retail_bots(double mean_capital, double stddev_capital, int num_bots);
 
     BotContainer() = default;
 
@@ -52,8 +52,8 @@ public:
     {}
 
 private:
-    void add_mm_bot_(float starting_capital);
-    void add_retail_bot_(float starting_capital);
+    void add_mm_bot_(double starting_capital);
+    void add_retail_bot_(double starting_capital);
     std::unordered_map<std::string, RetailBot> retail_bots_{};
     std::unordered_map<std::string, MarketMakerBot> market_makers_{};
     std::string ticker_;

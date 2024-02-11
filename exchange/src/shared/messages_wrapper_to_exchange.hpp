@@ -21,8 +21,8 @@ struct MarketOrder {
     std::string client_id;
     SIDE side;
     std::string ticker;
-    float quantity;
-    float price;
+    double quantity;
+    double price;
 };
 
 } // namespace messages
