@@ -2,8 +2,8 @@
 
 #include <cassert>
 
-#include <string>
 #include <iostream>
+#include <string>
 
 namespace nutc {
 namespace bots {

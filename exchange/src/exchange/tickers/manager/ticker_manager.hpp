@@ -34,7 +34,7 @@ public:
             return;
         for (auto& [ticker, engine] : engines_) {
             auto [removed, added] = engine.on_tick(new_tick, ORDER_EXPIRATION_TIME);
-      
+
             for (matching::StoredOrder& order : added) {
                 if (order.trader->get_type() != manager::TraderType::BOT)
                     continue;

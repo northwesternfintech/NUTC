@@ -3,6 +3,11 @@
 #include "exchange/dashboard/state/ticker_state.hpp"
 #include "exchange/tick_manager/tick_observer.hpp"
 
+#include <ncurses.h>
+
+#include <deque>
+#include <fstream>
+
 namespace nutc {
 namespace dashboard {
 
@@ -13,9 +18,7 @@ public:
     void
     on_tick(uint64_t tick) override
     {
-        if (tick % 4 != 0)
-            return;
-        mainLoop();
+        mainLoop(tick);
     }
 
     static Dashboard&
@@ -30,21 +33,31 @@ public:
     Dashboard& operator=(Dashboard&&) = delete;
     Dashboard(Dashboard&&) = delete;
     void close();
-    void init();
-    void clear_screen();
 
 private:
-    void drawTickerLayout(size_t num_tickers);
+    void drawTickerLayout(WINDOW* window, int start_y, size_t num_tickers);
+    void displayStockTickerData(
+        WINDOW* window, int start_y, int start_x, const TickerState& ticker
+    );
+    void displayStockTickers(WINDOW* window, int start_y);
+    void displayLog(WINDOW* window, int start_y);
 
-    void displayStockTickerData(int start_y, int start_x, const TickerState& ticker);
+    void mainLoop(uint64_t tick);
 
-    int displayMarketMakerBotsData(int start_y, int start_x, const TickerState& bots);
+    static void* read_pipe_and_log(void* args);
 
-    void mainLoop();
-    
+    std::deque<std::string> log_queue_{};
+
     FILE* err_file_;
 
-    Dashboard() = default;
+    WINDOW* ticker_window_;
+    WINDOW* log_window_;
+
+    char current_window_ = '1';
+
+    std::ifstream log_file_;
+
+    Dashboard();
     ~Dashboard() = default;
 };
 
