@@ -128,46 +128,37 @@ Dashboard::displayStockTickerData(
         window, start_y++, start_x, "Bids/asks: %lu %lu", ticker.num_bids_,
         ticker.num_asks_
     );
-    mvwprintw(window, start_y++, start_x, "MM bots: %lu", ticker.num_mm_bots_);
-    mvwprintw(
-        window, start_y++, start_x, "MM min/max/avg num bids: %lu %lu %lu",
-        ticker.mm_min_open_bids_, ticker.mm_max_open_bids_, ticker.mm_avg_open_bids_
-    );
-    mvwprintw(
-        window, start_y++, start_x, "MM min/max/avg num asks: %lu %lu %lu",
-        ticker.mm_min_open_asks_, ticker.mm_max_open_asks_, ticker.mm_avg_open_asks_
-    );
-    mvwprintw(
-        window, start_y++, start_x, "MM min/max/avg utilization: %.2f %.2f %.2f",
-        static_cast<double>(ticker.mm_min_utilization_),
-        static_cast<double>(ticker.mm_max_utilization_),
-        static_cast<double>(ticker.mm_avg_utilization_)
-    );
-
     start_y++;
-    mvwprintw(window, start_y++, start_x, "Retail bots: %lu", ticker.num_retail_bots_);
-    mvwprintw(
-        window, start_y++, start_x, "Retail min/max/avg num bids: %lu %lu %lu",
-        ticker.retail_min_open_bids_, ticker.retail_max_open_bids_,
-        ticker.retail_avg_open_bids_
-    );
-    mvwprintw(
-        window, start_y++, start_x, "Retail min/max/avg num asks: %lu %lu %lu",
-        ticker.retail_min_open_asks_, ticker.retail_max_open_asks_,
-        ticker.retail_avg_open_asks_
-    );
-    mvwprintw(
-        window, start_y++, start_x, "Retail min/max/avg utilization: %.2f %.2f %.2f",
-        static_cast<double>(ticker.retail_min_utilization_),
-        static_cast<double>(ticker.retail_max_utilization_),
-        static_cast<double>(ticker.retail_avg_utilization_)
-    );
-    mvwprintw(
-        window, start_y++, start_x, "Retail min/max/avg PnL: %.2f %.2f %.2f",
-        static_cast<double>(ticker.retail_min_pnl_),
-        static_cast<double>(ticker.retail_max_pnl_),
-        static_cast<double>(ticker.retail_avg_pnl_)
-    );
+  
+    auto display_bot_stats = [&](const BotStates& state, const char* bot_type) {
+        mvwprintw(
+            window, start_y++, start_x, "%s bots: %lu", bot_type, state.num_bots_
+        );
+        mvwprintw(
+            window, start_y++, start_x, "%s min/max/avg num bids: %lu %lu %lu",
+            bot_type, state.min_open_bids_, state.max_open_bids_, state.avg_open_bids_
+        );
+        mvwprintw(
+            window, start_y++, start_x, "%s min/max/avg num asks: %lu %lu %lu",
+            bot_type, state.min_open_asks_, state.max_open_asks_, state.avg_open_asks_
+        );
+        mvwprintw(
+            window, start_y++, start_x, "%s min/max/avg utilization: %.2f %.2f %.2f",
+            bot_type, static_cast<double>(state.min_utilization_),
+            static_cast<double>(state.max_utilization_),
+            static_cast<double>(state.avg_utilization_)
+        );
+        mvwprintw(
+            window, start_y++, start_x, "%s min/max/avg PnL: %.2f %.2f %.2f",
+            bot_type, static_cast<double>(state.min_pnl_),
+            static_cast<double>(state.max_pnl_),
+            static_cast<double>(state.avg_pnl_)
+        );
+    start_y++;
+    };
+
+  display_bot_stats(ticker.mm_state_, "MM");
+  display_bot_stats(ticker.retail_state_, "Retail");
 }
 
 void

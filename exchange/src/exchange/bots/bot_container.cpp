@@ -135,18 +135,18 @@ BotContainer::process_order_match(Match& match)
 {
     auto process_buyer_match = [&match](auto&& umap) {
         auto buyer_match = umap.find(match.buyer_id);
-        if(buyer_match == umap.end())
-          return;
+        if (buyer_match == umap.end())
+            return;
         buyer_match->second.modify_held_stock(1);
-        buyer_match->second.modify_capital(-match.quantity*match.price);
+        buyer_match->second.modify_capital(-match.quantity * match.price);
     };
-  
+
     auto process_seller_match = [&match](auto&& umap) {
         auto seller_match = umap.find(match.seller_id);
-        if(seller_match == umap.end())
-          return;
+        if (seller_match == umap.end())
+            return;
         seller_match->second.modify_held_stock(-1);
-        seller_match->second.modify_capital(match.quantity*match.price);
+        seller_match->second.modify_capital(match.quantity * match.price);
     };
 
     process_buyer_match(market_makers_);

@@ -16,7 +16,8 @@ RetailBot::take_action(float current, float theo)
     if (poisson_dist(gen) > 0) {
         if (true || noise_factor < p_trade * signal_strength) {
             if (current < theo) {
-                // float price = calculate_order_price(messages::SIDE::BUY, current, theo);
+                // float price = calculate_order_price(messages::SIDE::BUY, current,
+                // theo);
                 float price = current;
                 assert(price > 0);
                 float quantity = (1 - get_capital_utilization()) * .4f
@@ -31,7 +32,7 @@ RetailBot::take_action(float current, float theo)
             if (current > theo) {
                 // sell
                 // float price =
-                    // calculate_order_price(messages::SIDE::SELL, current, theo);
+                // calculate_order_price(messages::SIDE::SELL, current, theo);
                 float price = current;
                 assert(price > 0);
                 float quantity = (1 - get_capital_utilization()) * .4f
