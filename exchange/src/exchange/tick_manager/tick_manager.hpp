@@ -7,14 +7,22 @@
 
 #include <list>
 #include <thread>
+#include <queue>
 
 namespace nutc {
 namespace ticks {
 
 enum class PRIORITY { first, second, third, fourth };
 
+using std::chrono::milliseconds;
+
 class TickManager {
 public:
+    [[nodiscard]] uint64_t get_current_tick() const
+    {
+        return current_tick_;
+    }
+    
     void
     attach(TickObserver* observer, PRIORITY priority)
     {
@@ -53,6 +61,17 @@ public:
         }
     }
 
+    struct tick_metrics_t {
+      milliseconds top_1p_ms;
+      milliseconds top_5p_ms;
+      milliseconds top_10p_ms;
+      milliseconds top_50p_ms;
+      milliseconds median_tick_ms;
+      milliseconds avg_tick_ms;
+  };
+  
+    [[nodiscard]] tick_metrics_t get_tick_metrics() const;
+
     void
     start()
     {
@@ -68,7 +87,7 @@ public:
     }
 
 private:
-    std::chrono::milliseconds delay_time_;
+    milliseconds delay_time_;
     std::atomic<bool> running_;
     std::thread tick_thread_;
     std::list<TickObserver*> first_observers_;
@@ -77,8 +96,10 @@ private:
     std::list<TickObserver*> fourth_observers_;
     static constexpr uint16_t MS_PER_SECOND = 1000;
 
+  std::deque<milliseconds> last_1000_tick_times_;
+
     explicit TickManager(uint16_t start_tick_rate) :
-        delay_time_(std::chrono::milliseconds(MS_PER_SECOND / start_tick_rate))
+        delay_time_(milliseconds(MS_PER_SECOND / start_tick_rate))
     {}
 
     auto notify_tick_();
@@ -89,6 +110,7 @@ public:
     TickManager(TickManager&&) = delete;
     TickManager& operator=(const TickManager&) = delete;
     TickManager& operator=(TickManager&&) = delete;
+
 
     static TickManager&
     get_instance(uint16_t start_tick_rate = 0)

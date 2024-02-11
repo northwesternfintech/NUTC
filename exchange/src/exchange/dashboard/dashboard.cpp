@@ -1,5 +1,6 @@
 #include "dashboard.hpp"
 
+#include "exchange/tick_manager/tick_manager.hpp"
 #include "exchange/traders/trader_manager.hpp"
 #include "exchange/traders/trader_types.hpp"
 #include "state/global_metrics.hpp"
@@ -38,17 +39,22 @@ Dashboard::Dashboard() : err_file_(freopen("logs/error_log.txt", "w", stderr))
     ticker_window_ = newwin(y_max, x_max, 0, 0);
     log_window_ = newwin(y_max, x_max, 0, 0);
     leaderboard_window_ = newwin(y_max, x_max, 0, 0);
+    performance_window_ = newwin(y_max, x_max, 0, 0);
 
-    scrollok(log_window_, TRUE);
+    scrollok(ticker_window_, TRUE);
     scrollok(log_window_, TRUE);
     scrollok(leaderboard_window_, TRUE);
+    scrollok(performance_window_, TRUE);
 
     werase(ticker_window_);
     werase(leaderboard_window_);
+    werase(performance_window_);
     werase(log_window_);
+  
     wrefresh(ticker_window_);
     wrefresh(leaderboard_window_);
     wrefresh(log_window_);
+    wrefresh(performance_window_);
 
     mainLoop(0);
 }
@@ -59,6 +65,7 @@ Dashboard::close()
     delwin(ticker_window_);
     delwin(log_window_);
     delwin(leaderboard_window_);
+    delwin(performance_window_);
     fflush(err_file_);
     fclose(err_file_);
     clear();
@@ -71,8 +78,8 @@ void
 draw_generic_text(WINDOW* window, int start_y)
 {
     mvwprintw(
-        window, start_y++, window->_maxx / 2 - 38,
-        "Press '1' for Ticker Window, '2' for Log Window, '3' for Leaderboard Window"
+        window, start_y++, window->_maxx / 2 - 52,
+        "Press '1' for Ticker Window, '2' for Log Window, '3' for Leaderboard Window, '4' for Performance Window"
     );
 }
 
@@ -182,6 +189,27 @@ Dashboard::displayLeaderboard(WINDOW* window, int start_y)
     }
 }
 
+void Dashboard::displayPerformance(WINDOW* window, int start_y)
+{
+    mvwprintw(window, start_y, window->_maxx / 2 - 5, "Performance");
+
+  ticks::TickManager& tick_manager = ticks::TickManager::get_instance();
+  ticks::TickManager::tick_metrics_t metrics = tick_manager.get_tick_metrics();
+  start_y++;
+  if(tick_manager.get_current_tick() < 100) {
+    mvwprintw(window, start_y+4, window->_maxx / 2 - 23, "Current tick (%lu) below 100. Not enough data", tick_manager.get_current_tick());
+    return;
+  }
+  mvwprintw(window, start_y++, window->_maxx / 2 - 8, "Current Tick: %lu", tick_manager.get_current_tick());
+  mvwprintw(window, start_y++, window->_maxx / 2 - 13, "Top 1p tick times(ms): %lu", metrics.top_1p_ms.count());
+  mvwprintw(window, start_y++, window->_maxx / 2 - 13, "Top 5p tick times(ms): %lu", metrics.top_5p_ms.count());
+  mvwprintw(window, start_y++, window->_maxx / 2 - 13, "Top 10p tick times(ms): %lu", metrics.top_10p_ms.count());
+  mvwprintw(window, start_y++, window->_maxx / 2 - 13, "Top 50p tick times(ms): %lu", metrics.top_50p_ms.count());
+  mvwprintw(window, start_y++, window->_maxx / 2 - 13, "Average tick time(ms): %lu", metrics.avg_tick_ms.count());
+  mvwprintw(window, start_y++, window->_maxx / 2 - 12, "Median tick time(ms): %lu", metrics.median_tick_ms.count());
+  mvwprintw(window, start_y++, window->_maxx / 2 - 12, "Theoretical max hz: %.2f", 1000.0/static_cast<double>(metrics.avg_tick_ms.count()));
+}
+
 void
 Dashboard::displayLog(WINDOW* window, int start_y)
 {
@@ -190,7 +218,6 @@ Dashboard::displayLog(WINDOW* window, int start_y)
 
     if (log_file_.eof()) {
         log_file_.clear();
-        // log_file_.seekg(log_pos_);
     }
 
     int y = start_y + 3;
@@ -198,7 +225,6 @@ Dashboard::displayLog(WINDOW* window, int start_y)
         log_queue_.push_back(line);
         if(log_file_.peek() == EOF)
           break;
-        // log_pos_ = log_file_.tellg();
     }
 
     while (log_queue_.size() > (window->_maxy - start_y - 1)) {
@@ -208,7 +234,6 @@ Dashboard::displayLog(WINDOW* window, int start_y)
     for (const std::string& line : log_queue_) {
         mvwprintw(window, y++, 2, line.c_str());
     }
-
     // this is a bit hacky, but prevents the log file from getting too big
     // std::ofstream("logs/app.log");
 }
@@ -217,15 +242,19 @@ void
 Dashboard::mainLoop(uint64_t tick)
 {
     char chr = getch();
-    if (chr == '1' || chr == '2' || chr == '3')
+    if (chr == '1' || chr == '2' || chr == '3' || chr == '4')
         current_window_ = chr;
     else if (tick % 4 != 0)
         return;
+
+    // TODO: make it so we don't calculate metrics of screens we aren't on
 
     switch (current_window_) {
         case '1':
             werase(log_window_);
             werase(leaderboard_window_);
+            werase(ticker_window_);
+            werase(performance_window_);
             draw_generic_text(ticker_window_, 0);
             displayStockTickers(ticker_window_, 1);
             wrefresh(ticker_window_);
@@ -233,16 +262,29 @@ Dashboard::mainLoop(uint64_t tick)
         case '2':
             werase(ticker_window_);
             werase(leaderboard_window_);
+            werase(log_window_);
+            werase(performance_window_);
             draw_generic_text(log_window_, 0);
             displayLog(log_window_, 1);
             wrefresh(log_window_);
             break;
         case '3':
             werase(ticker_window_);
+            werase(leaderboard_window_);
             werase(log_window_);
+            werase(performance_window_);
             draw_generic_text(leaderboard_window_, 0);
             displayLeaderboard(leaderboard_window_, 1);
             wrefresh(leaderboard_window_);
+            break;
+        case '4':
+            werase(ticker_window_);
+            werase(log_window_);
+            werase(performance_window_);
+            werase(leaderboard_window_);
+            draw_generic_text(performance_window_, 0);
+            displayPerformance(performance_window_, 2);
+            wrefresh(performance_window_);
             break;
         default:
             break;

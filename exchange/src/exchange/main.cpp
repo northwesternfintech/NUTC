@@ -185,8 +185,8 @@ main(int argc, const char** argv)
         {100000, 100000, 100000, 25000, 25000, 10000, 5000, 5000, 5000, 5000}
     ); // NOLINT(*)
 
-    engine_manager.get_bot_container("ETH").add_retail_bots(10, 3, 10);
-    engine_manager.get_bot_container("BTC").add_retail_bots(100, 30, 2);
+    engine_manager.get_bot_container("ETH").add_retail_bots(10, 3, 100);
+    engine_manager.get_bot_container("BTC").add_retail_bots(100, 30, 100);
     engine_manager.get_bot_container("USD").add_retail_bots(1000, 300, 100);
 
     ticks::TickManager::get_instance().attach(&engine_manager, ticks::PRIORITY::first);

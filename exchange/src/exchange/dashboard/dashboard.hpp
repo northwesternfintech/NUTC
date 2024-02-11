@@ -42,6 +42,7 @@ private:
     void displayStockTickers(WINDOW* window, int start_y);
     void displayLog(WINDOW* window, int start_y);
     void displayLeaderboard(WINDOW* window, int start_y);
+    void displayPerformance(WINDOW* window, int start_y);
 
     void mainLoop(uint64_t tick);
 
@@ -54,6 +55,7 @@ private:
     WINDOW* ticker_window_;
     WINDOW* log_window_;
     WINDOW* leaderboard_window_;
+    WINDOW* performance_window_;
 
     std::streampos log_pos_ = std::ios::beg;
 
