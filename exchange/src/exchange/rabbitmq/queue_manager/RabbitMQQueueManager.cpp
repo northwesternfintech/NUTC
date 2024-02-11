@@ -20,7 +20,7 @@ RabbitMQQueueManager::initialize_queue(
         log_e(rabbitmq, "Failed to declare queue.");
         return false;
     }
-    log_i(rabbitmq, "Declared queue: {}", queue_name);
+    log_t3(rabbitmq, "Declared queue: {}", queue_name);
 
     return true;
 }

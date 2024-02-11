@@ -25,6 +25,7 @@ namespace nutc {
  */
 namespace matching {
 
+// Later, we can combine these
 struct match_result_t {
     std::vector<Match> matches;
     std::vector<ObUpdate> ob_updates;
@@ -33,6 +34,7 @@ struct match_result_t {
 struct on_tick_result_t {
     std::vector<StoredOrder> removed_orders;
     std::vector<StoredOrder> added_orders;
+    std::vector<Match> matched_orders;
 };
 
 class Engine {
@@ -63,12 +65,13 @@ public:
     }
 
     float
-    get_midprice() const
+    get_midprice()
     {
         if (asks_.empty() || bids_.empty()) [[unlikely]] {
-            return initial_price_;
+            return last_midprice_;
         }
-        return (asks_.begin()->price + bids_.rbegin()->price) / 2;
+        last_midprice_ = (asks_.begin()->price + bids_.rbegin()->price) / 2;
+        return last_midprice_;
     }
 
     void
@@ -83,7 +86,7 @@ public:
     void
     set_initial_price(float price)
     {
-        initial_price_ = price;
+        last_midprice_ = price;
     }
 
     void
@@ -106,7 +109,7 @@ public:
 
 private:
     uint64_t current_tick_ = 0;
-    float initial_price_;
+    float last_midprice_;
 
     match_result_t
     attempt_matches_(manager::ClientManager& manager, StoredOrder& aggressive_order);
@@ -123,6 +126,7 @@ private:
 
     std::vector<StoredOrder> removed_orders_{};
     std::vector<StoredOrder> added_orders_{};
+    std::vector<Match> matched_orders_{};
 
     template <typename Comparator>
     std::optional<std::reference_wrapper<StoredOrder>>

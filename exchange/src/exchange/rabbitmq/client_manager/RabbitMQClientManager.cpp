@@ -46,7 +46,7 @@ RabbitMQClientManager::wait_for_clients(
         }
     }
 
-    log_i(
+    log_t1(
         rabbitmq, "All {} clients ready. Starting exchange with {} ready clients",
         num_clients, num_running
     );

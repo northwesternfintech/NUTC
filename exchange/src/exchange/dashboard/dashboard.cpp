@@ -143,6 +143,31 @@ Dashboard::displayStockTickerData(
         static_cast<double>(ticker.mm_max_utilization_),
         static_cast<double>(ticker.mm_avg_utilization_)
     );
+
+    start_y++;
+    mvwprintw(window, start_y++, start_x, "Retail bots: %lu", ticker.num_retail_bots_);
+    mvwprintw(
+        window, start_y++, start_x, "Retail min/max/avg num bids: %lu %lu %lu",
+        ticker.retail_min_open_bids_, ticker.retail_max_open_bids_,
+        ticker.retail_avg_open_bids_
+    );
+    mvwprintw(
+        window, start_y++, start_x, "Retail min/max/avg num asks: %lu %lu %lu",
+        ticker.retail_min_open_asks_, ticker.retail_max_open_asks_,
+        ticker.retail_avg_open_asks_
+    );
+    mvwprintw(
+        window, start_y++, start_x, "Retail min/max/avg utilization: %.2f %.2f %.2f",
+        static_cast<double>(ticker.retail_min_utilization_),
+        static_cast<double>(ticker.retail_max_utilization_),
+        static_cast<double>(ticker.retail_avg_utilization_)
+    );
+    mvwprintw(
+        window, start_y++, start_x, "Retail min/max/avg PnL: %.2f %.2f %.2f",
+        static_cast<double>(ticker.retail_min_pnl_),
+        static_cast<double>(ticker.retail_max_pnl_),
+        static_cast<double>(ticker.retail_avg_pnl_)
+    );
 }
 
 void

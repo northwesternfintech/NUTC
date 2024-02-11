@@ -49,10 +49,10 @@ RabbitMQ::handleIncomingMessages()
             [&](auto&& arg) {
                 using T = std::decay_t<decltype(arg)>;
                 if constexpr (std::is_same_v<T, ObUpdate>) {
-                    log_i(
+                    /*log_i(
                         wrapper_rabbitmq, "Received order book update: {}",
                         glz::write_json(std::get<ObUpdate>(data))
-                    );
+                    );*/
                     ObUpdate update = std::get<ObUpdate>(data);
                     std::string side =
                         update.side == messages::SIDE::BUY ? "BUY" : "SELL";
@@ -62,10 +62,10 @@ RabbitMQ::handleIncomingMessages()
                     return;
                 }
                 else if constexpr (std::is_same_v<T, Match>) {
-                    log_i(
+                    /*log_i(
                         wrapper_rabbitmq, "Received match: {}",
                         glz::write_json(std::get<Match>(data))
-                    );
+                    );*/
                     Match match = std::get<Match>(data);
                     std::string side =
                         match.side == messages::SIDE::BUY ? "BUY" : "SELL";
@@ -76,11 +76,11 @@ RabbitMQ::handleIncomingMessages()
                 }
                 else if constexpr (std::is_same_v<T, AccountUpdate>) {
                     AccountUpdate update = std::get<AccountUpdate>(data);
-                    log_i(
+                    /*log_i(
                         wrapper_rabbitmq,
                         "Received account update with capital remaining: {}",
                         update.capital_remaining
-                    );
+                    );*/
                     std::string side =
                         update.side == messages::SIDE::BUY ? "BUY" : "SELL";
                     nutc::pywrapper::get_account_update_function()(
@@ -113,7 +113,7 @@ RabbitMQ::publishMarketOrder(
     };
     std::string message = glz::write_json(order);
 
-    log_i(wrapper_rabbitmq, "Publishing order: {}", message);
+    // log_i(wrapper_rabbitmq, "Publishing order: {}", message);
     return publishMessage("market_order", message);
 }
 
@@ -195,7 +195,7 @@ RabbitMQ::initializeConnection(const std::string& queueName)
         return false;
     }
 
-    log_i(wrapper_rabbitmq, "Connection established");
+    // log_i(wrapper_rabbitmq, "Connection established");
 
     return true;
 }
@@ -244,7 +244,7 @@ bool
 RabbitMQ::publishInit(const std::string& id, bool ready)
 {
     std::string message = glz::write_json(InitMessage{id, ready});
-    log_i(wrapper_rabbitmq, "Publishing init message: {}", message);
+    // log_i(wrapper_rabbitmq, "Publishing init message: {}", message);
     bool rVal = publishMessage("market_order", message);
     return rVal;
 }

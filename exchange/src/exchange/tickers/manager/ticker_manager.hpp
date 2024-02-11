@@ -33,7 +33,8 @@ public:
         if (new_tick < ORDER_EXPIRATION_TIME)
             return;
         for (auto& [ticker, engine] : engines_) {
-            auto [removed, added] = engine.on_tick(new_tick, ORDER_EXPIRATION_TIME);
+            auto [removed, added, matched] =
+                engine.on_tick(new_tick, ORDER_EXPIRATION_TIME);
 
             for (matching::StoredOrder& order : added) {
                 if (order.trader->get_type() != manager::TraderType::BOT)
@@ -51,6 +52,11 @@ public:
                     .process_order_expiration(
                         order.trader->get_id(), order.side, order.price * order.quantity
                     );
+            }
+
+            for (Match& order : matched) {
+                // TODO(stevenewald): check if bot beforehand?
+                bot_containers_.at(ticker).process_order_match(order);
             }
         }
     }

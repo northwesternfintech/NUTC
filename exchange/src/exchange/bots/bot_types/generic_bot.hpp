@@ -2,7 +2,6 @@
 
 #include <cassert>
 
-#include <iostream>
 #include <string>
 
 namespace nutc {
@@ -16,9 +15,35 @@ class GenericBot {
     size_t open_bids_ = 0; // for stats, not the strategy
     size_t open_asks_ = 0;
 
-    float interest_limit_;
+    const float INTEREST_LIMIT;
+    float capital_ = 0;
+    float held_stock_ = 0;
 
 public:
+    [[nodiscard]] float
+    get_capital() const
+    {
+        return capital_;
+    }
+
+    void
+    modify_capital(float delta)
+    {
+        capital_ += delta;
+    }
+
+    [[nodiscard]] float
+    get_held_stock() const
+    {
+        return held_stock_;
+    }
+
+    void
+    modify_held_stock(float delta)
+    {
+        held_stock_ += delta;
+    }
+
     [[nodiscard]] const std::string&
     get_id() const
     {
@@ -46,7 +71,7 @@ public:
     [[nodiscard]] float
     get_interest_limit() const
     {
-        return interest_limit_;
+        return INTEREST_LIMIT;
     }
 
     [[nodiscard]] float
@@ -100,7 +125,7 @@ public:
     virtual ~GenericBot() = default;
 
     GenericBot(std::string bot_id, float interest_limit) :
-        BOT_ID(std::move(bot_id)), interest_limit_(interest_limit)
+        BOT_ID(std::move(bot_id)), INTEREST_LIMIT(interest_limit)
     {}
 
     GenericBot(const GenericBot& other) = default;
