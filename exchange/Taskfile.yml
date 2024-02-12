@@ -36,6 +36,13 @@ tasks:
       - test -f CMakeUserPresets.json
     cmds:
       - cmake --build --preset=dev -j
+        
+  build-no-parallel:
+    dir: '{{.USER_WORKING_DIR}}'
+    preconditions:
+      - test -f CMakeUserPresets.json
+    cmds:
+      - cmake --build --preset=dev
 
   run:
     env:

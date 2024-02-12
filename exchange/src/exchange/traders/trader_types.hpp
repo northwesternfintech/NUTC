@@ -59,7 +59,7 @@ struct generic_trader_t {
     get_holdings(const std::string& ticker) const
     {
         if (!holdings_.contains(ticker))
-            return 0.0f;
+            return 0.0;
 
         return holdings_.at(ticker);
     }

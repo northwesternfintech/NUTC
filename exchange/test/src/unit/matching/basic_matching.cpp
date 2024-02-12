@@ -47,9 +47,9 @@ TEST_F(UnitBasicMatching, SimpleAddRemove)
 {
     using nutc::testing_utils::get_capital_simple;
     using nutc::testing_utils::modify_capital_simple;
-    float capital_1 = get_capital_simple(manager_, "ABC");
+    double capital_1 = get_capital_simple(manager_, "ABC");
     modify_capital_simple(manager_, "ABC", 100);
-    float capital_2 = get_capital_simple(manager_, "ABC");
+    double capital_2 = get_capital_simple(manager_, "ABC");
     ASSERT_EQ(capital_1 + 100, capital_2);
 }
 

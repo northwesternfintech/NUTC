@@ -1,6 +1,6 @@
 #include "tick_manager.hpp"
 
-#include <numeric>
+#include <queue>
 
 namespace nutc {
 namespace ticks {
@@ -44,7 +44,7 @@ TickManager::tick_metrics_t TickManager::get_tick_metrics() const {
   size_t num_ticks = last_1000_tick_times_.size();
 
   if(num_ticks < 100) {
-    return {milliseconds(0), milliseconds(0), milliseconds(0), milliseconds(0), milliseconds(0)};
+    return {milliseconds(0), milliseconds(0), milliseconds(0), milliseconds(0), milliseconds(0), milliseconds(0)};
   }
 
   for(size_t i = 0; i < num_ticks/100; i++) {

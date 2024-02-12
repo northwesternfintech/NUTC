@@ -14,7 +14,7 @@ namespace nutc {
 namespace messages {
 
 struct StartTime {
-    uint64_t start_time_ns;
+    int64_t start_time_ns;
 };
 
 /**

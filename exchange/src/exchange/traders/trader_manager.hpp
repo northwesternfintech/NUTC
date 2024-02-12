@@ -5,7 +5,6 @@
 
 #include <glaze/glaze.hpp>
 
-#include <iostream>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -19,7 +18,6 @@ class ClientManager {
     std::unordered_map<std::string, trader_t> traders_;
 
 public:
-    // TODO: unit test to see if this could be an issue
     const generic_trader_t*
     get_generic_trader(const std::string& user_id) const
     {
@@ -41,7 +39,8 @@ public:
         );
     }
 
-    [[nodiscard]] std::string
+  // Returns actual internal ID. Usually don't need it unless we're testing
+    std::string
     add_client(const trader_t& trader)
     {
         std::string user_id =
