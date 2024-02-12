@@ -29,7 +29,9 @@ add_executable(NUTC_tests
   src/integration/basic_rmq.cpp
   src/integration/basic_algo.cpp
   src/integration/time_based.cpp
-  )
+  src/unit/misc/engine_manager.cpp
+
+)
 
 target_include_directories(
   NUTC_tests ${warning_guard}
