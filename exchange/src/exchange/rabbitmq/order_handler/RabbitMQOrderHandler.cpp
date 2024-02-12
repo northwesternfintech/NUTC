@@ -29,7 +29,10 @@ RabbitMQOrderHandler::handle_incoming_market_order(
     log_i(rabbitmq, "Received market order: {}", buffer);
 
     std::optional<std::reference_wrapper<matching::Engine>> engine =
-        engine_manager.get_engine(order.ticker, is_rmq ? engine_manager::EngineState::RMQ: engine_manager::EngineState::BOT);
+        engine_manager.get_engine(
+            order.ticker,
+            is_rmq ? engine_manager::EngineState::RMQ : engine_manager::EngineState::BOT
+        );
 
     if (!engine.has_value()) {
         log_w(

@@ -14,10 +14,7 @@ using engine_ref_t = std::reference_wrapper<nutc::matching::Engine>;
 namespace nutc {
 namespace engine_manager {
 
-enum class EngineState {
-    BOT,
-    RMQ
-};
+enum class EngineState { BOT, RMQ };
 
 class EngineManager : public nutc::ticks::TickObserver {
 public:
@@ -35,7 +32,8 @@ public:
     }
 
     void
-    set_engine_state(EngineState new_state) {
+    set_engine_state(EngineState new_state)
+    {
         engine_state.store(new_state, std::memory_order_release);
     }
 
