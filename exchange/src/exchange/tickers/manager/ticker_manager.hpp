@@ -5,6 +5,7 @@
 #include "exchange/tick_manager/tick_observer.hpp"
 #include "exchange/tickers/engine/engine.hpp"
 
+#include <atomic>
 #include <optional>
 #include <string>
 
@@ -13,9 +14,30 @@ using engine_ref_t = std::reference_wrapper<nutc::matching::Engine>;
 namespace nutc {
 namespace engine_manager {
 
+enum class EngineState {
+    BOT,
+    RMQ
+};
+
 class EngineManager : public nutc::ticks::TickObserver {
 public:
-    std::optional<engine_ref_t> get_engine(const std::string& ticker);
+    std::optional<engine_ref_t>
+    get_engine(const std::string& ticker, EngineState require_state)
+    {
+        while (engine_state.load(std::memory_order_acquire) != require_state) {
+            std::this_thread::yield();
+        }
+        auto engine = engines_.find(ticker);
+        if (engine != engines_.end()) {
+            return std::reference_wrapper<nutc::matching::Engine>(engine->second);
+        }
+        return std::nullopt;
+    }
+
+    void
+    set_engine_state(EngineState new_state) {
+        engine_state.store(new_state, std::memory_order_release);
+    }
 
     bots::BotContainer&
     get_bot_container(const std::string& ticker)
@@ -59,6 +81,7 @@ public:
 private:
     std::map<std::string, matching::Engine> engines_;
     std::unordered_map<std::string, bots::BotContainer> bot_containers_;
+    std::atomic<EngineState> engine_state;
     EngineManager() = default;
     void set_initial_price_(const std::string& ticker, float price);
 

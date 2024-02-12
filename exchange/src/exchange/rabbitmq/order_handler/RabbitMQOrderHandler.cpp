@@ -10,7 +10,7 @@ namespace rabbitmq {
 void
 RabbitMQOrderHandler::handle_incoming_market_order(
     engine_manager::EngineManager& engine_manager, manager::ClientManager& clients,
-    MarketOrder&& order
+    MarketOrder&& order, bool is_rmq
 )
 {
     std::string buffer;
@@ -29,7 +29,8 @@ RabbitMQOrderHandler::handle_incoming_market_order(
     log_i(rabbitmq, "Received market order: {}", buffer);
 
     std::optional<std::reference_wrapper<matching::Engine>> engine =
-        engine_manager.get_engine(order.ticker);
+        engine_manager.get_engine(order.ticker, is_rmq ? engine_manager::EngineState::RMQ: engine_manager::EngineState::BOT);
+
     if (!engine.has_value()) {
         log_w(
             matching, "Received order for unknown ticker {}. Discarding order",

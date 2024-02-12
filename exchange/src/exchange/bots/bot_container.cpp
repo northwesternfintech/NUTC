@@ -23,7 +23,7 @@ void
 BotContainer::on_tick(uint64_t)
 {
     auto theo = fabs(theo_generator_.generate_next_price() + brownian_offset_);
-    auto current = engine_manager::EngineManager::get_instance().get_engine(ticker_);
+    auto current = engine_manager::EngineManager::get_instance().get_engine(ticker_, engine_manager::EngineState::BOT);
     assert(current.has_value());
     auto current_price = current.value().get().get_midprice();
     auto orders = BotContainer::on_new_theo(static_cast<float>(theo), current_price);
@@ -32,7 +32,7 @@ BotContainer::on_tick(uint64_t)
         order.ticker = ticker_;
         rabbitmq::RabbitMQOrderHandler::handle_incoming_market_order(
             engine_manager::EngineManager::get_instance(),
-            manager::ClientManager::get_instance(), std::move(order)
+            manager::ClientManager::get_instance(), std::move(order), false
         );
     }
 }
