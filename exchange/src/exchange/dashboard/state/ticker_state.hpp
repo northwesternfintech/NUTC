@@ -1,11 +1,8 @@
 #pragma once
 
-#include "exchange/tick_manager/tick_observer.hpp"
-
 #include <cmath>
 
 #include <string>
-#include <vector>
 
 namespace nutc {
 namespace dashboard {
@@ -30,7 +27,7 @@ struct BotStates {
     double avg_pnl_{};
 };
 
-struct TickerState : public ticks::TickObserver {
+struct TickerState  {
     const std::string TICKER;
     const double STARTING_PRICE;
 
@@ -47,7 +44,7 @@ struct TickerState : public ticks::TickObserver {
         TICKER(std::move(ticker)), STARTING_PRICE(starting_price)
     {}
 
-    void on_tick(uint64_t tick) override;
+    void calculate_metrics();
 
 private:
     void
@@ -61,14 +58,14 @@ private:
 
         auto reset_bot_states = [](BotStates& bot_states) {
             bot_states.num_bots_ = 0;
-            bot_states.min_open_bids_ = INFINITY;
-            bot_states.min_open_asks_ = INFINITY;
-            bot_states.max_open_bids_ = -INFINITY;
-            bot_states.max_open_asks_ = -INFINITY;
-            bot_states.min_utilization_ = static_cast<double>(INFINITY);
-            bot_states.max_utilization_ = -static_cast<double>(INFINITY);
-            bot_states.min_pnl_ = static_cast<double>(INFINITY);
-            bot_states.max_pnl_ = -static_cast<double>(INFINITY);
+            bot_states.min_open_bids_ = std::numeric_limits<size_t>::max();
+            bot_states.min_open_asks_ = std::numeric_limits<size_t>::max();
+            bot_states.max_open_bids_ = std::numeric_limits<size_t>::min();
+            bot_states.max_open_asks_ = std::numeric_limits<size_t>::min();
+            bot_states.min_utilization_ = std::numeric_limits<double>::max();
+            bot_states.max_utilization_ = std::numeric_limits<double>::min();
+            bot_states.min_pnl_ = std::numeric_limits<double>::max();
+            bot_states.max_pnl_ = std::numeric_limits<double>::min();
             bot_states.avg_open_bids_ = 0;
             bot_states.avg_open_asks_ = 0;
             bot_states.avg_bid_interest_ = 0;

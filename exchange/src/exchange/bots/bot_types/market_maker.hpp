@@ -13,7 +13,7 @@ public:
         GenericBot(std::move(bot_id), interest_limit)
     {}
 
-    static constexpr double BASE_SPREAD = 0.16f;
+    static constexpr double BASE_SPREAD = 0.16;
 
     std::vector<messages::MarketOrder>
     take_action(double new_theo)
@@ -26,13 +26,13 @@ public:
         static constexpr uint8_t LEVELS = 6;
         std::vector<messages::MarketOrder> orders(LEVELS);
 
-        std::array<double, LEVELS> quantities = {1.0f / 12, 1.0f / 6, 1.0f / 4,
-                                                 1.0f / 4,  1.0f / 6, 1.0f / 12};
+        std::array<double, LEVELS> quantities = {1.0 / 12, 1.0 / 6, 1.0 / 4,
+                                                 1.0 / 4,  1.0 / 6, 1.0 / 12};
 
         std::array<double, LEVELS> prices = {
-            new_theo - BASE_SPREAD - .10f, new_theo - BASE_SPREAD - .05f,
+            new_theo - BASE_SPREAD - .10, new_theo - BASE_SPREAD - .05,
             new_theo - BASE_SPREAD,        new_theo + BASE_SPREAD,
-            new_theo + BASE_SPREAD + .05f, new_theo + BASE_SPREAD * .10f,
+            new_theo + BASE_SPREAD + .05, new_theo + BASE_SPREAD * .10,
         };
 
         double capital_tolerance = compute_capital_tolerance_();

@@ -66,8 +66,8 @@ Dashboard::close()
     delwin(log_window_);
     delwin(leaderboard_window_);
     delwin(performance_window_);
-    fflush(err_file_);
-    fclose(err_file_);
+    fflush(err_file_); //NOLINT
+    fclose(err_file_); //NOLINT
     clear();
     refresh();
     curs_set(0);
@@ -94,7 +94,7 @@ Dashboard::drawTickerLayout(WINDOW* window, int start_y, size_t num_tickers)
 
     for (size_t i = 1; i < num_tickers + 1; ++i) {
         for (int j = start_y + 2; j < y_max; ++j) {
-            mvwprintw(window, j, i * x_max / num_tickers, "|"); // NOLINT
+            mvwprintw(window, j, static_cast<int>(i) * x_max / static_cast<int>(num_tickers), "|"); // NOLINT
         }
     }
 
@@ -179,11 +179,11 @@ Dashboard::displayLeaderboard(WINDOW* window, int start_y)
     mvwprintw(window, start_y, window->_maxx / 2 - 5, "Leaderboard");
 
     manager::ClientManager& client_manager = manager::ClientManager::get_instance();
-    for (auto& [user_id, trader_variant] : client_manager.get_clients_const()) {
+    for (const auto& [user_id, trader_variant] : client_manager.get_clients_const()) {
         const manager::generic_trader_t& trader = std::visit(
-            [](auto&& arg) -> const manager::generic_trader_t& { return arg; },
+            [](auto&& arg) { return static_cast<const manager::generic_trader_t&>(arg); },
             trader_variant
-        ); // NOLINT
+        );
         mvwprintw(window, start_y++, 2, "User: %s", user_id.c_str());
         mvwprintw(window, start_y++, 2, "  Capital: %.2f", trader.get_capital());
     }
@@ -220,37 +220,43 @@ Dashboard::displayLog(WINDOW* window, int start_y)
         log_file_.clear();
     }
 
-    int y = start_y + 3;
+    int curr_y = start_y + 3;
     while (std::getline(log_file_, line)) {
         log_queue_.push_back(line);
         if(log_file_.peek() == EOF)
           break;
     }
 
-    while (log_queue_.size() > (window->_maxy - start_y - 1)) {
+    while (static_cast<int>(log_queue_.size()) > (window->_maxy - start_y - 1)) {
         log_queue_.pop_front();
     }
 
     for (const std::string& line : log_queue_) {
-        mvwprintw(window, y++, 2, line.c_str());
+        mvwprintw(window, curr_y++, 2, "%s", line.c_str());
     }
     // this is a bit hacky, but prevents the log file from getting too big
     // std::ofstream("logs/app.log");
 }
 
+void Dashboard::calculate_ticker_metrics() {
+  auto& states = dashboard::DashboardState::get_instance().get_ticker_states();
+  for(auto& [_, state] : states) {
+    state.calculate_metrics();
+  }
+}
+
 void
 Dashboard::mainLoop(uint64_t tick)
 {
-    char chr = getch();
+    char chr = static_cast<char>(getch());
     if (chr == '1' || chr == '2' || chr == '3' || chr == '4')
         current_window_ = chr;
-    else if (tick % 4 != 0)
+    else if (tick % 15 != 0)
         return;
-
-    // TODO: make it so we don't calculate metrics of screens we aren't on
 
     switch (current_window_) {
         case '1':
+            calculate_ticker_metrics();
             werase(log_window_);
             werase(leaderboard_window_);
             werase(ticker_window_);

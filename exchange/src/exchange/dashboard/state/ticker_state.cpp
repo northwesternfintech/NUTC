@@ -9,10 +9,8 @@ namespace nutc {
 namespace dashboard {
 
 void
-TickerState::on_tick(uint64_t tick)
+TickerState::calculate_metrics()
 {
-    if (tick % 4 != 0)
-        return;
     reset_();
     bots::BotContainer& bot_container =
         engine_manager::EngineManager::get_instance().get_bot_container(TICKER);

@@ -120,12 +120,12 @@ print_file_contents(const std::string& filepath)
 }
 
 void
-flush_log(int sig) // NOLINT(*)
+flush_log(int)
 {
     nutc::events::Logger::get_logger().flush();
     nutc::dashboard::Dashboard::get_instance().close();
     print_file_contents("logs/error_log.txt");
-    std::exit(0);
+  std::exit(0); // NOLINT(concurrency-*)
 }
 
 // Initializes tick manager with brownian motion
@@ -144,12 +144,9 @@ initialize_ticker(const std::string& ticker, double starting_price)
         EngineManager::get_instance().get_bot_container(ticker);
 
     // Should run after stale order removal, so they can react to removed orders
-    tick_manager.attach(&bot_container, PRIORITY::second);
+    tick_manager.attach(&bot_container, PRIORITY::second, "Bot Engine");
 
     DashboardState::get_instance().add_ticker(ticker, starting_price);
-
-    auto& ticker_state = DashboardState::get_instance().get_ticker_state(ticker);
-    tick_manager.attach(&ticker_state, PRIORITY::third);
 }
 
 // todo: please god clean this up
@@ -163,7 +160,7 @@ main(int argc, const char** argv)
     // Set up logging
     logging::init(quill::LogLevel::Info);
 
-    static constexpr uint16_t TICK_HZ = 10;
+    static constexpr uint16_t TICK_HZ = 30;
     nutc::ticks::TickManager::get_instance(TICK_HZ);
 
     initialize_ticker("ETH", 100);
@@ -172,7 +169,7 @@ main(int argc, const char** argv)
 
     auto& dashboard = nutc::dashboard::Dashboard::get_instance();
     nutc::ticks::TickManager::get_instance().attach(
-        &dashboard, nutc::ticks::PRIORITY::fourth
+        &dashboard, nutc::ticks::PRIORITY::fourth, "Dashboard Manager"
     );
 
     auto& engine_manager = engine_manager::EngineManager::get_instance();
@@ -180,16 +177,16 @@ main(int argc, const char** argv)
     engine_manager.get_bot_container("ETH").add_mm_bots(
         {50000, 25000, 25000, 10000, 10000, 5000}
     );                                                            // NOLINT(*)
-    engine_manager.get_bot_container("BTC").add_mm_bots({50000}); // NOLINT(*)
+    engine_manager.get_bot_container("BTC").add_mm_bots({50000, 25000}); // NOLINT(*)
     engine_manager.get_bot_container("USD").add_mm_bots(
         {100000, 100000, 100000, 25000, 25000, 10000, 5000, 5000, 5000, 5000}
     ); // NOLINT(*)
 
-    engine_manager.get_bot_container("ETH").add_retail_bots(10, 3, 100);
-    engine_manager.get_bot_container("BTC").add_retail_bots(100, 30, 100);
-    engine_manager.get_bot_container("USD").add_retail_bots(1000, 300, 100);
+    engine_manager.get_bot_container("ETH").add_retail_bots(10, 3, 200);
+    engine_manager.get_bot_container("BTC").add_retail_bots(100, 5, 500);
+    engine_manager.get_bot_container("USD").add_retail_bots(100, 10, 100);
 
-    ticks::TickManager::get_instance().attach(&engine_manager, ticks::PRIORITY::first);
+    ticks::TickManager::get_instance().attach(&engine_manager, ticks::PRIORITY::first, "Matching Engine");
     ticks::TickManager::get_instance().start();
 
     manager::ClientManager& users = manager::ClientManager::get_instance();
@@ -211,7 +208,7 @@ main(int argc, const char** argv)
     using algo_mgmt::AlgoManager;
 
     auto initialize_dev_mode = [&]() {
-        log_t1(main, "Initializing NUTC in development mode");
+        log_i(main, "Initializing NUTC in development mode");
         using algo_mgmt::DevModeAlgoManager;
 
         DevModeAlgoManager manager = DevModeAlgoManager(DEBUG_NUM_USERS);
@@ -220,7 +217,7 @@ main(int argc, const char** argv)
 
     // Weird name because of shadowing
     auto initialize_sandbox_mode = [&, &sandbox = sandbox]() {
-        log_t1(main, "Initializing NUTC in sandbox mode");
+        log_i(main, "Initializing NUTC in sandbox mode");
         using algo_mgmt::SandboxAlgoManager;
 
         auto& [uid, algo_id] = sandbox.value(); // NOLINT (unchecked-*)
@@ -229,7 +226,7 @@ main(int argc, const char** argv)
     };
 
     auto initialize_normal_mode = [&]() {
-        log_t1(main, "Initializing NUTC in normal mode");
+        log_i(main, "Initializing NUTC in normal mode");
         using algo_mgmt::NormalModeAlgoManager;
 
         NormalModeAlgoManager manager = NormalModeAlgoManager();

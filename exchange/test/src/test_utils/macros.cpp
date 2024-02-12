@@ -8,18 +8,18 @@
 namespace nutc {
 namespace testing_utils {
 bool
-is_nearly_equal(float f_a, float f_b, float epsilon)
+is_nearly_equal(double f_a, double f_b, double epsilon)
 {
-    float abs_a = std::fabs(f_a);
-    float abs_b = std::fabs(f_b);
-    float diff = std::fabs(f_a - f_b);
+    double abs_a = std::fabs(f_a);
+    double abs_b = std::fabs(f_b);
+    double diff = std::fabs(f_a - f_b);
     return diff <= ((abs_a < abs_b ? abs_b : abs_a) * epsilon);
 }
 
 bool
 validate_match(
     const Match& match, const std::string& ticker, const std::string& buyer_id,
-    const std::string& seller_id, messages::SIDE side, float price, float quantity
+    const std::string& seller_id, messages::SIDE side, double price, double quantity
 )
 {
     return match.ticker == ticker && match.buyer_id == buyer_id
@@ -30,8 +30,8 @@ validate_match(
 
 bool
 validate_ob_update(
-    const ObUpdate& update, const std::string& ticker, messages::SIDE side, float price,
-    float quantity
+    const ObUpdate& update, const std::string& ticker, messages::SIDE side, double price,
+    double quantity
 )
 {
     return update.ticker == ticker && update.side == side
@@ -42,7 +42,7 @@ validate_ob_update(
 bool
 validate_market_order(
     const MarketOrder& update, const std::string& client_id, const std::string& ticker,
-    messages::SIDE side, float price, float quantity
+    messages::SIDE side, double price, double quantity
 )
 {
     return update.client_id == client_id && update.ticker == ticker
@@ -52,7 +52,7 @@ validate_market_order(
 
 void
 add_client_simple(
-    manager::ClientManager& manager, const std::string& client_id, float capital
+    manager::ClientManager& manager, const std::string& client_id, double capital
 )
 {
     std::string trader_id =
@@ -66,7 +66,7 @@ add_client_simple(
 void
 modify_holdings_simple(
     manager::ClientManager& manager, const std::string& client_id,
-    const std::string& ticker, float quantity
+    const std::string& ticker, double quantity
 )
 {
     auto& client = manager.get_client(client_id);
@@ -80,7 +80,7 @@ modify_holdings_simple(
 
 void
 modify_capital_simple(
-    manager::ClientManager& manager, const std::string& client_id, float capital_change
+    manager::ClientManager& manager, const std::string& client_id, double capital_change
 )
 {
     auto& client = manager.get_client(client_id);
@@ -90,7 +90,7 @@ modify_capital_simple(
     );
 }
 
-float
+double
 get_capital_simple(manager::ClientManager& manager, const std::string& client_id)
 {
     auto& client = manager.get_client(client_id);

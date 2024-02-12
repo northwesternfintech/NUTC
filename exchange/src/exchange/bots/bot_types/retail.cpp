@@ -6,6 +6,10 @@ namespace bots {
 std::optional<messages::MarketOrder>
 RetailBot::take_action(double current, double theo)
 {
+  if(get_capital() < -get_interest_limit() * 0.1) {
+    // log_i(retail_bot, "Retail bot {} is out of capital", get_id());
+    return std::nullopt;
+  }
     double p_trade = (1 - get_capital_utilization());
 
     std::uniform_real_distribution<> dis(0.0, 1.0);
@@ -19,7 +23,8 @@ RetailBot::take_action(double current, double theo)
                 // double price = calculate_order_price(messages::SIDE::BUY, current,
                 // theo);
                 double price = current;
-                double quantity = (1 - get_capital_utilization()) * .4f
+                assert(price > 0);
+                double quantity = (1 - get_capital_utilization()) * .000001
                                   * get_interest_limit() / price;
                 modify_open_bids(1);
                 modify_long_capital(quantity * price);
@@ -31,7 +36,8 @@ RetailBot::take_action(double current, double theo)
             if (current > theo) {
                 // calculate_order_price(messages::SIDE::SELL, current, theo);
                 double price = current;
-                double quantity = (1 - get_capital_utilization()) * .4f
+                assert(price > 0);
+                double quantity = (1 - get_capital_utilization()) * .00001
                                   * get_interest_limit() / price;
                 modify_open_asks(1);
                 modify_short_capital(quantity * price);
@@ -52,7 +58,7 @@ RetailBot::calculate_order_price(
 {
     double price_difference = std::abs(theo_price - current_price);
 
-    double signal_strength_adjustment = price_difference * 0.5f;
+    double signal_strength_adjustment = price_difference * 0.5;
 
     double buffer_amount = current_price * buffer_percent;
 

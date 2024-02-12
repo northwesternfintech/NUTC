@@ -3,7 +3,6 @@
 #include "exchange/logging.hpp"
 #include "exchange/rabbitmq/consumer/RabbitMQConsumer.hpp"
 #include "exchange/rabbitmq/publisher/RabbitMQPublisher.hpp"
-#include "exchange/traders/trader_manager.hpp"
 
 namespace nutc {
 namespace rabbitmq {
@@ -46,7 +45,7 @@ RabbitMQClientManager::wait_for_clients(
         }
     }
 
-    log_t1(
+    log_i(
         rabbitmq, "All {} clients ready. Starting exchange with {} ready clients",
         num_clients, num_running
     );
@@ -60,10 +59,10 @@ RabbitMQClientManager::send_start_time(
     using time_point = std::chrono::high_resolution_clock::time_point;
     time_point time =
         std::chrono::high_resolution_clock::now() + std::chrono::seconds(wait_seconds);
-    uint64_t time_ns = std::chrono::time_point_cast<std::chrono::nanoseconds>(time)
+    int64_t time_ns = std::chrono::time_point_cast<std::chrono::nanoseconds>(time)
                            .time_since_epoch()
                            .count();
-
+  
     messages::StartTime message{time_ns};
     std::string buf = glz::write_json(message);
 

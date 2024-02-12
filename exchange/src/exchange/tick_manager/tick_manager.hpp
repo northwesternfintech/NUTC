@@ -1,13 +1,13 @@
 #pragma once
 
 #include "tick_observer.hpp"
+#include "exchange/logging.hpp"
 
 #include <cassert>
 #include <chrono>
 
 #include <list>
 #include <thread>
-#include <queue>
 
 namespace nutc {
 namespace ticks {
@@ -24,8 +24,9 @@ public:
     }
     
     void
-    attach(TickObserver* observer, PRIORITY priority)
+    attach(TickObserver* observer, PRIORITY priority, const std::string& name = "UNNAMED")
     {
+    log_i(tick_manager, "Tick engine registered observer {} with priority {}", name, static_cast<int>(priority));
         switch (priority) {
             case PRIORITY::first:
                 first_observers_.push_back(observer);

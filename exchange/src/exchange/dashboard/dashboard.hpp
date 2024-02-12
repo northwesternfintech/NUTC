@@ -35,14 +35,16 @@ public:
     void close();
 
 private:
-    void drawTickerLayout(WINDOW* window, int start_y, size_t num_tickers);
-    void displayStockTickerData(
+    void static drawTickerLayout(WINDOW* window, int start_y, size_t num_tickers);
+    void static displayStockTickerData(
         WINDOW* window, int start_y, int start_x, const TickerState& ticker
     );
-    void displayStockTickers(WINDOW* window, int start_y);
+    void static displayStockTickers(WINDOW* window, int start_y);
     void displayLog(WINDOW* window, int start_y);
-    void displayLeaderboard(WINDOW* window, int start_y);
-    void displayPerformance(WINDOW* window, int start_y);
+    void static displayLeaderboard(WINDOW* window, int start_y);
+    void static displayPerformance(WINDOW* window, int start_y);
+
+    void static calculate_ticker_metrics();
 
     void mainLoop(uint64_t tick);
 
