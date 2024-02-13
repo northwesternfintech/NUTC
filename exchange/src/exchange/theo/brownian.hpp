@@ -30,6 +30,18 @@ class BrownianMotion {
     size_t ticker_ = 0;
     Signedness signedness_ = Signedness::DoesntMatter;
 
+    // Current value, used to generate next one
+    double cur_value_;
+
+    // Control the size of market events and skewness of the distribution
+    size_t mean_size_of_event;
+    size_t stdev_of_event;
+    size_t skew_scale;
+    
+    // Control the actual ticking, whereby market events are slowed over many ticks
+    size_t ticker;
+    bool ticking_up;
+
 public:
     [[nodiscard]] double
     get_price() const
