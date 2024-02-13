@@ -34,7 +34,7 @@ BrownianMotion::generate_next_price()
     if (ticker_ > 0) {
         ticker_--;
         cur_value_ += generate_change_in_price_(
-            -cur_value_ / SKEW_SCALE, BROWNIAN_MOTION_DEVIATION, signedness
+            -cur_value_ / SKEW_SCALE, BROWNIAN_MOTION_DEVIATION, signedness_
         );
         return cur_value_;
     }
@@ -51,7 +51,7 @@ BrownianMotion::generate_next_price()
 
         // Whether to tick up or tick down
         bool ticking_up = distribution(random_number_generator_) > 0.5;
-        signedness = ticking_up ? Signedness::Positive : Signedness::Negative;
+        signedness_ = ticking_up ? Signedness::Positive : Signedness::Negative;
 
         // Generate new price
         cur_value_ += generate_change_in_price_(
@@ -67,9 +67,6 @@ BrownianMotion::generate_next_price()
         );
         return cur_value_;
     }
-
-    cur_value_ = new_price;
-    return new_price;
 }
 
 } // namespace stochastic

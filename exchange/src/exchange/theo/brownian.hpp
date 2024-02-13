@@ -12,6 +12,12 @@
 #pragma once
 #include "exchange/config.h"
 
+#define BROWNIAN_MOTION_MEAN_SIZE_EVENT  15
+#define BROWNIAN_MOTION_STDEV_EVENT_SIZE 5
+#define BROWNIAN_MOTION_DEVIATION        0.1
+#define SKEW_SCALE                       20000
+#define SKEW_FACTOR                      4
+
 #include <random>
 
 namespace nutc {
@@ -27,7 +33,7 @@ class BrownianMotion {
 
     // Control the actual ticking, whereby market events are slowed over many ticks
     size_t ticker_ = 0;
-    Signedness signedness = Signedness::DoesntMatter;
+    Signedness signedness_ = Signedness::DoesntMatter;
 
 public:
     [[nodiscard]] double
