@@ -18,8 +18,20 @@ namespace nutc {
 namespace stochastic {
 
 class BrownianMotion {
-    double cur_value_;
+    // It's pretty obvious what this does
     std::mt19937 random_number_generator_;
+
+    // Current value, used to generate next one
+    double cur_value_;
+
+    // Control the size of market events and skewness of the distribution
+    size_t mean_size_of_event;
+    size_t stdev_of_event;
+    size_t skew_scale;
+    
+    // Control the actual ticking, whereby market events are slowed over many ticks
+    size_t ticker;
+    bool ticking_up;
 
 public:
     // Default constructor for BrownianMotion, takes nothing
