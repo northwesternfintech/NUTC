@@ -31,7 +31,7 @@ public:
 
         std::array<double, LEVELS> prices = {
             new_theo - BASE_SPREAD - .10, new_theo - BASE_SPREAD - .05,
-            new_theo - BASE_SPREAD,        new_theo + BASE_SPREAD,
+            new_theo - BASE_SPREAD,       new_theo + BASE_SPREAD,
             new_theo + BASE_SPREAD + .05, new_theo + BASE_SPREAD * .10,
         };
 

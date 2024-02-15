@@ -2,7 +2,6 @@
 
 #include "exchange/config.h"
 #include "exchange/logging.hpp"
-#include "exchange/traders/trader_types.hpp"
 #include "exchange/utils/file_operations/file_operations.hpp"
 
 #include <stdexcept>
@@ -15,13 +14,13 @@ DevModeAlgoManager::initialize_client_manager(manager::ClientManager& users)
 {
     auto handle_algos_provided_filenames = [&]() {
         for (const std::string& filepath : algo_filenames_.value())
-            users.add_client(manager::local_trader_t{filepath, filepath});
+            users.add_local_trader(filepath);
     };
 
     auto handle_algos_default_filenames = [&]() {
         for (size_t i = 0; i < num_clients_; i++) {
             std::string algo_id = std::string(ALGO_DIR) + "/algo_" + std::to_string(i);
-            users.add_client(manager::local_trader_t{algo_id, algo_id});
+            users.add_local_trader(algo_id);
         }
     };
 

@@ -27,7 +27,7 @@ struct BotStates {
     double avg_pnl_{};
 };
 
-struct TickerState  {
+struct TickerState {
     const std::string TICKER;
     const double STARTING_PRICE;
 

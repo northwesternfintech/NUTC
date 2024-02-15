@@ -3,9 +3,6 @@
 #include "exchange/algos/dev_mode/dev_mode.hpp"
 #include "exchange/config.h"
 #include "exchange/rabbitmq/client_manager/RabbitMQClientManager.hpp"
-#include "exchange/traders/trader_types.hpp"
-
-#include <csignal>
 
 namespace nutc {
 namespace testing_utils {
@@ -13,17 +10,8 @@ namespace testing_utils {
 void
 kill_all_processes(const manager::ClientManager& users)
 {
-    for (const auto& [_, client] : users.get_clients_const()) {
-        pid_t pid = std::visit(
-            [&](auto&& arg) {
-                using t = std::decay_t<decltype(arg)>;
-                if constexpr (!std::is_same_v<t, manager::bot_trader_t>) {
-                    return arg.get_pid();
-                }
-                return -1;
-            },
-            client
-        );
+    for (const auto& [id, trader] : users.get_traders()) {
+        auto pid = trader->get_pid();
         if (pid != -1)
             kill(pid, SIGKILL);
     }
@@ -39,17 +27,11 @@ initialize_testing_clients(
 
     DevModeAlgoManager algo_manager = DevModeAlgoManager(algo_filenames);
     algo_manager.initialize_client_manager(users);
-    for (auto& [_, client] : users.get_clients()) {
-        std::visit(
-            [&](auto&& arg) {
-                using t = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<t, manager::local_trader_t>) {
-                    arg.set_capital(1000000); // NOLINT(*)
-                    arg.set_start_delay(has_delay);
-                }
-            },
-            client
-        );
+    for (auto& [_, trader] : users.get_traders()) {
+        if (trader->get_type() == manager::LOCAL) {
+            trader->set_capital(1000000);
+            trader->set_start_delay(has_delay);
+        }
     }
     size_t num_users = spawning::spawn_all_clients(users);
     rabbitmq::RabbitMQClientManager::wait_for_clients(users, num_users);

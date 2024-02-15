@@ -235,23 +235,20 @@ Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
             added_orders_.push_back(sell_order);
         }
 
-        auto update_traders = [&](manager::generic_trader_t* trader, SIDE side) {
-            if (side == SIDE::BUY) {
-                trader->modify_capital(-quantity_to_match * price_to_match);
-                trader->modify_holdings(buy_order.ticker, quantity_to_match);
-            }
-            else {
-                trader->modify_capital(quantity_to_match * price_to_match);
-                trader->modify_holdings(buy_order.ticker, -quantity_to_match);
-            }
-        };
+        auto update_traders =
+            [&](const std::unique_ptr<manager::generic_trader_t>& trader, SIDE side) {
+                if (side == SIDE::BUY) {
+                    trader->modify_capital(-quantity_to_match * price_to_match);
+                    trader->modify_holdings(buy_order.ticker, quantity_to_match);
+                }
+                else {
+                    trader->modify_capital(quantity_to_match * price_to_match);
+                    trader->modify_holdings(buy_order.ticker, -quantity_to_match);
+                }
+            };
 
-        update_traders(
-            const_cast<manager::generic_trader_t*>(buy_order.trader), SIDE::BUY
-        );
-        update_traders(
-            const_cast<manager::generic_trader_t*>(sell_order.trader), SIDE::SELL
-        );
+        update_traders(buy_order.trader, SIDE::BUY);
+        update_traders(sell_order.trader, SIDE::SELL);
     }
 
     if (aggressive_quantity > 0) {

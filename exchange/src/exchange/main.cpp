@@ -125,7 +125,7 @@ flush_log(int)
     nutc::events::Logger::get_logger().flush();
     nutc::dashboard::Dashboard::get_instance().close();
     print_file_contents("logs/error_log.txt");
-  std::exit(0); // NOLINT(concurrency-*)
+    std::exit(0); // NOLINT(concurrency-*)
 }
 
 // Initializes tick manager with brownian motion
@@ -176,7 +176,7 @@ main(int argc, const char** argv)
 
     engine_manager.get_bot_container("ETH").add_mm_bots(
         {50000, 25000, 25000, 10000, 10000, 5000}
-    );                                                            // NOLINT(*)
+    );                                                                   // NOLINT(*)
     engine_manager.get_bot_container("BTC").add_mm_bots({50000, 25000}); // NOLINT(*)
     engine_manager.get_bot_container("USD").add_mm_bots(
         {100000, 100000, 100000, 25000, 25000, 10000, 5000, 5000, 5000, 5000}
@@ -186,7 +186,9 @@ main(int argc, const char** argv)
     engine_manager.get_bot_container("BTC").add_retail_bots(100, 5, 500);
     engine_manager.get_bot_container("USD").add_retail_bots(100, 10, 100);
 
-    ticks::TickManager::get_instance().attach(&engine_manager, ticks::PRIORITY::first, "Matching Engine");
+    ticks::TickManager::get_instance().attach(
+        &engine_manager, ticks::PRIORITY::first, "Matching Engine"
+    );
     ticks::TickManager::get_instance().start();
 
     manager::ClientManager& users = manager::ClientManager::get_instance();

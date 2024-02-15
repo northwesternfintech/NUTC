@@ -14,18 +14,20 @@ protected:
     void
     SetUp() override
     {
-        using nutc::testing_utils::add_client_simple;
-        using nutc::testing_utils::modify_holdings_simple;
+        manager_.add_local_trader("A");
+        manager_.add_local_trader("B");
+        manager_.add_local_trader("C");
+        manager_.add_local_trader("D");
 
-        add_client_simple(manager_, "A");
-        add_client_simple(manager_, "B");
-        add_client_simple(manager_, "C");
-        add_client_simple(manager_, "D");
+        manager_.get_trader("A")->modify_capital(STARTING_CAPITAL);
+        manager_.get_trader("B")->modify_capital(STARTING_CAPITAL);
+        manager_.get_trader("C")->modify_capital(STARTING_CAPITAL);
+        manager_.get_trader("D")->modify_capital(STARTING_CAPITAL);
 
-        modify_holdings_simple(manager_, "A", "ETHUSD", DEFAULT_QUANTITY);
-        modify_holdings_simple(manager_, "B", "ETHUSD", DEFAULT_QUANTITY);
-        modify_holdings_simple(manager_, "C", "ETHUSD", DEFAULT_QUANTITY);
-        modify_holdings_simple(manager_, "D", "ETHUSD", DEFAULT_QUANTITY);
+        manager_.get_trader("A")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+        manager_.get_trader("B")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+        manager_.get_trader("C")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+        manager_.get_trader("D")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     }
 
     ClientManager& manager_ = nutc::manager::ClientManager::get_instance(); // NOLINT(*)

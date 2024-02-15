@@ -1,7 +1,6 @@
 #include "bot_container.hpp"
 
 #include "exchange/rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
-#include "exchange/tick_manager/tick_manager.hpp"
 #include "exchange/tickers/manager/ticker_manager.hpp"
 #include "exchange/traders/trader_manager.hpp"
 
@@ -66,34 +65,32 @@ void
 BotContainer::add_retail_bot_(double starting_capital)
 {
     manager::ClientManager& users = nutc::manager::ClientManager::get_instance();
-    std::string bot_id = users.add_client(manager::bot_trader_t{});
+    std::string bot_id = users.add_bot_trader();
 
     retail_bots_.emplace(
         std::piecewise_construct, std::forward_as_tuple(bot_id),
         std::forward_as_tuple(bot_id, starting_capital)
     );
-    manager::trader_t& bot = users.get_client(bot_id);
-    assert(std::holds_alternative<manager::bot_trader_t>(bot));
-    auto& bot_trader = std::get<manager::bot_trader_t>(bot);
-    bot_trader.set_capital(starting_capital);
-    bot_trader.modify_holdings(ticker_, INFINITY);
+    const auto& bot = users.get_trader(bot_id);
+    assert(bot->get_type() == manager::BOT);
+    bot->set_capital(starting_capital);
+    bot->modify_holdings(ticker_, INFINITY);
 }
 
 void
 BotContainer::add_mm_bot_(double starting_capital)
 {
     manager::ClientManager& users = nutc::manager::ClientManager::get_instance();
-    std::string bot_id = users.add_client(manager::bot_trader_t{});
+    std::string bot_id = users.add_bot_trader();
 
     market_makers_.emplace(
         std::piecewise_construct, std::forward_as_tuple(bot_id),
         std::forward_as_tuple(bot_id, starting_capital)
     );
-    manager::trader_t& bot = users.get_client(bot_id);
-    assert(std::holds_alternative<manager::bot_trader_t>(bot));
-    auto& bot_trader = std::get<manager::bot_trader_t>(bot);
-    bot_trader.set_capital(starting_capital);
-    bot_trader.modify_holdings(ticker_, INFINITY);
+    const auto& bot = users.get_trader(bot_id);
+    assert(bot->get_type() == manager::BOT);
+    bot->set_capital(starting_capital);
+    bot->modify_holdings(ticker_, INFINITY);
 }
 
 std::vector<MarketOrder>

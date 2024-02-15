@@ -17,9 +17,9 @@ public:
     add_ticker(std::string ticker, double starting_price)
     {
         ticker_states_.emplace(
-    std::piecewise_construct,
-    std::forward_as_tuple(ticker),
-    std::forward_as_tuple(ticker, starting_price));
+            std::piecewise_construct, std::forward_as_tuple(ticker),
+            std::forward_as_tuple(ticker, starting_price)
+        );
     }
 
     TickerState&
