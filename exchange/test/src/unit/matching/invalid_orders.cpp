@@ -16,14 +16,14 @@ protected:
     void
     SetUp() override
     {
-        using nutc::testing_utils::add_client_simple;
-        using nutc::testing_utils::modify_holdings_simple;
+        manager_.add_local_trader("ABC");
+        manager_.add_local_trader("DEF");
 
-        add_client_simple(manager_, "ABC");
-        add_client_simple(manager_, "DEF");
+        manager_.get_trader("ABC")->modify_capital(STARTING_CAPITAL);
+        manager_.get_trader("DEF")->modify_capital(STARTING_CAPITAL);
 
-        modify_holdings_simple(manager_, "ABC", "ETHUSD", DEFAULT_QUANTITY);
-        modify_holdings_simple(manager_, "DEF", "ETHUSD", DEFAULT_QUANTITY);
+        manager_.get_trader("ABC")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+        manager_.get_trader("DEF")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     }
 
     ClientManager& manager_ = nutc::manager::ClientManager::get_instance(); // NOLINT(*)
@@ -38,7 +38,7 @@ protected:
 
 TEST_F(UnitInvalidOrders, SimpleInvalidFunds)
 {
-    nutc::testing_utils::modify_capital_simple(manager_, "ABC", -STARTING_CAPITAL);
+    manager_.get_trader("ABC")->modify_capital(-STARTING_CAPITAL);
     std::optional<SIDE> err =
         manager_.validate_match(Match{"ETHUSD", SELL, 1, 1, "ABC", "DEF"});
 
@@ -50,7 +50,7 @@ TEST_F(UnitInvalidOrders, SimpleInvalidFunds)
 
 TEST_F(UnitInvalidOrders, RemoveThenAddFunds)
 {
-    nutc::testing_utils::modify_capital_simple(manager_, "ABC", -STARTING_CAPITAL);
+    manager_.get_trader("ABC")->modify_capital(-STARTING_CAPITAL);
 
     MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
     MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
@@ -66,7 +66,7 @@ TEST_F(UnitInvalidOrders, RemoveThenAddFunds)
     ASSERT_EQ(ob_updates2.size(), 1);
     ASSERT_EQ_OB_UPDATE(ob_updates2[0], "ETHUSD", SELL, 1, 1);
 
-    nutc::testing_utils::modify_capital_simple(manager_, "ABC", STARTING_CAPITAL);
+    manager_.get_trader("ABC")->modify_capital(STARTING_CAPITAL);
 
     // Kept, but not matched
     auto [matches3, ob_updates3] = add_to_engine_(order2);
@@ -84,7 +84,7 @@ TEST_F(UnitInvalidOrders, RemoveThenAddFunds)
 
 TEST_F(UnitInvalidOrders, MatchingInvalidFunds)
 {
-    nutc::testing_utils::modify_capital_simple(manager_, "ABC", -STARTING_CAPITAL);
+    manager_.get_trader("ABC")->modify_capital(-STARTING_CAPITAL);
 
     MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
     MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
@@ -103,20 +103,19 @@ TEST_F(UnitInvalidOrders, MatchingInvalidFunds)
 
 TEST_F(UnitInvalidOrders, SimpleManyInvalidOrder)
 {
-    using nutc::testing_utils::add_client_simple;
-    using nutc::testing_utils::modify_capital_simple;
-    using nutc::testing_utils::modify_holdings_simple;
+    manager_.add_local_trader("A");
+    manager_.add_local_trader("B");
+    manager_.add_local_trader("C");
+    manager_.add_local_trader("D");
 
-    add_client_simple(manager_, "A");
-    add_client_simple(manager_, "B");
-    add_client_simple(manager_, "C");
-    add_client_simple(manager_, "D");
+    manager_.get_trader("A")->modify_capital(STARTING_CAPITAL);
+    manager_.get_trader("C")->modify_capital(STARTING_CAPITAL);
+    manager_.get_trader("D")->modify_capital(STARTING_CAPITAL);
 
-    modify_capital_simple(manager_, "B", -STARTING_CAPITAL);
-    modify_holdings_simple(manager_, "A", "ETHUSD", DEFAULT_QUANTITY);
-    modify_holdings_simple(manager_, "B", "ETHUSD", DEFAULT_QUANTITY);
-    modify_holdings_simple(manager_, "C", "ETHUSD", DEFAULT_QUANTITY);
-    modify_holdings_simple(manager_, "D", "ETHUSD", DEFAULT_QUANTITY);
+    manager_.get_trader("A")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+    manager_.get_trader("B")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+    manager_.get_trader("C")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+    manager_.get_trader("D")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
 
     MarketOrder order1{"A", BUY, "ETHUSD", 1, 1};
     MarketOrder order2{"B", BUY, "ETHUSD", 1, 1};

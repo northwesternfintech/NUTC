@@ -6,10 +6,10 @@ namespace bots {
 std::optional<messages::MarketOrder>
 RetailBot::take_action(double current, double theo)
 {
-  if(get_capital() < -get_interest_limit() * 0.1) {
-    // log_i(retail_bot, "Retail bot {} is out of capital", get_id());
-    return std::nullopt;
-  }
+    if (get_capital() < -get_interest_limit() * 0.1) {
+        // log_i(retail_bot, "Retail bot {} is out of capital", get_id());
+        return std::nullopt;
+    }
     double p_trade = (1 - get_capital_utilization());
 
     std::uniform_real_distribution<> dis(0.0, 1.0);

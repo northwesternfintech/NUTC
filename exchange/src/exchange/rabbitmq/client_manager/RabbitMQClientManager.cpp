@@ -28,10 +28,7 @@ RabbitMQClientManager::wait_for_clients(
                 message.client_id, message.ready ? "ready" : "not ready"
             );
             if (message.ready) {
-                auto set_active = [&](auto&& trader) {
-                    trader.set_active(/*active=*/true);
-                };
-                std::visit(set_active, manager.get_client(message.client_id));
+                manager.get_trader(message.client_id)->set_active(/*active=*/true);
                 num_running++;
             }
         }
@@ -60,23 +57,17 @@ RabbitMQClientManager::send_start_time(
     time_point time =
         std::chrono::high_resolution_clock::now() + std::chrono::seconds(wait_seconds);
     int64_t time_ns = std::chrono::time_point_cast<std::chrono::nanoseconds>(time)
-                           .time_since_epoch()
-                           .count();
-  
+                          .time_since_epoch()
+                          .count();
+
     messages::StartTime message{time_ns};
     std::string buf = glz::write_json(message);
 
-    auto send_to_client = [buf](auto&& trader) {
-        if (!trader.is_active())
-            return;
-
-        RabbitMQPublisher::publish_message(trader.get_id(), buf);
-    };
-
-    const auto& clients = manager.get_clients_const();
-    std::for_each(clients.begin(), clients.end(), [&](auto&& pair) {
-        std::visit(send_to_client, pair.second);
-    });
+    const auto& traders = manager.get_traders();
+    for (const auto& [id, trader] : traders) {
+        if (trader->is_active())
+            RabbitMQPublisher::publish_message(id, buf);
+    }
 }
 
 } // namespace rabbitmq

@@ -17,13 +17,7 @@ struct generic_trader_t {
         return USER_ID;
     }
 
-    virtual TraderType
-    get_type() const
-    {
-        throw std::runtime_error("Not implemented");
-    }
-
-    virtual ~generic_trader_t() = default;
+    virtual TraderType get_type() const = 0;
 
     double
     get_capital() const
@@ -83,7 +77,18 @@ struct generic_trader_t {
         capital_ += change_in_capital;
     }
 
+    virtual void set_pid(pid_t pid) = 0;
+    virtual pid_t get_pid() const = 0;
+
+    virtual std::string get_algo_id() const = 0;
+
     explicit generic_trader_t(std::string user_id) : USER_ID(std::move(user_id)) {}
+
+    virtual ~generic_trader_t() = default;
+    generic_trader_t& operator=(generic_trader_t&& other) = delete;
+    generic_trader_t& operator=(const generic_trader_t& other) = delete;
+    generic_trader_t(generic_trader_t&& other) = default;
+    generic_trader_t(const generic_trader_t& other) = default;
 
 private:
     const std::string USER_ID;
@@ -98,26 +103,26 @@ struct remote_trader_t : public generic_trader_t {
         generic_trader_t(std::move(user_id)), algo_id_(std::move(algo_id))
     {}
 
-    TraderType
+    constexpr TraderType
     get_type() const override
     {
         return TraderType::REMOTE;
     }
 
     void
-    set_pid(pid_t pid)
+    set_pid(pid_t pid) override
     {
         pid_ = pid;
     }
 
     pid_t
-    get_pid() const
+    get_pid() const override
     {
         return pid_;
     }
 
     std::string
-    get_algo_id() const
+    get_algo_id() const override
     {
         return algo_id_;
     }
@@ -129,66 +134,65 @@ private:
 
 struct local_trader_t : public generic_trader_t {
     explicit local_trader_t(std::string algo_path) :
-        generic_trader_t(generate_user_id()), ALGO_PATH(std::move(algo_path))
+        generic_trader_t(std::move(algo_path))
     {}
 
-    TraderType
+    constexpr TraderType
     get_type() const override
     {
         return TraderType::LOCAL;
     }
 
-    // FOR TESTING PURPOSES ONLY
-    explicit local_trader_t(std::string user_id, std::string algo_path) :
-        generic_trader_t(std::move(user_id)), ALGO_PATH(std::move(algo_path))
-    {}
-
     std::string
-    get_algo_path() const
+    get_algo_id() const override
     {
-        return ALGO_PATH;
+        return get_id();
     }
 
     void
-    set_pid(pid_t pid)
+    set_pid(pid_t pid) override
     {
         pid_ = pid;
     }
 
     pid_t
-    get_pid() const
+    get_pid() const override
     {
         return pid_;
     }
 
 private:
-    const std::string ALGO_PATH;
     pid_t pid_{};
-
-    static uint
-    get_and_increment_user_id()
-    {
-        static uint user_id = 0;
-        return user_id++;
-    }
-
-    static std::string
-    generate_user_id()
-    {
-        return "LOCAL_" + std::to_string(get_and_increment_user_id());
-    }
 };
 
 struct bot_trader_t : public generic_trader_t {
     bot_trader_t() : generic_trader_t(generate_user_id()) {}
 
-private:
-    TraderType
+    constexpr TraderType
     get_type() const override
     {
         return TraderType::BOT;
     }
 
+    pid_t
+    get_pid() const override
+    {
+        return -1;
+    }
+
+    void
+    set_pid(pid_t) override
+    {
+        throw std::runtime_error("Not implemented");
+    }
+
+    std::string
+    get_algo_id() const override
+    {
+        throw std::runtime_error("Not implemented");
+    }
+
+private:
     static uint
     get_and_increment_user_id()
     {

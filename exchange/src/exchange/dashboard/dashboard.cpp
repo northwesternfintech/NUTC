@@ -50,7 +50,7 @@ Dashboard::Dashboard() : err_file_(freopen("logs/error_log.txt", "w", stderr))
     werase(leaderboard_window_);
     werase(performance_window_);
     werase(log_window_);
-  
+
     wrefresh(ticker_window_);
     wrefresh(leaderboard_window_);
     wrefresh(log_window_);
@@ -66,8 +66,8 @@ Dashboard::close()
     delwin(log_window_);
     delwin(leaderboard_window_);
     delwin(performance_window_);
-    fflush(err_file_); //NOLINT
-    fclose(err_file_); //NOLINT
+    fflush(err_file_); // NOLINT
+    fclose(err_file_); // NOLINT
     clear();
     refresh();
     curs_set(0);
@@ -79,7 +79,8 @@ draw_generic_text(WINDOW* window, int start_y)
 {
     mvwprintw(
         window, start_y++, window->_maxx / 2 - 52,
-        "Press '1' for Ticker Window, '2' for Log Window, '3' for Leaderboard Window, '4' for Performance Window"
+        "Press '1' for Ticker Window, '2' for Log Window, '3' for Leaderboard Window, "
+        "'4' for Performance Window"
     );
 }
 
@@ -94,7 +95,10 @@ Dashboard::drawTickerLayout(WINDOW* window, int start_y, size_t num_tickers)
 
     for (size_t i = 1; i < num_tickers + 1; ++i) {
         for (int j = start_y + 2; j < y_max; ++j) {
-            mvwprintw(window, j, static_cast<int>(i) * x_max / static_cast<int>(num_tickers), "|"); // NOLINT
+            mvwprintw(
+                window, j, static_cast<int>(i) * x_max / static_cast<int>(num_tickers),
+                "|"
+            ); // NOLINT
         }
     }
 
@@ -179,35 +183,60 @@ Dashboard::displayLeaderboard(WINDOW* window, int start_y)
     mvwprintw(window, start_y, window->_maxx / 2 - 5, "Leaderboard");
 
     manager::ClientManager& client_manager = manager::ClientManager::get_instance();
-    for (const auto& [user_id, trader_variant] : client_manager.get_clients_const()) {
-        const manager::generic_trader_t& trader = std::visit(
-            [](auto&& arg) { return static_cast<const manager::generic_trader_t&>(arg); },
-            trader_variant
-        );
-        mvwprintw(window, start_y++, 2, "User: %s", user_id.c_str());
-        mvwprintw(window, start_y++, 2, "  Capital: %.2f", trader.get_capital());
+    for (const auto& [user_id, trader] : client_manager.get_traders()) {
+        mvwprintw(window, start_y++, 2, "User: %s", trader->get_id().c_str());
+        mvwprintw(window, start_y++, 2, "  Capital: %.2f", trader->get_capital());
     }
 }
 
-void Dashboard::displayPerformance(WINDOW* window, int start_y)
+void
+Dashboard::displayPerformance(WINDOW* window, int start_y)
 {
     mvwprintw(window, start_y, window->_maxx / 2 - 5, "Performance");
 
-  ticks::TickManager& tick_manager = ticks::TickManager::get_instance();
-  ticks::TickManager::tick_metrics_t metrics = tick_manager.get_tick_metrics();
-  start_y++;
-  if(tick_manager.get_current_tick() < 100) {
-    mvwprintw(window, start_y+4, window->_maxx / 2 - 23, "Current tick (%lu) below 100. Not enough data", tick_manager.get_current_tick());
-    return;
-  }
-  mvwprintw(window, start_y++, window->_maxx / 2 - 8, "Current Tick: %lu", tick_manager.get_current_tick());
-  mvwprintw(window, start_y++, window->_maxx / 2 - 13, "Top 1p tick times(ms): %lu", metrics.top_1p_ms.count());
-  mvwprintw(window, start_y++, window->_maxx / 2 - 13, "Top 5p tick times(ms): %lu", metrics.top_5p_ms.count());
-  mvwprintw(window, start_y++, window->_maxx / 2 - 13, "Top 10p tick times(ms): %lu", metrics.top_10p_ms.count());
-  mvwprintw(window, start_y++, window->_maxx / 2 - 13, "Top 50p tick times(ms): %lu", metrics.top_50p_ms.count());
-  mvwprintw(window, start_y++, window->_maxx / 2 - 13, "Average tick time(ms): %lu", metrics.avg_tick_ms.count());
-  mvwprintw(window, start_y++, window->_maxx / 2 - 12, "Median tick time(ms): %lu", metrics.median_tick_ms.count());
-  mvwprintw(window, start_y++, window->_maxx / 2 - 12, "Theoretical max hz: %.2f", 1000.0/static_cast<double>(metrics.avg_tick_ms.count()));
+    ticks::TickManager& tick_manager = ticks::TickManager::get_instance();
+    ticks::TickManager::tick_metrics_t metrics = tick_manager.get_tick_metrics();
+    start_y++;
+    if (tick_manager.get_current_tick() < 100) {
+        mvwprintw(
+            window, start_y + 4, window->_maxx / 2 - 23,
+            "Current tick (%lu) below 100. Not enough data",
+            tick_manager.get_current_tick()
+        );
+        return;
+    }
+    mvwprintw(
+        window, start_y++, window->_maxx / 2 - 8, "Current Tick: %lu",
+        tick_manager.get_current_tick()
+    );
+    mvwprintw(
+        window, start_y++, window->_maxx / 2 - 13, "Top 1p tick times(ms): %lu",
+        metrics.top_1p_ms.count()
+    );
+    mvwprintw(
+        window, start_y++, window->_maxx / 2 - 13, "Top 5p tick times(ms): %lu",
+        metrics.top_5p_ms.count()
+    );
+    mvwprintw(
+        window, start_y++, window->_maxx / 2 - 13, "Top 10p tick times(ms): %lu",
+        metrics.top_10p_ms.count()
+    );
+    mvwprintw(
+        window, start_y++, window->_maxx / 2 - 13, "Top 50p tick times(ms): %lu",
+        metrics.top_50p_ms.count()
+    );
+    mvwprintw(
+        window, start_y++, window->_maxx / 2 - 13, "Average tick time(ms): %lu",
+        metrics.avg_tick_ms.count()
+    );
+    mvwprintw(
+        window, start_y++, window->_maxx / 2 - 12, "Median tick time(ms): %lu",
+        metrics.median_tick_ms.count()
+    );
+    mvwprintw(
+        window, start_y++, window->_maxx / 2 - 12, "Theoretical max hz: %.2f",
+        1000.0 / static_cast<double>(metrics.avg_tick_ms.count())
+    );
 }
 
 void
@@ -223,8 +252,8 @@ Dashboard::displayLog(WINDOW* window, int start_y)
     int curr_y = start_y + 3;
     while (std::getline(log_file_, line)) {
         log_queue_.push_back(line);
-        if(log_file_.peek() == EOF)
-          break;
+        if (log_file_.peek() == EOF)
+            break;
     }
 
     while (static_cast<int>(log_queue_.size()) > (window->_maxy - start_y - 1)) {
@@ -238,11 +267,13 @@ Dashboard::displayLog(WINDOW* window, int start_y)
     // std::ofstream("logs/app.log");
 }
 
-void Dashboard::calculate_ticker_metrics() {
-  auto& states = dashboard::DashboardState::get_instance().get_ticker_states();
-  for(auto& [_, state] : states) {
-    state.calculate_metrics();
-  }
+void
+Dashboard::calculate_ticker_metrics()
+{
+    auto& states = dashboard::DashboardState::get_instance().get_ticker_states();
+    for (auto& [_, state] : states) {
+        state.calculate_metrics();
+    }
 }
 
 void

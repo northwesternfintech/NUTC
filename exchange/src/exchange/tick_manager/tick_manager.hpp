@@ -1,7 +1,7 @@
 #pragma once
 
-#include "tick_observer.hpp"
 #include "exchange/logging.hpp"
+#include "tick_observer.hpp"
 
 #include <cassert>
 #include <chrono>
@@ -18,15 +18,21 @@ using std::chrono::milliseconds;
 
 class TickManager {
 public:
-    [[nodiscard]] uint64_t get_current_tick() const
+    [[nodiscard]] uint64_t
+    get_current_tick() const
     {
         return current_tick_;
     }
-    
+
     void
-    attach(TickObserver* observer, PRIORITY priority, const std::string& name = "UNNAMED")
+    attach(
+        TickObserver* observer, PRIORITY priority, const std::string& name = "UNNAMED"
+    )
     {
-    log_i(tick_manager, "Tick engine registered observer {} with priority {}", name, static_cast<int>(priority));
+        log_i(
+            tick_manager, "Tick engine registered observer {} with priority {}", name,
+            static_cast<int>(priority)
+        );
         switch (priority) {
             case PRIORITY::first:
                 first_observers_.push_back(observer);
@@ -63,14 +69,14 @@ public:
     }
 
     struct tick_metrics_t {
-      milliseconds top_1p_ms;
-      milliseconds top_5p_ms;
-      milliseconds top_10p_ms;
-      milliseconds top_50p_ms;
-      milliseconds median_tick_ms;
-      milliseconds avg_tick_ms;
-  };
-  
+        milliseconds top_1p_ms;
+        milliseconds top_5p_ms;
+        milliseconds top_10p_ms;
+        milliseconds top_50p_ms;
+        milliseconds median_tick_ms;
+        milliseconds avg_tick_ms;
+    };
+
     [[nodiscard]] tick_metrics_t get_tick_metrics() const;
 
     void
@@ -97,7 +103,7 @@ private:
     std::list<TickObserver*> fourth_observers_;
     static constexpr uint16_t MS_PER_SECOND = 1000;
 
-  std::deque<milliseconds> last_1000_tick_times_;
+    std::deque<milliseconds> last_1000_tick_times_;
 
     explicit TickManager(uint16_t start_tick_rate) :
         delay_time_(milliseconds(MS_PER_SECOND / start_tick_rate))
@@ -111,7 +117,6 @@ public:
     TickManager(TickManager&&) = delete;
     TickManager& operator=(const TickManager&) = delete;
     TickManager& operator=(TickManager&&) = delete;
-
 
     static TickManager&
     get_instance(uint16_t start_tick_rate = 0)

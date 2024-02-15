@@ -78,7 +78,7 @@ public:
     add_order(const MarketOrder& order)
     {
         return add_order(StoredOrder(
-            manager::ClientManager::get_instance().get_generic_trader(order.client_id),
+            manager::ClientManager::get_instance().get_trader(order.client_id),
             order.side, order.ticker, order.quantity, order.price, this->current_tick_
         ));
     }
