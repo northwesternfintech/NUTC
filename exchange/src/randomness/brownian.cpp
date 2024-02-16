@@ -15,54 +15,57 @@ namespace nutc {
 namespace stochastic {
 
 double
+BrownianMotion::generate_change_in_price(double mean, double stdev, Signedness sign)
+{
+    std::normal_distribution<double> distribution(mean, stdev);
+
+    if (sign == Signedness::DoesntMatter) {
+        return distribution(random_number_generator_);
+    }
+    else {
+        short multiplier = (sign == Signedness::Positive ? 1 : -1);
+        return multiplier * abs(distribution(random_number_generator_));
+    }
+}
+
+double
 BrownianMotion::generate_next_price()
 {
     if (ticker_ > 0) {
         ticker_--;
-        int sign = ticking_up_ ? 1 : -1;
-        double new_price = cur_value_;
-
-        // Generate change in price
-        std::normal_distribution<double> distribution(
-            -cur_value_ / skew_scale_, BROWNIAN_MOTION_DEVIATION
+        Signedness sign = ticking_up_ ? Signedness::Positive : Signedness::Negative;
+        cur_value_ += generate_change_in_price(
+            -cur_value_ / SKEW_SCALE, BROWNIAN_MOTION_DEVIATION, sign
         );
-        double delta_current_price = distribution(random_number_generator_);
-        double new_price = new_price + delta_current_price;
-        cur_value_ = new_price;
-        return new_price;
+        return cur_value_;
     }
 
     // Not ticking, so we need a random number
-    std::uniform_real_distribution<double> distribution(0.0, 1.0);
-    double random_number = distribution(random_number_generator_);
+    std::uniform_real_distribution<double> zero_to_one_nd(0.0, 1.0);
+    double random_number = zero_to_one_nd(random_number_generator_);
 
     if (random_number >= probability_) {
         std::normal_distribution<double> distribution(
             BROWNIAN_MOTION_MEAN_SIZE_EVENT, BROWNIAN_MOTION_STDEV_EVENT_SIZE
         );
-        ticker_ = (int)abs(distribution(random_number_generator_));
+        ticker_ = static_cast<size_t>(abs(distribution(random_number_generator_)));
 
         // Whether to tick up or tick down
         ticking_up_ = distribution(random_number_generator_) > 0.5;
 
-        // Generate change in price
-        std::normal_distribution<double> distribution(
-            -cur_value_ / skew_scale_, BROWNIAN_MOTION_DEVIATION
+        // Generate new price
+        cur_value_ += generate_change_in_price(
+            -cur_value_ / SKEW_SCALE, BROWNIAN_MOTION_DEVIATION,
+            Signedness::DoesntMatter
         );
-        double delta_current_price = distribution(random_number_generator_);
-        double new_price = new_price + delta_current_price;
-        cur_value_ = new_price;
-        return new_price;
+        return cur_value_;
     }
     else {
-        // Generate change in price
-        std::normal_distribution<double> distribution(
-            -cur_value_ / skew_scale_, BROWNIAN_MOTION_DEVIATION / SKEW_FACTOR
+        cur_value_ += generate_change_in_price(
+            -cur_value_ / SKEW_SCALE, BROWNIAN_MOTION_DEVIATION / SKEW_FACTOR,
+            Signedness::DoesntMatter
         );
-        double delta_current_price = distribution(random_number_generator_);
-        double new_price = new_price + delta_current_price;
-        cur_value_ = new_price;
-        return new_price;
+        return cur_value_;
     }
 }
 

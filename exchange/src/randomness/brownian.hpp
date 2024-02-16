@@ -10,12 +10,7 @@
  */
 
 #pragma once
-
-#define BROWNIAN_MOTION_MEAN_SIZE_EVENT  15
-#define BROWNIAN_MOTION_STDEV_EVENT_SIZE 5
-#define BROWNIAN_MOTION_DEVIATION        0.1
-#define SKEW_SCALE                       20000
-#define SKEW_FACTOR                      4
+#include "config.h"
 
 #include <random>
 
@@ -23,23 +18,12 @@ namespace nutc {
 
 namespace stochastic {
 
+enum class Signedness { Negative = -1, DoesntMatter = 0, Positive = 1 };
+
 class BrownianMotion {
-    // It's pretty obvious what this does
-    std::mt19937 random_number_generator_;
-
-    // Current value, used to generate next one
-    double cur_value_;
-
-    // Control the size of market events
-    size_t mean_size_of_event_ = BROWNIAN_MOTION_MEAN_SIZE_EVENT;
-    size_t stdev_of_event_ = BROWNIAN_MOTION_STDEV_EVENT_SIZE;
-    float probability_ = 0.9;
-
-    // Control skewness of the distribution
-    size_t skew_scale_ = SKEW_SCALE;
-
-    // How much more market events skew than normal
-    size_t skew_factor_ = SKEW_FACTOR;
+    std::mt19937 random_number_generator_; // It's pretty obvious what this does
+    double cur_value_; // Current value, used to generate next one
+    double probability_ = 0.95; // probability of no market event
 
     // Control the actual ticking, whereby market events are slowed over many ticks
     size_t ticker_ = 0;
@@ -59,6 +43,9 @@ public:
         random_number_generator_ = std::mt19937(seed);
     }
 
+    // Generates and returns the change in price, i.e. dp/dt
+    [[nodiscard]] double
+    generate_change_in_price(double mean, double stdev, Signedness sign);
     // Generates and returns the next price based on previous prices
     [[nodiscard]] double generate_next_price();
 
@@ -71,7 +58,7 @@ public:
 
     // Force set the probability of market event
     void
-    set_probability(float new_probability)
+    set_probability(double new_probability)
     {
         probability_ = new_probability;
     }
