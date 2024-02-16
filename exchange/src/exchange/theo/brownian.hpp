@@ -10,13 +10,8 @@
  */
 
 #pragma once
-#include "exchange/config.h"
 
-#define BROWNIAN_MOTION_MEAN_SIZE_EVENT  15
-#define BROWNIAN_MOTION_STDEV_EVENT_SIZE 5
-#define BROWNIAN_MOTION_DEVIATION        0.1
-#define SKEW_SCALE                       20000
-#define SKEW_FACTOR                      4
+#include "exchange/config.h"
 
 #include <random>
 
@@ -55,6 +50,9 @@ public:
         set_seed(seed);
     }
 
+    // Generates and returns the change in price, i.e. dp/dt
+    [[nodiscard]] double
+    generate_change_in_price(double mean, double stdev, Signedness sign);
     // Generates and returns the next price based on previous prices
     double generate_next_price();
 
