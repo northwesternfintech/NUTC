@@ -18,7 +18,7 @@ quote_id(std::string user_id)
 
 pid_t
 spawn_client(
-    const std::unique_ptr<manager::generic_trader_t>& trader,
+    const std::unique_ptr<manager::GenericTrader>& trader,
     const std::string& binary_path
 )
 {
@@ -74,8 +74,7 @@ spawn_all_clients(nutc::manager::ClientManager& users)
     const std::string wrapper_binary_path(wrapper_binary_location);
 
     size_t num_clients = 0;
-    auto spawn_one_trader = [&](const std::unique_ptr<manager::generic_trader_t>& trader
-                            ) {
+    auto spawn_one_trader = [&](const std::unique_ptr<manager::GenericTrader>& trader) {
         if (trader->get_type() == manager::BOT)
             return;
 

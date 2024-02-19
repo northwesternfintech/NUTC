@@ -81,7 +81,7 @@ BotContainer::add_retail_bot_(double starting_capital)
     const auto& bot = users.get_trader(bot_id);
     assert(bot->get_type() == manager::BOT);
     bot->set_capital(starting_capital);
-    bot->modify_holdings(ticker_, INFINITY);
+    // bot->modify_holdings(ticker_, INFINITY);
 }
 
 void
@@ -140,7 +140,7 @@ BotContainer::process_order_match(Match& match)
         auto buyer_match = umap.find(match.buyer_id);
         if (buyer_match == umap.end())
             return;
-        buyer_match->second.modify_held_stock(1);
+        buyer_match->second.modify_held_stock(-match.quantity);
         buyer_match->second.modify_capital(-match.quantity * match.price);
     };
 
@@ -148,7 +148,7 @@ BotContainer::process_order_match(Match& match)
         auto seller_match = umap.find(match.seller_id);
         if (seller_match == umap.end())
             return;
-        seller_match->second.modify_held_stock(-1);
+        seller_match->second.modify_held_stock(match.quantity);
         seller_match->second.modify_capital(match.quantity * match.price);
     };
 

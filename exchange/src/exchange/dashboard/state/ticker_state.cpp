@@ -27,6 +27,8 @@ TickerState::calculate_metrics()
 
     auto calculate_pnl = [&engine_ref](const bots::GenericBot& bot) {
         double capital = bot.get_capital();
+
+        // Held stock can be negative due to leverage
         double held_stock = bot.get_held_stock();
         double stock_value = engine_ref.get_midprice() * held_stock;
         return capital + stock_value;
@@ -35,6 +37,7 @@ TickerState::calculate_metrics()
     auto update_bot_state = [&calculate_pnl](auto&& container, BotStates& state) {
         state.num_bots_ = container.size();
         for (const auto& [id, bot] : container) {
+            state.total_capital_held_ += bot.get_interest_limit() + bot.get_capital();
             if (!bot.is_active()) {
                 continue;
             }

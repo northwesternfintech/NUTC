@@ -12,6 +12,7 @@ struct BotStates {
     size_t num_bots_{};
     size_t num_bots_active_{};
     double percent_active_{};
+    double total_capital_held_{};
 
     size_t min_open_bids_{};
     size_t min_open_asks_{};
@@ -63,6 +64,7 @@ private:
             bot_states.num_bots_ = 0;
             bot_states.num_bots_active_ = 0;
             bot_states.percent_active_ = 0;
+            bot_states.total_capital_held_ = 0;
             bot_states.min_open_bids_ = std::numeric_limits<size_t>::max();
             bot_states.min_open_asks_ = std::numeric_limits<size_t>::max();
             bot_states.max_open_bids_ = std::numeric_limits<size_t>::min();

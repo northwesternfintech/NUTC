@@ -143,6 +143,10 @@ Dashboard::displayStockTickerData(
             state.num_bots_active_, state.percent_active_
         );
         mvwprintw(
+            window, start_y++, start_x, "%s total capital held: %.0f", bot_type,
+            state.total_capital_held_
+        );
+        mvwprintw(
             window, start_y++, start_x, "%s min/max/avg num bids: %lu %lu %.2f",
             bot_type, state.min_open_bids_, state.max_open_bids_, state.avg_open_bids_
         );

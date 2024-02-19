@@ -10,7 +10,8 @@ namespace manager {
 
 enum TraderType { REMOTE, LOCAL, BOT };
 
-struct generic_trader_t {
+class GenericTrader {
+public:
     std::string
     get_id() const
     {
@@ -82,13 +83,13 @@ struct generic_trader_t {
 
     virtual std::string get_algo_id() const = 0;
 
-    explicit generic_trader_t(std::string user_id) : USER_ID(std::move(user_id)) {}
+    explicit GenericTrader(std::string user_id) : USER_ID(std::move(user_id)) {}
 
-    virtual ~generic_trader_t() = default;
-    generic_trader_t& operator=(generic_trader_t&& other) = delete;
-    generic_trader_t& operator=(const generic_trader_t& other) = delete;
-    generic_trader_t(generic_trader_t&& other) = default;
-    generic_trader_t(const generic_trader_t& other) = delete;
+    virtual ~GenericTrader() = default;
+    GenericTrader& operator=(GenericTrader&& other) = delete;
+    GenericTrader& operator=(const GenericTrader& other) = delete;
+    GenericTrader(GenericTrader&& other) = default;
+    GenericTrader(const GenericTrader& other) = delete;
 
 private:
     const std::string USER_ID;
@@ -98,9 +99,10 @@ private:
     std::unordered_map<std::string, double> holdings_{};
 };
 
-struct remote_trader_t : public generic_trader_t {
-    remote_trader_t(std::string user_id, std::string algo_id) :
-        generic_trader_t(std::move(user_id)), algo_id_(std::move(algo_id))
+class RemoteTrader : public GenericTrader {
+public:
+    RemoteTrader(std::string user_id, std::string algo_id) :
+        GenericTrader(std::move(user_id)), algo_id_(std::move(algo_id))
     {}
 
     constexpr TraderType
@@ -132,10 +134,9 @@ private:
     pid_t pid_{};
 };
 
-struct local_trader_t : public generic_trader_t {
-    explicit local_trader_t(std::string algo_path) :
-        generic_trader_t(std::move(algo_path))
-    {}
+class LocalTrader : public GenericTrader {
+public:
+    explicit LocalTrader(std::string algo_path) : GenericTrader(std::move(algo_path)) {}
 
     constexpr TraderType
     get_type() const override
@@ -165,8 +166,9 @@ private:
     pid_t pid_{};
 };
 
-struct bot_trader_t : public generic_trader_t {
-    bot_trader_t() : generic_trader_t(generate_user_id()) {}
+class BotTrader : public GenericTrader {
+public:
+    BotTrader() : GenericTrader(generate_user_id()) {}
 
     constexpr TraderType
     get_type() const override
@@ -205,7 +207,7 @@ private:
     }
 };
 
-using trader_t = std::variant<remote_trader_t, local_trader_t, bot_trader_t>;
+using trader_t = std::variant<RemoteTrader, LocalTrader, BotTrader>;
 
 } // namespace manager
 } // namespace nutc
