@@ -50,13 +50,13 @@ set_thread_name(const std::string& name)
 /**
  * Set up logging.
  */
-void init(quill::LogLevel log_level = DEFAULT_LOG_LEVEL, const std::string& uid = "");
+void init(quill::LogLevel log_level = DEFAULT_LOG_LEVEL);
 
 /**
  * Set up logging.
  */
 inline void
-init(uint8_t verbosity = 0, const std::string& uid = "")
+init(uint8_t verbosity = 0)
 {
     auto log_level = static_cast<uint8_t>(DEFAULT_LOG_LEVEL);
 
@@ -65,7 +65,7 @@ init(uint8_t verbosity = 0, const std::string& uid = "")
     else // protect from underflow
         log_level = 0;
 
-    init(static_cast<quill::LogLevel>(log_level), uid);
+    init(static_cast<quill::LogLevel>(log_level));
 }
 
 /******************************************************************************
