@@ -102,7 +102,7 @@ main(int argc, const char** argv)
     pybind11::scoped_interpreter guard{};
 
     // Start logging and print build info
-    nutc::logging::init(verbosity, uid);
+    nutc::logging::init(verbosity);
     log_i(main, "Starting NUTC Client for UID {}", uid);
 
     // Initialize the RMQ connection to the exchange
