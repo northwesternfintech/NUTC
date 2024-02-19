@@ -6,7 +6,8 @@ namespace bots {
 bool
 RetailBot::is_active() const
 {
-    return get_capital() > -get_interest_limit() * 0.1;
+    return get_capital()
+           > -get_interest_limit() * .9; // drop out if they lose 90% of their money
 }
 
 std::optional<messages::MarketOrder>

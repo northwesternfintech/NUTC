@@ -13,7 +13,7 @@ namespace matching {
 using SIDE = messages::SIDE;
 
 struct StoredOrder {
-    const std::unique_ptr<manager::generic_trader_t>& trader;
+    const std::unique_ptr<manager::GenericTrader>& trader;
     std::string ticker;
     SIDE side;
     double price;
@@ -33,7 +33,7 @@ struct StoredOrder {
     }
 
     StoredOrder(
-        const std::unique_ptr<manager::generic_trader_t>& trader, SIDE side,
+        const std::unique_ptr<manager::GenericTrader>& trader, SIDE side,
         std::string ticker, double quantity, double price, uint64_t tick
     ) :
         trader(trader),

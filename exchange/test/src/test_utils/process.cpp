@@ -44,7 +44,7 @@ initialize_testing_clients(
         logging::init(quill::LogLevel::Info);
     };
 
-    // Make sure clients are initilized within 100ms
+    // Make sure clients are initialized within 100ms
     // This is just for testing utils, so it's okay
 
     auto future = std::async(std::launch::async, init_clients);

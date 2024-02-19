@@ -160,7 +160,7 @@ main(int argc, const char** argv)
     // Set up logging
     logging::init(quill::LogLevel::Info);
 
-    static constexpr uint16_t TICK_HZ = 30;
+    static constexpr uint16_t TICK_HZ = 60;
     nutc::ticks::TickManager::get_instance(TICK_HZ);
 
     initialize_ticker("ETH", 100);
