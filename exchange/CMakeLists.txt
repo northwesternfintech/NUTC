@@ -46,7 +46,7 @@ add_library(
     src/exchange/traders/trader_manager.cpp
     
     src/exchange/utils/logger/logger.cpp
-    src/exchange/utils/file_operations/file_operations.cpp
+    src/shared/file_operations/file_operations.cpp
     
     src/exchange/theo/brownian.cpp
     

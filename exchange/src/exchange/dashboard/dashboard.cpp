@@ -139,6 +139,10 @@ Dashboard::displayStockTickerData(
             window, start_y++, start_x, "%s bots: %lu", bot_type, state.num_bots_
         );
         mvwprintw(
+            window, start_y++, start_x, "%s active bots: %lu - %.2f%%", bot_type,
+            state.num_bots_active_, state.percent_active_
+        );
+        mvwprintw(
             window, start_y++, start_x, "%s min/max/avg num bids: %lu %lu %.2f",
             bot_type, state.min_open_bids_, state.max_open_bids_, state.avg_open_bids_
         );

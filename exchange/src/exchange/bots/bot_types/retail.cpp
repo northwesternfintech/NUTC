@@ -3,11 +3,16 @@
 namespace nutc {
 namespace bots {
 
+bool
+RetailBot::is_active() const
+{
+    return get_capital() > -get_interest_limit() * 0.1;
+}
+
 std::optional<messages::MarketOrder>
 RetailBot::take_action(double current, double theo)
 {
-    if (get_capital() < -get_interest_limit() * 0.1) {
-        // log_i(retail_bot, "Retail bot {} is out of capital", get_id());
+    if (!is_active()) {
         return std::nullopt;
     }
     double p_trade = (1 - get_capital_utilization());
@@ -20,25 +25,23 @@ RetailBot::take_action(double current, double theo)
     if (poisson_dist(gen) > 0) {
         if (noise_factor < p_trade * signal_strength) {
             if (current < theo) {
-                // double price = calculate_order_price(messages::SIDE::BUY, current,
-                // theo);
                 double price = current;
                 assert(price > 0);
-                double quantity = (1 - get_capital_utilization()) * .000001
-                                  * get_interest_limit() / price;
+                double quantity =
+                    (1 - get_capital_utilization()) * get_interest_limit() / price;
+                quantity *= .01;
                 modify_open_bids(1);
                 modify_long_capital(quantity * price);
                 return messages::MarketOrder{
                     get_id(), messages::SIDE::BUY, "", quantity, price
                 };
-                // buy
             }
             if (current > theo) {
-                // calculate_order_price(messages::SIDE::SELL, current, theo);
                 double price = current;
                 assert(price > 0);
-                double quantity = (1 - get_capital_utilization()) * .00001
-                                  * get_interest_limit() / price;
+                double quantity =
+                    (1 - get_capital_utilization()) * get_interest_limit() / price;
+                quantity *= .01;
                 modify_open_asks(1);
                 modify_short_capital(quantity * price);
                 return messages::MarketOrder{

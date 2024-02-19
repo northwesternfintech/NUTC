@@ -88,7 +88,7 @@ struct generic_trader_t {
     generic_trader_t& operator=(generic_trader_t&& other) = delete;
     generic_trader_t& operator=(const generic_trader_t& other) = delete;
     generic_trader_t(generic_trader_t&& other) = default;
-    generic_trader_t(const generic_trader_t& other) = default;
+    generic_trader_t(const generic_trader_t& other) = delete;
 
 private:
     const std::string USER_ID;
@@ -182,9 +182,7 @@ struct bot_trader_t : public generic_trader_t {
 
     void
     set_pid(pid_t) override
-    {
-        throw std::runtime_error("Not implemented");
-    }
+    {}
 
     std::string
     get_algo_id() const override

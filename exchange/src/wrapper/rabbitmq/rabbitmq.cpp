@@ -93,7 +93,7 @@ RabbitMQ::handleIncomingMessages()
                     return;
                 }
             },
-            data
+            std::move(data)
         );
     }
 }

@@ -18,6 +18,8 @@ public:
         AGGRESSIVENESS(std::normal_distribution<>{50, 2000}(gen))
     {}
 
+    [[nodiscard]] bool is_active() const override;
+
     std::optional<messages::MarketOrder> take_action(double current, double theo);
 
 private:

@@ -10,6 +10,9 @@ namespace dashboard {
 // NOLINTBEGIN
 struct BotStates {
     size_t num_bots_{};
+    size_t num_bots_active_{};
+    double percent_active_{};
+
     size_t min_open_bids_{};
     size_t min_open_asks_{};
     size_t max_open_bids_{};
@@ -58,6 +61,8 @@ private:
 
         auto reset_bot_states = [](BotStates& bot_states) {
             bot_states.num_bots_ = 0;
+            bot_states.num_bots_active_ = 0;
+            bot_states.percent_active_ = 0;
             bot_states.min_open_bids_ = std::numeric_limits<size_t>::max();
             bot_states.min_open_asks_ = std::numeric_limits<size_t>::max();
             bot_states.max_open_bids_ = std::numeric_limits<size_t>::min();

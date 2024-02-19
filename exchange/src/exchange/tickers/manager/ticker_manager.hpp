@@ -6,17 +6,14 @@
 #include "exchange/tickers/engine/engine.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
 
-#include <optional>
 #include <string>
-
-using engine_ref_t = std::reference_wrapper<nutc::matching::Engine>;
 
 namespace nutc {
 namespace engine_manager {
 
 class EngineManager : public nutc::ticks::TickObserver {
 public:
-    std::optional<engine_ref_t> get_engine(const std::string& ticker);
+    matching::Engine& get_engine(const std::string& ticker);
 
     bots::BotContainer&
     get_bot_container(const std::string& ticker)

@@ -12,8 +12,8 @@
 double
 generate_gaussian_noise(double mean, double stddev)
 {
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
+    static std::random_device rand;
+    static std::mt19937 gen(rand());
     std::normal_distribution<> distr(mean, stddev); // Define the normal distribution
 
     return distr(gen);
@@ -26,9 +26,8 @@ void
 BotContainer::on_tick(uint64_t)
 {
     auto theo = fabs(theo_generator_.generate_next_price() + brownian_offset_);
-    auto ticker = engine_manager::EngineManager::get_instance().get_engine(ticker_);
-    assert(ticker.has_value());
-    double current = ticker.value().get().get_midprice();
+    auto& ticker = engine_manager::EngineManager::get_instance().get_engine(ticker_);
+    double current = ticker.get_midprice();
     auto orders = BotContainer::on_new_theo(theo, current);
 
     for (auto& order : orders) {
@@ -41,20 +40,14 @@ BotContainer::on_tick(uint64_t)
 }
 
 void
-BotContainer::add_mm_bots(const std::vector<double>& starting_capitals)
+BotContainer::add_retail_bots(
+    double mean_capital, double stddev_capital, size_t num_bots
+)
 {
-    for (double capital : starting_capitals) {
-        add_mm_bot_(capital);
-    }
-}
-
-void
-BotContainer::add_retail_bots(double mean_capital, double stddev_capital, int num_bots)
-{
-    std::random_device rd;
-    std::mt19937 gen(rd());
+    std::random_device rand;
+    std::mt19937 gen(rand());
     std::normal_distribution<> distr(mean_capital, stddev_capital);
-    for (int i = 0; i < num_bots; i++) {
+    for (size_t i = 0; i < num_bots; i++) {
         auto capital = distr(gen);
         capital = std::abs(capital);
         add_retail_bot_(capital);
@@ -62,8 +55,22 @@ BotContainer::add_retail_bots(double mean_capital, double stddev_capital, int nu
 }
 
 void
+BotContainer::add_mm_bots(double mean_capital, double stddev_capital, size_t num_bots)
+{
+    std::random_device rand;
+    std::mt19937 gen(rand());
+    std::normal_distribution<> distr(mean_capital, stddev_capital);
+    for (size_t i = 0; i < num_bots; i++) {
+        auto capital = distr(gen);
+        capital = std::abs(capital);
+        add_mm_bot_(capital);
+    }
+}
+
+void
 BotContainer::add_retail_bot_(double starting_capital)
 {
+    assert(starting_capital > 0);
     manager::ClientManager& users = nutc::manager::ClientManager::get_instance();
     std::string bot_id = users.add_bot_trader();
 
@@ -80,6 +87,7 @@ BotContainer::add_retail_bot_(double starting_capital)
 void
 BotContainer::add_mm_bot_(double starting_capital)
 {
+    assert(starting_capital > 0);
     manager::ClientManager& users = nutc::manager::ClientManager::get_instance();
     std::string bot_id = users.add_bot_trader();
 
@@ -96,7 +104,7 @@ BotContainer::add_mm_bot_(double starting_capital)
 std::vector<MarketOrder>
 BotContainer::on_new_theo(double new_theo, double current)
 {
-    auto mm_new_theo = [new_theo](auto&& mm_trader, std::vector<MarketOrder>& orders) {
+    auto mm_new_theo = [new_theo](auto& mm_trader, std::vector<MarketOrder>& orders) {
         double noised_theo =
             new_theo + static_cast<double>(generate_gaussian_noise(0, .02));
         std::vector<messages::MarketOrder> mm_orders =
@@ -105,7 +113,7 @@ BotContainer::on_new_theo(double new_theo, double current)
     };
 
     auto retail_new_theo =
-        [new_theo, current](auto&& retail_trader, std::vector<MarketOrder>& orders) {
+        [new_theo, current](auto& retail_trader, std::vector<MarketOrder>& orders) {
             double noised_theo =
                 new_theo + static_cast<double>(generate_gaussian_noise(0, .1));
             auto bot_order = retail_trader.take_action(current, noised_theo);
@@ -128,7 +136,7 @@ BotContainer::on_new_theo(double new_theo, double current)
 void
 BotContainer::process_order_match(Match& match)
 {
-    auto process_buyer_match = [&match](auto&& umap) {
+    auto process_buyer_match = [&match](auto& umap) {
         auto buyer_match = umap.find(match.buyer_id);
         if (buyer_match == umap.end())
             return;
@@ -136,7 +144,7 @@ BotContainer::process_order_match(Match& match)
         buyer_match->second.modify_capital(-match.quantity * match.price);
     };
 
-    auto process_seller_match = [&match](auto&& umap) {
+    auto process_seller_match = [&match](auto& umap) {
         auto seller_match = umap.find(match.seller_id);
         if (seller_match == umap.end())
             return;
@@ -155,7 +163,7 @@ BotContainer::process_order_add(
     const std::string& bot_id, messages::SIDE side, double total_cap
 )
 {
-    auto process_order_add = [side, total_cap](auto&& match) {
+    auto process_order_add = [side, total_cap](auto& match) {
         if (side == messages::SIDE::BUY) {
             match->second.modify_long_capital(total_cap);
             match->second.modify_open_bids(1);
@@ -205,7 +213,6 @@ BotContainer::process_order_expiration(
         process_order_expiration(match1);
         return;
     }
-    throw std::runtime_error("Bot not found");
 }
 
 } // namespace bots
