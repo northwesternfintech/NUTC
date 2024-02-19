@@ -3,7 +3,6 @@
 #include "wrapper/common.hpp"
 #include "wrapper/config.h"
 
-#include <quill/handlers/RotatingFileHandler.h>
 #include <quill/Quill.h>
 
 #if defined(__CYGWIN__) || defined(__MINGW32__) || defined(__MINGW64__)                \
@@ -30,7 +29,7 @@ using namespace quill; // NOLINT(*-using-namespace)
 using cc = quill::ConsoleColours;
 
 void
-init(quill::LogLevel log_level, const std::string& uid)
+init(quill::LogLevel log_level)
 {
     detail::application_log_level = log_level;
 
@@ -38,10 +37,6 @@ init(quill::LogLevel log_level, const std::string& uid)
     // NOTE: on win32 a signal handler is needed for each new thread
     quill::init_signal_handler();
 #endif
-
-    // Create the logs directory
-    if (!std::filesystem::is_directory(LOG_DIR))
-        std::filesystem::create_directory(LOG_DIR);
 
     // Create our config object
     quill::Config cfg;
@@ -81,26 +76,6 @@ init(quill::LogLevel log_level, const std::string& uid)
     stdout_handler->set_log_level(log_level);
 
     cfg.default_handlers.emplace_back(stdout_handler);
-
-    //
-    // Initialize rotating file handler
-    //
-    quill::RotatingFileHandlerConfig handler_cfg;
-
-    handler_cfg.set_rotation_max_file_size(LOG_FILE_SIZE);
-    handler_cfg.set_max_backup_files(LOG_BACKUP_COUNT);
-    handler_cfg.set_open_mode('w');
-
-    const std::string log_file = LOG_DIR "/" + uid + ".log";
-    auto file_handler = quill::rotating_file_handler(log_file, handler_cfg);
-
-    file_handler->set_pattern(
-        LOGLINE_FORMAT,
-        "%Y-%m-%dT%T.%Qms" TZ_FORMAT // ISO 8601
-    );
-    file_handler->set_log_level(log_level);
-
-    cfg.default_handlers.emplace_back(file_handler);
 
     // Send the config
     quill::configure(cfg);
