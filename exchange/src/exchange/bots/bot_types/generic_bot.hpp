@@ -123,6 +123,7 @@ public:
     }
 
     virtual ~GenericBot() = default;
+    [[nodiscard]] virtual bool is_active() const = 0;
 
     GenericBot(std::string bot_id, double interest_limit) :
         BOT_ID(std::move(bot_id)), INTEREST_LIMIT(interest_limit)

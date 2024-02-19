@@ -2,7 +2,7 @@
 
 #include "exchange/config.h"
 #include "exchange/logging.hpp"
-#include "exchange/utils/file_operations/file_operations.hpp"
+#include "shared/file_operations/file_operations.hpp"
 
 #include <stdexcept>
 
@@ -33,7 +33,10 @@ DevModeAlgoManager::initialize_client_manager(manager::ClientManager& users)
 void
 DevModeAlgoManager::initialize_files() const
 {
-    std::string content = file_ops::read_file_content("./template.py");
+    if (algo_filenames_.has_value())
+        return;
+
+    std::string content = file_ops::read_file_content("template.py");
     std::string dir_name = std::string(ALGO_DIR);
     if (!file_ops::create_directory(dir_name)) {
         throw std::runtime_error("Failed to create directory");

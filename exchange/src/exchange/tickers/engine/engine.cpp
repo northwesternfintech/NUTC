@@ -44,13 +44,13 @@ Engine::on_tick(uint64_t new_tick, uint8_t order_expire_age)
     }
 
     std::vector<StoredOrder> return_vec = std::move(removed_orders_);
-    removed_orders_ = std::vector<StoredOrder>{};
+    removed_orders_.clear();
 
     std::vector<StoredOrder> added_orders = std::move(added_orders_);
-    added_orders_ = std::vector<StoredOrder>{};
+    added_orders_.clear();
 
     std::vector<Match> matched_orders = std::move(matched_orders_);
-    matched_orders_ = std::vector<Match>{};
+    matched_orders_.clear();
 
     return {return_vec, added_orders, matched_orders};
 }

@@ -33,7 +33,7 @@ RabbitMQConsumer::handle_incoming_messages(
                     );
                 }
             },
-            incoming_message
+            std::move(incoming_message)
         );
     }
 }

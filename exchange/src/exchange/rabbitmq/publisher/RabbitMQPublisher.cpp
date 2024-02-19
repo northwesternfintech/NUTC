@@ -42,6 +42,8 @@ RabbitMQPublisher::broadcast_matches(
     const auto& active_clients = clients.get_traders();
     for (const auto& [id, trader] : active_clients) {
         for (const auto& match : matches) {
+            if (trader->get_type() == manager::BOT)
+                continue;
             if (!trader->is_active())
                 continue;
 
@@ -60,8 +62,10 @@ RabbitMQPublisher::broadcast_ob_updates(
 {
     const auto& traders = clients.get_traders();
     for (const auto& [id, trader] : traders) {
+        if (trader->get_type() == manager::BOT)
+            continue;
         if (!trader->is_active() || id == ignore_uid) {
-            return;
+            continue;
         }
 
         for (const auto& update : updates) {
@@ -83,6 +87,8 @@ RabbitMQPublisher::broadcast_account_update(
     auto send_message = [&](const std::unique_ptr<manager::generic_trader_t>& trader,
                             messages::SIDE side) {
         if (trader->get_type() == manager::BOT)
+            return;
+        if (!trader->is_active())
             return;
         messages::AccountUpdate update = {
             match.ticker, side, match.price, match.quantity, trader->get_capital()

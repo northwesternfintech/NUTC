@@ -11,7 +11,6 @@
 #include <iostream>
 #include <optional>
 #include <string>
-#include <tuple>
 
 struct wrapper_args {
     uint8_t verbosity;
@@ -111,6 +110,7 @@ main(int argc, const char** argv)
 
     std::optional<std::string> algo;
     if (development_mode) {
+        log_i(main, "Running in development mode");
         algo = nutc::dev_mode::get_algo_from_file(algo_id);
     }
     else {

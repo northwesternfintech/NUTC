@@ -42,8 +42,8 @@ public:
     process_order_add(const std::string& bot_id, messages::SIDE side, double total_cap);
     void process_order_match(Match& match);
 
-    void add_mm_bots(const std::vector<double>& starting_capitals);
-    void add_retail_bots(double mean_capital, double stddev_capital, int num_bots);
+    void add_retail_bots(double mean_capital, double stddev_capital, size_t num_bots);
+    void add_mm_bots(double mean_capital, double stddev_capital, size_t num_bots);
 
     BotContainer() = default;
 

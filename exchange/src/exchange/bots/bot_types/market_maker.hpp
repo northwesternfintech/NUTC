@@ -72,6 +72,12 @@ public:
         return orders;
     }
 
+    [[nodiscard]] bool
+    is_active() const override
+    {
+        return true;
+    }
+
 private:
     [[nodiscard]] double
     compute_net_exposure_() const

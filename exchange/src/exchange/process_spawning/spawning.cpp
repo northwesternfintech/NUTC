@@ -2,7 +2,7 @@
 
 #include "exchange/logging.hpp"
 #include "exchange/traders/trader_types.hpp"
-#include "exchange/utils/file_operations/file_operations.hpp"
+#include "shared/file_operations/file_operations.hpp"
 
 #include <cstdlib>
 
@@ -22,8 +22,7 @@ spawn_client(
     const std::string& binary_path
 )
 {
-    using trader_type = std::decay_t<decltype(trader)>;
-    if constexpr (std::is_same_v<trader_type, nutc::manager::local_trader_t>) {
+    if (trader->get_type() == manager::LOCAL) {
         const std::string filepath = trader->get_algo_id() + ".py";
         assert(file_ops::file_exists(filepath));
     }
@@ -31,12 +30,10 @@ spawn_client(
     pid_t pid = fork();
     if (pid == 0) {
         std::vector<std::string> args = {
-            binary_path, "--uid", trader->get_id(), "--algo_id"
+            binary_path, "--uid", trader->get_id(), "--algo_id", trader->get_algo_id()
         };
 
-        args.emplace_back(trader->get_algo_id());
-
-        if constexpr (std::is_same_v<trader_type, nutc::manager::local_trader_t>) {
+        if (trader->get_type() == manager::LOCAL) {
             args.emplace_back("--dev");
         }
 

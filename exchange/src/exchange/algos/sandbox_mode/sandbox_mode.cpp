@@ -3,7 +3,7 @@
 #include "exchange/curl/curl.hpp"
 #include "exchange/logging.hpp"
 #include "exchange/traders/trader_types.hpp"
-#include "exchange/utils/file_operations/file_operations.hpp"
+#include "shared/file_operations/file_operations.hpp"
 
 #include <glaze/glaze.hpp>
 

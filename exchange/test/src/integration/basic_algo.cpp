@@ -37,7 +37,9 @@ protected:
 TEST_F(IntegrationBasicAlgo, InitialLiquidity)
 {
     std::vector<std::string> names{"test_algos/buy_tsla_at_100"};
-    nutc::testing_utils::initialize_testing_clients(users_, names);
+    if (!nutc::testing_utils::initialize_testing_clients(users_, names)) {
+        FAIL() << "Failed to initialize testing clients";
+    }
 
     // want to see if it buys
     engine_manager_.add_engine("TSLA");
@@ -50,10 +52,10 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
         nutc::messages::MarketOrder{
             user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100
         }
-    ); // NOLINT
+    );
 
     auto mess = rmq::RabbitMQConsumer::consume_message();
-    EXPECT_TRUE(std::holds_alternative<nutc::messages::MarketOrder>(mess));
+    ASSERT_TRUE(std::holds_alternative<nutc::messages::MarketOrder>(mess));
 
     nutc::messages::MarketOrder actual = std::get<nutc::messages::MarketOrder>(mess);
     ASSERT_EQ_MARKET_ORDER(
@@ -64,7 +66,9 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
 TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
 {
     std::vector<std::string> names{"test_algos/buy_tsla_on_trade"};
-    nutc::testing_utils::initialize_testing_clients(users_, names);
+    if (!nutc::testing_utils::initialize_testing_clients(users_, names)) {
+        FAIL() << "Failed to initialize testing clients";
+    }
 
     engine_manager_.add_engine("TSLA");
     engine_manager_.add_engine("APPL");
@@ -108,7 +112,9 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
 TEST_F(IntegrationBasicAlgo, OnAccountUpdate)
 {
     std::vector<std::string> names{"test_algos/buy_tsla_on_account"};
-    nutc::testing_utils::initialize_testing_clients(users_, names);
+    if (!nutc::testing_utils::initialize_testing_clients(users_, names)) {
+        FAIL() << "Failed to initialize testing clients";
+    }
 
     engine_manager_.add_engine("TSLA");
     engine_manager_.add_engine("APPL");

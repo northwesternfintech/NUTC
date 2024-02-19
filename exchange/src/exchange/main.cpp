@@ -174,14 +174,9 @@ main(int argc, const char** argv)
 
     auto& engine_manager = engine_manager::EngineManager::get_instance();
 
-    engine_manager.get_bot_container("ETH").add_mm_bots(
-        {50000, 25000, 25000, 10000, 10000, 5000}
-    );                                                                   // NOLINT(*)
-    engine_manager.get_bot_container("BTC").add_mm_bots({50000, 25000}); // NOLINT(*)
-    engine_manager.get_bot_container("USD").add_mm_bots(
-        {100000, 100000, 100000, 25000, 25000, 10000, 5000, 5000, 5000, 5000}
-    ); // NOLINT(*)
-
+    engine_manager.get_bot_container("ETH").add_mm_bots(100000, 10000, 5);
+    engine_manager.get_bot_container("BTC").add_mm_bots(25000, 5000, 10);
+    engine_manager.get_bot_container("USD").add_mm_bots(100000, 25000, 3);
     engine_manager.get_bot_container("ETH").add_retail_bots(10, 3, 200);
     engine_manager.get_bot_container("BTC").add_retail_bots(100, 5, 500);
     engine_manager.get_bot_container("USD").add_retail_bots(100, 10, 100);
