@@ -6,12 +6,11 @@ namespace manager {
 std::optional<messages::SIDE>
 ClientManager::validate_match(const messages::Match& match) const
 {
-    float trade_value = match.price * match.quantity;
-    float remaining_capital = get_capital(match.buyer_id) - trade_value;
+    double trade_value = match.price * match.quantity;
+    double remaining_capital = get_trader(match.buyer_id)->get_capital() - trade_value;
 
     bool insufficient_holdings =
-        match.seller_id != "SIMULATED"
-        && get_holdings(match.seller_id, match.ticker) - match.quantity < 0;
+        get_trader(match.seller_id)->get_holdings(match.ticker) - match.quantity < 0;
 
     if (remaining_capital < 0) [[unlikely]]
         return messages::SIDE::BUY;

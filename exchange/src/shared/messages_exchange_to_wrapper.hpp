@@ -14,7 +14,7 @@ namespace nutc {
 namespace messages {
 
 struct StartTime {
-    uint64_t start_time_ns;
+    int64_t start_time_ns;
 };
 
 /**
@@ -23,8 +23,8 @@ struct StartTime {
 struct Match {
     std::string ticker;
     SIDE side;
-    float price;
-    float quantity;
+    double price;
+    double quantity;
     std::string buyer_id;
     std::string seller_id;
 };
@@ -35,8 +35,8 @@ struct Match {
 struct ObUpdate {
     std::string ticker;
     SIDE side;
-    float price;
-    float quantity;
+    double price;
+    double quantity;
 };
 
 /**
@@ -46,9 +46,9 @@ struct ObUpdate {
 struct AccountUpdate {
     std::string ticker;
     SIDE side;
-    float price;
-    float quantity;
-    float capital_remaining;
+    double price;
+    double quantity;
+    double capital_remaining;
 };
 
 } // namespace messages

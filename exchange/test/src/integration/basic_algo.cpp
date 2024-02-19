@@ -26,6 +26,7 @@ protected:
     {
         nutc::testing_utils::kill_all_processes(users_);
         rmq::RabbitMQConnectionManager::reset_instance();
+        users_.reset();
     }
 
     ClientManager& users_ = nutc::manager::ClientManager::get_instance(); // NOLINT(*)
@@ -36,16 +37,25 @@ protected:
 TEST_F(IntegrationBasicAlgo, InitialLiquidity)
 {
     std::vector<std::string> names{"test_algos/buy_tsla_at_100"};
-    nutc::testing_utils::initialize_testing_clients(users_, names);
+    if (!nutc::testing_utils::initialize_testing_clients(users_, names)) {
+        FAIL() << "Failed to initialize testing clients";
+    }
 
     // want to see if it buys
     engine_manager_.add_engine("TSLA");
-    rmq::RabbitMQOrderHandler::add_liquidity_to_ticker(
-        users_, engine_manager_, "TSLA", 100, 100 // NOLINT (magic-number-*)
+
+    std::string user_id = users_.add_bot_trader();
+    users_.get_trader(user_id)->modify_holdings("TSLA", 1000); // NOLINT
+
+    rmq::RabbitMQOrderHandler::handle_incoming_market_order(
+        engine_manager_, users_,
+        nutc::messages::MarketOrder{
+            user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100
+        }
     );
 
     auto mess = rmq::RabbitMQConsumer::consume_message();
-    EXPECT_TRUE(std::holds_alternative<nutc::messages::MarketOrder>(mess));
+    ASSERT_TRUE(std::holds_alternative<nutc::messages::MarketOrder>(mess));
 
     nutc::messages::MarketOrder actual = std::get<nutc::messages::MarketOrder>(mess);
     ASSERT_EQ_MARKET_ORDER(
@@ -56,14 +66,22 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
 TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
 {
     std::vector<std::string> names{"test_algos/buy_tsla_on_trade"};
-    nutc::testing_utils::initialize_testing_clients(users_, names);
+    if (!nutc::testing_utils::initialize_testing_clients(users_, names)) {
+        FAIL() << "Failed to initialize testing clients";
+    }
 
     engine_manager_.add_engine("TSLA");
     engine_manager_.add_engine("APPL");
 
-    rmq::RabbitMQOrderHandler::add_liquidity_to_ticker(
-        users_, engine_manager_, "TSLA", 100, 100 // NOLINT (magic-number-*)
-    );
+    std::string user_id = users_.add_bot_trader();
+    users_.get_trader(user_id)->modify_holdings("TSLA", 1000); // NOLINT
+
+    rmq::RabbitMQOrderHandler::handle_incoming_market_order(
+        engine_manager_, users_,
+        nutc::messages::MarketOrder{
+            user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100
+        }
+    ); // NOLINT
 
     // obupdate triggers one user to place a BUY order of 10 TSLA at 100
     auto mess1 = rmq::RabbitMQConsumer::consume_message();
@@ -94,14 +112,22 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
 TEST_F(IntegrationBasicAlgo, OnAccountUpdate)
 {
     std::vector<std::string> names{"test_algos/buy_tsla_on_account"};
-    nutc::testing_utils::initialize_testing_clients(users_, names);
+    if (!nutc::testing_utils::initialize_testing_clients(users_, names)) {
+        FAIL() << "Failed to initialize testing clients";
+    }
 
     engine_manager_.add_engine("TSLA");
     engine_manager_.add_engine("APPL");
 
-    rmq::RabbitMQOrderHandler::add_liquidity_to_ticker(
-        users_, engine_manager_, "TSLA", 100, 100 // NOLINT (magic-number-*)
-    );
+    std::string user_id = users_.add_bot_trader();
+    users_.get_trader(user_id)->modify_holdings("TSLA", 1000); // NOLINT
+
+    rmq::RabbitMQOrderHandler::handle_incoming_market_order(
+        engine_manager_, users_,
+        nutc::messages::MarketOrder{
+            user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100
+        }
+    ); // NOLINT
 
     // obupdate triggers one user to place a BUY order of 10 TSLA at 102
     auto mess1 = rmq::RabbitMQConsumer::consume_message();

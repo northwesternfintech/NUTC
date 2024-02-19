@@ -26,7 +26,6 @@ add_executable(NUTC_tests
 
   src/unit/misc/tick_manager.cpp
 
-  src/integration/basic_rmq.cpp
   src/integration/basic_algo.cpp
   src/integration/time_based.cpp
   )

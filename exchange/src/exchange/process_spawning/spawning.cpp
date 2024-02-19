@@ -2,7 +2,7 @@
 
 #include "exchange/logging.hpp"
 #include "exchange/traders/trader_types.hpp"
-#include "exchange/utils/file_operations/file_operations.hpp"
+#include "shared/file_operations/file_operations.hpp"
 
 #include <cstdlib>
 
@@ -17,29 +17,27 @@ quote_id(std::string user_id)
 }
 
 pid_t
-spawn_client(auto& trader, const std::string& binary_path)
+spawn_client(
+    const std::unique_ptr<manager::GenericTrader>& trader,
+    const std::string& binary_path
+)
 {
-    using trader_type = std::decay_t<decltype(trader)>;
-    if constexpr (std::is_same_v<trader_type, nutc::manager::local_trader_t>) {
-        const std::string filepath = trader.get_algo_path() + ".py";
+    if (trader->get_type() == manager::LOCAL) {
+        const std::string filepath = trader->get_algo_id() + ".py";
         assert(file_ops::file_exists(filepath));
     }
 
     pid_t pid = fork();
     if (pid == 0) {
         std::vector<std::string> args = {
-            binary_path, "--uid", trader.get_id(), "--algo_id"
+            binary_path, "--uid", trader->get_id(), "--algo_id", trader->get_algo_id()
         };
 
-        if constexpr (std::is_same_v<trader_type, nutc::manager::local_trader_t>) {
-            args.emplace_back(trader.get_algo_path());
+        if (trader->get_type() == manager::LOCAL) {
             args.emplace_back("--dev");
         }
-        else {
-            args.emplace_back(trader.get_algo_id());
-        }
 
-        if (!trader.has_start_delay()) {
+        if (!trader->has_start_delay()) {
             args.emplace_back("--no-start-delay");
         }
 
@@ -76,24 +74,23 @@ spawn_all_clients(nutc::manager::ClientManager& users)
     const std::string wrapper_binary_path(wrapper_binary_location);
 
     size_t num_clients = 0;
-    auto spawn_one_client = [&](auto&& arg) {
-        using t = std::decay_t<decltype(arg)>;
-
-        if (arg.is_active())
+    auto spawn_one_trader = [&](const std::unique_ptr<manager::GenericTrader>& trader) {
+        if (trader->get_type() == manager::BOT)
             return;
 
-        if constexpr (!std::is_same_v<t, nutc::manager::bot_trader_t>) {
-            const std::string& trader_id = arg.get_id();
-            log_i(client_spawning, "Spawning client: {}", trader_id);
+        if (trader->is_active())
+            return;
 
-            std::string algo_id;
-            arg.set_pid(spawn_client(arg, wrapper_binary_path));
-        }
+        const std::string& trader_id = trader->get_id();
+        log_i(client_spawning, "Spawning client: {}", trader_id);
+
+        std::string algo_id;
+        trader->set_pid(spawn_client(trader, wrapper_binary_path));
         num_clients++;
     };
 
-    for (auto& [id, client] : users.get_clients()) {
-        std::visit(spawn_one_client, client);
+    for (const auto& [id, trader] : users.get_traders()) {
+        spawn_one_trader(trader);
     }
 
     return num_clients;

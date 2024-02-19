@@ -38,6 +38,7 @@ add_library(
     src/exchange/rabbitmq/queue_manager/RabbitMQQueueManager.cpp
 
     src/exchange/bots/bot_container.cpp
+    src/exchange/bots/bot_types/retail.cpp
 
     src/exchange/tickers/engine/engine.cpp
     src/exchange/tickers/manager/ticker_manager.cpp
@@ -45,7 +46,7 @@ add_library(
     src/exchange/traders/trader_manager.cpp
     
     src/exchange/utils/logger/logger.cpp
-    src/exchange/utils/file_operations/file_operations.cpp
+    src/shared/file_operations/file_operations.cpp
     
     src/exchange/theo/brownian.cpp
     
@@ -97,6 +98,8 @@ add_library(
     DASHBOARD_lib OBJECT
     src/exchange/dashboard/dashboard.cpp
 )
+
+target_link_libraries(DASHBOARD_lib PUBLIC EXCHANGE_lib)
 
 target_include_directories(
     DASHBOARD_lib ${warning_guard}

@@ -2,6 +2,7 @@
 
 #include "exchange/logging.hpp"
 #include "exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
+#include "exchange/traders/trader_types.hpp"
 
 namespace nutc {
 namespace rabbitmq {
@@ -38,21 +39,19 @@ RabbitMQPublisher::broadcast_matches(
     const manager::ClientManager& clients, const std::vector<messages::Match>& matches
 )
 {
-    auto broadcast_to_client = [&](auto&& trader) {
+    const auto& active_clients = clients.get_traders();
+    for (const auto& [id, trader] : active_clients) {
         for (const auto& match : matches) {
-            if (!trader.is_active())
+            if (trader->get_type() == manager::BOT)
+                continue;
+            if (!trader->is_active())
                 continue;
 
             std::string buffer;
             glz::write<glz::opts{}>(match, buffer);
-            publish_message(trader.get_id(), buffer);
+            publish_message(id, buffer);
         }
-    };
-
-    const auto& active_clients = clients.get_clients_const();
-    std::for_each(active_clients.begin(), active_clients.end(), [&](auto&& arg) {
-        std::visit(broadcast_to_client, arg.second);
-    });
+    }
 }
 
 void
@@ -61,22 +60,20 @@ RabbitMQPublisher::broadcast_ob_updates(
     const std::vector<messages::ObUpdate>& updates, const std::string& ignore_uid
 )
 {
-    auto broadcast_to_client = [&](auto&& trader) {
-        if (!trader.is_active() || trader.get_id() == ignore_uid) {
-            return;
+    const auto& traders = clients.get_traders();
+    for (const auto& [id, trader] : traders) {
+        if (trader->get_type() == manager::BOT)
+            continue;
+        if (!trader->is_active() || id == ignore_uid) {
+            continue;
         }
 
         for (const auto& update : updates) {
             std::string buffer;
             glz::write<glz::opts{}>(update, buffer);
-            publish_message(trader.get_id(), buffer);
+            publish_message(id, buffer);
         }
-    };
-
-    const auto& active_clients = clients.get_clients_const();
-    std::for_each(active_clients.begin(), active_clients.end(), [&](auto&& arg) {
-        std::visit(broadcast_to_client, arg.second);
-    });
+    }
 }
 
 void
@@ -87,20 +84,22 @@ RabbitMQPublisher::broadcast_account_update(
     const std::string& buyer_id = match.buyer_id;
     const std::string& seller_id = match.seller_id;
 
-    auto send_message = [&](const std::string& trader_id, messages::SIDE side) {
-        if (trader_id == "SIMULATED")
+    auto send_message = [&](const std::unique_ptr<manager::GenericTrader>& trader,
+                            messages::SIDE side) {
+        if (trader->get_type() == manager::BOT)
+            return;
+        if (!trader->is_active())
             return;
         messages::AccountUpdate update = {
-            match.ticker, side, match.price, match.quantity,
-            clients.get_capital(trader_id)
+            match.ticker, side, match.price, match.quantity, trader->get_capital()
         };
         std::string buffer;
         glz::write<glz::opts{}>(update, buffer);
-        publish_message(trader_id, buffer);
+        publish_message(trader->get_id(), buffer);
     };
 
-    send_message(buyer_id, messages::SIDE::BUY);
-    send_message(seller_id, messages::SIDE::SELL);
+    send_message(clients.get_trader(buyer_id), messages::SIDE::BUY);
+    send_message(clients.get_trader(seller_id), messages::SIDE::SELL);
 }
 
 } // namespace rabbitmq

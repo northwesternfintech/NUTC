@@ -1,5 +1,6 @@
 #pragma once
-#include "exchange/bots/market_maker.hpp"
+#include "exchange/bots/bot_types/market_maker.hpp"
+#include "exchange/bots/bot_types/retail.hpp"
 #include "exchange/theo/brownian.hpp"
 #include "exchange/tick_manager/tick_observer.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
@@ -20,21 +21,29 @@ public:
         return brownian_offset_ + theo_generator_.get_price();
     }
 
-    size_t
-    get_num_mm_bots() const
+    const std::unordered_map<std::string, MarketMakerBot>&
+    get_market_makers() const
     {
-        return market_makers_.size();
+        return market_makers_;
     }
 
-    void add_mm_bot(float starting_capital);
+    const std::unordered_map<std::string, RetailBot>&
+    get_retail_traders() const
+    {
+        return retail_bots_;
+    }
 
-    std::vector<MarketOrder> on_new_theo(float new_theo, float current);
-
-    void process_bot_match(const Match& match);
+    std::vector<MarketOrder> on_new_theo(double new_theo, double current);
 
     void process_order_expiration(
-        const std::string& bot_id, messages::SIDE side, float total_cap
+        const std::string& bot_id, messages::SIDE side, double total_cap
     );
+    void
+    process_order_add(const std::string& bot_id, messages::SIDE side, double total_cap);
+    void process_order_match(Match& match);
+
+    void add_retail_bots(double mean_capital, double stddev_capital, size_t num_bots);
+    void add_mm_bots(double mean_capital, double stddev_capital, size_t num_bots);
 
     BotContainer() = default;
 
@@ -43,7 +52,9 @@ public:
     {}
 
 private:
-    // TODO(stevenewald): make more elegant than string UUID
+    void add_mm_bot_(double starting_capital);
+    void add_retail_bot_(double starting_capital);
+    std::unordered_map<std::string, RetailBot> retail_bots_{};
     std::unordered_map<std::string, MarketMakerBot> market_makers_{};
     std::string ticker_;
 

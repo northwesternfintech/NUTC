@@ -5,8 +5,6 @@
 #include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
-#include <cassert>
-
 #include <functional>
 #include <queue>
 #include <set>
@@ -17,15 +15,26 @@ using ObUpdate = nutc::messages::ObUpdate;
 using Match = nutc::messages::Match;
 using SIDE = nutc::messages::SIDE;
 
+// this class is very messy and should be refactored at some point
+// there's minimal abstraction to support high performance, but this makes the code look
+// like garbage
+
 namespace nutc {
 /**
  * @brief Handles matching for an arbitrary ticker
  */
 namespace matching {
 
+// Later, we can combine these
 struct match_result_t {
     std::vector<Match> matches;
     std::vector<ObUpdate> ob_updates;
+};
+
+struct on_tick_result_t {
+    std::vector<StoredOrder> removed_orders;
+    std::vector<StoredOrder> added_orders;
+    std::vector<Match> matched_orders;
 };
 
 class Engine {
@@ -46,31 +55,38 @@ public:
         return {asks_.size(), bids_.size()};
     }
 
-    std::pair<float, float>
+    std::pair<double, double>
     get_spread() const
     {
-        if (asks_.empty() || bids_.empty()) {
+        if (asks_.empty() || bids_.empty()) [[unlikely]] {
             return {0, 0};
         }
         return {asks_.begin()->price, bids_.rbegin()->price};
     }
 
-    float
-    get_midprice() const
+    double
+    get_midprice()
     {
         if (asks_.empty() || bids_.empty()) [[unlikely]] {
-            return 0;
+            return last_midprice_;
         }
-        return (asks_.begin()->price + bids_.rbegin()->price) / 2;
+        last_midprice_ = (asks_.begin()->price + bids_.rbegin()->price) / 2;
+        return last_midprice_;
     }
 
     void
     add_order(const MarketOrder& order)
     {
         return add_order(StoredOrder(
-            order.client_id, order.side, order.ticker, order.quantity, order.price,
-            this->current_tick_
+            manager::ClientManager::get_instance().get_trader(order.client_id),
+            order.side, order.ticker, order.quantity, order.price, this->current_tick_
         ));
+    }
+
+    void
+    set_initial_price(double price)
+    {
+        last_midprice_ = price;
     }
 
     void
@@ -84,16 +100,16 @@ public:
                 asks_.insert({stored_order.price, stored_order.order_index});
         }
 
-        orders_by_id_[stored_order.order_index] = stored_order;
+        orders_by_id_.emplace(stored_order.order_index, stored_order);
         orders_by_tick_[stored_order.tick].push(stored_order.order_index);
     }
 
     // Called every tick
-    std::vector<StoredOrder>
-    remove_old_orders(uint64_t new_tick, uint64_t removed_tick_age);
+    on_tick_result_t on_tick(uint64_t new_tick, uint8_t order_expire_age);
 
 private:
     uint64_t current_tick_ = 0;
+    double last_midprice_;
 
     match_result_t
     attempt_matches_(manager::ClientManager& manager, StoredOrder& aggressive_order);
@@ -107,6 +123,10 @@ private:
 
     // tick -> queue of order ids
     std::map<uint64_t, std::queue<uint64_t>> orders_by_tick_;
+
+    std::vector<StoredOrder> removed_orders_{};
+    std::vector<StoredOrder> added_orders_{};
+    std::vector<Match> matched_orders_{};
 
     template <typename Comparator>
     std::optional<std::reference_wrapper<StoredOrder>>
@@ -122,7 +142,6 @@ private:
             if (order_set.empty()) {
                 return std::nullopt;
             }
-            assert(!order_set.empty());
             order_id = order_set.begin()->index;
         }
         return orders_by_id_.at(order_id);

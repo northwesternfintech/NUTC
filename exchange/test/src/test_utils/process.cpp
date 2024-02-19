@@ -1,10 +1,12 @@
 #include "process.hpp"
 
 #include "exchange/algos/dev_mode/dev_mode.hpp"
+#include "exchange/config.h"
+#include "exchange/logging.hpp"
+#include "exchange/process_spawning/spawning.hpp"
 #include "exchange/rabbitmq/client_manager/RabbitMQClientManager.hpp"
-#include "exchange/traders/trader_types.hpp"
 
-#include <csignal>
+#include <future>
 
 namespace nutc {
 namespace testing_utils {
@@ -12,46 +14,43 @@ namespace testing_utils {
 void
 kill_all_processes(const manager::ClientManager& users)
 {
-    for (const auto& [_, client] : users.get_clients_const()) {
-        pid_t pid = std::visit(
-            [&](auto&& arg) {
-                using t = std::decay_t<decltype(arg)>;
-                if constexpr (!std::is_same_v<t, manager::bot_trader_t>) {
-                    return arg.get_pid();
-                }
-                return -1;
-            },
-            client
-        );
-        kill(pid, SIGKILL);
+    for (const auto& [id, trader] : users.get_traders()) {
+        auto pid = trader->get_pid();
+        if (pid != -1)
+            kill(pid, SIGKILL);
     }
 }
 
-void
+bool
 initialize_testing_clients(
     nutc::manager::ClientManager& users, const std::vector<std::string>& algo_filenames,
     bool has_delay
 )
 {
-    using algo_mgmt::DevModeAlgoManager;
+    auto init_clients = [&]() {
+        using algo_mgmt::DevModeAlgoManager;
 
-    DevModeAlgoManager algo_manager = DevModeAlgoManager(algo_filenames);
-    algo_manager.initialize_client_manager(users);
-    for (auto& [_, client] : users.get_clients()) {
-        std::visit(
-            [&](auto&& arg) {
-                using t = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<t, manager::local_trader_t>) {
-                    arg.set_capital(1000000); // NOLINT(*)
-                    arg.set_start_delay(has_delay);
-                }
-            },
-            client
-        );
-    }
-    size_t num_users = spawning::spawn_all_clients(users);
-    rabbitmq::RabbitMQClientManager::wait_for_clients(users, num_users);
-    rabbitmq::RabbitMQClientManager::send_start_time(users, CLIENT_WAIT_SECS);
+        DevModeAlgoManager algo_manager = DevModeAlgoManager(algo_filenames);
+        algo_manager.initialize_client_manager(users);
+        for (auto& [_, trader] : users.get_traders()) {
+            if (trader->get_type() == manager::LOCAL) {
+                trader->set_capital(1000000);
+                trader->set_start_delay(has_delay);
+            }
+        }
+        size_t num_users = spawning::spawn_all_clients(users);
+        rabbitmq::RabbitMQClientManager::wait_for_clients(users, num_users);
+        rabbitmq::RabbitMQClientManager::send_start_time(users, CLIENT_WAIT_SECS);
+        logging::init(quill::LogLevel::Info);
+    };
+
+    // Make sure clients are initialized within 100ms
+    // This is just for testing utils, so it's okay
+
+    auto future = std::async(std::launch::async, init_clients);
+    return (
+        future.wait_for(std::chrono::milliseconds(100)) != std::future_status::timeout
+    );
 }
 } // namespace testing_utils
 } // namespace nutc

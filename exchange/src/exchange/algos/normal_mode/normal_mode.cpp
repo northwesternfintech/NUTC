@@ -1,7 +1,7 @@
 #include "normal_mode.hpp"
 
+#include "exchange/config.h"
 #include "exchange/curl/curl.hpp"
-#include "exchange/traders/trader_types.hpp"
 
 namespace nutc {
 namespace algo_mgmt {
@@ -15,9 +15,7 @@ NormalModeAlgoManager::initialize_client_manager(manager::ClientManager& users)
     for (const auto& [id, user] : firebase_users) {
         if (!user.contains("latestAlgoId"))
             continue;
-        users.add_client(
-            manager::remote_trader_t{id, user["latestAlgoId"].get<std::string>()}
-        );
+        users.add_remote_trader(id, user["latestAlgoId"].get<std::string>());
         num_clients_ += 1;
     }
 }

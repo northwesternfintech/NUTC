@@ -2,8 +2,7 @@
 
 #include "exchange/config.h"
 #include "exchange/logging.hpp"
-#include "exchange/traders/trader_types.hpp"
-#include "exchange/utils/file_operations/file_operations.hpp"
+#include "shared/file_operations/file_operations.hpp"
 
 #include <stdexcept>
 
@@ -15,13 +14,13 @@ DevModeAlgoManager::initialize_client_manager(manager::ClientManager& users)
 {
     auto handle_algos_provided_filenames = [&]() {
         for (const std::string& filepath : algo_filenames_.value())
-            users.add_client(manager::local_trader_t{filepath, filepath});
+            users.add_local_trader(filepath);
     };
 
     auto handle_algos_default_filenames = [&]() {
         for (size_t i = 0; i < num_clients_; i++) {
             std::string algo_id = std::string(ALGO_DIR) + "/algo_" + std::to_string(i);
-            users.add_client(manager::local_trader_t{algo_id});
+            users.add_local_trader(algo_id);
         }
     };
 
@@ -34,7 +33,10 @@ DevModeAlgoManager::initialize_client_manager(manager::ClientManager& users)
 void
 DevModeAlgoManager::initialize_files() const
 {
-    std::string content = file_ops::read_file_content("./template.py");
+    if (algo_filenames_.has_value())
+        return;
+
+    std::string content = file_ops::read_file_content("template.py");
     std::string dir_name = std::string(ALGO_DIR);
     if (!file_ops::create_directory(dir_name)) {
         throw std::runtime_error("Failed to create directory");

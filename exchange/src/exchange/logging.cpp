@@ -77,17 +77,11 @@ init(quill::LogLevel log_level)
 
     cfg.default_handlers.emplace_back(stdout_handler);
 
-    //
-    // Initialize rotating file handler
-    //
-    quill::RotatingFileHandlerConfig handler_cfg;
-
-    handler_cfg.set_rotation_max_file_size(LOG_FILE_SIZE);
-    handler_cfg.set_max_backup_files(LOG_BACKUP_COUNT);
+    auto handler_cfg = quill::FileHandlerConfig{};
     handler_cfg.set_open_mode('w');
 
     const std::string log_file = LOG_FILE;
-    auto file_handler = quill::rotating_file_handler(log_file, handler_cfg);
+    auto file_handler = quill::file_handler(log_file, handler_cfg);
 
     file_handler->set_pattern(
         LOGLINE_FORMAT,

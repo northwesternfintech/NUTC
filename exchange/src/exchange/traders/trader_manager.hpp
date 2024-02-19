@@ -1,6 +1,5 @@
 #pragma once
 // keep track of active users and account information
-#include "exchange/config.h"
 #include "shared/messages_exchange_to_wrapper.hpp"
 #include "trader_types.hpp"
 
@@ -13,64 +12,54 @@
 namespace nutc {
 namespace manager {
 
-using trader_t = std::variant<remote_trader_t, local_trader_t, bot_trader_t>;
-
 class ClientManager {
-    std::unordered_map<std::string, trader_t> traders_{};
+    std::unordered_map<std::string, std::unique_ptr<GenericTrader>> traders_;
 
 public:
+    void
+    add_remote_trader(const std::string& user_id, const std::string& algo_id)
+    {
+        traders_.emplace(user_id, std::make_unique<RemoteTrader>(user_id, algo_id));
+    }
+
+    void
+    add_local_trader(const std::string& algo_id)
+    {
+        traders_.emplace(algo_id, std::make_unique<LocalTrader>(algo_id));
+    }
+
+    // returns internal id
     [[nodiscard]] std::string
-    add_client(const trader_t& trader)
+    add_bot_trader()
     {
-        std::string user_id =
-            std::visit([](auto&& trader) { return trader.get_id(); }, trader);
-        traders_.emplace(user_id, trader);
-        return user_id;
+        std::unique_ptr<GenericTrader> bot = std::make_unique<BotTrader>();
+        std::string bot_id = bot->get_id();
+        traders_.emplace(bot_id, std::move(bot));
+        return bot_id;
     }
 
-    [[nodiscard]] trader_t&
-    get_client(const std::string& user_id)
+    [[nodiscard]] const std::unique_ptr<GenericTrader>&
+    get_trader(const std::string& trader_id) const
     {
-        assert(user_exists_(user_id));
-        return traders_.at(user_id);
+        assert(user_exists_(trader_id));
+        return traders_.at(trader_id);
     }
 
-    [[nodiscard]] float
-    get_holdings(const std::string& user_id, const std::string& ticker) const
+    [[nodiscard]] std::unique_ptr<GenericTrader>&
+    get_trader(const std::string& trader_id)
     {
-        assert(user_exists_(user_id));
-        return std::visit(
-            [&](auto&& trader) { return trader.get_holdings(ticker); },
-            traders_.at(user_id)
-        );
+        assert(user_exists_(trader_id));
+        return traders_.at(trader_id);
     }
 
-    [[nodiscard]] float
-    get_capital(const std::string& user_id) const
-    {
-        assert(user_exists_(user_id));
-        return std::visit(
-            [&](auto&& trader) { return trader.get_capital(); }, traders_.at(user_id)
-        );
-    }
-
-    [[nodiscard]] const trader_t&
-    get_client_const(const std::string& user_id) const
-    {
-        assert(user_exists_(user_id));
-        return traders_.at(user_id);
-    }
-
-    void initialize_from_firebase(const glz::json_t::object_t& users);
-
-    std::unordered_map<std::string, trader_t>&
-    get_clients()
+    std::unordered_map<std::string, std::unique_ptr<GenericTrader>>&
+    get_traders()
     {
         return traders_;
     }
 
-    const std::unordered_map<std::string, trader_t>&
-    get_clients_const() const
+    const std::unordered_map<std::string, std::unique_ptr<GenericTrader>>&
+    get_traders() const
     {
         return traders_;
     }

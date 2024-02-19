@@ -105,16 +105,32 @@ process_arguments(int argc, const char** argv)
 }
 
 void
-flush_log(int sig) // NOLINT(*)
+print_file_contents(const std::string& filepath)
+{
+    std::ifstream file(filepath);
+
+    if (!file) {
+        return;
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        std::cout << line << std::endl; // NOLINT
+    }
+}
+
+void
+flush_log(int)
 {
     nutc::events::Logger::get_logger().flush();
-    nutc::dashboard::close();
-    std::exit(0);
+    nutc::dashboard::Dashboard::get_instance().close();
+    print_file_contents("logs/error_log.txt");
+    std::exit(0); // NOLINT(concurrency-*)
 }
 
 // Initializes tick manager with brownian motion
 void
-initialize_ticker(const std::string& ticker, float starting_price)
+initialize_ticker(const std::string& ticker, double starting_price)
 {
     using nutc::dashboard::DashboardState;
     using nutc::engine_manager::EngineManager;
@@ -128,13 +144,9 @@ initialize_ticker(const std::string& ticker, float starting_price)
         EngineManager::get_instance().get_bot_container(ticker);
 
     // Should run after stale order removal, so they can react to removed orders
-    tick_manager.attach(&bot_container, PRIORITY::second);
+    tick_manager.attach(&bot_container, PRIORITY::second, "Bot Engine");
 
-    auto& metrics_manager = DashboardState::get_instance();
-    metrics_manager.add_ticker(ticker, starting_price);
-
-    auto& ticker_state = metrics_manager.get_ticker_state(ticker);
-    tick_manager.attach(&ticker_state, PRIORITY::third);
+    DashboardState::get_instance().add_ticker(ticker, starting_price);
 }
 
 // todo: please god clean this up
@@ -142,13 +154,13 @@ int
 main(int argc, const char** argv)
 {
     std::signal(SIGINT, flush_log);
+    std::signal(SIGABRT, flush_log);
 
     using namespace nutc; // NOLINT(*)
-
     // Set up logging
-    logging::init(quill::LogLevel::Error);
+    logging::init(quill::LogLevel::Info);
 
-    static constexpr uint16_t TICK_HZ = 30;
+    static constexpr uint16_t TICK_HZ = 60;
     nutc::ticks::TickManager::get_instance(TICK_HZ);
 
     initialize_ticker("ETH", 100);
@@ -157,26 +169,21 @@ main(int argc, const char** argv)
 
     auto& dashboard = nutc::dashboard::Dashboard::get_instance();
     nutc::ticks::TickManager::get_instance().attach(
-        &dashboard, nutc::ticks::PRIORITY::fourth
+        &dashboard, nutc::ticks::PRIORITY::fourth, "Dashboard Manager"
     );
 
-    bots::BotContainer& eth =
-        engine_manager::EngineManager::get_instance().get_bot_container("ETH");
-    bots::BotContainer& btc =
-        engine_manager::EngineManager::get_instance().get_bot_container("BTC");
-    bots::BotContainer& usd =
-        engine_manager::EngineManager::get_instance().get_bot_container("USD");
-    eth.add_mm_bot(50000);
-    eth.add_mm_bot(50000);
-    eth.add_mm_bot(50000);
-    btc.add_mm_bot(50000);
-    btc.add_mm_bot(50000);
-    usd.add_mm_bot(50000);
-
-    nutc::dashboard::init();
-
     auto& engine_manager = engine_manager::EngineManager::get_instance();
-    ticks::TickManager::get_instance().attach(&engine_manager, ticks::PRIORITY::first);
+
+    engine_manager.get_bot_container("ETH").add_mm_bots(100000, 10000, 5);
+    engine_manager.get_bot_container("BTC").add_mm_bots(25000, 5000, 10);
+    engine_manager.get_bot_container("USD").add_mm_bots(100000, 25000, 3);
+    engine_manager.get_bot_container("ETH").add_retail_bots(10, 3, 200);
+    engine_manager.get_bot_container("BTC").add_retail_bots(100, 5, 500);
+    engine_manager.get_bot_container("USD").add_retail_bots(100, 10, 100);
+
+    ticks::TickManager::get_instance().attach(
+        &engine_manager, ticks::PRIORITY::first, "Matching Engine"
+    );
     ticks::TickManager::get_instance().start();
 
     manager::ClientManager& users = manager::ClientManager::get_instance();
@@ -191,11 +198,14 @@ main(int argc, const char** argv)
         return 1;
     }
 
+    while (mode == Mode::BOTS_ONLY) {
+    } // spin forever, but keep rmq running. maybe remove this later?
+
     size_t num_clients{};
     using algo_mgmt::AlgoManager;
 
     auto initialize_dev_mode = [&]() {
-        log_t1(main, "Initializing NUTC in development mode");
+        log_i(main, "Initializing NUTC in development mode");
         using algo_mgmt::DevModeAlgoManager;
 
         DevModeAlgoManager manager = DevModeAlgoManager(DEBUG_NUM_USERS);
@@ -204,7 +214,7 @@ main(int argc, const char** argv)
 
     // Weird name because of shadowing
     auto initialize_sandbox_mode = [&, &sandbox = sandbox]() {
-        log_t1(main, "Initializing NUTC in sandbox mode");
+        log_i(main, "Initializing NUTC in sandbox mode");
         using algo_mgmt::SandboxAlgoManager;
 
         auto& [uid, algo_id] = sandbox.value(); // NOLINT (unchecked-*)
@@ -213,7 +223,7 @@ main(int argc, const char** argv)
     };
 
     auto initialize_normal_mode = [&]() {
-        log_t1(main, "Initializing NUTC in normal mode");
+        log_i(main, "Initializing NUTC in normal mode");
         using algo_mgmt::NormalModeAlgoManager;
 
         NormalModeAlgoManager manager = NormalModeAlgoManager();

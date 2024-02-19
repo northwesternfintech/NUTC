@@ -1,6 +1,4 @@
 #include "exchange/tickers/engine/engine.hpp"
-#include "shared/messages_exchange_to_wrapper.hpp"
-#include "shared/messages_wrapper_to_exchange.hpp"
 #include "test_utils/macros.hpp"
 
 #include <gtest/gtest.h>
@@ -15,15 +13,14 @@ protected:
     void
     SetUp() override
     {
-        using nutc::testing_utils::add_client_simple;
-        using nutc::testing_utils::modify_capital_simple;
-        using nutc::testing_utils::modify_holdings_simple;
+        manager_.add_local_trader("ABC");
+        manager_.add_local_trader("DEF");
 
-        add_client_simple(manager_, "ABC");
-        add_client_simple(manager_, "DEF");
+        manager_.get_trader("ABC")->modify_capital(STARTING_CAPITAL);
+        manager_.get_trader("DEF")->modify_capital(STARTING_CAPITAL);
 
-        modify_holdings_simple(manager_, "ABC", "ETHUSD", DEFAULT_QUANTITY);
-        modify_holdings_simple(manager_, "DEF", "ETHUSD", DEFAULT_QUANTITY);
+        manager_.get_trader("ABC")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+        manager_.get_trader("DEF")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     }
 
     void
@@ -45,11 +42,9 @@ protected:
 
 TEST_F(UnitBasicMatching, SimpleAddRemove)
 {
-    using nutc::testing_utils::get_capital_simple;
-    using nutc::testing_utils::modify_capital_simple;
-    float capital_1 = get_capital_simple(manager_, "ABC");
-    modify_capital_simple(manager_, "ABC", 100);
-    float capital_2 = get_capital_simple(manager_, "ABC");
+    double capital_1 = manager_.get_trader("ABC")->get_capital();
+    manager_.get_trader("ABC")->modify_capital(100);
+    double capital_2 = manager_.get_trader("ABC")->get_capital();
     ASSERT_EQ(capital_1 + 100, capital_2);
 }
 

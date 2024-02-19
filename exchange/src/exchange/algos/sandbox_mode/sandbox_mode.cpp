@@ -3,7 +3,7 @@
 #include "exchange/curl/curl.hpp"
 #include "exchange/logging.hpp"
 #include "exchange/traders/trader_types.hpp"
-#include "exchange/utils/file_operations/file_operations.hpp"
+#include "shared/file_operations/file_operations.hpp"
 
 #include <glaze/glaze.hpp>
 
@@ -18,11 +18,11 @@ SandboxAlgoManager::initialize_client_manager(manager::ClientManager& users)
     for (const auto& entry : std::filesystem::directory_iterator(ALGO_DIR)) {
         std::string algo_id = entry.path().filename().string();
         algo_id = algo_id.substr(0, algo_id.find(".py"));
-        users.add_client(manager::local_trader_t{algo_id});
+        users.add_local_trader(algo_id);
         num_clients_ += 1;
     }
 
-    users.add_client(manager::remote_trader_t{user_id_, algo_id_});
+    users.add_remote_trader(user_id_, algo_id_);
     num_clients_ += 1;
 }
 
