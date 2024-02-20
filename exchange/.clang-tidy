@@ -33,7 +33,9 @@ Checks: "\
   -hicpp-uppercase-literal-suffix,\
   -bugprone-easily-swappable-parameters,\
   -cppcoreguidelines-avoid-const-or-ref-data-members,\
-  -cppcoreguidelines-avoid-do-while"
+  -cppcoreguidelines-avoid-do-while, \
+  -*-magic-numbers, \
+  -*-vararg"
 WarningsAsErrors: false
 AnalyzeTemporaryDtors: false
 FormatStyle: file

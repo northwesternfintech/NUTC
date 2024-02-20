@@ -20,10 +20,14 @@ add_executable(NUTC_tests
   src/unit/matching/invalid_orders.cpp
   src/unit/matching/many_orders.cpp
 
+  src/unit/expiration/basic_expiration.cpp
+
   src/unit/logging/logging_orders.cpp
 
-  src/integration/basic_rmq.cpp
+  src/unit/misc/tick_manager.cpp
+
   src/integration/basic_algo.cpp
+  src/integration/time_based.cpp
   )
 
 target_include_directories(
@@ -34,7 +38,7 @@ target_include_directories(
 
 target_link_libraries(
   NUTC_tests PRIVATE
-  NUTC24_lib
+  EXCHANGE_lib 
   GTest::gtest_main
 )
 

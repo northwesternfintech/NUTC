@@ -1,7 +1,6 @@
-#include "config.h"
-#include "matching/engine/engine.hpp"
+#include "exchange/config.h"
+#include "exchange/tickers/engine/engine.hpp"
 #include "test_utils/macros.hpp"
-#include "utils/messages.hpp"
 
 #include <gtest/gtest.h>
 
@@ -15,22 +14,29 @@ protected:
     void
     SetUp() override
     {
-        using nutc::testing_utils::add_client_simple;
+        manager_.add_local_trader("ABC");
+        manager_.add_local_trader("DEF");
 
-        add_client_simple(manager_, "ABC");
-        add_client_simple(manager_, "DEF");
+        manager_.get_trader("ABC")->modify_capital(STARTING_CAPITAL);
+        manager_.get_trader("DEF")->modify_capital(STARTING_CAPITAL);
 
-        manager_.modify_holdings("ABC", "ETHUSD", DEFAULT_QUANTITY);
-        manager_.modify_holdings("DEF", "ETHUSD", DEFAULT_QUANTITY);
+        manager_.get_trader("ABC")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+        manager_.get_trader("DEF")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     }
 
-    ClientManager manager_; // NOLINT(*)
-    Engine engine_;         // NOLINT(*)
+    ClientManager& manager_ = nutc::manager::ClientManager::get_instance(); // NOLINT(*)
+    Engine engine_;                                                         // NOLINT(*)
+
+    nutc::matching::match_result_t
+    add_to_engine_(MarketOrder order)
+    {
+        return engine_.match_order(std::move(order), manager_);
+    }
 };
 
 TEST_F(UnitLoggingOrders, LogMarketOrders)
 {
-    manager_.modify_capital("ABC", -STARTING_CAPITAL);
+    manager_.get_trader("ABC")->modify_capital(-STARTING_CAPITAL);
 
     MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
     MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
@@ -46,8 +52,8 @@ TEST_F(UnitLoggingOrders, LogMatches)
     MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
     MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
 
-    auto [matches, ob_updates] = engine_.match_order(order1, manager_);
-    auto [matches2, ob_updates2] = engine_.match_order(order2, manager_);
+    auto [matches, ob_updates] = add_to_engine_(order1);
+    auto [matches2, ob_updates2] = add_to_engine_(order2);
 
     auto& logger = Logger::get_logger();
     EXPECT_NO_FATAL_FAILURE(logger.log_event(matches2.at(0)));

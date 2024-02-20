@@ -1,6 +1,7 @@
-#include "client_manager/client_manager.hpp"
-#include "matching/engine/engine.hpp"
-#include "utils/logger/logger.hpp"
+#include "exchange/tickers/engine/engine.hpp"
+#include "exchange/tickers/manager/ticker_manager.hpp"
+#include "exchange/traders/trader_manager.hpp"
+#include "exchange/utils/logger/logger.hpp"
 
 #include <limits>
 
@@ -9,35 +10,34 @@ using MarketOrder = nutc::messages::MarketOrder;
 using Logger = nutc::events::Logger;
 using ObUpdate = nutc::messages::ObUpdate;
 using ClientManager = nutc::manager::ClientManager;
+using EngineManager = nutc::engine_manager::EngineManager;
 using SIDE = nutc::messages::SIDE;
 
 namespace nutc {
 namespace testing_utils {
 bool is_nearly_equal(
-    float f_a, float f_b, float epsilon = std::numeric_limits<float>::epsilon()
+    double f_a, double f_b, double epsilon = std::numeric_limits<double>::epsilon()
 );
 
 bool validate_match(
     const Match& match, const std::string& ticker, const std::string& buyer_id,
-    const std::string& seller_id, messages::SIDE side, float price, float quantity
+    const std::string& seller_id, messages::SIDE side, double price, double quantity
 );
 
 bool validate_ob_update(
-    const ObUpdate& update, const std::string& ticker, messages::SIDE side, float price,
-    float quantity
+    const ObUpdate& update, const std::string& ticker, messages::SIDE side,
+    double price, double quantity
 );
 
 bool validate_market_order(
     const MarketOrder& update, const std::string& client_id, const std::string& ticker,
-    messages::SIDE side, float price, float quantity
+    messages::SIDE side, double price, double quantity
 );
-
-void add_client_simple(manager::ClientManager& manager, const std::string& client_id);
 
 } // namespace testing_utils
 } // namespace nutc
 
-#define EXPECT_EQ_MATCH(/* NOLINT(cppcoreguidelines-macro-usage) */                    \
+#define ASSERT_EQ_MATCH(/* NOLINT(cppcoreguidelines-macro-usage) */                    \
                         match, ticker_, buyer_id_, seller_id_, side_, price_,          \
                         quantity_                                                      \
 )                                                                                      \
@@ -58,7 +58,7 @@ void add_client_simple(manager::ClientManager& manager, const std::string& clien
             << ", price = " << (match).price << ", quantity = " << (match).quantity;   \
     } while (0)
 
-#define EXPECT_EQ_OB_UPDATE(/* NOLINT(cppcoreguidelines-macro-usage) */                \
+#define ASSERT_EQ_OB_UPDATE(/* NOLINT(cppcoreguidelines-macro-usage) */                \
                             update, ticker_, side_, price_, quantity_                  \
 )                                                                                      \
     do {                                                                               \
@@ -74,7 +74,7 @@ void add_client_simple(manager::ClientManager& manager, const std::string& clien
             << ", price = " << (update).price << ", quantity = " << (update).quantity; \
     } while (0)
 
-#define EXPECT_EQ_MARKET_ORDER(/* NOLINT (cppcoreguidelines-macro-usage) */            \
+#define ASSERT_EQ_MARKET_ORDER(/* NOLINT (cppcoreguidelines-macro-usage) */            \
                                update, client_id_, ticker_, side_, price_, quantity_   \
 )                                                                                      \
     do {                                                                               \
@@ -85,7 +85,8 @@ void add_client_simple(manager::ClientManager& manager, const std::string& clien
             << "Expected market order with client_id = " << (client_id_)               \
             << ", ticker =" << (ticker_) << ", side = " << static_cast<int>(side_)     \
             << ", price = " << (price_) << ", quantity = " << (quantity_)              \
-            << ". Actual update: ticker = " << (update).ticker                         \
+            << ". Actual update: client_id = " << (update).client_id                   \
+            << ", ticker = " << (update).ticker                                        \
             << ", side = " << static_cast<int>((update).side)                          \
             << ", price = " << (update).price << ", quantity = " << (update).quantity; \
     } while (0)

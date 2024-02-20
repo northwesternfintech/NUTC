@@ -5,6 +5,7 @@ export default interface AlgorithmType {
   fileIdKey: string;
   name: string;
   description: string;
+  sandboxLogFileURL?: string;
   lintFailureMessage?: string;
   lintSuccessMessage?: string;
 }

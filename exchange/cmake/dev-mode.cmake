@@ -7,10 +7,10 @@ endif()
 
 add_custom_target(
     run-exe
-    COMMAND NUTC24_exe
+    COMMAND EXCHANGE_exe 
     VERBATIM
 )
-add_dependencies(run-exe NUTC24_exe)
+add_dependencies(run-exe EXCHANGE_exe)
 
 option(BUILD_MCSS_DOCS "Build documentation using Doxygen and m.css" OFF)
 if(BUILD_MCSS_DOCS)

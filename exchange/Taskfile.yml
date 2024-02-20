@@ -1,7 +1,7 @@
 version: '3'
 
 env:
-  NAME: NUTC24
+  NAME: NUTC
 
 tasks:
   deps:
@@ -14,8 +14,12 @@ tasks:
     cmds:
       - cmake -D FIX=YES -P cmake/lint.cmake
 
+  new-log-dir:
+    cmds:
+      - rm -rf logs
+      - mkdir logs
+
   init:
-    dir: '{{.USER_WORKING_DIR}}'
     preconditions:
       - test -f CMakeUserPresets.json
     cmds:
@@ -32,21 +36,52 @@ tasks:
       - test -f CMakeUserPresets.json
     cmds:
       - cmake --build --preset=dev -j
+        
+  build-no-parallel:
+    dir: '{{.USER_WORKING_DIR}}'
+    preconditions:
+      - test -f CMakeUserPresets.json
+    cmds:
+      - cmake --build --preset=dev
 
   run:
-    dir: '{{.USER_WORKING_DIR}}'
+    env:
+      NUTC_WRAPPER_BINARY_PATH: "./build/dev/WRAPPER"
     cmds:
       - task: build
       - task: check-and-start-services
-      - ./build/dev/{{.NAME}}
+      - task: new-log-dir
+      - ./build/dev/{{.NAME}} 
 
+  bots:
+    env:
+      NUTC_WRAPPER_BINARY_PATH: "./build/dev/WRAPPER"
+    cmds:
+      - task: build
+      - task: check-and-start-services
+      - task: new-log-dir
+      - ./build/dev/{{.NAME}} --bots-only
+
+  run-with-gdb:
+    env:
+      NUTC_WRAPPER_BINARY_PATH: "./build/dev/WRAPPER"
+    cmds:
+      - task: build
+      - task: check-and-start-services
+      - task: new-log-dir
+      - gdb ./build/dev/{{.NAME}} 
+      
   dev:
+    env:
+      NUTC_WRAPPER_BINARY_PATH: "./build/dev/WRAPPER"
     cmds:
       - task: build
       - task: check-and-start-services
       - ./build/dev/{{.NAME}} --dev
 
   sandbox:
+    env:
+      NUTC_WRAPPER_BINARY_PATH: "./build/dev/WRAPPER"
     cmds:
       - task: build
       - task: check-and-start-services
@@ -65,18 +100,26 @@ tasks:
       - task: utest
       - task: itest
 
+
+  utest-with-gdb:
+    cmds:
+      - task: build
+      - gdb --args ./build/dev/test/NUTC_tests --preset=dev -R "Unit*"
+
   utest:
     cmds:
       - task: build
       - ctest --preset=dev -R "Unit*"
 
   itest:
+    env:
+      NUTC_WRAPPER_BINARY_PATH: "../WRAPPER"
     cmds:
       - task: build
       - task: check-and-start-services
       - mkdir -p build/dev/test/test_algos
       - cp -r test/test_algos/* build/dev/test/test_algos
-      - ctest --timeout 3 --preset=dev -R "Integration*"
+      - ctest --timeout 4 --preset=dev -R "Integration*"
 
   docs:
     dir: '{{.USER_WORKING_DIR}}'
@@ -92,7 +135,6 @@ tasks:
   default:
     cmds:
       - task: run
-
 
   lint:
     cmds:
