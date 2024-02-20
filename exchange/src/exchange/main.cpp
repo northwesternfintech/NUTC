@@ -157,34 +157,6 @@ main(int argc, const char** argv)
     std::signal(SIGABRT, flush_log);
 
     using namespace nutc; // NOLINT(*)
-    // Set up logging
-    logging::init(quill::LogLevel::Info);
-
-    static constexpr uint16_t TICK_HZ = 60;
-    nutc::ticks::TickManager::get_instance(TICK_HZ);
-
-    initialize_ticker("ETH", 100);
-    initialize_ticker("BTC", 200);
-    initialize_ticker("USD", 300);
-
-    auto& dashboard = nutc::dashboard::Dashboard::get_instance();
-    nutc::ticks::TickManager::get_instance().attach(
-        &dashboard, nutc::ticks::PRIORITY::fourth, "Dashboard Manager"
-    );
-
-    auto& engine_manager = engine_manager::EngineManager::get_instance();
-
-    engine_manager.get_bot_container("ETH").add_mm_bots(100000, 10000, 5);
-    engine_manager.get_bot_container("BTC").add_mm_bots(25000, 5000, 10);
-    engine_manager.get_bot_container("USD").add_mm_bots(100000, 25000, 3);
-    engine_manager.get_bot_container("ETH").add_retail_bots(10, 3, 200);
-    engine_manager.get_bot_container("BTC").add_retail_bots(100, 5, 500);
-    engine_manager.get_bot_container("USD").add_retail_bots(100, 10, 100);
-
-    ticks::TickManager::get_instance().attach(
-        &engine_manager, ticks::PRIORITY::first, "Matching Engine"
-    );
-    ticks::TickManager::get_instance().start();
 
     manager::ClientManager& users = manager::ClientManager::get_instance();
 
@@ -197,9 +169,6 @@ main(int argc, const char** argv)
         log_e(rabbitmq, "Failed to initialize connection");
         return 1;
     }
-
-    while (mode == Mode::BOTS_ONLY) {
-    } // spin forever, but keep rmq running. maybe remove this later?
 
     size_t num_clients{};
     using algo_mgmt::AlgoManager;
@@ -246,9 +215,39 @@ main(int argc, const char** argv)
 
     spawning::spawn_all_clients(users);
 
+    // Set up logging
+    logging::init(quill::LogLevel::Info);
+  
     // Run exchange
     rabbitmq::RabbitMQClientManager::wait_for_clients(users, num_clients);
     rabbitmq::RabbitMQClientManager::send_start_time(users, CLIENT_WAIT_SECS);
+
+    static constexpr uint16_t TICK_HZ = 60;
+    nutc::ticks::TickManager::get_instance(TICK_HZ);
+
+    initialize_ticker("ETH", 100);
+    initialize_ticker("BTC", 200);
+    initialize_ticker("USD", 300);
+
+    auto& dashboard = nutc::dashboard::Dashboard::get_instance();
+    nutc::ticks::TickManager::get_instance().attach(
+        &dashboard, nutc::ticks::PRIORITY::fourth, "Dashboard Manager"
+    );
+
+    auto& engine_manager = engine_manager::EngineManager::get_instance();
+
+    engine_manager.get_bot_container("ETH").add_mm_bots(100000, 10000, 5);
+    engine_manager.get_bot_container("BTC").add_mm_bots(25000, 5000, 10);
+    engine_manager.get_bot_container("USD").add_mm_bots(100000, 25000, 3);
+    engine_manager.get_bot_container("ETH").add_retail_bots(10, 3, 200);
+    engine_manager.get_bot_container("BTC").add_retail_bots(100, 5, 500);
+    engine_manager.get_bot_container("USD").add_retail_bots(100, 10, 100);
+
+    ticks::TickManager::get_instance().attach(
+        &engine_manager, ticks::PRIORITY::first, "Matching Engine"
+    );
+    ticks::TickManager::get_instance().start();
+
 
     // Main event loop
     rabbitmq::RabbitMQConsumer::handle_incoming_messages(users, engine_manager);

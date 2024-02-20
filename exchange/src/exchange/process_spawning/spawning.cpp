@@ -30,7 +30,7 @@ spawn_client(
     pid_t pid = fork();
     if (pid == 0) {
         std::vector<std::string> args = {
-            binary_path, "--uid", trader->get_id(), "--algo_id", trader->get_algo_id()
+            binary_path, "--uid", quote_id(trader->get_id()), "--algo_id", quote_id(trader->get_algo_id())
         };
 
         if (trader->get_type() == manager::LOCAL) {
@@ -49,7 +49,7 @@ spawn_client(
         c_args.push_back(nullptr);
 
         execvp(c_args[0], c_args.data());
-        log_e(client_spawning, "Failed to execute NUTC-client");
+        log_e(client_spawning, "Failed to execute NUTC wrapper");
         std::abort();
     }
     else if (pid < 0) { // Fork failed
