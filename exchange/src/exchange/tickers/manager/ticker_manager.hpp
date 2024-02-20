@@ -14,6 +14,7 @@ namespace engine_manager {
 class EngineManager : public nutc::ticks::TickObserver {
 public:
     matching::Engine& get_engine(const std::string& ticker);
+    bool has_engine(const std::string& ticker) const;
 
     bots::BotContainer&
     get_bot_container(const std::string& ticker)

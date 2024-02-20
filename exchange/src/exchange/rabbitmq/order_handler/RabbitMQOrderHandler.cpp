@@ -25,15 +25,18 @@ RabbitMQOrderHandler::handle_incoming_market_order(
     if (pos2 != std::string::npos) {
         buffer.replace(pos2, replace2.length(), R"("side":"ask")");
     }
+    if(clients.get_trader(order.client_id)->get_type() == manager::REMOTE)
+          log_i(rabbitmq, "Received market order: {}", buffer);
 
-    // log_i(rabbitmq, "Received market order: {}", buffer);
+    if(!engine_manager.has_engine(order.ticker)) {
+        return;
+    }
 
-    std::optional<std::reference_wrapper<matching::Engine>> engine =
+  matching::Engine& engine =
         engine_manager.get_engine(order.ticker);
-    assert(engine.has_value()); // TODO: FOR TESTING PURPOSES ONLY
     std::string client_id = order.client_id;
     auto [matches, ob_updates] =
-        engine.value().get().match_order(std::move(order), clients);
+        engine.match_order(std::move(order), clients);
     for (const auto& match : matches) {
         std::string buyer_id = match.buyer_id;
         std::string seller_id = match.seller_id;
