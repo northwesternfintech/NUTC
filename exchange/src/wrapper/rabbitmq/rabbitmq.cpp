@@ -69,7 +69,7 @@ RabbitMQ::handleIncomingMessages()
                     Match match = std::get<Match>(data);
                     std::string side =
                         match.side == messages::SIDE::BUY ? "BUY" : "SELL";
-                    nutc::pywrapper::get_trade_update_function()(
+                    nutc::pywrapper::get_trade_and_account_update_function()(
                         match.ticker, side, match.price, match.quantity
                     );
                     return;
@@ -83,7 +83,7 @@ RabbitMQ::handleIncomingMessages()
                     );*/
                     std::string side =
                         update.side == messages::SIDE::BUY ? "BUY" : "SELL";
-                    nutc::pywrapper::get_account_update_function()(
+                    nutc::pywrapper::get_trade_and_account_update_function()(
                         update.ticker, side, update.price, update.quantity,
                         update.capital_remaining
                     );

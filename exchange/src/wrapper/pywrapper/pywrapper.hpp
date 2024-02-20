@@ -21,21 +21,23 @@ namespace pywrapper {
  *
  * Designed to be triggered by the rabbitmq class when an orderbook update is received
  */
-py::object get_ob_update_function();
+inline const py::object
+get_ob_update_function()
+{
+    return py::globals()["strategy"].attr("on_orderbook_update");
+}
 
 /**
- * @brief Gets the callback function for trade updates
+ * @brief Gets the callback function for trade and account updates
  *
- * Designed to be triggered by the rabbitmq class when a trade update is received
+ * Designed to be triggered by the rabbitmq class when a trade or account update is
+ * received
  */
-py::object get_trade_update_function();
-
-/**
- * @brief Gets the callback function for account updates
- *
- * Designed to be triggered by the rabbitmq class when an account update is received
- */
-py::object get_account_update_function();
+inline const py::object
+get_trade_and_account_update_function()
+{
+    return py::globals()["strategy"].attr("on_trade_and_account_update");
+}
 
 /**
  * @brief Creates the Python API module

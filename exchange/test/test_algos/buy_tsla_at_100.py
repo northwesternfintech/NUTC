@@ -7,21 +7,30 @@ class Strategy:
     def __init__(self) -> None:
         """Your initialization code goes here."""
 
-    def on_trade_update(self, ticker: str, side: str, price: float, quantity: float) -> None:
-        """Called whenever two orders match. Could be one of your orders, or two other people's orders.
+    def on_trade_and_account_update(self, ticker: str, side: str, price: float, quantity: float, capital_remaining: float=None) -> None:
+        """Called whenever two orders match or one of your orders is filled.
+        Could be one of your orders, or two other people's orders.
 
         Parameters
         ----------
         ticker
             Ticker of orders that were matched
         side
-
+            Side (buy/sell)
         price
-            Price that trade was executed at
+            Price order executed at
         quantity
-            Volume traded
+            Volume traded or of order fulfilled
+        capital_remaining
+            Amount of capital after fulfilling order
         """
-        print(f"Python Trade update: {ticker} {side} {price} {quantity}")
+
+        if isinstance(capital_remaining, type(None)):
+            print(
+                f"Python Account update: {ticker} {side} {price} {quantity} {capital_remaining}"
+            )
+        else:
+            print(f"Python Trade update: {ticker} {side} {price} {quantity}")
 
     def on_orderbook_update(
         self, ticker: str, side: str, price: float, quantity: float
@@ -42,30 +51,3 @@ class Strategy:
         print(f"Python Orderbook update: {ticker} {side} {price} {quantity}")
         if(ticker=="TSLA" and price<101.0 and price>99.0):
             place_market_order("BUY", "TSLA", 10, 100)
-
-    def on_account_update(
-        self,
-        ticker: str,
-        side: str,
-        price: float,
-        quantity: float,
-        capital_remaining: float,
-    ) -> None:
-        """Called whenever one of your orders is filled.
-
-        Parameters
-        ----------
-        ticker
-            Ticker of order that was fulfilled
-        side
-            Side of order that was fulfilled
-        price
-            Price that order was fulfilled at
-        quantity
-            Volume of order that was fulfilled
-        capital_remaining
-            Amount of capital after fulfilling order
-        """
-        print(
-            f"Python Account update: {ticker} {side} {price} {quantity} {capital_remaining}"
-        )
