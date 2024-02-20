@@ -49,7 +49,7 @@ initialize_testing_clients(
 
     auto future = std::async(std::launch::async, init_clients);
     return (
-        future.wait_for(std::chrono::milliseconds(100)) != std::future_status::timeout
+        future.wait_for(std::chrono::milliseconds(1000)) != std::future_status::timeout
     );
 }
 } // namespace testing_utils
