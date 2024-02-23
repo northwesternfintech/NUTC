@@ -91,7 +91,6 @@ get_main_logger()
     class ____dummy_##category // makes you add a semicolon
 
 // Create loggers here for every category
-CREATE_LOG_CATEGORY(linting);
 CREATE_LOG_CATEGORY(mock_runtime);
 CREATE_LOG_CATEGORY(mock_api);
 CREATE_LOG_CATEGORY(redis);
@@ -99,6 +98,10 @@ CREATE_LOG_CATEGORY(web);
 CREATE_LOG_CATEGORY(libcurl);
 CREATE_LOG_CATEGORY(rabbitmq);
 CREATE_LOG_CATEGORY(firebase);
+CREATE_LOG_CATEGORY(crow);
+CREATE_LOG_CATEGORY(crow_watchdog);
+CREATE_LOG_CATEGORY(timeout_watchdog);
+CREATE_LOG_CATEGORY(linting);
 
 #undef CREATE_LOG_CATEGORY
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)

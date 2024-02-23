@@ -1,6 +1,7 @@
 #include "crow.hpp"
 
 #include "common.hpp"
+#include "config.h"
 #include "firebase/fetching.hpp"
 
 namespace nutc {
@@ -44,7 +45,7 @@ get_server_thread()
 
             // Watchdog to check for crash/pending after
             // LINT_ABSOLUTE_TIMEOUT_SECONDS seconds (default 130s)
-            std::thread check_pending_thread([&algo_id = algo_id, &uid = uid]() {
+            std::thread check_pending_thread([algo_id, uid]() {
                 std::this_thread::sleep_for(
                     std::chrono::seconds(LINT_ABSOLUTE_TIMEOUT_SECONDS)
                 );
@@ -68,7 +69,7 @@ get_server_thread()
                             nutc::client::set_lint_failure(uid, algo_id, error_msg);
 
                             log_e(
-                                main,
+                                crow_watchdog,
                                 "Algo id {} for uid {} still pending after {}s. FORCE "
                                 "PUSHING "
                                 "failure to Firebase.",
@@ -82,7 +83,7 @@ get_server_thread()
                         {
                             // can add a push to firebase here
                             log_e(
-                                main,
+                                crow_watchdog,
                                 "Algo id {} for uid {} unknown status after {}s.",
                                 algo_id,
                                 uid,
@@ -93,7 +94,7 @@ get_server_thread()
                     default:
                         {
                             log_i(
-                                main,
+                                crow_watchdog,
                                 "Algo id {} for uid {} looks ok {}s.",
                                 algo_id,
                                 uid,
@@ -106,6 +107,24 @@ get_server_thread()
             check_pending_thread.detach();
 
             spawning::spawn_client(uid, algo_id);
+
+            for (int i = 0; i <= LINT_ABSOLUTE_TIMEOUT_SECONDS; i++) {
+                if (nutc::client::get_algo_status(uid, algo_id)
+                    != nutc::client::LintingResultOption::PENDING) {
+                    log_i(
+                        crow, "Algo id {} for uid {} finished linting.", algo_id, uid
+                    );
+                    break;
+                }
+                log_i(
+                    crow,
+                    "Algo id {} for uid {} still pending after {}s.",
+                    algo_id,
+                    uid,
+                    i
+                );
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+            }
 
             res.body = "OK";
             res.code = 200;
