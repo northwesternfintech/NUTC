@@ -76,11 +76,11 @@ main(int argc, const char** argv)
     std::stringstream ss;
 
     // Watchdog to kill after LINT_AUTO_TIMEOUT_SECONDS (default 120)
-    std::thread timeout_thread([&ss = ss, &algoid = algoid, &uid = uid]() {
+    std::thread timeout_thread([&ss, algoid, uid]() {
         std::this_thread::sleep_for(std::chrono::seconds(LINT_AUTO_TIMEOUT_SECONDS));
 
         log_e(
-            main,
+            timeout_watchdog,
             "Timeout reached ({}s). Exiting process. Failed lint for algoid {} and uid "
             "{}.",
             LINT_AUTO_TIMEOUT_SECONDS,
@@ -90,13 +90,17 @@ main(int argc, const char** argv)
         ss << fmt::format("[linter] FAILED to lint algo_id {} for uid {}", algoid, uid)
            << "\n";
 
-        nutc::client::set_lint_failure(uid, algoid, ss.str() + "Failure!\n");
-        std::exit(1);
+        nutc::client::set_lint_failure(
+            uid,
+            algoid,
+            ss.str()
+                + "\nUnknown failure. Reach out to nuft@northwestern.edu for help\n"
+        );
     });
     timeout_thread.detach();
 
     // Log this event
-    log_i(main, "Linting algo_id: {} for user: {}", algoid, uid);
+    log_i(timeout_watchdog, "Linting algo_id: {} for user: {}", algoid, uid);
     ss << fmt::format("[linter] starting to lint algo_id {} for uid {}", algoid, uid)
        << "\n";
 
@@ -106,7 +110,7 @@ main(int argc, const char** argv)
     // Actually lint the algo and set success
     std::string response = nutc::lint::lint(uid, algoid, ss);
 
-    log_i(main, "Finished linting algo_id: {} for user: {}", algoid, uid);
+    log_i(timeout_watchdog, "Finished linting algo_id: {} for user: {}", algoid, uid);
     ss << fmt::format(
         "[linter] exited linting process and finished linting {} for uid {}",
         algoid,

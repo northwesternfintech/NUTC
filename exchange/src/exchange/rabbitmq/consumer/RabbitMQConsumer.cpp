@@ -32,6 +32,10 @@ RabbitMQConsumer::handle_incoming_messages(
                         engine_manager, clients, std::forward<t>(arg)
                     );
                 }
+                else {
+                    log_e(rabbitmq, "Unknown message type");
+                    std::abort();
+                }
             },
             std::move(incoming_message)
         );

@@ -69,10 +69,6 @@ find_package(argparse REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC argparse::argparse)
 
 
-# libzip
-find_package(libzip REQUIRED)
-target_link_libraries(EXCHANGE_lib PUBLIC libzip::zip)
-
 # Fmt
 find_package(fmt REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC fmt::fmt)
@@ -94,24 +90,29 @@ find_package(glaze REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC glaze::glaze)
 
 # ---- DASHBOARD ----------
-add_library(
-    DASHBOARD_lib OBJECT
-    src/exchange/dashboard/dashboard.cpp
-)
+option(DASHBOARD "Enable NUTC Dashboard" OFF)
 
-target_link_libraries(DASHBOARD_lib PUBLIC EXCHANGE_lib)
+if(DASHBOARD)
+  add_definitions(-DDASHBOARD)
+  add_library(
+      DASHBOARD_lib OBJECT
+      src/exchange/dashboard/dashboard.cpp
+  )
 
-target_include_directories(
-    DASHBOARD_lib ${warning_guard}
-    PUBLIC
-    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
-)
+  target_link_libraries(DASHBOARD_lib PUBLIC EXCHANGE_lib)
+
+  target_include_directories(
+      DASHBOARD_lib ${warning_guard}
+      PUBLIC
+      "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
+  )
 
 # ncurses 
-find_package(Curses REQUIRED)
-target_link_libraries(DASHBOARD_lib PUBLIC Curses::Curses)
+  find_package(Curses REQUIRED)
+  target_link_libraries(DASHBOARD_lib PUBLIC Curses::Curses)
 
-target_compile_features(DASHBOARD_lib PUBLIC cxx_std_20)
+  target_compile_features(DASHBOARD_lib PUBLIC cxx_std_20)
+endif()
 
 # ---- Declare executable ----
 
@@ -123,19 +124,19 @@ set_property(TARGET EXCHANGE_exe PROPERTY OUTPUT_NAME NUTC)
 target_compile_features(EXCHANGE_exe PRIVATE cxx_std_20)
 
 target_link_libraries(EXCHANGE_exe PRIVATE EXCHANGE_lib)
-target_link_libraries(EXCHANGE_exe PRIVATE DASHBOARD_lib)
+
+if(DASHBOARD)
+  target_link_libraries(EXCHANGE_exe PRIVATE DASHBOARD_lib)
+  target_link_libraries(EXCHANGE_exe PRIVATE Curses::Curses)
+endif()
 
 # quill
 target_link_libraries(EXCHANGE_exe PRIVATE quill::quill)
 
-# ncurses
-target_link_libraries(EXCHANGE_exe PRIVATE Curses::Curses)
 
 # fmt
 target_link_libraries(EXCHANGE_exe PRIVATE fmt::fmt)
 
-# libzip
-target_link_libraries(EXCHANGE_exe PUBLIC libzip::zip)
 
 # rabbitmq
 find_package(rabbitmq-c REQUIRED)

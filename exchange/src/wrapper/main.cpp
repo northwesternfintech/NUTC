@@ -24,12 +24,11 @@ static wrapper_args
 process_arguments(int argc, const char** argv)
 {
     argparse::ArgumentParser program(
-        "NUTC Client", VERSION, argparse::default_arguments::help
+        "NUTC Wrapper", VERSION, argparse::default_arguments::help
     );
 
     program.add_argument("-D", "--dev")
         .help("Enable development features")
-        .action([](const auto& /* unused */) {})
         .default_value(false)
         .implicit_value(true)
         .nargs(0);
@@ -62,7 +61,7 @@ process_arguments(int argc, const char** argv)
     program.add_argument("-V", "--version")
         .help("prints version information and exits")
         .action([&](const auto& /* unused */) {
-            fmt::println("NUTC Client v{}", VERSION);
+            fmt::println("NUTC wrapper v{}", VERSION);
             exit(0); // NOLINT(concurrency-*)
         })
         .default_value(false)
@@ -103,7 +102,7 @@ main(int argc, const char** argv)
 
     // Start logging and print build info
     nutc::logging::init(verbosity);
-    log_i(main, "Starting NUTC Client for UID {}", uid);
+    log_i(main, "Starting NUTC wrapper for UID {}", uid);
 
     // Initialize the RMQ connection to the exchange
     nutc::rabbitmq::RabbitMQ conn(uid);
