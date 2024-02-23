@@ -3,9 +3,11 @@
 #include "algos/normal_mode/normal_mode.hpp"
 #include "algos/sandbox_mode/sandbox_mode.hpp"
 #include "config.h"
-#include "dashboard/dashboard.hpp"
+#ifdef DASHBOARD
+#  include "dashboard/dashboard.hpp"
+#  include "exchange/dashboard/state/global_metrics.hpp"
+#endif
 #include "exchange/bots/bot_container.hpp"
-#include "exchange/dashboard/state/global_metrics.hpp"
 #include "exchange/tick_manager/tick_manager.hpp"
 #include "logging.hpp"
 #include "process_spawning/spawning.hpp"
@@ -123,7 +125,11 @@ void
 flush_log(int)
 {
     nutc::events::Logger::get_logger().flush();
+
+#ifdef DASHBOARD
     nutc::dashboard::Dashboard::get_instance().close();
+#endif
+
     print_file_contents("logs/error_log.txt");
     std::exit(0); // NOLINT(concurrency-*)
 }
@@ -132,7 +138,6 @@ flush_log(int)
 void
 initialize_ticker(const std::string& ticker, double starting_price)
 {
-    using nutc::dashboard::DashboardState;
     using nutc::engine_manager::EngineManager;
     using nutc::ticks::PRIORITY;
     using nutc::ticks::TickManager;
@@ -146,7 +151,9 @@ initialize_ticker(const std::string& ticker, double starting_price)
     // Should run after stale order removal, so they can react to removed orders
     tick_manager.attach(&bot_container, PRIORITY::second, "Bot Engine");
 
-    DashboardState::get_instance().add_ticker(ticker, starting_price);
+#ifdef DASHBOARD
+    nutc::dashboard::DashboardState::get_instance().add_ticker(ticker, starting_price);
+#endif
 }
 
 // todo: please god clean this up
@@ -217,7 +224,7 @@ main(int argc, const char** argv)
 
     // Set up logging
     logging::init(quill::LogLevel::Info);
-  
+
     // Run exchange
     rabbitmq::RabbitMQClientManager::wait_for_clients(users, num_clients);
     rabbitmq::RabbitMQClientManager::send_start_time(users, CLIENT_WAIT_SECS);
@@ -229,10 +236,12 @@ main(int argc, const char** argv)
     initialize_ticker("BTC", 200);
     initialize_ticker("USD", 300);
 
+#ifdef DASHBOARD
     auto& dashboard = nutc::dashboard::Dashboard::get_instance();
     nutc::ticks::TickManager::get_instance().attach(
         &dashboard, nutc::ticks::PRIORITY::fourth, "Dashboard Manager"
     );
+#endif
 
     auto& engine_manager = engine_manager::EngineManager::get_instance();
 
@@ -247,7 +256,6 @@ main(int argc, const char** argv)
         &engine_manager, ticks::PRIORITY::first, "Matching Engine"
     );
     ticks::TickManager::get_instance().start();
-
 
     // Main event loop
     rabbitmq::RabbitMQConsumer::handle_incoming_messages(users, engine_manager);

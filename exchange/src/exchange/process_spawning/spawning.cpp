@@ -30,7 +30,8 @@ spawn_client(
     pid_t pid = fork();
     if (pid == 0) {
         std::vector<std::string> args = {
-            binary_path, "--uid", quote_id(trader->get_id()), "--algo_id", quote_id(trader->get_algo_id())
+            binary_path, "--uid", quote_id(trader->get_id()), "--algo_id",
+            quote_id(trader->get_algo_id())
         };
 
         if (trader->get_type() == manager::LOCAL) {

@@ -12,10 +12,7 @@ RabbitMQClientManager::wait_for_clients(
     manager::ClientManager& manager, size_t num_clients
 )
 {
-    log_i(
-        rabbitmq, "Blocking until all {} clients are ready to start...",
-        num_clients
-    );
+    log_i(rabbitmq, "Blocking until all {} clients are ready to start...", num_clients);
     int num_running = 0;
 
     auto process_message = [&](const auto& message) {
