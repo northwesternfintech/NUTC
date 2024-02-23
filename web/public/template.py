@@ -81,7 +81,7 @@ class Strategy:
         quantity
             Volume of order that was fulfilled
         capital_remaining
-            Ammount of capital after fulfilling order
+            Amount of capital after fulfilling order
         """
         print(
             f"Python Account update: {ticker} {side} {price} {quantity} {capital_remaining}"
