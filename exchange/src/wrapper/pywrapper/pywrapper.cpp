@@ -1,5 +1,7 @@
 #include "pywrapper.hpp"
 
+#include <fmt/format.h>
+
 namespace nutc {
 namespace pywrapper {
 
@@ -40,14 +42,14 @@ get_account_update_function()
 }
 
 void
-run_code_init(const std::string& py_code)
+run_code_init(const std::string& py_code, const std::string& uid)
 {
     py::exec(py_code);
     py::exec(R"(
         def place_market_order(side, ticker, quantity, price):
             nutc_api.publish_market_order(side, ticker, quantity, price)
     )");
-    py::exec("strategy = Strategy()");
+    py::exec(fmt::format("strategy = Strategy({})", uid));
 }
 
 } // namespace pywrapper

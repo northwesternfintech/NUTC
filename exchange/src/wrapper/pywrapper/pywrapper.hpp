@@ -54,6 +54,7 @@ void create_api_module(
 /**
  * @brief Runs the initialize() function in the client algorithm
  */
-void run_code_init(const std::string& py_code);
+void run_code_init(const std::string& py_code, const std::string& uid);
+
 } // namespace pywrapper
 } // namespace nutc
