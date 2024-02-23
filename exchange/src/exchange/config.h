@@ -4,7 +4,7 @@
 
 #define VERSION          "1.0"
 #define STARTING_CAPITAL 100000
-#define DEBUG_NUM_USERS  2
+#define DEBUG_NUM_USERS  1
 
 #define CLIENT_WAIT_SECS 3
 #define ORDER_EXPIRATION_TIME 10

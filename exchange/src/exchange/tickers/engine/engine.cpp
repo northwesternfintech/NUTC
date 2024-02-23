@@ -59,7 +59,7 @@ void
 add_ob_update(std::vector<ObUpdate>& vec, StoredOrder& order, double quantity)
 {
     ObUpdate update{order.ticker, order.side, order.price, quantity};
-    if (order.trader->get_type() == manager::REMOTE) {
+    if (order.trader->get_type() != manager::BOT) {
         events::Logger& logger = events::Logger::get_logger();
         logger.log_event(update);
     }
@@ -199,8 +199,8 @@ Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
         buy_order.quantity -= quantity_to_match;
         sell_order.quantity -= quantity_to_match;
 
-        if (sell_order.trader->get_type() == manager::REMOTE
-            || buy_order.trader->get_type() == manager::REMOTE) {
+        if (sell_order.trader->get_type() != manager::BOT
+            || buy_order.trader->get_type() != manager::BOT) {
             logger.log_event(to_match);
         }
         result.matches.push_back(to_match);
