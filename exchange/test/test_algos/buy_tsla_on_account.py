@@ -5,8 +5,9 @@ def place_market_order(side: str, ticker: str, quantity: float, price: float) ->
 class Strategy:
     """Template for a strategy."""
 
-    def __init__(self) -> None:
+    def __init__(self, uid: str) -> None:
         """Your initialization code goes here."""
+        self.uid = uid
         place_market_order("BUY", "TSLA", 10, 102)
 
     def on_trade_update(

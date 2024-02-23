@@ -4,8 +4,9 @@ def place_market_order(side: str, ticker: str, quantity: float, price: float) ->
 class Strategy:
     """Template for a strategy."""
 
-    def __init__(self) -> None:
+    def __init__(self, uid: str) -> None:
         """Your initialization code goes here."""
+        self.uid = uid
 
     def on_trade_update(self, ticker: str, side: str, price: float, quantity: float) -> None:
         """Called whenever two orders match. Could be one of your orders, or two other people's orders.
