@@ -16,7 +16,6 @@ class Recipe(ConanFile):
         self.requires("libcurl/8.2.1")
         self.requires("argparse/2.9")
         self.requires("glaze/1.3.5")
-        self.requires("ncurses/6.4")
 
         # Wrapper
         self.requires("pybind11/2.10.4")

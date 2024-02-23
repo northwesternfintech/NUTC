@@ -3,9 +3,12 @@
 namespace nutc {
 namespace engine_manager {
 
-    bool EngineManager::has_engine(const std::string& ticker) const {
-        return engines_.find(ticker) != engines_.end();
-    }
+bool
+EngineManager::has_engine(const std::string& ticker) const
+{
+    return engines_.find(ticker) != engines_.end();
+}
+
 matching::Engine&
 EngineManager::get_engine(const std::string& ticker)
 {

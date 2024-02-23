@@ -6,7 +6,7 @@ RUN pip install conan numpy pandas polars scipy scikit-learn \
     && apt install -y --no-install-recommends build-essential libssl-dev cmake git
 
 WORKDIR /app/exchange
-COPY ./exchange/conanfile.py /app/exchange
+COPY ./exchange/conanfile_no_ncurses.py /app/exchange/conanfile.py
 COPY ./.github/scripts/conan-profile.sh /app/exchange
 
 RUN cat conan-profile.sh | bash \

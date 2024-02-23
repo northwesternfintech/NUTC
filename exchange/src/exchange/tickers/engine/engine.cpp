@@ -58,7 +58,12 @@ Engine::on_tick(uint64_t new_tick, uint8_t order_expire_age)
 void
 add_ob_update(std::vector<ObUpdate>& vec, StoredOrder& order, double quantity)
 {
-    vec.push_back(ObUpdate{order.ticker, order.side, order.price, quantity});
+    ObUpdate update{order.ticker, order.side, order.price, quantity};
+    if (order.trader->get_type() == manager::REMOTE) {
+        events::Logger& logger = events::Logger::get_logger();
+        logger.log_event(update);
+    }
+    vec.push_back(std::move(update));
 }
 
 bool
@@ -95,17 +100,6 @@ Engine::match_order(MarketOrder&& order, manager::ClientManager& manager)
     add_order(stored_order);
 
     match_result_t res = attempt_matches_(manager, stored_order);
-
-    events::Logger& logger = events::Logger::get_logger();
-
-    // Log information from res
-    for (const auto& match : res.matches) {
-        logger.log_event(match);
-    }
-
-    for (const auto& ob_update : res.ob_updates) {
-        logger.log_event(ob_update);
-    }
 
     return res;
 }
@@ -147,6 +141,8 @@ Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
     match_result_t result;
     double aggressive_quantity = aggressive_order.quantity;
     uint64_t aggressive_index = aggressive_order.order_index;
+
+    events::Logger& logger = events::Logger::get_logger();
 
     while (can_match_orders_()) {
         StoredOrder& sell_order_ref =
@@ -203,9 +199,10 @@ Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
         buy_order.quantity -= quantity_to_match;
         sell_order.quantity -= quantity_to_match;
 
-        events::Logger& logger = events::Logger::get_logger();
-        logger.log_event(to_match);
-
+        if (sell_order.trader->get_type() == manager::REMOTE
+            || buy_order.trader->get_type() == manager::REMOTE) {
+            logger.log_event(to_match);
+        }
         result.matches.push_back(to_match);
 
         bool sell_aggressive = sell_order.order_index == aggressive_index;
