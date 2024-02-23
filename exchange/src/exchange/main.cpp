@@ -189,7 +189,7 @@ main(int argc, const char** argv)
     };
 
     // Weird name because of shadowing
-    auto initialize_sandbox_mode = [&, &sandbox = sandbox]() {
+    auto initialize_sandbox_mode = [&]() {
         log_i(main, "Initializing NUTC in sandbox mode");
         using algo_mgmt::SandboxAlgoManager;
 

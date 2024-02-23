@@ -1,4 +1,3 @@
-#include "wrapper/common.hpp"
 #include "wrapper/dev_mode/dev_mode.hpp"
 #include "wrapper/firebase/firebase.hpp"
 #include "wrapper/pywrapper/pywrapper.hpp"

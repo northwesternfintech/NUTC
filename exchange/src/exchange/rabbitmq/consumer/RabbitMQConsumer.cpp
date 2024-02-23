@@ -55,6 +55,23 @@ RabbitMQConsumer::consume_message_as_string()
 
     if (res.reply_type != AMQP_RESPONSE_NORMAL) {
         log_e(rabbitmq, "Failed to consume message.");
+        switch (res.reply_type) {
+            case AMQP_RESPONSE_LIBRARY_EXCEPTION:
+                log_e(
+                    rabbitmq, "Library exception: {}",
+                    amqp_error_string2(res.library_error)
+                );
+                break;
+            case AMQP_RESPONSE_SERVER_EXCEPTION:
+                log_e(rabbitmq, "Server exception: {}", res.reply.id);
+                break;
+            case AMQP_RESPONSE_NONE:
+                log_e(rabbitmq, "No response from server.");
+                break;
+            default:
+                log_e(rabbitmq, "Unknown error.");
+                break;
+        }
         return std::nullopt;
     }
 
