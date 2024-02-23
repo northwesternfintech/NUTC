@@ -49,7 +49,7 @@ run_initialization()
 {
     log_i(mock_runtime, "Running initialization code");
     try {
-        py::exec("strategy = Strategy()");
+        py::exec("strategy = Strategy('LINTER_TEST_UID')");
     }
 
     catch (const std::exception& e) {
