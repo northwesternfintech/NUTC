@@ -49,7 +49,7 @@ run_code_init(const std::string& py_code, const std::string& uid)
         def place_market_order(side, ticker, quantity, price):
             nutc_api.publish_market_order(side, ticker, quantity, price)
     )");
-    py::exec(fmt::format("strategy = Strategy({})", uid));
+    py::exec(fmt::format("strategy = Strategy('{}')", uid));
 }
 
 } // namespace pywrapper
