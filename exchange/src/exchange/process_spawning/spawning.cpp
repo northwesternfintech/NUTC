@@ -65,14 +65,16 @@ size_t
 spawn_all_clients(nutc::manager::ClientManager& users)
 {
     const char* wrapper_binary_location = std::getenv("NUTC_WRAPPER_BINARY_PATH");
-    if (wrapper_binary_location == nullptr) [[unlikely]] {
-        log_e(
-            client_spawning,
-            "Failed to get NUTC_WRAPPER_BINARY_PATH from environment variable"
-        );
-        exit(1);
-    }
+    assert(
+        wrapper_binary_location != nullptr
+        && "NUTC_WRAPPER_BINARY_PATH environment variable not set"
+    );
+
     const std::string wrapper_binary_path(wrapper_binary_location);
+    assert(
+        file_ops::file_exists(wrapper_binary_path)
+        && "NUTC_WRAPPER_BINARY_PATH does not exist"
+    );
 
     size_t num_clients = 0;
     auto spawn_one_trader = [&](const std::unique_ptr<manager::GenericTrader>& trader) {
