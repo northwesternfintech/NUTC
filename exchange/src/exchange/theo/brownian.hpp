@@ -50,9 +50,6 @@ public:
         set_seed(seed);
     }
 
-    // Generates and returns the change in price, i.e. dp/dt
-    [[nodiscard]] double
-    generate_change_in_price(double mean, double stdev, Signedness sign);
     // Generates and returns the next price based on previous prices
     double generate_next_price();
 
