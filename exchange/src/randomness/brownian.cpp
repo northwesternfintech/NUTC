@@ -23,7 +23,7 @@ BrownianMotion::generate_change_in_price(double mean, double stdev, Signedness s
         return distribution(random_number_generator_);
     }
     else {
-        short multiplier = (sign == Signedness::Positive ? 1 : -1);
+        short multiplier = static_cast<short>(sign);
         return multiplier * abs(distribution(random_number_generator_));
     }
 }
@@ -33,9 +33,8 @@ BrownianMotion::generate_next_price()
 {
     if (ticker_ > 0) {
         ticker_--;
-        Signedness sign = ticking_up_ ? Signedness::Positive : Signedness::Negative;
         cur_value_ += generate_change_in_price(
-            -cur_value_ / SKEW_SCALE, BROWNIAN_MOTION_DEVIATION, sign
+            -cur_value_ / SKEW_SCALE, BROWNIAN_MOTION_DEVIATION, signedness
         );
         return cur_value_;
     }
@@ -51,7 +50,8 @@ BrownianMotion::generate_next_price()
         ticker_ = static_cast<size_t>(abs(distribution(random_number_generator_)));
 
         // Whether to tick up or tick down
-        ticking_up_ = distribution(random_number_generator_) > 0.5;
+        bool ticking_up = distribution(random_number_generator_) > 0.5;
+        signedness = ticking_up ? Signedness::Positive : Signedness::Negative;
 
         // Generate new price
         cur_value_ += generate_change_in_price(

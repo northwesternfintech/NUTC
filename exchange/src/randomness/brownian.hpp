@@ -27,7 +27,7 @@ class BrownianMotion {
 
     // Control the actual ticking, whereby market events are slowed over many ticks
     size_t ticker_ = 0;
-    bool ticking_up_ = false;
+    Signedness signedness = Signedness::DoesntMatter;
 
 public:
     // Default constructor for BrownianMotion, takes nothing
@@ -40,12 +40,9 @@ public:
     // Constructor for BrownianMotion, takes a seed
     explicit BrownianMotion(const unsigned int seed) : cur_value_(0)
     {
-        random_number_generator_ = std::mt19937(seed);
+        set_seed(seed);
     }
 
-    // Generates and returns the change in price, i.e. dp/dt
-    [[nodiscard]] double
-    generate_change_in_price(double mean, double stdev, Signedness sign);
     // Generates and returns the next price based on previous prices
     [[nodiscard]] double generate_next_price();
 
@@ -69,6 +66,11 @@ public:
     {
         random_number_generator_ = std::mt19937(new_seed);
     }
+
+private:
+    // Generates and returns the change in price, i.e. dp/dt
+    [[nodiscard]] double
+    generate_change_in_price(double mean, double stdev, Signedness sign);
 };
 
 } // namespace stochastic
