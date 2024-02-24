@@ -205,6 +205,18 @@ target_link_libraries(WRAPPER_exe PRIVATE pybind11::pybind11)
 target_link_libraries(WRAPPER_exe PRIVATE Python3::Python)
 target_link_libraries(WRAPPER_exe PRIVATE ${Python3_LIBRARIES})
 
+# Enable lto for release builds
+include(CheckIPOSupported)
+check_ipo_supported(RESULT lto_supported OUTPUT error)
+if(lto_supported)
+  set_target_properties(WRAPPER_lib PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+  set_target_properties(WRAPPER_exe PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+  set_target_properties(EXCHANGE_lib PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+  set_target_properties(EXCHANGE_exe PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+else()
+    message(WARNING "LTO is not supported: ${error}")
+endif()
+
 # ---- Install rules ----
 
 if(NOT CMAKE_SKIP_INSTALL_RULES)
@@ -221,5 +233,3 @@ elseif(NOT PROJECT_IS_TOP_LEVEL)
       "Developer mode is intended for developers of NUTC24"
   )
 endif()
-
-include(cmake/dev-mode.cmake)
