@@ -272,6 +272,8 @@ RabbitMQ::waitForStartTime(bool skip_start_wait)
             );
         std::this_thread::sleep_until(wait_until);
 
+        log_i(wrapper_rabbitmq, "Done sleeping, start time: {}", start.start_time_ns);
+
         return;
     }
     else {

@@ -45,7 +45,7 @@ run_code_init(const std::string& py_code)
     py::exec(py_code);
     py::exec(R"(
         def place_market_order(side, ticker, quantity, price):
-            nutc_api.publish_market_order(side, ticker, quantity, price)
+            return nutc_api.publish_market_order(side, ticker, quantity, price)
     )");
     py::exec("strategy = Strategy()");
 }
