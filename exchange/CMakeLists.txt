@@ -223,9 +223,10 @@ if(NOT CMAKE_SKIP_INSTALL_RULES)
   include(cmake/install-rules.cmake)
 endif()
 
-# ---- Developer mode ----
 
+# ---- Developer mode ----
 if(NOT NUTC24_DEVELOPER_MODE)
+message("lol")
   return()
 elseif(NOT PROJECT_IS_TOP_LEVEL)
   message(
@@ -233,3 +234,5 @@ elseif(NOT PROJECT_IS_TOP_LEVEL)
       "Developer mode is intended for developers of NUTC24"
   )
 endif()
+
+include(cmake/dev-mode.cmake)
