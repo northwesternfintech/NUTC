@@ -42,6 +42,15 @@ target_link_libraries(
   GTest::gtest_main
 )
 
+# Enable lto for release builds
+include(CheckIPOSupported)
+check_ipo_supported(RESULT lto_supported OUTPUT error)
+if(lto_supported)
+  set_target_properties(NUTC_tests PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+else()
+    message(WARNING "LTO is not supported: ${error}")
+endif()
+
 target_compile_features(NUTC_tests PRIVATE cxx_std_20)
 
 gtest_discover_tests(NUTC_tests)
