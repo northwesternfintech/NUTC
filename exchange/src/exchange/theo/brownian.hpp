@@ -10,7 +10,10 @@
  */
 
 #pragma once
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2e6e804 (fix misc errors before merging)
 #include "exchange/config.h"
 
 #include <random>
@@ -23,24 +26,12 @@ enum class Signedness { Negative = -1, DoesntMatter = 0, Positive = 1 };
 
 class BrownianMotion {
     std::mt19937 random_number_generator_; // It's pretty obvious what this does
-    double cur_value_; // Current value, used to generate next one
-    double probability_ = 0.95; // probability of no market event
+    double cur_value_;                     // Current value, used to generate next one
+    double probability_ = 0.95;            // probability of no market event
 
     // Control the actual ticking, whereby market events are slowed over many ticks
     size_t ticker_ = 0;
     Signedness signedness_ = Signedness::DoesntMatter;
-
-    // Current value, used to generate next one
-    double cur_value_;
-
-    // Control the size of market events and skewness of the distribution
-    size_t mean_size_of_event;
-    size_t stdev_of_event;
-    size_t skew_scale;
-    
-    // Control the actual ticking, whereby market events are slowed over many ticks
-    size_t ticker;
-    bool ticking_up;
 
 public:
     [[nodiscard]] double
@@ -57,10 +48,7 @@ public:
     }
 
     // Constructor for BrownianMotion, takes a seed
-    explicit BrownianMotion(const unsigned int seed) : cur_value_(0)
-    {
-        set_seed(seed);
-    }
+    explicit BrownianMotion(const unsigned int seed) : cur_value_(0) { set_seed(seed); }
 
     // Generates and returns the next price based on previous prices
     double generate_next_price();

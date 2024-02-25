@@ -28,9 +28,13 @@
 #define ALGO_DIR "algos"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 enum class Mode { SANDBOX, DEV, NORMAL, BOTS_ONLY, PROD };
 >>>>>>> 86a485b (fix code qual)
+=======
+enum class Mode { SANDBOX, DEV, NORMAL, BOTS_ONLY };
+>>>>>>> 2e6e804 (fix misc errors before merging)
 // Brownian motion stuff
 #define BROWNIAN_MOTION_MEAN_SIZE_EVENT  15
 #define BROWNIAN_MOTION_STDEV_EVENT_SIZE 5
