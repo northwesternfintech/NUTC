@@ -15,7 +15,7 @@ namespace nutc {
 namespace stochastic {
 
 double
-BrownianMotion::generate_change_in_price(double mean, double stdev, Signedness sign)
+BrownianMotion::generate_change_in_price_(double mean, double stdev, Signedness sign)
 {
     std::normal_distribution<double> distribution(mean, stdev);
 
@@ -33,7 +33,7 @@ BrownianMotion::generate_next_price()
 {
     if (ticker_ > 0) {
         ticker_--;
-        cur_value_ += generate_change_in_price(
+        cur_value_ += generate_change_in_price_(
             -cur_value_ / SKEW_SCALE, BROWNIAN_MOTION_DEVIATION, signedness
         );
         return cur_value_;
@@ -54,14 +54,14 @@ BrownianMotion::generate_next_price()
         signedness = ticking_up ? Signedness::Positive : Signedness::Negative;
 
         // Generate new price
-        cur_value_ += generate_change_in_price(
+        cur_value_ += generate_change_in_price_(
             -cur_value_ / SKEW_SCALE, BROWNIAN_MOTION_DEVIATION,
             Signedness::DoesntMatter
         );
         return cur_value_;
     }
     else {
-        cur_value_ += generate_change_in_price(
+        cur_value_ += generate_change_in_price_(
             -cur_value_ / SKEW_SCALE, BROWNIAN_MOTION_DEVIATION / SKEW_FACTOR,
             Signedness::DoesntMatter
         );
