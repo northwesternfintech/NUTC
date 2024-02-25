@@ -1,5 +1,8 @@
 #include "tick_manager.hpp"
 
+#include "exchange/concurrency/exchange_lock.hpp"
+#include "exchange/concurrency/pin_threads.hpp"
+
 #include <queue>
 
 namespace nutc {
@@ -8,6 +11,7 @@ namespace ticks {
 auto
 TickManager::notify_tick_() // NOLINT
 {
+    concurrency::ExchangeLock::get_instance().lock();
     auto start = std::chrono::high_resolution_clock::now();
     for (TickObserver* observer : first_observers_) {
         observer->on_tick(current_tick_);
@@ -21,9 +25,7 @@ TickManager::notify_tick_() // NOLINT
         observer->on_tick(current_tick_);
     }
 
-    for (TickObserver* observer : fourth_observers_) {
-        observer->on_tick(current_tick_);
-    }
+    concurrency::ExchangeLock::get_instance().unlock();
     auto end = std::chrono::high_resolution_clock::now();
     return end - start;
 }
@@ -101,6 +103,7 @@ TickManager::run_()
 {
     using namespace std::chrono;
     auto next_tick = steady_clock::now();
+    concurrency::pin_to_core(1, "on_tick");
 
     while (running_) {
         next_tick += delay_time_;

@@ -1,5 +1,6 @@
 #include "RabbitMQConsumer.hpp"
 
+#include "exchange/concurrency/exchange_lock.hpp"
 #include "exchange/logging.hpp"
 #include "exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
 #include "exchange/rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
@@ -17,6 +18,7 @@ RabbitMQConsumer::handle_incoming_messages(
 )
 {
     while (true) {
+        concurrency::ExchangeLock::get_instance().lock();
         auto incoming_message = consume_message();
 
         // Use std::visit to deal with the variant
@@ -39,6 +41,7 @@ RabbitMQConsumer::handle_incoming_messages(
             },
             std::move(incoming_message)
         );
+        concurrency::ExchangeLock::get_instance().unlock();
     }
 }
 

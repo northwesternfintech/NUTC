@@ -90,10 +90,12 @@ process_arguments(int argc, const char** argv)
         program.get<bool>("--no-start-delay")
     };
 }
+
 class NullBuffer : public std::streambuf {
 public:
-    NullBuffer() {}  // Public constructor
+    NullBuffer() {} // Public constructor
 };
+
 int
 main(int argc, const char** argv)
 {

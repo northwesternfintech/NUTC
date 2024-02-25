@@ -8,6 +8,7 @@
 #  include "exchange/dashboard/state/global_metrics.hpp"
 #endif
 #include "exchange/bots/bot_container.hpp"
+#include "exchange/concurrency/pin_threads.hpp"
 #include "exchange/tick_manager/tick_manager.hpp"
 #include "logging.hpp"
 #include "process_spawning/spawning.hpp"
@@ -239,7 +240,7 @@ main(int argc, const char** argv)
 #ifdef DASHBOARD
     auto& dashboard = nutc::dashboard::Dashboard::get_instance();
     nutc::ticks::TickManager::get_instance().attach(
-        &dashboard, nutc::ticks::PRIORITY::fourth, "Dashboard Manager"
+        &dashboard, nutc::ticks::PRIORITY::third, "Dashboard Manager"
     );
 #endif
 
@@ -256,6 +257,8 @@ main(int argc, const char** argv)
         &engine_manager, ticks::PRIORITY::first, "Matching Engine"
     );
     ticks::TickManager::get_instance().start();
+
+    concurrency::pin_to_core(0, "main");
 
     // Main event loop
     rabbitmq::RabbitMQConsumer::handle_incoming_messages(users, engine_manager);
