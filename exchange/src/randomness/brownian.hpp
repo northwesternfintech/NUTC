@@ -70,7 +70,7 @@ public:
 private:
     // Generates and returns the change in price, i.e. dp/dt
     [[nodiscard]] double
-    generate_change_in_price(double mean, double stdev, Signedness sign);
+    generate_change_in_price_(double mean, double stdev, Signedness sign);
 };
 
 } // namespace stochastic
