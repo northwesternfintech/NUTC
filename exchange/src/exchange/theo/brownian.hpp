@@ -10,10 +10,7 @@
  */
 
 #pragma once
-<<<<<<< HEAD
 
-=======
->>>>>>> 2e6e804 (fix misc errors before merging)
 #include "exchange/config.h"
 
 #include <random>
