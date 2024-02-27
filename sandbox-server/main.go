@@ -27,7 +27,11 @@ const dockerTimeout = time.Minute * 1
 const firebaseStorageUrl = "https://firebasestorage.googleapis.com/v0/b/nutc-web.appspot.com/o"
 const firebaseApiKey = "AIzaSyCo2l3x2DMhg5CaNy1Pyvknk_GK8v34iUc"
 
-const port = "8081"
+const port = "8080"
+
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}
 
 func main() {
 	server := http.Server{
@@ -45,6 +49,8 @@ func main() {
 }
 
 func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Request received from %s\n", r.RemoteAddr)
+	enableCors(&w)
 	user_id := r.URL.Query().Get("user_id")
 	algo_id := r.URL.Query().Get("algo_id")
 	if user_id == "" || algo_id == "" {
@@ -73,8 +79,13 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 		cmd_algo_id = " " + algo_id[1:]
 	}
 
+	imageName := "nutc-exchange"
+	// if err := checkAndPullImage(ctx, cli, imageName); err != nil {
+	// 	log.Fatalf("Failed to check/pull image: %v", err)
+	// }
+
 	config := &container.Config{
-		Image: "nutc-exchange",
+		Image: imageName,
 		Cmd:   []string{"--sandbox", cmd_user_id, cmd_algo_id},
 	}
 	hostConfig := &container.HostConfig{
@@ -90,10 +101,11 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 
 	// container name cannot contain spaces and cannot start with "-"
 	container_name := fmt.Sprintf("%s-%s-%s", strings.TrimSpace(cmd_user_id), strings.TrimSpace(cmd_algo_id), nano_id)
+	log.Printf("Starting container %s\n", container_name)
 	resp, err := cli.ContainerCreate(ctx, config, hostConfig, nil, nil, container_name)
 	if err != nil {
 		http.Error(w, "Failed to create docker container", http.StatusInternalServerError)
-		fmt.Printf("%s", err.Error())
+		fmt.Printf("Create container error: %s", err.Error())
 		return
 	}
 

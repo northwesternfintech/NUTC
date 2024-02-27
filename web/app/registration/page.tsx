@@ -50,7 +50,7 @@ async function writeNewUser(functions: any, database: any, user: UserInfoType) {
     }
   }
   await update(ref(database, "users/" + user.uid), user);
-  await functions.httpsCallable("emailApplication")();
+  // await functions.httpsCallable("emailApplication")();
   return true;
 }
 

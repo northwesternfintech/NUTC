@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"io"
+	"log"
 	"reflect"
 )
 
@@ -30,6 +31,7 @@ func isType(data map[string]interface{}, v interface{}) bool {
 }
 
 func Analyze(file io.Reader, user_id string) (string, error) {
+	log.Printf("Analyzing log file for user %s", user_id)
 	scanner := bufio.NewScanner(file)
 	var log_entries []LogEntry
 
@@ -38,6 +40,7 @@ func Analyze(file io.Reader, user_id string) (string, error) {
 		if err := json.Unmarshal([]byte(scanner.Text()), &entry); err != nil {
 			return "", err
 		}
+		log.Printf("Entry: %v", entry)
 		log_entries = append(log_entries, entry)
 	}
 
