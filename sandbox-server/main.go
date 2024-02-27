@@ -166,6 +166,7 @@ func isValidID(id string) bool {
 }
 
 func uploadLogFile(user_id, algo_id, apiKey, file_str string) (string, error) {
+	log.Printf("Uploading log file for user %s and algo %s", user_id, algo_id)
 	reader := strings.NewReader(file_str)
 	var buffer bytes.Buffer
 

@@ -33,7 +33,10 @@ func isType(data map[string]interface{}, v interface{}) bool {
 func Analyze(file io.Reader, user_id string) (string, error) {
 	log.Printf("Analyzing log file for user %s", user_id)
 	scanner := bufio.NewScanner(file)
+	
 	var log_entries []LogEntry
+
+	log.Printf("Scanning log file")
 
 	for scanner.Scan() {
 		var entry LogEntry
@@ -50,6 +53,8 @@ func Analyze(file io.Reader, user_id string) (string, error) {
 
 	var matches []LogEntry
 	var updates []LogEntry
+
+	log.Printf("Processing log entries")
 
 	for _, entry := range log_entries {
 		var data = entry.Data.(map[string]interface{})
@@ -68,5 +73,6 @@ func Analyze(file io.Reader, user_id string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	log.Printf("Analysis complete: %s", string(outputJSON))
 	return string(outputJSON), nil
 }
