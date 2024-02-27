@@ -151,6 +151,8 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Printf("%s", err.Error())
 		}
+
+		log.Printf("Log file uploaded successfully for user %s and algo %s", user_id, algo_id)
 	}()
 
 	fmt.Fprintf(w, "Container %s started successfully with user_id: %s and algo_id: %s\n", container_name, user_id, algo_id)
@@ -232,6 +234,8 @@ func addLogFileUrlToUser(user_id, algo_id, file_url string) error {
 	}
 
 	data := UserData{file_url}
+
+	log.Printf("Adding log file url: %s to user %s and algo %s", file_url, user_id, algo_id)
 
 	jsonData, err := json.Marshal(data)
 	if err != nil {
