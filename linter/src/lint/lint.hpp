@@ -11,7 +11,7 @@
 namespace nutc {
 namespace lint {
 
-[[nodiscard]] std::string lint(
+[[nodiscard]] bool lint(
     const std::string& uid, const std::string& algo_id, std::stringstream& output_stream
 );
 

@@ -52,7 +52,7 @@ set_lint_success(
 )
 {
     std::string json_success = "\"" + replaceDisallowedValues(success) + "\"";
-    log_i(main, "Seeing lint success: {}", json_success);
+    log_i(main, "Setting lint success: {}", json_success);
     std::string params1 =
         fmt::format("users/{}/algos/{}/lintSuccessMessage.json", uid, algo_id);
     std::string params2 = fmt::format("users/{}/latestAlgoId.json", uid);
@@ -61,6 +61,7 @@ set_lint_success(
         firebase_request("PUT", get_firebase_endpoint(params1), json_success);
     glz::json_t res2 =
         firebase_request("PUT", get_firebase_endpoint(params2), "\"" + algo_id + "\"");
+    set_lint_result(uid, algo_id, true);
 }
 
 void
@@ -69,11 +70,12 @@ set_lint_failure(
 )
 {
     std::string json_failure = "\"" + replaceDisallowedValues(failure) + "\"";
-    log_e(main, "Seeing lint failure: {}", json_failure);
+    log_e(main, "Setting lint failure: {}", json_failure);
     std::string params =
         fmt::format("users/{}/algos/{}/lintFailureMessage.json", uid, algo_id);
     glz::json_t res =
         firebase_request("PUT", get_firebase_endpoint(params), json_failure);
+    set_lint_result(uid, algo_id, false);
 }
 
 glz::json_t

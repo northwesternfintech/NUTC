@@ -60,12 +60,11 @@ get_server_thread()
                         {
                             // Push failure
                             std::string error_msg = fmt::format(
-                                "unknown runtime error: your code is syntactically "
-                                "correct but timed out after {} seconds while linting",
+                                "Internal server error. Reach out to "
+                                "nuft@u.northwestern.edu for support",
                                 LINT_ABSOLUTE_TIMEOUT_SECONDS
                             );
 
-                            nutc::client::set_lint_result(uid, algo_id, false);
                             nutc::client::set_lint_failure(uid, algo_id, error_msg);
 
                             log_e(
@@ -89,17 +88,15 @@ get_server_thread()
                                 uid,
                                 LINT_ABSOLUTE_TIMEOUT_SECONDS
                             );
+                            nutc::client::set_lint_failure(
+                                uid,
+                                algo_id,
+                                "Unknown status. Reach out to #nuft-support."
+                            );
                             break;
                         }
                     default:
                         {
-                            log_i(
-                                crow_watchdog,
-                                "Algo id {} for uid {} looks ok {}s.",
-                                algo_id,
-                                uid,
-                                LINT_ABSOLUTE_TIMEOUT_SECONDS
-                            );
                             break;
                         }
                 }
@@ -111,18 +108,8 @@ get_server_thread()
             for (int i = 0; i <= LINT_ABSOLUTE_TIMEOUT_SECONDS; i++) {
                 if (nutc::client::get_algo_status(uid, algo_id)
                     != nutc::client::LintingResultOption::PENDING) {
-                    log_i(
-                        crow, "Algo id {} for uid {} finished linting.", algo_id, uid
-                    );
                     break;
                 }
-                log_i(
-                    crow,
-                    "Algo id {} for uid {} still pending after {}s.",
-                    algo_id,
-                    uid,
-                    i
-                );
                 std::this_thread::sleep_for(std::chrono::seconds(1));
             }
 
