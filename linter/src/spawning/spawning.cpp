@@ -27,7 +27,6 @@ spawn_client(const std::string& uid, std::string& algoid)
     }
     else if (pid < 0) {
         log_e(linting, "Failed to fork");
-        exit(1);
     }
 }
 } // namespace spawning

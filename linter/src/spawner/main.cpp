@@ -81,7 +81,8 @@ main(int argc, const char** argv)
 
         log_e(
             timeout_watchdog,
-            "Timeout reached ({}s). Exiting process. Failed lint for algoid {} and uid "
+            "Internal timeout reached ({}s). Exiting process. Failed lint for algoid "
+            "{} and uid "
             "{}.",
             LINT_AUTO_TIMEOUT_SECONDS,
             algoid,
@@ -94,8 +95,15 @@ main(int argc, const char** argv)
             uid,
             algoid,
             ss.str()
-                + "\nUnknown failure. Reach out to nuft@northwestern.edu for help\n"
+                + fmt::format(
+                    "\nYour code did not execute within %d seconds. Check all "
+                    "functions to see if you have an infinite loop or infinite "
+                    "recursion.\n\nIf you continue to experience this error, reach out "
+                    "to #nuft-support.\n",
+                    LINT_AUTO_TIMEOUT_SECONDS
+                )
         );
+        exit(1);
     });
     timeout_thread.detach();
 
@@ -108,16 +116,20 @@ main(int argc, const char** argv)
     pybind11::initialize_interpreter();
 
     // Actually lint the algo and set success
-    std::string response = nutc::lint::lint(uid, algoid, ss);
+    bool lint_success = nutc::lint::lint(uid, algoid, ss);
 
-    log_i(timeout_watchdog, "Finished linting algo_id: {} for user: {}", algoid, uid);
+    log_i(
+        timeout_watchdog,
+        "Finished linting algo_id: {} for user: {} with success {}",
+        algoid,
+        uid,
+        lint_success
+    );
     ss << fmt::format(
         "[linter] exited linting process and finished linting {} for uid {}",
         algoid,
         uid
     ) << "\n";
-
-    nutc::client::set_lint_success(uid, algoid, ss.str() + "Success!\n");
 
     // Stop py
     pybind11::finalize_interpreter();
