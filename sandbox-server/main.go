@@ -27,7 +27,7 @@ const dockerTimeout = time.Minute * 1
 const firebaseStorageUrl = "https://firebasestorage.googleapis.com/v0/b/nutc-web.appspot.com/o"
 const firebaseApiKey = "AIzaSyCo2l3x2DMhg5CaNy1Pyvknk_GK8v34iUc"
 
-const port = "8081"
+const port = "12687"
 
 func main() {
 	server := http.Server{
