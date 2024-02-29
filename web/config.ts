@@ -2,7 +2,7 @@ import { isLocalhost } from "@/app/firebase/config";
 
 export const config: any = {
   linterBaseUrl: "https://nutc-linter-4oeeau4rxa-uc.a.run.app",
-  sandboxBaseUrl: "",
+  sandboxBaseUrl: "https://nuft.nikola.cx/__/nutc-sandbox",
 };
 
 export function linterEndpoint(uid: string, algo_id: string): string {
