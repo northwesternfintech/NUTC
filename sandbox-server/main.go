@@ -75,7 +75,7 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	config := &container.Config{
-		Image: "",
+		Image: "nutc-exchange",
 		Cmd:   []string{"--sandbox", cmd_user_id, cmd_algo_id},
 	}
 	hostConfig := &container.HostConfig{
