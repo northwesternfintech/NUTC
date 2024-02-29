@@ -60,6 +60,7 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	cli, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
+		log.Printf("ERROR: Failed to initialize docker client: %s", err.Error())
 		http.Error(w, "Failed to initialize docker client", http.StatusInternalServerError)
 		return
 	}
@@ -74,7 +75,7 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	config := &container.Config{
-		Image: "nutc-exchange",
+		Image: "",
 		Cmd:   []string{"--sandbox", cmd_user_id, cmd_algo_id},
 	}
 	hostConfig := &container.HostConfig{
@@ -83,6 +84,7 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 
 	nano_id, err := gonanoid.New(6)
 	if err != nil {
+		log.Printf("ERROR: Failed to generate nano id: %s", err.Error())
 		http.Error(w, "Failed to create docker container", http.StatusInternalServerError)
 		fmt.Printf("%s", err.Error())
 		return
@@ -90,14 +92,17 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 
 	// container name cannot contain spaces and cannot start with "-"
 	container_name := fmt.Sprintf("%s-%s-%s", strings.TrimSpace(cmd_user_id), strings.TrimSpace(cmd_algo_id), nano_id)
+	log.Printf("Starting container with name: %s\n", container_name)
 	resp, err := cli.ContainerCreate(ctx, config, hostConfig, nil, nil, container_name)
 	if err != nil {
+		log.Printf("ERROR: Failed to create docker container: %s", err.Error())
 		http.Error(w, "Failed to create docker container", http.StatusInternalServerError)
 		fmt.Printf("%s", err.Error())
 		return
 	}
 
 	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+		log.Printf("ERROR: Failed to start docker container: %s", err.Error())
 		http.Error(w, "Failed to start docker container", http.StatusInternalServerError)
 		return
 	}
@@ -109,6 +114,7 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 
 		reader, _, err := cli.CopyFromContainer(context.Background(), resp.ID, "logs/structured.log")
 		if err != nil {
+			log.Printf("ERROR: Failed to copy log file from container: %s", err.Error())
 			fmt.Printf("%s", err.Error())
 			return
 		}
@@ -125,11 +131,13 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 		out_file, err := analyzer.Analyze(tarReader, user_id)
 
 		if err != nil {
+			log.Printf("ERROR: Failed to analyze log file: %s", err.Error())
 			fmt.Printf("%s", err.Error())
 		}
 
 		download_token, err := uploadLogFile(user_id, algo_id, firebaseApiKey, out_file)
 		if err != nil {
+			log.Printf("ERROR: Failed to upload log file: %s", err.Error())
 			fmt.Printf("%s", err.Error())
 		}
 
@@ -137,6 +145,7 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 
 		err = addLogFileUrlToUser(user_id, algo_id, file_url)
 		if err != nil {
+			log.Printf("ERROR: Failed to add log file url to user algo: %s", err.Error())
 			fmt.Printf("%s", err.Error())
 		}
 	}()
@@ -185,11 +194,13 @@ func uploadLogFile(user_id, algo_id, apiKey, file_str string) (string, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
+		log.Printf("ERROR: Client.do: Failed to upload log file: %s", err.Error())
 		return "", fmt.Errorf("client.Do: %v", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		log.Printf("ERROR: Failed to upload log file: %s", resp.Status)
 		return "", fmt.Errorf("upload failed with status: %v", resp.Status)
 	}
 
@@ -206,6 +217,7 @@ func uploadLogFile(user_id, algo_id, apiKey, file_str string) (string, error) {
 
 	downloadToken, ok := jsonResponse["downloadTokens"].(string)
 	if !ok {
+		log.Printf("ERROR: download token not found in response: %v", jsonResponse)
 		return "", fmt.Errorf("download token not found in response")
 	}
 
@@ -235,12 +247,14 @@ func addLogFileUrlToUser(user_id, algo_id, file_url string) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
+		log.Printf("ERROR: Client.do: Failed to add log file url to user algo: %s", err.Error())
 		return fmt.Errorf("client.Do: %v", err)
 	}
 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		log.Printf("ERROR: Failed to add log file url to user algo: %s", resp.Status)
 		return fmt.Errorf("upload failed with status: %v", resp.Status)
 	}
 
