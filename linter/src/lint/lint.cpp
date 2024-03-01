@@ -47,7 +47,7 @@ lint(
         return false;
     }
 
-    output_stream << "[linter] linting process done!"
+    output_stream << "\n[linter] linting process succeeded!"
                   << "\n";
 
     nutc::client::set_lint_success(uid, algo_id, output_stream.str());

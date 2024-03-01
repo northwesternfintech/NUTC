@@ -74,10 +74,24 @@ main(int argc, const char** argv)
 
     // Move a string stream from the loop to this process
     std::stringstream ss;
+    bool has_exited = false;
 
     // Watchdog to kill after LINT_AUTO_TIMEOUT_SECONDS (default 120)
-    std::thread timeout_thread([&ss, algoid, uid]() {
-        std::this_thread::sleep_for(std::chrono::seconds(LINT_AUTO_TIMEOUT_SECONDS));
+    std::thread timeout_thread([&ss, &has_exited, algoid, uid]() {
+        auto start_time = std::chrono::steady_clock::now();
+        while (std::chrono::steady_clock::now() - start_time
+               < std::chrono::seconds(LINT_AUTO_TIMEOUT_SECONDS)) {
+            if (has_exited) {
+                log_i(
+                    timeout_watchdog,
+                    "Algo id {} for uid {} has completed. Exiting process-level "
+                    "watchdog.",
+                    algoid,
+                    uid
+                );
+                return;
+            }
+        }
 
         log_e(
             timeout_watchdog,
@@ -103,7 +117,6 @@ main(int argc, const char** argv)
                     LINT_AUTO_TIMEOUT_SECONDS
                 )
         );
-        exit(1);
     });
 
     // Log this event
@@ -132,6 +145,8 @@ main(int argc, const char** argv)
 
     // Stop py
     pybind11::finalize_interpreter();
+    has_exited = true;
+    timeout_thread.join();
 
     // Done!
     return 0;

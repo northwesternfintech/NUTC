@@ -46,10 +46,21 @@ get_server_thread()
             // Watchdog to check for crash/pending after
             // LINT_ABSOLUTE_TIMEOUT_SECONDS seconds (default 130s)
             std::thread check_pending_thread([algo_id, uid]() {
-                std::this_thread::sleep_for(
-                    std::chrono::seconds(LINT_ABSOLUTE_TIMEOUT_SECONDS)
-                );
-
+                for (int i = 0; i <= LINT_ABSOLUTE_TIMEOUT_SECONDS; i++) {
+                    if (nutc::client::get_algo_status(uid, algo_id)
+                        != nutc::client::LintingResultOption::PENDING) {
+                        log_i(
+                            crow_watchdog,
+                            "Algo id {} for uid {} firebase result detected as set by "
+                            "crow-level watchdog {}s",
+                            algo_id,
+                            uid,
+                            i
+                        );
+                        return;
+                    }
+                    std::this_thread::sleep_for(std::chrono::seconds(1));
+                }
                 // Check status from Firebase
                 nutc::client::LintingResultOption linting_status =
                     nutc::client::get_algo_status(uid, algo_id);
@@ -101,17 +112,10 @@ get_server_thread()
                         }
                 }
             });
-            check_pending_thread.detach();
 
             spawning::spawn_client(uid, algo_id);
 
-            for (int i = 0; i <= LINT_ABSOLUTE_TIMEOUT_SECONDS; i++) {
-                if (nutc::client::get_algo_status(uid, algo_id)
-                    != nutc::client::LintingResultOption::PENDING) {
-                    break;
-                }
-                std::this_thread::sleep_for(std::chrono::seconds(1));
-            }
+            check_pending_thread.join();
 
             res.body = "OK";
             res.code = 200;
