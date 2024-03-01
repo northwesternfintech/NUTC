@@ -115,18 +115,18 @@ trigger_callbacks()
     }
 
     try {
-        py::exec(R"(strategy.on_orderbook_update("USD","BUY",1.0,1.0))");
+        py::exec(R"(strategy.on_orderbook_update("LTC","BUY",1.0,1.0))");
     } catch (const std::exception& e) {
         return fmt::format("Failed to run on_orderbook_update: {}", e.what());
     }
     try {
-        py::exec(R"(strategy.on_trade_update("USD","BUY",1.0,1.0))");
+        py::exec(R"(strategy.on_trade_update("LTC","BUY",1.0,1.0))");
     } catch (const std::exception& e) {
         return fmt::format("Failed to run on_trade_update: {}", e.what());
     }
 
     try {
-        py::exec(R"(strategy.on_account_update("USD","BUY",1.0,1.0,1.0))");
+        py::exec(R"(strategy.on_account_update("LTC","BUY",1.0,1.0,1.0))");
     } catch (const std::exception& e) {
         return fmt::format("Failed to run on_account_update: {}", e.what());
     }
