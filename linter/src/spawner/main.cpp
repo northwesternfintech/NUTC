@@ -105,7 +105,6 @@ main(int argc, const char** argv)
         );
         exit(1);
     });
-    timeout_thread.detach();
 
     // Log this event
     log_i(timeout_watchdog, "Linting algo_id: {} for user: {}", algoid, uid);
