@@ -301,13 +301,24 @@ export default function Submission() {
                   userInfo?.user?.uid || "",
                 ) //bad practice, fix later
               ) {
+                Swal.fire({
+                  title: "Algorithm submitted. Waiting for linting to complete...",
+                  text: "This may take up to 2 minutes.",
+                  icon: "info",
+                  allowOutsideClick: false,
+                  allowEscapeKey: false,
+                  allowEnterKey: false
+                });
+                Swal.showLoading();
                 await axios.get(
                   linterEndpoint(userInfo?.user?.uid || "", algoRef.key),
                 );
+                Swal.close();
                 Swal.fire({
-                  title: "Algorithm submitted!",
+                  title: "Linting complete!",
+                  text: "View results in the dashboard.",
                   icon: "success",
-                  timer: 2000,
+                  timer: 5000,
                   timerProgressBar: true,
                   willClose: () => {
                     window.location.reload();

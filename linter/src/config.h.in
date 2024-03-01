@@ -29,8 +29,8 @@
 #endif
 
 // Linting
-#define LINT_AUTO_TIMEOUT_SECONDS     8
-#define LINT_ABSOLUTE_TIMEOUT_SECONDS 12 
+#define LINT_AUTO_TIMEOUT_SECONDS     110
+#define LINT_ABSOLUTE_TIMEOUT_SECONDS 120
 
 /**
  * If we are in debug mode.
