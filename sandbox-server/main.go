@@ -79,7 +79,7 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 		Cmd:   []string{"--sandbox", cmd_user_id, cmd_algo_id},
 	}
 	hostConfig := &container.HostConfig{
-		AutoRemove: true,
+		AutoRemove: false,
 	}
 
 	nano_id, err := gonanoid.New(6)
@@ -95,14 +95,14 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Starting container with name: %s\n", container_name)
 	resp, err := cli.ContainerCreate(ctx, config, hostConfig, nil, nil, container_name)
 	if err != nil {
-		log.Printf("ERROR: Failed to create docker container: %s", err.Error())
+		log.Printf("ERROR: Failed to create docker container: %s\n", err.Error())
 		http.Error(w, "Failed to create docker container", http.StatusInternalServerError)
 		fmt.Printf("%s", err.Error())
 		return
 	}
 
 	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-		log.Printf("ERROR: Failed to start docker container: %s", err.Error())
+		log.Printf("ERROR: Failed to start docker container: %s\n", err.Error())
 		http.Error(w, "Failed to start docker container", http.StatusInternalServerError)
 		return
 	}
@@ -114,7 +114,7 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 
 		reader, _, err := cli.CopyFromContainer(context.Background(), resp.ID, "logs/structured.log")
 		if err != nil {
-			log.Printf("ERROR: Failed to copy log file from container: %s", err.Error())
+			log.Printf("ERROR: Failed to copy log file from container: %s\n", err.Error())
 			fmt.Printf("%s", err.Error())
 			return
 		}
@@ -131,13 +131,13 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 		out_file, err := analyzer.Analyze(tarReader, user_id)
 
 		if err != nil {
-			log.Printf("ERROR: Failed to analyze log file: %s", err.Error())
+			log.Printf("ERROR: Failed to analyze log file: %s\n", err.Error())
 			fmt.Printf("%s", err.Error())
 		}
 
 		download_token, err := uploadLogFile(user_id, algo_id, firebaseApiKey, out_file)
 		if err != nil {
-			log.Printf("ERROR: Failed to upload log file: %s", err.Error())
+			log.Printf("ERROR: Failed to upload log file: %s\n", err.Error())
 			fmt.Printf("%s", err.Error())
 		}
 
@@ -145,7 +145,7 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 
 		err = addLogFileUrlToUser(user_id, algo_id, file_url)
 		if err != nil {
-			log.Printf("ERROR: Failed to add log file url to user algo: %s", err.Error())
+			log.Printf("ERROR: Failed to add log file url to user algo: %s\n", err.Error())
 			fmt.Printf("%s", err.Error())
 		}
 	}()
