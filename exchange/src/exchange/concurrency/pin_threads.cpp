@@ -14,7 +14,11 @@ pin_to_core(size_t core_num, std::string thread_name)
 #ifdef __linux__
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
-    CPU_SET(core_num, &cpuset);
+
+    auto num_cores = static_cast<size_t>(sysconf(_SC_NPROCESSORS_ONLN));
+    size_t target_core = core_num < num_cores ? core_num : num_cores - 1;
+
+    CPU_SET(target_core, &cpuset);
 
     pthread_t current_thread = pthread_self();
     int result = pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
@@ -29,6 +33,12 @@ pin_to_core(size_t core_num, std::string thread_name)
               "the same core. This is okay for testing, but not for production."
     );
 #endif
+}
+
+void
+pin_to_core(size_t core_num)
+{
+    pin_to_core(core_num, "");
 }
 
 } // namespace concurrency

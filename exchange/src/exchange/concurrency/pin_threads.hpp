@@ -7,7 +7,8 @@
 namespace nutc {
 namespace concurrency {
 
-void pin_to_core(size_t core_num, std::string thread_name = "");
+void pin_to_core(size_t core_num, std::string thread_name);
+void pin_to_core(size_t core_num);
 
 } // namespace concurrency
 } // namespace nutc

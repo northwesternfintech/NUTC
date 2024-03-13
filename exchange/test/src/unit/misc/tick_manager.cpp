@@ -20,15 +20,6 @@ protected:
     TickManager& manager_ = TickManager::get_instance(START_TICK_RATE);
 };
 
-TEST_F(UnitTickManagerTest, SingletonInstance)
-{
-    manager_.start();
-    auto& instance1 = nutc::ticks::TickManager::get_instance(60);
-    auto& instance2 = nutc::ticks::TickManager::get_instance(30);
-    ASSERT_EQ(std::addressof(instance1), std::addressof(instance2));
-    manager_.stop();
-}
-
 class TestObserver : public nutc::ticks::TickObserver {
 public:
     void

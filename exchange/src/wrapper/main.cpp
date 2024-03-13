@@ -104,6 +104,12 @@ main(int argc, const char** argv)
         process_arguments(argc, argv);
     pybind11::scoped_interpreter guard{};
 
+    NullBuffer null_buffer;
+    std::cout.rdbuf(&null_buffer);
+    std::cerr.rdbuf(&null_buffer);
+    freopen("/dev/null", "w", stdout);
+    freopen("/dev/null", "w", stderr);
+
     // Start logging and print build info
     nutc::logging::init(verbosity);
     log_i(main, "Starting NUTC wrapper for UID {}", uid);
@@ -134,12 +140,6 @@ main(int argc, const char** argv)
     // Initialize the algorithm. For now, only designed for py
     nutc::pywrapper::create_api_module(conn.getMarketFunc(uid));
     nutc::pywrapper::run_code_init(algo.value());
-
-    NullBuffer null_buffer;
-    std::cout.rdbuf(&null_buffer);
-    std::cerr.rdbuf(&null_buffer);
-    freopen("/dev/null", "w", stdout);
-    freopen("/dev/null", "w", stderr);
 
     // Main event loop
     conn.handleIncomingMessages();

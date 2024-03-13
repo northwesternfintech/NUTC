@@ -25,8 +25,6 @@ RabbitMQOrderHandler::handle_incoming_market_order(
     if (pos2 != std::string::npos) {
         buffer.replace(pos2, replace2.length(), R"("side":"ask")");
     }
-    if (clients.get_trader(order.client_id)->get_type() == manager::REMOTE)
-        log_i(rabbitmq, "Received market order: {}", buffer);
 
     if (!engine_manager.has_engine(order.ticker)) {
         return;

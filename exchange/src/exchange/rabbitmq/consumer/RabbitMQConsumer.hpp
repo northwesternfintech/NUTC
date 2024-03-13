@@ -12,7 +12,16 @@ namespace rabbitmq {
 
 class RabbitMQConsumer {
 public:
-    static std::variant<messages::InitMessage, messages::MarketOrder> consume_message();
+    static std::optional<std::variant<messages::InitMessage, messages::MarketOrder>>
+    consume_message(int timeout_us);
+
+    static std::variant<messages::InitMessage, messages::MarketOrder>
+    consume_message()
+    {
+        auto message = consume_message(0);
+        assert(message.has_value());
+        return message.value();
+    }
 
     /**
      * @brief Main event loop, handles incoming messages from exchange
@@ -25,7 +34,7 @@ public:
     );
 
 private:
-    static std::optional<std::string> consume_message_as_string();
+    static std::optional<std::string> consume_message_as_string(int timeout_us);
 };
 
 } // namespace rabbitmq

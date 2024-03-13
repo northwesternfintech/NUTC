@@ -235,7 +235,7 @@ main(int argc, const char** argv)
 
     initialize_ticker("ETH", 100);
     initialize_ticker("BTC", 200);
-    initialize_ticker("USD", 300);
+    initialize_ticker("LTC", 300);
 
 #ifdef DASHBOARD
     auto& dashboard = nutc::dashboard::Dashboard::get_instance();
@@ -248,10 +248,10 @@ main(int argc, const char** argv)
 
     engine_manager.get_bot_container("ETH").add_mm_bots(100000, 10000, 5);
     engine_manager.get_bot_container("BTC").add_mm_bots(25000, 5000, 10);
-    engine_manager.get_bot_container("USD").add_mm_bots(100000, 25000, 3);
+    engine_manager.get_bot_container("LTC").add_mm_bots(100000, 25000, 3);
     engine_manager.get_bot_container("ETH").add_retail_bots(10, 3, 200);
     engine_manager.get_bot_container("BTC").add_retail_bots(100, 5, 500);
-    engine_manager.get_bot_container("USD").add_retail_bots(100, 10, 100);
+    engine_manager.get_bot_container("LTC").add_retail_bots(100, 10, 100);
 
     ticks::TickManager::get_instance().attach(
         &engine_manager, ticks::PRIORITY::first, "Matching Engine"
