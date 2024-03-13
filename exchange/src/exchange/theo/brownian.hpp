@@ -11,15 +11,24 @@
 
 #pragma once
 
+#include "exchange/config.h"
+
 #include <random>
 
 namespace nutc {
 
 namespace stochastic {
 
+enum class Signedness { Negative = -1, DoesntMatter = 0, Positive = 1 };
+
 class BrownianMotion {
-    double cur_value_;
-    std::mt19937 random_number_generator_;
+    std::mt19937 random_number_generator_; // It's pretty obvious what this does
+    double cur_value_;                     // Current value, used to generate next one
+    double probability_ = 0.95;            // probability of no market event
+
+    // Control the actual ticking, whereby market events are slowed over many ticks
+    size_t ticker_ = 0;
+    Signedness signedness_ = Signedness::DoesntMatter;
 
 public:
     [[nodiscard]] double
@@ -36,10 +45,7 @@ public:
     }
 
     // Constructor for BrownianMotion, takes a seed
-    explicit BrownianMotion(const unsigned int seed) : cur_value_(0)
-    {
-        random_number_generator_ = std::mt19937(seed);
-    }
+    explicit BrownianMotion(const unsigned int seed) : cur_value_(0) { set_seed(seed); }
 
     // Generates and returns the next price based on previous prices
     double generate_next_price();
@@ -51,12 +57,24 @@ public:
         cur_value_ = new_price;
     }
 
+    // Force set the probability of market event
+    void
+    set_probability(double new_probability)
+    {
+        probability_ = new_probability;
+    }
+
     // Force set the seed to something else
     void
     set_seed(unsigned int new_seed)
     {
         random_number_generator_ = std::mt19937(new_seed);
     }
+
+private:
+    // Generates and returns the change in price, i.e. dp/dt
+    [[nodiscard]] double
+    generate_change_in_price_(double mean, double stdev, Signedness sign);
 };
 
 } // namespace stochastic
