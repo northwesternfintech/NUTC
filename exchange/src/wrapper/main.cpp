@@ -90,7 +90,10 @@ process_arguments(int argc, const char** argv)
         program.get<bool>("--no-start-delay")
     };
 }
-
+class NullBuffer : public std::streambuf {
+public:
+    NullBuffer() {}  // Public constructor
+};
 int
 main(int argc, const char** argv)
 {
@@ -129,6 +132,12 @@ main(int argc, const char** argv)
     // Initialize the algorithm. For now, only designed for py
     nutc::pywrapper::create_api_module(conn.getMarketFunc(uid));
     nutc::pywrapper::run_code_init(algo.value());
+
+    NullBuffer null_buffer;
+    std::cout.rdbuf(&null_buffer);
+    std::cerr.rdbuf(&null_buffer);
+    freopen("/dev/null", "w", stdout);
+    freopen("/dev/null", "w", stderr);
 
     // Main event loop
     conn.handleIncomingMessages();

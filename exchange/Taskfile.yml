@@ -4,9 +4,9 @@ vars:
   NAME: NUTC
   
   # BOTS, DEV, or NORMAL
-  MODE: "BOTS"
+  MODE: "NORMAL"
   
-  DASHBOARD_ENABLED: False 
+  DASHBOARD_ENABLED: True 
   
   RELEASE_BUILD: False
   RELEASE_PRESET: "ci-ubuntu"
@@ -56,6 +56,17 @@ tasks:
       - test -f CMakeUserPresets.json
     cmds:
       - cmake --build {{.CMAKE_SUFFIX}} -j 
+      
+  run-with-gdb:
+    env:
+      NUTC_WRAPPER_BINARY_PATH: '{{if eq .RELEASE_BUILD "True"}}./build/WRAPPER{{else}}./build/dev/WRAPPER{{end}}'
+    vars:
+      NUTC_PATH: '{{if eq .RELEASE_BUILD "True"}}build/{{.NAME}}{{else}}build/dev/{{.NAME}}{{end}}'
+    cmds:
+      - task: build
+      - task: check-and-start-services
+      - task: new-log-dir
+      - gdb ./{{ .NUTC_PATH }}
 
   run:
     env:
