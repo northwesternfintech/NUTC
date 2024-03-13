@@ -1,5 +1,6 @@
 #include "RabbitMQConsumer.hpp"
 
+#include "exchange/concurrency/exchange_lock.hpp"
 #include "exchange/logging.hpp"
 #include "exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
 #include "exchange/rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
@@ -17,7 +18,12 @@ RabbitMQConsumer::handle_incoming_messages(
 )
 {
     while (true) {
-        auto incoming_message = consume_message();
+        concurrency::ExchangeLock::get_instance().lock();
+        auto incoming_message = consume_message(10);
+        if (!incoming_message.has_value()) {
+            concurrency::ExchangeLock::get_instance().unlock();
+            continue;
+        }
 
         // Use std::visit to deal with the variant
         std::visit(
@@ -37,26 +43,38 @@ RabbitMQConsumer::handle_incoming_messages(
                     std::abort();
                 }
             },
-            std::move(incoming_message)
+            std::move(incoming_message.value())
         );
+        concurrency::ExchangeLock::get_instance().unlock();
     }
 }
 
 std::optional<std::string>
-RabbitMQConsumer::consume_message_as_string()
+RabbitMQConsumer::consume_message_as_string(int timeout_us)
 {
     const auto& connection_state =
         RabbitMQConnectionManager::get_instance().get_connection_state();
 
     amqp_envelope_t envelope;
     amqp_maybe_release_buffers(connection_state);
-    amqp_rpc_reply_t res =
-        amqp_consume_message(connection_state, &envelope, nullptr, 0);
+
+    struct timeval timeout {};
+
+    timeout.tv_usec = timeout_us;
+    amqp_rpc_reply_t res;
+    if (timeout_us == 0) {
+        res = amqp_consume_message(connection_state, &envelope, nullptr, 0);
+    }
+    else {
+        res = amqp_consume_message(connection_state, &envelope, &timeout, 0);
+    }
 
     if (res.reply_type != AMQP_RESPONSE_NORMAL) {
-        log_e(rabbitmq, "Failed to consume message.");
         switch (res.reply_type) {
             case AMQP_RESPONSE_LIBRARY_EXCEPTION:
+                if (amqp_error_string2(res.library_error)
+                    == std::string("request timed out"))
+                    break;
                 log_e(
                     rabbitmq, "Library exception: {}",
                     amqp_error_string2(res.library_error)
@@ -66,7 +84,7 @@ RabbitMQConsumer::consume_message_as_string()
                 log_e(rabbitmq, "Server exception: {}", res.reply.id);
                 break;
             case AMQP_RESPONSE_NONE:
-                log_e(rabbitmq, "No response from server.");
+                log_d(rabbitmq, "No incoming messages");
                 break;
             default:
                 log_e(rabbitmq, "Unknown error.");
@@ -82,13 +100,12 @@ RabbitMQConsumer::consume_message_as_string()
     return message;
 }
 
-std::variant<messages::InitMessage, messages::MarketOrder>
-RabbitMQConsumer::consume_message()
+std::optional<std::variant<messages::InitMessage, messages::MarketOrder>>
+RabbitMQConsumer::consume_message(int timeout_us)
 {
-    std::optional<std::string> buf = consume_message_as_string();
+    std::optional<std::string> buf = consume_message_as_string(timeout_us);
     if (!buf.has_value()) {
-        // todo: throw exception instead
-        std::abort();
+        return std::nullopt;
     }
 
     std::variant<messages::InitMessage, messages::MarketOrder> data;

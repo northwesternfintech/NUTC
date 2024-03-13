@@ -25,8 +25,6 @@ RabbitMQOrderHandler::handle_incoming_market_order(
     if (pos2 != std::string::npos) {
         buffer.replace(pos2, replace2.length(), R"("side":"ask")");
     }
-    if (clients.get_trader(order.client_id)->get_type() == manager::REMOTE)
-        log_i(rabbitmq, "Received market order: {}", buffer);
 
     if (!engine_manager.has_engine(order.ticker)) {
         return;
@@ -39,18 +37,7 @@ RabbitMQOrderHandler::handle_incoming_market_order(
         std::string buyer_id = match.buyer_id;
         std::string seller_id = match.seller_id;
         RabbitMQPublisher::broadcast_account_update(clients, match);
-        /*log_i(
-            matching, "Matched order with price {} and quantity {}", match.price,
-            match.quantity
-        );*/
     }
-    /*for (const auto& update : ob_updates) {
-        log_i(
-            rabbitmq, "New ObUpdate with ticker {} price {} quantity {} side {}",
-            update.ticker, update.price, update.quantity,
-            update.side == messages::SIDE::BUY ? "BUY" : "ASK"
-        );
-    }*/
     if (!matches.empty()) {
         RabbitMQPublisher::broadcast_matches(clients, matches);
     }

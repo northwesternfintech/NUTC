@@ -53,6 +53,7 @@ add_library(
     src/exchange/tick_manager/tick_manager.cpp
     
     src/exchange/dashboard/state/ticker_state.cpp
+    src/exchange/concurrency/pin_threads.cpp
 )
 
 target_include_directories(
