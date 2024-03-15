@@ -1,4 +1,5 @@
 #include "exchange/tickers/engine/engine.hpp"
+#include "exchange/tickers/engine/order_storage.hpp"
 #include "exchange/tickers/manager/ticker_manager.hpp"
 #include "exchange/traders/trader_manager.hpp"
 #include "exchange/utils/logger/logger.hpp"
@@ -7,6 +8,7 @@
 
 using Engine = nutc::matching::Engine;
 using MarketOrder = nutc::messages::MarketOrder;
+using StoredOrder = nutc::matching::StoredOrder;
 using Logger = nutc::events::Logger;
 using ObUpdate = nutc::messages::ObUpdate;
 using ClientManager = nutc::manager::ClientManager;
