@@ -19,7 +19,7 @@ add_executable(NUTC_tests
   src/unit/matching/invalid_orders.cpp
   src/unit/matching/many_orders.cpp
   
-  src/unit/matching/new_basic_matching.cpp
+  src/unit/matching/basic_matching.cpp
   src/unit/matching/order_container.cpp
 
   src/unit/expiration/basic_expiration.cpp

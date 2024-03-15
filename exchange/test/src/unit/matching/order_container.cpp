@@ -38,7 +38,7 @@ TEST_F(UnitOrderContainerTest, SimpleAddRemove)
     container_.add_order(so1);
     ASSERT_EQ(container_.get_level(SIDE::BUY, 1), 1);
     ASSERT_FALSE(container_.can_match_orders());
-  
+
     container_.add_order(so2);
     ASSERT_EQ(container_.get_level(SIDE::SELL, 1), 1);
     ASSERT_TRUE(container_.can_match_orders());
@@ -62,7 +62,7 @@ TEST_F(UnitOrderContainerTest, ModifyQuantity)
 
     container_.modify_order_quantity(so2.order_index, 1);
     ASSERT_EQ(container_.get_level(SIDE::SELL, 1), 2);
-  
+
     container_.modify_order_quantity(so2.order_index, -2);
     ASSERT_EQ(container_.get_level(SIDE::SELL, 1), 0);
     ASSERT_FALSE(container_.can_match_orders());
