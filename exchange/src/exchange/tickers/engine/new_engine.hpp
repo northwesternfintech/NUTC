@@ -22,6 +22,15 @@ public:
         return attempt_matches_();
     }
 
+    std::vector<StoredOrder>
+    expire_old_orders(uint64_t new_tick)
+    {
+        assert(new_tick == current_tick_ + 1);
+        auto orders = order_container_.expire_orders(current_tick_);
+        current_tick_ = new_tick;
+        return orders;
+    }
+
 private:
     bool
     handle_order_failure_(const StoredOrder& buyer, const StoredOrder& seller)

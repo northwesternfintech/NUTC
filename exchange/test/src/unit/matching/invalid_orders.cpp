@@ -34,7 +34,6 @@ protected:
     }
 };
 
-
 TEST_F(UnitInvalidOrders, RemoveThenAddFunds)
 {
     manager_.get_trader("ABC")->modify_capital(-STARTING_CAPITAL);
@@ -105,7 +104,6 @@ TEST_F(UnitInvalidOrders, SimpleManyInvalidOrder)
     ASSERT_EQ(matches.size(), 0);
     matches = add_to_engine_(order3);
     ASSERT_EQ(matches.size(), 0);
-
 
     // Should match two orders and throw out the invalid order (2)
     matches = add_to_engine_(order4);

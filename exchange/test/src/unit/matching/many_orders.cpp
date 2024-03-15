@@ -32,8 +32,8 @@ protected:
     ClientManager& manager_ = nutc::manager::ClientManager::get_instance(); // NOLINT(*)
     nutc::matching::NewEngine engine_{}; // NOLINT (*)
 
-  std::vector<Match>  
-  add_to_engine_(MarketOrder order)
+    std::vector<Match>
+    add_to_engine_(MarketOrder order)
     {
         return engine_.match_order(std::move(order));
     }
@@ -98,6 +98,7 @@ TEST_F(UnitManyOrders, SimpleManyOrder)
     ASSERT_EQ_MATCH(matches[1], "ETHUSD", "B", "D", SELL, 1, 1);
     ASSERT_EQ_MATCH(matches[2], "ETHUSD", "C", "D", SELL, 1, 1);
 }
+
 TEST_F(UnitManyOrders, PassiveAndAggressivePartial)
 {
     MarketOrder order1{"A", SELL, "ETHUSD", 1, 1};

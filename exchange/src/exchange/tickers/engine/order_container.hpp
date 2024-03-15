@@ -4,7 +4,6 @@
 #include "shared/util.hpp"
 
 #include <map>
-#include <queue>
 #include <set>
 #include <unordered_map>
 
@@ -16,7 +15,7 @@ public:
     void
     add_order(StoredOrder order)
     {
-        orders_by_tick_[order.tick].push(order.order_index);
+        orders_by_tick_[order.tick].push_back(order.order_index);
         if (order.side == SIDE::BUY) {
             bids_.insert(order_index{order.price, order.order_index});
         }
@@ -25,6 +24,18 @@ public:
         }
         modify_level_(order.side, order.price, order.quantity);
         orders_by_id_.emplace(order.order_index, std::move(order));
+    }
+
+    std::vector<StoredOrder>
+    expire_orders(uint64_t tick)
+    {
+        std::vector<StoredOrder> result;
+        for (uint64_t index : orders_by_tick_[tick]) {
+            result.push_back(std::move(orders_by_id_.at(index)));
+            orders_by_id_.erase(index);
+        }
+        orders_by_tick_.erase(tick);
+        return result;
     }
 
     void
@@ -115,7 +126,7 @@ private:
     std::unordered_map<uint64_t, StoredOrder> orders_by_id_;
 
     // tick -> queue of order ids
-    std::map<uint64_t, std::queue<uint64_t>> orders_by_tick_;
+    std::map<uint64_t, std::vector<uint64_t>> orders_by_tick_;
 
     std::unordered_map<double, double> bid_levels_;
     std::unordered_map<double, double> ask_levels_;

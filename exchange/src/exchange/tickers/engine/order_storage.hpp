@@ -13,7 +13,7 @@ namespace matching {
 using SIDE = messages::SIDE;
 
 struct StoredOrder {
-    const std::unique_ptr<manager::GenericTrader>& trader;
+    std::unique_ptr<manager::GenericTrader>& trader;
     std::string ticker;
     SIDE side;
     double price;
@@ -33,13 +33,37 @@ struct StoredOrder {
     }
 
     StoredOrder(
-        const std::unique_ptr<manager::GenericTrader>& trader, SIDE side,
-        std::string ticker, double quantity, double price, uint64_t tick
+        std::unique_ptr<manager::GenericTrader>& trader, SIDE side, std::string ticker,
+        double quantity, double price, uint64_t tick
     ) :
         trader(trader),
         ticker(std::move(ticker)), side(side), price(price), quantity(quantity),
         tick(tick), order_index(get_and_increment_global_index())
     {}
+
+    StoredOrder(StoredOrder&& other) noexcept :
+        trader(other.trader), ticker(std::move(other.ticker)), side(other.side),
+        price(other.price), quantity(other.quantity), tick(other.tick),
+        order_index(other.order_index)
+    {}
+
+    StoredOrder&
+    operator=(StoredOrder&& other) noexcept
+    {
+        if (this != &other) {
+            trader = std::move(other.trader);
+            ticker = std::move(other.ticker);
+            side = other.side;
+            price = other.price;
+            quantity = other.quantity;
+            tick = other.tick;
+            order_index = other.order_index;
+        }
+        return *this;
+    }
+
+    StoredOrder(const StoredOrder& other) = default;
+    StoredOrder& operator=(const StoredOrder& other) = delete;
 
     explicit StoredOrder(messages::MarketOrder&& other, uint64_t tick) :
 
@@ -115,8 +139,6 @@ struct StoredOrder {
         }
         return true;
     }
-
-    StoredOrder(const StoredOrder& other) = default;
 };
 
 struct order_index {
