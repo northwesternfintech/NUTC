@@ -6,6 +6,8 @@ namespace nutc {
 namespace manager {
 
 class LocalTrader : public GenericTrader {
+    pid_t pid_{};
+
 public:
     explicit LocalTrader(std::string algo_path, double capital) :
         GenericTrader(std::move(algo_path), capital)
@@ -17,7 +19,7 @@ public:
         return TraderType::LOCAL;
     }
 
-    std::string
+    const std::string&
     get_algo_id() const override
     {
         return get_id();
@@ -34,9 +36,6 @@ public:
     {
         return pid_;
     }
-
-private:
-    pid_t pid_{};
 };
 
 } // namespace manager

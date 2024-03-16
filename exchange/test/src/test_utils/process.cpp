@@ -34,7 +34,6 @@ initialize_testing_clients(
         algo_manager.initialize_client_manager(users);
         for (auto& [_, trader] : users.get_traders()) {
             if (trader->get_type() == manager::LOCAL) {
-                trader->set_capital(1000000);
                 trader->set_start_delay(has_delay);
             }
         }

@@ -13,12 +13,17 @@ public:
 
     MarketMakerBot(std::string ticker, double interest_limit) :
         BotTrader(std::move(ticker), interest_limit)
-    {
-        set_capital(std::numeric_limits<double>::max());
-        modify_holdings(TICKER, std::numeric_limits<double>::max());
-    }
+    {}
 
     static constexpr double BASE_SPREAD = 0.16;
+
+    double
+    get_capital() const override
+    {
+        return std::numeric_limits<double>::max();
+    }
+
+    bool constexpr can_leverage() override { return true; }
 
     std::vector<messages::MarketOrder>
     take_action(double new_theo)

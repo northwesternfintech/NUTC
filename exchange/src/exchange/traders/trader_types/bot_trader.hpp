@@ -51,7 +51,7 @@ public:
     set_pid(pid_t) override
     {}
 
-    std::string
+    const std::string&
     get_algo_id() const override
     {
         throw std::runtime_error("Not implemented");

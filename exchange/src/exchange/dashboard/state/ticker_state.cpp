@@ -26,18 +26,19 @@ TickerState::calculate_metrics()
     theo_ = bot_container.get_theo();
 
     auto calculate_pnl = [&engine_ref](const std::shared_ptr<bots::BotTrader>& bot) {
-        double capital = bot->get_pnl();
+        double capital_delta = bot->get_capital_delta();
 
         // Held stock can be negative due to leverage
         double held_stock = bot->get_held_stock();
         double stock_value = engine_ref.get_midprice() * held_stock;
-        return capital + stock_value;
+        return capital_delta + stock_value;
     };
 
     auto update_bot_state = [&calculate_pnl](auto&& container, BotStates& state) {
         state.num_bots_ = container.size();
         for (const auto& [id, bot] : container) {
-            state.total_capital_held_ += bot->get_interest_limit() + bot->get_capital();
+            state.total_capital_held_ +=
+                bot->get_interest_limit() + bot->get_capital_delta();
             if (!bot->is_active()) {
                 continue;
             }

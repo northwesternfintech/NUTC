@@ -1,16 +1,15 @@
 #pragma once
 
-#include "trader_type.hpp"
-
 #include <string>
 #include <unordered_map>
 
 namespace nutc {
 namespace manager {
+enum TraderType { REMOTE, LOCAL, BOT };
 
 class GenericTrader {
 public:
-    std::string
+    const std::string&
     get_id() const
     {
         return USER_ID;
@@ -18,10 +17,10 @@ public:
 
     virtual TraderType get_type() const = 0;
 
-    double
+    virtual double
     get_capital() const
     {
-        return capital_;
+        return INITIAL_CAPITAL + capital_delta_;
     }
 
     bool
@@ -57,6 +56,12 @@ public:
         return holdings_.at(ticker);
     }
 
+    virtual constexpr bool
+    can_leverage()
+    {
+        return false;
+    }
+
     double
     modify_holdings(const std::string& ticker, double change_in_holdings)
     {
@@ -65,30 +70,24 @@ public:
     }
 
     void
-    set_capital(double capital)
-    {
-        capital_ = capital;
-    }
-
-    void
     modify_capital(double change_in_capital)
     {
-        capital_ += change_in_capital;
+        capital_delta_ += change_in_capital;
     }
 
     double
-    get_pnl() const
+    get_capital_delta() const
     {
-        return capital_ - INITIAL_CAPITAL;
+        return capital_delta_;
     }
 
     virtual void set_pid(pid_t pid) = 0;
     virtual pid_t get_pid() const = 0;
 
-    virtual std::string get_algo_id() const = 0;
+    virtual const std::string& get_algo_id() const = 0;
 
     explicit GenericTrader(std::string user_id, double capital) :
-        USER_ID(std::move(user_id)), INITIAL_CAPITAL(capital), capital_(capital)
+        USER_ID(std::move(user_id)), INITIAL_CAPITAL(capital)
     {}
 
     virtual ~GenericTrader() = default;
@@ -100,7 +99,7 @@ public:
 private:
     const std::string USER_ID;
     const double INITIAL_CAPITAL;
-    double capital_;
+    double capital_delta_ = 0;
     bool is_active_ = false;
     bool has_start_delay_ = true;
     std::unordered_map<std::string, double> holdings_{};

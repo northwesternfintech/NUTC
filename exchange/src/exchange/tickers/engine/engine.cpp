@@ -68,6 +68,9 @@ add_ob_update(std::vector<ObUpdate>& vec, StoredOrder& order, double quantity)
 bool
 insufficient_capital(const StoredOrder& order)
 {
+    if (order.trader->can_leverage()) {
+        return false;
+    }
     double capital = order.trader->get_capital();
     double order_value = order.price * order.quantity;
     return order.side == SIDE::BUY && order_value > capital;
@@ -76,6 +79,9 @@ insufficient_capital(const StoredOrder& order)
 bool
 insufficient_holdings(const StoredOrder& order)
 {
+    if (order.trader->can_leverage()) {
+        return false;
+    }
     double holdings = order.trader->get_holdings(order.ticker);
     return order.side == SIDE::SELL && order.quantity > holdings;
 }

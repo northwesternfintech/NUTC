@@ -16,17 +16,15 @@ public:
     RetailBot(std::string ticker, double interest_limit) :
         BotTrader(std::move(ticker), interest_limit),
         AGGRESSIVENESS(std::normal_distribution<>{50, 2000}(gen))
-    {
-        set_capital(interest_limit);
-    }
-
-    [[nodiscard]] bool is_active() const override;
-
-    std::optional<messages::MarketOrder> take_action(double current, double theo);
+    {}
 
     RetailBot(RetailBot&& other) noexcept :
         BotTrader(std::move(other)), AGGRESSIVENESS(other.AGGRESSIVENESS)
     {}
+
+    [[nodiscard]] bool is_active() const override;
+
+    std::optional<messages::MarketOrder> take_action(double current, double theo);
 
 private:
     static double calculate_order_price(
