@@ -131,6 +131,10 @@ Dashboard::displayStockTickerData(
         window, start_y++, start_x, "Bids/asks: %lu %lu", ticker.num_bids_,
         ticker.num_asks_
     );
+    mvwprintw(
+        window, start_y++, start_x, "Matches since last tick: %lu",
+        ticker.matches_since_last_tick_
+    );
     start_y++;
 
     auto display_bot_stats = [&](const BotStates& state, const char* bot_type) {

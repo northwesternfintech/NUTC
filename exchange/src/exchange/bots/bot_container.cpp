@@ -4,6 +4,7 @@
 #include "exchange/rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
 #include "exchange/tickers/manager/ticker_manager.hpp"
 #include "exchange/traders/trader_manager.hpp"
+#include "exchange/traders/trader_types/bot_trader.hpp"
 
 #include <cmath>
 
@@ -40,10 +41,10 @@ BotContainer::on_tick(uint64_t)
     }
 }
 
+template <class BotType>
 void
-BotContainer::add_retail_bots(
-    double mean_capital, double stddev_capital, size_t num_bots
-)
+BotContainer::add_bots(double mean_capital, double stddev_capital, size_t num_bots)
+requires HandledBotType<BotType>
 {
     std::random_device rand;
     std::mt19937 gen(rand());
@@ -51,44 +52,33 @@ BotContainer::add_retail_bots(
     for (size_t i = 0; i < num_bots; i++) {
         auto capital = distr(gen);
         capital = std::abs(capital);
-        add_retail_bot_(capital);
+        add_single_bot_<BotType>(capital);
     }
 }
 
-void
-BotContainer::add_mm_bots(double mean_capital, double stddev_capital, size_t num_bots)
-{
-    std::random_device rand;
-    std::mt19937 gen(rand());
-    std::normal_distribution<> distr(mean_capital, stddev_capital);
-    for (size_t i = 0; i < num_bots; i++) {
-        auto capital = distr(gen);
-        capital = std::abs(capital);
-        add_mm_bot_(capital);
-    }
-}
+template void BotContainer::add_bots<RetailBot>(double, double, size_t);
+template void BotContainer::add_bots<MarketMakerBot>(double, double, size_t);
 
+template <class BotType>
 void
-BotContainer::add_retail_bot_(double starting_capital)
+BotContainer::add_single_bot_(double starting_capital)
+requires HandledBotType<BotType>
 {
-    assert(starting_capital > 0);
     manager::ClientManager& users = nutc::manager::ClientManager::get_instance();
-    RetailBot bot(ticker_, starting_capital);
+
+    BotType bot(ticker_, starting_capital);
     std::string bot_id = bot.get_id();
     auto retail_bot = users.add_bot_trader(std::move(bot));
-    retail_bots_.insert({bot_id, retail_bot});
+    if constexpr (std::is_same_v<BotType, RetailBot>) {
+        retail_bots_.insert({bot_id, retail_bot});
+    }
+    else {
+        market_makers_.insert({bot_id, retail_bot});
+    }
 }
 
-void
-BotContainer::add_mm_bot_(double starting_capital)
-{
-    assert(starting_capital > 0);
-    manager::ClientManager& users = nutc::manager::ClientManager::get_instance();
-    MarketMakerBot bot(ticker_, starting_capital);
-    std::string bot_id = bot.get_id();
-    auto mm_bot = users.add_bot_trader(std::move(bot));
-    market_makers_.insert({bot_id, mm_bot});
-}
+template void BotContainer::add_single_bot_<RetailBot>(double);
+template void BotContainer::add_single_bot_<MarketMakerBot>(double);
 
 std::vector<MarketOrder>
 BotContainer::on_new_theo(double new_theo, double current)

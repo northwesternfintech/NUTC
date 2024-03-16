@@ -20,7 +20,7 @@ public:
     }
 
     void
-    set_pid(pid_t pid) override
+    set_pid(const pid_t& pid) override
     {
         pid_ = pid;
     }

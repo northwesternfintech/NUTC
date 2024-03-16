@@ -195,6 +195,7 @@ Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
         matched_orders_.push_back(Match{
             "", aggressive_side, price_to_match, quantity_to_match, buyer_id, seller_id
         });
+        matches_since_last_tick_++;
 
         orders_by_id_.erase(buy_order_ref.order_index);
         orders_by_id_.erase(sell_order_ref.order_index);

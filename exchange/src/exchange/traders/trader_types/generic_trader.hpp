@@ -81,7 +81,7 @@ public:
         return capital_delta_;
     }
 
-    virtual void set_pid(pid_t pid) = 0;
+    virtual void set_pid(const pid_t& pid) = 0;
     virtual pid_t get_pid() const = 0;
 
     virtual const std::string& get_algo_id() const = 0;

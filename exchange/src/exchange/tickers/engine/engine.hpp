@@ -89,6 +89,14 @@ public:
         last_midprice_ = price;
     }
 
+    size_t
+    get_and_reset_matches_since_last_tick()
+    {
+        size_t temp = matches_since_last_tick_;
+        matches_since_last_tick_ = 0;
+        return temp;
+    }
+
     void
     add_order(const StoredOrder& stored_order)
     {
@@ -110,6 +118,7 @@ public:
 private:
     uint64_t current_tick_ = 0;
     double last_midprice_;
+    size_t matches_since_last_tick_ = 0;
 
     match_result_t
     attempt_matches_(manager::ClientManager& manager, StoredOrder& aggressive_order);

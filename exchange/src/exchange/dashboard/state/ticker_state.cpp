@@ -24,6 +24,7 @@ TickerState::calculate_metrics()
     num_bids_ = bids;
 
     theo_ = bot_container.get_theo();
+    matches_since_last_tick_ = engine_ref.get_and_reset_matches_since_last_tick();
 
     auto calculate_pnl = [&engine_ref](const std::shared_ptr<bots::BotTrader>& bot) {
         double capital_delta = bot->get_capital_delta();
