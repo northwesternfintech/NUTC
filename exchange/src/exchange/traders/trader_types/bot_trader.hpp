@@ -1,14 +1,31 @@
 #pragma once
 
+#include "exchange/traders/trader_types/generic_trader.hpp"
+
 #include <cassert>
 
+#include <stdexcept>
 #include <string>
 
 namespace nutc {
 namespace bots {
 
-class GenericBot {
-    const std::string BOT_ID;
+class BotTrader : public manager::GenericTrader {
+    static uint
+    get_and_increment_user_id()
+    {
+        static uint user_id = 0;
+        return user_id++;
+    }
+
+    static std::string
+    generate_user_id()
+    {
+        return "BOT_" + std::to_string(get_and_increment_user_id());
+    }
+
+protected:
+    const std::string TICKER;
     double short_interest_ = 0;
     double long_interest_ = 0;
 
@@ -16,38 +33,42 @@ class GenericBot {
     size_t open_asks_ = 0;
 
     const double INTEREST_LIMIT;
-    double capital_ = 0;
-    double held_stock_ = 0;
 
 public:
-    [[nodiscard]] double
-    get_capital() const
+    constexpr manager::TraderType
+    get_type() const override
     {
-        return capital_;
+        return manager::TraderType::BOT;
+    }
+
+    pid_t
+    get_pid() const override
+    {
+        return -1;
     }
 
     void
-    modify_capital(double delta)
+    set_pid(const pid_t&) override
     {
-        capital_ += delta;
+        throw std::runtime_error("Not implemented");
+    }
+
+    const std::string&
+    get_algo_id() const override
+    {
+        throw std::runtime_error("Not implemented");
     }
 
     [[nodiscard]] double
     get_held_stock() const
     {
-        return held_stock_;
+        return get_holdings(TICKER);
     }
 
     void
     modify_held_stock(double delta)
     {
-        held_stock_ += delta;
-    }
-
-    [[nodiscard]] const std::string&
-    get_id() const
-    {
-        return BOT_ID;
+        modify_holdings(TICKER, delta);
     }
 
     void
@@ -122,17 +143,23 @@ public:
         }
     }
 
-    virtual ~GenericBot() = default;
-    [[nodiscard]] virtual bool is_active() const = 0;
+    ~BotTrader() override = default;
 
-    GenericBot(std::string bot_id, double interest_limit) :
-        BOT_ID(std::move(bot_id)), INTEREST_LIMIT(interest_limit)
+    [[nodiscard]] virtual bool
+    is_active() const
+    {
+        return false;
+    }
+
+    BotTrader(std::string ticker, double interest_limit) :
+        GenericTrader(generate_user_id(), interest_limit), TICKER(std::move(ticker)),
+        INTEREST_LIMIT(interest_limit)
     {}
 
-    GenericBot(const GenericBot& other) = default;
-    GenericBot(GenericBot&& other) = default;
-    GenericBot& operator=(const GenericBot& other) = delete;
-    GenericBot& operator=(GenericBot&& other) = delete;
+    BotTrader(const BotTrader& other) = delete;
+    BotTrader(BotTrader&& other) = default;
+    BotTrader& operator=(const BotTrader& other) = delete;
+    BotTrader& operator=(BotTrader&& other) = delete;
 };
 
 } // namespace bots

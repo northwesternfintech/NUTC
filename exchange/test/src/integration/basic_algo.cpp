@@ -44,7 +44,7 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
     // want to see if it buys
     engine_manager_.add_engine("TSLA");
 
-    std::string user_id = users_.add_bot_trader();
+    std::string user_id = users_.add_bot_trader(0);
     users_.get_trader(user_id)->modify_holdings("TSLA", 1000); // NOLINT
 
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(
@@ -73,7 +73,7 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
     engine_manager_.add_engine("TSLA");
     engine_manager_.add_engine("APPL");
 
-    std::string user_id = users_.add_bot_trader();
+    std::string user_id = users_.add_bot_trader(0);
     users_.get_trader(user_id)->modify_holdings("TSLA", 1000); // NOLINT
 
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(
@@ -119,7 +119,7 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdate)
     engine_manager_.add_engine("TSLA");
     engine_manager_.add_engine("APPL");
 
-    std::string user_id = users_.add_bot_trader();
+    std::string user_id = users_.add_bot_trader(0);
     users_.get_trader(user_id)->modify_holdings("TSLA", 1000); // NOLINT
 
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(

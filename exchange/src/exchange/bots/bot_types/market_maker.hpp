@@ -1,5 +1,5 @@
 #pragma once
-#include "generic_bot.hpp"
+#include "exchange/traders/trader_types/bot_trader.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
 #include <sys/types.h>
@@ -7,13 +7,23 @@
 namespace nutc {
 namespace bots {
 
-class MarketMakerBot : public GenericBot {
+class MarketMakerBot : public BotTrader {
 public:
-    MarketMakerBot(std::string bot_id, double interest_limit) :
-        GenericBot(std::move(bot_id), interest_limit)
+    MarketMakerBot(MarketMakerBot&& other) = default;
+
+    MarketMakerBot(std::string ticker, double interest_limit) :
+        BotTrader(std::move(ticker), interest_limit)
     {}
 
     static constexpr double BASE_SPREAD = 0.16;
+
+    double
+    get_capital() const override
+    {
+        return std::numeric_limits<double>::max();
+    }
+
+    bool constexpr can_leverage() const override { return true; }
 
     std::vector<messages::MarketOrder>
     take_action(double new_theo)
@@ -56,8 +66,7 @@ public:
         for (size_t i = 0; i < LEVELS; ++i) {
             auto side = (i < LEVELS / 2) ? messages::SIDE::BUY : messages::SIDE::SELL;
             orders[i] = messages::MarketOrder{
-                GenericBot::get_id(), side, "", total_quantity * quantities[i],
-                prices[i]
+                get_id(), side, TICKER, total_quantity * quantities[i], prices[i]
             };
             if (side == messages::SIDE::BUY) {
                 modify_long_capital(total_quantity * quantities[i] * prices[i]);

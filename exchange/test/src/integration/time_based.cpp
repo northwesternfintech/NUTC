@@ -47,7 +47,7 @@ TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
     auto start = std::chrono::high_resolution_clock::now();
 
     engine_manager_.add_engine("TSLA");
-    std::string user_id = users_.add_bot_trader();
+    std::string user_id = users_.add_bot_trader(0);
     users_.get_trader(user_id)->modify_holdings("TSLA", 1000); // NOLINT
 
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(

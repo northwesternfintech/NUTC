@@ -2,7 +2,6 @@
 
 #include "exchange/tick_manager/tick_manager.hpp"
 #include "exchange/traders/trader_manager.hpp"
-#include "exchange/traders/trader_types.hpp"
 #include "state/global_metrics.hpp"
 
 #include <quill/Quill.h>
@@ -131,6 +130,10 @@ Dashboard::displayStockTickerData(
     mvwprintw(
         window, start_y++, start_x, "Bids/asks: %lu %lu", ticker.num_bids_,
         ticker.num_asks_
+    );
+    mvwprintw(
+        window, start_y++, start_x, "Matches since last tick: %lu",
+        ticker.matches_since_last_tick_
     );
     start_y++;
 

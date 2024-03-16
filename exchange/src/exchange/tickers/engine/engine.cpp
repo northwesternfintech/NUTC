@@ -1,7 +1,6 @@
 #include "engine.hpp"
 
 #include "exchange/tickers/engine/order_storage.hpp"
-#include "exchange/traders/trader_types.hpp"
 #include "exchange/utils/logger/logger.hpp"
 
 #include <algorithm>
@@ -69,6 +68,9 @@ add_ob_update(std::vector<ObUpdate>& vec, StoredOrder& order, double quantity)
 bool
 insufficient_capital(const StoredOrder& order)
 {
+    if (order.trader->can_leverage()) {
+        return false;
+    }
     double capital = order.trader->get_capital();
     double order_value = order.price * order.quantity;
     return order.side == SIDE::BUY && order_value > capital;
@@ -77,6 +79,9 @@ insufficient_capital(const StoredOrder& order)
 bool
 insufficient_holdings(const StoredOrder& order)
 {
+    if (order.trader->can_leverage()) {
+        return false;
+    }
     double holdings = order.trader->get_holdings(order.ticker);
     return order.side == SIDE::SELL && order.quantity > holdings;
 }
@@ -190,6 +195,7 @@ Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
         matched_orders_.push_back(Match{
             "", aggressive_side, price_to_match, quantity_to_match, buyer_id, seller_id
         });
+        matches_since_last_tick_++;
 
         orders_by_id_.erase(buy_order_ref.order_index);
         orders_by_id_.erase(sell_order_ref.order_index);
@@ -232,7 +238,7 @@ Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
             added_orders_.push_back(sell_order);
         }
 
-        auto update_traders = [&](const std::unique_ptr<manager::GenericTrader>& trader,
+        auto update_traders = [&](const std::shared_ptr<manager::GenericTrader>& trader,
                                   SIDE side) {
             if (side == SIDE::BUY) {
                 trader->modify_capital(-quantity_to_match * price_to_match);

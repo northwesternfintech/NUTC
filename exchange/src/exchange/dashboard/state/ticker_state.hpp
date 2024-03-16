@@ -40,6 +40,7 @@ struct TickerState {
     std::pair<double, double> spread_{};
     size_t num_bids_{};
     size_t num_asks_{};
+    size_t matches_since_last_tick_;
 
     BotStates mm_state_{};
     BotStates retail_state_{};

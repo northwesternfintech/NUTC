@@ -1,22 +1,28 @@
 #pragma once
 
-#include "generic_bot.hpp"
+#include "exchange/traders/trader_types/bot_trader.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
 namespace nutc {
 
 namespace bots {
 
-class RetailBot : public GenericBot {
+class RetailBot : public BotTrader {
     std::random_device rd{};
     std::mt19937 gen{};
     std::poisson_distribution<> poisson_dist{};
 
 public:
-    RetailBot(std::string bot_id, double interest_limit) :
-        GenericBot(std::move(bot_id), interest_limit),
+    RetailBot(std::string ticker, double interest_limit) :
+        BotTrader(std::move(ticker), interest_limit),
         AGGRESSIVENESS(std::normal_distribution<>{50, 2000}(gen))
     {}
+
+    RetailBot(RetailBot&& other) noexcept :
+        BotTrader(std::move(other)), AGGRESSIVENESS(other.AGGRESSIVENESS)
+    {}
+
+    bool constexpr can_leverage() const override { return true; }
 
     [[nodiscard]] bool is_active() const override;
 

@@ -11,6 +11,10 @@ namespace bots {
 using MarketOrder = messages::MarketOrder;
 using Match = messages::Match;
 
+template <typename T>
+concept HandledBotType =
+    std::disjunction_v<std::is_same<T, RetailBot>, std::is_same<T, MarketMakerBot>>;
+
 class BotContainer : public ticks::TickObserver {
 public:
     void on_tick(uint64_t) override;
@@ -21,13 +25,13 @@ public:
         return brownian_offset_ + theo_generator_.get_price();
     }
 
-    const std::unordered_map<std::string, MarketMakerBot>&
+    const std::unordered_map<std::string, const std::shared_ptr<MarketMakerBot>>&
     get_market_makers() const
     {
         return market_makers_;
     }
 
-    const std::unordered_map<std::string, RetailBot>&
+    const std::unordered_map<std::string, const std::shared_ptr<RetailBot>>&
     get_retail_traders() const
     {
         return retail_bots_;
@@ -42,8 +46,9 @@ public:
     process_order_add(const std::string& bot_id, messages::SIDE side, double total_cap);
     void process_order_match(Match& match);
 
-    void add_retail_bots(double mean_capital, double stddev_capital, size_t num_bots);
-    void add_mm_bots(double mean_capital, double stddev_capital, size_t num_bots);
+    template <class BotType>
+    void add_bots(double mean_capital, double stddev_capital, size_t num_bots)
+    requires HandledBotType<BotType>;
 
     BotContainer() = default;
 
@@ -52,10 +57,13 @@ public:
     {}
 
 private:
-    void add_mm_bot_(double starting_capital);
-    void add_retail_bot_(double starting_capital);
-    std::unordered_map<std::string, RetailBot> retail_bots_{};
-    std::unordered_map<std::string, MarketMakerBot> market_makers_{};
+    template <class BotType>
+    void add_single_bot_(double starting_capital)
+    requires HandledBotType<BotType>;
+
+    std::unordered_map<std::string, const std::shared_ptr<RetailBot>> retail_bots_{};
+    std::unordered_map<std::string, const std::shared_ptr<MarketMakerBot>>
+        market_makers_{};
     std::string ticker_;
 
     stochastic::BrownianMotion theo_generator_{};

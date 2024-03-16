@@ -1,7 +1,6 @@
 #include "spawning.hpp"
 
 #include "exchange/logging.hpp"
-#include "exchange/traders/trader_types.hpp"
 #include "shared/file_operations/file_operations.hpp"
 
 #include <cstdlib>
@@ -18,7 +17,7 @@ quote_id(std::string user_id)
 
 pid_t
 spawn_client(
-    const std::unique_ptr<manager::GenericTrader>& trader,
+    const std::shared_ptr<manager::GenericTrader>& trader,
     const std::string& binary_path
 )
 {
@@ -77,7 +76,7 @@ spawn_all_clients(nutc::manager::ClientManager& users)
     );
 
     size_t num_clients = 0;
-    auto spawn_one_trader = [&](const std::unique_ptr<manager::GenericTrader>& trader) {
+    auto spawn_one_trader = [&](const std::shared_ptr<manager::GenericTrader>& trader) {
         if (trader->get_type() == manager::BOT)
             return;
 

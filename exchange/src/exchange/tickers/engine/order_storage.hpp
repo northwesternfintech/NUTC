@@ -1,6 +1,6 @@
 #pragma once
 #include "exchange/traders/trader_manager.hpp"
-#include "exchange/traders/trader_types.hpp"
+#include "exchange/traders/trader_types/generic_trader.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
 #include <fmt/format.h>
@@ -13,7 +13,7 @@ namespace matching {
 using SIDE = messages::SIDE;
 
 struct StoredOrder {
-    const std::unique_ptr<manager::GenericTrader>& trader;
+    std::shared_ptr<manager::GenericTrader> trader;
     std::string ticker;
     SIDE side;
     double price;
@@ -33,16 +33,39 @@ struct StoredOrder {
     }
 
     StoredOrder(
-        const std::unique_ptr<manager::GenericTrader>& trader, SIDE side,
-        std::string ticker, double quantity, double price, uint64_t tick
+        std::shared_ptr<manager::GenericTrader> trader, SIDE side, std::string ticker,
+        double quantity, double price, uint64_t tick
     ) :
-        trader(trader),
+        trader(std::move(trader)),
         ticker(std::move(ticker)), side(side), price(price), quantity(quantity),
         tick(tick), order_index(get_and_increment_global_index())
     {}
 
-    explicit StoredOrder(messages::MarketOrder&& other, uint64_t tick) :
+    StoredOrder(StoredOrder&& other) noexcept :
+        trader(std::move(other.trader)), ticker(std::move(other.ticker)),
+        side(other.side), price(other.price), quantity(other.quantity),
+        tick(other.tick), order_index(other.order_index)
+    {}
 
+    StoredOrder&
+    operator=(StoredOrder&& other) noexcept
+    {
+        if (this != &other) {
+            trader = std::move(other.trader);
+            ticker = std::move(other.ticker);
+            side = other.side;
+            price = other.price;
+            quantity = other.quantity;
+            tick = other.tick;
+            order_index = other.order_index;
+        }
+        return *this;
+    }
+
+    StoredOrder(const StoredOrder& other) = default;
+    StoredOrder& operator=(const StoredOrder& other) = delete;
+
+    explicit StoredOrder(messages::MarketOrder&& other, uint64_t tick) :
         trader(manager::ClientManager::get_instance().get_trader(other.client_id)),
         ticker(std::move(other.ticker)), side(other.side), price(other.price),
         quantity(other.quantity), tick(tick),
@@ -115,8 +138,6 @@ struct StoredOrder {
         }
         return true;
     }
-
-    StoredOrder(const StoredOrder& other) = default;
 };
 
 struct order_index {

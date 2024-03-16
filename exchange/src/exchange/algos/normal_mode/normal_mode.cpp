@@ -15,8 +15,9 @@ NormalModeAlgoManager::initialize_client_manager(manager::ClientManager& users)
     for (const auto& [id, user] : firebase_users) {
         if (!user.contains("latestAlgoId"))
             continue;
-        users.add_remote_trader(id, user["latestAlgoId"].get<std::string>());
-        users.get_trader(id)->set_capital(STARTING_CAPITAL);
+        users.add_remote_trader(
+            id, user["latestAlgoId"].get<std::string>(), STARTING_CAPITAL
+        );
         num_clients_ += 1;
     }
 }
