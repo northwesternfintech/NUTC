@@ -13,14 +13,17 @@ class RetailBot : public GenericBot {
     std::poisson_distribution<> poisson_dist{};
 
 public:
-    RetailBot(std::string bot_id, double interest_limit) :
-        GenericBot(std::move(bot_id), interest_limit),
+    RetailBot(std::string ticker, double interest_limit) :
+        GenericBot(std::move(ticker), interest_limit),
         AGGRESSIVENESS(std::normal_distribution<>{50, 2000}(gen))
-    {}
+    {
+        set_capital(interest_limit);
+    }
 
     [[nodiscard]] bool is_active() const override;
 
     std::optional<messages::MarketOrder> take_action(double current, double theo);
+    RetailBot(RetailBot&& other) noexcept : GenericBot(std::move(other)), AGGRESSIVENESS(other.AGGRESSIVENESS) {}
 
 private:
     static double calculate_order_price(

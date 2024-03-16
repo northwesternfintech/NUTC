@@ -34,7 +34,7 @@ RetailBot::take_action(double current, double theo)
                 modify_open_bids(1);
                 modify_long_capital(quantity * price);
                 return messages::MarketOrder{
-                    get_id(), messages::SIDE::BUY, "", quantity, price
+                    get_id(), messages::SIDE::BUY, TICKER, quantity, price
                 };
             }
             if (current > theo) {
@@ -46,7 +46,7 @@ RetailBot::take_action(double current, double theo)
                 modify_open_asks(1);
                 modify_short_capital(quantity * price);
                 return messages::MarketOrder{
-                    get_id(), messages::SIDE::SELL, "", quantity, price
+                    get_id(), messages::SIDE::SELL, TICKER, quantity, price
                 };
             }
         }

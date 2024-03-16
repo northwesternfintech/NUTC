@@ -13,7 +13,7 @@ namespace matching {
 using SIDE = messages::SIDE;
 
 struct StoredOrder {
-    std::unique_ptr<manager::GenericTrader>& trader;
+    std::shared_ptr<manager::GenericTrader> trader;
     std::string ticker;
     SIDE side;
     double price;
@@ -33,18 +33,18 @@ struct StoredOrder {
     }
 
     StoredOrder(
-        std::unique_ptr<manager::GenericTrader>& trader, SIDE side, std::string ticker,
+        std::shared_ptr<manager::GenericTrader> trader, SIDE side, std::string ticker,
         double quantity, double price, uint64_t tick
     ) :
-        trader(trader),
+        trader(std::move(trader)),
         ticker(std::move(ticker)), side(side), price(price), quantity(quantity),
         tick(tick), order_index(get_and_increment_global_index())
     {}
 
     StoredOrder(StoredOrder&& other) noexcept :
-        trader(other.trader), ticker(std::move(other.ticker)), side(other.side),
-        price(other.price), quantity(other.quantity), tick(other.tick),
-        order_index(other.order_index)
+        trader(std::move(other.trader)), ticker(std::move(other.ticker)),
+        side(other.side), price(other.price), quantity(other.quantity),
+        tick(other.tick), order_index(other.order_index)
     {}
 
     StoredOrder&
@@ -66,7 +66,6 @@ struct StoredOrder {
     StoredOrder& operator=(const StoredOrder& other) = delete;
 
     explicit StoredOrder(messages::MarketOrder&& other, uint64_t tick) :
-
         trader(manager::ClientManager::get_instance().get_trader(other.client_id)),
         ticker(std::move(other.ticker)), side(other.side), price(other.price),
         quantity(other.quantity), tick(tick),

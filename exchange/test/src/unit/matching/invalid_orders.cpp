@@ -14,11 +14,8 @@ protected:
     void
     SetUp() override
     {
-        manager_.add_local_trader("ABC");
-        manager_.add_local_trader("DEF");
-
-        manager_.get_trader("ABC")->modify_capital(STARTING_CAPITAL);
-        manager_.get_trader("DEF")->modify_capital(STARTING_CAPITAL);
+        manager_.add_local_trader("ABC", STARTING_CAPITAL);
+        manager_.add_local_trader("DEF", STARTING_CAPITAL);
 
         manager_.get_trader("ABC")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
         manager_.get_trader("DEF")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
@@ -79,14 +76,10 @@ TEST_F(UnitInvalidOrders, MatchingInvalidFunds)
 
 TEST_F(UnitInvalidOrders, SimpleManyInvalidOrder)
 {
-    manager_.add_local_trader("A");
-    manager_.add_local_trader("B");
-    manager_.add_local_trader("C");
-    manager_.add_local_trader("D");
-
-    manager_.get_trader("A")->modify_capital(STARTING_CAPITAL);
-    manager_.get_trader("C")->modify_capital(STARTING_CAPITAL);
-    manager_.get_trader("D")->modify_capital(STARTING_CAPITAL);
+    manager_.add_local_trader("A", STARTING_CAPITAL);
+    manager_.add_local_trader("B", 0);
+    manager_.add_local_trader("C", STARTING_CAPITAL);
+    manager_.add_local_trader("D", STARTING_CAPITAL);
 
     manager_.get_trader("A")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     manager_.get_trader("B")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);

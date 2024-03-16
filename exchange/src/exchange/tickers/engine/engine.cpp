@@ -232,7 +232,7 @@ Engine::attempt_matches_( // NOLINT (cognitive-complexity-*)
             added_orders_.push_back(sell_order);
         }
 
-        auto update_traders = [&](const std::unique_ptr<manager::GenericTrader>& trader,
+        auto update_traders = [&](const std::shared_ptr<manager::GenericTrader>& trader,
                                   SIDE side) {
             if (side == SIDE::BUY) {
                 trader->modify_capital(-quantity_to_match * price_to_match);

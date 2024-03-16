@@ -1,3 +1,4 @@
+#include "exchange/config.h"
 #include "exchange/tickers/engine/new_engine.hpp"
 #include "test_utils/macros.hpp"
 
@@ -13,15 +14,10 @@ protected:
     void
     SetUp() override
     {
-        manager_.add_local_trader("A");
-        manager_.add_local_trader("B");
-        manager_.add_local_trader("C");
-        manager_.add_local_trader("D");
-
-        manager_.get_trader("A")->modify_capital(STARTING_CAPITAL);
-        manager_.get_trader("B")->modify_capital(STARTING_CAPITAL);
-        manager_.get_trader("C")->modify_capital(STARTING_CAPITAL);
-        manager_.get_trader("D")->modify_capital(STARTING_CAPITAL);
+        manager_.add_local_trader("A", STARTING_CAPITAL);
+        manager_.add_local_trader("B", STARTING_CAPITAL);
+        manager_.add_local_trader("C", STARTING_CAPITAL);
+        manager_.add_local_trader("D", STARTING_CAPITAL);
 
         manager_.get_trader("A")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
         manager_.get_trader("B")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);

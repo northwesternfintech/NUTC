@@ -14,11 +14,8 @@ protected:
     void
     SetUp() override
     {
-        manager_.add_local_trader("ABC");
-        manager_.add_local_trader("DEF");
-
-        manager_.get_trader("ABC")->modify_capital(STARTING_CAPITAL);
-        manager_.get_trader("DEF")->modify_capital(STARTING_CAPITAL);
+        manager_.add_local_trader("ABC", STARTING_CAPITAL);
+        manager_.add_local_trader("DEF", STARTING_CAPITAL);
 
         manager_.get_trader("ABC")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
         manager_.get_trader("DEF")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);

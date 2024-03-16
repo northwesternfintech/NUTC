@@ -1,10 +1,12 @@
 #pragma once
-// keep track of active users and account information
+#include "exchange/bots/bot_types/market_maker.hpp"
+#include "exchange/bots/bot_types/retail.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
 #include "trader_types.hpp"
 
 #include <glaze/glaze.hpp>
 
+#include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -13,52 +15,65 @@ namespace nutc {
 namespace manager {
 
 class ClientManager {
-    std::unordered_map<std::string, std::unique_ptr<GenericTrader>> traders_;
+    std::unordered_map<std::string, const std::shared_ptr<GenericTrader>> traders_;
 
 public:
     void
-    add_remote_trader(const std::string& user_id, const std::string& algo_id)
+    add_remote_trader(const std::string& user_id, const std::string& algo_id, double capital)
     {
-        traders_.emplace(user_id, std::make_unique<RemoteTrader>(user_id, algo_id));
+        traders_.emplace(user_id, std::make_shared<RemoteTrader>(user_id, algo_id, capital));
     }
 
     void
-    add_local_trader(const std::string& algo_id)
+    add_local_trader(const std::string& algo_id, double capital)
     {
-        traders_.emplace(algo_id, std::make_unique<LocalTrader>(algo_id));
+        traders_.emplace(algo_id, std::make_shared<LocalTrader>(algo_id, capital));
     }
 
-    // returns internal id
-    [[nodiscard]] std::string
-    add_bot_trader()
+    // FOR TESTING ONLY - THIS WILL HAVE NO ATTACHED REAL BOT
+    std::string
+    add_bot_trader(double capital)
     {
-        std::unique_ptr<GenericTrader> bot = std::make_unique<BotTrader>();
+        std::shared_ptr<GenericTrader> bot = std::make_shared<BotTrader>(capital);
         std::string bot_id = bot->get_id();
-        traders_.emplace(bot_id, std::move(bot));
+        traders_.insert({bot_id, bot});
         return bot_id;
     }
 
-    [[nodiscard]] const std::unique_ptr<GenericTrader>&
+  std::shared_ptr<bots::RetailBot>
+    add_bot_trader(bots::RetailBot&& trader)
+    {
+        std::string bot_id = trader.get_id();
+        std::shared_ptr<GenericTrader> bot =
+            std::make_shared<bots::RetailBot>(std::move(trader));
+        traders_.insert({bot_id, bot});
+        return std::dynamic_pointer_cast<bots::RetailBot>(bot);
+    }
+  
+  std::shared_ptr<bots::MarketMakerBot>
+    add_bot_trader(bots::MarketMakerBot&& trader)
+    {
+        std::string bot_id = trader.get_id();
+        std::shared_ptr<GenericTrader> bot =
+            std::make_shared<bots::MarketMakerBot>(std::move(trader));
+        traders_.insert({bot_id, bot});
+        return std::dynamic_pointer_cast<bots::MarketMakerBot>(bot);
+    }
+
+    [[nodiscard]] std::shared_ptr<GenericTrader>
     get_trader(const std::string& trader_id) const
     {
         assert(user_exists_(trader_id));
         return traders_.at(trader_id);
     }
 
-    [[nodiscard]] std::unique_ptr<GenericTrader>&
-    get_trader(const std::string& trader_id)
-    {
-        assert(user_exists_(trader_id));
-        return traders_.at(trader_id);
-    }
-
-    std::unordered_map<std::string, std::unique_ptr<GenericTrader>>&
+    std::unordered_map<std::string, const std::shared_ptr<GenericTrader>>&
     get_traders()
     {
         return traders_;
     }
 
-    const std::unordered_map<std::string, std::unique_ptr<GenericTrader>>&
+    const std::unordered_map<std::string, const std::shared_ptr<GenericTrader>>&
     get_traders() const
     {
         return traders_;

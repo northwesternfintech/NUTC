@@ -9,9 +9,14 @@ namespace bots {
 
 class MarketMakerBot : public GenericBot {
 public:
-    MarketMakerBot(std::string bot_id, double interest_limit) :
-        GenericBot(std::move(bot_id), interest_limit)
-    {}
+    MarketMakerBot(MarketMakerBot&& other) = default;
+    
+    MarketMakerBot(std::string ticker, double interest_limit) :
+        GenericBot(std::move(ticker), interest_limit)
+    {
+        set_capital(std::numeric_limits<double>::max());
+        modify_holdings(TICKER, std::numeric_limits<double>::max());
+    }
 
     static constexpr double BASE_SPREAD = 0.16;
 
@@ -56,7 +61,7 @@ public:
         for (size_t i = 0; i < LEVELS; ++i) {
             auto side = (i < LEVELS / 2) ? messages::SIDE::BUY : messages::SIDE::SELL;
             orders[i] = messages::MarketOrder{
-                GenericBot::get_id(), side, "", total_quantity * quantities[i],
+                get_id(), side, TICKER, total_quantity * quantities[i],
                 prices[i]
             };
             if (side == messages::SIDE::BUY) {

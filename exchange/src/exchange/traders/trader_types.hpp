@@ -3,7 +3,6 @@
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
-#include <variant>
 
 namespace nutc {
 namespace manager {
@@ -78,12 +77,16 @@ public:
         capital_ += change_in_capital;
     }
 
+    double get_pnl() const {
+return capital_ - INITIAL_CAPITAL;
+  }
+
     virtual void set_pid(pid_t pid) = 0;
     virtual pid_t get_pid() const = 0;
 
     virtual std::string get_algo_id() const = 0;
 
-    explicit GenericTrader(std::string user_id) : USER_ID(std::move(user_id)) {}
+    explicit GenericTrader(std::string user_id, double capital) : USER_ID(std::move(user_id)), INITIAL_CAPITAL(capital), capital_(capital) {}
 
     virtual ~GenericTrader() = default;
     GenericTrader& operator=(GenericTrader&& other) = delete;
@@ -93,7 +96,8 @@ public:
 
 private:
     const std::string USER_ID;
-    double capital_ = 0;
+    const double INITIAL_CAPITAL;
+    double capital_;
     bool is_active_ = false;
     bool has_start_delay_ = true;
     std::unordered_map<std::string, double> holdings_{};
@@ -101,8 +105,8 @@ private:
 
 class RemoteTrader : public GenericTrader {
 public:
-    RemoteTrader(std::string user_id, std::string algo_id) :
-        GenericTrader(std::move(user_id)), algo_id_(std::move(algo_id))
+    RemoteTrader(std::string user_id, std::string algo_id, double capital) :
+        GenericTrader(std::move(user_id), capital), algo_id_(std::move(algo_id))
     {}
 
     constexpr TraderType
@@ -136,7 +140,7 @@ private:
 
 class LocalTrader : public GenericTrader {
 public:
-    explicit LocalTrader(std::string algo_path) : GenericTrader(std::move(algo_path)) {}
+    explicit LocalTrader(std::string algo_path, double capital) : GenericTrader(std::move(algo_path), capital) {}
 
     constexpr TraderType
     get_type() const override
@@ -168,7 +172,7 @@ private:
 
 class BotTrader : public GenericTrader {
 public:
-    BotTrader() : GenericTrader(generate_user_id()) {}
+    explicit BotTrader(double capital) : GenericTrader(generate_user_id(), capital) {}
 
     constexpr TraderType
     get_type() const override
@@ -206,8 +210,6 @@ private:
         return "BOT_" + std::to_string(get_and_increment_user_id());
     }
 };
-
-using trader_t = std::variant<RemoteTrader, LocalTrader, BotTrader>;
 
 } // namespace manager
 } // namespace nutc

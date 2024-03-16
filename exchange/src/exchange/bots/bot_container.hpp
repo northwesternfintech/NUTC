@@ -21,13 +21,13 @@ public:
         return brownian_offset_ + theo_generator_.get_price();
     }
 
-    const std::unordered_map<std::string, MarketMakerBot>&
+    const std::unordered_map<std::string, const std::shared_ptr<MarketMakerBot>>&
     get_market_makers() const
     {
         return market_makers_;
     }
 
-    const std::unordered_map<std::string, RetailBot>&
+    const std::unordered_map<std::string, const std::shared_ptr<RetailBot>>&
     get_retail_traders() const
     {
         return retail_bots_;
@@ -54,8 +54,9 @@ public:
 private:
     void add_mm_bot_(double starting_capital);
     void add_retail_bot_(double starting_capital);
-    std::unordered_map<std::string, RetailBot> retail_bots_{};
-    std::unordered_map<std::string, MarketMakerBot> market_makers_{};
+    std::unordered_map<std::string, const std::shared_ptr<RetailBot>> retail_bots_{};
+    std::unordered_map<std::string, const std::shared_ptr<MarketMakerBot>>
+        market_makers_{};
     std::string ticker_;
 
     stochastic::BrownianMotion theo_generator_{};

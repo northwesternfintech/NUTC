@@ -84,7 +84,7 @@ RabbitMQPublisher::broadcast_account_update(
     const std::string& buyer_id = match.buyer_id;
     const std::string& seller_id = match.seller_id;
 
-    auto send_message = [&](const std::unique_ptr<manager::GenericTrader>& trader,
+    auto send_message = [&](const std::shared_ptr<manager::GenericTrader>& trader,
                             messages::SIDE side) {
         if (trader->get_type() == manager::BOT)
             return;

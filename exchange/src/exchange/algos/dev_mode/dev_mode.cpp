@@ -14,16 +14,14 @@ DevModeAlgoManager::initialize_client_manager(manager::ClientManager& users)
 {
     auto handle_algos_provided_filenames = [&]() {
         for (const std::string& filepath : algo_filenames_.value()) {
-            users.add_local_trader(filepath);
-            users.get_trader(filepath)->set_capital(STARTING_CAPITAL);
+            users.add_local_trader(filepath, STARTING_CAPITAL);
         }
     };
 
     auto handle_algos_default_filenames = [&]() {
         for (size_t i = 0; i < num_clients_; i++) {
             std::string algo_id = std::string(ALGO_DIR) + "/algo_" + std::to_string(i);
-            users.add_local_trader(algo_id);
-            users.get_trader(algo_id)->set_capital(STARTING_CAPITAL);
+            users.add_local_trader(algo_id, STARTING_CAPITAL);
         }
     };
 
