@@ -1,6 +1,6 @@
 #pragma once
 #include "exchange/traders/trader_manager.hpp"
-#include "exchange/traders/trader_types.hpp"
+#include "exchange/traders/trader_types/generic_trader.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
 #include <fmt/format.h>

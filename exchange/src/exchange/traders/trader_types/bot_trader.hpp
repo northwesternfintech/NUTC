@@ -1,15 +1,29 @@
 #pragma once
 
-#include "exchange/traders/trader_types.hpp"
+#include "exchange/traders/trader_types/generic_trader.hpp"
 
 #include <cassert>
 
+#include <stdexcept>
 #include <string>
 
 namespace nutc {
 namespace bots {
 
-class GenericBot : public manager::BotTrader {
+class BotTrader : public manager::GenericTrader {
+    static uint
+    get_and_increment_user_id()
+    {
+        static uint user_id = 0;
+        return user_id++;
+    }
+
+    static std::string
+    generate_user_id()
+    {
+        return "BOT_" + std::to_string(get_and_increment_user_id());
+    }
+
 protected:
     const std::string TICKER;
     double short_interest_ = 0;
@@ -21,6 +35,28 @@ protected:
     const double INTEREST_LIMIT;
 
 public:
+    constexpr manager::TraderType
+    get_type() const override
+    {
+        return manager::TraderType::BOT;
+    }
+
+    pid_t
+    get_pid() const override
+    {
+        return -1;
+    }
+
+    void
+    set_pid(pid_t) override
+    {}
+
+    std::string
+    get_algo_id() const override
+    {
+        throw std::runtime_error("Not implemented");
+    }
+
     [[nodiscard]] double
     get_held_stock() const
     {
@@ -105,7 +141,7 @@ public:
         }
     }
 
-    ~GenericBot() override = default;
+    ~BotTrader() override = default;
 
     [[nodiscard]] virtual bool
     is_active() const
@@ -113,14 +149,15 @@ public:
         return false;
     }
 
-    GenericBot(std::string ticker, double interest_limit) :
-       BotTrader(interest_limit), TICKER(std::move(ticker)), INTEREST_LIMIT(interest_limit)
+    BotTrader(std::string ticker, double interest_limit) :
+        GenericTrader(generate_user_id(), interest_limit), TICKER(std::move(ticker)),
+        INTEREST_LIMIT(interest_limit)
     {}
 
-    GenericBot(const GenericBot& other) = delete;
-    GenericBot(GenericBot&& other) = default;
-    GenericBot& operator=(const GenericBot& other) = delete;
-    GenericBot& operator=(GenericBot&& other) = delete;
+    BotTrader(const BotTrader& other) = delete;
+    BotTrader(BotTrader&& other) = default;
+    BotTrader& operator=(const BotTrader& other) = delete;
+    BotTrader& operator=(BotTrader&& other) = delete;
 };
 
 } // namespace bots

@@ -1,7 +1,7 @@
 #include "ticker_state.hpp"
 
-#include "exchange/bots/bot_types/generic_bot.hpp"
 #include "exchange/tickers/manager/ticker_manager.hpp"
+#include "exchange/traders/trader_types/bot_trader.hpp"
 
 #include <algorithm>
 
@@ -25,7 +25,7 @@ TickerState::calculate_metrics()
 
     theo_ = bot_container.get_theo();
 
-    auto calculate_pnl = [&engine_ref](const std::shared_ptr<bots::GenericBot>& bot) {
+    auto calculate_pnl = [&engine_ref](const std::shared_ptr<bots::BotTrader>& bot) {
         double capital = bot->get_pnl();
 
         // Held stock can be negative due to leverage

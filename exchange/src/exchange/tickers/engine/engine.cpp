@@ -1,7 +1,6 @@
 #include "engine.hpp"
 
 #include "exchange/tickers/engine/order_storage.hpp"
-#include "exchange/traders/trader_types.hpp"
 #include "exchange/utils/logger/logger.hpp"
 
 #include <algorithm>

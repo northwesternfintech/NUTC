@@ -2,7 +2,6 @@
 
 #include "exchange/logging.hpp"
 #include "exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
-#include "exchange/traders/trader_types.hpp"
 
 namespace nutc {
 namespace rabbitmq {

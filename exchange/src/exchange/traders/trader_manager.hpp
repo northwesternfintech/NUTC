@@ -2,7 +2,9 @@
 #include "exchange/bots/bot_types/market_maker.hpp"
 #include "exchange/bots/bot_types/retail.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
-#include "trader_types.hpp"
+#include "trader_types/bot_trader.hpp"
+#include "trader_types/local_trader.hpp"
+#include "trader_types/remote_trader.hpp"
 
 #include <glaze/glaze.hpp>
 
@@ -19,9 +21,13 @@ class ClientManager {
 
 public:
     void
-    add_remote_trader(const std::string& user_id, const std::string& algo_id, double capital)
+    add_remote_trader(
+        const std::string& user_id, const std::string& algo_id, double capital
+    )
     {
-        traders_.emplace(user_id, std::make_shared<RemoteTrader>(user_id, algo_id, capital));
+        traders_.emplace(
+            user_id, std::make_shared<RemoteTrader>(user_id, algo_id, capital)
+        );
     }
 
     void
@@ -34,13 +40,14 @@ public:
     std::string
     add_bot_trader(double capital)
     {
-        std::shared_ptr<GenericTrader> bot = std::make_shared<BotTrader>(capital);
+        std::shared_ptr<GenericTrader> bot =
+            std::make_shared<bots::BotTrader>("", capital);
         std::string bot_id = bot->get_id();
         traders_.insert({bot_id, bot});
         return bot_id;
     }
 
-  std::shared_ptr<bots::RetailBot>
+    std::shared_ptr<bots::RetailBot>
     add_bot_trader(bots::RetailBot&& trader)
     {
         std::string bot_id = trader.get_id();
@@ -49,8 +56,8 @@ public:
         traders_.insert({bot_id, bot});
         return std::dynamic_pointer_cast<bots::RetailBot>(bot);
     }
-  
-  std::shared_ptr<bots::MarketMakerBot>
+
+    std::shared_ptr<bots::MarketMakerBot>
     add_bot_trader(bots::MarketMakerBot&& trader)
     {
         std::string bot_id = trader.get_id();

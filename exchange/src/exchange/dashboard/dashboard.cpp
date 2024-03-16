@@ -2,7 +2,6 @@
 
 #include "exchange/tick_manager/tick_manager.hpp"
 #include "exchange/traders/trader_manager.hpp"
-#include "exchange/traders/trader_types.hpp"
 #include "state/global_metrics.hpp"
 
 #include <quill/Quill.h>
