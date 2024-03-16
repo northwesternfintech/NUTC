@@ -5,7 +5,9 @@
 #include "exchange/tick_manager/tick_observer.hpp"
 #include "exchange/tickers/engine/engine.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
+#include "exchange/traders/trader_types/bot_trader.hpp"
 
+#include <memory>
 #include <string>
 
 namespace nutc {
@@ -34,23 +36,38 @@ public:
             auto [removed, added, matched] =
                 engine.on_tick(new_tick, ORDER_EXPIRATION_TIME);
 
-            for (matching::StoredOrder& order : added) {
-                if (order.trader->get_type() != manager::TraderType::BOT)
-                    continue;
-                bot_containers_.at(order.ticker)
-                    .process_order_add(
-                        order.trader->get_id(), order.side, order.price * order.quantity
-                    );
-            }
+            auto process_order_change = [](const matching::StoredOrder& stored_order,
+                                           bool opened_order) {
+                if (stored_order.trader->get_type() != manager::TraderType::BOT)
+                    return;
+                auto bot =
+                    std::static_pointer_cast<bots::BotTrader>(stored_order.trader);
+                double total_cap = stored_order.price * stored_order.quantity
+                                   * (opened_order ? 1 : -1);
+                int order_change = opened_order ? 1 : -1;
+                if (stored_order.side == messages::SIDE::BUY) {
+                    bot->modify_long_capital(total_cap);
+                    bot->modify_open_bids(order_change);
+                }
+                else {
+                    bot->modify_short_capital(total_cap);
+                    bot->modify_open_asks(order_change);
+                }
+            };
 
-            for (matching::StoredOrder& order : removed) {
-                if (order.trader->get_type() != manager::TraderType::BOT)
-                    continue;
-                bot_containers_.at(order.ticker)
-                    .process_order_expiration(
-                        order.trader->get_id(), order.side, order.price * order.quantity
-                    );
-            }
+            std::for_each(
+                added.begin(), added.end(),
+                [&](const matching::StoredOrder& order) {
+                    process_order_change(order, true);
+                }
+            );
+
+            std::for_each(
+                removed.begin(), removed.end(),
+                [&](const matching::StoredOrder& order) {
+                    process_order_change(order, false);
+                }
+            );
 
             for (Match& order : matched) {
                 // TODO(stevenewald): check if bot beforehand?
