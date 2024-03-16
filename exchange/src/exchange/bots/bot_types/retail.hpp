@@ -22,6 +22,8 @@ public:
         BotTrader(std::move(other)), AGGRESSIVENESS(other.AGGRESSIVENESS)
     {}
 
+    bool constexpr can_leverage() const override {return true;}
+
     [[nodiscard]] bool is_active() const override;
 
     std::optional<messages::MarketOrder> take_action(double current, double theo);

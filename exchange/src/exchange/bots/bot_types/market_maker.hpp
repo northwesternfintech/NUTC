@@ -23,7 +23,7 @@ public:
         return std::numeric_limits<double>::max();
     }
 
-    bool constexpr can_leverage() override { return true; }
+    bool constexpr can_leverage() const override { return true; }
 
     std::vector<messages::MarketOrder>
     take_action(double new_theo)

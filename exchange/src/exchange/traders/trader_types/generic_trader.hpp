@@ -57,7 +57,7 @@ public:
     }
 
     virtual constexpr bool
-    can_leverage()
+    can_leverage() const
     {
         return false;
     }
