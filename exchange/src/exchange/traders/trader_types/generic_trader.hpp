@@ -1,5 +1,7 @@
 #pragma once
 
+#include "shared/util.hpp"
+
 #include <string>
 #include <unordered_map>
 
@@ -80,6 +82,22 @@ public:
     {
         return capital_delta_;
     }
+
+    // For now, only bots care about this
+    // ticker, side, price, quantity
+    virtual void
+    process_order_expiration(const std::string&, messages::SIDE, double, double)
+    {}
+
+    // ticker, price, side, quantity
+    virtual void
+    process_order_match(const std::string&, messages::SIDE, double, double)
+    {}
+
+    // will be removed soon, making these changes iteratively
+    virtual void
+    process_order_add(const std::string&, messages::SIDE, double, double)
+    {}
 
     virtual void set_pid(const pid_t& pid) = 0;
     virtual pid_t get_pid() const = 0;

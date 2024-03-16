@@ -36,36 +36,21 @@ public:
             auto [removed, added, matched] =
                 engine.on_tick(new_tick, ORDER_EXPIRATION_TIME);
 
-            auto process_order_change = [](const matching::StoredOrder& stored_order,
-                                           bool opened_order) {
-                if (stored_order.trader->get_type() != manager::TraderType::BOT)
-                    return;
-                auto bot =
-                    std::static_pointer_cast<bots::BotTrader>(stored_order.trader);
-                double total_cap = stored_order.price * stored_order.quantity
-                                   * (opened_order ? 1 : -1);
-                int order_change = opened_order ? 1 : -1;
-                if (stored_order.side == messages::SIDE::BUY) {
-                    bot->modify_long_capital(total_cap);
-                    bot->modify_open_bids(order_change);
-                }
-                else {
-                    bot->modify_short_capital(total_cap);
-                    bot->modify_open_asks(order_change);
-                }
-            };
-
             std::for_each(
                 added.begin(), added.end(),
                 [&](const matching::StoredOrder& order) {
-                    process_order_change(order, true);
+                    order.trader->process_order_add(
+                        order.ticker, order.side, order.price, order.quantity
+                    );
                 }
             );
 
             std::for_each(
                 removed.begin(), removed.end(),
                 [&](const matching::StoredOrder& order) {
-                    process_order_change(order, false);
+                    order.trader->process_order_expiration(
+                        order.ticker, order.side, order.price, order.quantity
+                    );
                 }
             );
 
