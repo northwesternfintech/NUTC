@@ -27,14 +27,14 @@ namespace matching {
 
 // Later, we can combine these
 struct match_result_t {
-    std::vector<Match> matches;
+    std::vector<StoredMatch> matches;
     std::vector<ObUpdate> ob_updates;
 };
 
 struct on_tick_result_t {
     std::vector<StoredOrder> removed_orders;
     std::vector<StoredOrder> added_orders;
-    std::vector<Match> matched_orders;
+    std::vector<StoredMatch> matched_orders;
 };
 
 class Engine {
@@ -135,7 +135,7 @@ private:
 
     std::vector<StoredOrder> removed_orders_{};
     std::vector<StoredOrder> added_orders_{};
-    std::vector<Match> matched_orders_{};
+    std::vector<StoredMatch> matched_orders_{};
 
     template <typename Comparator>
     std::optional<std::reference_wrapper<StoredOrder>>

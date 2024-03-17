@@ -1,7 +1,5 @@
 #include "exchange/tickers/engine/engine.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
-#include "exchange/tickers/manager/ticker_manager.hpp"
-#include "exchange/traders/trader_manager.hpp"
 #include "exchange/utils/logger/logger.hpp"
 
 #include <limits>
@@ -12,7 +10,6 @@ using StoredOrder = nutc::matching::StoredOrder;
 using Logger = nutc::events::Logger;
 using ObUpdate = nutc::messages::ObUpdate;
 using ClientManager = nutc::manager::ClientManager;
-using EngineManager = nutc::engine_manager::EngineManager;
 using SIDE = nutc::messages::SIDE;
 
 namespace nutc {
@@ -35,6 +32,9 @@ bool validate_market_order(
     const MarketOrder& update, const std::string& client_id, const std::string& ticker,
     messages::SIDE side, double price, double quantity
 );
+
+StoredOrder
+make_stored_order(MarketOrder& order, const manager::ClientManager& manager);
 
 } // namespace testing_utils
 } // namespace nutc

@@ -4,6 +4,20 @@
 
 namespace nutc {
 namespace testing_utils {
+
+StoredOrder
+make_stored_order(MarketOrder& order, const manager::ClientManager& manager)
+{
+    return StoredOrder{
+        manager.get_trader(order.client_id),
+        order.side,
+        order.ticker,
+        order.quantity,
+        order.price,
+        /*tick=*/0
+    };
+}
+
 bool
 is_nearly_equal(double f_a, double f_b, double epsilon)
 {

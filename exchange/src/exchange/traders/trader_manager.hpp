@@ -1,7 +1,7 @@
 #pragma once
 #include "exchange/bots/bot_types/market_maker.hpp"
 #include "exchange/bots/bot_types/retail.hpp"
-#include "shared/messages_exchange_to_wrapper.hpp"
+#include "exchange/tickers/engine/order_storage.hpp"
 #include "trader_types/bot_trader.hpp"
 #include "trader_types/local_trader.hpp"
 #include "trader_types/remote_trader.hpp"
@@ -86,8 +86,8 @@ public:
         return traders_;
     }
 
-    [[nodiscard]] std::optional<messages::SIDE>
-    validate_match(const messages::Match& match) const;
+    [[nodiscard]] static std::optional<messages::SIDE>
+    validate_match(const matching::StoredMatch& match);
 
     // Primarily for testing
     void

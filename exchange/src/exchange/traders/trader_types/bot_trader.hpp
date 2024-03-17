@@ -35,6 +35,16 @@ protected:
     const double INTEREST_LIMIT;
 
 public:
+    BotTrader(std::string ticker, double interest_limit) :
+        GenericTrader(generate_user_id(), interest_limit), TICKER(std::move(ticker)),
+        INTEREST_LIMIT(interest_limit)
+    {}
+
+    BotTrader(const BotTrader& other) = delete;
+    BotTrader(BotTrader&& other) = default;
+    BotTrader& operator=(const BotTrader& other) = delete;
+    BotTrader& operator=(BotTrader&& other) = delete;
+
     constexpr manager::TraderType
     get_type() const override
     {
@@ -57,18 +67,6 @@ public:
     get_algo_id() const override
     {
         throw std::runtime_error("Not implemented");
-    }
-
-    [[nodiscard]] double
-    get_held_stock() const
-    {
-        return get_holdings(TICKER);
-    }
-
-    void
-    modify_held_stock(double delta)
-    {
-        modify_holdings(TICKER, delta);
     }
 
     void
@@ -120,44 +118,6 @@ public:
     }
 
     void
-    process_order_expiration(
-        const std::string& ticker, messages::SIDE side, double price, double quantity
-    ) override
-    {
-        // We should only get an order expiration for the sole ticker this bot trades on
-        assert(ticker == TICKER);
-
-        double total_cap = price * quantity;
-        if (side == messages::SIDE::BUY) {
-            modify_long_capital(-total_cap);
-            modify_open_bids(-1);
-        }
-        else {
-            modify_short_capital(-total_cap);
-            modify_open_asks(-1);
-        }
-    }
-
-    void
-    process_order_add(
-        const std::string& ticker, messages::SIDE side, double price, double quantity
-    ) override
-    {
-        // We should only get an order add for the sole ticker this bot trades on
-        assert(ticker == TICKER);
-
-        double total_cap = price * quantity;
-        if (side == messages::SIDE::BUY) {
-            modify_long_capital(total_cap);
-            modify_open_bids(1);
-        }
-        else {
-            modify_short_capital(total_cap);
-            modify_open_asks(1);
-        }
-    }
-
-    void
     modify_open_bids(int delta)
     {
         if (delta < 0) {
@@ -181,6 +141,12 @@ public:
         }
     }
 
+    const std::string&
+    get_ticker() const
+    {
+        return TICKER;
+    }
+
     ~BotTrader() override = default;
 
     [[nodiscard]] virtual bool
@@ -189,15 +155,13 @@ public:
         return false;
     }
 
-    BotTrader(std::string ticker, double interest_limit) :
-        GenericTrader(generate_user_id(), interest_limit), TICKER(std::move(ticker)),
-        INTEREST_LIMIT(interest_limit)
-    {}
+    void process_order_expiration(
+        const std::string& ticker, messages::SIDE side, double price, double quantity
+    ) override;
 
-    BotTrader(const BotTrader& other) = delete;
-    BotTrader(BotTrader&& other) = default;
-    BotTrader& operator=(const BotTrader& other) = delete;
-    BotTrader& operator=(BotTrader&& other) = delete;
+    void process_order_add(
+        const std::string& ticker, messages::SIDE side, double price, double quantity
+    ) override;
 };
 
 } // namespace bots

@@ -1,6 +1,9 @@
 #pragma once
 
+#include "exchange/traders/trader_manager.hpp"
 #include "order_container.hpp"
+#include "shared/messages_exchange_to_wrapper.hpp"
+#include "shared/messages_wrapper_to_exchange.hpp"
 #include "shared/util.hpp"
 
 using MarketOrder = nutc::messages::MarketOrder;
@@ -13,12 +16,17 @@ namespace matching {
 
 class NewEngine {
     OrderContainer order_container_;
+    uint64_t current_tick_ = 0;
 
 public:
     std::vector<Match>
-    match_order(MarketOrder order)
+    match_order(const MarketOrder& order)
     {
-        order_container_.add_order(StoredOrder(std::move(order), current_tick_));
+        auto trader =
+            manager::ClientManager::get_instance().get_trader(order.client_id);
+        order_container_.add_order(StoredOrder{
+            trader, order.side, order.ticker, order.quantity, order.price, current_tick_
+        });
         return attempt_matches_();
     }
 
@@ -84,8 +92,6 @@ private:
         }
         return matches;
     }
-
-    uint64_t current_tick_;
 };
 
 } // namespace matching
