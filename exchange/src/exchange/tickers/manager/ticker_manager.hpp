@@ -4,6 +4,7 @@
 #include "exchange/config.h"
 #include "exchange/tick_manager/tick_observer.hpp"
 #include "exchange/tickers/engine/engine.hpp"
+#include "exchange/tickers/engine/new_engine.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
 #include "shared/util.hpp"
 
@@ -12,15 +13,25 @@
 namespace nutc {
 namespace engine_manager {
 
+using NewEngine = matching::NewEngine;
+
 class EngineManager : public nutc::ticks::TickObserver {
 public:
-    matching::Engine& get_engine(const std::string& ticker);
+    NewEngine& get_engine(const std::string& ticker);
     bool has_engine(const std::string& ticker) const;
 
     bots::BotContainer&
     get_bot_container(const std::string& ticker)
     {
         return bot_containers_.at(ticker);
+    }
+
+    void
+    match_order(const MarketOrder& order)
+    {
+        std::vector<matching::StoredMatch> matches =
+            get_engine(order.ticker).match_order(order);
+        matches_.insert(matches_.end(), matches.begin(), matches.end());
     }
 
     void add_engine(const std::string& ticker, double starting_price);
@@ -32,22 +43,16 @@ public:
         if (new_tick < ORDER_EXPIRATION_TIME)
             return;
         for (auto& [ticker, engine] : engines_) {
-            auto [removed, added, matched] =
-                engine.on_tick(new_tick, ORDER_EXPIRATION_TIME);
+            std::vector<matching::StoredOrder> expired_orders =
+                engine.expire_old_orders(new_tick);
 
-            for (const auto& order : added) {
-                order.trader->process_order_add(
-                    order.ticker, order.side, order.price, order.quantity
-                );
-            }
-
-            for (const auto& order : removed) {
+            for (const auto& order : expired_orders) {
                 order.trader->process_order_expiration(
                     order.ticker, order.side, order.price, order.quantity
                 );
             }
 
-            for (const auto& match : matched) {
+            for (const auto& match : matches_) {
                 match.buyer->process_order_match(
                     match.ticker, messages::SIDE::BUY, match.price, match.quantity
                 );
@@ -55,6 +60,7 @@ public:
                     match.ticker, messages::SIDE::SELL, match.price, match.quantity
                 );
             }
+            matches_.clear();
         }
     }
 
@@ -67,7 +73,8 @@ public:
     }
 
 private:
-    std::map<std::string, matching::Engine> engines_;
+    std::map<std::string, NewEngine> engines_;
+    std::vector<matching::StoredMatch> matches_;
     std::unordered_map<std::string, bots::BotContainer> bot_containers_;
     EngineManager() = default;
     void set_initial_price_(const std::string& ticker, double price);

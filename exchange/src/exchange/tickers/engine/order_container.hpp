@@ -15,6 +15,30 @@ namespace matching {
 
 class OrderContainer {
 public:
+    double
+    get_midprice() const
+    {
+        if (bids_.empty() || asks_.empty()) {
+            return 0;
+        }
+        return (bids_.begin()->price + asks_.begin()->price) / 2;
+    }
+
+    std::pair<uint, uint>
+    get_spread_nums() const
+    {
+        return {asks_.size(), bids_.size()};
+    }
+
+    std::pair<double, double>
+    get_spread() const
+    {
+        if (asks_.empty() || bids_.empty()) [[unlikely]] {
+            return {0, 0};
+        }
+        return {asks_.begin()->price, bids_.rbegin()->price};
+    }
+
     void
     add_order(StoredOrder order)
     {

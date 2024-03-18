@@ -27,7 +27,7 @@ BotContainer::on_tick(uint64_t)
 {
     auto theo = fabs(theo_generator_.generate_next_price() + brownian_offset_);
     auto& ticker = engine_manager::EngineManager::get_instance().get_engine(ticker_);
-    double current = ticker.get_midprice();
+    double current = ticker.get_order_container().get_midprice();
     auto orders = BotContainer::on_new_theo(theo, current);
 
     for (auto& order : orders) {

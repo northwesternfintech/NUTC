@@ -19,11 +19,20 @@ class NewEngine {
     uint64_t current_tick_ = 0;
 
 public:
+    const OrderContainer&
+    get_order_container() const
+    {
+        return order_container_;
+    }
+
     std::vector<StoredMatch>
     match_order(const MarketOrder& order)
     {
         auto trader =
             manager::ClientManager::get_instance().get_trader(order.client_id);
+        // round to 2 decimal places
+        // TODO: make this configurable. right now, it just rounds to one cent
+        // double price = std::round(order.price * 100) / 100;
         order_container_.add_order(StoredOrder{
             trader, order.side, order.ticker, order.quantity, order.price, current_tick_
         });
