@@ -19,7 +19,7 @@ class NewEngine {
     uint64_t current_tick_ = 0;
 
 public:
-    std::vector<Match>
+    std::vector<StoredMatch>
     match_order(const MarketOrder& order)
     {
         auto trader =
@@ -57,7 +57,7 @@ private:
         return false;
     }
 
-    static Match
+    static StoredMatch
     build_match(const StoredOrder& buyer, const StoredOrder& seller)
     {
         double quantity = std::min(buyer.quantity, seller.quantity);
@@ -65,16 +65,14 @@ private:
             buyer.order_index < seller.order_index ? buyer.price : seller.price;
         SIDE aggressive_side =
             buyer.order_index < seller.order_index ? seller.side : buyer.side;
-        const std::string& buyer_id = buyer.trader->get_id();
-        const std::string& seller_id = seller.trader->get_id();
-        return Match{buyer.ticker, aggressive_side, price,
-                     quantity,     buyer_id,        seller_id};
+        return StoredMatch{buyer.trader,    seller.trader, buyer.ticker,
+                           aggressive_side, price,         quantity};
     }
 
-    std::vector<Match>
+    std::vector<StoredMatch>
     attempt_matches_()
     {
-        std::vector<Match> matches;
+        std::vector<StoredMatch> matches;
         while (order_container_.can_match_orders()) {
             const StoredOrder& highest_bid = order_container_.top_order(SIDE::BUY);
             const StoredOrder& cheapest_ask = order_container_.top_order(SIDE::SELL);

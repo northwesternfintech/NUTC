@@ -19,8 +19,9 @@ bool is_nearly_equal(
 );
 
 bool validate_match(
-    const Match& match, const std::string& ticker, const std::string& buyer_id,
-    const std::string& seller_id, messages::SIDE side, double price, double quantity
+    const nutc::matching::StoredMatch& match, const std::string& ticker,
+    const std::string& buyer_id, const std::string& seller_id, messages::SIDE side,
+    double price, double quantity
 );
 
 bool validate_ob_update(
@@ -54,8 +55,8 @@ make_stored_order(MarketOrder& order, const manager::ClientManager& manager);
             << ", side = " << static_cast<int>(side_) << ", price = " << (price_)      \
             << ", quantity = " << (quantity_)                                          \
             << ". Actual match: ticker = " << (match).ticker                           \
-            << ", buyer_id = " << (match).buyer_id                                     \
-            << ", seller_id = " << (match).seller_id                                   \
+            << ", buyer_id = " << (match).buyer->get_id()                              \
+            << ", seller_id = " << (match).seller->get_id()                            \
             << ", side = " << static_cast<int>((match).side)                           \
             << ", price = " << (match).price << ", quantity = " << (match).quantity;   \
     } while (0)

@@ -29,12 +29,13 @@ is_nearly_equal(double f_a, double f_b, double epsilon)
 
 bool
 validate_match(
-    const Match& match, const std::string& ticker, const std::string& buyer_id,
-    const std::string& seller_id, messages::SIDE side, double price, double quantity
+    const nutc::matching::StoredMatch& match, const std::string& ticker,
+    const std::string& buyer_id, const std::string& seller_id, messages::SIDE side,
+    double price, double quantity
 )
 {
-    return match.ticker == ticker && match.buyer_id == buyer_id
-           && match.seller_id == seller_id && match.side == side
+    return match.ticker == ticker && match.buyer->get_id() == buyer_id
+           && match.seller->get_id() == seller_id && match.side == side
            && is_nearly_equal(match.price, price)
            && is_nearly_equal(match.quantity, quantity);
 }

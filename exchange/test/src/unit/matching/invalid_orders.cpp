@@ -24,10 +24,10 @@ protected:
     ClientManager& manager_ = nutc::manager::ClientManager::get_instance(); // NOLINT(*)
     nutc::matching::NewEngine engine_{}; // NOLINT (*)
 
-    std::vector<Match>
-    add_to_engine_(MarketOrder order)
+    std::vector<nutc::matching::StoredMatch>
+    add_to_engine_(const MarketOrder& order)
     {
-        return engine_.match_order(std::move(order));
+        return engine_.match_order(order);
     }
 };
 
