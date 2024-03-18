@@ -1,10 +1,8 @@
 #include "bot_container.hpp"
 
-#include "exchange/bots/bot_types/market_maker.hpp"
 #include "exchange/rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
 #include "exchange/tickers/manager/ticker_manager.hpp"
 #include "exchange/traders/trader_manager.hpp"
-#include "exchange/traders/trader_types/bot_trader.hpp"
 
 #include <cmath>
 
@@ -112,88 +110,5 @@ BotContainer::on_new_theo(double new_theo, double current)
 
     return orders;
 }
-
-void
-BotContainer::process_order_match(Match& match)
-{
-    auto process_buyer_match = [&match](auto& umap) {
-        auto buyer_match = umap.find(match.buyer_id);
-        if (buyer_match == umap.end())
-            return;
-        buyer_match->second->modify_held_stock(-match.quantity);
-        buyer_match->second->modify_capital(-match.quantity * match.price);
-    };
-
-    auto process_seller_match = [&match](auto& umap) {
-        auto seller_match = umap.find(match.seller_id);
-        if (seller_match == umap.end())
-            return;
-        seller_match->second->modify_held_stock(match.quantity);
-        seller_match->second->modify_capital(match.quantity * match.price);
-    };
-
-    process_buyer_match(market_makers_);
-    process_buyer_match(retail_bots_);
-    process_seller_match(market_makers_);
-    process_seller_match(retail_bots_);
-}
-
-void
-BotContainer::process_order_add(
-    const std::string& bot_id, messages::SIDE side, double total_cap
-)
-{
-    auto process_order_add = [side, total_cap](auto& match) {
-        if (side == messages::SIDE::BUY) {
-            match->second->modify_long_capital(total_cap);
-            match->second->modify_open_bids(1);
-        }
-        else {
-            match->second->modify_short_capital(total_cap);
-            match->second->modify_open_asks(1);
-        }
-    };
-
-    auto retail_match = retail_bots_.find(bot_id);
-    if (retail_match != retail_bots_.end()) {
-        process_order_add(retail_match);
-        return;
-    }
-    auto mm_match = market_makers_.find(bot_id);
-    if (mm_match != market_makers_.end()) {
-        process_order_add(mm_match);
-        return;
-    }
-    throw std::runtime_error("Bot not found");
-}
-
-void
-BotContainer::process_order_expiration(
-    const std::string& bot_id, messages::SIDE side, double total_cap
-)
-{
-    auto process_order_expiration = [side, total_cap](auto match) {
-        if (side == messages::SIDE::BUY) {
-            match->second->modify_long_capital(-total_cap);
-            match->second->modify_open_bids(-1);
-        }
-        else {
-            match->second->modify_short_capital(-total_cap);
-            match->second->modify_open_asks(-1);
-        }
-    };
-
-    auto retail_match = retail_bots_.find(bot_id);
-    if (retail_match != retail_bots_.end()) {
-        process_order_expiration(retail_match);
-        return;
-    }
-    auto match1 = market_makers_.find(bot_id);
-    if (match1 != market_makers_.end()) {
-        process_order_expiration(match1);
-        return;
-    }
-}
-
 } // namespace bots
 } // namespace nutc

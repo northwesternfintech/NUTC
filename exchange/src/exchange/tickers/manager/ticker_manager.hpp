@@ -5,6 +5,7 @@
 #include "exchange/tick_manager/tick_observer.hpp"
 #include "exchange/tickers/engine/engine.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
+#include "shared/util.hpp"
 
 #include <string>
 
@@ -34,27 +35,25 @@ public:
             auto [removed, added, matched] =
                 engine.on_tick(new_tick, ORDER_EXPIRATION_TIME);
 
-            for (matching::StoredOrder& order : added) {
-                if (order.trader->get_type() != manager::TraderType::BOT)
-                    continue;
-                bot_containers_.at(order.ticker)
-                    .process_order_add(
-                        order.trader->get_id(), order.side, order.price * order.quantity
-                    );
+            for (const auto& order : added) {
+                order.trader->process_order_add(
+                    order.ticker, order.side, order.price, order.quantity
+                );
             }
 
-            for (matching::StoredOrder& order : removed) {
-                if (order.trader->get_type() != manager::TraderType::BOT)
-                    continue;
-                bot_containers_.at(order.ticker)
-                    .process_order_expiration(
-                        order.trader->get_id(), order.side, order.price * order.quantity
-                    );
+            for (const auto& order : removed) {
+                order.trader->process_order_expiration(
+                    order.ticker, order.side, order.price, order.quantity
+                );
             }
 
-            for (Match& order : matched) {
-                // TODO(stevenewald): check if bot beforehand?
-                bot_containers_.at(ticker).process_order_match(order);
+            for (const auto& match : matched) {
+                match.buyer->process_order_match(
+                    match.ticker, messages::SIDE::BUY, match.price, match.quantity
+                );
+                match.seller->process_order_match(
+                    match.ticker, messages::SIDE::SELL, match.price, match.quantity
+                );
             }
         }
     }

@@ -7,6 +7,7 @@
 
 using nutc::messages::SIDE::BUY;
 using nutc::messages::SIDE::SELL;
+using nutc::testing_utils::make_stored_order;
 
 class UnitOrderContainerTest : public ::testing::Test {
 protected:
@@ -30,8 +31,8 @@ TEST_F(UnitOrderContainerTest, SimpleAddRemove)
 {
     MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
     MarketOrder order2{"ABC", SELL, "ETHUSD", 1, 1};
-    StoredOrder so1 = StoredOrder(std::move(order1), 0);
-    StoredOrder so2 = StoredOrder(std::move(order2), 0);
+    StoredOrder so1 = make_stored_order(order1, manager_);
+    StoredOrder so2 = make_stored_order(order2, manager_);
 
     container_.add_order(so1);
     ASSERT_EQ(container_.get_level(SIDE::BUY, 1), 1);
@@ -50,8 +51,8 @@ TEST_F(UnitOrderContainerTest, ModifyQuantity)
 {
     MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
     MarketOrder order2{"ABC", SELL, "ETHUSD", 1, 1};
-    StoredOrder so1 = StoredOrder(std::move(order1), 0);
-    StoredOrder so2 = StoredOrder(std::move(order2), 0);
+    StoredOrder so1 = make_stored_order(order1, manager_);
+    StoredOrder so2 = make_stored_order(order2, manager_);
 
     container_.add_order(so1);
     container_.add_order(so2);

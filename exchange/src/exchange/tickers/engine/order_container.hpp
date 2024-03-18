@@ -3,9 +3,12 @@
 #include "order_storage.hpp"
 #include "shared/util.hpp"
 
+#include <cassert>
+
 #include <map>
 #include <set>
 #include <unordered_map>
+#include <vector>
 
 namespace nutc {
 namespace matching {

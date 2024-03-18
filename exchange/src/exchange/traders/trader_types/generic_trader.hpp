@@ -1,5 +1,7 @@
 #pragma once
 
+#include "shared/util.hpp"
+
 #include <string>
 #include <unordered_map>
 
@@ -8,7 +10,24 @@ namespace manager {
 enum TraderType { REMOTE, LOCAL, BOT };
 
 class GenericTrader {
+    const std::string USER_ID;
+    const double INITIAL_CAPITAL;
+    double capital_delta_ = 0;
+    bool is_active_ = false;
+    bool has_start_delay_ = true;
+    std::unordered_map<std::string, double> holdings_{};
+
 public:
+    explicit GenericTrader(std::string user_id, double capital) :
+        USER_ID(std::move(user_id)), INITIAL_CAPITAL(capital)
+    {}
+
+    virtual ~GenericTrader() = default;
+    GenericTrader& operator=(GenericTrader&& other) = delete;
+    GenericTrader& operator=(const GenericTrader& other) = delete;
+    GenericTrader(GenericTrader&& other) = default;
+    GenericTrader(const GenericTrader& other) = delete;
+
     const std::string&
     get_id() const
     {
@@ -81,28 +100,26 @@ public:
         return capital_delta_;
     }
 
+    // will be removed soon, making these changes iteratively
+    virtual void
+    process_order_add(const std::string&, messages::SIDE, double, double)
+    {}
+
+    // For now, only bots care about this
+    // ticker, side, price, quantity
+    virtual void
+    process_order_expiration(const std::string&, messages::SIDE, double, double)
+    {}
+
+    // ticker, price, side, quantity
+    virtual void process_order_match(
+        const std::string& ticker, messages::SIDE side, double price, double quantity
+    );
+
     virtual void set_pid(const pid_t& pid) = 0;
     virtual pid_t get_pid() const = 0;
 
     virtual const std::string& get_algo_id() const = 0;
-
-    explicit GenericTrader(std::string user_id, double capital) :
-        USER_ID(std::move(user_id)), INITIAL_CAPITAL(capital)
-    {}
-
-    virtual ~GenericTrader() = default;
-    GenericTrader& operator=(GenericTrader&& other) = delete;
-    GenericTrader& operator=(const GenericTrader& other) = delete;
-    GenericTrader(GenericTrader&& other) = default;
-    GenericTrader(const GenericTrader& other) = delete;
-
-private:
-    const std::string USER_ID;
-    const double INITIAL_CAPITAL;
-    double capital_delta_ = 0;
-    bool is_active_ = false;
-    bool has_start_delay_ = true;
-    std::unordered_map<std::string, double> holdings_{};
 };
 } // namespace manager
 } // namespace nutc

@@ -1,7 +1,5 @@
 #pragma once
-#include "exchange/traders/trader_manager.hpp"
 #include "exchange/traders/trader_types/generic_trader.hpp"
-#include "shared/messages_wrapper_to_exchange.hpp"
 
 #include <fmt/format.h>
 
@@ -11,6 +9,15 @@ namespace nutc {
 namespace matching {
 
 using SIDE = messages::SIDE;
+
+struct StoredMatch {
+    std::shared_ptr<manager::GenericTrader> buyer;
+    std::shared_ptr<manager::GenericTrader> seller;
+    std::string ticker;
+    SIDE side;
+    double price;
+    double quantity;
+};
 
 struct StoredOrder {
     std::shared_ptr<manager::GenericTrader> trader;
@@ -64,13 +71,6 @@ struct StoredOrder {
 
     StoredOrder(const StoredOrder& other) = default;
     StoredOrder& operator=(const StoredOrder& other) = delete;
-
-    explicit StoredOrder(messages::MarketOrder&& other, uint64_t tick) :
-        trader(manager::ClientManager::get_instance().get_trader(other.client_id)),
-        ticker(std::move(other.ticker)), side(other.side), price(other.price),
-        quantity(other.quantity), tick(tick),
-        order_index(get_and_increment_global_index())
-    {}
 
     bool
     operator==(const StoredOrder& other) const

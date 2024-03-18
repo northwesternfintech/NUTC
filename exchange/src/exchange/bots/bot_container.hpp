@@ -39,13 +39,6 @@ public:
 
     std::vector<MarketOrder> on_new_theo(double new_theo, double current);
 
-    void process_order_expiration(
-        const std::string& bot_id, messages::SIDE side, double total_cap
-    );
-    void
-    process_order_add(const std::string& bot_id, messages::SIDE side, double total_cap);
-    void process_order_match(Match& match);
-
     template <class BotType>
     void add_bots(double mean_capital, double stddev_capital, size_t num_bots)
     requires HandledBotType<BotType>;

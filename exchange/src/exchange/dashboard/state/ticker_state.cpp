@@ -30,7 +30,7 @@ TickerState::calculate_metrics()
         double capital_delta = bot->get_capital_delta();
 
         // Held stock can be negative due to leverage
-        double held_stock = bot->get_held_stock();
+        double held_stock = bot->get_holdings(bot->get_ticker());
         double stock_value = engine_ref.get_midprice() * held_stock;
         return capital_delta + stock_value;
     };
