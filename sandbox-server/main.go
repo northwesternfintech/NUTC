@@ -103,7 +103,7 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	hostConfig := &container.HostConfig{
-		AutoRemove: true,
+		AutoRemove: false,
 	}
 
 	nanoID, err := gonanoid.New(6)
