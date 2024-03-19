@@ -130,6 +130,23 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// wait 10 seconds and check if the container is still running
+	time.Sleep(10 * time.Second)
+	inspect, err := cli.ContainerInspect(ctx, resp.ID)
+	if err != nil {
+		sugar.Errorf("Failed to inspect docker container: %v", err)
+		http.Error(w, "Failed to inspect docker container", http.StatusInternalServerError)
+		return
+	}
+
+	if inspect.State.Running {
+		sugar.Infof("Container %s is still running", containerName)
+	} else {
+		sugar.Infof("Container %s has stopped", containerName)
+		http.Error(w, "Container failed to start", http.StatusInternalServerError)
+		return
+	}
+
 	go func() {
 		// Ensure to handle errors within this goroutine using the sugar logger
 		defer cli.ContainerStop(context.Background(), resp.ID, container.StopOptions{})
