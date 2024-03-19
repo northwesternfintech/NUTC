@@ -10,7 +10,7 @@ COPY /analyzer ./analyzer
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/sandbox .
 
-FROM rabbitmq:3.12.13-alpine
+FROM scratch
 
 COPY --from=build /bin/sandbox /bin/sandbox
 
