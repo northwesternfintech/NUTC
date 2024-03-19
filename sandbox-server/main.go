@@ -66,13 +66,13 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 	user_id := r.URL.Query().Get("user_id")
 	algo_id := r.URL.Query().Get("algo_id")
 	if user_id == "" || algo_id == "" {
-		sugar.Error("Missing required query parameter")
+		sugar.Warn("Missing required query parameter")
 		http.Error(w, "Missing required query parameter", http.StatusBadRequest)
 		return
 	}
 
 	if !isValidID(user_id) || !isValidID(algo_id) {
-		sugar.Error("Invalid user or algo ID")
+		sugar.Warn("Invalid user or algo ID")
 		http.Error(w, "Invalid user or algo ID", http.StatusBadRequest)
 		return
 	}
