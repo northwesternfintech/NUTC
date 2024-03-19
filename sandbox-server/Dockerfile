@@ -1,6 +1,6 @@
 FROM golang:1.21 as build
 
-WORKDIR /src
+WORKDIR /
 
 COPY go.mod go.sum ./
 RUN go mod download
