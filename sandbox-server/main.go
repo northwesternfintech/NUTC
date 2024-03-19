@@ -95,16 +95,16 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	imageName := "nutc-exchange"
+	exchangeCmd := []string{"--sandbox", cmd_user_id, cmd_algo_id}
 
 	config := &container.Config{
 		Image: imageName,
-		Cmd:   []string{"--sandbox", cmd_user_id, cmd_algo_id},
+		Cmd:   exchangeCmd,
 	}
+	
 	hostConfig := &container.HostConfig{
 		AutoRemove: true,
 	}
-
-	sugar.Infof("Starting container with user_id: %s and algo_id: %s", user_id, algo_id)
 
 	nanoID, err := gonanoid.New(6)
 	if err != nil {
@@ -114,7 +114,9 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	containerName := fmt.Sprintf("%s-%s-%s", strings.TrimSpace(user_id), strings.TrimSpace(algo_id), nanoID)
-	sugar.Infof("Starting container %s", containerName)
+
+	sugar.Infof("Starting container with name %s", containerName)
+	sugar.Infof("Container cmd: %s", exchangeCmd)
 	resp, err := cli.ContainerCreate(ctx, config, hostConfig, nil, nil, containerName)
 	if err != nil {
 		sugar.Errorf("Failed to create docker container: %v", err)
@@ -187,7 +189,7 @@ func uploadLogFile(user_id, algo_id, apiKey, file_str string) (string, error) {
 		"user_id", user_id,
 		"algo_id", algo_id,
 		"file_str", file_str,
-    )
+	)
 	sugar.Infoln("Uploading log file")
 	reader := strings.NewReader(file_str)
 	var buffer bytes.Buffer
@@ -257,7 +259,7 @@ func uploadLogFile(user_id, algo_id, apiKey, file_str string) (string, error) {
 
 // Add log file url to user algo in firebase database
 func addLogFileUrlToUser(user_id, algo_id, file_url string) error {
-	sugarNoContext := zap.L().Sugar() 
+	sugarNoContext := zap.L().Sugar()
 	sugar := sugarNoContext.With(
 		"user_id", user_id,
 		"algo_id", algo_id,
@@ -270,7 +272,6 @@ func addLogFileUrlToUser(user_id, algo_id, file_url string) error {
 	}
 
 	data := UserData{file_url}
-
 
 	jsonData, err := json.Marshal(data)
 	if err != nil {
