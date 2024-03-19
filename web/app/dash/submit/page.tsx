@@ -316,12 +316,19 @@ export default function Submission() {
                 await axios.get(
                   linterEndpoint(userInfo?.user?.uid || "", algoRef.key)
                 );
-                await axios.get(
-                  sandboxEndpoint(userInfo?.user?.uid || "", algoRef.key)
-                );
                 Swal.close();
                 Swal.fire({
                   title: "Linting complete!",
+                  text: "View results in the dashboard.",
+                  icon: "success",
+                  timer: 5000,
+                  timerProgressBar: true,
+                });
+                await axios.get(
+                  sandboxEndpoint(userInfo?.user?.uid || "", algoRef.key)
+                );
+                Swal.fire({
+                  title: "Running algorithm!",
                   text: "View results in the dashboard.",
                   icon: "success",
                   timer: 5000,
