@@ -1,6 +1,6 @@
 "use client";
 import { CheckIcon, PaperClipIcon } from "@heroicons/react/24/solid";
-import { linterEndpoint } from "@/config";
+import { linterEndpoint, sandboxEndpoint } from "@/config";
 import axios from "axios";
 import { useRef, useState } from "react";
 import AlgorithmType from "@/app/dash/algoType";
@@ -14,7 +14,7 @@ async function uploadAlgo(
   database: any,
   storage: any,
   uid: string,
-  file: File,
+  file: File
 ) {
   const fileRef = push(ref(database, `users/${uid}/algos`));
   if (!fileRef) {
@@ -38,7 +38,7 @@ async function writeNewAlgo(
   algo: AlgorithmType,
   algoRef: any,
   database: any,
-  uid: string,
+  uid: string
 ) {
   if (algo.downloadURL === "" || algo.description === "" || algo.name === "") {
     Swal.fire({
@@ -133,7 +133,7 @@ export default function Submission() {
       database,
       storage,
       userInfo?.user?.uid || "unknown",
-      selectedFile,
+      selectedFile
     );
     if (downloadLink.downloadURL !== "") {
       setAlgo((prevState) => ({
@@ -238,11 +238,13 @@ export default function Submission() {
                   Algorithm Upload
                 </label>
                 <div
-                  className={algo.downloadURL
-                    ? "mt-2 flex justify-center rounded-lg border border-solid border-green-400 px-6 py-10"
-                    : isDragOver
-                    ? "mt-2 flex justify-center rounded-lg border border-solid border-indigo-500 px-6 py-10"
-                    : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"}
+                  className={
+                    algo.downloadURL
+                      ? "mt-2 flex justify-center rounded-lg border border-solid border-green-400 px-6 py-10"
+                      : isDragOver
+                      ? "mt-2 flex justify-center rounded-lg border border-solid border-indigo-500 px-6 py-10"
+                      : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"
+                  }
                   ref={dropRef}
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
@@ -298,20 +300,24 @@ export default function Submission() {
                   algo,
                   algoRef,
                   database,
-                  userInfo?.user?.uid || "",
+                  userInfo?.user?.uid || ""
                 ) //bad practice, fix later
               ) {
                 Swal.fire({
-                  title: "Algorithm submitted. Waiting for linting to complete...",
+                  title:
+                    "Algorithm submitted. Waiting for linting to complete...",
                   text: "This may take up to 2 minutes.",
                   icon: "info",
                   allowOutsideClick: false,
                   allowEscapeKey: false,
-                  allowEnterKey: false
+                  allowEnterKey: false,
                 });
                 Swal.showLoading();
                 await axios.get(
-                  linterEndpoint(userInfo?.user?.uid || "", algoRef.key),
+                  linterEndpoint(userInfo?.user?.uid || "", algoRef.key)
+                );
+                await axios.get(
+                  sandboxEndpoint(userInfo?.user?.uid || "", algoRef.key)
                 );
                 Swal.close();
                 Swal.fire({
