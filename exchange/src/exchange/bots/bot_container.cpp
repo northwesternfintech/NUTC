@@ -34,7 +34,7 @@ BotContainer::on_tick(uint64_t)
         order.ticker = ticker_;
         rabbitmq::RabbitMQOrderHandler::handle_incoming_market_order(
             engine_manager::EngineManager::get_instance(),
-            manager::ClientManager::get_instance(), std::move(order)
+            std::move(order)
         );
     }
 }

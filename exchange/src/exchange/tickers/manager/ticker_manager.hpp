@@ -1,11 +1,14 @@
 #pragma once
 
 #include "exchange/bots/bot_container.hpp"
-#include "exchange/config.h"
+#include "exchange/logging.hpp"
+#include "exchange/rabbitmq/publisher/RabbitMQPublisher.hpp"
 #include "exchange/tick_manager/tick_observer.hpp"
-#include "exchange/tickers/engine/engine.hpp"
+#include "exchange/tickers/engine/level_update_generator.hpp"
 #include "exchange/tickers/engine/new_engine.hpp"
+#include "exchange/tickers/engine/order_container.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
+#include "exchange/traders/trader_manager.hpp"
 #include "shared/util.hpp"
 
 #include <string>
@@ -40,8 +43,6 @@ public:
     void
     on_tick(uint64_t new_tick) override
     {
-        if (new_tick < ORDER_EXPIRATION_TIME)
-            return;
         for (auto& [ticker, engine] : engines_) {
             std::vector<matching::StoredOrder> expired_orders =
                 engine.expire_old_orders(new_tick);
@@ -52,6 +53,8 @@ public:
                 );
             }
 
+            // TODO: do this in a converter
+            std::vector<Match> glz_matches;
             for (const auto& match : matches_) {
                 match.buyer->process_order_match(
                     match.ticker, messages::SIDE::BUY, match.price, match.quantity
@@ -59,7 +62,29 @@ public:
                 match.seller->process_order_match(
                     match.ticker, messages::SIDE::SELL, match.price, match.quantity
                 );
+                glz_matches.emplace_back(
+                    match.ticker, match.side, match.price, match.quantity,
+                    match.buyer->get_id(), match.seller->get_id()
+                );
             }
+
+            std::vector<ObUpdate> updates = matching::LevelUpdateGenerator::get_updates(
+                ticker, last_order_containers[ticker], engine.get_order_container()
+            );
+            for (auto& update1 : updates) {
+                log_i(
+                    main, "{} {} {}", update1.ticker, update1.price, update1.quantity
+                );
+            }
+            last_order_containers[ticker] = engine.get_order_container();
+
+            rabbitmq::RabbitMQPublisher::broadcast_ob_updates(
+                manager::ClientManager::get_instance(), updates
+            );
+
+            rabbitmq::RabbitMQPublisher::broadcast_matches(
+                manager::ClientManager::get_instance(), glz_matches
+            );
             matches_.clear();
         }
     }
@@ -73,8 +98,10 @@ public:
     }
 
 private:
+    // these should probably be combined into a single map. later problem :P
     std::map<std::string, NewEngine> engines_;
     std::vector<matching::StoredMatch> matches_;
+    std::unordered_map<std::string, matching::OrderContainer> last_order_containers;
     std::unordered_map<std::string, bots::BotContainer> bot_containers_;
     EngineManager() = default;
     void set_initial_price_(const std::string& ticker, double price);

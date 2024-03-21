@@ -267,7 +267,7 @@ main(int argc, const char** argv)
     concurrency::pin_to_core(0, "main");
 
     // Main event loop
-    rabbitmq::RabbitMQConsumer::handle_incoming_messages(users, engine_manager);
+    rabbitmq::RabbitMQConsumer::handle_incoming_messages(engine_manager);
 
     return 0;
 }

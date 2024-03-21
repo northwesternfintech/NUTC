@@ -1,5 +1,7 @@
 #include "ticker_manager.hpp"
 
+#include "exchange/bots/bot_container.hpp"
+
 namespace nutc {
 namespace engine_manager {
 
@@ -30,10 +32,7 @@ EngineManager::add_engine(const std::string& ticker, double starting_price)
 {
     engines_.emplace(ticker, NewEngine());
     set_initial_price_(ticker, starting_price);
-    bot_containers_.emplace(
-        std::piecewise_construct, std::forward_as_tuple(ticker),
-        std::forward_as_tuple(ticker, starting_price)
-    );
+    bot_containers_.emplace(ticker, bots::BotContainer(ticker, starting_price));
 }
 
 // for testing

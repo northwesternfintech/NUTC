@@ -59,7 +59,7 @@ public:
         std::vector<StoredOrder> result;
         for (uint64_t index : orders_by_tick_[tick]) {
             result.push_back(std::move(orders_by_id_.at(index)));
-            orders_by_id_.erase(index);
+            remove_order(index);
         }
         orders_by_tick_.erase(tick);
         return result;
@@ -80,11 +80,14 @@ public:
     remove_order(uint64_t order_id)
     {
         StoredOrder& order = get_order_(order_id);
+        order_index index{order.price, order_id};
         if (order.side == SIDE::BUY) {
-            bids_.erase(order_index{order.price, order_id});
+            assert (bids_.find(index) != bids_.end());
+            bids_.erase(index);
         }
         else {
-            asks_.erase(order_index{order.price, order_id});
+            assert (asks_.find(index) != asks_.end());
+            asks_.erase(index);
         }
         modify_level_(order.side, order.price, -order.quantity);
         orders_by_id_.erase(order_id);
@@ -118,6 +121,12 @@ public:
             return false;
         }
         return top_order(SIDE::BUY).can_match(top_order(SIDE::SELL));
+    }
+
+    const std::unordered_map<double, double>&
+    get_levels(SIDE side) const
+    {
+        return side == SIDE::BUY ? bid_levels_ : ask_levels_;
     }
 
 private:

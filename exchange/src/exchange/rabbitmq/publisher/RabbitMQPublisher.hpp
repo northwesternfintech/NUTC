@@ -20,10 +20,7 @@ public:
     // ignore id because we shouldn't send ob update to user who placed order
     static void broadcast_ob_updates(
         const manager::ClientManager& clients,
-        const std::vector<messages::ObUpdate>& updates, const std::string& ignore_uid
-    );
-    static void broadcast_account_update(
-        const manager::ClientManager& clients, const messages::Match& match
+        const std::vector<messages::ObUpdate>& updates
     );
 };
 

@@ -40,7 +40,6 @@ add_library(
     src/exchange/bots/bot_container.cpp
     src/exchange/bots/bot_types/retail.cpp
 
-    src/exchange/tickers/engine/engine.cpp
     src/exchange/tickers/manager/ticker_manager.cpp
     
     src/exchange/traders/trader_manager.cpp

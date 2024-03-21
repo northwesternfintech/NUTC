@@ -1,6 +1,5 @@
 #include "RabbitMQOrderHandler.hpp"
 
-#include "exchange/rabbitmq/publisher/RabbitMQPublisher.hpp"
 #include "exchange/tickers/manager/ticker_manager.hpp"
 
 namespace nutc {
@@ -8,7 +7,7 @@ namespace rabbitmq {
 
 void
 RabbitMQOrderHandler::handle_incoming_market_order(
-    engine_manager::EngineManager& engine_manager, manager::ClientManager& clients,
+    engine_manager::EngineManager& engine_manager,
     MarketOrder&& order
 )
 {

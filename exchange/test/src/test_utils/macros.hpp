@@ -1,10 +1,10 @@
-#include "exchange/tickers/engine/engine.hpp"
+#include "exchange/tickers/engine/new_engine.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
 #include "exchange/utils/logger/logger.hpp"
 
 #include <limits>
 
-using Engine = nutc::matching::Engine;
+using Engine = nutc::matching::NewEngine;
 using MarketOrder = nutc::messages::MarketOrder;
 using StoredOrder = nutc::matching::StoredOrder;
 using Logger = nutc::events::Logger;

@@ -33,6 +33,7 @@ RabbitMQPublisher::publish_message(
     return check_reply(amqp_get_rpc_reply(conn), "Failed to publish message.");
 }
 
+// TODO: make this clear it also publishes account updates
 void
 RabbitMQPublisher::broadcast_matches(
     const manager::ClientManager& clients, const std::vector<messages::Match>& matches
@@ -49,6 +50,13 @@ RabbitMQPublisher::broadcast_matches(
             std::string buffer;
             glz::write<glz::opts{}>(match, buffer);
             publish_message(id, buffer);
+
+            messages::AccountUpdate update{
+                match.ticker, match.side, match.price, match.quantity,
+                clients.get_trader(id)->get_capital()
+            };
+            glz::write<glz::opts{}>(update, buffer);
+            publish_message(id, buffer);
         }
     }
 }
@@ -56,14 +64,14 @@ RabbitMQPublisher::broadcast_matches(
 void
 RabbitMQPublisher::broadcast_ob_updates(
     const manager::ClientManager& clients,
-    const std::vector<messages::ObUpdate>& updates, const std::string& ignore_uid
+    const std::vector<messages::ObUpdate>& updates
 )
 {
     const auto& traders = clients.get_traders();
     for (const auto& [id, trader] : traders) {
         if (trader->get_type() == manager::BOT)
             continue;
-        if (!trader->is_active() || id == ignore_uid) {
+        if (!trader->is_active()) {
             continue;
         }
 
@@ -73,32 +81,6 @@ RabbitMQPublisher::broadcast_ob_updates(
             publish_message(id, buffer);
         }
     }
-}
-
-void
-RabbitMQPublisher::broadcast_account_update(
-    const manager::ClientManager& clients, const messages::Match& match
-)
-{
-    const std::string& buyer_id = match.buyer_id;
-    const std::string& seller_id = match.seller_id;
-
-    auto send_message = [&](const std::shared_ptr<manager::GenericTrader>& trader,
-                            messages::SIDE side) {
-        if (trader->get_type() == manager::BOT)
-            return;
-        if (!trader->is_active())
-            return;
-        messages::AccountUpdate update = {
-            match.ticker, side, match.price, match.quantity, trader->get_capital()
-        };
-        std::string buffer;
-        glz::write<glz::opts{}>(update, buffer);
-        publish_message(trader->get_id(), buffer);
-    };
-
-    send_message(clients.get_trader(buyer_id), messages::SIDE::BUY);
-    send_message(clients.get_trader(seller_id), messages::SIDE::SELL);
 }
 
 } // namespace rabbitmq

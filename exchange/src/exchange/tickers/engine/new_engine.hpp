@@ -1,5 +1,6 @@
 #pragma once
 
+#include "exchange/config.h"
 #include "exchange/traders/trader_manager.hpp"
 #include "order_container.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
@@ -42,8 +43,8 @@ public:
     std::vector<StoredOrder>
     expire_old_orders(uint64_t new_tick)
     {
-        assert(new_tick == current_tick_ + 1);
-        auto orders = order_container_.expire_orders(current_tick_);
+        auto orders =
+            order_container_.expire_orders(new_tick - ORDER_EXPIRATION_TIME);
         current_tick_ = new_tick;
         return orders;
     }

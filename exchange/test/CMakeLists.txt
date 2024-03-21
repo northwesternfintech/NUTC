@@ -22,8 +22,6 @@ add_executable(NUTC_tests
   src/unit/matching/basic_matching.cpp
   src/unit/matching/order_container.cpp
 
-  src/unit/matching/ob_compressor.cpp
-
   src/unit/expiration/basic_expiration.cpp
 
   src/unit/logging/logging_orders.cpp

@@ -1,6 +1,7 @@
 #include "exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
 #include "exchange/rabbitmq/consumer/RabbitMQConsumer.hpp"
 #include "exchange/rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
+#include "exchange/tickers/manager/ticker_manager.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 #include "test_utils/macros.hpp"
 #include "test_utils/process.hpp"
@@ -48,11 +49,13 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
     users_.get_trader(user_id)->modify_holdings("TSLA", 1000); // NOLINT
 
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(
-        engine_manager_, users_,
+        engine_manager_, 
         nutc::messages::MarketOrder{
             user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100
         }
     );
+
+    nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 
     auto mess = rmq::RabbitMQConsumer::consume_message();
     ASSERT_TRUE(std::holds_alternative<nutc::messages::MarketOrder>(mess));
@@ -77,11 +80,12 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
     users_.get_trader(user_id)->modify_holdings("TSLA", 1000); // NOLINT
 
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(
-        engine_manager_, users_,
+        engine_manager_,
         nutc::messages::MarketOrder{
             user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100
         }
     ); // NOLINT
+    nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 
     // obupdate triggers one user to place a BUY order of 10 TSLA at 100
     auto mess1 = rmq::RabbitMQConsumer::consume_message();
@@ -95,8 +99,9 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
     );
 
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(
-        engine_manager_, users_, std::move(actual_mo)
+        engine_manager_, std::move(actual_mo)
     );
+    nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 
     // on_trade_match triggers one user to place a BUY order of 1 TSLA at 100
     auto mess2 = rmq::RabbitMQConsumer::consume_message();
@@ -123,11 +128,12 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdate)
     users_.get_trader(user_id)->modify_holdings("TSLA", 1000); // NOLINT
 
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(
-        engine_manager_, users_,
+        engine_manager_, 
         nutc::messages::MarketOrder{
             user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100
         }
     ); // NOLINT
+    nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 
     // obupdate triggers one user to place a BUY order of 10 TSLA at 102
     auto mess1 = rmq::RabbitMQConsumer::consume_message();
@@ -141,8 +147,9 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdate)
     );
 
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(
-        engine_manager_, users_, std::move(actual_mo)
+        engine_manager_, std::move(actual_mo)
     );
+    nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 
     // on_trade_match triggers one user to place a BUY order of 1 TSLA at 100
     auto mess2 = rmq::RabbitMQConsumer::consume_message();
