@@ -1,7 +1,7 @@
 #include "exchange/tickers/engine/order_container.hpp"
-#include "exchange/traders/trader_manager.hpp"
 
 #include "exchange/config.h"
+#include "exchange/traders/trader_manager.hpp"
 #include "test_utils/macros.hpp"
 
 #include <gtest/gtest.h>

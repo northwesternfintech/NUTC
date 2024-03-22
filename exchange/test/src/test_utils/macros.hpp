@@ -1,6 +1,6 @@
 #include "exchange/tickers/engine/engine.hpp"
-#include "exchange/traders/trader_manager.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
+#include "exchange/traders/trader_manager.hpp"
 #include "exchange/utils/logger/logger.hpp"
 
 #include <limits>

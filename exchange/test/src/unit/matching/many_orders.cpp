@@ -1,6 +1,6 @@
 #include "exchange/config.h"
-#include "exchange/traders/trader_manager.hpp"
 #include "exchange/tickers/engine/engine.hpp"
+#include "exchange/traders/trader_manager.hpp"
 #include "test_utils/macros.hpp"
 
 #include <gtest/gtest.h>

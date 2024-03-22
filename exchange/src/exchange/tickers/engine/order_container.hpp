@@ -26,13 +26,14 @@ class OrderContainer {
 
     std::unordered_map<double, double> bid_levels_;
     std::unordered_map<double, double> ask_levels_;
+
 public:
     const std::unordered_map<double, double>&
     get_levels(SIDE side) const
     {
         return side == SIDE::BUY ? bid_levels_ : ask_levels_;
     }
-  
+
     double
     get_level(SIDE side, double price) const
     {
@@ -42,7 +43,7 @@ public:
         }
         return levels.at(price);
     }
-  
+
     double
     get_midprice() const
     {
@@ -66,7 +67,7 @@ public:
         }
         return {asks_.begin()->price, bids_.rbegin()->price};
     }
-  
+
     bool
     can_match_orders() const
     {
@@ -76,21 +77,15 @@ public:
         return get_top_order(SIDE::BUY).can_match(get_top_order(SIDE::SELL));
     }
 
-    void
-    add_order(StoredOrder order);
+    void add_order(StoredOrder order);
 
-    std::vector<StoredOrder>
-    expire_orders(uint64_t tick);
+    std::vector<StoredOrder> expire_orders(uint64_t tick);
 
-    void
-    modify_order_quantity(uint64_t order_index, double delta);
+    void modify_order_quantity(uint64_t order_index, double delta);
 
-    StoredOrder
-    remove_order(uint64_t order_id);
+    StoredOrder remove_order(uint64_t order_id);
 
-    const StoredOrder&
-    get_top_order(SIDE side) const;
-
+    const StoredOrder& get_top_order(SIDE side) const;
 
 private:
     const StoredOrder&

@@ -10,8 +10,7 @@ using messages::ObUpdate;
 
 class LevelUpdateGenerator {
 public:
-    static std::vector<ObUpdate>
-    get_updates(
+    static std::vector<ObUpdate> get_updates(
         const std::string& ticker, const OrderContainer& before,
         const OrderContainer& after
     );
