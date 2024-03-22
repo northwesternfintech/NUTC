@@ -1,5 +1,5 @@
 #include "exchange/config.h"
-#include "exchange/tickers/engine/new_engine.hpp"
+#include "exchange/tickers/engine/engine.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
 #include "test_utils/macros.hpp"
 

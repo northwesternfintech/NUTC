@@ -5,7 +5,7 @@
 #include "exchange/rabbitmq/publisher/RabbitMQPublisher.hpp"
 #include "exchange/tick_manager/tick_observer.hpp"
 #include "exchange/tickers/engine/level_update_generator.hpp"
-#include "exchange/tickers/engine/new_engine.hpp"
+#include "exchange/tickers/engine/engine.hpp"
 #include "exchange/tickers/engine/order_container.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
 #include "exchange/traders/trader_manager.hpp"
