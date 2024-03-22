@@ -2,6 +2,7 @@
 
 #include "exchange/logging.hpp"
 #include "exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
+#include "exchange/traders/trader_types/generic_trader.hpp"
 
 namespace nutc {
 namespace rabbitmq {
@@ -42,7 +43,7 @@ RabbitMQPublisher::broadcast_matches(
     const auto& active_clients = clients.get_traders();
     for (const auto& [id, trader] : active_clients) {
         for (const auto& match : matches) {
-            if (trader->get_type() == manager::BOT)
+            if (trader->get_type() == manager::TraderType::BOT)
                 continue;
             if (!trader->is_active())
                 continue;
@@ -69,7 +70,7 @@ RabbitMQPublisher::broadcast_ob_updates(
 {
     const auto& traders = clients.get_traders();
     for (const auto& [id, trader] : traders) {
-        if (trader->get_type() == manager::BOT)
+        if (trader->get_type() == manager::TraderType::BOT)
             continue;
         if (!trader->is_active()) {
             continue;

@@ -42,11 +42,13 @@ Engine::handle_order_failure_(const StoredOrder& buyer, const StoredOrder& selle
 {
     double quantity = std::min(buyer.quantity, seller.quantity);
     double price = buyer.order_index < seller.order_index ? buyer.price : seller.price;
-    if (!buyer.trader->can_leverage() && buyer.trader->get_capital() < price * quantity) {
+    if (!buyer.trader->can_leverage()
+        && buyer.trader->get_capital() < price * quantity) {
         order_container_.remove_order(buyer.order_index);
         return true;
     }
-    if (!seller.trader->can_leverage() && seller.trader->get_holdings(buyer.ticker) < buyer.quantity) {
+    if (!seller.trader->can_leverage()
+        && seller.trader->get_holdings(buyer.ticker) < buyer.quantity) {
         order_container_.remove_order(seller.order_index);
         return true;
     }

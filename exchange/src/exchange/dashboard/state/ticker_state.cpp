@@ -26,8 +26,8 @@ TickerState::calculate_metrics()
 
     theo_ = bot_container.get_theo();
     uint64_t new_num_matches =
-    engine_manager::EngineManager::get_instance().get_num_matches(TICKER);
-    matches_since_last_tick_ = new_num_matches-num_matches_;
+        engine_manager::EngineManager::get_instance().get_num_matches(TICKER);
+    matches_since_last_tick_ = new_num_matches - num_matches_;
     num_matches_ = new_num_matches;
 
     auto calculate_pnl = [&order_container](const std::shared_ptr<bots::BotTrader>& bot
