@@ -22,10 +22,10 @@ protected:
         manager_.get_trader("DEF")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     }
 
-    ClientManager& manager_ = nutc::manager::ClientManager::get_instance(); // NOLINT(*)
+    TraderManager& manager_ = nutc::manager::TraderManager::get_instance(); // NOLINT(*)
     Engine engine_{}; // NOLINT (*)
 
-  std::vector<nutc::matching::StoredMatch>
+    std::vector<nutc::matching::StoredMatch>
     add_to_engine_(const MarketOrder& order)
     {
         return engine_.match_order(order);
@@ -54,5 +54,5 @@ TEST_F(UnitOrderExpiration, IncrementTick)
     MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
 
     auto matches = add_to_engine_(order1);
-    ASSERT_EQ(1, engine_.expire_old_orders(ORDER_EXPIRATION_TIME*2).size());
+    ASSERT_EQ(1, engine_.expire_old_orders(ORDER_EXPIRATION_TIME * 2).size());
 }

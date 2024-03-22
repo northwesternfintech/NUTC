@@ -12,7 +12,7 @@
 #include "exchange/tick_manager/tick_manager.hpp"
 #include "logging.hpp"
 #include "process_spawning/spawning.hpp"
-#include "rabbitmq/client_manager/RabbitMQClientManager.hpp"
+#include "rabbitmq/trader_manager/RabbitMQTraderManager.hpp"
 #include "rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
 #include "rabbitmq/consumer/RabbitMQConsumer.hpp"
 #include "tickers/manager/ticker_manager.hpp"
@@ -166,7 +166,7 @@ main(int argc, const char** argv)
 
     using namespace nutc; // NOLINT(*)
 
-    manager::ClientManager& users = manager::ClientManager::get_instance();
+    manager::TraderManager& users = manager::TraderManager::get_instance();
 
     auto [mode, sandbox] = process_arguments(argc, argv);
 
@@ -227,8 +227,8 @@ main(int argc, const char** argv)
     logging::init(quill::LogLevel::Info);
 
     // Run exchange
-    rabbitmq::RabbitMQClientManager::wait_for_clients(users, num_clients);
-    rabbitmq::RabbitMQClientManager::send_start_time(users, CLIENT_WAIT_SECS);
+    rabbitmq::RabbitMQTraderManager::wait_for_clients(users, num_clients);
+    rabbitmq::RabbitMQTraderManager::send_start_time(users, CLIENT_WAIT_SECS);
 
     static constexpr uint16_t TICK_HZ = 60;
     nutc::ticks::TickManager::get_instance(TICK_HZ);

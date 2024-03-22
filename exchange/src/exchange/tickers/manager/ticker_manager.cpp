@@ -11,7 +11,7 @@ EngineManager::has_engine(const std::string& ticker) const
     return engines_.find(ticker) != engines_.end();
 }
 
-NewEngine&
+Engine&
 EngineManager::get_engine(const std::string& ticker)
 {
     auto engine = engines_.find(ticker);
@@ -30,7 +30,7 @@ EngineManager::set_initial_price_(const std::string& ticker, double price)
 void
 EngineManager::add_engine(const std::string& ticker, double starting_price)
 {
-    engines_.emplace(ticker, NewEngine());
+    engines_.emplace(ticker, Engine());
     set_initial_price_(ticker, starting_price);
     bot_containers_.emplace(ticker, bots::BotContainer(ticker, starting_price));
 }
@@ -39,7 +39,7 @@ EngineManager::add_engine(const std::string& ticker, double starting_price)
 void
 EngineManager::add_engine(const std::string& ticker)
 {
-    engines_.emplace(ticker, NewEngine());
+    engines_.emplace(ticker, Engine());
 }
 
 } // namespace engine_manager

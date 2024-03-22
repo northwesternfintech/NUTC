@@ -16,7 +16,7 @@
 namespace nutc {
 namespace manager {
 
-class ClientManager {
+class TraderManager {
     std::unordered_map<std::string, const std::shared_ptr<GenericTrader>> traders_;
 
 public:
@@ -103,22 +103,22 @@ private:
         return traders_.contains(user_id);
     }
 
-    ClientManager() = default;
-    ~ClientManager() = default;
+    TraderManager() = default;
+    ~TraderManager() = default;
 
 public:
     // Singleton
-    static ClientManager&
+    static TraderManager&
     get_instance()
     {
-        static ClientManager instance;
+        static TraderManager instance;
         return instance;
     }
 
-    ClientManager(const ClientManager&) = delete;
-    ClientManager(ClientManager&&) = delete;
-    ClientManager& operator=(const ClientManager&) = delete;
-    ClientManager& operator=(ClientManager&&) = delete;
+    TraderManager(const TraderManager&) = delete;
+    TraderManager(TraderManager&&) = delete;
+    TraderManager& operator=(const TraderManager&) = delete;
+    TraderManager& operator=(TraderManager&&) = delete;
 };
 
 } // namespace manager

@@ -193,7 +193,7 @@ Dashboard::displayLeaderboard(WINDOW* window, int start_y)
 {
     mvwprintw(window, start_y, window->_maxx / 2 - 5, "Leaderboard");
 
-    manager::ClientManager& client_manager = manager::ClientManager::get_instance();
+    manager::TraderManager& client_manager = manager::TraderManager::get_instance();
     int start_x = 2;
     int orig_start_y = start_y;
     for (const auto& [user_id, trader] : client_manager.get_traders()) {

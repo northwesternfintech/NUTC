@@ -16,7 +16,7 @@ public:
         user_id_(user_id), algo_id_(algo_id)
     {}
 
-    void initialize_client_manager(manager::ClientManager& users) override;
+    void initialize_client_manager(manager::TraderManager& users) override;
 
     void initialize_files() const override;
 

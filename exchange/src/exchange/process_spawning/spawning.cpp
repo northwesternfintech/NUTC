@@ -61,7 +61,7 @@ spawn_client(
 }
 
 size_t
-spawn_all_clients(nutc::manager::ClientManager& users)
+spawn_all_clients(nutc::manager::TraderManager& users)
 {
     const char* wrapper_binary_location = std::getenv("NUTC_WRAPPER_BINARY_PATH");
     assert(

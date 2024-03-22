@@ -19,7 +19,7 @@ public:
         num_clients_(filenames.size()), algo_filenames_(filenames)
     {}
 
-    void initialize_client_manager(manager::ClientManager& users) override;
+    void initialize_client_manager(manager::TraderManager& users) override;
 
     void initialize_files() const override;
 

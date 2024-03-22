@@ -13,8 +13,7 @@ namespace nutc {
 namespace rabbitmq {
 
 void
-RabbitMQConsumer::handle_incoming_messages(
-    engine_manager::EngineManager& engine_manager
+RabbitMQConsumer::handle_incoming_messages(engine_manager::EngineManager& engine_manager
 )
 {
     while (true) {

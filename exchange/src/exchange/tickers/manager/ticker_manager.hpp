@@ -4,8 +4,8 @@
 #include "exchange/logging.hpp"
 #include "exchange/rabbitmq/publisher/RabbitMQPublisher.hpp"
 #include "exchange/tick_manager/tick_observer.hpp"
-#include "exchange/tickers/engine/level_update_generator.hpp"
 #include "exchange/tickers/engine/engine.hpp"
+#include "exchange/tickers/engine/level_update_generator.hpp"
 #include "exchange/tickers/engine/order_container.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
 #include "exchange/traders/trader_manager.hpp"
@@ -16,11 +16,11 @@
 namespace nutc {
 namespace engine_manager {
 
-using NewEngine = matching::NewEngine;
+using Engine = matching::Engine;
 
 class EngineManager : public nutc::ticks::TickObserver {
 public:
-    NewEngine& get_engine(const std::string& ticker);
+    Engine& get_engine(const std::string& ticker);
     bool has_engine(const std::string& ticker) const;
 
     bots::BotContainer&
@@ -79,11 +79,11 @@ public:
             last_order_containers[ticker] = engine.get_order_container();
 
             rabbitmq::RabbitMQPublisher::broadcast_ob_updates(
-                manager::ClientManager::get_instance(), updates
+                manager::TraderManager::get_instance(), updates
             );
 
             rabbitmq::RabbitMQPublisher::broadcast_matches(
-                manager::ClientManager::get_instance(), glz_matches
+                manager::TraderManager::get_instance(), glz_matches
             );
             matches_.clear();
         }
@@ -99,7 +99,7 @@ public:
 
 private:
     // these should probably be combined into a single map. later problem :P
-    std::map<std::string, NewEngine> engines_;
+    std::map<std::string, Engine> engines_;
     std::vector<matching::StoredMatch> matches_;
     std::unordered_map<std::string, matching::OrderContainer> last_order_containers;
     std::unordered_map<std::string, bots::BotContainer> bot_containers_;

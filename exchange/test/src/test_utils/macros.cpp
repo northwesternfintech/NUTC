@@ -6,7 +6,7 @@ namespace nutc {
 namespace testing_utils {
 
 StoredOrder
-make_stored_order(MarketOrder& order, const manager::ClientManager& manager)
+make_stored_order(MarketOrder& order, const manager::TraderManager& manager)
 {
     return StoredOrder{
         manager.get_trader(order.client_id),

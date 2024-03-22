@@ -30,7 +30,7 @@ protected:
         users_.reset();
     }
 
-    ClientManager& users_ = nutc::manager::ClientManager::get_instance(); // NOLINT(*)
+    TraderManager& users_ = nutc::manager::TraderManager::get_instance(); // NOLINT(*)
     nutc::engine_manager::EngineManager& engine_manager_ =
         nutc::engine_manager::EngineManager::get_instance(); // NOLINT(*)
 };
@@ -49,7 +49,7 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
     users_.get_trader(user_id)->modify_holdings("TSLA", 1000); // NOLINT
 
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(
-        engine_manager_, 
+        engine_manager_,
         nutc::messages::MarketOrder{
             user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100
         }
@@ -128,7 +128,7 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdate)
     users_.get_trader(user_id)->modify_holdings("TSLA", 1000); // NOLINT
 
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(
-        engine_manager_, 
+        engine_manager_,
         nutc::messages::MarketOrder{
             user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100
         }

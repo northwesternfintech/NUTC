@@ -13,13 +13,13 @@ public:
     static bool
     publish_message(const std::string& queue_name, const std::string& message);
     static void broadcast_matches(
-        const manager::ClientManager& clients,
+        const manager::TraderManager& clients,
         const std::vector<messages::Match>& matches
     );
 
     // ignore id because we shouldn't send ob update to user who placed order
     static void broadcast_ob_updates(
-        const manager::ClientManager& clients,
+        const manager::TraderManager& clients,
         const std::vector<messages::ObUpdate>& updates
     );
 };

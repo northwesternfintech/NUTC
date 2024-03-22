@@ -7,7 +7,7 @@ namespace nutc {
 namespace algo_mgmt {
 
 void
-NormalModeAlgoManager::initialize_client_manager(manager::ClientManager& users)
+NormalModeAlgoManager::initialize_client_manager(manager::TraderManager& users)
 {
     num_clients_ = 0;
 

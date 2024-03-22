@@ -6,7 +6,7 @@ namespace nutc {
 namespace manager {
 
 std::optional<messages::SIDE>
-ClientManager::validate_match(const matching::StoredMatch& match)
+TraderManager::validate_match(const matching::StoredMatch& match)
 {
     double trade_value = match.price * match.quantity;
     double remaining_capital = match.buyer->get_capital() - trade_value;

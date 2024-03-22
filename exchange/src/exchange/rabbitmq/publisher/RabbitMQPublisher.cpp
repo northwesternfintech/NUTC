@@ -36,7 +36,7 @@ RabbitMQPublisher::publish_message(
 // TODO: make this clear it also publishes account updates
 void
 RabbitMQPublisher::broadcast_matches(
-    const manager::ClientManager& clients, const std::vector<messages::Match>& matches
+    const manager::TraderManager& clients, const std::vector<messages::Match>& matches
 )
 {
     const auto& active_clients = clients.get_traders();
@@ -63,7 +63,7 @@ RabbitMQPublisher::broadcast_matches(
 
 void
 RabbitMQPublisher::broadcast_ob_updates(
-    const manager::ClientManager& clients,
+    const manager::TraderManager& clients,
     const std::vector<messages::ObUpdate>& updates
 )
 {

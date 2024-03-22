@@ -1,5 +1,6 @@
 #include "exchange/config.h"
 #include "exchange/tickers/engine/engine.hpp"
+#include "exchange/traders/trader_manager.hpp"
 #include "test_utils/macros.hpp"
 
 #include <gtest/gtest.h>
@@ -28,7 +29,7 @@ protected:
         SetUp();
     }
 
-    ClientManager& manager_ = nutc::manager::ClientManager::get_instance(); // NOLINT(*)
+    TraderManager& manager_ = nutc::manager::TraderManager::get_instance(); // NOLINT(*)
     Engine engine_{}; // NOLINT (*)
 
     std::vector<nutc::matching::StoredMatch>

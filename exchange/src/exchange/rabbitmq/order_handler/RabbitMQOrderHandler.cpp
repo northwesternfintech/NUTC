@@ -7,8 +7,7 @@ namespace rabbitmq {
 
 void
 RabbitMQOrderHandler::handle_incoming_market_order(
-    engine_manager::EngineManager& engine_manager,
-    MarketOrder&& order
+    engine_manager::EngineManager& engine_manager, MarketOrder&& order
 )
 {
     std::string buffer;
