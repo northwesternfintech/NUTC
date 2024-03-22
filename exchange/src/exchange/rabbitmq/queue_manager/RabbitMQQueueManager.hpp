@@ -14,6 +14,10 @@ public:
     static bool initialize_queue(
         const amqp_connection_state_t& connection_state, const std::string& queue_name
     );
+    static bool initialize_exchange(
+        const amqp_connection_state_t& connection_state,
+        const std::string& exchange_name
+    );
 };
 
 } // namespace rabbitmq

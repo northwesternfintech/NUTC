@@ -9,7 +9,7 @@ namespace matching {
 // in most cases and only called on tick
 // so simplicity > performance
 std::vector<ObUpdate>
-LevelUpdateGenerator::get_updates(
+get_updates(
     const std::string& ticker, const OrderContainer& before, const OrderContainer& after
 )
 {

@@ -69,6 +69,12 @@ RabbitMQConnectionManager::initialize_connection_()
         log_e(rabbitmq, "Failed to initialize queue.");
         return false;
     }
+    if (!RabbitMQQueueManager::initialize_exchange(
+            connection_state_, "fanout_to_wrappers"
+        )) {
+        log_e(rabbitmq, "Failed to initialize exchange.");
+        return false;
+    }
     if (!RabbitMQQueueManager::initialize_consume(connection_state_, "market_order")) {
         log_e(rabbitmq, "Failed to initialize consume.");
         return false;

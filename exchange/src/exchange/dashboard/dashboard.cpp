@@ -302,7 +302,7 @@ Dashboard::mainLoop(uint64_t tick)
     char chr = static_cast<char>(getch());
     if (chr == '1' || chr == '2' || chr == '3' || chr == '4')
         current_window_ = chr;
-    else if (false && tick % 15 != 0)
+    else if (tick % 15 != 0)
         return;
 
     // Hacky, fix this later lol

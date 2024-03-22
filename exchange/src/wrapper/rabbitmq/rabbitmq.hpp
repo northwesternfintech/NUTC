@@ -55,6 +55,10 @@ public:
      */
     RabbitMQ(const std::string& uid);
 
+    bool bind_queue_to_exchange(
+        const std::string& queue_name, const std::string& exchange_name
+    );
+
     /**
      * @brief Destructor for RabbitMQ (RAII)
      *

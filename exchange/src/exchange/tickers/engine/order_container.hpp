@@ -28,12 +28,18 @@ class OrderContainer {
     std::unordered_map<double, double> ask_levels_;
 
 public:
+    /**
+     * @brief Get the price->quantity map for a SIDE
+     */
     const std::unordered_map<double, double>&
     get_levels(SIDE side) const
     {
         return side == SIDE::BUY ? bid_levels_ : ask_levels_;
     }
 
+    /**
+     * @brief Get the quantity at a specific price for a side
+     */
     double
     get_level(SIDE side, double price) const
     {
@@ -79,12 +85,26 @@ public:
 
     void add_order(StoredOrder order);
 
+    /**
+     * @brief Expire all orders that were created tick-EXPIRATION_TIME ago
+     * This should be called every tick
+     */
     std::vector<StoredOrder> expire_orders(uint64_t tick);
 
+    /**
+     * @brief Modify the quantity of an order
+     * Remove it if the quantity is now 0
+     */
     void modify_order_quantity(uint64_t order_index, double delta);
 
+    /**
+     * @brief Remove an order from all data structures
+     */
     StoredOrder remove_order(uint64_t order_id);
 
+    /**
+     * @brief Get the top order on a side
+     */
     const StoredOrder& get_top_order(SIDE side) const;
 
 private:

@@ -6,6 +6,26 @@ namespace nutc {
 namespace rabbitmq {
 
 bool
+RabbitMQQueueManager::initialize_exchange(
+    const amqp_connection_state_t& connection_state, const std::string& exchange_name
+)
+{
+    amqp_exchange_declare(
+        connection_state, 1, amqp_cstring_bytes(exchange_name.c_str()),
+        amqp_cstring_bytes("fanout"), 0, 0, 0, 0, amqp_empty_table
+    );
+    amqp_rpc_reply_t res = amqp_get_rpc_reply(connection_state);
+
+    if (res.reply_type != AMQP_RESPONSE_NORMAL) {
+        log_e(rabbitmq, "Failed to declare exchange.");
+        return false;
+    }
+    log_i(rabbitmq, "Declared exchange: {}", exchange_name);
+
+    return true;
+}
+
+bool
 RabbitMQQueueManager::initialize_queue(
     const amqp_connection_state_t& connection_state, const std::string& queue_name
 )

@@ -38,16 +38,14 @@ EngineManager::on_tick(uint64_t new_tick)
             );
         }
 
-        std::vector<ObUpdate> updates = matching::LevelUpdateGenerator::get_updates(
+        std::vector<ObUpdate> updates = matching::get_updates(
             ticker, last_order_containers_[ticker], engine.get_order_container()
         );
         last_order_containers_[ticker] = engine.get_order_container();
 
         log_i(main, "Broadcasting {} updates for {}", updates.size(), ticker);
 
-        rabbitmq::RabbitMQPublisher::broadcast_ob_updates(
-            manager::TraderManager::get_instance(), updates
-        );
+        rabbitmq::RabbitMQPublisher::broadcast_ob_updates(updates);
 
         rabbitmq::RabbitMQPublisher::broadcast_matches(
             manager::TraderManager::get_instance(), glz_matches
