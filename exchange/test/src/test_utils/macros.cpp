@@ -14,8 +14,7 @@ make_stored_order(MarketOrder& order, const manager::TraderManager& manager)
         order.ticker,
         order.quantity,
         order.price,
-        /*tick=*/0
-    };
+        /*tick=*/0};
 }
 
 bool

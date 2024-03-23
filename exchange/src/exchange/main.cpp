@@ -230,7 +230,7 @@ main(int argc, const char** argv)
     rabbitmq::RabbitMQTraderManager::wait_for_clients(users, num_clients);
     rabbitmq::RabbitMQTraderManager::send_start_time(users, CLIENT_WAIT_SECS);
 
-    static constexpr uint16_t TICK_HZ = 60;
+    static constexpr uint16_t TICK_HZ = 1;
     nutc::ticks::TickManager::get_instance(TICK_HZ);
 
     initialize_ticker("ETH", 100);
@@ -247,17 +247,17 @@ main(int argc, const char** argv)
     auto& engine_manager = engine_manager::EngineManager::get_instance();
 
     engine_manager.get_bot_container("ETH").add_bots<bots::MarketMakerBot>(
-        100000, 10000, 5
+        100000, 10000, 100
     );
     engine_manager.get_bot_container("BTC").add_bots<bots::MarketMakerBot>(
-        25000, 5000, 10
+        25000, 5000, 100
     );
     engine_manager.get_bot_container("LTC").add_bots<bots::MarketMakerBot>(
-        100000, 25000, 3
+        100000, 25000, 100
     );
-    engine_manager.get_bot_container("ETH").add_bots<bots::RetailBot>(10, 3, 200);
-    engine_manager.get_bot_container("BTC").add_bots<bots::RetailBot>(100, 5, 500);
-    engine_manager.get_bot_container("LTC").add_bots<bots::RetailBot>(100, 10, 100);
+    engine_manager.get_bot_container("ETH").add_bots<bots::RetailBot>(10, 3, 1000);
+    engine_manager.get_bot_container("BTC").add_bots<bots::RetailBot>(100, 5, 1000);
+    engine_manager.get_bot_container("LTC").add_bots<bots::RetailBot>(100, 10, 1000);
 
     ticks::TickManager::get_instance().attach(
         &engine_manager, ticks::PRIORITY::first, "Matching Engine"

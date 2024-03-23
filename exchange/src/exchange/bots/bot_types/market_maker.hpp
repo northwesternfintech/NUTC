@@ -66,8 +66,7 @@ public:
         for (size_t i = 0; i < LEVELS; ++i) {
             auto side = (i < LEVELS / 2) ? messages::SIDE::BUY : messages::SIDE::SELL;
             orders[i] = messages::MarketOrder{
-                get_id(), side, TICKER, total_quantity * quantities[i], prices[i]
-            };
+                get_id(), side, TICKER, total_quantity * quantities[i], prices[i]};
             if (side == messages::SIDE::BUY) {
                 modify_long_capital(total_quantity * quantities[i] * prices[i]);
             }

@@ -63,8 +63,7 @@ Engine::match_order(const MarketOrder& order)
     // TODO: make this configurable. right now, it just rounds to one cent
     double price = std::round(order.price * 100) / 100;
     order_container_.add_order(StoredOrder{
-        trader, order.side, order.ticker, order.quantity, price, current_tick_
-    });
+        trader, order.side, order.ticker, order.quantity, price, current_tick_});
     return attempt_matches_();
 }
 

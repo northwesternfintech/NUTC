@@ -31,8 +31,7 @@ spawn_client(
     if (pid == 0) {
         std::vector<std::string> args = {
             binary_path, "--uid", quote_id(trader->get_id()), "--algo_id",
-            quote_id(trader->get_algo_id())
-        };
+            quote_id(trader->get_algo_id())};
 
         if (trader->get_type() == manager::TraderType::LOCAL) {
             args.emplace_back("--dev");

@@ -1,6 +1,7 @@
 #include "dashboard.hpp"
 
 #include "exchange/tick_manager/tick_manager.hpp"
+#include "exchange/tickers/manager/ticker_manager.hpp"
 #include "exchange/traders/trader_manager.hpp"
 #include "exchange/traders/trader_types/generic_trader.hpp"
 #include "state/global_metrics.hpp"
@@ -198,10 +199,23 @@ Dashboard::displayLeaderboard(WINDOW* window, int start_y)
     int start_x = 2;
     int orig_start_y = start_y;
     for (const auto& [user_id, trader] : client_manager.get_traders()) {
-        if (trader->get_type() != manager::TraderType::REMOTE)
+        if (trader->get_type() == manager::TraderType::BOT)
             continue;
+
+        double val = 0;
+        for (const std::string& ticker : {"ETH", "LTC", "BTC"}) {
+            double amount_held = trader->get_holdings(ticker);
+            double midprice = engine_manager::EngineManager::get_instance()
+                                  .get_engine(ticker)
+                                  .get_order_container()
+                                  .get_midprice();
+            val += amount_held * midprice;
+        }
+
         mvwprintw(window, start_y++, start_x, "User: %s", trader->get_id().c_str());
-        mvwprintw(window, start_y++, start_x, "  Capital: %.2f", trader->get_capital());
+        mvwprintw(
+            window, start_y++, start_x, "  Capital: %.2f", trader->get_capital()
+        );
         if (start_y + 2 >= window->_maxy) {
             start_y = orig_start_y;
             start_x += 60;

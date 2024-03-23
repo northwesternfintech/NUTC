@@ -26,6 +26,11 @@ tasks:
       - cmake -D FIX=YES -P cmake/lint.cmake
       - cmake -D FIX=YES -P cmake/spell.cmake
 
+  kill:
+    dir: .
+    cmds:
+      - pkill -f -9 WRAPPER
+
   new-log-dir:
     dir: .
     cmds:

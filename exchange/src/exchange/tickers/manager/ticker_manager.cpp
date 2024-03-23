@@ -26,6 +26,13 @@ EngineManager::on_tick(uint64_t new_tick)
         // TODO: do this in a converter
         std::vector<Match> glz_matches;
         for (const auto& match : matches_) {
+            bool buyer_is_bot = match.buyer->get_type() == manager::TraderType::BOT;
+            bool seller_is_bot = match.buyer->get_type() == manager::TraderType::BOT;
+
+            if (buyer_is_bot && seller_is_bot) {
+                continue;
+            }
+
             match.buyer->process_order_match(
                 match.ticker, messages::SIDE::BUY, match.price, match.quantity
             );

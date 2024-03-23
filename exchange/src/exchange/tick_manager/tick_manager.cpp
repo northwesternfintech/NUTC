@@ -94,8 +94,7 @@ TickManager::get_tick_metrics() const
         10 * top_10p_ms / num_ticks,
         2 * top_50p_ms / num_ticks,
         median_tick_ms,
-        total_ms / num_ticks
-    };
+        total_ms / num_ticks};
 }
 
 void
