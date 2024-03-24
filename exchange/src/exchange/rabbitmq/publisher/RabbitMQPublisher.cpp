@@ -41,30 +41,13 @@ RabbitMQPublisher::publish_message(
     return check_reply(amqp_get_rpc_reply(conn), "Failed to publish message.");
 }
 
-// TODO: make this clear it also publishes account updates
 void
-RabbitMQPublisher::broadcast_matches(
-    const manager::TraderManager& clients, const std::vector<messages::Match>& matches
-)
+RabbitMQPublisher::broadcast_matches(const std::vector<messages::Match>& matches)
 {
     for (const auto& match : matches) {
         std::string buffer;
         glz::write<glz::opts{}>(match, buffer);
         publish_message("fanout_to_wrappers", buffer, /*is_exchange=*/true);
-
-        messages::AccountUpdate update1{
-            match.ticker, match.side, match.price, match.quantity,
-            clients.get_trader(match.buyer_id)->get_capital()
-        };
-        messages::AccountUpdate update2{
-            match.ticker, match.side, match.price, match.quantity,
-            clients.get_trader(match.seller_id)->get_capital()
-        };
-        glz::write<glz::opts{}>(update1, buffer);
-        publish_message(match.buyer_id, buffer);
-
-        glz::write<glz::opts{}>(update2, buffer);
-        publish_message(match.seller_id, buffer);
     }
 }
 

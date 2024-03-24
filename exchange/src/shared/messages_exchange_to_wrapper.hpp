@@ -27,6 +27,8 @@ struct Match {
     double quantity;
     std::string buyer_id;
     std::string seller_id;
+    double buyer_capital;
+    double seller_capital;
 };
 
 /**
@@ -46,18 +48,6 @@ struct ObUpdate {
     }
 };
 
-/**
- * @brief Sent by exchange to clients to indicate an update with their specific account
- * This is only sent to the two clients that participated in the trade
- */
-struct AccountUpdate {
-    std::string ticker;
-    SIDE side;
-    double price;
-    double quantity;
-    double capital_remaining;
-};
-
 } // namespace messages
 } // namespace nutc
 
@@ -73,21 +63,12 @@ struct glz::meta<nutc::messages::ObUpdate> {
 
 /// \cond
 template <>
-struct glz::meta<nutc::messages::AccountUpdate> {
-    using T = nutc::messages::AccountUpdate;
-    static constexpr auto value = object(
-        "capital_remaining", &T::capital_remaining, "ticker", &T::ticker, "side",
-        &T::side, "price", &T::price, "quantity", &T::quantity
-    );
-};
-
-/// \cond
-template <>
 struct glz::meta<nutc::messages::Match> {
     using T = nutc::messages::Match;
     static constexpr auto value = object(
         "ticker", &T::ticker, "buyer_id", &T::buyer_id, "seller_id", &T::seller_id,
-        "side", &T::side, "price", &T::price, "quantity", &T::quantity
+        "side", &T::side, "price", &T::price, "quantity", &T::quantity, "buyer_capital",
+        &T::buyer_capital, "seller_capital", &T::seller_capital
     );
 };
 

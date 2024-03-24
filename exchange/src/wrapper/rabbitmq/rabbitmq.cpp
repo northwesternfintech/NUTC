@@ -1,6 +1,7 @@
 #include "rabbitmq.hpp"
 
 #include "wrapper/logging.hpp"
+#include "wrapper/pywrapper/pywrapper.hpp"
 
 #include <chrono>
 
@@ -61,10 +62,10 @@ RabbitMQ::connectToRabbitMQ(
 
 // todo: split into helpers
 void
-RabbitMQ::handleIncomingMessages()
+RabbitMQ::handleIncomingMessages(const std::string& uid)
 {
     while (true) {
-        std::variant<StartTime, ObUpdate, Match, AccountUpdate> data = consumeMessage();
+        std::variant<StartTime, ObUpdate, Match> data = consumeMessage();
         std::visit(
             [&](auto&& arg) {
                 using T = std::decay_t<decltype(arg)>;
@@ -89,24 +90,23 @@ RabbitMQ::handleIncomingMessages()
                     Match match = std::get<Match>(data);
                     std::string side =
                         match.side == messages::SIDE::BUY ? "BUY" : "SELL";
+
                     nutc::pywrapper::get_trade_update_function()(
                         match.ticker, side, match.price, match.quantity
                     );
-                    return;
-                }
-                else if constexpr (std::is_same_v<T, AccountUpdate>) {
-                    AccountUpdate update = std::get<AccountUpdate>(data);
-                    /*log_i(
-                        wrapper_rabbitmq,
-                        "Received account update with capital remaining: {}",
-                        update.capital_remaining
-                    );*/
-                    std::string side =
-                        update.side == messages::SIDE::BUY ? "BUY" : "SELL";
-                    nutc::pywrapper::get_account_update_function()(
-                        update.ticker, side, update.price, update.quantity,
-                        update.capital_remaining
-                    );
+
+                    if (match.buyer_id == uid) {
+                        nutc::pywrapper::get_account_update_function()(
+                            match.ticker, side, match.price, match.quantity,
+                            match.buyer_capital
+                        );
+                    }
+                    else if (match.seller_id == uid) {
+                        nutc::pywrapper::get_account_update_function()(
+                            match.ticker, side, match.price, match.quantity,
+                            match.seller_capital
+                        );
+                    }
                     return;
                 }
                 else {
@@ -154,7 +154,7 @@ RabbitMQ::publishMessage(const std::string& queueName, const std::string& messag
     return true;
 }
 
-std::variant<StartTime, ObUpdate, Match, AccountUpdate>
+std::variant<StartTime, ObUpdate, Match>
 RabbitMQ::consumeMessage()
 {
     std::string buf = consumeMessageAsString();
@@ -163,7 +163,7 @@ RabbitMQ::consumeMessage()
         exit(1);
     }
 
-    std::variant<StartTime, ObUpdate, Match, AccountUpdate> data{};
+    std::variant<StartTime, ObUpdate, Match> data{};
     auto err = glz::read_json(data, buf);
     if (err) {
         std::string error = glz::format_error(err, buf);
@@ -273,8 +273,8 @@ RabbitMQ::publishInit(const std::string& id, bool ready)
     return rVal;
 }
 
-// If wait_blocking is disabled, we block until we *receive* the message, but not after
-// Otherwise, we block until the start time
+// If wait_blocking is disabled, we block until we *receive* the message, but not
+// after Otherwise, we block until the start time
 void
 RabbitMQ::waitForStartTime(bool skip_start_wait)
 {

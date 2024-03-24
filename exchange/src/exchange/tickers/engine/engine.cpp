@@ -33,8 +33,9 @@ Engine::build_match(const StoredOrder& buyer, const StoredOrder& seller)
     double price = buyer.order_index < seller.order_index ? buyer.price : seller.price;
     SIDE aggressive_side =
         buyer.order_index < seller.order_index ? seller.side : buyer.side;
-    return StoredMatch{buyer.trader,    seller.trader, buyer.ticker,
-                       aggressive_side, price,         quantity};
+    return StoredMatch{
+        buyer.trader, seller.trader, buyer.ticker, aggressive_side, price, quantity,
+    };
 }
 
 bool

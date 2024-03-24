@@ -2,14 +2,10 @@
 
 #include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
-#include "wrapper/pywrapper/pywrapper.hpp"
 #include "wrapper/pywrapper/rate_limiter.hpp"
 
 #include <unistd.h>
 
-#include <chrono>
-
-#include <iostream>
 #include <string>
 
 #include <rabbitmq-c/amqp.h>
@@ -19,7 +15,6 @@ using InitMessage = nutc::messages::InitMessage;
 using MarketOrder = nutc::messages::MarketOrder;
 using ObUpdate = nutc::messages::ObUpdate;
 using Match = nutc::messages::Match;
-using AccountUpdate = nutc::messages::AccountUpdate;
 using StartTime = nutc::messages::StartTime;
 
 /**
@@ -103,7 +98,7 @@ public:
      *
      * @returns A shutdown or error message
      */
-    void handleIncomingMessages();
+    void handleIncomingMessages(const std::string& uid);
 
 private:
     rate_limiter::RateLimiter limiter;
@@ -124,7 +119,7 @@ private:
     );
 
     std::string consumeMessageAsString();
-    std::variant<StartTime, ObUpdate, Match, AccountUpdate> consumeMessage();
+    std::variant<StartTime, ObUpdate, Match> consumeMessage();
 };
 
 } // namespace rabbitmq
