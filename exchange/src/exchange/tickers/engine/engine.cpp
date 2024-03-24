@@ -48,7 +48,7 @@ Engine::handle_order_failure_(const StoredOrder& buyer, const StoredOrder& selle
         return true;
     }
     if (!seller.trader->can_leverage()
-        && seller.trader->get_holdings(buyer.ticker) < buyer.quantity) {
+        && seller.trader->get_holdings(buyer.ticker) <= quantity) {
         order_container_.remove_order(seller.order_index);
         return true;
     }
@@ -63,7 +63,8 @@ Engine::match_order(const MarketOrder& order)
     // TODO: make this configurable. right now, it just rounds to one cent
     double price = std::round(order.price * 100) / 100;
     order_container_.add_order(StoredOrder{
-        trader, order.side, order.ticker, order.quantity, price, current_tick_});
+        trader, order.side, order.ticker, order.quantity, price, current_tick_
+    });
     return attempt_matches_();
 }
 

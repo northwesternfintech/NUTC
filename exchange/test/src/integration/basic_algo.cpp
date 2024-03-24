@@ -51,7 +51,8 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(
         engine_manager_,
         nutc::messages::MarketOrder{
-            user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100}
+            user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100
+        }
     );
 
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);
@@ -81,7 +82,8 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(
         engine_manager_,
         nutc::messages::MarketOrder{
-            user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100}
+            user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100
+        }
     ); // NOLINT
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 
@@ -128,7 +130,8 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdate)
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(
         engine_manager_,
         nutc::messages::MarketOrder{
-            user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100}
+            user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100
+        }
     ); // NOLINT
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 

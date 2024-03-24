@@ -53,7 +53,8 @@ TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(
         engine_manager_,
         nutc::messages::MarketOrder{
-            user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100}
+            user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100
+        }
     ); // NOLINT
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 

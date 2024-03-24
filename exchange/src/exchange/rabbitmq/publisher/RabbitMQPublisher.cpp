@@ -57,11 +57,11 @@ RabbitMQPublisher::broadcast_matches(
         auto seller = clients.get_trader(match.seller_id);
 
         messages::AccountUpdate update1{
-            match.ticker, match.side, match.price, match.quantity,
-            buyer->get_capital()};
+            match.ticker, match.side, match.price, match.quantity, buyer->get_capital()
+        };
         messages::AccountUpdate update2{
-            match.ticker, match.side, match.price, match.quantity,
-            seller->get_capital()};
+            match.ticker, match.side, match.price, match.quantity, seller->get_capital()
+        };
 
         if (buyer->get_type() != manager::TraderType::BOT) {
             glz::write<glz::opts{}>(update1, buffer);

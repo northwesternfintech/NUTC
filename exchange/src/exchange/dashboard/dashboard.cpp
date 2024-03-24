@@ -203,7 +203,7 @@ Dashboard::displayLeaderboard(WINDOW* window, int start_y)
             continue;
 
         double val = 0;
-        for (const std::string& ticker : {"ETH", "LTC", "BTC"}) {
+        for (std::string ticker : {"ETH", "LTC", "BTC"}) {
             double amount_held = trader->get_holdings(ticker);
             double midprice = engine_manager::EngineManager::get_instance()
                                   .get_engine(ticker)
@@ -214,7 +214,7 @@ Dashboard::displayLeaderboard(WINDOW* window, int start_y)
 
         mvwprintw(window, start_y++, start_x, "User: %s", trader->get_id().c_str());
         mvwprintw(
-            window, start_y++, start_x, "  Capital: %.2f", trader->get_capital()
+            window, start_y++, start_x, "  Capital: %.2f", trader->get_capital() + val
         );
         if (start_y + 2 >= window->_maxy) {
             start_y = orig_start_y;
