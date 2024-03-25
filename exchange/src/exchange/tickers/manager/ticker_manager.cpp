@@ -32,6 +32,13 @@ EngineManager::on_tick(uint64_t new_tick)
             match.seller->process_order_match(
                 match.ticker, messages::SIDE::SELL, match.price, match.quantity
             );
+
+            bool buyer_is_bot = match.buyer->get_type() == manager::TraderType::BOT;
+            bool seller_is_bot = match.buyer->get_type() == manager::TraderType::BOT;
+            if (buyer_is_bot && seller_is_bot) {
+                continue;
+            }
+
             glz_matches.emplace_back(
                 match.ticker, match.side, match.price, match.quantity,
                 match.buyer->get_id(), match.seller->get_id()

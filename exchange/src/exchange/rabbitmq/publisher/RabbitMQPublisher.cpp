@@ -2,6 +2,7 @@
 
 #include "exchange/logging.hpp"
 #include "exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
+#include "exchange/traders/trader_types/generic_trader.hpp"
 
 namespace nutc {
 namespace rabbitmq {
@@ -52,19 +53,25 @@ RabbitMQPublisher::broadcast_matches(
         glz::write<glz::opts{}>(match, buffer);
         publish_message("fanout_to_wrappers", buffer, /*is_exchange=*/true);
 
+        auto buyer = clients.get_trader(match.buyer_id);
+        auto seller = clients.get_trader(match.seller_id);
+
         messages::AccountUpdate update1{
-            match.ticker, match.side, match.price, match.quantity,
-            clients.get_trader(match.buyer_id)->get_capital()
+            match.ticker, match.side, match.price, match.quantity, buyer->get_capital()
         };
         messages::AccountUpdate update2{
-            match.ticker, match.side, match.price, match.quantity,
-            clients.get_trader(match.seller_id)->get_capital()
+            match.ticker, match.side, match.price, match.quantity, seller->get_capital()
         };
-        glz::write<glz::opts{}>(update1, buffer);
-        publish_message(match.buyer_id, buffer);
 
-        glz::write<glz::opts{}>(update2, buffer);
-        publish_message(match.seller_id, buffer);
+        if (buyer->get_type() != manager::TraderType::BOT) {
+            glz::write<glz::opts{}>(update1, buffer);
+            publish_message(match.buyer_id, buffer);
+        }
+
+        if (seller->get_type() != manager::TraderType::BOT) {
+            glz::write<glz::opts{}>(update2, buffer);
+            publish_message(match.seller_id, buffer);
+        }
     }
 }
 

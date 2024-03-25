@@ -99,7 +99,7 @@ private:
     std::deque<milliseconds> last_1000_tick_times_;
 
     explicit TickManager(uint16_t start_tick_rate) :
-        delay_time_(milliseconds(MS_PER_SECOND / start_tick_rate))
+        delay_time_(milliseconds(start_tick_rate / MS_PER_SECOND))
     {}
 
     auto notify_tick_();

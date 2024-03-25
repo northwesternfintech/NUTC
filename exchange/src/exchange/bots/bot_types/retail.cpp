@@ -1,6 +1,9 @@
 #include "retail.hpp"
 
-#include "exchange/config.h"
+#define RETAIL_ORDER_OFFSET .01 // How much retail orders are offset from theo price.
+// Ex. .02 means buy order is
+// theo+.02 to ensure it gets filled
+#define RETAIL_ORDER_SIZE .1 // How much of the interest limit to use for retail orders
 
 namespace nutc {
 namespace bots {
@@ -16,6 +19,9 @@ std::optional<messages::MarketOrder>
 RetailBot::take_action(double current, double theo)
 {
     if (!is_active()) {
+        return std::nullopt;
+    }
+    if (current - RETAIL_ORDER_OFFSET <= 0) {
         return std::nullopt;
     }
     double p_trade = (1 - get_capital_utilization());
