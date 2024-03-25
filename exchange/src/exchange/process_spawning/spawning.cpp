@@ -1,6 +1,7 @@
 #include "spawning.hpp"
 
 #include "exchange/logging.hpp"
+#include "exchange/traders/trader_types/generic_trader.hpp"
 #include "shared/file_operations/file_operations.hpp"
 
 #include <cstdlib>
@@ -21,7 +22,7 @@ spawn_client(
     const std::string& binary_path
 )
 {
-    if (trader->get_type() == manager::LOCAL) {
+    if (trader->get_type() == manager::TraderType::LOCAL) {
         const std::string filepath = trader->get_algo_id() + ".py";
         assert(file_ops::file_exists(filepath));
     }
@@ -33,7 +34,7 @@ spawn_client(
             quote_id(trader->get_algo_id())
         };
 
-        if (trader->get_type() == manager::LOCAL) {
+        if (trader->get_type() == manager::TraderType::LOCAL) {
             args.emplace_back("--dev");
         }
 
@@ -61,7 +62,7 @@ spawn_client(
 }
 
 size_t
-spawn_all_clients(nutc::manager::ClientManager& users)
+spawn_all_clients(nutc::manager::TraderManager& users)
 {
     const char* wrapper_binary_location = std::getenv("NUTC_WRAPPER_BINARY_PATH");
     assert(
@@ -77,7 +78,7 @@ spawn_all_clients(nutc::manager::ClientManager& users)
 
     size_t num_clients = 0;
     auto spawn_one_trader = [&](const std::shared_ptr<manager::GenericTrader>& trader) {
-        if (trader->get_type() == manager::BOT)
+        if (trader->get_type() == manager::TraderType::BOT)
             return;
 
         if (trader->is_active())

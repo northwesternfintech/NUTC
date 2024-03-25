@@ -37,6 +37,13 @@ struct ObUpdate {
     SIDE side;
     double price;
     double quantity;
+
+    bool
+    operator==(const ObUpdate& other) const
+    {
+        return ticker == other.ticker && side == other.side && price == other.price
+               && quantity == other.quantity;
+    }
 };
 
 /**

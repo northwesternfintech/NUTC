@@ -8,7 +8,7 @@ namespace rabbitmq {
 
 bool
 RabbitMQPublisher::publish_message(
-    const std::string& queue_name, const std::string& message
+    const std::string& target_name, const std::string& message, bool is_exchange
 )
 {
     auto check_reply = [&](amqp_rpc_reply_t reply, const char* error_msg) -> bool {
@@ -25,80 +25,57 @@ RabbitMQPublisher::publish_message(
         return false;
     }
 
-    amqp_basic_publish(
-        conn, 1, amqp_cstring_bytes(""), amqp_cstring_bytes(queue_name.c_str()), 0, 0,
-        nullptr, amqp_cstring_bytes(message.c_str())
-    );
+    if (is_exchange) {
+        amqp_basic_publish(
+            conn, 1, amqp_cstring_bytes(target_name.c_str()), amqp_cstring_bytes(""), 0,
+            0, nullptr, amqp_cstring_bytes(message.c_str())
+        );
+    }
+    else {
+        amqp_basic_publish(
+            conn, 1, amqp_cstring_bytes(""), amqp_cstring_bytes(target_name.c_str()), 0,
+            0, nullptr, amqp_cstring_bytes(message.c_str())
+        );
+    }
 
     return check_reply(amqp_get_rpc_reply(conn), "Failed to publish message.");
 }
 
+// TODO: make this clear it also publishes account updates
 void
 RabbitMQPublisher::broadcast_matches(
-    const manager::ClientManager& clients, const std::vector<messages::Match>& matches
+    const manager::TraderManager& clients, const std::vector<messages::Match>& matches
 )
 {
-    const auto& active_clients = clients.get_traders();
-    for (const auto& [id, trader] : active_clients) {
-        for (const auto& match : matches) {
-            if (trader->get_type() == manager::BOT)
-                continue;
-            if (!trader->is_active())
-                continue;
+    for (const auto& match : matches) {
+        std::string buffer;
+        glz::write<glz::opts{}>(match, buffer);
+        publish_message("fanout_to_wrappers", buffer, /*is_exchange=*/true);
 
-            std::string buffer;
-            glz::write<glz::opts{}>(match, buffer);
-            publish_message(id, buffer);
-        }
-    }
-}
-
-void
-RabbitMQPublisher::broadcast_ob_updates(
-    const manager::ClientManager& clients,
-    const std::vector<messages::ObUpdate>& updates, const std::string& ignore_uid
-)
-{
-    const auto& traders = clients.get_traders();
-    for (const auto& [id, trader] : traders) {
-        if (trader->get_type() == manager::BOT)
-            continue;
-        if (!trader->is_active() || id == ignore_uid) {
-            continue;
-        }
-
-        for (const auto& update : updates) {
-            std::string buffer;
-            glz::write<glz::opts{}>(update, buffer);
-            publish_message(id, buffer);
-        }
-    }
-}
-
-void
-RabbitMQPublisher::broadcast_account_update(
-    const manager::ClientManager& clients, const messages::Match& match
-)
-{
-    const std::string& buyer_id = match.buyer_id;
-    const std::string& seller_id = match.seller_id;
-
-    auto send_message = [&](const std::shared_ptr<manager::GenericTrader>& trader,
-                            messages::SIDE side) {
-        if (trader->get_type() == manager::BOT)
-            return;
-        if (!trader->is_active())
-            return;
-        messages::AccountUpdate update = {
-            match.ticker, side, match.price, match.quantity, trader->get_capital()
+        messages::AccountUpdate update1{
+            match.ticker, match.side, match.price, match.quantity,
+            clients.get_trader(match.buyer_id)->get_capital()
         };
+        messages::AccountUpdate update2{
+            match.ticker, match.side, match.price, match.quantity,
+            clients.get_trader(match.seller_id)->get_capital()
+        };
+        glz::write<glz::opts{}>(update1, buffer);
+        publish_message(match.buyer_id, buffer);
+
+        glz::write<glz::opts{}>(update2, buffer);
+        publish_message(match.seller_id, buffer);
+    }
+}
+
+void
+RabbitMQPublisher::broadcast_ob_updates(const std::vector<messages::ObUpdate>& updates)
+{
+    for (const auto& update : updates) {
         std::string buffer;
         glz::write<glz::opts{}>(update, buffer);
-        publish_message(trader->get_id(), buffer);
-    };
-
-    send_message(clients.get_trader(buyer_id), messages::SIDE::BUY);
-    send_message(clients.get_trader(seller_id), messages::SIDE::SELL);
+        publish_message("fanout_to_wrappers", buffer, /*is_exchange=*/true);
+    }
 }
 
 } // namespace rabbitmq

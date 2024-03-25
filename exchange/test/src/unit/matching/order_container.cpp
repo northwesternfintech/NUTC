@@ -1,9 +1,12 @@
 #include "exchange/tickers/engine/order_container.hpp"
 
 #include "exchange/config.h"
+#include "exchange/traders/trader_manager.hpp"
 #include "test_utils/macros.hpp"
 
 #include <gtest/gtest.h>
+
+// TODO: expiration tests
 
 using nutc::messages::SIDE::BUY;
 using nutc::messages::SIDE::SELL;
@@ -23,7 +26,7 @@ protected:
         manager_.get_trader("DEF")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     }
 
-    ClientManager& manager_ = nutc::manager::ClientManager::get_instance(); // NOLINT(*)
+    TraderManager& manager_ = nutc::manager::TraderManager::get_instance(); // NOLINT(*)
     nutc::matching::OrderContainer container_;                              // NOLINT
 };
 
@@ -42,7 +45,9 @@ TEST_F(UnitOrderContainerTest, SimpleAddRemove)
     ASSERT_EQ(container_.get_level(SIDE::SELL, 1), 1);
     ASSERT_TRUE(container_.can_match_orders());
 
-    container_.remove_order(so1.order_index);
+    auto order = container_.remove_order(so1.order_index);
+    ASSERT_EQ(order.order_index, so1.order_index);
+    ASSERT_EQ(order.price, so1.price);
     ASSERT_EQ(container_.get_level(SIDE::BUY, 1), 0);
     ASSERT_FALSE(container_.can_match_orders());
 }

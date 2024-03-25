@@ -10,7 +10,7 @@ namespace nutc {
 namespace algo_mgmt {
 
 void
-DevModeAlgoManager::initialize_client_manager(manager::ClientManager& users)
+DevModeAlgoManager::initialize_client_manager(manager::TraderManager& users)
 {
     auto handle_algos_provided_filenames = [&]() {
         for (const std::string& filepath : algo_filenames_.value()) {

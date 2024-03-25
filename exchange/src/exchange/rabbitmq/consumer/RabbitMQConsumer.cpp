@@ -13,8 +13,7 @@ namespace nutc {
 namespace rabbitmq {
 
 void
-RabbitMQConsumer::handle_incoming_messages(
-    manager::ClientManager& clients, engine_manager::EngineManager& engine_manager
+RabbitMQConsumer::handle_incoming_messages(engine_manager::EngineManager& engine_manager
 )
 {
     while (true) {
@@ -35,7 +34,7 @@ RabbitMQConsumer::handle_incoming_messages(
                 }
                 else if constexpr (std::is_same_v<t, messages::MarketOrder>) {
                     RabbitMQOrderHandler::handle_incoming_market_order(
-                        engine_manager, clients, std::forward<t>(arg)
+                        engine_manager, std::forward<t>(arg)
                     );
                 }
                 else {

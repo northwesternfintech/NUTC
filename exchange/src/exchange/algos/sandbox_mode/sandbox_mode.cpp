@@ -7,7 +7,7 @@
 namespace nutc {
 namespace algo_mgmt {
 void
-SandboxAlgoManager::initialize_client_manager(manager::ClientManager& users)
+SandboxAlgoManager::initialize_client_manager(manager::TraderManager& users)
 {
     users.add_remote_trader(user_id_, algo_id_, STARTING_CAPITAL);
     num_clients_ = 1;

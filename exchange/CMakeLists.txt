@@ -30,7 +30,7 @@ add_library(
     
     src/exchange/process_spawning/spawning.cpp
     
-    src/exchange/rabbitmq/client_manager/RabbitMQClientManager.cpp
+    src/exchange/rabbitmq/trader_manager/RabbitMQTraderManager.cpp
     src/exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.cpp
     src/exchange/rabbitmq/consumer/RabbitMQConsumer.cpp
     src/exchange/rabbitmq/order_handler/RabbitMQOrderHandler.cpp
@@ -41,6 +41,9 @@ add_library(
     src/exchange/bots/bot_types/retail.cpp
 
     src/exchange/tickers/engine/engine.cpp
+    src/exchange/tickers/engine/order_container.cpp
+    src/exchange/tickers/engine/level_update_generator.cpp
+
     src/exchange/tickers/manager/ticker_manager.cpp
     
     src/exchange/traders/trader_manager.cpp

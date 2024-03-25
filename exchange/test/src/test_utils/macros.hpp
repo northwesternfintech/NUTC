@@ -1,5 +1,6 @@
 #include "exchange/tickers/engine/engine.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
+#include "exchange/traders/trader_manager.hpp"
 #include "exchange/utils/logger/logger.hpp"
 
 #include <limits>
@@ -9,7 +10,7 @@ using MarketOrder = nutc::messages::MarketOrder;
 using StoredOrder = nutc::matching::StoredOrder;
 using Logger = nutc::events::Logger;
 using ObUpdate = nutc::messages::ObUpdate;
-using ClientManager = nutc::manager::ClientManager;
+using TraderManager = nutc::manager::TraderManager;
 using SIDE = nutc::messages::SIDE;
 
 namespace nutc {
@@ -19,8 +20,9 @@ bool is_nearly_equal(
 );
 
 bool validate_match(
-    const Match& match, const std::string& ticker, const std::string& buyer_id,
-    const std::string& seller_id, messages::SIDE side, double price, double quantity
+    const nutc::matching::StoredMatch& match, const std::string& ticker,
+    const std::string& buyer_id, const std::string& seller_id, messages::SIDE side,
+    double price, double quantity
 );
 
 bool validate_ob_update(
@@ -34,7 +36,7 @@ bool validate_market_order(
 );
 
 StoredOrder
-make_stored_order(MarketOrder& order, const manager::ClientManager& manager);
+make_stored_order(MarketOrder& order, const manager::TraderManager& manager);
 
 } // namespace testing_utils
 } // namespace nutc
@@ -54,8 +56,8 @@ make_stored_order(MarketOrder& order, const manager::ClientManager& manager);
             << ", side = " << static_cast<int>(side_) << ", price = " << (price_)      \
             << ", quantity = " << (quantity_)                                          \
             << ". Actual match: ticker = " << (match).ticker                           \
-            << ", buyer_id = " << (match).buyer_id                                     \
-            << ", seller_id = " << (match).seller_id                                   \
+            << ", buyer_id = " << (match).buyer->get_id()                              \
+            << ", seller_id = " << (match).seller->get_id()                            \
             << ", side = " << static_cast<int>((match).side)                           \
             << ", price = " << (match).price << ", quantity = " << (match).quantity;   \
     } while (0)

@@ -1,5 +1,6 @@
 #include "exchange/config.h"
-#include "exchange/tickers/engine/new_engine.hpp"
+#include "exchange/tickers/engine/engine.hpp"
+#include "exchange/traders/trader_manager.hpp"
 #include "test_utils/macros.hpp"
 
 #include <gtest/gtest.h>
@@ -25,10 +26,10 @@ protected:
         manager_.get_trader("D")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     }
 
-    ClientManager& manager_ = nutc::manager::ClientManager::get_instance(); // NOLINT(*)
-    nutc::matching::NewEngine engine_{}; // NOLINT (*)
+    TraderManager& manager_ = nutc::manager::TraderManager::get_instance(); // NOLINT(*)
+    Engine engine_{}; // NOLINT (*)
 
-    std::vector<Match>
+    std::vector<nutc::matching::StoredMatch>
     add_to_engine_(MarketOrder order)
     {
         return engine_.match_order(std::move(order));

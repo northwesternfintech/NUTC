@@ -5,10 +5,10 @@
 namespace nutc {
 namespace testing_utils {
 
-void kill_all_processes(const manager::ClientManager& users);
+void kill_all_processes(const manager::TraderManager& users);
 
 [[nodiscard]] bool initialize_testing_clients(
-    nutc::manager::ClientManager& users, const std::vector<std::string>& algo_filenames,
+    nutc::manager::TraderManager& users, const std::vector<std::string>& algo_filenames,
     bool has_delay = false
 );
 

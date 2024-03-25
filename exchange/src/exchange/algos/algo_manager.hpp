@@ -28,7 +28,7 @@ public:
      */
     virtual void initialize_files() const = 0;
 
-    virtual void initialize_client_manager(manager::ClientManager& manager) = 0;
+    virtual void initialize_client_manager(manager::TraderManager& manager) = 0;
 
     [[nodiscard]] virtual size_t get_num_clients() const = 0;
 
@@ -37,7 +37,7 @@ public:
     static size_t
     initialize_algo_management(
         nutc::algo_mgmt::AlgoManager& algo_manager,
-        nutc::manager::ClientManager& client_manager
+        nutc::manager::TraderManager& client_manager
     )
     {
         algo_manager.initialize_files();

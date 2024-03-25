@@ -8,6 +8,26 @@ namespace nutc {
 namespace rabbitmq {
 
 bool
+RabbitMQ::bind_queue_to_exchange(
+    const std::string& queue_name, const std::string& exchange_name
+)
+{
+    amqp_queue_bind(
+        conn, 1, amqp_cstring_bytes(queue_name.c_str()),
+        amqp_cstring_bytes(exchange_name.c_str()), amqp_empty_bytes, amqp_empty_table
+    );
+    amqp_rpc_reply_t res = amqp_get_rpc_reply(conn);
+
+    if (res.reply_type != AMQP_RESPONSE_NORMAL) {
+        log_e(wrapper_rabbitmq, "Failed to bind queue to exchange.");
+        return false;
+    }
+    log_i(wrapper_rabbitmq, "Bound queue {} to exchange {}", queue_name, exchange_name);
+
+    return true;
+}
+
+bool
 RabbitMQ::connectToRabbitMQ(
     const std::string& hostname, int port, const std::string& username,
     const std::string& password
@@ -188,6 +208,10 @@ RabbitMQ::initializeConnection(const std::string& queueName)
     }
 
     if (!initializeQueue(queueName)) {
+        return false;
+    }
+
+    if (!bind_queue_to_exchange(queueName, "fanout_to_wrappers")) {
         return false;
     }
 

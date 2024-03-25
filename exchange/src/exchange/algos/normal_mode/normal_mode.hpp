@@ -9,7 +9,7 @@ class NormalModeAlgoManager : public AlgoManager {
     size_t num_clients_{};
 
 public:
-    void initialize_client_manager(manager::ClientManager& users) override;
+    void initialize_client_manager(manager::TraderManager& users) override;
 
     // No files to initialize
     void

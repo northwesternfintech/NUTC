@@ -14,113 +14,6 @@ namespace nutc {
 namespace matching {
 
 class OrderContainer {
-public:
-    void
-    add_order(StoredOrder order)
-    {
-        orders_by_tick_[order.tick].push_back(order.order_index);
-        if (order.side == SIDE::BUY) {
-            bids_.insert(order_index{order.price, order.order_index});
-        }
-        else {
-            asks_.insert(order_index{order.price, order.order_index});
-        }
-        modify_level_(order.side, order.price, order.quantity);
-        orders_by_id_.emplace(order.order_index, std::move(order));
-    }
-
-    std::vector<StoredOrder>
-    expire_orders(uint64_t tick)
-    {
-        std::vector<StoredOrder> result;
-        for (uint64_t index : orders_by_tick_[tick]) {
-            result.push_back(std::move(orders_by_id_.at(index)));
-            orders_by_id_.erase(index);
-        }
-        orders_by_tick_.erase(tick);
-        return result;
-    }
-
-    void
-    modify_order_quantity(uint64_t order_index, double delta)
-    {
-        StoredOrder& order = get_order_(order_index);
-        order.quantity += delta;
-        modify_level_(order.side, order.price, delta);
-        assert(order.quantity >= 0);
-        if (util::is_close_to_zero(order.quantity))
-            remove_order(order_index);
-    }
-
-    void
-    remove_order(uint64_t order_id)
-    {
-        StoredOrder& order = get_order_(order_id);
-        if (order.side == SIDE::BUY) {
-            bids_.erase(order_index{order.price, order_id});
-        }
-        else {
-            asks_.erase(order_index{order.price, order_id});
-        }
-        modify_level_(order.side, order.price, -order.quantity);
-        orders_by_id_.erase(order_id);
-    }
-
-    double
-    get_level(SIDE side, double price) const
-    {
-        const auto& levels = side == SIDE::BUY ? bid_levels_ : ask_levels_;
-        if (levels.find(price) == levels.end()) {
-            return 0;
-        }
-        return levels.at(price);
-    }
-
-    const StoredOrder&
-    top_order(SIDE side) const
-    {
-        if (side == SIDE::BUY) {
-            assert(!bids_.empty());
-            return get_order_(bids_.begin()->index);
-        }
-        assert(!asks_.empty());
-        return get_order_(asks_.begin()->index);
-    }
-
-    bool
-    can_match_orders() const
-    {
-        if (bids_.empty() || asks_.empty()) {
-            return false;
-        }
-        return top_order(SIDE::BUY).can_match(top_order(SIDE::SELL));
-    }
-
-private:
-    const StoredOrder&
-    get_order_(uint64_t order_id) const
-    {
-        assert(orders_by_id_.find(order_id) != orders_by_id_.end());
-        return orders_by_id_.at(order_id);
-    }
-
-    StoredOrder&
-    get_order_(uint64_t order_id)
-    {
-        assert(orders_by_id_.find(order_id) != orders_by_id_.end());
-        return orders_by_id_.at(order_id);
-    }
-
-    void
-    modify_level_(SIDE side, double price, double qualtity)
-    {
-        auto& levels = side == SIDE::BUY ? bid_levels_ : ask_levels_;
-        levels[price] += qualtity;
-        if (levels[price] == 0) {
-            levels.erase(price);
-        }
-    }
-
     // both map/sort price, order_index
     std::set<order_index, bid_comparator> bids_;
     std::set<order_index, ask_comparator> asks_;
@@ -133,6 +26,117 @@ private:
 
     std::unordered_map<double, double> bid_levels_;
     std::unordered_map<double, double> ask_levels_;
+
+public:
+    /**
+     * @brief Get the price->quantity map for a SIDE
+     */
+    const std::unordered_map<double, double>&
+    get_levels(SIDE side) const
+    {
+        return side == SIDE::BUY ? bid_levels_ : ask_levels_;
+    }
+
+    /**
+     * @brief Get the quantity at a specific price for a side
+     */
+    double
+    get_level(SIDE side, double price) const
+    {
+        const auto& levels = side == SIDE::BUY ? bid_levels_ : ask_levels_;
+        if (levels.find(price) == levels.end()) {
+            return 0;
+        }
+        return levels.at(price);
+    }
+
+    double
+    get_midprice() const
+    {
+        if (bids_.empty() || asks_.empty()) {
+            return 0;
+        }
+        return (bids_.begin()->price + asks_.begin()->price) / 2;
+    }
+
+    std::pair<uint, uint>
+    get_spread_nums() const
+    {
+        return {asks_.size(), bids_.size()};
+    }
+
+    std::pair<double, double>
+    get_spread() const
+    {
+        if (asks_.empty() || bids_.empty()) [[unlikely]] {
+            return {0, 0};
+        }
+        return {asks_.begin()->price, bids_.rbegin()->price};
+    }
+
+    bool
+    can_match_orders() const
+    {
+        if (bids_.empty() || asks_.empty()) {
+            return false;
+        }
+        return get_top_order(SIDE::BUY).can_match(get_top_order(SIDE::SELL));
+    }
+
+    void add_order(StoredOrder order);
+
+    /**
+     * @brief Expire all orders that were created tick-EXPIRATION_TIME ago
+     * This should be called every tick
+     */
+    std::vector<StoredOrder> expire_orders(uint64_t tick);
+
+    /**
+     * @brief Modify the quantity of an order
+     * Remove it if the quantity is now 0
+     */
+    void modify_order_quantity(uint64_t order_index, double delta);
+
+    /**
+     * @brief Remove an order from all data structures
+     */
+    StoredOrder remove_order(uint64_t order_id);
+
+    /**
+     * @brief Get the top order on a side
+     */
+    const StoredOrder& get_top_order(SIDE side) const;
+
+private:
+    const StoredOrder&
+    get_order_(uint64_t order_id) const
+    {
+        assert(order_exists_(order_id));
+        return orders_by_id_.at(order_id);
+    }
+
+    StoredOrder&
+    get_order_(uint64_t order_id)
+    {
+        assert(order_exists_(order_id));
+        return orders_by_id_.at(order_id);
+    }
+
+    bool
+    order_exists_(uint64_t order_id) const
+    {
+        return orders_by_id_.find(order_id) != orders_by_id_.end();
+    }
+
+    void
+    modify_level_(SIDE side, double price, double qualtity)
+    {
+        auto& levels = side == SIDE::BUY ? bid_levels_ : ask_levels_;
+        levels[price] += qualtity;
+        if (levels[price] == 0) {
+            levels.erase(price);
+        }
+    }
 };
 } // namespace matching
 } // namespace nutc

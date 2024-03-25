@@ -2,6 +2,7 @@
 
 #include "exchange/tick_manager/tick_manager.hpp"
 #include "exchange/traders/trader_manager.hpp"
+#include "exchange/traders/trader_types/generic_trader.hpp"
 #include "state/global_metrics.hpp"
 
 #include <quill/Quill.h>
@@ -193,11 +194,11 @@ Dashboard::displayLeaderboard(WINDOW* window, int start_y)
 {
     mvwprintw(window, start_y, window->_maxx / 2 - 5, "Leaderboard");
 
-    manager::ClientManager& client_manager = manager::ClientManager::get_instance();
+    manager::TraderManager& client_manager = manager::TraderManager::get_instance();
     int start_x = 2;
     int orig_start_y = start_y;
     for (const auto& [user_id, trader] : client_manager.get_traders()) {
-        if (trader->get_type() != manager::REMOTE)
+        if (trader->get_type() != manager::TraderType::REMOTE)
             continue;
         mvwprintw(window, start_y++, start_x, "User: %s", trader->get_id().c_str());
         mvwprintw(window, start_y++, start_x, "  Capital: %.2f", trader->get_capital());

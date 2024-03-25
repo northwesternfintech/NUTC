@@ -13,11 +13,11 @@ namespace nutc {
 namespace spawning {
 
 /**
- * @brief Spawns all clients in the given ClientManager
- * @param users The ClientManager to spawn clients for
+ * @brief Spawns all clients in the given TraderManager
+ * @param users The TraderManager to spawn clients for
  * @returns the number of clients spawned
  */
-size_t spawn_all_clients(nutc::manager::ClientManager& users);
+size_t spawn_all_clients(nutc::manager::TraderManager& users);
 
 } // namespace spawning
 } // namespace nutc

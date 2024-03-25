@@ -1,4 +1,4 @@
-#include "RabbitMQClientManager.hpp"
+#include "RabbitMQTraderManager.hpp"
 
 #include "exchange/logging.hpp"
 #include "exchange/rabbitmq/consumer/RabbitMQConsumer.hpp"
@@ -8,8 +8,8 @@ namespace nutc {
 namespace rabbitmq {
 
 void
-RabbitMQClientManager::wait_for_clients(
-    manager::ClientManager& manager, size_t num_clients
+RabbitMQTraderManager::wait_for_clients(
+    manager::TraderManager& manager, size_t num_clients
 )
 {
     log_i(rabbitmq, "Blocking until all {} clients are ready to start...", num_clients);
@@ -50,8 +50,8 @@ RabbitMQClientManager::wait_for_clients(
 }
 
 void
-RabbitMQClientManager::send_start_time(
-    const manager::ClientManager& manager, int wait_seconds
+RabbitMQTraderManager::send_start_time(
+    const manager::TraderManager& manager, int wait_seconds
 )
 {
     using time_point = std::chrono::high_resolution_clock::time_point;
