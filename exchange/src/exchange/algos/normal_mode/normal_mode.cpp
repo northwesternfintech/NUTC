@@ -2,6 +2,7 @@
 
 #include "exchange/config.h"
 #include "exchange/curl/curl.hpp"
+#include "exchange/traders/trader_types/remote_trader.hpp"
 
 namespace nutc {
 namespace algo_mgmt {
@@ -9,14 +10,26 @@ namespace algo_mgmt {
 void
 NormalModeAlgoManager::initialize_client_manager(manager::TraderManager& users)
 {
+    constexpr std::array<const char*, 3> REQUIRED_FIEDS = {
+        "latestAlgoId", "firstName", "lastName"
+    };
     num_clients_ = 0;
 
     glz::json_t::object_t firebase_users = get_all_users();
-    for (const auto& [id, user] : firebase_users) {
-        if (!user.contains("latestAlgoId"))
+    for (const auto& [user_id, user] : firebase_users) {
+        bool contains_all_fields = std::all_of(
+            REQUIRED_FIEDS.begin(), REQUIRED_FIEDS.end(),
+            [&user](const char* field) { return user.contains(field); }
+        );
+        if (!contains_all_fields) {
             continue;
-        users.add_remote_trader(
-            id, user["latestAlgoId"].get<std::string>(), STARTING_CAPITAL
+        }
+
+        std::string full_name = user["firstName"].get<std::string>() + " "
+                                + user["lastName"].get<std::string>();
+        std::string algo_id = user["latestAlgoId"].get<std::string>();
+        users.add_trader<manager::RemoteTrader>(
+            user_id, full_name, algo_id, STARTING_CAPITAL
         );
         num_clients_ += 1;
     }

@@ -12,6 +12,8 @@ namespace rmq = nutc::rabbitmq;
 
 class IntegrationBasicAlgo : public ::testing::Test {
 protected:
+    using BotTrader = nutc::bots::BotTrader;
+
     void
     SetUp() override
     {
@@ -47,13 +49,13 @@ TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
     auto start = std::chrono::high_resolution_clock::now();
 
     engine_manager_.add_engine("TSLA");
-    std::string user_id = users_.add_bot_trader(0);
-    users_.get_trader(user_id)->modify_holdings("TSLA", 1000); // NOLINT
+    auto bot = users_.add_trader<BotTrader>("", 0);
+    bot->modify_holdings("TSLA", 1000); // NOLINT
 
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(
         engine_manager_,
         nutc::messages::MarketOrder{
-            user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100
+            bot->get_id(), nutc::messages::SIDE::SELL, "TSLA", 100, 100
         }
     ); // NOLINT
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);

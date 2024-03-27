@@ -1,6 +1,7 @@
 #include "exchange/config.h"
 #include "exchange/tickers/engine/engine.hpp"
 #include "exchange/traders/trader_manager.hpp"
+#include "exchange/traders/trader_types/local_trader.hpp"
 #include "test_utils/macros.hpp"
 
 #include <gtest/gtest.h>
@@ -10,13 +11,14 @@ using nutc::messages::SIDE::SELL;
 
 class UnitInvalidOrders : public ::testing::Test {
 protected:
+    using LocalTrader = nutc::manager::LocalTrader;
     static constexpr const int DEFAULT_QUANTITY = 1000;
 
     void
     SetUp() override
     {
-        manager_.add_local_trader("ABC", STARTING_CAPITAL);
-        manager_.add_local_trader("DEF", STARTING_CAPITAL);
+        manager_.add_trader<LocalTrader>("ABC", STARTING_CAPITAL);
+        manager_.add_trader<LocalTrader>("DEF", STARTING_CAPITAL);
 
         manager_.get_trader("ABC")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
         manager_.get_trader("DEF")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
@@ -77,10 +79,10 @@ TEST_F(UnitInvalidOrders, MatchingInvalidFunds)
 
 TEST_F(UnitInvalidOrders, SimpleManyInvalidOrder)
 {
-    manager_.add_local_trader("A", STARTING_CAPITAL);
-    manager_.add_local_trader("B", 0);
-    manager_.add_local_trader("C", STARTING_CAPITAL);
-    manager_.add_local_trader("D", STARTING_CAPITAL);
+    manager_.add_trader<LocalTrader>("A", STARTING_CAPITAL);
+    manager_.add_trader<LocalTrader>("B", 0);
+    manager_.add_trader<LocalTrader>("C", STARTING_CAPITAL);
+    manager_.add_trader<LocalTrader>("D", STARTING_CAPITAL);
 
     manager_.get_trader("A")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     manager_.get_trader("B")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);

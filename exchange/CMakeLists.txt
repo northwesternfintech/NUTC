@@ -46,7 +46,6 @@ add_library(
 
     src/exchange/tickers/manager/ticker_manager.cpp
     
-    src/exchange/traders/trader_manager.cpp
     src/exchange/traders/trader_types/generic_trader.cpp
     src/exchange/traders/trader_types/bot_trader.cpp
     

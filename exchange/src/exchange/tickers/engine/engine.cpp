@@ -49,7 +49,7 @@ Engine::handle_order_failure_(const StoredOrder& buyer, const StoredOrder& selle
         return true;
     }
     if (!seller.trader->can_leverage()
-        && seller.trader->get_holdings(buyer.ticker) < buyer.quantity) {
+        && seller.trader->get_holdings(buyer.ticker) < quantity) {
         order_container_.remove_order(seller.order_index);
         return true;
     }
