@@ -34,7 +34,8 @@ EngineManager::on_tick(uint64_t new_tick)
             );
             glz_matches.emplace_back(
                 match.ticker, match.side, match.price, match.quantity,
-                match.buyer->get_id(), match.seller->get_id()
+                match.buyer->get_id(), match.seller->get_id(),
+                match.buyer->get_capital(), match.seller->get_capital()
             );
         }
 
@@ -47,9 +48,7 @@ EngineManager::on_tick(uint64_t new_tick)
 
         rabbitmq::RabbitMQPublisher::broadcast_ob_updates(updates);
 
-        rabbitmq::RabbitMQPublisher::broadcast_matches(
-            manager::TraderManager::get_instance(), glz_matches
-        );
+        rabbitmq::RabbitMQPublisher::broadcast_matches(glz_matches);
         matches_.clear();
     }
 }

@@ -144,6 +144,6 @@ main(int argc, const char** argv)
     nutc::pywrapper::run_code_init(algo.value());
 
     // Main event loop
-    conn.handleIncomingMessages();
+    conn.handleIncomingMessages(uid);
     return 0;
 }
