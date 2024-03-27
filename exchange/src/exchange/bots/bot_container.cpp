@@ -63,14 +63,12 @@ requires HandledBotType<BotType>
 {
     manager::TraderManager& users = nutc::manager::TraderManager::get_instance();
 
-    BotType bot(ticker_, starting_capital);
-    std::string bot_id = bot.get_id();
-    auto retail_bot = users.add_bot_trader(std::move(bot));
+    auto retail_bot = users.add_trader<BotType>(ticker_, starting_capital);
     if constexpr (std::is_same_v<BotType, RetailBot>) {
-        retail_bots_.insert({bot_id, retail_bot});
+        retail_bots_.insert({retail_bot->get_id(), retail_bot});
     }
     else {
-        market_makers_.insert({bot_id, retail_bot});
+        market_makers_.insert({retail_bot->get_id(), retail_bot});
     }
 }
 
