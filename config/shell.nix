@@ -15,6 +15,8 @@ nixpkgs.mkShell {
   nixpkgs.python312Packages.yfinance
   nixpkgs.python312Packages.pandas
   nixpkgs.python312Packages.scikit-learn
+  nixpkgs.clang-tools
+  nixpkgs.codespell
   ];
 
   shellHook = ''

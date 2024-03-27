@@ -2,6 +2,7 @@
 #include "exchange/rabbitmq/consumer/RabbitMQConsumer.hpp"
 #include "exchange/rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
 #include "exchange/tickers/manager/ticker_manager.hpp"
+#include "exchange/traders/trader_types/bot_trader.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 #include "test_utils/macros.hpp"
 #include "test_utils/process.hpp"
@@ -12,6 +13,8 @@ namespace rmq = nutc::rabbitmq;
 
 class IntegrationBasicAlgo : public ::testing::Test {
 protected:
+    using BotTrader = nutc::bots::BotTrader;
+
     void
     SetUp() override
     {
@@ -45,13 +48,13 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
     // want to see if it buys
     engine_manager_.add_engine("TSLA");
 
-    std::string user_id = users_.add_bot_trader(0);
-    users_.get_trader(user_id)->modify_holdings("TSLA", 1000); // NOLINT
+    auto bot = users_.add_trader<BotTrader>("", 0);
+    bot->modify_holdings("TSLA", 1000); // NOLINT
 
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(
         engine_manager_,
         nutc::messages::MarketOrder{
-            user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100
+            bot->get_id(), nutc::messages::SIDE::SELL, "TSLA", 100, 100
         }
     );
 
@@ -76,13 +79,13 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
     engine_manager_.add_engine("TSLA");
     engine_manager_.add_engine("APPL");
 
-    std::string user_id = users_.add_bot_trader(0);
-    users_.get_trader(user_id)->modify_holdings("TSLA", 1000); // NOLINT
+    auto bot = users_.add_trader<BotTrader>("", 0);
+    bot->modify_holdings("TSLA", 1000); // NOLINT
 
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(
         engine_manager_,
         nutc::messages::MarketOrder{
-            user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100
+            bot->get_id(), nutc::messages::SIDE::SELL, "TSLA", 100, 100
         }
     ); // NOLINT
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);
@@ -124,13 +127,13 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdate)
     engine_manager_.add_engine("TSLA");
     engine_manager_.add_engine("APPL");
 
-    std::string user_id = users_.add_bot_trader(0);
-    users_.get_trader(user_id)->modify_holdings("TSLA", 1000); // NOLINT
+    auto bot = users_.add_trader<BotTrader>("", 0);
+    bot->modify_holdings("TSLA", 1000); // NOLINT
 
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(
         engine_manager_,
         nutc::messages::MarketOrder{
-            user_id, nutc::messages::SIDE::SELL, "TSLA", 100, 100
+            bot->get_id(), nutc::messages::SIDE::SELL, "TSLA", 100, 100
         }
     ); // NOLINT
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);

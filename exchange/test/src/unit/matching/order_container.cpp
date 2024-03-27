@@ -2,6 +2,7 @@
 
 #include "exchange/config.h"
 #include "exchange/traders/trader_manager.hpp"
+#include "exchange/traders/trader_types/local_trader.hpp"
 #include "test_utils/macros.hpp"
 
 #include <gtest/gtest.h>
@@ -14,13 +15,14 @@ using nutc::testing_utils::make_stored_order;
 
 class UnitOrderContainerTest : public ::testing::Test {
 protected:
+    using LocalTrader = nutc::manager::LocalTrader;
     static constexpr const int DEFAULT_QUANTITY = 1000;
 
     void
     SetUp() override
     {
-        manager_.add_local_trader("ABC", STARTING_CAPITAL);
-        manager_.add_local_trader("DEF", STARTING_CAPITAL);
+        manager_.add_trader<LocalTrader>("ABC", STARTING_CAPITAL);
+        manager_.add_trader<LocalTrader>("DEF", STARTING_CAPITAL);
 
         manager_.get_trader("ABC")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
         manager_.get_trader("DEF")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
