@@ -34,7 +34,7 @@ BrownianMotion::generate_next_price()
     if (ticker_ > 0) {
         ticker_--;
         cur_value_ += generate_change_in_price_(
-            -cur_value_ / SKEW_SCALE, BROWNIAN_MOTION_DEVIATION, signedness_
+            -cur_value_ / BrownianMotionParameters::TICK_SKEW_SCALE, BrownianMotionParameters::EVENT_SIZE_STDEV, signedness_
         );
         return cur_value_;
     }
@@ -43,9 +43,10 @@ BrownianMotion::generate_next_price()
     std::uniform_real_distribution<double> zero_to_one_nd(0.0, 1.0);
     double random_number = zero_to_one_nd(random_number_generator_);
 
+    // Create a market event
     if (random_number >= probability_) {
         std::normal_distribution<double> distribution(
-            BROWNIAN_MOTION_MEAN_SIZE_EVENT, BROWNIAN_MOTION_STDEV_EVENT_SIZE
+            BrownianMotionParameters::EVENT_SIZE_MEAN, BrownianMotionParameters::EVENT_SIZE_STDEV
         );
         ticker_ = static_cast<size_t>(abs(distribution(random_number_generator_)));
 
@@ -55,14 +56,14 @@ BrownianMotion::generate_next_price()
 
         // Generate new price
         cur_value_ += generate_change_in_price_(
-            -cur_value_ / SKEW_SCALE, BROWNIAN_MOTION_DEVIATION,
+            -cur_value_ / BrownianMotionParameters::TICK_SKEW_SCALE, BrownianMotionParameters::EVENT_SIZE_STDEV,
             Signedness::DoesntMatter
         );
         return cur_value_;
     }
     else {
         cur_value_ += generate_change_in_price_(
-            -cur_value_ / SKEW_SCALE, BROWNIAN_MOTION_DEVIATION / SKEW_FACTOR,
+            -cur_value_ / BrownianMotionParameters::TICK_SKEW_SCALE, BrownianMotionParameters::EVENT_SIZE_STDEV / BrownianMotionParameters::EVENT_DEVIATION_FACTOR,
             Signedness::DoesntMatter
         );
         return cur_value_;
