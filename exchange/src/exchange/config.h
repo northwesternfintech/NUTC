@@ -41,7 +41,8 @@ namespace BrownianMotionParameters {
      * skewed towards zero using `TICK_SKEW_SCALE`. This variable is the stdev.
      * 
      * Higher means more change per tick for all ticks; lower means less. This affects
-     * market events too, which have a stdev = `DEVIATION` * `EVENT_DEVIATION_FACTOR`
+     * market events too, which have a stdev = `DEVIATION`. Non market events have a stdev
+     * equal to, strangely, `DEVIATION` * `EVENT_DEVIATION_FACTOR`
      */
     constexpr double DEVIATION = 0.1;
     
