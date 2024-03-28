@@ -1,35 +1,50 @@
 package main
 
 import (
+	"archive/tar"
 	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"net/url"
+	"os"
 	"sandbox-server/analyzer"
 	"strings"
 	"time"
 	"unicode"
 
-	"archive/tar"
-
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	gonanoid "github.com/matoous/go-nanoid/v2"
+	"go.uber.org/zap"
 )
 
 const dockerTimeout = time.Minute * 1
 const firebaseStorageUrl = "https://firebasestorage.googleapis.com/v0/b/nutc-web.appspot.com/o"
 const firebaseApiKey = "AIzaSyCo2l3x2DMhg5CaNy1Pyvknk_GK8v34iUc"
 
-const port = "8081"
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}
+
+func initZapLogger() *zap.SugaredLogger {
+	logger, _ := zap.NewDevelopment()
+	zap.ReplaceGlobals(logger)
+	return logger.Sugar()
+}
 
 func main() {
+	sugar := initZapLogger()
+	defer sugar.Sync()
+
+	var port = os.Getenv("SANDBOX_SERVER_PORT")
+	if port == "" {
+		port = "12687"
+	}
 	server := http.Server{
 		Addr:         ":" + port,
 		ReadTimeout:  5 * time.Second,
@@ -38,21 +53,26 @@ func main() {
 	}
 	http.HandleFunc("/", algoTestingHandler)
 
-	log.Printf("Sandbox server listening on port %s\n", port)
+	sugar.Infof("Sandbox server listening on port %s", port)
 	if err := server.ListenAndServe(); err != nil {
-		log.Fatal("Failed to start server\n")
+		sugar.Fatalf("Failed to start server: %v", err)
 	}
 }
 
 func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
+	sugar := zap.L().Sugar()
+	sugar.Infof("Request received from %s", r.RemoteAddr)
+	enableCors(&w)
 	user_id := r.URL.Query().Get("user_id")
 	algo_id := r.URL.Query().Get("algo_id")
 	if user_id == "" || algo_id == "" {
+		sugar.Warn("Missing required query parameter")
 		http.Error(w, "Missing required query parameter", http.StatusBadRequest)
 		return
 	}
 
 	if !isValidID(user_id) || !isValidID(algo_id) {
+		sugar.Warn("Invalid user or algo ID")
 		http.Error(w, "Invalid user or algo ID", http.StatusBadRequest)
 		return
 	}
@@ -60,6 +80,7 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	cli, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
+		sugar.Errorf("Failed to initialize docker client: %v", err)
 		http.Error(w, "Failed to initialize docker client", http.StatusInternalServerError)
 		return
 	}
@@ -73,47 +94,71 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 		cmd_algo_id = " " + algo_id[1:]
 	}
 
+	imageName := "nutc-exchange"
+	exchangeCmd := []string{"--sandbox", cmd_user_id, cmd_algo_id}
+
 	config := &container.Config{
-		Image: "nutc-exchange",
-		Cmd:   []string{"--sandbox", cmd_user_id, cmd_algo_id},
+		Image: imageName,
+		Cmd:   exchangeCmd,
 	}
+	
 	hostConfig := &container.HostConfig{
-		AutoRemove: true,
+		AutoRemove: false,
 	}
 
-	nano_id, err := gonanoid.New(6)
+	nanoID, err := gonanoid.New(6)
 	if err != nil {
+		sugar.Errorf("Failed to generate nanoID: %v", err)
 		http.Error(w, "Failed to create docker container", http.StatusInternalServerError)
-		fmt.Printf("%s", err.Error())
 		return
 	}
 
-	// container name cannot contain spaces and cannot start with "-"
-	container_name := fmt.Sprintf("%s-%s-%s", strings.TrimSpace(cmd_user_id), strings.TrimSpace(cmd_algo_id), nano_id)
-	resp, err := cli.ContainerCreate(ctx, config, hostConfig, nil, nil, container_name)
+	containerName := fmt.Sprintf("%s-%s-%s", strings.TrimSpace(user_id), strings.TrimSpace(algo_id), nanoID)
+
+	sugar.Infof("Starting container with name %s", containerName)
+	sugar.Infof("Container cmd: %s", exchangeCmd)
+	resp, err := cli.ContainerCreate(ctx, config, hostConfig, nil, nil, containerName)
 	if err != nil {
+		sugar.Errorf("Failed to create docker container: %v", err)
 		http.Error(w, "Failed to create docker container", http.StatusInternalServerError)
-		fmt.Printf("%s", err.Error())
 		return
 	}
 
 	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+		sugar.Errorf("Failed to start docker container: %v", err)
 		http.Error(w, "Failed to start docker container", http.StatusInternalServerError)
 		return
 	}
 
+	// wait 10 seconds and check if the container is still running
+	time.Sleep(10 * time.Second)
+	inspect, err := cli.ContainerInspect(ctx, resp.ID)
+	if err != nil {
+		sugar.Errorf("Failed to inspect docker container: %v", err)
+		http.Error(w, "Failed to inspect docker container", http.StatusInternalServerError)
+		return
+	}
+
+	if inspect.State.Running {
+		sugar.Infof("Container %s is still running", containerName)
+	} else {
+		sugar.Infof("Container %s has stopped", containerName)
+		http.Error(w, "Container failed to start", http.StatusInternalServerError)
+		return
+	}
+
 	go func() {
+		// Ensure to handle errors within this goroutine using the sugar logger
 		defer cli.ContainerStop(context.Background(), resp.ID, container.StopOptions{})
 
 		time.Sleep(dockerTimeout)
 
 		reader, _, err := cli.CopyFromContainer(context.Background(), resp.ID, "logs/structured.log")
 		if err != nil {
-			fmt.Printf("%s", err.Error())
+			sugar.Errorf("Failed to copy from container: %v", err)
 			return
 		}
 		defer reader.Close()
-
 		tarReader := tar.NewReader(reader)
 
 		_, err = tarReader.Next()
@@ -139,9 +184,11 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Printf("%s", err.Error())
 		}
+
+		sugar.Infof("Log file uploaded successfully: %s", file_url)
 	}()
 
-	fmt.Fprintf(w, "Container %s started successfully with user_id: %s and algo_id: %s\n", container_name, user_id, algo_id)
+	fmt.Fprintf(w, "Container %s started successfully with user_id: %s and algo_id: %s\n", containerName, user_id, algo_id)
 }
 
 func isValidID(id string) bool {
@@ -154,6 +201,13 @@ func isValidID(id string) bool {
 }
 
 func uploadLogFile(user_id, algo_id, apiKey, file_str string) (string, error) {
+	sugarNoContext := zap.L().Sugar()
+	sugar := sugarNoContext.With(
+		"user_id", user_id,
+		"algo_id", algo_id,
+		"file_str", file_str,
+	)
+	sugar.Infoln("Uploading log file")
 	reader := strings.NewReader(file_str)
 	var buffer bytes.Buffer
 
@@ -163,19 +217,23 @@ func uploadLogFile(user_id, algo_id, apiKey, file_str string) (string, error) {
 
 	part, err := writer.CreateFormFile("file", fileName)
 	if err != nil {
+		sugar.Errorf("writer.CreateFormFile: %v", err)
 		return "", fmt.Errorf("writer.CreateFormFile: %v", err)
 	}
 
 	if _, err := io.Copy(part, reader); err != nil {
+		sugar.Errorf("io.Copy: %v", err)
 		return "", fmt.Errorf("io.Copy: %v", err)
 	}
 
 	if err := writer.Close(); err != nil {
+		sugar.Errorf("writer.Close: %v", err)
 		return "", fmt.Errorf("writer.Close: %v", err)
 	}
 
 	req, err := http.NewRequest("POST", firebaseStorageUrl+"?uploadType=media&name="+fileName, &buffer)
 	if err != nil {
+		sugar.Errorf("http.NewRequest: %v", err)
 		return "", fmt.Errorf("http.NewRequest: %v", err)
 	}
 
@@ -185,11 +243,13 @@ func uploadLogFile(user_id, algo_id, apiKey, file_str string) (string, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
+		sugar.Errorf("client.Do: %v", err)
 		return "", fmt.Errorf("client.Do: %v", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		sugar.Errorf("upload failed with status: %v", resp.Status)
 		return "", fmt.Errorf("upload failed with status: %v", resp.Status)
 	}
 
@@ -201,11 +261,13 @@ func uploadLogFile(user_id, algo_id, apiKey, file_str string) (string, error) {
 	// Unmarshal the JSON response
 	var jsonResponse map[string]interface{}
 	if err := json.Unmarshal(bodyBytes, &jsonResponse); err != nil {
+		sugar.Errorf("json.Unmarshal: %v", err)
 		return "", fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	downloadToken, ok := jsonResponse["downloadTokens"].(string)
 	if !ok {
+		sugar.Errorf("download token not found in response")
 		return "", fmt.Errorf("download token not found in response")
 	}
 
@@ -214,6 +276,14 @@ func uploadLogFile(user_id, algo_id, apiKey, file_str string) (string, error) {
 
 // Add log file url to user algo in firebase database
 func addLogFileUrlToUser(user_id, algo_id, file_url string) error {
+	sugarNoContext := zap.L().Sugar()
+	sugar := sugarNoContext.With(
+		"user_id", user_id,
+		"algo_id", algo_id,
+		"file_url", file_url,
+	)
+	sugar.Infoln("Uploading log file")
+
 	type UserData struct {
 		SandboxLogFileUrl string `json:"sandboxLogFileURL"`
 	}
