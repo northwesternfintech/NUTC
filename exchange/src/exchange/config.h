@@ -75,6 +75,14 @@ namespace BrownianMotionParameters {
      * smaller means more constrained to be close to baseline.
      */
     constexpr uint TICK_SKEW_SCALE = 20000;
+
+    /**
+     * `ONE_MINUS_EVENT_PROBABILITY`
+     * Probability of NO event per tick, which means the expected ticks
+     * between events equals 1/(1-this thing). Must be between 0 and 1. If
+     * outside this range, will lead to undefined behavior.
+     */
+    constexpr double ONE_MINUS_EVENT_PROBABILITY = 0.95;
 }
 
 

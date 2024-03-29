@@ -44,7 +44,7 @@ BrownianMotion::generate_next_price()
     double random_number = zero_to_one_nd(random_number_generator_);
 
     // Create a market event
-    if (random_number >= probability_) {
+    if (random_number >= BrownianMotionParameters::ONE_MINUS_EVENT_PROBABILITY) {
         std::normal_distribution<double> distribution(
             BrownianMotionParameters::EVENT_SIZE_MEAN, BrownianMotionParameters::EVENT_SIZE_STDEV
         );
