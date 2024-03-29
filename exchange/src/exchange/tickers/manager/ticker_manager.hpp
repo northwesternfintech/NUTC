@@ -20,11 +20,30 @@ class EngineManager : public nutc::ticks::TickObserver {
     std::unordered_map<std::string, matching::OrderContainer> last_order_containers_;
     std::unordered_map<std::string, uint64_t> num_matches_;
     std::unordered_map<std::string, bots::BotContainer> bot_containers_;
+    std::unordered_map<std::string, double> midprices_;
     EngineManager() = default;
+    Engine& get_engine_(const std::string& ticker);
+    const Engine& get_engine_(const std::string& ticker) const;
 
 public:
-    Engine& get_engine(const std::string& ticker);
     bool has_engine(const std::string& ticker) const;
+
+    const matching::OrderContainer&
+    get_order_container(const std::string& ticker) const
+    {
+        return get_engine_(ticker).get_order_container();
+    }
+
+    double
+    get_midprice(const std::string& ticker)
+    {
+        double midprice = get_engine_(ticker).get_order_container().get_midprice();
+        if (midprice == 0) {
+            return midprices_.contains(ticker) ? midprices_.at(ticker) : 0.0;
+        }
+        midprices_[ticker] = midprice;
+        return midprice;
+    }
 
     uint64_t
     get_num_matches(const std::string& ticker) const
@@ -44,7 +63,7 @@ public:
     match_order(const MarketOrder& order)
     {
         std::vector<matching::StoredMatch> matches =
-            get_engine(order.ticker).match_order(order);
+            get_engine_(order.ticker).match_order(order);
         num_matches_[order.ticker] += matches.size();
         matches_.insert(matches_.end(), matches.begin(), matches.end());
     }

@@ -46,7 +46,7 @@ public:
     BotContainer() = default;
 
     explicit BotContainer(std::string ticker, double starting_price) :
-        ticker_(std::move(ticker)), brownian_offset_(starting_price)
+        TICKER(std::move(ticker)), brownian_offset_(starting_price)
     {}
 
 private:
@@ -57,7 +57,7 @@ private:
     std::unordered_map<std::string, const std::shared_ptr<RetailBot>> retail_bots_{};
     std::unordered_map<std::string, const std::shared_ptr<MarketMakerBot>>
         market_makers_{};
-    std::string ticker_;
+    const std::string TICKER;
 
     stochastic::BrownianMotion theo_generator_{};
     double brownian_offset_ = 0.0;

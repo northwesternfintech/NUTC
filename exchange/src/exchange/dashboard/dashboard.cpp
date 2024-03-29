@@ -1,13 +1,17 @@
 #include "dashboard.hpp"
 
 #include "exchange/tick_manager/tick_manager.hpp"
+#include "exchange/tickers/manager/ticker_manager.hpp"
 #include "exchange/traders/trader_manager.hpp"
 #include "exchange/traders/trader_types/generic_trader.hpp"
+#include "exchange/traders/trader_types/remote_trader.hpp"
 #include "state/global_metrics.hpp"
 
 #include <quill/Quill.h>
 
 #include <cassert>
+
+#include <memory>
 
 namespace nutc {
 namespace dashboard {
@@ -197,11 +201,53 @@ Dashboard::displayLeaderboard(WINDOW* window, int start_y)
     manager::TraderManager& client_manager = manager::TraderManager::get_instance();
     int start_x = 2;
     int orig_start_y = start_y;
+
+    auto portfolio_value = [&](const auto& trader) {
+        double pnl = 0.0;
+        for (std::string ticker : {"ETH", "BTC", "LTC"}) {
+            double amount_held = trader->get_holdings(ticker);
+            double midprice =
+                engine_manager::EngineManager::get_instance().get_midprice(ticker);
+            pnl += amount_held * midprice;
+        }
+        return pnl;
+    };
+
+    std::vector<std::shared_ptr<manager::RemoteTrader>> ordered_traders;
     for (const auto& [user_id, trader] : client_manager.get_traders()) {
         if (trader->get_type() != manager::TraderType::REMOTE)
             continue;
-        mvwprintw(window, start_y++, start_x, "User: %s", trader->get_id().c_str());
-        mvwprintw(window, start_y++, start_x, "  Capital: %.2f", trader->get_capital());
+        ordered_traders.push_back(std::static_pointer_cast<manager::RemoteTrader>(trader
+        ));
+    }
+    std::sort(
+        ordered_traders.begin(), ordered_traders.end(),
+        [&portfolio_value](
+            const std::shared_ptr<manager::RemoteTrader>& a,
+            const std::shared_ptr<manager::RemoteTrader>& b
+        ) {
+            return a->get_capital() + portfolio_value(a)
+                   > b->get_capital() + portfolio_value(b);
+        }
+    );
+
+    for (const auto& trader : ordered_traders) {
+        if (trader->get_type() != manager::TraderType::REMOTE)
+            continue;
+
+        auto remote_trader = std::static_pointer_cast<manager::RemoteTrader>(trader);
+        double capital = remote_trader->get_capital();
+        double portfolio = portfolio_value(trader);
+        double pnl = capital + portfolio - STARTING_CAPITAL;
+        if (pnl == 0)
+            continue;
+
+        mvwprintw(
+            window, start_y++, start_x, "User: %s", remote_trader->get_name().c_str()
+        );
+        mvwprintw(window, start_y++, start_x, "  Portfolio Value: %.2f", portfolio);
+        mvwprintw(window, start_y++, start_x, "  Capital: %.2f", capital);
+        mvwprintw(window, start_y++, start_x, "  PnL: %.2f", pnl);
         if (start_y + 2 >= window->_maxy) {
             start_y = orig_start_y;
             start_x += 60;
@@ -302,11 +348,9 @@ Dashboard::mainLoop(uint64_t tick)
     char chr = static_cast<char>(getch());
     if (chr == '1' || chr == '2' || chr == '3' || chr == '4')
         current_window_ = chr;
-    else if (tick % 15 != 0)
-        return;
 
     // Hacky, fix this later lol
-    if (tick < 200 && tick > 100) {
+    if (tick < 150 && tick > 50) {
         clear();
         refresh();
     }

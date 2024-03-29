@@ -4,6 +4,18 @@
 
 namespace nutc {
 namespace matching {
+constexpr auto
+order_price(const StoredOrder& order1, const StoredOrder& order2)
+{
+    return order1.order_index < order2.order_index ? order1.price : order2.price;
+}
+
+constexpr double
+order_quantity(const StoredOrder& order1, const StoredOrder& order2)
+{
+    return std::min(order1.price, order2.price);
+}
+
 std::vector<StoredMatch>
 Engine::attempt_matches_()
 {
@@ -13,15 +25,26 @@ Engine::attempt_matches_()
         const StoredOrder& cheapest_ask = order_container_.get_top_order(SIDE::SELL);
         assert(highest_bid.price >= cheapest_ask.price);
         assert(highest_bid.ticker == cheapest_ask.ticker);
+        assert(cheapest_ask.price > 0);
 
-        if (handle_order_failure_(highest_bid, cheapest_ask))
+        if (!order_can_execute_(highest_bid, cheapest_ask))
             continue;
 
-        double quantity = std::min(highest_bid.quantity, cheapest_ask.quantity);
-
-        matches.push_back(build_match(highest_bid, cheapest_ask));
-        order_container_.modify_order_quantity(highest_bid.order_index, -quantity);
-        order_container_.modify_order_quantity(cheapest_ask.order_index, -quantity);
+        auto match = build_match(highest_bid, cheapest_ask);
+        assert (match.quantity > 0);
+        match.buyer->process_order_match(
+            match.ticker, messages::SIDE::BUY, match.price, match.quantity
+        );
+        match.seller->process_order_match(
+            match.ticker, messages::SIDE::SELL, match.price, match.quantity
+        );
+        matches.push_back(std::move(match));
+        order_container_.modify_order_quantity(
+            highest_bid.order_index, -match.quantity
+        );
+        order_container_.modify_order_quantity(
+            cheapest_ask.order_index, -match.quantity
+        );
     }
     return matches;
 }
@@ -29,8 +52,9 @@ Engine::attempt_matches_()
 StoredMatch
 Engine::build_match(const StoredOrder& buyer, const StoredOrder& seller)
 {
-    double quantity = std::min(buyer.quantity, seller.quantity);
-    double price = buyer.order_index < seller.order_index ? buyer.price : seller.price;
+    assert(buyer.ticker == seller.ticker);
+    double quantity = order_quantity(buyer, seller);
+    double price = order_price(buyer, seller);
     SIDE aggressive_side =
         buyer.order_index < seller.order_index ? seller.side : buyer.side;
     return StoredMatch{
@@ -39,21 +63,21 @@ Engine::build_match(const StoredOrder& buyer, const StoredOrder& seller)
 }
 
 bool
-Engine::handle_order_failure_(const StoredOrder& buyer, const StoredOrder& seller)
+Engine::order_can_execute_(const StoredOrder& buyer, const StoredOrder& seller)
 {
-    double quantity = std::min(buyer.quantity, seller.quantity);
-    double price = buyer.order_index < seller.order_index ? buyer.price : seller.price;
+    double quantity = order_quantity(buyer, seller);
+    double price = order_price(buyer, seller);
     if (!buyer.trader->can_leverage()
         && buyer.trader->get_capital() < price * quantity) {
         order_container_.remove_order(buyer.order_index);
-        return true;
+        return false;
     }
     if (!seller.trader->can_leverage()
-        && seller.trader->get_holdings(buyer.ticker) < quantity) {
+        && seller.trader->get_holdings(seller.ticker) < quantity) {
         order_container_.remove_order(seller.order_index);
-        return true;
+        return false;
     }
-    return false;
+    return true;
 }
 
 std::vector<StoredMatch>

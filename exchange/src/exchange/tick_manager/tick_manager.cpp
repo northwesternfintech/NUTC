@@ -101,12 +101,11 @@ TickManager::get_tick_metrics() const
 void
 TickManager::run_()
 {
-    using namespace std::chrono;
-    auto next_tick = steady_clock::now();
+    using steady_clock = std::chrono::steady_clock;
+    auto next_tick = steady_clock::now() + delay_time_;
     concurrency::pin_to_core(1, "on_tick");
 
     while (running_) {
-        next_tick += delay_time_;
         std::this_thread::sleep_until(next_tick);
         current_tick_++;
         auto time = notify_tick_();
@@ -114,6 +113,7 @@ TickManager::run_()
         if (last_1000_tick_times_.size() > 1000) {
             last_1000_tick_times_.pop_back();
         }
+        next_tick = steady_clock::now() + delay_time_;
     }
 }
 

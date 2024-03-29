@@ -26,6 +26,12 @@ tasks:
       - cmake -D FIX=YES -P cmake/lint.cmake
       - cmake -D FIX=YES -P cmake/spell.cmake
 
+  kill-wrappers:
+    dir: .
+    cmds:
+      - cmd: pkill -f -9 WRAPPER
+        ignore_error: true
+
   new-log-dir:
     dir: .
     cmds:
@@ -77,6 +83,7 @@ tasks:
       - task: check-and-start-services
       - task: new-log-dir
       - ./{{ .NUTC_PATH }} {{ .MODE_FLAG }}
+      - task: kill-wrappers
       
       # - ./build/dev/{{.NAME}} --sandbox "1Pd1lJUMPURc0ezL393vWwRz9g32" " NgMtXt5Ff_lwqtySBJ9"
 

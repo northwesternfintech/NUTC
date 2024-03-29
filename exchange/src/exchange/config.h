@@ -29,13 +29,5 @@
 
 enum class Mode { SANDBOX, DEV, NORMAL, BOTS_ONLY };
 
-// Brownian motion stuff
- #define BROWNIAN_MOTION_MEAN_SIZE_EVENT  15
- #define BROWNIAN_MOTION_STDEV_EVENT_SIZE 5
- #define BROWNIAN_MOTION_DEVIATION        0.1
- #define SKEW_SCALE                       20000 // Factor by which the market wants to return to baseline (larger = less)
- #define SKEW_FACTOR                      4 // How much more market events skew than normal
-
-
 #define RETAIL_ORDER_OFFSET .02 // How much retail orders are offset from theo price. Ex. .02 means buy order is theo+.02 to ensure it gets filled
 #define RETAIL_ORDER_SIZE .05 // How much of the interest limit to use for retail orders

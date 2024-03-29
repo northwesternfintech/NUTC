@@ -100,6 +100,12 @@ public:
      */
     void handleIncomingMessages(const std::string& uid);
 
+    void
+    markStarted(bool started)
+    {
+        has_started = started;
+    }
+
 private:
     rate_limiter::RateLimiter limiter;
     [[nodiscard]] bool initializeConnection(const std::string& queueName);
@@ -110,6 +116,7 @@ private:
     );
 
     amqp_connection_state_t conn;
+    bool has_started = false;
     [[nodiscard]] bool
     publishMessage(const std::string& queueName, const std::string& message);
     [[nodiscard]] bool initializeQueue(const std::string& queueName);

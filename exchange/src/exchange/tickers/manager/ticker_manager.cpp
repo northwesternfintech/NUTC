@@ -4,8 +4,6 @@
 #include "exchange/logging.hpp"
 #include "exchange/rabbitmq/publisher/RabbitMQPublisher.hpp"
 #include "exchange/tickers/engine/level_update_generator.hpp"
-#include "exchange/traders/trader_manager.hpp"
-#include "shared/util.hpp"
 
 namespace nutc {
 namespace engine_manager {
@@ -25,13 +23,8 @@ EngineManager::on_tick(uint64_t new_tick)
 
         // TODO: do this in a converter
         std::vector<Match> glz_matches;
+        glz_matches.reserve(matches_.size());
         for (const auto& match : matches_) {
-            match.buyer->process_order_match(
-                match.ticker, messages::SIDE::BUY, match.price, match.quantity
-            );
-            match.seller->process_order_match(
-                match.ticker, messages::SIDE::SELL, match.price, match.quantity
-            );
             glz_matches.emplace_back(
                 match.ticker, match.side, match.price, match.quantity,
                 match.buyer->get_id(), match.seller->get_id(),
@@ -60,7 +53,15 @@ EngineManager::has_engine(const std::string& ticker) const
 }
 
 Engine&
-EngineManager::get_engine(const std::string& ticker)
+EngineManager::get_engine_(const std::string& ticker)
+{
+    auto engine = engines_.find(ticker);
+    assert(engine != engines_.end());
+    return engine->second;
+}
+
+const Engine&
+EngineManager::get_engine_(const std::string& ticker) const
 {
     auto engine = engines_.find(ticker);
     assert(engine != engines_.end());

@@ -1,3 +1,11 @@
+// Brownian motion stuff
+#define BROWNIAN_MOTION_MEAN_SIZE_EVENT  15
+#define BROWNIAN_MOTION_STDEV_EVENT_SIZE 5
+#define BROWNIAN_MOTION_DEVIATION        .1
+#define SKEW_SCALE                                                                     \
+    2000 // Factor by which the market wants to return to baseline (larger = less)
+#define SKEW_FACTOR 4 // How much more market events skew than normal
+
 /**
  * @file brownian.cpp
  * @author Andrew Li (andrewli@u.northwestern.edu)

@@ -104,14 +104,6 @@ main(int argc, const char** argv)
         process_arguments(argc, argv);
     pybind11::scoped_interpreter guard{};
 
-    if (!development_mode) {
-        NullBuffer null_buffer;
-        std::cout.rdbuf(&null_buffer);
-        std::cerr.rdbuf(&null_buffer);
-        freopen("/dev/null", "w", stdout);
-        freopen("/dev/null", "w", stderr);
-    }
-
     // Start logging and print build info
     nutc::logging::init(verbosity);
     log_i(main, "Starting NUTC wrapper for UID {}", uid);
@@ -128,20 +120,34 @@ main(int argc, const char** argv)
         algo = nutc::firebase::get_algo(uid, algo_id);
     }
 
-    // Send message to exchange to let it know we successfully initialized
-    bool published_init = conn.publishInit(uid, algo.has_value());
-    if (!published_init) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    if (!conn.publishInit(uid, algo.has_value())) {
         log_e(main, "Failed to publish init message");
         return 1;
     }
     if (!algo.has_value()) {
+        // assert (conn.publishInit(uid, /*ready=*/false));
         return 0;
     }
-    conn.waitForStartTime(no_start_delay);
 
     // Initialize the algorithm. For now, only designed for py
     nutc::pywrapper::create_api_module(conn.getMarketFunc(uid));
     nutc::pywrapper::run_code_init(algo.value());
+
+    if (!development_mode) {
+        NullBuffer null_buffer;
+        std::cout.rdbuf(&null_buffer);
+        std::cerr.rdbuf(&null_buffer);
+        freopen("/dev/null", "w", stdout);
+        freopen("/dev/null", "w", stderr);
+    }
+
+    // Send message to exchange to let it know we successfully initialized
+    // assert (conn.publishInit(uid, true));
+
+    conn.waitForStartTime(no_start_delay);
+    conn.markStarted(true);
 
     // Main event loop
     conn.handleIncomingMessages(uid);

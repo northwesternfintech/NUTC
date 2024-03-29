@@ -127,6 +127,9 @@ RabbitMQ::publishMarketOrder(
     if (limiter.should_rate_limit()) {
         return false;
     }
+    if (!has_started) {
+        return false;
+    }
     MarketOrder order{
         client_id, side == "BUY" ? messages::SIDE::BUY : messages::SIDE::SELL, ticker,
         quantity, price

@@ -2,6 +2,8 @@
 
 #include "shared/util.hpp"
 
+#include <cassert>
+
 #include <string>
 #include <unordered_map>
 
@@ -92,6 +94,7 @@ public:
     modify_capital(double change_in_capital)
     {
         capital_delta_ += change_in_capital;
+        // assert(can_leverage() || get_capital() >= -1);
     }
 
     double

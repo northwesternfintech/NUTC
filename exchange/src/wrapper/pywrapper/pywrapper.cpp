@@ -1,5 +1,7 @@
 #include "pywrapper.hpp"
 
+#include <iostream>
+
 namespace nutc {
 namespace pywrapper {
 
