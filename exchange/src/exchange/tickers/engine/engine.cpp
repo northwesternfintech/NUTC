@@ -13,7 +13,7 @@ order_price(const StoredOrder& order1, const StoredOrder& order2)
 constexpr double
 order_quantity(const StoredOrder& order1, const StoredOrder& order2)
 {
-    return std::min(order1.price, order2.price);
+    return std::min(order1.quantity, order2.quantity);
 }
 
 std::vector<StoredMatch>
@@ -31,7 +31,7 @@ Engine::attempt_matches_()
             continue;
 
         auto match = build_match(highest_bid, cheapest_ask);
-        assert (match.quantity > 0);
+        assert(match.quantity > 0);
         match.buyer->process_order_match(
             match.ticker, messages::SIDE::BUY, match.price, match.quantity
         );
@@ -84,6 +84,8 @@ std::vector<StoredMatch>
 Engine::match_order(const MarketOrder& order)
 {
     auto trader = manager::TraderManager::get_instance().get_trader(order.client_id);
+    if (order.quantity <= 0 || order.price <= 0)
+        return {};
     // round to 2 decimal places
     // TODO: make this configurable. right now, it just rounds to one cent
     double price = std::round(order.price * 100) / 100;
