@@ -29,11 +29,6 @@ public:
     std::optional<messages::MarketOrder> take_action(double current, double theo);
 
 private:
-    static double calculate_order_price(
-        messages::SIDE side, double current_price, double theo_price,
-        double buffer_percent = 0.02
-    );
-
     const double AGGRESSIVENESS;
 };
 

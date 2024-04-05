@@ -57,23 +57,5 @@ RetailBot::take_action(double current, double theo)
     return std::nullopt;
 }
 
-// Unused right now, maybe useful in the future
-double
-RetailBot::calculate_order_price(
-    messages::SIDE side, double current_price, double theo_price, double buffer_percent
-)
-{
-    double price_difference = std::abs(theo_price - current_price);
-
-    double signal_strength_adjustment = price_difference * 0.5;
-
-    double buffer_amount = current_price * buffer_percent;
-
-    if (side == messages::SIDE::BUY) {
-        return current_price - buffer_amount - signal_strength_adjustment;
-    }
-    return current_price + buffer_amount + signal_strength_adjustment;
-}
-
 } // namespace bots
 } // namespace nutc
