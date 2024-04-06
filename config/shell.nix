@@ -4,7 +4,10 @@ let
   }) {};
 in
 nixpkgs.mkShell {
-  buildInputs = [ nixpkgs.python312Full
+  buildInputs = [ 
+  nixpkgs.conan
+  nixpkgs.ncurses
+  nixpkgs.python312Full
   nixpkgs.python312Packages.cppy
   nixpkgs.python312Packages.matplotlib
   nixpkgs.python312Packages.numpy
@@ -13,5 +16,10 @@ nixpkgs.mkShell {
   nixpkgs.python312Packages.pandas
   nixpkgs.python312Packages.scikit-learn
   ];
+
+  shellHook = ''
+    source ${toString ./setup.sh}
+    export TERMINFO=/usr/share/terminfo
+  '';
 }
 
