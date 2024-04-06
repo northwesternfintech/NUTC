@@ -6,12 +6,14 @@ on:
       - main
     paths:
       - 'linter/**'
+      - '.github/workflows/linter-cicd.yml'
 
   pull_request:
     branches:
       - main
     paths:
       - 'linter/**'
+      - '.github/workflows/linter-cicd.yml'
 
   workflow_dispatch:
 
@@ -84,6 +86,16 @@ jobs:
           sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main"
           sudo apt update
           sudo apt install llvm-17 llvm-17-dev llvm-17-tools clang-17 clang-tidy-17 clang-tools-17 libclang-17-dev -y
+
+    - name: Install Cache Conan dependencies
+      id: cache-conan
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-conan-deps
+      with:
+        path: ~/.conan2
+        key: ${{ runner.os }}-builder-${{ env.cache-name }}-${{ hashFiles('conanfile.py') }}
+        restore-keys: ${{ runner.os }}-builder-${{ env.cache-name }}-
 
     - name: Install dependencies
       run: |

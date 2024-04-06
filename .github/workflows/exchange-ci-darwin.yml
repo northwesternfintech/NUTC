@@ -1,4 +1,4 @@
-name: Exchange - Continuous Integration
+name: Exchange - Continuous Integration DARWIN
 
 on:
   push:
@@ -6,25 +6,25 @@ on:
       - main
     paths:
       - 'exchange/**'
-      - '.github/workflows/exchange-ci.yml'
+      - '.github/workflows/exchange-ci-darwin.yml'
 
   pull_request:
     branches:
       - main
     paths:
       - 'exchange/**'
-      - '.github/workflows/exchange-ci.yml'
+      - '.github/workflows/exchange-ci-darwin.yml'
 
   workflow_dispatch:
 
 # We only care about the latest revision of a PR, so cancel all previous instances.
 concurrency:
-  group: exchange-ci-${{ github.event.pull_request.number || github.ref_name }}
+  group: exchange-ci-darwin-${{ github.event.pull_request.number || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
   lint:
-    runs-on: ubuntu-22.04
+    runs-on: macos-14
     defaults:
       run:
         working-directory: exchange
@@ -39,16 +39,14 @@ jobs:
 
     - name: Install LLVM 17
       run: |
-          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-          sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main"
-          sudo apt update
-          sudo apt install llvm-17 llvm-17-dev llvm-17-tools clang-17 clang-tidy-17 clang-format-17 clang-tools-17 libclang-17-dev -y
+          brew install llvm@17
+          brew install clang-format
 
     - name: Install codespell
       run: pip3 install codespell
 
     - name: Lint
-      run: cmake -D FORMAT_COMMAND=clang-format-17 -P cmake/lint.cmake
+      run: cmake -D FORMAT_COMMAND=clang-format -P cmake/lint.cmake
 
     - name: Spell check
       run: cmake -P cmake/spell.cmake
@@ -56,17 +54,17 @@ jobs:
   sanitize:
     needs: [lint]
 
-    runs-on: ubuntu-22.04
+    runs-on: macos-14
     defaults:
       run:
         working-directory: exchange
 
 
     env:
-      CC: clang-17
-      CXX: clang++-17
-      CLANG_DIR: '/usr/lib/llvm-17/lib/cmake/clang'
-      LLVM_DIR: '/usr/lib/llvm-17/lib/cmake/llvm'
+      CC: /opt/homebrew/opt/llvm/bin/clang
+      CXX: /opt/homebrew/opt/llvm/bin/clang++
+      CLANG_DIR: '/opt/homebrew/opt/llvm/bin/clang'
+      LLVM_DIR: '/opt/homebrew/opt/llvm'
 
     steps:
     - uses: actions/checkout@v3
@@ -83,10 +81,8 @@ jobs:
 
     - name: Install LLVM 17
       run: |
-          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-          sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main"
-          sudo apt update
-          sudo apt install llvm-17 llvm-17-dev llvm-17-tools clang-17 clang-tidy-17 clang-tools-17 libclang-17-dev -y
+          brew install llvm@17
+          brew install clang-format
 
     - name: Install Cache Conan dependencies
       id: cache-conan
@@ -100,15 +96,13 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip3 install conan
-
-        sudo apt install libssl-dev -y
-        
-        bash < ../.github/scripts/conan-profile.sh
+        pip3 install conan 
+        conan profile detect
+        python3 ../.github/scripts/write_config.py
         conan install . -s build_type=Release -b missing
 
     - name: Configure
-      run: cmake --preset=ci-sanitize
+      run: cmake --preset=ci-sanitize-darwin
 
     - name: Build
       run: cmake --build build/sanitize -j
@@ -129,7 +123,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-22.04]
+        os: [macos-14]
 
     runs-on: ${{ matrix.os }}
     defaults:
@@ -138,10 +132,10 @@ jobs:
 
 
     env:
-      CC: clang-17
-      CXX: clang++-17
-      CLANG_DIR: '/usr/lib/llvm-17/lib/cmake/clang'
-      LLVM_DIR: '/usr/lib/llvm-17/lib/cmake/llvm'
+      CC: /opt/homebrew/opt/llvm/bin/clang
+      CXX: /opt/homebrew/opt/llvm/bin/clang++
+      CLANG_DIR: '/opt/homebrew/opt/llvm/bin/clang'
+      LLVM_DIR: '/opt/homebrew/opt/llvm'
 
     steps:
     - uses: actions/checkout@v3
@@ -150,19 +144,13 @@ jobs:
 
     - name: Install LLVM 17
       run: |
-          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-          sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main"
-          sudo apt update
-          sudo apt install llvm-17 llvm-17-dev llvm-17-tools clang-17 clang-tidy-17 clang-tools-17 libclang-17-dev -y
+          brew install llvm@17
+          brew install clang-format
 
     - name: Install static analyzers
-      if: matrix.os == 'ubuntu-22.04'
+      if: matrix.os == 'macos-14'
       run: >-
-        sudo apt install cppcheck -y -q
-
-        sudo update-alternatives --install
-        /usr/bin/clang-tidy clang-tidy
-        /usr/bin/clang-tidy-17 160
+        brew install cppcheck
 
     - name: Install Python
       uses: actions/setup-python@v4
@@ -175,11 +163,9 @@ jobs:
     - name: Install dependencies
       shell: bash
       run: |
-        pip3 install conan
-        
-        sudo apt install libssl-dev -y
-        
-        bash < ../.github/scripts/conan-profile.sh
+        pip3 install conan 
+        conan profile detect
+        python3 ../.github/scripts/write_config.py
         conan install . -s build_type=Release -b missing
 
     - name: Setup MultiToolTask
@@ -207,7 +193,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-22.04]
+        os: [macos-14]
 
     runs-on: ${{ matrix.os }}
     defaults:
@@ -215,10 +201,10 @@ jobs:
         working-directory: exchange
 
     env:
-      CC: clang-17
-      CXX: clang++-17
-      CLANG_DIR: '/usr/lib/llvm-17/lib/cmake/clang'
-      LLVM_DIR: '/usr/lib/llvm-17/lib/cmake/llvm'
+      CC: /opt/homebrew/opt/llvm/bin/clang
+      CXX: /opt/homebrew/opt/llvm/bin/clang++
+      CLANG_DIR: '/opt/homebrew/opt/llvm/bin/clang'
+      LLVM_DIR: '/opt/homebrew/opt/llvm'
       NUTC_WRAPPER_BINARY_PATH: ${{ github.workspace }}/exchange/build/WRAPPER
 
     steps:
@@ -228,19 +214,13 @@ jobs:
 
     - name: Install LLVM 17
       run: |
-          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-          sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main"
-          sudo apt update
-          sudo apt install llvm-17 llvm-17-dev llvm-17-tools clang-17 clang-tidy-17 clang-tools-17 libclang-17-dev -y
+          brew install llvm@17
+          brew install clang-format
 
     - name: Install static analyzers
-      if: matrix.os == 'ubuntu-22.04'
+      if: matrix.os == 'macos-14'
       run: >-
-        sudo apt install cppcheck -y -q
-
-        sudo update-alternatives --install
-        /usr/bin/clang-tidy clang-tidy
-        /usr/bin/clang-tidy-17 160
+        brew install cppcheck
 
     - name: Install Python
       uses: actions/setup-python@v4
@@ -253,11 +233,9 @@ jobs:
     - name: Install dependencies
       shell: bash
       run: |
-        pip3 install conan
-        
-        sudo apt install libssl-dev rabbitmq-server -y
-        
-        bash < ../.github/scripts/conan-profile.sh
+        pip3 install conan 
+        conan profile detect
+        python3 ../.github/scripts/write_config.py
         conan install . -s build_type=Release -b missing
 
     - name: Setup MultiToolTask
@@ -299,53 +277,3 @@ jobs:
     - name: Test exchange
       working-directory: exchange/build
       run: ctest --output-on-failure --no-tests=error --timeout 10 -C Release -R "Integration*"
-
-  docs:
-    # Deploy docs only when builds succeed
-    needs: [sanitize, unit-test, integration-test]
-
-    runs-on: ubuntu-22.04
-    defaults:
-      run:
-        working-directory: exchange
-
-
-    # To enable, first you have to create an orphaned gh-pages branch:
-    #
-    #    git switch --orphan gh-pages
-    #    git commit --allow-empty -m "Initial commit"
-    #    git push -u origin gh-pages
-    #
-    # Edit the <name> placeholder below to your GitHub name, so this action
-    # runs only in your repository and no one else's fork. After these, delete
-    # this comment and the last line in the conditional below.
-    # If you do not wish to use GitHub Pages for deploying documentation, then
-    # simply delete this job similarly to the coverage one.
-    if: github.ref == 'refs/heads/main'
-      && github.event_name == 'push'
-      && github.repository_owner == 'northwesternfintech'
-
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: 'recursive'
-
-    - uses: actions/setup-python@v4
-      with: { python-version: "3.12" }
-
-    - name: Install m.css dependencies
-      run: pip3 install jinja2 Pygments
-
-    - name: Install Doxygen
-      run: sudo apt update -q
-        && sudo apt install doxygen -q -y
-
-    - name: Build docs
-      run: cmake "-DPROJECT_SOURCE_DIR=$PWD" "-DPROJECT_BINARY_DIR=$PWD/build"
-        -P cmake/docs-ci.cmake
-
-    - name: Deploy docs
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: build/docs/html
