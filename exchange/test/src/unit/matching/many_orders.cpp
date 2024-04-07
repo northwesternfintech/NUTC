@@ -1,6 +1,7 @@
 #include "exchange/config.h"
 #include "exchange/tickers/engine/engine.hpp"
 #include "exchange/traders/trader_manager.hpp"
+#include "exchange/traders/trader_types/local_trader.hpp"
 #include "test_utils/macros.hpp"
 
 #include <gtest/gtest.h>
@@ -10,15 +11,16 @@ using nutc::messages::SIDE::SELL;
 
 class UnitManyOrders : public ::testing::Test {
 protected:
+    using LocalTrader = nutc::manager::LocalTrader;
     static constexpr const int DEFAULT_QUANTITY = 1000;
 
     void
     SetUp() override
     {
-        manager_.add_local_trader("A", STARTING_CAPITAL);
-        manager_.add_local_trader("B", STARTING_CAPITAL);
-        manager_.add_local_trader("C", STARTING_CAPITAL);
-        manager_.add_local_trader("D", STARTING_CAPITAL);
+        manager_.add_trader<LocalTrader>("A", STARTING_CAPITAL);
+        manager_.add_trader<LocalTrader>("B", STARTING_CAPITAL);
+        manager_.add_trader<LocalTrader>("C", STARTING_CAPITAL);
+        manager_.add_trader<LocalTrader>("D", STARTING_CAPITAL);
 
         manager_.get_trader("A")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
         manager_.get_trader("B")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);

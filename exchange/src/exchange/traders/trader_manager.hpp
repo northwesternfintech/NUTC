@@ -1,15 +1,9 @@
 #pragma once
-#include "exchange/bots/bot_types/market_maker.hpp"
-#include "exchange/bots/bot_types/retail.hpp"
-#include "exchange/tickers/engine/order_storage.hpp"
-#include "trader_types/bot_trader.hpp"
-#include "trader_types/local_trader.hpp"
-#include "trader_types/remote_trader.hpp"
+#include "exchange/traders/trader_types/generic_trader.hpp"
 
 #include <glaze/glaze.hpp>
 
 #include <memory>
-#include <optional>
 #include <string>
 #include <unordered_map>
 
@@ -20,51 +14,17 @@ class TraderManager {
     std::unordered_map<std::string, const std::shared_ptr<GenericTrader>> traders_;
 
 public:
-    void
-    add_remote_trader(
-        const std::string& user_id, const std::string& algo_id, double capital
-    )
+    /**
+     * @brief Add a trader to the trader manager, return a shared pointer to the trader
+     */
+    template <typename T, typename... Args>
+    std::shared_ptr<T>
+    add_trader(Args&&... args)
     {
-        traders_.emplace(
-            user_id, std::make_shared<RemoteTrader>(user_id, algo_id, capital)
-        );
-    }
-
-    void
-    add_local_trader(const std::string& algo_id, double capital)
-    {
-        traders_.emplace(algo_id, std::make_shared<LocalTrader>(algo_id, capital));
-    }
-
-    // FOR TESTING ONLY - THIS WILL HAVE NO ATTACHED REAL BOT
-    std::string
-    add_bot_trader(double capital)
-    {
-        std::shared_ptr<GenericTrader> bot =
-            std::make_shared<bots::BotTrader>("", capital);
-        std::string bot_id = bot->get_id();
-        traders_.insert({bot_id, bot});
-        return bot_id;
-    }
-
-    std::shared_ptr<bots::RetailBot>
-    add_bot_trader(bots::RetailBot&& trader)
-    {
-        std::string bot_id = trader.get_id();
-        std::shared_ptr<GenericTrader> bot =
-            std::make_shared<bots::RetailBot>(std::move(trader));
-        traders_.insert({bot_id, bot});
-        return std::dynamic_pointer_cast<bots::RetailBot>(bot);
-    }
-
-    std::shared_ptr<bots::MarketMakerBot>
-    add_bot_trader(bots::MarketMakerBot&& trader)
-    {
-        std::string bot_id = trader.get_id();
-        std::shared_ptr<GenericTrader> bot =
-            std::make_shared<bots::MarketMakerBot>(std::move(trader));
-        traders_.insert({bot_id, bot});
-        return std::dynamic_pointer_cast<bots::MarketMakerBot>(bot);
+        std::shared_ptr<GenericTrader> trader =
+            make_shared_trader_<T>(std::forward<Args>(args)...);
+        traders_.insert({trader->get_id(), trader});
+        return std::dynamic_pointer_cast<T>(trader);
     }
 
     [[nodiscard]] std::shared_ptr<GenericTrader>
@@ -86,9 +46,6 @@ public:
         return traders_;
     }
 
-    [[nodiscard]] static std::optional<messages::SIDE>
-    validate_match(const matching::StoredMatch& match);
-
     // Primarily for testing
     void
     reset()
@@ -97,6 +54,14 @@ public:
     }
 
 private:
+    template <typename T, typename... Args>
+    requires std::is_base_of_v<GenericTrader, T>
+    std::shared_ptr<GenericTrader>
+    make_shared_trader_(Args&&... args)
+    {
+        return std::make_shared<T>(std::forward<Args>(args)...);
+    }
+
     bool
     user_exists_(const std::string& user_id) const
     {
