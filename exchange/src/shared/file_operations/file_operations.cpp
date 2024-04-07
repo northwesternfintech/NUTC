@@ -12,6 +12,22 @@
 // Low level file operations. Decoupled from functionality of exchange
 namespace nutc {
 namespace file_ops {
+
+void
+print_file_contents(const std::string& filepath)
+{
+    std::ifstream file(filepath);
+
+    if (!file) {
+        return;
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        std::cout << line << std::endl; // NOLINT
+    }
+}
+
 bool
 create_directory(const std::string& dir)
 {

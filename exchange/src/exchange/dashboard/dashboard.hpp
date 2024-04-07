@@ -1,25 +1,15 @@
 #pragma once
 
-#include "exchange/dashboard/state/ticker_state.hpp"
 #include "exchange/tick_manager/tick_observer.hpp"
 
-#include <ncurses.h>
-
-#include <deque>
-#include <fstream>
-
+#ifndef DASHBOARD
 namespace nutc {
 namespace dashboard {
-
-// NOLINTBEGIN
-
 class Dashboard : public ticks::TickObserver {
 public:
-    void
-    on_tick(uint64_t tick) override
-    {
-        mainLoop(tick);
-    }
+    constexpr void
+    on_tick(uint64_t) override
+    {}
 
     static Dashboard&
     get_instance()
@@ -32,24 +22,30 @@ public:
     Dashboard(const Dashboard&) = delete;
     Dashboard& operator=(Dashboard&&) = delete;
     Dashboard(Dashboard&&) = delete;
-    void close();
+
+    void
+    close()
+    {}
+
+    ~Dashboard() override = default;
 
 private:
-    void static drawTickerLayout(WINDOW* window, int start_y, size_t num_tickers);
-    void static displayStockTickerData(
-        WINDOW* window, int start_y, int start_x, const TickerState& ticker
-    );
-    void static displayStockTickers(WINDOW* window, int start_y);
-    void displayLog(WINDOW* window, int start_y);
-    void static displayLeaderboard(WINDOW* window, int start_y);
-    void static displayPerformance(WINDOW* window, int start_y);
+    Dashboard() = default;
+};
+} // namespace dashboard
+} // namespace nutc
+#else
+#  include "exchange/dashboard/state/ticker_state.hpp"
 
-    void static calculate_ticker_metrics();
+#  include <ncurses.h>
 
-    void mainLoop(uint64_t tick);
+#  include <deque>
+#  include <fstream>
 
-    static void* read_pipe_and_log(void* args);
+namespace nutc {
+namespace dashboard {
 
+class Dashboard : public ticks::TickObserver {
     std::deque<std::string> log_queue_{};
 
     FILE* err_file_;
@@ -65,13 +61,49 @@ private:
 
     std::ifstream log_file_;
 
+public:
+    void
+    on_tick(uint64_t tick) override
+    {
+        main_loop_(tick);
+    }
+
+    static Dashboard&
+    get_instance()
+    {
+        static Dashboard instance;
+        return instance;
+    }
+
+    Dashboard& operator=(const Dashboard&) = delete;
+    Dashboard(const Dashboard&) = delete;
+    Dashboard& operator=(Dashboard&&) = delete;
+    Dashboard(Dashboard&&) = delete;
+    void close();
+    ~Dashboard() override = default;
+
+private:
+    void static draw_ticker_layout(WINDOW* window, int start_y, size_t num_tickers);
+    void static display_stock_ticker_data(
+        WINDOW* window, int start_y, int start_x, const TickerState& ticker
+    );
+    void static display_stock_tickers(WINDOW* window, int start_y);
+    void display_log_(WINDOW* window, int start_y);
+    void static display_leaderboard(WINDOW* window, int start_y);
+    void static display_performance(WINDOW* window, int start_y);
+
+    void static calculate_ticker_metrics();
+
+    void main_loop_(uint64_t tick);
+
+    static void* read_pipe_and_log(void* args);
+
     Dashboard();
-    ~Dashboard() = default;
 };
 
 } // namespace dashboard
 } // namespace nutc
+#endif
 
 //
 //
-// NOLINTEND

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "exchange/traders/trader_manager.hpp"
+#include "shared/util.hpp"
 
 namespace nutc {
 namespace algo_mgmt {
@@ -34,16 +35,15 @@ public:
 
     virtual ~AlgoManager() = default;
 
-    static size_t
-    initialize_algo_management(
-        nutc::algo_mgmt::AlgoManager& algo_manager,
-        nutc::manager::TraderManager& client_manager
-    )
+    void
+    initialize_algo_management(nutc::manager::TraderManager& client_manager)
     {
-        algo_manager.initialize_files();
-        algo_manager.initialize_client_manager(client_manager);
-        return algo_manager.get_num_clients();
+        initialize_files();
+        initialize_client_manager(client_manager);
     }
+
+    static std::unique_ptr<AlgoManager>
+    get_algo_mgr(util::Mode mode, std::optional<util::algorithm> sandbox);
 };
 
 } // namespace algo_mgmt

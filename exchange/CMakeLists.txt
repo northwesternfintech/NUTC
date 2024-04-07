@@ -23,6 +23,7 @@ add_library(
     src/exchange/algos/sandbox_mode/sandbox_mode.cpp
     src/exchange/algos/dev_mode/dev_mode.cpp
     src/exchange/algos/normal_mode/normal_mode.cpp
+    src/exchange/algos/algo_manager.cpp
     
     src/exchange/logging.cpp
 
@@ -58,6 +59,8 @@ add_library(
     
     src/exchange/dashboard/state/ticker_state.cpp
     src/exchange/concurrency/pin_threads.cpp
+
+    src/exchange/config/argparse.cpp
 )
 
 target_include_directories(
