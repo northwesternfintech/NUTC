@@ -3,6 +3,8 @@
 #include "exchange/traders/trader_types/bot_trader.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
+#include <random>
+
 namespace nutc {
 
 namespace bots {
