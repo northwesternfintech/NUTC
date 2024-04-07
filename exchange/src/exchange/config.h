@@ -27,8 +27,6 @@
 //
 #define ALGO_DIR "algos"
 
-enum class Mode { SANDBOX, DEV, NORMAL, BOTS_ONLY };
-
 // Brownian motion stuff
  #define BROWNIAN_MOTION_MEAN_SIZE_EVENT  15
  #define BROWNIAN_MOTION_STDEV_EVENT_SIZE 5

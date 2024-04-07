@@ -56,7 +56,7 @@ Dashboard::Dashboard() : err_file_(freopen("logs/error_log.txt", "w", stderr))
     wrefresh(log_window_);
     wrefresh(performance_window_);
 
-    mainLoop(0);
+    main_loop_(0);
 }
 
 void
@@ -85,7 +85,7 @@ draw_generic_text(WINDOW* window, int start_y)
 }
 
 void
-Dashboard::drawTickerLayout(WINDOW* window, int start_y, size_t num_tickers)
+Dashboard::draw_ticker_layout(WINDOW* window, int start_y, size_t num_tickers)
 {
     assert(num_tickers <= 4);
 
@@ -117,7 +117,7 @@ Dashboard::drawTickerLayout(WINDOW* window, int start_y, size_t num_tickers)
 }
 
 void
-Dashboard::displayStockTickerData(
+Dashboard::display_stock_ticker_data(
     WINDOW* window, int start_y, int start_x, const TickerState& ticker
 )
 {
@@ -175,22 +175,24 @@ Dashboard::displayStockTickerData(
 }
 
 void
-Dashboard::displayStockTickers(WINDOW* window, int start_y)
+Dashboard::display_stock_tickers(WINDOW* window, int start_y)
 {
     auto& states = dashboard::DashboardState::get_instance().get_ticker_states();
     size_t num_tickers = states.size();
-    drawTickerLayout(window, start_y, num_tickers);
+    draw_ticker_layout(window, start_y, num_tickers);
 
     size_t idx = 0;
     for (auto& [ticker, state] : states) {
         size_t start_x =
             (idx++ * static_cast<size_t>(window->_maxx) / states.size()) + 3;
-        displayStockTickerData(window, start_y + 2, static_cast<int>(start_x), state);
+        display_stock_ticker_data(
+            window, start_y + 2, static_cast<int>(start_x), state
+        );
     }
 }
 
 void
-Dashboard::displayLeaderboard(WINDOW* window, int start_y)
+Dashboard::display_leaderboard(WINDOW* window, int start_y)
 {
     mvwprintw(window, start_y, window->_maxx / 2 - 5, "Leaderboard");
 
@@ -210,7 +212,7 @@ Dashboard::displayLeaderboard(WINDOW* window, int start_y)
 }
 
 void
-Dashboard::displayPerformance(WINDOW* window, int start_y)
+Dashboard::display_performance(WINDOW* window, int start_y)
 {
     mvwprintw(window, start_y, window->_maxx / 2 - 5, "Performance");
 
@@ -260,7 +262,7 @@ Dashboard::displayPerformance(WINDOW* window, int start_y)
 }
 
 void
-Dashboard::displayLog(WINDOW* window, int start_y)
+Dashboard::display_log_(WINDOW* window, int start_y)
 {
     mvwprintw(window, start_y, window->_maxx / 2 - 2, "Logs");
     std::string line;
@@ -297,7 +299,7 @@ Dashboard::calculate_ticker_metrics()
 }
 
 void
-Dashboard::mainLoop(uint64_t tick)
+Dashboard::main_loop_(uint64_t tick)
 {
     char chr = static_cast<char>(getch());
     if (chr == '1' || chr == '2' || chr == '3' || chr == '4')
@@ -319,7 +321,7 @@ Dashboard::mainLoop(uint64_t tick)
             werase(ticker_window_);
             werase(performance_window_);
             draw_generic_text(ticker_window_, 0);
-            displayStockTickers(ticker_window_, 1);
+            display_stock_tickers(ticker_window_, 1);
             wrefresh(ticker_window_);
             break;
         case '2':
@@ -328,7 +330,7 @@ Dashboard::mainLoop(uint64_t tick)
             werase(log_window_);
             werase(performance_window_);
             draw_generic_text(log_window_, 0);
-            displayLog(log_window_, 1);
+            display_log_(log_window_, 1);
             wrefresh(log_window_);
             break;
         case '3':
@@ -337,7 +339,7 @@ Dashboard::mainLoop(uint64_t tick)
             werase(log_window_);
             werase(performance_window_);
             draw_generic_text(leaderboard_window_, 0);
-            displayLeaderboard(leaderboard_window_, 1);
+            display_leaderboard(leaderboard_window_, 1);
             wrefresh(leaderboard_window_);
             break;
         case '4':
@@ -346,7 +348,7 @@ Dashboard::mainLoop(uint64_t tick)
             werase(performance_window_);
             werase(leaderboard_window_);
             draw_generic_text(performance_window_, 0);
-            displayPerformance(performance_window_, 2);
+            display_performance(performance_window_, 2);
             wrefresh(performance_window_);
             break;
         default:
