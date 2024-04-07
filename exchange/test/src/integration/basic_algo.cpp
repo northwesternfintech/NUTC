@@ -19,8 +19,9 @@ protected:
     SetUp() override
     {
         auto& rmq_conn = rmq::RabbitMQConnectionManager::get_instance();
+        bool connected = rmq_conn.initialize_connection();
 
-        if (!rmq_conn.connected_to_rabbitmq()) {
+        if (!connected) {
             FAIL() << "Failed to connect to rabbitmq";
         }
     }
@@ -163,4 +164,38 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdate)
         actual2, "test_algos/buy_tsla_on_account", "APPL", nutc::messages::SIDE::BUY,
         100, 1
     );
+}
+
+TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
+{
+    std::vector<std::string> names{"test_algos/buy_tsla_at_100"};
+    if (!nutc::testing_utils::initialize_testing_clients(
+            users_, names, /*has_delay=*/true
+        )) {
+        FAIL() << "Failed to initialize testing clients";
+    }
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    engine_manager_.add_engine("TSLA");
+    auto bot = users_.add_trader<BotTrader>("", 0);
+    bot->modify_holdings("TSLA", 1000); // NOLINT
+
+    rmq::RabbitMQOrderHandler::handle_incoming_market_order(
+        engine_manager_,
+        nutc::messages::MarketOrder{
+            bot->get_id(), nutc::messages::SIDE::SELL, "TSLA", 100, 100
+        }
+    ); // NOLINT
+    nutc::engine_manager::EngineManager::get_instance().on_tick(0);
+
+    auto mess = rmq::RabbitMQConsumer::consume_message();
+
+    auto end = std::chrono::high_resolution_clock::now();
+    const int64_t duration_ms =
+        std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    const double wait_time_ms = CLIENT_WAIT_SECS * 1000;
+
+    EXPECT_GE(duration_ms, wait_time_ms);
+    EXPECT_LE(duration_ms, wait_time_ms + 1000);
 }
