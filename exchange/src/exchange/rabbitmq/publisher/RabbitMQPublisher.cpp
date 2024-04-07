@@ -19,7 +19,11 @@ RabbitMQPublisher::publish_message(
         return true;
     };
 
-    const auto& conn = RabbitMQConnectionManager::get_instance().get_connection_state();
+    auto& rmq = RabbitMQConnectionManager::get_instance();
+    if (!rmq.connected_to_rabbitmq())
+        return false;
+
+    const auto& conn = rmq.get_connection_state();
 
     if (!check_reply(amqp_get_rpc_reply(conn), "Failed to declare queue.")) {
         return false;

@@ -21,6 +21,7 @@ nixpkgs.mkShell {
 
   shellHook = ''
     source ${toString ./setup.sh}
+    alias t=task
     export TERMINFO=/usr/share/terminfo
   '';
 }

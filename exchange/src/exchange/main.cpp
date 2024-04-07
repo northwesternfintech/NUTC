@@ -170,12 +170,15 @@ main(int argc, const char** argv)
 
     auto [mode, sandbox] = process_arguments(argc, argv);
 
-    auto& rmq_conn = rabbitmq::RabbitMQConnectionManager::get_instance();
+    if (mode != Mode::BOTS_ONLY) {
+        auto& rmq_conn = rabbitmq::RabbitMQConnectionManager::get_instance();
+        rmq_conn.initialize_connection();
 
-    // Connect to RabbitMQ
-    if (!rmq_conn.connected_to_rabbitmq()) {
-        log_e(rabbitmq, "Failed to initialize connection");
-        return 1;
+        // Connect to RabbitMQ
+        if (!rmq_conn.connected_to_rabbitmq()) {
+            log_e(rabbitmq, "Failed to initialize connection");
+            return 1;
+        }
     }
 
     size_t num_clients{};
@@ -267,7 +270,12 @@ main(int argc, const char** argv)
     concurrency::pin_to_core(0, "main");
 
     // Main event loop
-    rabbitmq::RabbitMQConsumer::handle_incoming_messages(engine_manager);
+    if (mode == Mode::BOTS_ONLY) {
+        while (true) {}
+    }
+    else {
+        rabbitmq::RabbitMQConsumer::handle_incoming_messages(engine_manager);
+    }
 
     return 0;
 }

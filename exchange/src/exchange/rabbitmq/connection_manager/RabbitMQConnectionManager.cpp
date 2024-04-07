@@ -11,11 +11,12 @@ namespace nutc {
 namespace rabbitmq {
 
 bool
-RabbitMQConnectionManager::connect_to_rabbitmq(
+RabbitMQConnectionManager::connect_to_rabbitmq_(
     const std::string& hostname, int port, const std::string& username,
     const std::string& password
 )
 {
+    connection_state_ = amqp_new_connection();
     amqp_socket_t* socket = amqp_tcp_socket_new(connection_state_);
 
     if (socket == nullptr) {
@@ -46,6 +47,8 @@ RabbitMQConnectionManager::connect_to_rabbitmq(
 void
 RabbitMQConnectionManager::close_connection()
 {
+    if (connection_state_ == nullptr)
+        return;
     // Close channel and connection, then destroy connection
     amqp_channel_close(connection_state_, 1, AMQP_REPLY_SUCCESS);
     amqp_connection_close(connection_state_, AMQP_REPLY_SUCCESS);
@@ -55,7 +58,7 @@ RabbitMQConnectionManager::close_connection()
 bool
 RabbitMQConnectionManager::initialize_connection_()
 {
-    if (!connect_to_rabbitmq("localhost", RABBITMQ_PORT, "NUFT", "ADMIN"))
+    if (!connect_to_rabbitmq_("localhost", RABBITMQ_PORT, "NUFT", "ADMIN"))
         return false;
 
     amqp_channel_open(connection_state_, 1);

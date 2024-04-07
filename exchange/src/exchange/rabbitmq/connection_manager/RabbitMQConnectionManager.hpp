@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdexcept>
 #include <string>
 
 #include <rabbitmq-c/amqp.h>
@@ -11,8 +12,7 @@ class RabbitMQConnectionManager {
     // Only allow the singleton instance to create the connection
     RabbitMQConnectionManager& operator=(RabbitMQConnectionManager&&) = default;
 
-    // TODO(stevenewald): consider RAII?
-    ~RabbitMQConnectionManager() = default;
+    ~RabbitMQConnectionManager() { close_connection(); }
 
 public:
     // Delete the copy constructor and assignment operator
@@ -39,10 +39,6 @@ public:
         get_instance() = RabbitMQConnectionManager();
     }
 
-    bool connect_to_rabbitmq(
-        const std::string& hostname, int port, const std::string& username,
-        const std::string& password
-    );
     void close_connection();
 
     [[nodiscard]] bool
@@ -54,18 +50,32 @@ public:
     amqp_connection_state_t&
     get_connection_state()
     {
+        if (connection_state_ == nullptr) {
+            throw std::runtime_error(
+                "Attempted to get connection state while not connected to RMQ"
+            );
+        }
         return connection_state_;
     }
 
+    bool
+    initialize_connection()
+    {
+        connected_ = initialize_connection_();
+        return connected_;
+    }
+
 private:
-    amqp_connection_state_t connection_state_;
-    bool connected_;
+    amqp_connection_state_t connection_state_ = nullptr;
+    bool connected_ = false;
 
     bool initialize_connection_();
+    bool connect_to_rabbitmq_(
+        const std::string& hostname, int port, const std::string& username,
+        const std::string& password
+    );
 
-    RabbitMQConnectionManager() :
-        connection_state_(amqp_new_connection()), connected_(initialize_connection_())
-    {}
+    RabbitMQConnectionManager() = default;
 };
 
 } // namespace rabbitmq
