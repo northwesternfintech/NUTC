@@ -31,8 +31,6 @@ public:
 
     virtual void initialize_client_manager(manager::TraderManager& manager) = 0;
 
-    [[nodiscard]] virtual size_t get_num_clients() const = 0;
-
     virtual ~AlgoManager() = default;
 
     void

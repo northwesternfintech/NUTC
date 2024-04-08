@@ -1,6 +1,6 @@
 #include "exchange/tickers/engine/order_container.hpp"
 
-#include "exchange/config.h"
+#include "config.h"
 #include "exchange/traders/trader_manager.hpp"
 #include "exchange/traders/trader_types/local_trader.hpp"
 #include "test_utils/macros.hpp"
@@ -21,8 +21,8 @@ protected:
     void
     SetUp() override
     {
-        manager_.add_trader<LocalTrader>("ABC", STARTING_CAPITAL);
-        manager_.add_trader<LocalTrader>("DEF", STARTING_CAPITAL);
+        manager_.add_trader<LocalTrader>("ABC", TEST_STARTING_CAPITAL);
+        manager_.add_trader<LocalTrader>("DEF", TEST_STARTING_CAPITAL);
 
         manager_.get_trader("ABC")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
         manager_.get_trader("DEF")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);

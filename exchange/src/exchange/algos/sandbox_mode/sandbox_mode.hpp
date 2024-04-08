@@ -19,12 +19,6 @@ public:
     void initialize_client_manager(manager::TraderManager& users) override;
 
     void initialize_files() const override;
-
-    [[nodiscard]] size_t
-    get_num_clients() const override
-    {
-        return num_clients_;
-    }
 };
 
 } // namespace algo_mgmt

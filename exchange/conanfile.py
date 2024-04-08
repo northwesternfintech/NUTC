@@ -16,6 +16,7 @@ class Recipe(ConanFile):
         self.requires("libcurl/8.6.0")
         self.requires("argparse/3.0")
         self.requires("glaze/2.4.0")
+        self.requires("yaml-cpp/0.8.0")
         self.requires("ncurses/6.4")
 
         # Wrapper

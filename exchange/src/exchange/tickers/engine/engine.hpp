@@ -1,6 +1,5 @@
 #pragma once
 
-#include "exchange/config.h"
 #include "order_container.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
@@ -15,10 +14,15 @@ namespace nutc {
 namespace matching {
 
 class Engine {
+    const size_t ORDER_EXPIRATION_TICKS = 0;
     OrderContainer order_container_;
     uint64_t current_tick_ = 0;
 
 public:
+    explicit Engine(size_t order_expiration_ticks) :
+        ORDER_EXPIRATION_TICKS(order_expiration_ticks)
+    {}
+
     const OrderContainer&
     get_order_container() const
     {
@@ -30,7 +34,7 @@ public:
     std::vector<StoredOrder>
     expire_old_orders(uint64_t new_tick)
     {
-        auto orders = order_container_.expire_orders(new_tick - ORDER_EXPIRATION_TIME);
+        auto orders = order_container_.expire_orders(new_tick - ORDER_EXPIRATION_TICKS);
         current_tick_ = new_tick;
         return orders;
     }

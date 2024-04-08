@@ -62,6 +62,9 @@ public:
     initialize_connection()
     {
         connected_ = initialize_connection_();
+        if (!connected_) {
+            throw std::runtime_error("Unable to connect to RabbitMQ");
+        }
         return connected_;
     }
 
