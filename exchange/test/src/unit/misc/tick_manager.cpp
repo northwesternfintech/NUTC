@@ -17,7 +17,7 @@ protected:
     SetUp() override
     {}
 
-    TickManager& manager_ = TickManager::get_instance(START_TICK_RATE);
+    TickManager& manager_ = TickManager::get_instance();
 };
 
 class TestObserver : public nutc::ticks::TickObserver {
@@ -49,7 +49,7 @@ TEST_F(UnitTickManagerTest, AttachDetachObserver)
 {
     TestObserver observer;
     manager_.attach(&observer, PRIORITY::first);
-    manager_.start();
+    manager_.start(START_TICK_RATE);
     // wait for 100 ms, should be around 10 ticks
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     manager_.stop();

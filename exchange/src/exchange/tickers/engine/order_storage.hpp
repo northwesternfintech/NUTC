@@ -21,6 +21,7 @@ struct StoredMatch {
 
 struct StoredOrder {
     std::shared_ptr<manager::GenericTrader> trader;
+    // TODO(stevenewald): can get rid of
     std::string ticker;
     SIDE side;
     double price;

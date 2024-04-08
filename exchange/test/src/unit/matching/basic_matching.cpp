@@ -1,4 +1,4 @@
-#include "exchange/config.h"
+#include "config.h"
 #include "exchange/tickers/engine/engine.hpp"
 #include "exchange/traders/trader_manager.hpp"
 #include "exchange/traders/trader_types/local_trader.hpp"
@@ -17,8 +17,8 @@ protected:
     void
     SetUp() override
     {
-        manager_.add_trader<LocalTrader>("ABC", STARTING_CAPITAL);
-        manager_.add_trader<LocalTrader>("DEF", STARTING_CAPITAL);
+        manager_.add_trader<LocalTrader>("ABC", TEST_STARTING_CAPITAL);
+        manager_.add_trader<LocalTrader>("DEF", TEST_STARTING_CAPITAL);
 
         manager_.get_trader("ABC")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
         manager_.get_trader("DEF")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
@@ -32,7 +32,7 @@ protected:
     }
 
     TraderManager& manager_ = nutc::manager::TraderManager::get_instance(); // NOLINT(*)
-    Engine engine_{}; // NOLINT (*)
+    Engine engine_{TEST_ORDER_EXPIRATION_TICKS}; // NOLINT (*)
 
     std::vector<nutc::matching::StoredMatch>
     add_to_engine_(const MarketOrder& order)

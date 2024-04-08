@@ -1,3 +1,4 @@
+#include "config.h"
 #include "exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
 #include "exchange/rabbitmq/consumer/RabbitMQConsumer.hpp"
 #include "exchange/rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
@@ -194,7 +195,7 @@ TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
     auto end = std::chrono::high_resolution_clock::now();
     const int64_t duration_ms =
         std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    const double wait_time_ms = CLIENT_WAIT_SECS * 1000;
+    const double wait_time_ms = TEST_CLIENT_WAIT_SECS * 1000;
 
     EXPECT_GE(duration_ms, wait_time_ms);
     EXPECT_LE(duration_ms, wait_time_ms + 1000);

@@ -276,6 +276,9 @@ jobs:
     - name: Install exchange
       run: cmake --install build --config Release --prefix .
 
+    - name: Move config file
+      run: cp -r config.yml build/test/config_yml
+
     - name: Move test algo files
       run: cp -r test/test_algos build/test/test_algos
       

@@ -4,7 +4,7 @@
 #include "exchange/logging.hpp"
 #include "exchange/rabbitmq/publisher/RabbitMQPublisher.hpp"
 #include "exchange/tickers/engine/level_update_generator.hpp"
-#include "exchange/traders/trader_manager.hpp"
+#include "shared/config/config_loader.hpp"
 #include "shared/util.hpp"
 
 namespace nutc {
@@ -67,19 +67,20 @@ EngineManager::get_engine(const std::string& ticker)
     return engine->second;
 }
 
-// TODO(anyone): make it clear this adds a bot container
+// TODO(stevenewald): consolidate this so no longer necessary
 void
 EngineManager::add_engine(const std::string& ticker, double starting_price)
 {
-    engines_.emplace(ticker, Engine());
+    size_t exp_ticks =
+        config::Config::get_instance().constants().ORDER_EXPIRATION_TICKS;
+    engines_.emplace(ticker, exp_ticks);
     bot_containers_.emplace(ticker, bots::BotContainer(ticker, starting_price));
 }
 
-// for testing
 void
 EngineManager::add_engine(const std::string& ticker)
 {
-    engines_.emplace(ticker, Engine());
+    add_engine(ticker, 0);
 }
 
 } // namespace engine_manager

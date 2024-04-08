@@ -8,10 +8,9 @@ namespace nutc {
 namespace rabbitmq {
 
 void
-RabbitMQTraderManager::wait_for_clients(
-    manager::TraderManager& manager, size_t num_clients
-)
+RabbitMQTraderManager::wait_for_clients(manager::TraderManager& manager)
 {
+    size_t num_clients = manager.get_traders().size();
     log_i(rabbitmq, "Blocking until all {} clients are ready to start...", num_clients);
     int num_running = 0;
 
@@ -51,7 +50,7 @@ RabbitMQTraderManager::wait_for_clients(
 
 void
 RabbitMQTraderManager::send_start_time(
-    const manager::TraderManager& manager, int wait_seconds
+    const manager::TraderManager& manager, size_t wait_seconds
 )
 {
     using time_point = std::chrono::high_resolution_clock::time_point;

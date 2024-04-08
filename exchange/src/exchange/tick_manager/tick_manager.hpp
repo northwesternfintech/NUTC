@@ -17,6 +17,17 @@ enum class PRIORITY { first, second, third };
 using std::chrono::milliseconds;
 
 class TickManager {
+    uint64_t current_tick_ = 0;
+    milliseconds delay_time_;
+    std::atomic<bool> running_;
+    std::thread tick_thread_;
+    std::list<TickObserver*> first_observers_;
+    std::list<TickObserver*> second_observers_;
+    std::list<TickObserver*> third_observers_;
+    static constexpr uint16_t MS_PER_SECOND = 1000;
+
+    std::deque<milliseconds> last_1000_tick_times_;
+
 public:
     [[nodiscard]] uint64_t
     get_current_tick() const
@@ -74,8 +85,9 @@ public:
     [[nodiscard]] tick_metrics_t get_tick_metrics() const;
 
     void
-    start()
+    start(uint16_t tick_hz)
     {
+        delay_time_ = milliseconds(MS_PER_SECOND / tick_hz);
         running_ = true;
         tick_thread_ = std::thread(&TickManager::run_, this);
     }
@@ -88,19 +100,7 @@ public:
     }
 
 private:
-    milliseconds delay_time_;
-    std::atomic<bool> running_;
-    std::thread tick_thread_;
-    std::list<TickObserver*> first_observers_;
-    std::list<TickObserver*> second_observers_;
-    std::list<TickObserver*> third_observers_;
-    static constexpr uint16_t MS_PER_SECOND = 1000;
-
-    std::deque<milliseconds> last_1000_tick_times_;
-
-    explicit TickManager(uint16_t start_tick_rate) :
-        delay_time_(milliseconds(MS_PER_SECOND / start_tick_rate))
-    {}
+    explicit TickManager() : delay_time_(1) {}
 
     auto notify_tick_();
     void run_();
@@ -112,20 +112,11 @@ public:
     TickManager& operator=(TickManager&&) = delete;
 
     static TickManager&
-    get_instance(uint16_t start_tick_rate = 0)
+    get_instance()
     {
-        static bool has_been_initialized = false;
-        if (start_tick_rate == 0) {
-            assert(has_been_initialized);
-        }
-        has_been_initialized = true;
-
-        static TickManager manager(start_tick_rate);
+        static TickManager manager;
         return manager;
     }
-
-private:
-    uint64_t current_tick_ = 0;
 };
 } // namespace ticks
 } // namespace nutc

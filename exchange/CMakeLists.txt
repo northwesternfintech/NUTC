@@ -51,7 +51,9 @@ add_library(
     src/exchange/traders/trader_types/bot_trader.cpp
     
     src/exchange/utils/logger/logger.cpp
+
     src/shared/file_operations/file_operations.cpp
+    src/shared/config/config_loader.cpp
     
     src/exchange/theo/brownian.cpp
     
@@ -76,6 +78,9 @@ target_compile_features(EXCHANGE_lib PUBLIC cxx_std_20)
 find_package(argparse REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC argparse::argparse)
 
+# yaml-cpp
+find_package(yaml-cpp REQUIRED)
+target_link_libraries(EXCHANGE_lib PUBLIC yaml-cpp::yaml-cpp)
 
 # Fmt
 find_package(fmt REQUIRED)
@@ -144,6 +149,10 @@ target_link_libraries(EXCHANGE_exe PRIVATE quill::quill)
 
 # fmt
 target_link_libraries(EXCHANGE_exe PRIVATE fmt::fmt)
+
+# yaml-cpp
+find_package(yaml-cpp REQUIRED)
+target_link_libraries(EXCHANGE_exe PUBLIC yaml-cpp::yaml-cpp)
 
 
 # rabbitmq

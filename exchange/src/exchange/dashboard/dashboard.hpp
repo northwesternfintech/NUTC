@@ -99,6 +99,9 @@ private:
     static void* read_pipe_and_log(void* args);
 
     Dashboard();
+
+    // Cache this in the class instead of calling config every time
+    const uint16_t TICK_HZ;
 };
 
 } // namespace dashboard

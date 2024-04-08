@@ -1,4 +1,4 @@
-#include "exchange/config.h"
+#include "config.h"
 #include "exchange/tickers/engine/engine.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
 #include "exchange/traders/trader_types/local_trader.hpp"
@@ -18,15 +18,15 @@ protected:
     void
     SetUp() override
     {
-        manager_.add_trader<LocalTrader>("ABC", STARTING_CAPITAL);
-        manager_.add_trader<LocalTrader>("DEF", STARTING_CAPITAL);
+        manager_.add_trader<LocalTrader>("ABC", TEST_STARTING_CAPITAL);
+        manager_.add_trader<LocalTrader>("DEF", TEST_STARTING_CAPITAL);
 
         manager_.get_trader("ABC")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
         manager_.get_trader("DEF")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     }
 
     TraderManager& manager_ = nutc::manager::TraderManager::get_instance(); // NOLINT(*)
-    Engine engine_{}; // NOLINT (*)
+    Engine engine_{TEST_ORDER_EXPIRATION_TICKS}; // NOLINT (*)
 
     std::vector<nutc::matching::StoredMatch>
     add_to_engine_(const MarketOrder& order)
@@ -42,7 +42,7 @@ TEST_F(UnitOrderExpiration, SimpleNoMatch)
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
 
-    ASSERT_EQ(1, engine_.expire_old_orders(ORDER_EXPIRATION_TIME).size());
+    ASSERT_EQ(1, engine_.expire_old_orders(TEST_ORDER_EXPIRATION_TICKS).size());
     ASSERT_EQ(0, engine_.get_order_container().get_spread_nums().first);
     ASSERT_EQ(0, engine_.get_order_container().get_spread_nums().second);
 
@@ -52,10 +52,10 @@ TEST_F(UnitOrderExpiration, SimpleNoMatch)
 
 TEST_F(UnitOrderExpiration, IncrementTick)
 {
-    engine_.expire_old_orders(ORDER_EXPIRATION_TIME);
+    engine_.expire_old_orders(TEST_ORDER_EXPIRATION_TICKS);
     MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
     MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
 
     auto matches = add_to_engine_(order1);
-    ASSERT_EQ(1, engine_.expire_old_orders(ORDER_EXPIRATION_TIME * 2).size());
+    ASSERT_EQ(1, engine_.expire_old_orders(TEST_ORDER_EXPIRATION_TICKS * 2).size());
 }
