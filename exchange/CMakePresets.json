@@ -171,9 +171,7 @@
       "inherits": [
         "ci-build",
         "ci-linux",
-        "clang-tidy",
         "conan",
-        "cppcheck",
         "dev-mode"
       ]
     },
