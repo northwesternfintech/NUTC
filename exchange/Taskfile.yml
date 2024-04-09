@@ -41,6 +41,11 @@ tasks:
       - rm -rf logs
       - mkdir logs
 
+  kill-wrappers:
+    cmds:
+      - cmd: pkill -f -9 WRAPPER
+        ignore_error: true
+
   init:
     dir: .
     vars:
@@ -86,6 +91,7 @@ tasks:
       - task: check-and-start-services
       - task: new-log-dir
       - ./{{ .NUTC_PATH }} {{ .MODE_FLAG }}
+      - task: kill-wrappers
       
       # - ./build/dev/{{.NAME}} --sandbox "1Pd1lJUMPURc0ezL393vWwRz9g32" " NgMtXt5Ff_lwqtySBJ9"
 

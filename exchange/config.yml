@@ -9,6 +9,8 @@ global:
 
     exchange_tick_hz: 30
 
+    display_refresh_hz: 2
+
 tickers:
   - ticker: "ETH"
     start_price: 100

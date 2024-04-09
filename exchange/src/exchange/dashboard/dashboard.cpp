@@ -1,8 +1,10 @@
 #include "dashboard.hpp"
 
 #include "exchange/tick_manager/tick_manager.hpp"
+#include "exchange/tickers/manager/ticker_manager.hpp"
 #include "exchange/traders/trader_manager.hpp"
 #include "exchange/traders/trader_types/generic_trader.hpp"
+#include "exchange/traders/trader_types/remote_trader.hpp"
 #include "shared/config/config_loader.hpp"
 #include "state/global_metrics.hpp"
 
@@ -10,12 +12,16 @@
 
 #include <cassert>
 
+#include <algorithm>
+#include <memory>
+
 namespace nutc {
 namespace dashboard {
 
 Dashboard::Dashboard() :
     err_file_(freopen("logs/error_log.txt", "w", stderr)),
-    TICK_HZ(config::Config::get_instance().constants().TICK_HZ)
+    TICK_HZ(config::Config::get_instance().constants().TICK_HZ),
+    DISPLAY_HZ(config::Config::get_instance().constants().DISPLAY_HZ)
 {
     quill::stdout_handler("console")->set_log_level(quill::LogLevel::Error);
     std::ofstream create_file("logs/app.log");
@@ -202,11 +208,47 @@ Dashboard::display_leaderboard(WINDOW* window, int start_y)
     manager::TraderManager& client_manager = manager::TraderManager::get_instance();
     int start_x = 2;
     int orig_start_y = start_y;
+    // todo: move to class member variable
+    const auto& tickers = config::Config::get_instance().get_tickers();
+
+    auto portfolio_value = [&](const auto& trader) {
+        double pnl = 0.0;
+        for (const auto& ticker_conf : tickers) {
+            double amount_held = trader->get_holdings(ticker_conf.TICKER);
+            double midprice =
+                engine_manager::EngineManager::get_instance().get_midprice(
+                    ticker_conf.TICKER
+                );
+            pnl += amount_held * midprice;
+        }
+        return pnl;
+    };
+
+    std::vector<std::shared_ptr<manager::GenericTrader>> ordered_traders;
     for (const auto& [user_id, trader] : client_manager.get_traders()) {
         if (trader->get_type() != manager::TraderType::REMOTE)
             continue;
-        mvwprintw(window, start_y++, start_x, "User: %s", trader->get_id().c_str());
-        mvwprintw(window, start_y++, start_x, "  Capital: %.2f", trader->get_capital());
+        ordered_traders.push_back(trader);
+    }
+    std::sort(
+        ordered_traders.begin(), ordered_traders.end(),
+        [&portfolio_value](const auto& a, const auto& b) {
+            return a->get_capital() + portfolio_value(a)
+                   > b->get_capital() + portfolio_value(b);
+        }
+    ); // NOLINT
+    for (const auto& trader : ordered_traders) {
+        double capital = trader->get_capital();
+        double portfolio = portfolio_value(trader);
+        double pnl = capital + portfolio
+                     - config::Config::get_instance().constants().STARTING_CAPITAL;
+        if (pnl == 0)
+            continue;
+        auto name = std::static_pointer_cast<manager::RemoteTrader>(trader)->get_name();
+        mvwprintw(window, start_y++, start_x, "Competitor: %s", name.c_str());
+        mvwprintw(window, start_y++, start_x, "  Portfolio Value: %.2f", portfolio);
+        mvwprintw(window, start_y++, start_x, "  Capital: %.2f", capital);
+        mvwprintw(window, start_y++, start_x, "  PnL: %.2f", pnl);
         if (start_y + 2 >= window->_maxy) {
             start_y = orig_start_y;
             start_x += 60;
@@ -308,7 +350,7 @@ Dashboard::main_loop_(uint64_t tick)
     if (chr == '1' || chr == '2' || chr == '3' || chr == '4') {
         current_window_ = chr;
     }
-    else if (tick % (TICK_HZ / 3) != 0) {
+    else if (tick % (TICK_HZ / DISPLAY_HZ) != 0) {
         // Only update once per half sec
         return;
     }

@@ -5,6 +5,9 @@
 #ifndef DASHBOARD
 namespace nutc {
 namespace dashboard {
+// THIS IS AN EMPTY VERSION OF DASHBOARD FOR WHEN WE DISABLE IT
+// IF YOU WANT TO MODIFY THE ACTUAL DASHBOARD, SCROLL DOWN
+
 class Dashboard : public ticks::TickObserver {
 public:
     constexpr void
@@ -44,7 +47,10 @@ private:
 
 namespace nutc {
 namespace dashboard {
-
+/**
+ * @brief Displays the dashboard and all respective metrics. Messy, but that's okay
+ * because it's very isolated Performance not a big consideration
+ */
 class Dashboard : public ticks::TickObserver {
     std::deque<std::string> log_queue_{};
 
@@ -60,6 +66,8 @@ class Dashboard : public ticks::TickObserver {
     char current_window_ = '1';
 
     std::ifstream log_file_;
+    const uint16_t TICK_HZ;
+    const uint8_t DISPLAY_HZ;
 
 public:
     void
@@ -99,9 +107,6 @@ private:
     static void* read_pipe_and_log(void* args);
 
     Dashboard();
-
-    // Cache this in the class instead of calling config every time
-    const uint16_t TICK_HZ;
 };
 
 } // namespace dashboard

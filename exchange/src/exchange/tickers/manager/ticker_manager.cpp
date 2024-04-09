@@ -5,7 +5,6 @@
 #include "exchange/rabbitmq/publisher/RabbitMQPublisher.hpp"
 #include "exchange/tickers/engine/level_update_generator.hpp"
 #include "shared/config/config_loader.hpp"
-#include "shared/util.hpp"
 
 namespace nutc {
 namespace engine_manager {
@@ -25,13 +24,8 @@ EngineManager::on_tick(uint64_t new_tick)
 
         // TODO: do this in a converter
         std::vector<Match> glz_matches;
+        glz_matches.reserve(matches_.size());
         for (const auto& match : matches_) {
-            match.buyer->process_order_match(
-                match.ticker, messages::SIDE::BUY, match.price, match.quantity
-            );
-            match.seller->process_order_match(
-                match.ticker, messages::SIDE::SELL, match.price, match.quantity
-            );
             glz_matches.emplace_back(
                 match.ticker, match.side, match.price, match.quantity,
                 match.buyer->get_id(), match.seller->get_id(),
@@ -51,6 +45,18 @@ EngineManager::on_tick(uint64_t new_tick)
         rabbitmq::RabbitMQPublisher::broadcast_matches(glz_matches);
         matches_.clear();
     }
+}
+
+double
+EngineManager::get_midprice(const std::string& ticker)
+{
+    double real_midprice = get_engine(ticker).get_order_container().get_midprice();
+    // TODO(anyone): should use optional
+    if (real_midprice == 0) {
+        return midprices_.contains(ticker) ? midprices_.at(ticker) : 0.0;
+    }
+    midprices_[ticker] = real_midprice;
+    return real_midprice;
 }
 
 bool
