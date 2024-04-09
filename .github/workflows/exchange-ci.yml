@@ -172,6 +172,16 @@ jobs:
       uses: actions/setup-python@v4
       with: { python-version: "3.12-dev" }
 
+    - name: Install Cache Conan dependencies
+      id: cache-conan
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-conan-deps
+      with:
+        path: ~/.conan2
+        key: ${{ runner.os }}-builder-${{ env.cache-name }}-${{ hashFiles('conanfile.py') }}
+        restore-keys: ${{ runner.os }}-builder-${{ env.cache-name }}-
+
     - name: Install dependencies
       shell: bash
       run: |
@@ -250,6 +260,16 @@ jobs:
       uses: actions/setup-python@v4
       with: { python-version: "3.12-dev" }
 
+    - name: Install Cache Conan dependencies
+      id: cache-conan
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-conan-deps
+      with:
+        path: ~/.conan2
+        key: ${{ runner.os }}-builder-${{ env.cache-name }}-${{ hashFiles('conanfile.py') }}
+        restore-keys: ${{ runner.os }}-builder-${{ env.cache-name }}-
+
     - name: Install dependencies
       shell: bash
       run: |
@@ -277,7 +297,7 @@ jobs:
       run: cmake --install build --config Release --prefix .
 
     - name: Move config file
-      run: cp -r config.yml build/test/config_yml
+      run: cp -r config.yml build/test/config.yml
 
     - name: Move test algo files
       run: cp -r test/test_algos build/test/test_algos
