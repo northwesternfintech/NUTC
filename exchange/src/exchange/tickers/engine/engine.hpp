@@ -40,7 +40,7 @@ public:
     }
 
 private:
-    bool handle_order_failure_(const StoredOrder& buyer, const StoredOrder& seller);
+    bool order_can_execute_(const StoredOrder& buyer, const StoredOrder& seller);
 
     static StoredMatch build_match(const StoredOrder& buyer, const StoredOrder& seller);
 

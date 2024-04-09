@@ -20,9 +20,11 @@ class EngineManager : public nutc::ticks::TickObserver {
     std::unordered_map<std::string, matching::OrderContainer> last_order_containers_;
     std::unordered_map<std::string, uint64_t> num_matches_;
     std::unordered_map<std::string, bots::BotContainer> bot_containers_;
+    std::unordered_map<std::string, double> midprices_;
     EngineManager() = default;
 
 public:
+    double get_midprice(const std::string& ticker);
     Engine& get_engine(const std::string& ticker);
     bool has_engine(const std::string& ticker) const;
 

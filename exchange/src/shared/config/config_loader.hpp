@@ -19,6 +19,7 @@ struct global_config {
     const size_t WAIT_SECS;
     const size_t ORDER_EXPIRATION_TICKS;
     const uint16_t TICK_HZ;
+    const uint8_t DISPLAY_HZ;
 };
 
 struct ticker_config {
