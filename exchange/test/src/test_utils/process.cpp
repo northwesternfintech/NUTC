@@ -1,7 +1,7 @@
 #include "process.hpp"
 
+#include "config.h"
 #include "exchange/algos/dev_mode/dev_mode.hpp"
-#include "exchange/config.h"
 #include "exchange/logging.hpp"
 #include "exchange/process_spawning/spawning.hpp"
 #include "exchange/rabbitmq/trader_manager/RabbitMQTraderManager.hpp"
@@ -37,9 +37,9 @@ initialize_testing_clients(
                 trader->set_start_delay(has_delay);
             }
         }
-        size_t num_users = spawning::spawn_all_clients(users);
-        rabbitmq::RabbitMQTraderManager::wait_for_clients(users, num_users);
-        rabbitmq::RabbitMQTraderManager::send_start_time(users, CLIENT_WAIT_SECS);
+        spawning::spawn_all_clients(users);
+        rabbitmq::RabbitMQTraderManager::wait_for_clients(users);
+        rabbitmq::RabbitMQTraderManager::send_start_time(users, TEST_CLIENT_WAIT_SECS);
         logging::init(quill::LogLevel::Info);
     };
 

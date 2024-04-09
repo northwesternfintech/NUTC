@@ -1,6 +1,6 @@
 #include "argparse.hpp"
 
-#include "exchange/config.h"
+#include "shared/config/config.h"
 
 namespace nutc {
 namespace config {

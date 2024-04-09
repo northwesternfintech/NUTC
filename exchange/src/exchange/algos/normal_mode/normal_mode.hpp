@@ -16,13 +16,6 @@ public:
     initialize_files() const override
     {}
 
-    // WARNING!! not initialized until initialize_client_manager is run
-    [[nodiscard]] size_t
-    get_num_clients() const override
-    {
-        return num_clients_;
-    }
-
 private:
     static glz::json_t::object_t get_all_users();
 };

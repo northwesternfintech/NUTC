@@ -3,6 +3,7 @@
 #include "exchange/config.h"
 #include "exchange/logging.hpp"
 #include "exchange/traders/trader_types/local_trader.hpp"
+#include "shared/config/config_loader.hpp"
 #include "shared/file_operations/file_operations.hpp"
 
 #include <stdexcept>
@@ -13,16 +14,17 @@ namespace algo_mgmt {
 void
 DevModeAlgoManager::initialize_client_manager(manager::TraderManager& users)
 {
+    int starting_cap = config::Config::get_instance().constants().STARTING_CAPITAL;
     auto handle_algos_provided_filenames = [&]() {
         for (const std::string& filepath : algo_filenames_.value()) {
-            users.add_trader<manager::LocalTrader>(filepath, STARTING_CAPITAL);
+            users.add_trader<manager::LocalTrader>(filepath, starting_cap);
         }
     };
 
     auto handle_algos_default_filenames = [&]() {
         for (size_t i = 0; i < num_clients_; i++) {
             std::string algo_id = std::string(ALGO_DIR) + "/algo_" + std::to_string(i);
-            users.add_trader<manager::LocalTrader>(algo_id, STARTING_CAPITAL);
+            users.add_trader<manager::LocalTrader>(algo_id, starting_cap);
         }
     };
 

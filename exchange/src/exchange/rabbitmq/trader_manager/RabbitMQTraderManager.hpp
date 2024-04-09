@@ -12,10 +12,10 @@ public:
      * This ensures that all clients are connected to the exchange and have successfully
      * started (vs a RMQ or firebase error)
      */
-    static void wait_for_clients(manager::TraderManager& manager, size_t num_clients);
+    static void wait_for_clients(manager::TraderManager& manager);
 
     static void
-    send_start_time(const manager::TraderManager& manager, int wait_seconds);
+    send_start_time(const manager::TraderManager& manager, size_t wait_seconds);
 };
 } // namespace rabbitmq
 } // namespace nutc

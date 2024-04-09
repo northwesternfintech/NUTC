@@ -3,6 +3,7 @@
 #include "exchange/config.h"
 #include "exchange/curl/curl.hpp"
 #include "exchange/traders/trader_types/remote_trader.hpp"
+#include "shared/config/config_loader.hpp"
 
 #include <fmt/format.h>
 
@@ -15,7 +16,7 @@ NormalModeAlgoManager::initialize_client_manager(manager::TraderManager& users)
     constexpr std::array<const char*, 3> REQUIRED_FIEDS = {
         "latestAlgoId", "firstName", "lastName"
     };
-    num_clients_ = 0;
+    int starting_cap = config::Config::get_instance().constants().STARTING_CAPITAL;
 
     glz::json_t::object_t firebase_users = get_all_users();
     for (const auto& [user_id, user] : firebase_users) {
@@ -33,9 +34,8 @@ NormalModeAlgoManager::initialize_client_manager(manager::TraderManager& users)
         );
         std::string algo_id = user["latestAlgoId"].get<std::string>();
         users.add_trader<manager::RemoteTrader>(
-            user_id, full_name, algo_id, STARTING_CAPITAL
+            user_id, full_name, algo_id, starting_cap
         );
-        num_clients_ += 1;
     }
 }
 

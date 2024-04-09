@@ -106,20 +106,25 @@ tasks:
       - ctest {{.TEST_FLAGS}} -R "Unit*"
 
   itest:
-    dir: '{{if eq .RELEASE_BUILD "True"}}./build{{else}}.{{end}}'
+    dir: '.'
     vars:
-      WRAPPER_RELATIVE_PATH: '{{if eq .RELEASE_BUILD "False"}}build/dev/{{end}}WRAPPER'
-      TEST_ALGOS_DIR: '{{if eq .RELEASE_BUILD "True"}}../test{{else}}test{{end}}/test_algos'
-      TEST_DIR: '{{if eq .RELEASE_BUILD "True"}}test{{else}}./build/dev/test{{end}}/test_algos'
+      TEST_DIR: 'build{{if eq .RELEASE_BUILD "False"}}/dev{{end}}/test'
+    cmds:
+      - task: build
+      - task: check-and-start-services
+      - echo $NUTC_WRAPPER_BINARY_PATH
+      - cp -r test/test_algos {{.TEST_DIR}}
+      - cp config.yml {{.TEST_DIR}}/config.yml
+      - task: run-itest
+
+  run-itest:
+    dir: '{{if eq .RELEASE_BUILD "False"}}.{{else}}build{{end}}'
+    vars:
+      WRAPPER_RELATIVE_PATH: 'build{{if eq .RELEASE_BUILD "False"}}/dev{{end}}/WRAPPER'
       DEV_TEST_FLAGS: '--timeout 4 --preset=dev'
       RELEASE_TEST_FLAGS: '--output-on-failure --no-tests=error --timeout 10 -C Release'
       TEST_FLAGS: '{{if eq .RELEASE_BUILD "True"}}{{.RELEASE_TEST_FLAGS}}{{else}}{{.DEV_TEST_FLAGS}}{{end}}'
     env:
       NUTC_WRAPPER_BINARY_PATH: '{{.PWD}}/{{.WRAPPER_RELATIVE_PATH}}'
     cmds:
-      - task: build
-      - task: check-and-start-services
-      - echo $NUTC_WRAPPER_BINARY_PATH
-      - mkdir -p {{.TEST_DIR}}
-      - cp -r {{.TEST_ALGOS_DIR}}/* {{.TEST_DIR}}
-      - ctest {{.TEST_FLAGS}} -R "Integration*"
+      - ctest {{.TEST_FLAGS}} -R "Integration*" 

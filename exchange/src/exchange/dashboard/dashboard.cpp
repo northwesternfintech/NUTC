@@ -3,6 +3,7 @@
 #include "exchange/tick_manager/tick_manager.hpp"
 #include "exchange/traders/trader_manager.hpp"
 #include "exchange/traders/trader_types/generic_trader.hpp"
+#include "shared/config/config_loader.hpp"
 #include "state/global_metrics.hpp"
 
 #include <quill/Quill.h>
@@ -12,7 +13,9 @@
 namespace nutc {
 namespace dashboard {
 
-Dashboard::Dashboard() : err_file_(freopen("logs/error_log.txt", "w", stderr))
+Dashboard::Dashboard() :
+    err_file_(freopen("logs/error_log.txt", "w", stderr)),
+    TICK_HZ(config::Config::get_instance().constants().TICK_HZ)
 {
     quill::stdout_handler("console")->set_log_level(quill::LogLevel::Error);
     std::ofstream create_file("logs/app.log");
@@ -302,13 +305,16 @@ void
 Dashboard::main_loop_(uint64_t tick)
 {
     char chr = static_cast<char>(getch());
-    if (chr == '1' || chr == '2' || chr == '3' || chr == '4')
+    if (chr == '1' || chr == '2' || chr == '3' || chr == '4') {
         current_window_ = chr;
-    else if (tick % 15 != 0)
+    }
+    else if (tick % (TICK_HZ / 3) != 0) {
+        // Only update once per half sec
         return;
+    }
 
-    // Hacky, fix this later lol
-    if (tick < 200 && tick > 100) {
+    // Hacky way to clear the screen, probably can be removed if we tweak the wrapper?
+    if (tick < TICK_HZ * 4 && TICK_HZ * 2 > 100) {
         clear();
         refresh();
     }
