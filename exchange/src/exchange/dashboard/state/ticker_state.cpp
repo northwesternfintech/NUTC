@@ -15,10 +15,10 @@ TickerState::calculate_metrics()
     bots::BotContainer& bot_container =
         engine_manager::EngineManager::get_instance().get_bot_container(TICKER);
 
-    auto& engine_ref = engine_manager::EngineManager::get_instance().get_engine(TICKER);
-    const auto& order_container = engine_ref.get_order_container();
+    auto& engine_ref = engine_manager::EngineManager::get_instance();
+    const auto& order_container = engine_ref.get_engine(TICKER).get_order_container();
 
-    midprice_ = order_container.get_midprice();
+    midprice_ = engine_ref.get_midprice(TICKER);
     spread_ = order_container.get_spread();
     auto [asks, bids] = order_container.get_spread_nums();
     num_asks_ = asks;
@@ -30,13 +30,12 @@ TickerState::calculate_metrics()
     matches_since_last_tick_ = new_num_matches - num_matches_;
     num_matches_ = new_num_matches;
 
-    auto calculate_pnl = [&order_container](const std::shared_ptr<bots::BotTrader>& bot
-                         ) {
+    auto calculate_pnl = [&engine_ref](const std::shared_ptr<bots::BotTrader>& bot) {
         double capital_delta = bot->get_capital_delta();
 
         // Held stock can be negative due to leverage
         double held_stock = bot->get_holdings(bot->get_ticker());
-        double stock_value = order_container.get_midprice() * held_stock;
+        double stock_value = engine_ref.get_midprice(bot->get_ticker()) * held_stock;
         return capital_delta + stock_value;
     };
 

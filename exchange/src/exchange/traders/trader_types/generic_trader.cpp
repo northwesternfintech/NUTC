@@ -10,11 +10,11 @@ GenericTrader::process_order_match(
 {
     double total_cap = price * quantity;
     if (side == messages::SIDE::BUY) {
-        modify_holdings(ticker, -quantity);
+        modify_holdings(ticker, quantity);
         modify_capital(-total_cap);
     }
     else {
-        modify_holdings(ticker, quantity);
+        modify_holdings(ticker, -quantity);
         modify_capital(total_cap);
     }
 }
