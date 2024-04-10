@@ -23,6 +23,7 @@ RUN apt update \
     && apt install -y rabbitmq-server \
     && pip install numpy pandas polars scipy scikit-learn prophet attrs cppyy lightgbm xgboost 
 
+COPY --from=build /app/exchange/config.yml .
 COPY --from=build /app/exchange/build/NUTC /bin/NUTC-exchange
 COPY --from=build /app/exchange/build/WRAPPER /bin/WRAPPER
 COPY ./exchange/scripts/docker-start.sh /app/docker-start.sh
