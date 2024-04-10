@@ -1,4 +1,4 @@
 #!/bin/sh
 rabbitmq-server -detached
-sleep 5
+rabbitmqctl wait /var/lib/rabbitmq/mnesia/rabbit@$(hostname).pid
 exec NUTC-exchange "$@"

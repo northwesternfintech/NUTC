@@ -134,3 +134,9 @@ tasks:
       NUTC_WRAPPER_BINARY_PATH: '{{.PWD}}/{{.WRAPPER_RELATIVE_PATH}}'
     cmds:
       - ctest {{.TEST_FLAGS}} -R "Integration*" 
+
+  test-sandbox:
+    dir: '..'
+    cmds:
+      - docker build -t stevenewald/sandbox -f exchange/Dockerfile .
+      - docker run --rm stevenewald/sandbox --sandbox "tf42elp8bhY8EYRsEMaoyPdomHw2" " Ns1qA8K5sJkT6GvujtG"
