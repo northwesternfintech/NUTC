@@ -27,7 +27,7 @@ public:
         std::shared_ptr<GenericTrader> trader =
             make_shared_trader_<T>(std::forward<Args>(args)...);
         traders_.insert({trader->get_id(), trader});
-        return std::dynamic_pointer_cast<T>(trader);
+        return std::static_pointer_cast<T>(trader);
     }
 
     [[nodiscard]] std::shared_ptr<GenericTrader>

@@ -20,7 +20,7 @@ class RetailBot : public BotTrader {
 public:
     RetailBot(std::string ticker, double interest_limit) :
         BotTrader(std::move(ticker), interest_limit),
-        AGGRESSIVENESS(std::normal_distribution<>{50, 2000}(gen))
+        AGGRESSIVENESS(std::normal_distribution<>{1000, 2000}(gen))
     {}
 
     RetailBot(RetailBot&& other) noexcept :

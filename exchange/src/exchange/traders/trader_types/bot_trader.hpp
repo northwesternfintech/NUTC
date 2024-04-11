@@ -25,15 +25,16 @@ class BotTrader : public manager::GenericTrader {
     }
 
 protected:
+    // NOLINTBEGIN(*)
     const std::string TICKER;
     double short_interest_ = 0;
     double long_interest_ = 0;
 
-    size_t open_bids_ = 0; // for stats, not the strategy
-    size_t open_asks_ = 0;
+    double open_bids_ = 0; // for stats, not the strategy
+    double open_asks_ = 0;
 
     const double INTEREST_LIMIT;
-
+    // NOLINTEND(*)
 public:
     BotTrader(std::string ticker, double interest_limit) :
         GenericTrader(generate_user_id(), interest_limit), TICKER(std::move(ticker)),
@@ -106,13 +107,13 @@ public:
         return short_interest_;
     }
 
-    [[nodiscard]] size_t
+    [[nodiscard]] double
     get_open_bids() const
     {
         return open_bids_;
     }
 
-    [[nodiscard]] size_t
+    [[nodiscard]] double
     get_open_asks() const
     {
         return open_asks_;
@@ -121,31 +122,29 @@ public:
     [[nodiscard]] double
     get_capital_utilization() const
     {
-        return (get_long_interest() + get_short_interest()) / get_interest_limit();
+        double capital_util =
+            (get_long_interest() + get_short_interest()) / get_interest_limit();
+        assert(capital_util <= 1);
+        // assert(capital_util >= 0);
+        return capital_util;
     }
 
+    /**
+     * @brief Called by the bot(derived class) when a bid position is opened
+     */
     void
-    modify_open_bids(int delta)
+    modify_open_bids(double delta)
     {
-        if (delta < 0) {
-            assert(open_bids_ >= static_cast<size_t>(std::abs(delta)));
-            open_bids_ -= static_cast<size_t>(std::abs(delta));
-        }
-        else {
-            open_bids_ += static_cast<size_t>(delta);
-        }
+        open_bids_ += delta;
     }
 
+    /**
+     * @brief Called by the bot (derived class) when an ask position is opened
+     */
     void
-    modify_open_asks(int delta)
+    modify_open_asks(double delta)
     {
-        if (delta < 0) {
-            assert(open_asks_ >= static_cast<size_t>(std::abs(delta)));
-            open_asks_ -= static_cast<size_t>(std::abs(delta));
-        }
-        else {
-            open_asks_ += static_cast<size_t>(delta);
-        }
+        open_asks_ += delta;
     }
 
     const std::string&
@@ -163,10 +162,6 @@ public:
     }
 
     void process_order_expiration(
-        const std::string& ticker, messages::SIDE side, double price, double quantity
-    ) override;
-
-    void process_order_add(
         const std::string& ticker, messages::SIDE side, double price, double quantity
     ) override;
 };

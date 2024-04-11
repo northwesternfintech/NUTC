@@ -117,7 +117,8 @@ tasks:
       TEST_DIR: 'build{{if eq .RELEASE_BUILD "False"}}/dev{{end}}/test'
     cmds:
       - task: build
-      - task: check-and-start-rmq
+        # Don't want to check the mode
+      - ./scripts/check_rabbitmq.sh
       - echo $NUTC_WRAPPER_BINARY_PATH
       - cp -r test/test_algos {{.TEST_DIR}}
       - cp config.yml {{.TEST_DIR}}/config.yml

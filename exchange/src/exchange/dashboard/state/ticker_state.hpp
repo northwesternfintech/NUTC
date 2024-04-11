@@ -1,7 +1,6 @@
 #pragma once
 
-#include <cmath>
-
+#include <limits>
 #include <string>
 
 namespace nutc {
@@ -14,10 +13,10 @@ struct BotStates {
     double percent_active_{};
     double total_capital_held_{};
 
-    size_t min_open_bids_{};
-    size_t min_open_asks_{};
-    size_t max_open_bids_{};
-    size_t max_open_asks_{};
+    double min_open_bids_{};
+    double min_open_asks_{};
+    double max_open_bids_{};
+    double max_open_asks_{};
     double min_utilization_{};
     double max_utilization_{};
     double min_pnl_{};
@@ -67,10 +66,10 @@ private:
             bot_states.num_bots_active_ = 0;
             bot_states.percent_active_ = 0;
             bot_states.total_capital_held_ = 0;
-            bot_states.min_open_bids_ = std::numeric_limits<size_t>::max();
-            bot_states.min_open_asks_ = std::numeric_limits<size_t>::max();
-            bot_states.max_open_bids_ = std::numeric_limits<size_t>::min();
-            bot_states.max_open_asks_ = std::numeric_limits<size_t>::min();
+            bot_states.min_open_bids_ = std::numeric_limits<double>::max();
+            bot_states.min_open_asks_ = std::numeric_limits<double>::max();
+            bot_states.max_open_bids_ = std::numeric_limits<double>::min();
+            bot_states.max_open_asks_ = std::numeric_limits<double>::min();
             bot_states.min_utilization_ = std::numeric_limits<double>::max();
             bot_states.max_utilization_ = std::numeric_limits<double>::min();
             bot_states.min_pnl_ = std::numeric_limits<double>::max();
