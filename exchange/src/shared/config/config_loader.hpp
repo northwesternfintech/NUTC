@@ -49,7 +49,11 @@ public:
     static const Config&
     get_instance()
     {
-        static Config instance(CONFIG_FILE);
+        const char* config_file_path = std::getenv("NUTC_CONFIG_FILE");
+        if (!config_file_path)
+            config_file_path = DEFAULT_CONFIG_FILE;
+
+        static Config instance(config_file_path);
         return instance;
     }
 
