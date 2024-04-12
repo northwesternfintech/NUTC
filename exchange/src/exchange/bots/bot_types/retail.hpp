@@ -1,8 +1,11 @@
 #pragma once
 
+#include "exchange/tickers/engine/order_storage.hpp"
 #include "exchange/traders/trader_types/bot_trader.hpp"
-#include "shared/messages_wrapper_to_exchange.hpp"
 
+#include <cstdint>
+
+#include <optional>
 #include <random>
 
 namespace nutc {
@@ -28,7 +31,8 @@ public:
 
     [[nodiscard]] bool is_active() const override;
 
-    std::optional<messages::MarketOrder> take_action(double current, double theo);
+    std::optional<matching::StoredOrder>
+    take_action(double current, double theo, uint64_t current_tick);
 
 private:
     const double AGGRESSIVENESS;

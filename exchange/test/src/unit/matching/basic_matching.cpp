@@ -1,5 +1,4 @@
 #include "config.h"
-#include "exchange/tickers/engine/engine.hpp"
 #include "exchange/traders/trader_manager.hpp"
 #include "exchange/traders/trader_types/local_trader.hpp"
 #include "test_utils/macros.hpp"
@@ -35,7 +34,7 @@ protected:
     Engine engine_{TEST_ORDER_EXPIRATION_TICKS}; // NOLINT (*)
 
     std::vector<nutc::matching::StoredMatch>
-    add_to_engine_(const MarketOrder& order)
+    add_to_engine_(const StoredOrder& order)
     {
         return engine_.match_order(order);
     }
@@ -43,8 +42,8 @@ protected:
 
 TEST_F(UnitBasicMatching, SimpleMatch)
 {
-    MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
-    MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
+    StoredOrder order1{manager_.get_trader("ABC"), BUY, "ETHUSD", 1, 1, 0};
+    StoredOrder order2{manager_.get_trader("DEF"), SELL, "ETHUSD", 1, 1, 0};
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
     matches = add_to_engine_(order2);
@@ -54,11 +53,11 @@ TEST_F(UnitBasicMatching, SimpleMatch)
 
 TEST_F(UnitBasicMatching, CorrectBuyPricingOrder)
 {
-    MarketOrder buy1{"ABC", BUY, "ETHUSD", 1, 1};
-    MarketOrder buy2{"ABC", BUY, "ETHUSD", 1, 2};
-    MarketOrder buy3{"ABC", BUY, "ETHUSD", 1, 3};
-    MarketOrder buy4{"ABC", BUY, "ETHUSD", 1, 4};
-    MarketOrder sell1{"DEF", SELL, "ETHUSD", 1, 1};
+    StoredOrder buy1{manager_.get_trader("ABC"), BUY, "ETHUSD", 1, 1, 0};
+    StoredOrder buy2{manager_.get_trader("ABC"), BUY, "ETHUSD", 1, 2, 0};
+    StoredOrder buy3{manager_.get_trader("ABC"), BUY, "ETHUSD", 1, 3, 0};
+    StoredOrder buy4{manager_.get_trader("ABC"), BUY, "ETHUSD", 1, 4, 0};
+    StoredOrder sell1{manager_.get_trader("DEF"), SELL, "ETHUSD", 1, 1, 0};
 
     // Place cheapest buy orders first, then most expensive
     auto matches = add_to_engine_(buy1);
@@ -79,9 +78,9 @@ TEST_F(UnitBasicMatching, CorrectBuyPricingOrder)
 
 TEST_F(UnitBasicMatching, NoMatchThenMatchBuy)
 {
-    MarketOrder order1{"ABC", SELL, "ETHUSD", 1, 1};
-    MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
-    MarketOrder order3{"DEF", BUY, "ETHUSD", 1, 2};
+    StoredOrder order1{manager_.get_trader("ABC"), SELL, "ETHUSD", 1, 1, 0};
+    StoredOrder order2{manager_.get_trader("DEF"), SELL, "ETHUSD", 1, 1, 0};
+    StoredOrder order3{manager_.get_trader("DEF"), BUY, "ETHUSD", 1, 2, 0};
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
     matches = add_to_engine_(order2);
@@ -93,10 +92,10 @@ TEST_F(UnitBasicMatching, NoMatchThenMatchBuy)
 
 TEST_F(UnitBasicMatching, NoMatchThenMatchSell)
 {
-    MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
-    MarketOrder order2{"DEF", BUY, "ETHUSD", 1, 1};
+    StoredOrder order1{manager_.get_trader("ABC"), BUY, "ETHUSD", 1, 1, 0};
+    StoredOrder order2{manager_.get_trader("DEF"), BUY, "ETHUSD", 1, 1, 0};
+    StoredOrder order3{manager_.get_trader("DEF"), SELL, "ETHUSD", 2, 0, 0};
 
-    MarketOrder order3{"DEF", SELL, "ETHUSD", 2, 0};
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
     matches = add_to_engine_(order2);
@@ -111,8 +110,8 @@ TEST_F(UnitBasicMatching, NoMatchThenMatchSell)
 
 TEST_F(UnitBasicMatching, PassivePriceMatch)
 {
-    MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 2};
-    MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
+    StoredOrder order1{manager_.get_trader("ABC"), BUY, "ETHUSD", 1, 2, 0};
+    StoredOrder order2{manager_.get_trader("DEF"), SELL, "ETHUSD", 1, 1, 0};
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
 
@@ -123,8 +122,8 @@ TEST_F(UnitBasicMatching, PassivePriceMatch)
 
 TEST_F(UnitBasicMatching, PartialFill)
 {
-    MarketOrder order1{"ABC", BUY, "ETHUSD", 2, 1};
-    MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
+    StoredOrder order1{manager_.get_trader("ABC"), BUY, "ETHUSD", 2, 1, 0};
+    StoredOrder order2{manager_.get_trader("DEF"), SELL, "ETHUSD", 1, 1, 0};
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
 
@@ -135,9 +134,9 @@ TEST_F(UnitBasicMatching, PartialFill)
 
 TEST_F(UnitBasicMatching, MultipleFill)
 {
-    MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
-    MarketOrder order2{"ABC", BUY, "ETHUSD", 1, 1};
-    MarketOrder order3{"DEF", SELL, "ETHUSD", 2, 1};
+    StoredOrder order1{manager_.get_trader("ABC"), BUY, "ETHUSD", 1, 1, 0};
+    StoredOrder order2{manager_.get_trader("ABC"), BUY, "ETHUSD", 1, 1, 0};
+    StoredOrder order3{manager_.get_trader("DEF"), SELL, "ETHUSD", 2, 1, 0};
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
 
@@ -152,9 +151,9 @@ TEST_F(UnitBasicMatching, MultipleFill)
 
 TEST_F(UnitBasicMatching, MultiplePartialFill)
 {
-    MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
-    MarketOrder order2{"ABC", BUY, "ETHUSD", 1, 1};
-    MarketOrder order3{"DEF", SELL, "ETHUSD", 3, 1};
+    StoredOrder order1{manager_.get_trader("ABC"), BUY, "ETHUSD", 1, 1, 0};
+    StoredOrder order2{manager_.get_trader("ABC"), BUY, "ETHUSD", 1, 1, 0};
+    StoredOrder order3{manager_.get_trader("DEF"), SELL, "ETHUSD", 3, 1, 0};
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
 
@@ -169,8 +168,8 @@ TEST_F(UnitBasicMatching, MultiplePartialFill)
 
 TEST_F(UnitBasicMatching, SimpleMatchReversed)
 {
-    MarketOrder order1{"ABC", SELL, "ETHUSD", 1, 1};
-    MarketOrder order2{"DEF", BUY, "ETHUSD", 1, 1};
+    StoredOrder order1{manager_.get_trader("ABC"), SELL, "ETHUSD", 1, 1, 0};
+    StoredOrder order2{manager_.get_trader("DEF"), BUY, "ETHUSD", 1, 1, 0};
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
     matches = add_to_engine_(order2);
@@ -180,8 +179,8 @@ TEST_F(UnitBasicMatching, SimpleMatchReversed)
 
 TEST_F(UnitBasicMatching, PassivePriceMatchReversed)
 {
-    MarketOrder order1{"ABC", SELL, "ETHUSD", 1, 1};
-    MarketOrder order2{"DEF", BUY, "ETHUSD", 1, 2};
+    StoredOrder order1{manager_.get_trader("ABC"), SELL, "ETHUSD", 1, 1, 0};
+    StoredOrder order2{manager_.get_trader("DEF"), BUY, "ETHUSD", 1, 2, 0};
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
 
@@ -193,8 +192,8 @@ TEST_F(UnitBasicMatching, PassivePriceMatchReversed)
 
 TEST_F(UnitBasicMatching, PartialFillReversed)
 {
-    MarketOrder order1{"ABC", SELL, "ETHUSD", 2, 1};
-    MarketOrder order2{"DEF", BUY, "ETHUSD", 1, 1};
+    StoredOrder order1{manager_.get_trader("ABC"), SELL, "ETHUSD", 2, 1, 0};
+    StoredOrder order2{manager_.get_trader("DEF"), BUY, "ETHUSD", 1, 1, 0};
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
     matches = add_to_engine_(order2);
@@ -204,9 +203,9 @@ TEST_F(UnitBasicMatching, PartialFillReversed)
 
 TEST_F(UnitBasicMatching, MultipleFillReversed)
 {
-    MarketOrder order1{"ABC", SELL, "ETHUSD", 1, 1};
-    MarketOrder order2{"ABC", SELL, "ETHUSD", 1, 1};
-    MarketOrder order3{"DEF", BUY, "ETHUSD", 2, 1};
+    StoredOrder order1{manager_.get_trader("ABC"), SELL, "ETHUSD", 1, 1, 0};
+    StoredOrder order2{manager_.get_trader("ABC"), SELL, "ETHUSD", 1, 1, 0};
+    StoredOrder order3{manager_.get_trader("DEF"), BUY, "ETHUSD", 2, 1, 0};
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
 
@@ -221,9 +220,9 @@ TEST_F(UnitBasicMatching, MultipleFillReversed)
 
 TEST_F(UnitBasicMatching, MultiplePartialFillReversed)
 {
-    MarketOrder order1{"ABC", SELL, "ETHUSD", 1, 1};
-    MarketOrder order2{"ABC", SELL, "ETHUSD", 1, 1};
-    MarketOrder order3{"DEF", BUY, "ETHUSD", 3, 1};
+    StoredOrder order1{manager_.get_trader("ABC"), SELL, "ETHUSD", 1, 1, 0};
+    StoredOrder order2{manager_.get_trader("ABC"), SELL, "ETHUSD", 1, 1, 0};
+    StoredOrder order3{manager_.get_trader("DEF"), BUY, "ETHUSD", 3, 1, 0};
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
 

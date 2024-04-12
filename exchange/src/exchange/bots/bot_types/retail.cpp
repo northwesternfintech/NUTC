@@ -1,6 +1,12 @@
 #include "retail.hpp"
 
 #include "exchange/config.h"
+#include "exchange/tickers/engine/order_storage.hpp"
+#include "exchange/traders/trader_manager.hpp"
+
+#include <cstdint>
+
+#include <memory>
 
 namespace nutc {
 namespace bots {
@@ -12,8 +18,8 @@ RetailBot::is_active() const
            > -get_interest_limit() * .9; // drop out if they lose 90% of their money
 }
 
-std::optional<messages::MarketOrder>
-RetailBot::take_action(double current, double theo)
+std::optional<matching::StoredOrder>
+RetailBot::take_action(double current, double theo, uint64_t current_tick)
 {
     if (!is_active()) {
         return std::nullopt;
@@ -35,9 +41,11 @@ RetailBot::take_action(double current, double theo)
                 quantity *= RETAIL_ORDER_SIZE;
                 modify_open_bids(1);
                 modify_long_capital(quantity * price);
-                return messages::MarketOrder{
-                    get_id(), messages::SIDE::BUY, TICKER, quantity, price
-                };
+                auto trader =
+                    manager::TraderManager::get_instance().get_trader(get_id());
+                return matching::StoredOrder{trader, messages::SIDE::BUY,
+                                             TICKER, quantity,
+                                             price,  current_tick};
             }
             if (current > theo) {
                 double price = current - RETAIL_ORDER_OFFSET;
@@ -47,9 +55,11 @@ RetailBot::take_action(double current, double theo)
                 quantity *= RETAIL_ORDER_SIZE;
                 modify_open_asks(1);
                 modify_short_capital(quantity * price);
-                return messages::MarketOrder{
-                    get_id(), messages::SIDE::SELL, TICKER, quantity, price
-                };
+                auto trader =
+                    manager::TraderManager::get_instance().get_trader(get_id());
+                return matching::StoredOrder{trader, messages::SIDE::SELL,
+                                             TICKER, quantity,
+                                             price,  current_tick};
             }
         }
     }

@@ -2,6 +2,7 @@
 #include "exchange/tickers/engine/order_storage.hpp"
 #include "exchange/traders/trader_manager.hpp"
 #include "exchange/utils/logger/logger.hpp"
+#include "shared/messages_wrapper_to_exchange.hpp"
 
 #include <limits>
 

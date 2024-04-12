@@ -2,10 +2,8 @@
 
 #include "order_container.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
-#include "shared/messages_wrapper_to_exchange.hpp"
 #include "shared/util.hpp"
 
-using MarketOrder = nutc::messages::MarketOrder;
 using ObUpdate = nutc::messages::ObUpdate;
 using Match = nutc::messages::Match;
 using SIDE = nutc::messages::SIDE;
@@ -29,7 +27,7 @@ public:
         return order_container_;
     }
 
-    std::vector<StoredMatch> match_order(const MarketOrder& order);
+    std::vector<StoredMatch> match_order(const StoredOrder& order);
 
     std::vector<StoredOrder>
     expire_old_orders(uint64_t new_tick)

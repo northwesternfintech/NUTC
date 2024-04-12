@@ -1,8 +1,13 @@
 #pragma once
+#include "exchange/tickers/engine/order_storage.hpp"
+#include "exchange/traders/trader_manager.hpp"
 #include "exchange/traders/trader_types/bot_trader.hpp"
-#include "shared/messages_wrapper_to_exchange.hpp"
 
 #include <sys/types.h>
+
+#include <cstdint>
+
+#include <memory>
 
 namespace nutc {
 namespace bots {
@@ -25,8 +30,8 @@ public:
 
     bool constexpr can_leverage() const override { return true; }
 
-    std::vector<messages::MarketOrder>
-    take_action(double new_theo)
+    std::vector<matching::StoredOrder>
+    take_action(double new_theo, uint64_t current_tick)
     {
         double long_interest = get_long_interest();
         double short_interest = get_short_interest();
@@ -34,7 +39,6 @@ public:
         double interest_limit = get_interest_limit();
 
         static constexpr uint8_t LEVELS = 6;
-        std::vector<messages::MarketOrder> orders(LEVELS);
 
         std::array<double, LEVELS> quantities = {1.0 / 12, 1.0 / 6, 1.0 / 4,
                                                  1.0 / 4,  1.0 / 6, 1.0 / 12};
@@ -63,11 +67,15 @@ public:
 
         double total_quantity = capital_tolerance / avg_price;
 
+        std::vector<matching::StoredOrder> orders(LEVELS);
+
         for (size_t i = 0; i < LEVELS; ++i) {
             auto side = (i < LEVELS / 2) ? messages::SIDE::BUY : messages::SIDE::SELL;
-            orders[i] = messages::MarketOrder{
-                get_id(), side, TICKER, total_quantity * quantities[i], prices[i]
-            };
+            auto trader = manager::TraderManager::get_instance().get_trader(get_id());
+
+            orders[i] = matching::StoredOrder{trader,    side,
+                                              TICKER,    total_quantity * quantities[i],
+                                              prices[i], current_tick};
             if (side == messages::SIDE::BUY) {
                 modify_long_capital(total_quantity * quantities[i] * prices[i]);
             }

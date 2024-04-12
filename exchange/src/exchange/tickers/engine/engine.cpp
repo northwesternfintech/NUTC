@@ -1,7 +1,5 @@
 #include "engine.hpp"
 
-#include "exchange/traders/trader_manager.hpp"
-
 namespace nutc {
 namespace matching {
 
@@ -86,14 +84,9 @@ Engine::order_can_execute_(const StoredOrder& buyer, const StoredOrder& seller)
 }
 
 std::vector<StoredMatch>
-Engine::match_order(const MarketOrder& order)
+Engine::match_order(const StoredOrder& order)
 {
-    auto trader = manager::TraderManager::get_instance().get_trader(order.client_id);
-    // TODO(): make this configurable. right now, it just rounds to one cent
-    double price = std::round(order.price * 100) / 100;
-    order_container_.add_order(StoredOrder{
-        trader, order.side, order.ticker, order.quantity, price, current_tick_
-    });
+    order_container_.add_order(order);
     return attempt_matches_();
 }
 

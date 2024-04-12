@@ -1,13 +1,13 @@
 #include "bot_container.hpp"
 
-#include "exchange/rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
+#include "exchange/tickers/engine/order_storage.hpp"
 #include "exchange/tickers/manager/ticker_manager.hpp"
 #include "exchange/traders/trader_manager.hpp"
 
 #include <cmath>
+#include <cstdint>
 
 #include <random>
-#include <utility>
 
 double
 generate_gaussian_noise(double mean, double stddev)
@@ -23,17 +23,16 @@ namespace nutc {
 
 namespace bots {
 void
-BotContainer::on_tick(uint64_t)
+BotContainer::on_tick(uint64_t current_tick)
 {
+    auto& manager = engine_manager::EngineManager::get_instance();
     auto theo = fabs(theo_generator_.generate_next_price() + brownian_offset_);
-    auto current = engine_manager::EngineManager::get_instance().get_midprice(ticker_);
-    auto orders = BotContainer::on_new_theo(theo, current);
+    auto current = manager.get_midprice(ticker_);
+    auto orders = BotContainer::on_new_theo(theo, current, current_tick);
 
     for (auto& order : orders) {
         order.ticker = ticker_;
-        rabbitmq::RabbitMQOrderHandler::handle_incoming_market_order(
-            engine_manager::EngineManager::get_instance(), std::move(order)
-        );
+        manager.match_order(order);
     }
 }
 
@@ -74,28 +73,35 @@ requires HandledBotType<BotType>
 template void BotContainer::add_single_bot_<RetailBot>(double);
 template void BotContainer::add_single_bot_<MarketMakerBot>(double);
 
-std::vector<MarketOrder>
-BotContainer::on_new_theo(double new_theo, double current)
+std::vector<matching::StoredOrder>
+BotContainer::on_new_theo(double new_theo, double current, uint64_t current_tick)
 {
-    auto mm_new_theo = [new_theo](auto& mm_trader, std::vector<MarketOrder>& orders) {
+    auto mm_new_theo = [new_theo, current_tick](
+                           auto& mm_trader, std::vector<matching::StoredOrder>& orders
+                       ) {
         double noised_theo =
             new_theo + static_cast<double>(generate_gaussian_noise(0, .02));
 
-        std::vector<messages::MarketOrder> mm_orders =
-            mm_trader->take_action(noised_theo);
-        orders.insert(orders.end(), mm_orders.begin(), mm_orders.end());
+        std::vector<matching::StoredOrder> mm_orders =
+            mm_trader->take_action(noised_theo, current_tick);
+        orders.insert(
+            orders.end(), std::make_move_iterator(mm_orders.begin()),
+            std::make_move_iterator(mm_orders.end())
+        );
     };
 
-    auto retail_new_theo =
-        [new_theo, current](auto& retail_trader, std::vector<MarketOrder>& orders) {
-            double noised_theo =
-                new_theo + static_cast<double>(generate_gaussian_noise(0, .1));
-            auto bot_order = retail_trader->take_action(current, noised_theo);
-            if (bot_order.has_value())
-                orders.push_back(bot_order.value());
-        };
+    auto retail_new_theo = [new_theo, current, current_tick](
+                               auto& retail_trader,
+                               std::vector<matching::StoredOrder>& orders
+                           ) {
+        double noised_theo =
+            new_theo + static_cast<double>(generate_gaussian_noise(0, .1));
+        auto bot_order = retail_trader->take_action(current, noised_theo, current_tick);
+        if (bot_order.has_value())
+            orders.push_back(bot_order.value());
+    };
 
-    std::vector<MarketOrder> orders{};
+    std::vector<matching::StoredOrder> orders{};
     for (auto& [_, mm_trader] : market_makers_) {
         mm_new_theo(mm_trader, orders);
     }
