@@ -1,5 +1,4 @@
 #include "config.h"
-#include "exchange/tickers/engine/engine.hpp"
 #include "exchange/traders/trader_manager.hpp"
 #include "exchange/traders/trader_types/local_trader.hpp"
 #include "test_utils/macros.hpp"
@@ -28,7 +27,7 @@ protected:
     Engine engine_{TEST_ORDER_EXPIRATION_TICKS}; // NOLINT (*)
 
     std::vector<nutc::matching::StoredMatch>
-    add_to_engine_(const MarketOrder& order)
+    add_to_engine_(const StoredOrder& order)
     {
         return engine_.match_order(order);
     }
@@ -38,8 +37,8 @@ TEST_F(UnitInvalidOrders, RemoveThenAddFunds)
 {
     manager_.get_trader("ABC")->modify_capital(-TEST_STARTING_CAPITAL);
 
-    MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
-    MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
+    StoredOrder order2{manager_.get_trader("DEF"), SELL, "ETHUSD", 1, 1, 0};
+    StoredOrder order1{manager_.get_trader("ABC"), BUY, "ETHUSD", 1, 1, 0};
 
     // Thrown out
     auto matches = add_to_engine_(order1);
@@ -65,8 +64,8 @@ TEST_F(UnitInvalidOrders, MatchingInvalidFunds)
 {
     manager_.get_trader("ABC")->modify_capital(-TEST_STARTING_CAPITAL);
 
-    MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
-    MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
+    StoredOrder order1{manager_.get_trader("ABC"), BUY, "ETHUSD", 1, 1, 0};
+    StoredOrder order2{manager_.get_trader("DEF"), SELL, "ETHUSD", 1, 1, 0};
 
     // Thrown out
     auto matches = add_to_engine_(order1);
@@ -89,10 +88,10 @@ TEST_F(UnitInvalidOrders, SimpleManyInvalidOrder)
     manager_.get_trader("C")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     manager_.get_trader("D")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
 
-    MarketOrder order1{"A", BUY, "ETHUSD", 1, 1};
-    MarketOrder order2{"B", BUY, "ETHUSD", 1, 1};
-    MarketOrder order3{"C", BUY, "ETHUSD", 1, 1};
-    MarketOrder order4{"D", SELL, "ETHUSD", 3, 1};
+    StoredOrder order1{manager_.get_trader("A"), BUY, "ETHUSD", 1, 1, 0};
+    StoredOrder order2{manager_.get_trader("B"), BUY, "ETHUSD", 1, 1, 0};
+    StoredOrder order3{manager_.get_trader("C"), BUY, "ETHUSD", 1, 1, 0};
+    StoredOrder order4{manager_.get_trader("D"), SELL, "ETHUSD", 3, 1, 0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);

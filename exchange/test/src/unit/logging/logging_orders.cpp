@@ -28,7 +28,7 @@ protected:
     Engine engine_{TEST_ORDER_EXPIRATION_TICKS}; // NOLINT (*)
 
     std::vector<nutc::matching::StoredMatch>
-    add_to_engine_(const MarketOrder& order)
+    add_to_engine_(const StoredOrder& order)
     {
         return engine_.match_order(order);
     }
@@ -49,8 +49,8 @@ TEST_F(UnitLoggingOrders, LogMarketOrders)
 
 TEST_F(UnitLoggingOrders, LogMatches)
 {
-    MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
-    MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
+    StoredOrder order1{manager_.get_trader("ABC"), BUY, "ETHUSD", 1, 1, 0};
+    StoredOrder order2{manager_.get_trader("DEF"), SELL, "ETHUSD", 1, 1, 0};
 
     auto matches = add_to_engine_(order1);
     auto matches2 = add_to_engine_(order2);

@@ -1,5 +1,4 @@
 #include "config.h"
-#include "exchange/tickers/engine/engine.hpp"
 #include "exchange/traders/trader_manager.hpp"
 #include "exchange/traders/trader_types/local_trader.hpp"
 #include "test_utils/macros.hpp"
@@ -32,19 +31,19 @@ protected:
     Engine engine_{TEST_ORDER_EXPIRATION_TICKS}; // NOLINT (*)
 
     std::vector<nutc::matching::StoredMatch>
-    add_to_engine_(MarketOrder order)
+    add_to_engine_(const StoredOrder& order)
     {
-        return engine_.match_order(std::move(order));
+        return engine_.match_order(order);
     }
 };
 
 TEST_F(UnitManyOrders, CorrectTimePriority)
 {
-    MarketOrder order1{"A", BUY, "ETHUSD", 1, 1};
-    MarketOrder order2{"B", BUY, "ETHUSD", 1, 1};
-    MarketOrder order3{"C", SELL, "ETHUSD", 1, 1};
-    MarketOrder order4{"D", BUY, "ETHUSD", 1, 1};
-    MarketOrder order5{"C", SELL, "ETHUSD", 5, 1};
+    StoredOrder order1{manager_.get_trader("A"), BUY, "ETHUSD", 1, 1, 0};
+    StoredOrder order2{manager_.get_trader("B"), BUY, "ETHUSD", 1, 1, 0};
+    StoredOrder order3{manager_.get_trader("C"), SELL, "ETHUSD", 1, 1, 0};
+    StoredOrder order4{manager_.get_trader("D"), BUY, "ETHUSD", 1, 1, 0};
+    StoredOrder order5{manager_.get_trader("C"), SELL, "ETHUSD", 5, 1, 0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
@@ -63,8 +62,8 @@ TEST_F(UnitManyOrders, CorrectTimePriority)
 
 TEST_F(UnitManyOrders, OnlyMatchesOne)
 {
-    MarketOrder order1{"A", BUY, "ETHUSD", 1, 1};
-    MarketOrder order2{"B", SELL, "ETHUSD", 1, 1};
+    StoredOrder order1{manager_.get_trader("A"), BUY, "ETHUSD", 1, 1, 0};
+    StoredOrder order2{manager_.get_trader("B"), SELL, "ETHUSD", 1, 1, 0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
@@ -78,10 +77,10 @@ TEST_F(UnitManyOrders, OnlyMatchesOne)
 
 TEST_F(UnitManyOrders, SimpleManyOrder)
 {
-    MarketOrder order1{"A", BUY, "ETHUSD", 1, 1};
-    MarketOrder order2{"B", BUY, "ETHUSD", 1, 1};
-    MarketOrder order3{"C", BUY, "ETHUSD", 1, 1};
-    MarketOrder order4{"D", SELL, "ETHUSD", 3, 1};
+    StoredOrder order1{manager_.get_trader("A"), BUY, "ETHUSD", 1, 1, 0};
+    StoredOrder order2{manager_.get_trader("B"), BUY, "ETHUSD", 1, 1, 0};
+    StoredOrder order3{manager_.get_trader("C"), BUY, "ETHUSD", 1, 1, 0};
+    StoredOrder order4{manager_.get_trader("D"), SELL, "ETHUSD", 3, 1, 0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
@@ -100,10 +99,10 @@ TEST_F(UnitManyOrders, SimpleManyOrder)
 
 TEST_F(UnitManyOrders, PassiveAndAggressivePartial)
 {
-    MarketOrder order1{"A", SELL, "ETHUSD", 1, 1};
-    MarketOrder order2{"B", SELL, "ETHUSD", 10, 1}; // NOLINT (*)
-    MarketOrder order3{"C", BUY, "ETHUSD", 2, 3};
-    MarketOrder order4{"D", BUY, "ETHUSD", 10, 4}; // NOLINT (*)
+    StoredOrder order1{manager_.get_trader("A"), SELL, "ETHUSD", 1, 1, 0};
+    StoredOrder order2{manager_.get_trader("B"), SELL, "ETHUSD", 10, 1, 0};
+    StoredOrder order3{manager_.get_trader("C"), BUY, "ETHUSD", 2, 3, 0};
+    StoredOrder order4{manager_.get_trader("D"), BUY, "ETHUSD", 10, 4, 0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);

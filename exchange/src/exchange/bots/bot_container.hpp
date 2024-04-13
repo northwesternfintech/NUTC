@@ -3,13 +3,13 @@
 #include "exchange/bots/bot_types/retail.hpp"
 #include "exchange/theo/brownian.hpp"
 #include "exchange/tick_manager/tick_observer.hpp"
-#include "shared/messages_exchange_to_wrapper.hpp"
+#include "exchange/tickers/engine/order_storage.hpp"
+
+#include <cstdint>
 
 namespace nutc {
 
 namespace bots {
-using MarketOrder = messages::MarketOrder;
-using Match = messages::Match;
 
 template <typename T>
 concept HandledBotType =
@@ -37,7 +37,8 @@ public:
         return retail_bots_;
     }
 
-    std::vector<MarketOrder> on_new_theo(double new_theo, double current);
+    std::vector<matching::StoredOrder>
+    on_new_theo(double new_theo, double current, uint64_t current_tick);
 
     template <class BotType>
     void add_bots(double mean_capital, double stddev_capital, size_t num_bots)

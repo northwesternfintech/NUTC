@@ -43,7 +43,7 @@ public:
     }
 
     void
-    match_order(const MarketOrder& order)
+    match_order(const matching::StoredOrder& order)
     {
         std::vector<matching::StoredMatch> matches =
             get_engine(order.ticker).match_order(order);

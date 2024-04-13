@@ -45,8 +45,8 @@ struct StoredOrder {
         double quantity, double price, uint64_t tick
     ) :
         trader(std::move(trader)),
-        ticker(std::move(ticker)), side(side), price(price), quantity(quantity),
-        tick(tick), order_index(get_and_increment_global_index())
+        ticker(std::move(ticker)), side(side), price(std::round(price * 100) / 100),
+        quantity(quantity), tick(tick), order_index(get_and_increment_global_index())
     {}
 
     StoredOrder(StoredOrder&& other) noexcept :

@@ -13,10 +13,16 @@ public:
         GenericTrader(std::move(algo_path), capital)
     {}
 
-    constexpr TraderType
+    TraderType
     get_type() const override
     {
         return TraderType::LOCAL;
+    }
+
+    bool
+    can_leverage() const override
+    {
+        return false;
     }
 
     const std::string&
