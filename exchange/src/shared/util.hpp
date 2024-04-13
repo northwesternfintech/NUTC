@@ -2,6 +2,10 @@
 
 #include <cmath>
 
+#ifndef uint
+    typedef unsigned int uint;
+#endif
+
 namespace nutc {
 namespace messages {
 enum class SIDE { BUY, SELL };

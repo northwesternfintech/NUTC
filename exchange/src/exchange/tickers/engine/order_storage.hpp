@@ -70,7 +70,7 @@ struct StoredOrder {
     }
 
     StoredOrder(const StoredOrder& other) = default;
-    StoredOrder& operator=(const StoredOrder& other) = delete;
+    StoredOrder& operator=(const StoredOrder& other) = default;
 
     bool
     operator==(const StoredOrder& other) const
