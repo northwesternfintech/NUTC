@@ -3,14 +3,15 @@
 #include "exchange/tick_manager/tick_manager.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
 #include "exchange/tickers/manager/ticker_manager.hpp"
-#include "wrapper/rabbitmq/rabbitmq.hpp"
+#include "exchange/traders/trader_manager.hpp"
+#include "shared/messages_wrapper_to_exchange.hpp"
 
 namespace nutc {
 namespace rabbitmq {
 
 void
 RabbitMQOrderHandler::handle_incoming_market_order(
-    engine_manager::EngineManager& engine_manager, MarketOrder&& order
+    engine_manager::EngineManager& engine_manager, messages::MarketOrder&& order
 )
 {
     if (order.price < 0 || order.quantity <= 0)

@@ -1,17 +1,21 @@
 #pragma once
 #include "exchange/tickers/engine/order_storage.hpp"
-#include "exchange/traders/trader_manager.hpp"
 #include "exchange/traders/trader_types/bot_trader.hpp"
+#include "exchange/traders/trader_types/generic_trader.hpp"
 
 #include <sys/types.h>
 
 #include <cstdint>
 
+#include <array>
 #include <memory>
+#include <vector>
 
 namespace nutc {
 namespace bots {
 
+// TODO for hardening: if price gets close to 0, quantity will get very high because we
+// divide by price. Maybe something to think about?
 class MarketMakerBot : public BotTrader {
 public:
     MarketMakerBot(MarketMakerBot&& other) = default;
@@ -28,7 +32,11 @@ public:
         return std::numeric_limits<double>::max();
     }
 
-    bool constexpr can_leverage() const override { return true; }
+    bool
+    can_leverage() const override
+    {
+        return true;
+    }
 
     std::vector<matching::StoredOrder>
     take_action(double new_theo, uint64_t current_tick)
@@ -38,10 +46,11 @@ public:
 
         double interest_limit = get_interest_limit();
 
-        static constexpr uint8_t LEVELS = 6;
+        static constexpr const uint8_t LEVELS = 6;
 
-        std::array<double, LEVELS> quantities = {1.0 / 12, 1.0 / 6, 1.0 / 4,
-                                                 1.0 / 4,  1.0 / 6, 1.0 / 12};
+        static constexpr const std::array<double, LEVELS> quantities = {
+            1.0 / 12, 1.0 / 6, 1.0 / 4, 1.0 / 4, 1.0 / 6, 1.0 / 12
+        };
 
         std::array<double, LEVELS> prices = {
             new_theo - BASE_SPREAD - .10, new_theo - BASE_SPREAD - .05,
@@ -71,7 +80,9 @@ public:
 
         for (size_t i = 0; i < LEVELS; ++i) {
             auto side = (i < LEVELS / 2) ? messages::SIDE::BUY : messages::SIDE::SELL;
-            auto trader = manager::TraderManager::get_instance().get_trader(get_id());
+            auto trader = std::static_pointer_cast<manager::GenericTrader>(
+                this->shared_from_this()
+            );
 
             orders[i] = matching::StoredOrder{trader,    side,
                                               TICKER,    total_quantity * quantities[i],

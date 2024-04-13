@@ -45,10 +45,17 @@ public:
     BotTrader& operator=(const BotTrader& other) = delete;
     BotTrader& operator=(BotTrader&& other) = delete;
 
-    constexpr manager::TraderType
+    manager::TraderType
     get_type() const override
     {
         return manager::TraderType::BOT;
+    }
+
+    // Bots should override if they shouldn't be able to leverage
+    bool
+    can_leverage() const override
+    {
+        return true;
     }
 
     pid_t

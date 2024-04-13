@@ -2,7 +2,6 @@
 
 #include "exchange/config.h"
 #include "exchange/tickers/engine/order_storage.hpp"
-#include "exchange/traders/trader_manager.hpp"
 
 #include <cstdint>
 
@@ -33,6 +32,9 @@ RetailBot::take_action(double current, double theo, uint64_t current_tick)
 
     if (poisson_dist(gen) > 0) {
         if (noise_factor < p_trade * signal_strength) {
+            auto trader = std::static_pointer_cast<manager::GenericTrader>(
+                this->shared_from_this()
+            );
             if (current < theo) {
                 double price = current + RETAIL_ORDER_OFFSET;
                 assert(price > 0);
@@ -41,8 +43,6 @@ RetailBot::take_action(double current, double theo, uint64_t current_tick)
                 quantity *= RETAIL_ORDER_SIZE;
                 modify_open_bids(1);
                 modify_long_capital(quantity * price);
-                auto trader =
-                    manager::TraderManager::get_instance().get_trader(get_id());
                 return matching::StoredOrder{trader, messages::SIDE::BUY,
                                              TICKER, quantity,
                                              price,  current_tick};
@@ -55,8 +55,6 @@ RetailBot::take_action(double current, double theo, uint64_t current_tick)
                 quantity *= RETAIL_ORDER_SIZE;
                 modify_open_asks(1);
                 modify_short_capital(quantity * price);
-                auto trader =
-                    manager::TraderManager::get_instance().get_trader(get_id());
                 return matching::StoredOrder{trader, messages::SIDE::SELL,
                                              TICKER, quantity,
                                              price,  current_tick};

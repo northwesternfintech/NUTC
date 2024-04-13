@@ -12,9 +12,9 @@
 double
 generate_gaussian_noise(double mean, double stddev)
 {
-    static std::random_device rand;
-    static std::mt19937 gen(rand());
-    std::normal_distribution<> distr(mean, stddev); // Define the normal distribution
+    static std::random_device rand{};
+    static std::mt19937 gen{rand()};
+    std::normal_distribution<double> distr{mean, stddev};
 
     return distr(gen);
 }
@@ -84,6 +84,8 @@ BotContainer::on_new_theo(double new_theo, double current, uint64_t current_tick
 
         std::vector<matching::StoredOrder> mm_orders =
             mm_trader->take_action(noised_theo, current_tick);
+
+        orders.reserve(orders.size() + mm_orders.size());
         orders.insert(
             orders.end(), std::make_move_iterator(mm_orders.begin()),
             std::make_move_iterator(mm_orders.end())

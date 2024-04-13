@@ -2,6 +2,7 @@
 
 #include "shared/util.hpp"
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 
@@ -9,7 +10,7 @@ namespace nutc {
 namespace manager {
 enum TraderType { REMOTE, LOCAL, BOT };
 
-class GenericTrader {
+class GenericTrader : public std::enable_shared_from_this<GenericTrader> {
     const std::string USER_ID;
     const double INITIAL_CAPITAL;
     double capital_delta_ = 0;
@@ -28,13 +29,15 @@ public:
     GenericTrader(GenericTrader&& other) = default;
     GenericTrader(const GenericTrader& other) = delete;
 
+    virtual bool can_leverage() const = 0;
+
+    virtual TraderType get_type() const = 0;
+
     const std::string&
     get_id() const
     {
         return USER_ID;
     }
-
-    virtual TraderType get_type() const = 0;
 
     virtual double
     get_capital() const
@@ -73,12 +76,6 @@ public:
             return 0.0;
 
         return holdings_.at(ticker);
-    }
-
-    virtual constexpr bool
-    can_leverage() const
-    {
-        return false;
     }
 
     double

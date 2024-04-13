@@ -17,10 +17,16 @@ public:
         FULL_NAME(std::move(full_name)), ALGO_ID(std::move(algo_id))
     {}
 
-    constexpr TraderType
+    TraderType
     get_type() const override
     {
         return TraderType::REMOTE;
+    }
+
+    bool
+    can_leverage() const override
+    {
+        return false;
     }
 
     void

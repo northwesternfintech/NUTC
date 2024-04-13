@@ -4,16 +4,12 @@
 #include "exchange/theo/brownian.hpp"
 #include "exchange/tick_manager/tick_observer.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
-#include "shared/messages_exchange_to_wrapper.hpp"
-#include "shared/messages_wrapper_to_exchange.hpp"
 
 #include <cstdint>
 
 namespace nutc {
 
 namespace bots {
-using MarketOrder = messages::MarketOrder;
-using Match = messages::Match;
 
 template <typename T>
 concept HandledBotType =
