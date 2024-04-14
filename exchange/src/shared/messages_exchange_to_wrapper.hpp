@@ -29,6 +29,15 @@ struct Match {
     std::string seller_id;
     double buyer_capital;
     double seller_capital;
+
+    Match(
+        std::string ticker, SIDE side, double price, double quantity, std::string bid,
+        std::string sid, double bcap, double scap
+    ) :
+        ticker(ticker),
+        side(side), price(price), quantity(quantity), buyer_id(bid), seller_id(sid),
+        buyer_capital(bcap), seller_capital(scap)
+    {}
 };
 
 /**

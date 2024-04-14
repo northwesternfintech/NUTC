@@ -184,6 +184,16 @@
     {
       "name": "ci-docker",
       "inherits": ["ci-build", "ci-linux", "conan"]
+    },
+    {
+      "name": "ci-sanitize-darwin",
+      "binaryDir": "${sourceDir}/build/sanitize",
+      "inherits": ["ci-darwin", "dev-mode", "conan"],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Sanitize",
+        "CMAKE_CXX_FLAGS_SANITIZE": "-O2 -g -fsanitize=address,undefined -fno-omit-frame-pointer -fno-common",
+        "CMAKE_MAP_IMPORTED_CONFIG_SANITIZE": "Sanitize;RelWithDebInfo;Release;Debug;"
+      }
     }
   ]
 }
