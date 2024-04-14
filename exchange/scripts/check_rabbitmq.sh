@@ -1,15 +1,25 @@
 #!/bin/bash
 
+wait_for_rabbitmq() {
+    local pid_path="/var/lib/rabbitmq/mnesia/rabbit@$(hostname).pid"
+    if [[ "$(uname)" == "Darwin" ]]; then
+        pid_path="/usr/local/var/lib/rabbitmq/mnesia/rabbit@$(hostname).pid"
+    fi
+    echo "Waiting for RabbitMQ to be ready..."
+    rabbitmqctl wait "$pid_path"
+    echo "RabbitMQ is ready."
+}
+
 USERNAME="NUFT"
 PASSWORD="ADMIN"
 
 if docker ps | grep -q nutc-rabbitmq-server; then
-    echo "'nutc-rabbitmq-server' container is already running."
+    true
 elif docker ps -a | grep -q nutc-rabbitmq-server; then
     echo "Starting the existing 'nutc-rabbitmq-server' container..."
     docker start nutc-rabbitmq-server
     echo "'nutc-rabbitmq-server' container started."
-    sleep 5
+    wait_for_rabbitmq
 else
     echo "Starting RabbitMQ container..."
     docker run -d \
@@ -20,5 +30,8 @@ else
         -e RABBITMQ_DEFAULT_PASS=$PASSWORD \
         rabbitmq:management
     echo "RabbitMQ container started with username: $USERNAME and password: $PASSWORD."
-    sleep 5
+    wait_for_rabbitmq
 fi
+
+
+
