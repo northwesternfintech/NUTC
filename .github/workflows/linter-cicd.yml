@@ -6,12 +6,14 @@ on:
       - main
     paths:
       - 'linter/**'
+      - '.github/workflows/linter-cicd.yml'
 
   pull_request:
     branches:
       - main
     paths:
       - 'linter/**'
+      - '.github/workflows/linter-cicd.yml'
 
   workflow_dispatch:
 
@@ -121,7 +123,7 @@ jobs:
         UBSAN_OPTIONS: print_stacktrace=1
       run: ctest --output-on-failure --no-tests=error -j 2
 
-  test:
+  test-linux:
     needs: [lint]
 
     strategy:
@@ -198,9 +200,78 @@ jobs:
       working-directory: linter/build
       run: ctest --output-on-failure --no-tests=error -C Release -j 2
 
+  test-darwin:
+    needs: [lint]
+
+    strategy:
+      matrix:
+        os: [macos-14]
+
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: linter
+
+    env:
+      CC: /opt/homebrew/opt/llvm/bin/clang
+      CXX: /opt/homebrew/opt/llvm/bin/clang++
+      CLANG_DIR: '/opt/homebrew/opt/llvm/bin/clang'
+      LLVM_DIR: '/opt/homebrew/opt/llvm'
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+
+    - name: Install LLVM 17
+      run: |
+          brew install llvm@17
+          brew install clang-format
+
+    - name: Install static analyzers
+      if: matrix.os == 'macos-14'
+      run: >-
+        brew install cppcheck
+
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with: { python-version: "3.12" }
+    
+    - name: Install Python Developer Headers
+      run: brew install python@3.12
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        pip3 install conan 
+        conan profile detect
+        python3 ../.github/scripts/write_config.py
+        conan install . -s build_type=Release -b missing
+
+    - name: Setup MultiToolTask
+      if: matrix.os == 'windows-2022'
+      run: |
+        Add-Content "$env:GITHUB_ENV" 'UseMultiToolTask=true'
+        Add-Content "$env:GITHUB_ENV" 'EnforceProcessCountAcrossBuilds=true'
+
+    - name: Configure
+      shell: pwsh
+      run: cmake "--preset=ci-$("${{ matrix.os }}".split("-")[0])"
+
+    - name: Build
+      run: cmake --build build --config Release -j 2
+
+    - name: Install
+      run: cmake --install build --config Release --prefix prefix
+
+    - name: Test
+      working-directory: linter/build
+      run: ctest --output-on-failure --no-tests=error -C Release -j 2
+
+
   docs:
     # Deploy docs only when builds succeed
-    needs: [sanitize, test]
+    needs: [sanitize, test-darwin, test-linux]
 
     runs-on: ubuntu-22.04
     defaults:
@@ -272,7 +343,7 @@ jobs:
 
 
   deploy-dockerimage:
-      needs: [lint, sanitize, test]
+      needs: [lint, sanitize, test-darwin, test-linux]
 
       # don't want to deploy if PR
       if: github.event_name == 'push'

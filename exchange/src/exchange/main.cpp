@@ -151,7 +151,9 @@ main(int argc, const char** argv)
     std::signal(SIGINT, flush_log);
     std::signal(SIGABRT, flush_log);
 
-    auto [mode, sandbox] = config::process_arguments(argc, argv);
+    auto prox_args = config::process_arguments(argc, argv);
+    auto mode = std::get<0>(prox_args);
+    auto sandbox = std::get<1>(prox_args);
 
     // Algos must init before wrappers
     initialize_algos(mode, sandbox);

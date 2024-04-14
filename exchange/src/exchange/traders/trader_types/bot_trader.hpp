@@ -11,10 +11,10 @@ namespace nutc {
 namespace bots {
 
 class BotTrader : public manager::GenericTrader {
-    static uint
+    static uint64_t
     get_and_increment_user_id()
     {
-        static uint user_id = 0;
+        static uint64_t user_id = 0;
         return user_id++;
     }
 

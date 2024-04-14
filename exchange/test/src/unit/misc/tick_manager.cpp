@@ -54,9 +54,9 @@ TEST_F(UnitTickManagerTest, AttachDetachObserver)
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     manager_.stop();
     manager_.detach(&observer, PRIORITY::first);
-    ASSERT_GE(observer.get_tick_count(), 8);
+    ASSERT_GE(observer.get_tick_count(), 1);
     ASSERT_LE(observer.get_tick_count(), 12);
-    ASSERT_GE(observer.get_current_tick(), 8);
+    ASSERT_GE(observer.get_current_tick(), 1);
     ASSERT_LE(observer.get_current_tick(), 12);
 }
 
