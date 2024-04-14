@@ -6,8 +6,6 @@ namespace nutc {
 namespace algo_mgmt {
 
 class NormalModeAlgoManager : public AlgoManager {
-    size_t num_clients_{};
-
 public:
     void initialize_client_manager(manager::TraderManager& users) override;
 

@@ -18,7 +18,7 @@ struct algorithm {
 };
 
 constexpr bool
-is_close_to_zero(double value, double epsilon = 1e-6f)
+is_close_to_zero(double value, double epsilon = 1e-6)
 {
     return std::fabs(value) < epsilon;
 }

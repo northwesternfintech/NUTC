@@ -13,13 +13,16 @@ namespace algo_mgmt {
 void
 NormalModeAlgoManager::initialize_client_manager(manager::TraderManager& users)
 {
-    constexpr std::array<const char*, 3> REQUIRED_FIEDS = {
+    static constexpr const std::array<const char*, 3> REQUIRED_FIEDS = {
         "latestAlgoId", "firstName", "lastName"
     };
-    int starting_cap = config::Config::get_instance().constants().STARTING_CAPITAL;
+    static const int STARTING_CAPITAL =
+        config::Config::get_instance().constants().STARTING_CAPITAL;
 
     glz::json_t::object_t firebase_users = get_all_users();
-    for (const auto& [user_id, user] : firebase_users) {
+    for (const auto& user_it : firebase_users) {
+        const auto& user_id = user_it.first;
+        const auto& user = user_it.second;
         bool contains_all_fields = std::all_of(
             REQUIRED_FIEDS.begin(), REQUIRED_FIEDS.end(),
             [&user](const char* field) { return user.contains(field); }
@@ -34,7 +37,7 @@ NormalModeAlgoManager::initialize_client_manager(manager::TraderManager& users)
         );
         std::string algo_id = user["latestAlgoId"].get<std::string>();
         users.add_trader<manager::RemoteTrader>(
-            user_id, full_name, algo_id, starting_cap
+            user_id, full_name, algo_id, STARTING_CAPITAL
         );
     }
 }

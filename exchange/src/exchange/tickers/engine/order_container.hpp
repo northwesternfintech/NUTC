@@ -59,7 +59,7 @@ public:
         return (bids_.begin()->price + asks_.begin()->price) / 2;
     }
 
-    std::pair<uint, uint>
+    std::pair<size_t, size_t>
     get_spread_nums() const
     {
         return {asks_.size(), bids_.size()};
