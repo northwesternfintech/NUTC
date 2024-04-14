@@ -70,10 +70,6 @@ RabbitMQ::handleIncomingMessages(const std::string& uid)
             [&](auto&& arg) {
                 using T = std::decay_t<decltype(arg)>;
                 if constexpr (std::is_same_v<T, ObUpdate>) {
-                    /*log_i(
-                        wrapper_rabbitmq, "Received order book update: {}",
-                        glz::write_json(std::get<ObUpdate>(data))
-                    );*/
                     ObUpdate update = std::get<ObUpdate>(data);
                     std::string side =
                         update.side == messages::SIDE::BUY ? "BUY" : "SELL";
@@ -83,10 +79,6 @@ RabbitMQ::handleIncomingMessages(const std::string& uid)
                     return;
                 }
                 else if constexpr (std::is_same_v<T, Match>) {
-                    /*log_i(
-                        wrapper_rabbitmq, "Received match: {}",
-                        glz::write_json(std::get<Match>(data))
-                    );*/
                     Match match = std::get<Match>(data);
                     std::string side =
                         match.side == messages::SIDE::BUY ? "BUY" : "SELL";
@@ -107,10 +99,6 @@ RabbitMQ::handleIncomingMessages(const std::string& uid)
                             match.seller_capital
                         );
                     }
-                    return;
-                }
-                else {
-                    return;
                 }
             },
             std::move(data)

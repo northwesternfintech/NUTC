@@ -10,7 +10,7 @@ class Recipe(ConanFile):
 
     def requirements(self):
         # Exchange
-        self.requires("fmt/[>=10.1.0]")
+        self.requires("fmt/10.1.1")
         self.requires("quill/3.3.1")
         self.requires("rabbitmq-c/0.13.0")
         self.requires("libcurl/8.2.1")

@@ -3,7 +3,7 @@
 #include <cmath>
 
 #ifndef uint
-    typedef unsigned int uint;
+typedef unsigned int uint;
 #endif
 
 namespace nutc {
@@ -13,7 +13,7 @@ enum class SIDE { BUY, SELL };
 
 namespace util {
 constexpr bool
-is_close_to_zero(double value, double epsilon = 1e-6f)
+is_close_to_zero(double value, double epsilon = 1e-6)
 {
     return std::fabs(value) < epsilon;
 }

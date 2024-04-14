@@ -6,10 +6,9 @@ namespace nutc {
 namespace concurrency {
 
 class ExchangeLock {
-    std::atomic_flag flag_;
+    std::atomic_flag flag_{};
 
-    ExchangeLock() : flag_(ATOMIC_FLAG_INIT) {}
-
+    ExchangeLock() = default;
     ~ExchangeLock() = default;
 
 public:

@@ -168,7 +168,9 @@ main(int argc, const char** argv)
 
     manager::TraderManager& users = manager::TraderManager::get_instance();
 
-    auto [mode, sandbox] = process_arguments(argc, argv);
+    auto prox_args = process_arguments(argc, argv);
+    auto mode = std::get<0>(prox_args);
+    auto sandbox = std::get<1>(prox_args);
 
     auto& rmq_conn = rabbitmq::RabbitMQConnectionManager::get_instance();
 

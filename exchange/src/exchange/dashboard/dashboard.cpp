@@ -220,37 +220,37 @@ Dashboard::displayPerformance(WINDOW* window, int start_y)
     if (tick_manager.get_current_tick() < 100) {
         mvwprintw(
             window, start_y + 4, window->_maxx / 2 - 23,
-            "Current tick (%lu) below 100. Not enough data",
+            "Current tick (%llu) below 100. Not enough data",
             tick_manager.get_current_tick()
         );
         return;
     }
     mvwprintw(
-        window, start_y++, window->_maxx / 2 - 8, "Current Tick: %lu",
+        window, start_y++, window->_maxx / 2 - 8, "Current Tick: %llu",
         tick_manager.get_current_tick()
     );
     mvwprintw(
-        window, start_y++, window->_maxx / 2 - 13, "Top 1p tick times(ms): %lu",
+        window, start_y++, window->_maxx / 2 - 13, "Top 1p tick times(ms): %llu",
         metrics.top_1p_ms.count()
     );
     mvwprintw(
-        window, start_y++, window->_maxx / 2 - 13, "Top 5p tick times(ms): %lu",
+        window, start_y++, window->_maxx / 2 - 13, "Top 5p tick times(ms): %llu",
         metrics.top_5p_ms.count()
     );
     mvwprintw(
-        window, start_y++, window->_maxx / 2 - 13, "Top 10p tick times(ms): %lu",
+        window, start_y++, window->_maxx / 2 - 13, "Top 10p tick times(ms): %llu",
         metrics.top_10p_ms.count()
     );
     mvwprintw(
-        window, start_y++, window->_maxx / 2 - 13, "Top 50p tick times(ms): %lu",
+        window, start_y++, window->_maxx / 2 - 13, "Top 50p tick times(ms): %llu",
         metrics.top_50p_ms.count()
     );
     mvwprintw(
-        window, start_y++, window->_maxx / 2 - 13, "Average tick time(ms): %lu",
+        window, start_y++, window->_maxx / 2 - 13, "Average tick time(ms): %llu",
         metrics.avg_tick_ms.count()
     );
     mvwprintw(
-        window, start_y++, window->_maxx / 2 - 12, "Median tick time(ms): %lu",
+        window, start_y++, window->_maxx / 2 - 12, "Median tick time(ms): %llu",
         metrics.median_tick_ms.count()
     );
     mvwprintw(

@@ -15,6 +15,10 @@ namespace messages {
 
 struct StartTime {
     int64_t start_time_ns;
+
+    StartTime() = default;
+
+    StartTime(int64_t stns) : start_time_ns(stns) {}
 };
 
 /**
@@ -29,6 +33,8 @@ struct Match {
     std::string seller_id;
     double buyer_capital;
     double seller_capital;
+
+    Match() = default;
 
     Match(
         std::string ticker, SIDE side, double price, double quantity, std::string bid,
@@ -48,6 +54,12 @@ struct ObUpdate {
     SIDE side;
     double price;
     double quantity;
+
+    ObUpdate() = default;
+
+    ObUpdate(std::string ticker, SIDE side, double price, double quantity) :
+        ticker(ticker), side(side), price(price), quantity(quantity)
+    {}
 
     bool
     operator==(const ObUpdate& other) const
