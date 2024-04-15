@@ -1,33 +1,42 @@
-# NUTC Monorepo
 
-This monorepo holds all relevant repositories for the Northwestern Trading Competition project. The details of each are described below.
+# Northwestern Trading Competition Monorepo
 
-## Exchange
-The exchange is the core of the trading competition. It handles spawning in algorithm wrappers, receiving and matching orders, and many other tasks.
+## Introduction
 
-## Client
-The client is a wrapper over user-submitted (currently Python) algorithms. It exposes a function for algorithms to make stock purchases on the exchange, and executes callbacks when certain events occur (such as an order executing).
+The Northwestern Trading Competition (NUTC) is a contest where participants submit trading algorithms to compete in a simulated market environment. These algorithms are built from a provided template and interact with real-time simulated market data, executing arbitrary stock transactions. The objective is to maximize profit through strategic buying and selling of stocks.
 
-## Analyzer
-The exchange creates a log detailing events that occurred during the competition, such as order placement, execution, etc. The analyzer consumes this log and creates metrics that are displayable for web visualizers.
+This document outlines the structure and key functionalities of the five fundamental components that make up the NUTC.
 
-## Linter
-The linter is the primary way of testing user-submitted algorithms before the contest. It is (currently) designed to operate in a google cloud run environment, being triggered by user algorithm uploads.
+## Development Documentation
 
-## Web
-NUTC's web interface. It includes application, authentication, algorithm submission, and more.
+For detailed development documentation for NU Fintech, please refer to this [Google Docs link](https://docs.google.com/document/d/1yd7IGoILPUgHMdyfE8xAfjnyZ0ktbUPt0k9BOclE-oA/edit?usp=sharing).
 
-# Building
-To initialize and build all repos, follow the steps below
-1. Conan
-- `pip install conan`
-- `dnf install cmake`
-- `dnf install go-task`
-- `dnf install perl`
-- `conan profile detect`
-- `dnf install python3.11`
-- `dnf install python3.11-devel`
-- Copy `.conan2/profiles/default` to `.conan2/profiles/cpp20` 
-- Change compiler.cppstd from gnu14 to gnu20
-- Change compiler.version from 8 to 13 on Linux, or to 16 on Mac
-2. `task init-all`
+## Components
+
+### Algo Wrapper
+
+The wrapper manages a single user-submitted algorithm within a Python interpreter (pybind). It acts as an intermediary between the algorithm and the exchange, receiving market information from the exchange and forwarding it to the algorithm via callbacks. The wrapper also binds a Python function (`place_market_order`) to a C++ function that sends market order messages to the exchange.
+
+Each algorithm operates within its own process, ensuring isolation from the exchange and other algorithms. This setup enhances control over the algorithm, allowing limitations on certain functions and rate limiting order calls.
+
+Location: `NUTC/exchange/src/wrapper`
+
+Note: The wrapper code is some of the oldest in the codebase and is of low quality. Contributions to its improvement are welcome.
+
+### Exchange
+
+The exchange serves as the core of the NUTC and is the largest component. It performs the following key tasks:
+
+- Spawns a wrapper process for each participant's algorithm.
+- Handles the processing of market orders on each tick of the simulated exchange.
+- Matches all existing market orders.
+- Sends updates for matched orders.
+- Displays a dashboard with metrics for performance, bots, traders, etc.
+
+Communication between the exchange and the algorithm wrappers is facilitated through RabbitMQ, with frequent messages including market orders, order book updates, and matches.
+
+Bots (market makers, retail traders, etc.) run within the exchange itself and interact through function calls rather than messages.
+
+### Web Portal
+
+The NUTC web portal allows participants to view competition information, submit algorithms, and access extensive results from both testing and live competitions.
