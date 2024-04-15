@@ -56,9 +56,9 @@ tasks:
     cmds:
       - cmake --preset={{.PRESET}} {{.DASH_FLAG}}
 
-  check-and-start-services:
+  check-and-start-rmq:
     cmds:
-      - ./scripts/check_rabbitmq.sh
+      - if [ "{{.MODE}}" != "BOTS" ]; then ./scripts/check_rabbitmq.sh; fi
 
   build:
     dir: .
@@ -76,7 +76,7 @@ tasks:
       NUTC_PATH: '{{if eq .RELEASE_BUILD "True"}}build/{{.NAME}}{{else}}build/dev/{{.NAME}}{{end}}'
     cmds:
       - task: build
-      - task: check-and-start-services
+      - task: check-and-start-rmq
       - task: new-log-dir
       - gdb ./{{ .NUTC_PATH }}
 
@@ -88,7 +88,7 @@ tasks:
       MODE_FLAG: '{{if eq .MODE "BOTS"}}--bots-only{{else if eq .MODE "DEV"}}--dev{{end}}'
     cmds:
       - task: build
-      - task: check-and-start-services
+      - task: check-and-start-rmq
       - task: new-log-dir
       - ./{{ .NUTC_PATH }} {{ .MODE_FLAG }}
       - task: kill-wrappers
@@ -117,7 +117,7 @@ tasks:
       TEST_DIR: 'build{{if eq .RELEASE_BUILD "False"}}/dev{{end}}/test'
     cmds:
       - task: build
-      - task: check-and-start-services
+      - task: check-and-start-rmq
       - echo $NUTC_WRAPPER_BINARY_PATH
       - cp -r test/test_algos {{.TEST_DIR}}
       - cp config.yml {{.TEST_DIR}}/config.yml
