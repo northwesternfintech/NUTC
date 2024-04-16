@@ -62,6 +62,7 @@ add_library(
     
     src/exchange/dashboard/state/ticker_state.cpp
     src/exchange/concurrency/pin_threads.cpp
+    src/exchange/concurrency/exchange_lock.cpp
 
     src/exchange/config/argparse.cpp
 )

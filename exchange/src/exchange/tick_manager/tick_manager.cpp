@@ -11,7 +11,7 @@ namespace ticks {
 auto
 TickManager::notify_tick_() // NOLINT
 {
-    concurrency::ExchangeLock::get_instance().lock();
+    concurrency::ExchangeLock::lock();
     auto start = std::chrono::high_resolution_clock::now();
     for (TickObserver* observer : first_observers_) {
         observer->on_tick(current_tick_);
@@ -25,7 +25,7 @@ TickManager::notify_tick_() // NOLINT
         observer->on_tick(current_tick_);
     }
 
-    concurrency::ExchangeLock::get_instance().unlock();
+    concurrency::ExchangeLock::unlock();
     auto end = std::chrono::high_resolution_clock::now();
     return end - start;
 }

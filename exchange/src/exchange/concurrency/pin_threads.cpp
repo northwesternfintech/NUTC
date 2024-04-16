@@ -1,3 +1,4 @@
+#include "pin_threads.hpp"
 #include "exchange/logging.hpp"
 
 #ifdef __linux__
@@ -8,10 +9,11 @@
 namespace nutc {
 namespace concurrency {
 
-void
-pin_to_core(size_t core_num, std::string thread_name)
-{
+// TODO: name thread
 #ifdef __linux__
+void
+pin_to_core(size_t core_num, const std::string& thread_name)
+{
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
 
@@ -27,13 +29,17 @@ pin_to_core(size_t core_num, std::string thread_name)
         abort();
     }
     log_i(main, "Pinned {} thread to core {}", thread_name, core_num);
+}
 #else
+void
+pin_to_core(size_t, const std::string&)
+{
     log_e(
         main, "pin_to_core not implemented for this platform. Both threads may run on "
               "the same core. This is okay for testing, but not for production."
     );
-#endif
 }
+#endif
 
 void
 pin_to_core(size_t core_num)

@@ -17,10 +17,10 @@ RabbitMQConsumer::handle_incoming_messages(engine_manager::EngineManager& engine
 )
 {
     while (true) {
-        concurrency::ExchangeLock::get_instance().lock();
+        concurrency::ExchangeLock::lock();
         auto incoming_message = consume_message(10);
         if (!incoming_message.has_value()) {
-            concurrency::ExchangeLock::get_instance().unlock();
+            concurrency::ExchangeLock::unlock();
             continue;
         }
 
@@ -44,7 +44,7 @@ RabbitMQConsumer::handle_incoming_messages(engine_manager::EngineManager& engine
             },
             std::move(incoming_message.value())
         );
-        concurrency::ExchangeLock::get_instance().unlock();
+        concurrency::ExchangeLock::unlock();
     }
 }
 

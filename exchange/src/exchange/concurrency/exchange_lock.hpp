@@ -5,36 +5,43 @@
 namespace nutc {
 namespace concurrency {
 
+/**
+ * @brief A simple lock to prevent multiple threads from accessing the exchange at the
+ * same time
+ */
 class ExchangeLock {
     std::atomic_flag flag_{};
 
     ExchangeLock() = default;
     ~ExchangeLock() = default;
 
-public:
-    ExchangeLock(ExchangeLock const&) = delete;
-    ExchangeLock& operator=(ExchangeLock const&) = delete;
-    ExchangeLock(ExchangeLock&&) = delete;
-    ExchangeLock& operator=(ExchangeLock&&) = delete;
-
     static ExchangeLock&
-    get_instance()
+    get_instance_()
     {
         static ExchangeLock instance;
         return instance;
     }
 
-    void
-    lock()
-    {
-        while (flag_.test_and_set(std::memory_order_acquire)) {}
-    }
+    void lock_();
 
-    void
-    unlock()
-    {
-        flag_.clear(std::memory_order_release);
-    }
+    void unlock_();
+
+public:
+    /**
+     * @brief Block until we can acquire the lock
+     */
+    static void lock();
+
+    /**
+     * @brief Instantly unlock the exchange
+     * @note Assumes (and asserts, in dev mode) that it is already locked
+     */
+    static void unlock();
+
+    ExchangeLock(ExchangeLock const&) = delete;
+    ExchangeLock& operator=(ExchangeLock const&) = delete;
+    ExchangeLock(ExchangeLock&&) = delete;
+    ExchangeLock& operator=(ExchangeLock&&) = delete;
 };
 
 } // namespace concurrency
