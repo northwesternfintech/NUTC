@@ -40,6 +40,7 @@ add_library(
 
     src/exchange/bots/bot_container.cpp
     src/exchange/bots/bot_types/retail.cpp
+    src/exchange/bots/bot_types/market_maker.cpp
 
     src/exchange/tickers/engine/engine.cpp
     src/exchange/tickers/engine/order_container.cpp

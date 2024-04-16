@@ -97,18 +97,25 @@ public:
         return capital_delta_;
     }
 
-    // will be removed soon, making these changes iteratively
-    virtual void
-    process_order_add(const std::string&, messages::SIDE, double, double)
-    {}
-
-    // For now, only bots care about this
-    // ticker, side, price, quantity
+    /**
+     * @brief Triggered when an order this bot created expires after
+     * order_expiration_ticks, we want to let the trader know
+     * @note For now, only bots care about this
+     * @param ticker
+     * @param quantity
+     * @param price
+     * @param quantity
+     */
     virtual void
     process_order_expiration(const std::string&, messages::SIDE, double, double)
     {}
 
-    // ticker, price, side, quantity
+    // NOLINTEND
+
+    /**
+     * @brief Triggered when an order this bot created matches
+     * @note Implementing classes MUST update capital and holdings respectively
+     */
     virtual void process_order_match(
         const std::string& ticker, messages::SIDE side, double price, double quantity
     );

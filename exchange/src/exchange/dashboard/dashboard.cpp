@@ -160,11 +160,11 @@ Dashboard::display_stock_ticker_data(
             state.total_capital_held_
         );
         mvwprintw(
-            window, start_y++, start_x, "%s min/max/avg num bids: %lu %lu %.2f",
+            window, start_y++, start_x, "%s min/max/avg num bids: %.2f %.2f %.2f",
             bot_type, state.min_open_bids_, state.max_open_bids_, state.avg_open_bids_
         );
         mvwprintw(
-            window, start_y++, start_x, "%s min/max/avg num asks: %lu %lu %.2f",
+            window, start_y++, start_x, "%s min/max/avg num asks: %.2f %.2f %.2f",
             bot_type, state.min_open_asks_, state.max_open_asks_, state.avg_open_asks_
         );
         mvwprintw(
