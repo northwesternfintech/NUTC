@@ -1,12 +1,8 @@
 #pragma once
 
-#include "exchange/config.h"
-#include "exchange/logging.hpp"
-
 #include <glaze/glaze.hpp>
 
 #include <fstream>
-#include <optional>
 #include <string>
 
 namespace nutc {
@@ -39,46 +35,22 @@ enum class MESSAGE_TYPE { // needs to be changed to something better, but I will
 };
 
 class Logger {
-    /**
-     * @brief The file name to log events to
-     */
     std::string file_name_;
-
-    /**
-     * @brief The output file object
-     */
     std::ofstream output_file_;
 
 public:
-    /**
-     * @brief Construct a new Logger object
-     *
-     * @param file_name File name to log to
-     */
-
     static Logger& get_logger();
 
     void flush();
 
-    // Logger(const Logger&) = delete;
-    // Logger(Logger&&) = delete;
-    // Logger& operator=(const Logger&) = delete;
-    // Logger& operator=(Logger&&) = delete;
+    Logger(const Logger&) = delete;
+    Logger(Logger&&) = delete;
+    Logger& operator=(const Logger&) = delete;
+    Logger& operator=(Logger&&) = delete;
 
-    /**
-     * @brief Log an event to this Logger's file
-     *
-     * @param json_message the message to log
-     * @param uid optional UID to log with this message
-     */
     template <GlazeMetaSpecialized T>
     void log_event(const T& json_message);
 
-    /**
-     * @brief Get the file name string
-     *
-     * @return std::string
-     */
     [[nodiscard]] const std::string&
     get_file_name() const
     {
@@ -86,21 +58,23 @@ public:
     }
 
 private:
-    explicit Logger(std::string file_name) :
-        file_name_(file_name), output_file_(file_name, std::ios::out | std::ios::app)
+    explicit Logger(const std::string& file_name) :
+        file_name_(file_name),
+        output_file_(file_name, std::ios::out | std::ios::app)
     {}
 };
 
 } // namespace events
 } // namespace nutc
 
+// NOLINTBEGIN
 template <nutc::events::GlazeMetaSpecialized T>
 struct glz::meta<nutc::events::WithTimestamp<T>> {
     using U = nutc::events::WithTimestamp<T>;
-    /* clang-format off */
     static constexpr auto value = object(
         "data", [](auto&& self) -> auto& { return self.data; }, // Serialize orig. data
         "timestamp", [](auto&& self) -> auto& { return self.timestamp; } // Timestamp
     );
-    /* clang-format on */
 };
+
+// NOLINTEND

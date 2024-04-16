@@ -2,6 +2,7 @@
 #include "exchange/tickers/engine/order_storage.hpp"
 #include "exchange/traders/trader_manager.hpp"
 #include "exchange/traders/trader_types/local_trader.hpp"
+#include "shared/util.hpp"
 #include "test_utils/macros.hpp"
 
 #include <gtest/gtest.h>
@@ -45,16 +46,4 @@ TEST_F(UnitLoggingOrders, LogMarketOrders)
 
     EXPECT_NO_FATAL_FAILURE(logger.log_event(order1));
     EXPECT_NO_FATAL_FAILURE(logger.log_event(order2));
-}
-
-TEST_F(UnitLoggingOrders, LogMatches)
-{
-    StoredOrder order1{manager_.get_trader("ABC"), BUY, "ETHUSD", 1, 1, 0};
-    StoredOrder order2{manager_.get_trader("DEF"), SELL, "ETHUSD", 1, 1, 0};
-
-    auto matches = add_to_engine_(order1);
-    auto matches2 = add_to_engine_(order2);
-
-    auto& logger = Logger::get_logger();
-    // EXPECT_NO_FATAL_FAILURE(logger.log_event(matches2.at(0)));
 }

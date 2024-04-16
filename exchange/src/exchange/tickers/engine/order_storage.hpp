@@ -2,6 +2,7 @@
 #include "exchange/traders/trader_types/generic_trader.hpp"
 
 #include <fmt/format.h>
+#include <glaze/glaze.hpp>
 
 #include <string>
 

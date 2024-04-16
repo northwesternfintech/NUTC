@@ -4,10 +4,20 @@
 #include "exchange/logging.hpp"
 #include "exchange/rabbitmq/publisher/RabbitMQPublisher.hpp"
 #include "exchange/tickers/engine/level_update_generator.hpp"
+#include "exchange/utils/logger/logger.hpp"
 #include "shared/config/config_loader.hpp"
 
 namespace nutc {
 namespace engine_manager {
+
+namespace {
+bool
+both_bots(const matching::StoredMatch& match)
+{
+    return match.buyer->get_type() == manager::TraderType::BOT
+           && match.seller->get_type() == manager::TraderType::BOT;
+}
+} // namespace
 
 void
 EngineManager::on_tick(uint64_t new_tick)
@@ -26,12 +36,18 @@ EngineManager::on_tick(uint64_t new_tick)
         std::vector<Match> glz_matches;
         glz_matches.reserve(matches_.size());
         for (const auto& match : matches_) {
+            if (both_bots(match))
+                continue;
             glz_matches.emplace_back(
                 match.ticker, match.side, match.price, match.quantity,
                 match.buyer->get_id(), match.seller->get_id(),
                 match.buyer->get_capital(), match.seller->get_capital()
             );
         }
+
+        std::ranges::for_each(glz_matches, [](const auto& match) {
+            events::Logger::get_logger().log_event(match);
+        });
 
         std::vector<ObUpdate> updates = matching::get_updates(
             ticker, last_order_containers_[ticker], engine.get_order_container()

@@ -23,7 +23,7 @@ import (
 	"go.uber.org/zap"
 )
 
-const dockerTimeout = time.Minute * 1
+const dockerTimeout = time.Second * 15
 const firebaseStorageUrl = "https://firebasestorage.googleapis.com/v0/b/nutc-web.appspot.com/o"
 const firebaseApiKey = "AIzaSyCo2l3x2DMhg5CaNy1Pyvknk_GK8v34iUc"
 
@@ -132,7 +132,7 @@ func algoTestingHandler(w http.ResponseWriter, r *http.Request) {
 
 	// wait 10 seconds and check if the container is still running
 	time.Sleep(10 * time.Second)
-	inspect, err := cli.ContainerInspect(ctx, resp.ID)
+	inspect, err := cli.ContainerInspect(context.Background(), resp.ID)
 	if err != nil {
 		sugar.Errorf("Failed to inspect docker container: %v", err)
 		http.Error(w, "Failed to inspect docker container", http.StatusInternalServerError)

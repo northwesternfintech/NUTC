@@ -4,6 +4,7 @@
 #include "exchange/tickers/engine/order_storage.hpp"
 #include "exchange/tickers/manager/ticker_manager.hpp"
 #include "exchange/traders/trader_manager.hpp"
+#include "exchange/utils/logger/logger.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
 namespace nutc {
@@ -19,10 +20,12 @@ RabbitMQOrderHandler::handle_incoming_market_order(
     if (!engine_manager.has_engine(order.ticker))
         return;
 
+    events::Logger::get_logger().log_event(order);
+
     auto current_tick = ticks::TickManager::get_instance().get_current_tick();
     auto trader = manager::TraderManager::get_instance().get_trader(order.client_id);
     auto stored_order =
-        matching::StoredOrder{trader,         order.side,  order.ticker,
+        matching::StoredOrder{trader,         order.side,  std::move(order.ticker),
                               order.quantity, order.price, current_tick};
 
     engine_manager.match_order(stored_order);

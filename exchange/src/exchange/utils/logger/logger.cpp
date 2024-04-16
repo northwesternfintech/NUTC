@@ -1,5 +1,6 @@
 #include "exchange/utils/logger/logger.hpp" // includes fstream, string, optional
 
+#include "exchange/config.h"
 #include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
@@ -49,14 +50,11 @@ Logger::log_event(const T& json_message)
 {
     // If file is not open, throw an error to the error logger
     if (!output_file_.is_open()) [[unlikely]] {
-        // log_e(events, "Output file {} not open, unable to log event",
-        // get_file_name());
-        return;
+        throw std::runtime_error("Output file not open");
     }
 
     WithTimestamp<T> json_message_with_ts = {json_message};
 
-    // TODO(andrlime): fix type
     std::string buffer = glz::write_json(json_message_with_ts);
 
     // Log to the main log too
@@ -64,7 +62,9 @@ Logger::log_event(const T& json_message)
 
     // Write start of JSON
     output_file_ << buffer << "\n";
-    output_file_.flush();
+
+    // TODO: remove later, needed for sandbox
+    flush();
 }
 
 // Explicit instantiations

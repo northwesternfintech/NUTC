@@ -23,15 +23,17 @@ RUN apt update \
     && apt install -y rabbitmq-server \
     && pip install numpy pandas polars scipy scikit-learn prophet attrs cppyy lightgbm xgboost 
 
-COPY --from=build /app/exchange/config.yml .
-COPY --from=build /app/exchange/build/NUTC /bin/NUTC-exchange
-COPY --from=build /app/exchange/build/WRAPPER /bin/WRAPPER
+COPY --from=build /app/exchange/config.yml /app/config.yml
+COPY --from=build /app/exchange/build/NUTC /app/NUTC-exchange
+COPY --from=build /app/exchange/build/WRAPPER /app/NUTC-wrapper
 COPY ./exchange/scripts/docker-start.sh /app/docker-start.sh
 
-RUN chmod +x /bin/NUTC-exchange /bin/WRAPPER /app/docker-start.sh
+RUN ln -s /app/NUTC-exchange /usr/local/bin/NUTC-exchange
+RUN chmod +x /app/NUTC-exchange /app/NUTC-wrapper /app/docker-start.sh
 
 ENV RABBITMQ_DEFAULT_USER="NUFT"
 ENV RABBITMQ_DEFAULT_PASS="ADMIN"
-ENV NUTC_WRAPPER_BINARY_PATH="/bin/WRAPPER"
+ENV NUTC_WRAPPER_BINARY_PATH="/app/NUTC-wrapper"
+ENV NUTC_CONFIG_FILE="/app/config.yml"
 
 ENTRYPOINT ["./app/docker-start.sh"]
