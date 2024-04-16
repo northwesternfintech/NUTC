@@ -17,7 +17,7 @@ class DevModeAlgoInitializer : public AlgoInitializer {
     // Limit to 255
     const uint8_t num_algos_;
 
-    // Create the files outselves if not provided
+    // Create the files ourselves if not provided
     std::vector<fs::path> algo_filepaths_;
 
 public:

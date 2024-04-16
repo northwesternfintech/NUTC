@@ -15,7 +15,7 @@ public:
         user_id_(user_id), algo_id_(algo_id)
     {}
 
-    void initialize_trader_container(manager::TraderManager& users) const final;
+    void initialize_trader_container(manager::TraderManager& traders) const final;
 
     void
     initialize_files() final

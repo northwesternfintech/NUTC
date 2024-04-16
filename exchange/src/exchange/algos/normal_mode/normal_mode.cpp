@@ -19,7 +19,7 @@ NormalModeAlgoInitializer::initialize_trader_container(manager::TraderManager& t
     constexpr const std::array<const char*, 3> REQUIRED_DB_FIELDS = {
         "latestAlgoId", "firstName", "lastName"
     };
-    const int STARTING_CAPITAL =
+    const int starting_capital =
         config::Config::get_instance().constants().STARTING_CAPITAL;
 
     glz::json_t::object_t firebase_users = get_remote_traders();
@@ -41,7 +41,7 @@ NormalModeAlgoInitializer::initialize_trader_container(manager::TraderManager& t
         );
         std::string algo_id = user["latestAlgoId"].get<std::string>();
         traders.add_trader<manager::RemoteTrader>(
-            user_id, full_name, algo_id, STARTING_CAPITAL
+            user_id, full_name, algo_id, starting_capital
         );
     }
 }

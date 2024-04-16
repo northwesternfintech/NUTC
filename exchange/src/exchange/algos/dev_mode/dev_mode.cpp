@@ -11,12 +11,13 @@ namespace nutc {
 namespace algos {
 
 void
-DevModeAlgoInitializer::initialize_trader_container(manager::TraderManager& users) const
+DevModeAlgoInitializer::initialize_trader_container(manager::TraderManager& traders
+) const
 {
     int starting_cap = config::Config::get_instance().constants().STARTING_CAPITAL;
 
     for (const fs::path& filepath : algo_filepaths_) {
-        users.add_trader<manager::LocalTrader>(filepath.string(), starting_cap);
+        traders.add_trader<manager::LocalTrader>(filepath.string(), starting_cap);
     }
 }
 
@@ -27,8 +28,8 @@ DevModeAlgoInitializer::initialize_files()
         return;
 
     for (uint8_t i = 0; i < num_algos_; i++) {
-        fs::path p{std::string(ALGO_DIR) + "/algo_" + std::to_string(i) + ".py"};
-        algo_filepaths_.push_back(p);
+        fs::path path{std::string(ALGO_DIR) + "/algo_" + std::to_string(i) + ".py"};
+        algo_filepaths_.push_back(path);
     }
 
     std::string content = file_ops::read_file_content("template.py");
