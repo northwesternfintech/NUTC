@@ -12,14 +12,14 @@ namespace messages {
  * @brief Sent by clients to the exchange to indicate they're initialized and may or may
  * not be participating in the competition
  */
-struct InitMessage {
+struct init_message {
     std::string client_id;
     bool ready;
 };
 
-struct MarketOrder {
+struct market_order {
     std::string client_id;
-    SIDE side;
+    util::Side side;
     std::string ticker;
     double quantity;
     double price;
@@ -30,18 +30,18 @@ struct MarketOrder {
 
 /// \cond
 template <>
-struct glz::meta<nutc::messages::MarketOrder> {
-    using T = nutc::messages::MarketOrder;
+struct glz::meta<nutc::messages::market_order> {
+    using t = nutc::messages::market_order;
     static constexpr auto value = object(
-        "client_id", &T::client_id, "side", &T::side, "ticker", &T::ticker, "quantity",
-        &T::quantity, "price", &T::price
+        "trader_id", &t::client_id, "ticker", &t::ticker, "side", &t::side, "quantity",
+        &t::quantity, "price", &t::price
     );
 };
 
 /// \cond
 template <>
-struct glz::meta<nutc::messages::InitMessage> {
-    using T = nutc::messages::InitMessage;
+struct glz::meta<nutc::messages::init_message> {
+    using T = nutc::messages::init_message;
     static constexpr auto value =
-        object("client_id", &T::client_id, "ready", &T::ready);
+        object("trader_id", &T::client_id, "ready", &T::ready);
 };

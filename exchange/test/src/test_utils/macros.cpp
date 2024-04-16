@@ -1,14 +1,14 @@
 #include "macros.hpp"
 
-#include "exchange/traders/trader_manager.hpp"
+#include "exchange/traders/trader_container.hpp"
 
 namespace nutc {
 namespace testing_utils {
 
-StoredOrder
-make_stored_order(MarketOrder& order, const manager::TraderManager& manager)
+stored_order
+make_stored_order(market_order& order, const traders::TraderContainer& manager)
 {
-    return StoredOrder{
+    return stored_order{
         manager.get_trader(order.client_id),
         order.side,
         order.ticker,
@@ -29,8 +29,8 @@ is_nearly_equal(double f_a, double f_b, double epsilon)
 
 bool
 validate_match(
-    const nutc::matching::StoredMatch& match, const std::string& ticker,
-    const std::string& buyer_id, const std::string& seller_id, messages::SIDE side,
+    const nutc::matching::stored_match& match, const std::string& ticker,
+    const std::string& buyer_id, const std::string& seller_id, util::Side side,
     double price, double quantity
 )
 {
@@ -42,8 +42,8 @@ validate_match(
 
 bool
 validate_ob_update(
-    const ObUpdate& update, const std::string& ticker, messages::SIDE side,
-    double price, double quantity
+    const ObUpdate& update, const std::string& ticker, util::Side side, double price,
+    double quantity
 )
 {
     return update.ticker == ticker && update.side == side
@@ -53,8 +53,8 @@ validate_ob_update(
 
 bool
 validate_market_order(
-    const MarketOrder& update, const std::string& client_id, const std::string& ticker,
-    messages::SIDE side, double price, double quantity
+    const market_order& update, const std::string& client_id, const std::string& ticker,
+    util::Side side, double price, double quantity
 )
 {
     return update.client_id == client_id && update.ticker == ticker

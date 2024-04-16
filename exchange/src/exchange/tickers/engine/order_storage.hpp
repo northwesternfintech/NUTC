@@ -8,30 +8,28 @@
 namespace nutc {
 namespace matching {
 
-using SIDE = messages::SIDE;
-
-struct StoredMatch {
-    std::shared_ptr<manager::GenericTrader> buyer;
-    std::shared_ptr<manager::GenericTrader> seller;
+struct stored_match {
+    std::shared_ptr<traders::GenericTrader> buyer;
+    std::shared_ptr<traders::GenericTrader> seller;
     std::string ticker;
-    SIDE side;
+    util::Side side;
     double price;
     double quantity;
 };
 
-struct StoredOrder {
-    std::shared_ptr<manager::GenericTrader> trader;
+struct stored_order {
+    std::shared_ptr<traders::GenericTrader> trader;
     // TODO(stevenewald): can get rid of
-    std::string ticker;
-    SIDE side;
-    double price;
-    double quantity;
-    uint64_t tick;
+    std::string ticker{};
+    util::Side side{};
+    double price{};
+    double quantity{};
+    uint64_t tick{};
 
     // Used to sort orders by time created
-    uint64_t order_index;
+    uint64_t order_index{};
 
-    StoredOrder() = default;
+    stored_order() = default;
 
     static uint64_t
     get_and_increment_global_index()
@@ -40,23 +38,23 @@ struct StoredOrder {
         return global_index++;
     }
 
-    StoredOrder(
-        std::shared_ptr<manager::GenericTrader> trader, SIDE side, std::string ticker,
-        double quantity, double price, uint64_t tick
+    stored_order(
+        std::shared_ptr<traders::GenericTrader> trader, util::Side side,
+        std::string ticker, double quantity, double price, uint64_t tick
     ) :
         trader(std::move(trader)),
         ticker(std::move(ticker)), side(side), price(std::round(price * 100) / 100),
         quantity(quantity), tick(tick), order_index(get_and_increment_global_index())
     {}
 
-    StoredOrder(StoredOrder&& other) noexcept :
+    stored_order(stored_order&& other) noexcept :
         trader(std::move(other.trader)), ticker(std::move(other.ticker)),
         side(other.side), price(other.price), quantity(other.quantity),
         tick(other.tick), order_index(other.order_index)
     {}
 
-    StoredOrder&
-    operator=(StoredOrder&& other) noexcept
+    stored_order&
+    operator=(stored_order&& other) noexcept
     {
         if (this != &other) {
             trader = std::move(other.trader);
@@ -70,11 +68,11 @@ struct StoredOrder {
         return *this;
     }
 
-    StoredOrder(const StoredOrder& other) = default;
-    StoredOrder& operator=(const StoredOrder& other) = default;
+    stored_order(const stored_order& other) = default;
+    stored_order& operator=(const stored_order& other) = default;
 
     bool
-    operator==(const StoredOrder& other) const
+    operator==(const stored_order& other) const
     {
         return trader->get_id() == other.trader->get_id() && ticker == other.ticker
                && side == other.side && util::is_close_to_zero(price - other.price)
@@ -85,16 +83,16 @@ struct StoredOrder {
     [[nodiscard]] std::string
     to_string() const
     {
-        std::string side_str = side == SIDE::BUY ? "BUY" : "SELL";
+        std::string side_str = side == util::Side::buy ? "BUY" : "SELL";
         return fmt::format(
-            "StoredOrder(client_id={}, side={}, ticker={}, quantity={}, "
+            "stored_order(client_id={}, side={}, ticker={}, quantity={}, "
             "price={})",
             trader->get_id(), side_str, ticker, quantity, price
         );
     }
 
     int
-    operator<=>(const StoredOrder& other) const
+    operator<=>(const stored_order& other) const
     {
         // assuming both sides are same
         // otherwise, this shouldn't even be called
@@ -105,14 +103,14 @@ struct StoredOrder {
                 return 1;
             return 0;
         }
-        if (this->side == SIDE::BUY) {
+        if (this->side == util::Side::buy) {
             if (this->price < other.price)
                 return -1;
             if (this->price > other.price)
                 return 1;
             return 0;
         }
-        if (this->side == SIDE::SELL) {
+        if (this->side == util::Side::sell) {
             if (this->price > other.price)
                 return -1;
             if (this->price < other.price)
@@ -123,7 +121,7 @@ struct StoredOrder {
     }
 
     [[nodiscard]] bool
-    can_match(const StoredOrder& other) const
+    can_match(const stored_order& other) const
     {
         if (this->side == other.side) [[unlikely]] {
             return false;
@@ -131,14 +129,16 @@ struct StoredOrder {
         if (this->ticker != other.ticker) [[unlikely]] {
             return false;
         }
-        if (this->side == SIDE::BUY && this->price < other.price) {
+        if (this->side == util::Side::buy && this->price < other.price) {
             return false;
         }
-        if (this->side == SIDE::SELL && this->price > other.price) {
+        if (this->side == util::Side::sell && this->price > other.price) {
             return false;
         }
         return true;
     }
+
+    ~stored_order() = default;
 };
 
 struct order_index {

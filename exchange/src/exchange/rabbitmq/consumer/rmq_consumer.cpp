@@ -1,9 +1,9 @@
-#include "RabbitMQConsumer.hpp"
+#include "rmq_consumer.hpp"
 
 #include "exchange/concurrency/exchange_lock.hpp"
 #include "exchange/logging.hpp"
-#include "exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
-#include "exchange/rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
+#include "exchange/rabbitmq/connection_handler/rmq_connection_handler.hpp"
+#include "exchange/rabbitmq/order_handler/rmq_order_handler.hpp"
 
 #include <utility>
 
@@ -17,10 +17,10 @@ RabbitMQConsumer::handle_incoming_messages(engine_manager::EngineManager& engine
 )
 {
     while (true) {
-        concurrency::ExchangeLock::get_instance().lock();
+        concurrency::ExchangeLock::lock();
         auto incoming_message = consume_message(10);
         if (!incoming_message.has_value()) {
-            concurrency::ExchangeLock::get_instance().unlock();
+            concurrency::ExchangeLock::unlock();
             continue;
         }
 
@@ -28,11 +28,11 @@ RabbitMQConsumer::handle_incoming_messages(engine_manager::EngineManager& engine
         std::visit(
             [&](auto&& arg) {
                 using t = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<t, messages::InitMessage>) {
+                if constexpr (std::is_same_v<t, messages::init_message>) {
                     log_c(rabbitmq, "Not expecting initialization message");
                     std::abort();
                 }
-                else if constexpr (std::is_same_v<t, messages::MarketOrder>) {
+                else if constexpr (std::is_same_v<t, messages::market_order>) {
                     RabbitMQOrderHandler::handle_incoming_market_order(
                         engine_manager, std::forward<t>(arg)
                     );
@@ -44,7 +44,7 @@ RabbitMQConsumer::handle_incoming_messages(engine_manager::EngineManager& engine
             },
             std::move(incoming_message.value())
         );
-        concurrency::ExchangeLock::get_instance().unlock();
+        concurrency::ExchangeLock::unlock();
     }
 }
 
@@ -99,7 +99,7 @@ RabbitMQConsumer::consume_message_as_string(int timeout_us)
     return message;
 }
 
-std::optional<std::variant<messages::InitMessage, messages::MarketOrder>>
+std::optional<std::variant<messages::init_message, messages::market_order>>
 RabbitMQConsumer::consume_message(int timeout_us)
 {
     std::optional<std::string> buf = consume_message_as_string(timeout_us);
@@ -107,7 +107,7 @@ RabbitMQConsumer::consume_message(int timeout_us)
         return std::nullopt;
     }
 
-    std::variant<messages::InitMessage, messages::MarketOrder> data;
+    std::variant<messages::init_message, messages::market_order> data;
     auto err = glz::read_json(data, buf.value());
     if (err) {
         std::abort();

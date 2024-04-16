@@ -11,8 +11,8 @@
 #include <rabbitmq-c/amqp.h>
 #include <rabbitmq-c/tcp_socket.h>
 
-using InitMessage = nutc::messages::InitMessage;
-using MarketOrder = nutc::messages::MarketOrder;
+using init_message = nutc::messages::init_message;
+using market_order = nutc::messages::market_order;
 using ObUpdate = nutc::messages::ObUpdate;
 using Match = nutc::messages::Match;
 using StartTime = nutc::messages::StartTime;
@@ -79,7 +79,7 @@ public:
      * @brief Callback for the market order function
      *
      * Used by the wrapper to trigger an order from the py/cpp client
-     * Bound to the publishMarketOrder function, but will the client_uid prefilled
+     * Bound to the publishmarket_order function, but will the client_uid prefilled
      *
      * @param uid The unique identifier for the client
      * @returns A function that takes the order parameters and publishes the order
@@ -113,7 +113,7 @@ private:
     [[nodiscard]] bool
     publishMessage(const std::string& queueName, const std::string& message);
     [[nodiscard]] bool initializeQueue(const std::string& queueName);
-    [[nodiscard]] bool publishMarketOrder(
+    [[nodiscard]] bool publishmarket_order(
         const std::string& client_uid, const std::string& side,
         const std::string& ticker, double quantity, double price
     );

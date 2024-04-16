@@ -1,6 +1,6 @@
 #pragma once
 
-#include "exchange/tick_manager/tick_observer.hpp"
+#include "exchange/tick_scheduler/tick_observer.hpp"
 
 #ifndef DASHBOARD
 namespace nutc {

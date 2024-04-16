@@ -13,7 +13,7 @@ shutdown, and error handling.
   - Purpose: Represent RabbitMQ or related errors.
     - `message`: Specific error details.
 
-- **InitMessage**
+- **init_message**
   - Purpose: Convey initialization status.
     - `client_uid`: Unique client identifier.
     - `ready`: Indicates if the client is ready.
@@ -22,7 +22,7 @@ shutdown, and error handling.
 
 For managing and processing orders within the trading system.
 
-- **MarketOrder**
+- **market_order**
 
   - Purpose: Submit an order to the market.
     - `client_uid`: Unique identifier for the client placing the order.

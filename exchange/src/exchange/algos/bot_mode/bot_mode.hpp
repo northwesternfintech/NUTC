@@ -3,21 +3,23 @@
 #include "exchange/algos/algo_manager.hpp"
 
 namespace nutc {
-namespace algo_mgmt {
+namespace algos {
 
 /**
  * @brief Does nothing on initialization
  */
-class BotModeAlgoManager : public AlgoManager {
+class BotModeAlgoInitializer : public AlgoInitializer {
 public:
+    constexpr BotModeAlgoInitializer() = default;
+
     constexpr void
-    initialize_client_manager(manager::TraderManager&) override
+    initialize_trader_container(traders::TraderContainer&) const final
     {}
 
     constexpr void
-    initialize_files() const override
+    initialize_files() final
     {}
 };
 
-} // namespace algo_mgmt
+} // namespace algos
 } // namespace nutc

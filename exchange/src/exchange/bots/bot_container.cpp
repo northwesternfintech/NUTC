@@ -2,22 +2,24 @@
 
 #include "exchange/tickers/engine/order_storage.hpp"
 #include "exchange/tickers/manager/ticker_manager.hpp"
-#include "exchange/traders/trader_manager.hpp"
+#include "exchange/traders/trader_container.hpp"
 
 #include <cmath>
 #include <cstdint>
 
 #include <random>
 
+namespace {
 double
 generate_gaussian_noise(double mean, double stddev)
 {
     static std::random_device rand{};
     static std::mt19937 gen{rand()};
-    std::normal_distribution<double> distr{mean, stddev};
+    static std::normal_distribution<double> distr{mean, stddev};
 
     return distr(gen);
 }
+} // namespace
 
 namespace nutc {
 
@@ -25,13 +27,15 @@ namespace bots {
 void
 BotContainer::on_tick(uint64_t current_tick)
 {
+    // This should be simpler. We shouldn't need the manager here
     auto& manager = engine_manager::EngineManager::get_instance();
-    auto theo = fabs(theo_generator_.generate_next_price() + brownian_offset_);
-    auto current = manager.get_midprice(ticker_);
+    auto current = manager.get_midprice(TICKER);
+
+    auto theo = fabs(theo_generator_.generate_next_price() + BROWNIAN_OFFSET);
     auto orders = BotContainer::on_new_theo(theo, current, current_tick);
 
     for (auto& order : orders) {
-        order.ticker = ticker_;
+        assert(order.ticker == TICKER);
         manager.match_order(order);
     }
 }
@@ -59,9 +63,9 @@ void
 BotContainer::add_single_bot_(double starting_capital)
 requires HandledBotType<BotType>
 {
-    manager::TraderManager& users = nutc::manager::TraderManager::get_instance();
+    traders::TraderContainer& users = nutc::traders::TraderContainer::get_instance();
 
-    auto retail_bot = users.add_trader<BotType>(ticker_, starting_capital);
+    auto retail_bot = users.add_trader<BotType>(TICKER, starting_capital);
     if constexpr (std::is_same_v<BotType, RetailBot>) {
         retail_bots_.insert({retail_bot->get_id(), retail_bot});
     }
@@ -73,16 +77,15 @@ requires HandledBotType<BotType>
 template void BotContainer::add_single_bot_<RetailBot>(double);
 template void BotContainer::add_single_bot_<MarketMakerBot>(double);
 
-std::vector<matching::StoredOrder>
+std::vector<matching::stored_order>
 BotContainer::on_new_theo(double new_theo, double current, uint64_t current_tick)
 {
     auto mm_new_theo = [new_theo, current_tick](
-                           auto& mm_trader, std::vector<matching::StoredOrder>& orders
+                           auto& mm_trader, std::vector<matching::stored_order>& orders
                        ) {
-        double noised_theo =
-            new_theo + static_cast<double>(generate_gaussian_noise(0, .02));
+        double noised_theo = new_theo + generate_gaussian_noise(0, .02);
 
-        std::vector<matching::StoredOrder> mm_orders =
+        std::vector<matching::stored_order> mm_orders =
             mm_trader->take_action(noised_theo, current_tick);
 
         orders.reserve(orders.size() + mm_orders.size());
@@ -94,7 +97,7 @@ BotContainer::on_new_theo(double new_theo, double current, uint64_t current_tick
 
     auto retail_new_theo = [new_theo, current, current_tick](
                                auto& retail_trader,
-                               std::vector<matching::StoredOrder>& orders
+                               std::vector<matching::stored_order>& orders
                            ) {
         double noised_theo =
             new_theo + static_cast<double>(generate_gaussian_noise(0, .1));
@@ -103,7 +106,7 @@ BotContainer::on_new_theo(double new_theo, double current, uint64_t current_tick
             orders.push_back(bot_order.value());
     };
 
-    std::vector<matching::StoredOrder> orders{};
+    std::vector<matching::stored_order> orders{};
     for (auto& [_, mm_trader] : market_makers_) {
         mm_new_theo(mm_trader, orders);
     }

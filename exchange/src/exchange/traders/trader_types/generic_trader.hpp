@@ -7,8 +7,8 @@
 #include <unordered_map>
 
 namespace nutc {
-namespace manager {
-enum TraderType { REMOTE, LOCAL, BOT };
+namespace traders {
+enum class TraderType { remote, local, bot };
 
 class GenericTrader : public std::enable_shared_from_this<GenericTrader> {
     const std::string USER_ID;
@@ -107,7 +107,7 @@ public:
      * @param quantity
      */
     virtual void
-    process_order_expiration(const std::string&, messages::SIDE, double, double)
+    process_order_expiration(const std::string&, util::Side, double, double)
     {}
 
     // NOLINTEND
@@ -117,7 +117,7 @@ public:
      * @note Implementing classes MUST update capital and holdings respectively
      */
     virtual void process_order_match(
-        const std::string& ticker, messages::SIDE side, double price, double quantity
+        const std::string& ticker, util::Side side, double price, double quantity
     );
 
     virtual void set_pid(const pid_t& pid) = 0;
@@ -125,5 +125,5 @@ public:
 
     virtual const std::string& get_algo_id() const = 0;
 };
-} // namespace manager
+} // namespace traders
 } // namespace nutc

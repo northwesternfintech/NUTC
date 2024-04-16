@@ -1,14 +1,14 @@
-#include "RabbitMQTraderManager.hpp"
+#include "rmq_wrapper_init.hpp"
 
 #include "exchange/logging.hpp"
-#include "exchange/rabbitmq/consumer/RabbitMQConsumer.hpp"
-#include "exchange/rabbitmq/publisher/RabbitMQPublisher.hpp"
+#include "exchange/rabbitmq/consumer/rmq_consumer.hpp"
+#include "exchange/rabbitmq/publisher/rmq_publisher.hpp"
 
 namespace nutc {
 namespace rabbitmq {
 
 void
-RabbitMQTraderManager::wait_for_clients(manager::TraderManager& manager)
+RabbitMQWrapperInitializer::wait_for_clients(traders::TraderContainer& manager)
 {
     size_t num_clients = manager.get_traders().size();
     log_i(rabbitmq, "Blocking until all {} clients are ready to start...", num_clients);
@@ -16,13 +16,13 @@ RabbitMQTraderManager::wait_for_clients(manager::TraderManager& manager)
 
     auto process_message = [&](const auto& message) {
         using t = std::decay_t<decltype(message)>;
-        if constexpr (std::is_same_v<t, messages::MarketOrder>) {
+        if constexpr (std::is_same_v<t, messages::market_order>) {
             log_i(
                 rabbitmq,
                 "Received market order before initialization complete. Ignoring..."
             );
         }
-        else if constexpr (std::is_same_v<t, messages::InitMessage>) {
+        else if constexpr (std::is_same_v<t, messages::init_message>) {
             log_i(
                 rabbitmq, "Received init message from client {} with status {}",
                 message.client_id, message.ready ? "ready" : "not ready"
@@ -49,8 +49,8 @@ RabbitMQTraderManager::wait_for_clients(manager::TraderManager& manager)
 }
 
 void
-RabbitMQTraderManager::send_start_time(
-    const manager::TraderManager& manager, size_t wait_seconds
+RabbitMQWrapperInitializer::send_start_time(
+    const traders::TraderContainer& manager, size_t wait_seconds
 )
 {
     using time_point = std::chrono::high_resolution_clock::time_point;

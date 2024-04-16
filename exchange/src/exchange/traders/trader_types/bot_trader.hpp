@@ -10,7 +10,7 @@
 namespace nutc {
 namespace bots {
 
-class BotTrader : public manager::GenericTrader {
+class BotTrader : public traders::GenericTrader {
     static uint64_t
     get_and_increment_user_id()
     {
@@ -46,10 +46,10 @@ public:
     BotTrader& operator=(const BotTrader& other) = delete;
     BotTrader& operator=(BotTrader&& other) = delete;
 
-    manager::TraderType
+    traders::TraderType
     get_type() const override
     {
-        return manager::TraderType::BOT;
+        return traders::TraderType::bot;
     }
 
     // Bots should override if they shouldn't be able to leverage
@@ -162,7 +162,7 @@ public:
     }
 
     void process_order_expiration(
-        const std::string& ticker, messages::SIDE side, double price, double quantity
+        const std::string& ticker, util::Side side, double price, double quantity
     ) override;
 };
 

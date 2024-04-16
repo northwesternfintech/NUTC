@@ -2,7 +2,7 @@
 
 #include "exchange/bots/bot_container.hpp"
 #include "exchange/logging.hpp"
-#include "exchange/rabbitmq/publisher/RabbitMQPublisher.hpp"
+#include "exchange/rabbitmq/publisher/rmq_publisher.hpp"
 #include "exchange/tickers/engine/level_update_generator.hpp"
 #include "shared/config/config_loader.hpp"
 
@@ -13,7 +13,7 @@ void
 EngineManager::on_tick(uint64_t new_tick)
 {
     for (auto& [ticker, engine] : engines_) {
-        std::vector<matching::StoredOrder> expired_orders =
+        std::vector<matching::stored_order> expired_orders =
             engine.expire_old_orders(new_tick);
 
         for (const auto& order : expired_orders) {
@@ -23,7 +23,7 @@ EngineManager::on_tick(uint64_t new_tick)
         }
 
         // TODO: do this in a converter
-        std::vector<Match> glz_matches;
+        std::vector<messages::Match> glz_matches;
         glz_matches.reserve(matches_.size());
         for (const auto& match : matches_) {
             glz_matches.emplace_back(
@@ -33,7 +33,7 @@ EngineManager::on_tick(uint64_t new_tick)
             );
         }
 
-        std::vector<ObUpdate> updates = matching::get_updates(
+        std::vector<messages::ObUpdate> updates = matching::get_updates(
             ticker, last_order_containers_[ticker], engine.get_order_container()
         );
         last_order_containers_[ticker] = engine.get_order_container();

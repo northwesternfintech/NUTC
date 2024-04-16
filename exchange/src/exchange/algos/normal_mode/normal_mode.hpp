@@ -3,19 +3,21 @@
 #include "exchange/algos/algo_manager.hpp"
 
 namespace nutc {
-namespace algo_mgmt {
+namespace algos {
 
-class NormalModeAlgoManager : public AlgoManager {
+class NormalModeAlgoInitializer : public AlgoInitializer {
 public:
-    void initialize_client_manager(manager::TraderManager& users) override;
+    constexpr NormalModeAlgoInitializer() = default;
+
+    void initialize_trader_container(traders::TraderContainer& traders) const final;
 
     // No files to initialize
-    void
-    initialize_files() const override
+    constexpr void
+    initialize_files() final
     {}
 
 private:
-    static glz::json_t::object_t get_all_users();
+    static glz::json_t::object_t get_remote_traders();
 };
-} // namespace algo_mgmt
+} // namespace algos
 } // namespace nutc

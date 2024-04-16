@@ -1,13 +1,8 @@
 #pragma once
 
-#include "wrapper/config.h"
-#include "wrapper/logging.hpp"
-
 #include <curl/curl.h>
 #include <glaze/glaze.hpp>
 
-#include <iostream>
-#include <map>
 #include <optional>
 #include <string>
 
@@ -18,8 +13,6 @@ namespace firebase {
 glz::json_t firebase_request(
     const std::string& method, const std::string& url, const std::string& data = ""
 );
-
-std::string storage_request(const std::string& id, const std::string& url);
 
 glz::json_t get_user_info(const std::string& uid);
 

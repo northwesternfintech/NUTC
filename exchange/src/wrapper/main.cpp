@@ -1,4 +1,4 @@
-#include "wrapper/dev_mode/dev_mode.hpp"
+#include "shared/file_operations/file_operations.hpp"
 #include "wrapper/firebase/firebase.hpp"
 #include "wrapper/pywrapper/pywrapper.hpp"
 #include "wrapper/rabbitmq/rabbitmq.hpp"
@@ -19,7 +19,8 @@ struct wrapper_args {
     bool no_start_delay;
 };
 
-static wrapper_args
+namespace {
+wrapper_args
 process_arguments(int argc, const char** argv)
 {
     argparse::ArgumentParser program(
@@ -79,7 +80,7 @@ process_arguments(int argc, const char** argv)
     try {
         program.parse_args(argc, argv);
     } catch (const std::runtime_error& err) {
-        std::cerr << err.what() << std::endl;
+        std::cerr << err.what() << std::endl; // NOLINT
         std::cerr << program;
         exit(1); // NOLINT(concurrency-*)
     }
@@ -90,6 +91,7 @@ process_arguments(int argc, const char** argv)
         program.get<bool>("--no-start-delay")
     };
 }
+} // namespace
 
 class NullBuffer : public std::streambuf {
 public:
@@ -122,7 +124,7 @@ main(int argc, const char** argv)
     std::optional<std::string> algo;
     if (development_mode) {
         log_i(main, "Running in development mode");
-        algo = nutc::dev_mode::get_algo_from_file(algo_id);
+        algo = nutc::file_ops::read_file_content(algo_id);
     }
     else {
         algo = nutc::firebase::get_algo(uid, algo_id);

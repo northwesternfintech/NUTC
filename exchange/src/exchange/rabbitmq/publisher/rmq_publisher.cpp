@@ -1,7 +1,7 @@
-#include "RabbitMQPublisher.hpp"
+#include "rmq_publisher.hpp"
 
 #include "exchange/logging.hpp"
-#include "exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
+#include "exchange/rabbitmq/connection_handler/rmq_connection_handler.hpp"
 
 namespace nutc {
 namespace rabbitmq {
