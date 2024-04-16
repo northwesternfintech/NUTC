@@ -1,7 +1,6 @@
 #include "dev_mode.hpp"
 
 #include "exchange/config.h"
-#include "exchange/logging.hpp"
 #include "exchange/traders/trader_types/local_trader.hpp"
 #include "shared/config/config_loader.hpp"
 #include "shared/file_operations/file_operations.hpp"
@@ -9,54 +8,43 @@
 #include <stdexcept>
 
 namespace nutc {
-namespace algo_mgmt {
+namespace algos {
 
 void
-DevModeAlgoManager::initialize_client_manager(manager::TraderManager& users)
+DevModeAlgoInitializer::initialize_trader_container(manager::TraderManager& users) const
 {
     int starting_cap = config::Config::get_instance().constants().STARTING_CAPITAL;
-    auto handle_algos_provided_filenames = [&]() {
-        for (const std::string& filepath : algo_filenames_.value()) {
-            users.add_trader<manager::LocalTrader>(filepath, starting_cap);
-        }
-    };
 
-    auto handle_algos_default_filenames = [&]() {
-        for (size_t i = 0; i < num_clients_; i++) {
-            std::string algo_id = std::string(ALGO_DIR) + "/algo_" + std::to_string(i);
-            users.add_trader<manager::LocalTrader>(algo_id, starting_cap);
-        }
-    };
-
-    if (algo_filenames_.has_value())
-        handle_algos_provided_filenames();
-    else
-        handle_algos_default_filenames();
+    for (const fs::path& filepath : algo_filepaths_) {
+        users.add_trader<manager::LocalTrader>(filepath.string(), starting_cap);
+    }
 }
 
 void
-DevModeAlgoManager::initialize_files() const
+DevModeAlgoInitializer::initialize_files()
 {
-    if (algo_filenames_.has_value())
+    if (!algo_filepaths_.empty())
         return;
 
+    for (uint8_t i = 0; i < num_algos_; i++) {
+        fs::path p{std::string(ALGO_DIR) + "/algo_" + std::to_string(i) + ".py"};
+        algo_filepaths_.push_back(p);
+    }
+
     std::string content = file_ops::read_file_content("template.py");
-    std::string dir_name = std::string(ALGO_DIR);
-    if (!file_ops::create_directory(dir_name)) {
+
+    if (!file_ops::create_directory(ALGO_DIR)) {
         throw std::runtime_error("Failed to create directory");
     }
 
-    for (size_t i = 0; i < num_clients_; i++) {
-        std::string file_name = dir_name + "/algo_" + std::to_string(i) + ".py";
-
-        if (file_ops::file_exists(file_name))
+    for (const fs::path& path : algo_filepaths_) {
+        if (fs::exists(path))
             continue;
 
-        log_i(dev_mode, "Creating default algo {}", file_name);
-        std::ofstream file1(file_name);
+        std::ofstream file1(path);
 
         if (!file1) {
-            throw std::runtime_error("Failed to create file.");
+            throw std::runtime_error("Failed to create local algo");
         }
 
         file1 << content;
@@ -64,5 +52,5 @@ DevModeAlgoManager::initialize_files() const
     }
 }
 
-} // namespace algo_mgmt
+} // namespace algos
 } // namespace nutc

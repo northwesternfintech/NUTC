@@ -11,26 +11,26 @@
 #include <stdexcept>
 
 namespace nutc {
-namespace algo_mgmt {
-using Mode = util::Mode;
-using algorithm = util::algorithm;
+namespace algos {
 
-std::unique_ptr<AlgoManager>
-AlgoManager::get_algo_mgr(Mode mode, std::optional<algorithm> sandbox)
+using Mode = util::Mode;
+
+std::unique_ptr<AlgoInitializer>
+AlgoInitializer::get_algo_initializer(Mode mode, std::optional<util::algorithm> sandbox)
 {
     switch (mode) {
         case Mode::DEV:
-            return std::make_unique<algo_mgmt::DevModeAlgoManager>(DEBUG_NUM_USERS);
+            return std::make_unique<algos::DevModeAlgoInitializer>(DEBUG_NUM_USERS);
         case Mode::NORMAL:
-            return std::make_unique<algo_mgmt::NormalModeAlgoManager>();
+            return std::make_unique<algos::NormalModeAlgoInitializer>();
         case Mode::BOTS_ONLY:
-            return std::make_unique<algo_mgmt::BotModeAlgoManager>();
+            return std::make_unique<algos::BotModeAlgoInitializer>();
         case Mode::SANDBOX:
             auto& [uid, algo_id] = sandbox.value(); // NOLINT (unchecked-*)
-            return std::make_unique<algo_mgmt::SandboxAlgoManager>(uid, algo_id);
+            return std::make_unique<algos::SandboxAlgoInitializer>(uid, algo_id);
     }
     throw std::runtime_error("Unknown exchange mode");
 }
 
-} // namespace algo_mgmt
+} // namespace algos
 } // namespace nutc

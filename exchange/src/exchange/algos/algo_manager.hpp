@@ -4,12 +4,7 @@
 #include "shared/util.hpp"
 
 namespace nutc {
-namespace algo_mgmt {
-
-struct sandbox_params {
-    std::string& user_id;
-    std::string& algo_id;
-};
+namespace algos {
 
 /**
  * Serves as an abstract class to be implemented for dev_mode, sandbox_mode, and
@@ -22,27 +17,26 @@ struct sandbox_params {
  * firebase_mode pulls all the algorithms from
  * firebase and runs them, and is the normal way of running NUTC in production
  */
-class AlgoManager {
-public:
+class AlgoInitializer {
     /** Initialize any filesystem operations, if necessary
      * For example, dev_mode spawns in n algorithms in algos/algo_n.py
      */
-    virtual void initialize_files() const = 0;
+    virtual void initialize_files() = 0;
+    virtual void initialize_trader_container(manager::TraderManager& manager) const = 0;
 
-    virtual void initialize_client_manager(manager::TraderManager& manager) = 0;
-
-    virtual ~AlgoManager() = default;
-
+public:
     void
-    initialize_algo_management(nutc::manager::TraderManager& client_manager)
+    initialize_algo_management(manager::TraderManager& trader_container)
     {
         initialize_files();
-        initialize_client_manager(client_manager);
+        initialize_trader_container(trader_container);
     }
 
-    static std::unique_ptr<AlgoManager>
-    get_algo_mgr(util::Mode mode, std::optional<util::algorithm> sandbox);
+    static std::unique_ptr<AlgoInitializer>
+    get_algo_initializer(util::Mode mode, std::optional<util::algorithm> sandbox);
+
+    virtual ~AlgoInitializer() = default;
 };
 
-} // namespace algo_mgmt
+} // namespace algos
 } // namespace nutc

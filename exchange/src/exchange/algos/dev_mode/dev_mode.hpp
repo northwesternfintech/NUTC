@@ -3,26 +3,43 @@
 #include "exchange/algos/algo_manager.hpp"
 #include "exchange/traders/trader_manager.hpp"
 
+#include <filesystem>
+#include <limits>
+#include <stdexcept>
 #include <vector>
 
 namespace nutc {
-namespace algo_mgmt {
+namespace algos {
 
-class DevModeAlgoManager : public AlgoManager {
-    size_t num_clients_;
-    std::optional<std::vector<std::string>> algo_filenames_;
+namespace fs = std::filesystem;
+
+class DevModeAlgoInitializer : public AlgoInitializer {
+    // Limit to 255
+    const uint8_t num_algos_;
+
+    // Create the files outselves if not provided
+    std::vector<fs::path> algo_filepaths_;
 
 public:
-    explicit DevModeAlgoManager(size_t num_clients) : num_clients_(num_clients) {}
-
-    explicit DevModeAlgoManager(const std::vector<std::string>& filenames) :
-        num_clients_(filenames.size()), algo_filenames_(filenames)
+    constexpr explicit DevModeAlgoInitializer(uint8_t num_algos) :
+        num_algos_(num_algos), algo_filepaths_({})
     {}
 
-    void initialize_client_manager(manager::TraderManager& users) override;
+    explicit DevModeAlgoInitializer(const std::vector<fs::path>& algo_paths) :
+        num_algos_(static_cast<uint8_t>(algo_paths.size())), algo_filepaths_(algo_paths)
+    {
+        size_t max_size = std::numeric_limits<uint8_t>::max();
+        if (algo_paths.size() > max_size) {
+            throw std::runtime_error(
+                "Attempted to provide more algo filepaths than maximum"
+            );
+        }
+    }
 
-    void initialize_files() const override;
+    void initialize_trader_container(manager::TraderManager& traders) const final;
+
+    void initialize_files() final;
 };
 
-} // namespace algo_mgmt
+} // namespace algos
 } // namespace nutc

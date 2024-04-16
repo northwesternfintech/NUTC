@@ -7,26 +7,30 @@
 
 #include <fmt/format.h>
 
+#include <algorithm>
+
 namespace nutc {
-namespace algo_mgmt {
+namespace algos {
 
 void
-NormalModeAlgoManager::initialize_client_manager(manager::TraderManager& users)
+NormalModeAlgoInitializer::initialize_trader_container(manager::TraderManager& traders
+) const
 {
-    static constexpr const std::array<const char*, 3> REQUIRED_FIEDS = {
+    constexpr const std::array<const char*, 3> REQUIRED_DB_FIELDS = {
         "latestAlgoId", "firstName", "lastName"
     };
-    static const int STARTING_CAPITAL =
+    const int STARTING_CAPITAL =
         config::Config::get_instance().constants().STARTING_CAPITAL;
 
-    glz::json_t::object_t firebase_users = get_all_users();
+    glz::json_t::object_t firebase_users = get_remote_traders();
     for (const auto& user_it : firebase_users) {
         const auto& user_id = user_it.first;
         const auto& user = user_it.second;
-        bool contains_all_fields = std::all_of(
-            REQUIRED_FIEDS.begin(), REQUIRED_FIEDS.end(),
-            [&user](const char* field) { return user.contains(field); }
-        );
+
+        bool contains_all_fields =
+            std::ranges::all_of(REQUIRED_DB_FIELDS, [&user](const char* field) {
+                return user.contains(field);
+            });
         if (!contains_all_fields) {
             continue;
         }
@@ -36,19 +40,19 @@ NormalModeAlgoManager::initialize_client_manager(manager::TraderManager& users)
             user["lastName"].get<std::string>()
         );
         std::string algo_id = user["latestAlgoId"].get<std::string>();
-        users.add_trader<manager::RemoteTrader>(
+        traders.add_trader<manager::RemoteTrader>(
             user_id, full_name, algo_id, STARTING_CAPITAL
         );
     }
 }
 
 glz::json_t::object_t
-NormalModeAlgoManager::get_all_users()
+NormalModeAlgoInitializer::get_remote_traders()
 {
-    std::string endpoint = std::string(FIREBASE_URL) + std::string("users.json");
+    const std::string endpoint = std::string(FIREBASE_URL) + std::string("users.json");
     glz::json_t res = curl::request_to_json("GET", endpoint);
     return res.get<glz::json_t::object_t>();
 }
 
-} // namespace algo_mgmt
+} // namespace algos
 } // namespace nutc

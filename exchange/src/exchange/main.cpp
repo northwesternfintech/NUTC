@@ -1,3 +1,4 @@
+#include "algos/algo_manager.hpp"
 #include "dashboard/dashboard.hpp"
 #include "exchange/algos/algo_manager.hpp"
 #include "exchange/bots/bot_container.hpp"
@@ -125,7 +126,7 @@ void
 initialize_algos(const auto& mode, const auto& sandbox)
 {
     manager::TraderManager& users = manager::TraderManager::get_instance();
-    auto algo_mgr = algo_mgmt::AlgoManager::get_algo_mgr(mode, sandbox);
+    auto algo_mgr = algos::AlgoInitializer::get_algo_initializer(mode, sandbox);
     algo_mgr->initialize_algo_management(users);
 }
 

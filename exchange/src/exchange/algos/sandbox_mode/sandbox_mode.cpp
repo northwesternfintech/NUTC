@@ -6,20 +6,17 @@
 #include <glaze/glaze.hpp>
 
 namespace nutc {
-namespace algo_mgmt {
+namespace algos {
 void
-SandboxAlgoManager::initialize_client_manager(manager::TraderManager& users)
+SandboxAlgoInitializer::initialize_trader_container(manager::TraderManager& traders
+) const
 {
     int starting_cap = config::Config::get_instance().constants().STARTING_CAPITAL;
     // In sandbox, we aren't given their full name
-    users.add_trader<manager::RemoteTrader>(
+    traders.add_trader<manager::RemoteTrader>(
         user_id_, "UNKNOWN", algo_id_, starting_cap
     );
 }
 
-void
-SandboxAlgoManager::initialize_files() const
-{}
-
-} // namespace algo_mgmt
+} // namespace algos
 } // namespace nutc

@@ -28,10 +28,15 @@ initialize_testing_clients(
 )
 {
     auto init_clients = [&]() {
-        using algo_mgmt::DevModeAlgoManager;
+        using algos::DevModeAlgoInitializer;
 
-        DevModeAlgoManager algo_manager = DevModeAlgoManager(algo_filenames);
-        algo_manager.initialize_client_manager(users);
+        std::vector<std::filesystem::path> algo_filepaths;
+        for (const std::string& path : algo_filenames) {
+            algo_filepaths.emplace_back(std::filesystem::path{path});
+        }
+
+        DevModeAlgoInitializer algo_manager{algo_filepaths};
+        algo_manager.initialize_trader_container(users);
         for (auto& [_, trader] : users.get_traders()) {
             if (trader->get_type() == manager::LOCAL) {
                 trader->set_start_delay(has_delay);

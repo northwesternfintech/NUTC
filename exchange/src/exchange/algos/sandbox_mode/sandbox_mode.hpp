@@ -4,22 +4,23 @@
 #include "exchange/traders/trader_manager.hpp"
 
 namespace nutc {
-namespace algo_mgmt {
+namespace algos {
 
-class SandboxAlgoManager : public AlgoManager {
-    std::string user_id_;
-    std::string algo_id_;
-    size_t num_clients_{};
+class SandboxAlgoInitializer : public AlgoInitializer {
+    const std::string user_id_;
+    const std::string algo_id_;
 
 public:
-    SandboxAlgoManager(std::string& user_id, std::string& algo_id) :
+    SandboxAlgoInitializer(std::string& user_id, std::string& algo_id) :
         user_id_(user_id), algo_id_(algo_id)
     {}
 
-    void initialize_client_manager(manager::TraderManager& users) override;
+    void initialize_trader_container(manager::TraderManager& users) const final;
 
-    void initialize_files() const override;
+    void
+    initialize_files() final
+    {}
 };
 
-} // namespace algo_mgmt
+} // namespace algos
 } // namespace nutc
