@@ -49,7 +49,7 @@ public:
     manager::TraderType
     get_type() const override
     {
-        return manager::TraderType::BOT;
+        return manager::TraderType::bot;
     }
 
     // Bots should override if they shouldn't be able to leverage
@@ -162,7 +162,7 @@ public:
     }
 
     void process_order_expiration(
-        const std::string& ticker, messages::SIDE side, double price, double quantity
+        const std::string& ticker, util::Side side, double price, double quantity
     ) override;
 };
 

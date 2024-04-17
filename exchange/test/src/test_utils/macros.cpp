@@ -6,7 +6,7 @@ namespace nutc {
 namespace testing_utils {
 
 StoredOrder
-make_stored_order(MarketOrder& order, const manager::TraderManager& manager)
+make_stored_order(market_order& order, const manager::TraderManager& manager)
 {
     return StoredOrder{
         manager.get_trader(order.client_id),
@@ -30,7 +30,7 @@ is_nearly_equal(double f_a, double f_b, double epsilon)
 bool
 validate_match(
     const nutc::matching::StoredMatch& match, const std::string& ticker,
-    const std::string& buyer_id, const std::string& seller_id, messages::SIDE side,
+    const std::string& buyer_id, const std::string& seller_id, util::Side side,
     double price, double quantity
 )
 {
@@ -42,8 +42,8 @@ validate_match(
 
 bool
 validate_ob_update(
-    const ObUpdate& update, const std::string& ticker, messages::SIDE side,
-    double price, double quantity
+    const ObUpdate& update, const std::string& ticker, util::Side side, double price,
+    double quantity
 )
 {
     return update.ticker == ticker && update.side == side
@@ -53,8 +53,8 @@ validate_ob_update(
 
 bool
 validate_market_order(
-    const MarketOrder& update, const std::string& client_id, const std::string& ticker,
-    messages::SIDE side, double price, double quantity
+    const market_order& update, const std::string& client_id, const std::string& ticker,
+    util::Side side, double price, double quantity
 )
 {
     return update.client_id == client_id && update.ticker == ticker

@@ -26,7 +26,7 @@ struct StartTime {
  */
 struct Match {
     std::string ticker;
-    SIDE side;
+    util::Side side;
     double price;
     double quantity;
     std::string buyer_id;
@@ -37,12 +37,12 @@ struct Match {
     Match() = default;
 
     Match(
-        std::string ticker, SIDE side, double price, double quantity, std::string bid,
-        std::string sid, double bcap, double scap
+        std::string ticker, util::Side side, double price, double quantity,
+        std::string bid, std::string sid, double bcap, double scap
     ) :
-        ticker(ticker),
-        side(side), price(price), quantity(quantity), buyer_id(bid), seller_id(sid),
-        buyer_capital(bcap), seller_capital(scap)
+        ticker(std::move(ticker)),
+        side(side), price(price), quantity(quantity), buyer_id(std::move(bid)),
+        seller_id(std::move(sid)), buyer_capital(bcap), seller_capital(scap)
     {}
 };
 
@@ -51,14 +51,14 @@ struct Match {
  */
 struct ObUpdate {
     std::string ticker;
-    SIDE side;
+    util::Side side;
     double price;
     double quantity;
 
     ObUpdate() = default;
 
-    ObUpdate(std::string ticker, SIDE side, double price, double quantity) :
-        ticker(ticker), side(side), price(price), quantity(quantity)
+    ObUpdate(std::string ticker, util::Side side, double price, double quantity) :
+        ticker(std::move(ticker)), side(side), price(price), quantity(quantity)
     {}
 
     bool

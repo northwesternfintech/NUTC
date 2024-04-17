@@ -20,7 +20,7 @@ public:
     TraderType
     get_type() const override
     {
-        return TraderType::REMOTE;
+        return TraderType::remote;
     }
 
     bool

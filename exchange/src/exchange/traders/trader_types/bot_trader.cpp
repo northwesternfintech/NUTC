@@ -9,13 +9,13 @@ namespace bots {
 
 void
 BotTrader::process_order_expiration(
-    const std::string& ticker, messages::SIDE side, double price, double quantity
+    const std::string& ticker, util::Side side, double price, double quantity
 )
 {
     assert(ticker == TICKER);
 
     double total_cap = price * quantity;
-    if (side == messages::SIDE::BUY) {
+    if (side == util::Side::buy) {
         modify_long_capital(-total_cap);
         modify_open_bids(-quantity);
     }

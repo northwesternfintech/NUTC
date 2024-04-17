@@ -11,8 +11,8 @@ class SandboxAlgoInitializer : public AlgoInitializer {
     const std::string algo_id_;
 
 public:
-    SandboxAlgoInitializer(std::string& user_id, std::string& algo_id) :
-        user_id_(user_id), algo_id_(algo_id)
+    SandboxAlgoInitializer(std::string user_id, std::string algo_id) :
+        user_id_(std::move(user_id)), algo_id_(std::move(algo_id))
     {}
 
     void initialize_trader_container(manager::TraderManager& traders) const final;

@@ -16,7 +16,7 @@ public:
     TraderType
     get_type() const override
     {
-        return TraderType::LOCAL;
+        return TraderType::local;
     }
 
     bool

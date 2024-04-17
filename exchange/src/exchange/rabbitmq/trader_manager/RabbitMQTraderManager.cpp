@@ -16,13 +16,13 @@ RabbitMQTraderManager::wait_for_clients(manager::TraderManager& manager)
 
     auto process_message = [&](const auto& message) {
         using t = std::decay_t<decltype(message)>;
-        if constexpr (std::is_same_v<t, messages::MarketOrder>) {
+        if constexpr (std::is_same_v<t, messages::market_order>) {
             log_i(
                 rabbitmq,
                 "Received market order before initialization complete. Ignoring..."
             );
         }
-        else if constexpr (std::is_same_v<t, messages::InitMessage>) {
+        else if constexpr (std::is_same_v<t, messages::init_message>) {
             log_i(
                 rabbitmq, "Received init message from client {} with status {}",
                 message.client_id, message.ready ? "ready" : "not ready"

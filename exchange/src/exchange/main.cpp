@@ -133,7 +133,7 @@ initialize_algos(const auto& mode, const auto& sandbox)
 void
 blocking_event_loop(const auto& mode)
 {
-    if (mode == util::Mode::BOTS_ONLY) {
+    if (mode == util::Mode::bots_only) {
         while (true) {}
     }
     else {
@@ -159,7 +159,7 @@ main(int argc, const char** argv)
     // Algos must init before wrappers
     initialize_algos(mode, sandbox);
 
-    if (mode != util::Mode::BOTS_ONLY)
+    if (mode != util::Mode::bots_only)
         initialize_wrappers();
 
     initialize_tickers();

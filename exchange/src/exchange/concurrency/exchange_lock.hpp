@@ -16,7 +16,7 @@ class ExchangeLock {
     ~ExchangeLock() = default;
 
     static ExchangeLock&
-    get_instance_()
+    get_instance()
     {
         static ExchangeLock instance;
         return instance;

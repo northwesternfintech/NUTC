@@ -32,18 +32,18 @@ public:
      * @brief Get the price->quantity map for a SIDE
      */
     const std::unordered_map<double, double>&
-    get_levels(SIDE side) const
+    get_levels(util::Side side) const
     {
-        return side == SIDE::BUY ? bid_levels_ : ask_levels_;
+        return side == util::Side::buy ? bid_levels_ : ask_levels_;
     }
 
     /**
      * @brief Get the quantity at a specific price for a side
      */
     double
-    get_level(SIDE side, double price) const
+    get_level(util::Side side, double price) const
     {
-        const auto& levels = side == SIDE::BUY ? bid_levels_ : ask_levels_;
+        const auto& levels = side == util::Side::buy ? bid_levels_ : ask_levels_;
         if (levels.find(price) == levels.end()) {
             return 0;
         }
@@ -80,7 +80,8 @@ public:
         if (bids_.empty() || asks_.empty()) {
             return false;
         }
-        return get_top_order(SIDE::BUY).can_match(get_top_order(SIDE::SELL));
+        return get_top_order(util::Side::buy)
+            .can_match(get_top_order(util::Side::sell));
     }
 
     void add_order(StoredOrder order);
@@ -105,7 +106,7 @@ public:
     /**
      * @brief Get the top order on a side
      */
-    const StoredOrder& get_top_order(SIDE side) const;
+    const StoredOrder& get_top_order(util::Side side) const;
 
 private:
     const StoredOrder&
@@ -129,9 +130,9 @@ private:
     }
 
     void
-    modify_level_(SIDE side, double price, double qualtity)
+    modify_level_(util::Side side, double price, double qualtity)
     {
-        auto& levels = side == SIDE::BUY ? bid_levels_ : ask_levels_;
+        auto& levels = side == util::Side::buy ? bid_levels_ : ask_levels_;
         levels[price] += qualtity;
         if (levels[price] == 0) {
             levels.erase(price);

@@ -4,22 +4,18 @@
 
 #include <string>
 #include <unordered_map>
-#include <utility>
 
 namespace nutc {
 namespace dashboard {
 
 class DashboardState {
-    std::unordered_map<std::string, TickerState> ticker_states_{};
+    std::unordered_map<std::string, TickerState> ticker_states_;
 
 public:
     void
     add_ticker(std::string ticker, double starting_price)
     {
-        ticker_states_.emplace(
-            std::piecewise_construct, std::forward_as_tuple(ticker),
-            std::forward_as_tuple(ticker, starting_price)
-        );
+        ticker_states_.emplace(ticker, TickerState{ticker, starting_price});
     }
 
     TickerState&
@@ -34,12 +30,6 @@ public:
         return ticker_states_;
     }
 
-    size_t
-    num_tickers() const
-    {
-        return ticker_states_.size();
-    }
-
     static DashboardState&
     get_instance()
     {
@@ -52,9 +42,10 @@ public:
     DashboardState(DashboardState&&) = delete;
     DashboardState& operator=(DashboardState&&) = delete;
 
+    ~DashboardState() = default;
+
 private:
     DashboardState() = default;
-    ~DashboardState() = default;
 };
 
 } // namespace dashboard

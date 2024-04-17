@@ -1,4 +1,5 @@
 #include "pin_threads.hpp"
+
 #include "exchange/logging.hpp"
 
 #ifdef __linux__

@@ -8,13 +8,11 @@
 namespace nutc {
 namespace matching {
 
-using SIDE = messages::SIDE;
-
 struct StoredMatch {
     std::shared_ptr<manager::GenericTrader> buyer;
     std::shared_ptr<manager::GenericTrader> seller;
     std::string ticker;
-    SIDE side;
+    util::Side side;
     double price;
     double quantity;
 };
@@ -23,7 +21,7 @@ struct StoredOrder {
     std::shared_ptr<manager::GenericTrader> trader;
     // TODO(stevenewald): can get rid of
     std::string ticker;
-    SIDE side;
+    util::Side side;
     double price;
     double quantity;
     uint64_t tick;
@@ -41,8 +39,8 @@ struct StoredOrder {
     }
 
     StoredOrder(
-        std::shared_ptr<manager::GenericTrader> trader, SIDE side, std::string ticker,
-        double quantity, double price, uint64_t tick
+        std::shared_ptr<manager::GenericTrader> trader, util::Side side,
+        std::string ticker, double quantity, double price, uint64_t tick
     ) :
         trader(std::move(trader)),
         ticker(std::move(ticker)), side(side), price(std::round(price * 100) / 100),
@@ -85,7 +83,7 @@ struct StoredOrder {
     [[nodiscard]] std::string
     to_string() const
     {
-        std::string side_str = side == SIDE::BUY ? "BUY" : "SELL";
+        std::string side_str = side == util::Side::buy ? "BUY" : "SELL";
         return fmt::format(
             "StoredOrder(client_id={}, side={}, ticker={}, quantity={}, "
             "price={})",
@@ -105,14 +103,14 @@ struct StoredOrder {
                 return 1;
             return 0;
         }
-        if (this->side == SIDE::BUY) {
+        if (this->side == util::Side::buy) {
             if (this->price < other.price)
                 return -1;
             if (this->price > other.price)
                 return 1;
             return 0;
         }
-        if (this->side == SIDE::SELL) {
+        if (this->side == util::Side::sell) {
             if (this->price > other.price)
                 return -1;
             if (this->price < other.price)
@@ -131,10 +129,10 @@ struct StoredOrder {
         if (this->ticker != other.ticker) [[unlikely]] {
             return false;
         }
-        if (this->side == SIDE::BUY && this->price < other.price) {
+        if (this->side == util::Side::buy && this->price < other.price) {
             return false;
         }
-        if (this->side == SIDE::SELL && this->price > other.price) {
+        if (this->side == util::Side::sell && this->price > other.price) {
             return false;
         }
         return true;

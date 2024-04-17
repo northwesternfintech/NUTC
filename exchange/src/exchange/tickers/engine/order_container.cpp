@@ -3,9 +3,9 @@
 namespace nutc {
 namespace matching {
 const StoredOrder&
-OrderContainer::get_top_order(SIDE side) const
+OrderContainer::get_top_order(util::Side side) const
 {
-    if (side == SIDE::BUY) {
+    if (side == util::Side::buy) {
         assert(!bids_.empty());
         return get_order_(bids_.begin()->index);
     }
@@ -18,7 +18,7 @@ OrderContainer::remove_order(uint64_t order_id)
 {
     StoredOrder order = std::move(get_order_(order_id));
     order_index index{order.price, order_id};
-    if (order.side == SIDE::BUY) {
+    if (order.side == util::Side::buy) {
         assert(bids_.find(index) != bids_.end());
         bids_.erase(index);
     }
@@ -64,7 +64,7 @@ void
 OrderContainer::add_order(StoredOrder order)
 {
     orders_by_tick_[order.tick].push_back(order.order_index);
-    if (order.side == SIDE::BUY) {
+    if (order.side == util::Side::buy) {
         bids_.insert(order_index{order.price, order.order_index});
     }
     else {

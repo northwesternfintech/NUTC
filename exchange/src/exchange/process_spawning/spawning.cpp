@@ -22,7 +22,7 @@ spawn_client(
     const std::string& binary_path
 )
 {
-    if (trader->get_type() == manager::TraderType::LOCAL) {
+    if (trader->get_type() == manager::TraderType::local) {
         const std::string filepath = trader->get_algo_id() + ".py";
         assert(file_ops::file_exists(filepath));
     }
@@ -34,7 +34,7 @@ spawn_client(
             quote_id(trader->get_algo_id())
         };
 
-        if (trader->get_type() == manager::TraderType::LOCAL) {
+        if (trader->get_type() == manager::TraderType::local) {
             args.emplace_back("--dev");
         }
 
@@ -78,7 +78,7 @@ spawn_all_clients(nutc::manager::TraderManager& users)
 
     size_t num_clients = 0;
     auto spawn_one_trader = [&](const std::shared_ptr<manager::GenericTrader>& trader) {
-        if (trader->get_type() == manager::TraderType::BOT)
+        if (trader->get_type() == manager::TraderType::bot)
             return;
 
         if (trader->is_active())

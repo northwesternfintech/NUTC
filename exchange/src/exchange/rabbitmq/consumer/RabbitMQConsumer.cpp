@@ -28,11 +28,11 @@ RabbitMQConsumer::handle_incoming_messages(engine_manager::EngineManager& engine
         std::visit(
             [&](auto&& arg) {
                 using t = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<t, messages::InitMessage>) {
+                if constexpr (std::is_same_v<t, messages::init_message>) {
                     log_c(rabbitmq, "Not expecting initialization message");
                     std::abort();
                 }
-                else if constexpr (std::is_same_v<t, messages::MarketOrder>) {
+                else if constexpr (std::is_same_v<t, messages::market_order>) {
                     RabbitMQOrderHandler::handle_incoming_market_order(
                         engine_manager, std::forward<t>(arg)
                     );
@@ -99,7 +99,7 @@ RabbitMQConsumer::consume_message_as_string(int timeout_us)
     return message;
 }
 
-std::optional<std::variant<messages::InitMessage, messages::MarketOrder>>
+std::optional<std::variant<messages::init_message, messages::market_order>>
 RabbitMQConsumer::consume_message(int timeout_us)
 {
     std::optional<std::string> buf = consume_message_as_string(timeout_us);
@@ -107,7 +107,7 @@ RabbitMQConsumer::consume_message(int timeout_us)
         return std::nullopt;
     }
 
-    std::variant<messages::InitMessage, messages::MarketOrder> data;
+    std::variant<messages::init_message, messages::market_order> data;
     auto err = glz::read_json(data, buf.value());
     if (err) {
         std::abort();

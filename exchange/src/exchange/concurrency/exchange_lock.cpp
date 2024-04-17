@@ -21,13 +21,13 @@ ExchangeLock::unlock_()
 void
 ExchangeLock::lock()
 {
-    get_instance_().lock_();
+    get_instance().lock_();
 }
 
 void
 ExchangeLock::unlock()
 {
-    get_instance_().unlock_();
+    get_instance().unlock_();
 }
 
 } // namespace concurrency

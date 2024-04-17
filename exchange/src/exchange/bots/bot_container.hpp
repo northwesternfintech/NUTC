@@ -15,23 +15,34 @@ template <typename T>
 concept HandledBotType =
     std::disjunction_v<std::is_same<T, RetailBot>, std::is_same<T, MarketMakerBot>>;
 
+/**
+ * @brief Container for all bots in the exchange for a given ticker
+ */
 class BotContainer : public ticks::TickObserver {
+    const std::string TICKER;
+    const double BROWNIAN_OFFSET;
+    stochastic::BrownianMotion theo_generator_;
+
+    std::unordered_map<std::string, const std::shared_ptr<RetailBot>> retail_bots_{};
+    std::unordered_map<std::string, const std::shared_ptr<MarketMakerBot>>
+        market_makers_{};
+
 public:
     void on_tick(uint64_t) override;
 
     double
     get_theo() const
     {
-        return brownian_offset_ + theo_generator_.get_price();
+        return BROWNIAN_OFFSET + theo_generator_.get_price();
     }
 
-    const std::unordered_map<std::string, const std::shared_ptr<MarketMakerBot>>&
+    const auto&
     get_market_makers() const
     {
         return market_makers_;
     }
 
-    const std::unordered_map<std::string, const std::shared_ptr<RetailBot>>&
+    const auto&
     get_retail_traders() const
     {
         return retail_bots_;
@@ -44,24 +55,16 @@ public:
     void add_bots(double mean_capital, double stddev_capital, size_t num_bots)
     requires HandledBotType<BotType>;
 
-    BotContainer() = default;
+    BotContainer() : BROWNIAN_OFFSET(0.0) {}
 
     explicit BotContainer(std::string ticker, double starting_price) :
-        ticker_(std::move(ticker)), brownian_offset_(starting_price)
+        TICKER(std::move(ticker)), BROWNIAN_OFFSET(starting_price)
     {}
 
 private:
     template <class BotType>
     void add_single_bot_(double starting_capital)
     requires HandledBotType<BotType>;
-
-    std::unordered_map<std::string, const std::shared_ptr<RetailBot>> retail_bots_{};
-    std::unordered_map<std::string, const std::shared_ptr<MarketMakerBot>>
-        market_makers_{};
-    std::string ticker_;
-
-    stochastic::BrownianMotion theo_generator_{};
-    double brownian_offset_ = 0.0;
 };
 } // namespace bots
 } // namespace nutc

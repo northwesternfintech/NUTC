@@ -6,8 +6,8 @@
 
 #include <gtest/gtest.h>
 
-using nutc::messages::SIDE::BUY;
-using nutc::messages::SIDE::SELL;
+using nutc::util::Side::buy;
+using nutc::util::Side::sell;
 
 class UnitLoggingOrders : public ::testing::Test {
 protected:
@@ -34,12 +34,12 @@ protected:
     }
 };
 
-TEST_F(UnitLoggingOrders, LogMarketOrders)
+TEST_F(UnitLoggingOrders, Logmarket_orders)
 {
     manager_.get_trader("ABC")->modify_capital(-TEST_STARTING_CAPITAL);
 
-    MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
-    MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
+    market_order order2{"DEF", nutc::util::Side::sell, "ETHUSD", 1, 1};
+    market_order order1{"ABC", nutc::util::Side::buy, "ETHUSD", 1, 1};
 
     auto& logger = Logger::get_logger();
 
@@ -49,8 +49,12 @@ TEST_F(UnitLoggingOrders, LogMarketOrders)
 
 TEST_F(UnitLoggingOrders, LogMatches)
 {
-    StoredOrder order1{manager_.get_trader("ABC"), BUY, "ETHUSD", 1, 1, 0};
-    StoredOrder order2{manager_.get_trader("DEF"), SELL, "ETHUSD", 1, 1, 0};
+    StoredOrder order1{
+        manager_.get_trader("ABC"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
+    };
+    StoredOrder order2{
+        manager_.get_trader("DEF"), nutc::util::Side::sell, "ETHUSD", 1, 1, 0
+    };
 
     auto matches = add_to_engine_(order1);
     auto matches2 = add_to_engine_(order2);

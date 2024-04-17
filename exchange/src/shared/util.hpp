@@ -5,16 +5,13 @@
 #include <string>
 
 namespace nutc {
-namespace messages {
-enum class SIDE { BUY, SELL };
-}
-
 namespace util {
-enum class Mode { SANDBOX, DEV, NORMAL, BOTS_ONLY };
+enum class Side { buy, sell };
+enum class Mode { sandbox, dev, normal, bots_only };
 
 struct algorithm {
-    std::string uid;
-    std::string algo_id;
+    const std::string UID;
+    const std::string ALGO_ID;
 };
 
 constexpr bool

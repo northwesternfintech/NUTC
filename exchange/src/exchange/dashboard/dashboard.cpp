@@ -226,7 +226,7 @@ Dashboard::display_leaderboard(WINDOW* window, int start_y)
 
     std::vector<std::shared_ptr<manager::GenericTrader>> ordered_traders;
     for (const auto& [user_id, trader] : client_manager.get_traders()) {
-        if (trader->get_type() != manager::TraderType::REMOTE)
+        if (trader->get_type() != manager::TraderType::remote)
             continue;
         ordered_traders.push_back(trader);
     }
@@ -267,37 +267,37 @@ Dashboard::display_performance(WINDOW* window, int start_y)
     if (tick_manager.get_current_tick() < 100) {
         mvwprintw(
             window, start_y + 4, window->_maxx / 2 - 23,
-            "Current tick (%llu) below 100. Not enough data",
+            "Current tick (%lu) below 100. Not enough data",
             tick_manager.get_current_tick()
         );
         return;
     }
     mvwprintw(
-        window, start_y++, window->_maxx / 2 - 8, "Current Tick: %llu",
+        window, start_y++, window->_maxx / 2 - 8, "Current Tick: %lu",
         tick_manager.get_current_tick()
     );
     mvwprintw(
-        window, start_y++, window->_maxx / 2 - 13, "Top 1p tick times(ms): %llu",
+        window, start_y++, window->_maxx / 2 - 13, "Top 1p tick times(ms): %lu",
         metrics.top_1p_ms.count()
     );
     mvwprintw(
-        window, start_y++, window->_maxx / 2 - 13, "Top 5p tick times(ms): %llu",
+        window, start_y++, window->_maxx / 2 - 13, "Top 5p tick times(ms): %lu",
         metrics.top_5p_ms.count()
     );
     mvwprintw(
-        window, start_y++, window->_maxx / 2 - 13, "Top 10p tick times(ms): %llu",
+        window, start_y++, window->_maxx / 2 - 13, "Top 10p tick times(ms): %lu",
         metrics.top_10p_ms.count()
     );
     mvwprintw(
-        window, start_y++, window->_maxx / 2 - 13, "Top 50p tick times(ms): %llu",
+        window, start_y++, window->_maxx / 2 - 13, "Top 50p tick times(ms): %lu",
         metrics.top_50p_ms.count()
     );
     mvwprintw(
-        window, start_y++, window->_maxx / 2 - 13, "Average tick time(ms): %llu",
+        window, start_y++, window->_maxx / 2 - 13, "Average tick time(ms): %lu",
         metrics.avg_tick_ms.count()
     );
     mvwprintw(
-        window, start_y++, window->_maxx / 2 - 12, "Median tick time(ms): %llu",
+        window, start_y++, window->_maxx / 2 - 12, "Median tick time(ms): %lu",
         metrics.median_tick_ms.count()
     );
     mvwprintw(

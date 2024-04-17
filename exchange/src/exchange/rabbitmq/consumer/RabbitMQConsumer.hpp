@@ -11,10 +11,10 @@ namespace rabbitmq {
 
 class RabbitMQConsumer {
 public:
-    static std::optional<std::variant<messages::InitMessage, messages::MarketOrder>>
+    static std::optional<std::variant<messages::init_message, messages::market_order>>
     consume_message(int timeout_us);
 
-    static std::variant<messages::InitMessage, messages::MarketOrder>
+    static std::variant<messages::init_message, messages::market_order>
     consume_message()
     {
         auto message = consume_message(0);

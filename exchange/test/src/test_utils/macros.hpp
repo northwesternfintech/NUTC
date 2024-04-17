@@ -2,17 +2,17 @@
 #include "exchange/tickers/engine/order_storage.hpp"
 #include "exchange/traders/trader_manager.hpp"
 #include "exchange/utils/logger/logger.hpp"
+#include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
 #include <limits>
 
 using Engine = nutc::matching::Engine;
-using MarketOrder = nutc::messages::MarketOrder;
+using market_order = nutc::messages::market_order;
 using StoredOrder = nutc::matching::StoredOrder;
 using Logger = nutc::events::Logger;
 using ObUpdate = nutc::messages::ObUpdate;
 using TraderManager = nutc::manager::TraderManager;
-using SIDE = nutc::messages::SIDE;
 
 namespace nutc {
 namespace testing_utils {
@@ -22,22 +22,22 @@ bool is_nearly_equal(
 
 bool validate_match(
     const nutc::matching::StoredMatch& match, const std::string& ticker,
-    const std::string& buyer_id, const std::string& seller_id, messages::SIDE side,
+    const std::string& buyer_id, const std::string& seller_id, util::Side side,
     double price, double quantity
 );
 
 bool validate_ob_update(
-    const ObUpdate& update, const std::string& ticker, messages::SIDE side,
-    double price, double quantity
+    const ObUpdate& update, const std::string& ticker, util::Side side, double price,
+    double quantity
 );
 
 bool validate_market_order(
-    const MarketOrder& update, const std::string& client_id, const std::string& ticker,
-    messages::SIDE side, double price, double quantity
+    const market_order& update, const std::string& client_id, const std::string& ticker,
+    util::Side side, double price, double quantity
 );
 
 StoredOrder
-make_stored_order(MarketOrder& order, const manager::TraderManager& manager);
+make_stored_order(market_order& order, const manager::TraderManager& manager);
 
 } // namespace testing_utils
 } // namespace nutc

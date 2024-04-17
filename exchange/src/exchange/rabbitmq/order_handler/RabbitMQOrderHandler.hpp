@@ -8,7 +8,7 @@ namespace rabbitmq {
 class RabbitMQOrderHandler {
 public:
     static void handle_incoming_market_order(
-        engine_manager::EngineManager& engine_manager, messages::MarketOrder&& order
+        engine_manager::EngineManager& engine_manager, messages::market_order&& order
     );
 };
 

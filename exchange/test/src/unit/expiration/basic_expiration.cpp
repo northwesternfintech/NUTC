@@ -5,8 +5,8 @@
 
 #include <gtest/gtest.h>
 
-using nutc::messages::SIDE::BUY;
-using nutc::messages::SIDE::SELL;
+using nutc::util::Side::buy;
+using nutc::util::Side::sell;
 
 class UnitOrderExpiration : public ::testing::Test {
     using LocalTrader = nutc::manager::LocalTrader;
@@ -36,8 +36,12 @@ protected:
 
 TEST_F(UnitOrderExpiration, SimpleNoMatch)
 {
-    StoredOrder order1{manager_.get_trader("ABC"), BUY, "ETHUSD", 1, 1, 0};
-    StoredOrder order2{manager_.get_trader("DEF"), SELL, "ETHUSD", 1, 1, 0};
+    StoredOrder order1{
+        manager_.get_trader("ABC"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
+    };
+    StoredOrder order2{
+        manager_.get_trader("DEF"), nutc::util::Side::sell, "ETHUSD", 1, 1, 0
+    };
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
 
@@ -52,10 +56,14 @@ TEST_F(UnitOrderExpiration, SimpleNoMatch)
 TEST_F(UnitOrderExpiration, IncrementTick)
 {
     engine_.expire_old_orders(TEST_ORDER_EXPIRATION_TICKS);
-    StoredOrder order1{manager_.get_trader("ABC"), BUY, "ETHUSD", 1, 1,
-                       TEST_ORDER_EXPIRATION_TICKS};
-    StoredOrder order2{manager_.get_trader("DEF"), SELL, "ETHUSD", 1, 1,
-                       TEST_ORDER_EXPIRATION_TICKS};
+    StoredOrder order1{
+        manager_.get_trader("ABC"), nutc::util::Side::buy, "ETHUSD", 1, 1,
+        TEST_ORDER_EXPIRATION_TICKS
+    };
+    StoredOrder order2{
+        manager_.get_trader("DEF"), nutc::util::Side::sell, "ETHUSD", 1, 1,
+        TEST_ORDER_EXPIRATION_TICKS
+    };
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(1, engine_.expire_old_orders(TEST_ORDER_EXPIRATION_TICKS * 2).size());

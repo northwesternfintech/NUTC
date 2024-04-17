@@ -71,8 +71,7 @@ RabbitMQ::handleIncomingMessages(const std::string& uid)
                 using T = std::decay_t<decltype(arg)>;
                 if constexpr (std::is_same_v<T, ObUpdate>) {
                     ObUpdate update = std::get<ObUpdate>(data);
-                    std::string side =
-                        update.side == messages::SIDE::BUY ? "BUY" : "SELL";
+                    std::string side = update.side == util::Side::buy ? "BUY" : "SELL";
                     nutc::pywrapper::get_ob_update_function()(
                         update.ticker, side, update.price, update.quantity
                     );
@@ -80,8 +79,7 @@ RabbitMQ::handleIncomingMessages(const std::string& uid)
                 }
                 else if constexpr (std::is_same_v<T, Match>) {
                     Match match = std::get<Match>(data);
-                    std::string side =
-                        match.side == messages::SIDE::BUY ? "BUY" : "SELL";
+                    std::string side = match.side == util::Side::buy ? "BUY" : "SELL";
 
                     nutc::pywrapper::get_trade_update_function()(
                         match.ticker, side, match.price, match.quantity
@@ -107,7 +105,7 @@ RabbitMQ::handleIncomingMessages(const std::string& uid)
 }
 
 bool
-RabbitMQ::publishMarketOrder(
+RabbitMQ::publishmarket_order(
     const std::string& client_id, const std::string& side, const std::string& ticker,
     double quantity, double price
 )
@@ -115,9 +113,9 @@ RabbitMQ::publishMarketOrder(
     if (limiter.should_rate_limit()) {
         return false;
     }
-    MarketOrder order{
-        client_id, side == "BUY" ? messages::SIDE::BUY : messages::SIDE::SELL, ticker,
-        quantity, price
+    market_order order{
+        client_id, side == "BUY" ? util::Side::buy : util::Side::sell, ticker, quantity,
+        price
     };
     std::string message = glz::write_json(order);
 
@@ -247,7 +245,7 @@ std::function<bool(const std::string&, const std::string&, double, double)>
 RabbitMQ::getMarketFunc(const std::string& id)
 {
     return std::bind(
-        &RabbitMQ::publishMarketOrder, this, id, std::placeholders::_1,
+        &RabbitMQ::publishmarket_order, this, id, std::placeholders::_1,
         std::placeholders::_2, std::placeholders::_3, std::placeholders::_4
     );
 }
@@ -255,7 +253,7 @@ RabbitMQ::getMarketFunc(const std::string& id)
 bool
 RabbitMQ::publishInit(const std::string& id, bool ready)
 {
-    std::string message = glz::write_json(InitMessage{id, ready});
+    std::string message = glz::write_json(init_message{id, ready});
     // log_i(wrapper_rabbitmq, "Publishing init message: {}", message);
     bool rVal = publishMessage("market_order", message);
     return rVal;

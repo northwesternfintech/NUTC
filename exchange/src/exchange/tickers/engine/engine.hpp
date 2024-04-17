@@ -1,12 +1,6 @@
 #pragma once
 
 #include "order_container.hpp"
-#include "shared/messages_exchange_to_wrapper.hpp"
-#include "shared/util.hpp"
-
-using ObUpdate = nutc::messages::ObUpdate;
-using Match = nutc::messages::Match;
-using SIDE = nutc::messages::SIDE;
 
 namespace nutc {
 namespace matching {

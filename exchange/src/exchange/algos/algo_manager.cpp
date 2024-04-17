@@ -13,19 +13,19 @@
 namespace nutc {
 namespace algos {
 
-using Mode = util::Mode;
+using mode = util::Mode;
 
 std::unique_ptr<AlgoInitializer>
-AlgoInitializer::get_algo_initializer(Mode mode, std::optional<util::algorithm> sandbox)
+AlgoInitializer::get_algo_initializer(mode mode, std::optional<util::algorithm> sandbox)
 {
     switch (mode) {
-        case Mode::DEV:
+        case mode::dev:
             return std::make_unique<algos::DevModeAlgoInitializer>(DEBUG_NUM_USERS);
-        case Mode::NORMAL:
+        case mode::normal:
             return std::make_unique<algos::NormalModeAlgoInitializer>();
-        case Mode::BOTS_ONLY:
+        case mode::bots_only:
             return std::make_unique<algos::BotModeAlgoInitializer>();
-        case Mode::SANDBOX:
+        case mode::sandbox:
             auto& [uid, algo_id] = sandbox.value(); // NOLINT (unchecked-*)
             return std::make_unique<algos::SandboxAlgoInitializer>(uid, algo_id);
     }
