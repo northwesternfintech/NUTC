@@ -1,9 +1,9 @@
-#include "RabbitMQConsumer.hpp"
+#include "rmq_consumer.hpp"
 
 #include "exchange/concurrency/exchange_lock.hpp"
 #include "exchange/logging.hpp"
-#include "exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
-#include "exchange/rabbitmq/order_handler/RabbitMQOrderHandler.hpp"
+#include "exchange/rabbitmq/connection_handler/rmq_connection_handler.hpp"
+#include "exchange/rabbitmq/order_handler/rmq_order_handler.hpp"
 
 #include <utility>
 

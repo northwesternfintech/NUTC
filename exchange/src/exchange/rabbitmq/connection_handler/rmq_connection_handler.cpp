@@ -1,4 +1,4 @@
-#include "RabbitMQConnectionManager.hpp"
+#include "rmq_connection_handler.hpp"
 
 #include "exchange/logging.hpp"
 #include "exchange/rabbitmq/queue_manager/RabbitMQQueueManager.hpp"

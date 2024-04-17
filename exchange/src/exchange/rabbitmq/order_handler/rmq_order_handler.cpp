@@ -1,4 +1,4 @@
-#include "RabbitMQOrderHandler.hpp"
+#include "rmq_order_handler.hpp"
 
 #include "exchange/tick_manager/tick_manager.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"

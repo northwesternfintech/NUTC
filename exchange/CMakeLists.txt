@@ -32,9 +32,9 @@ add_library(
     src/exchange/process_spawning/spawning.cpp
     
     src/exchange/rabbitmq/trader_manager/RabbitMQTraderManager.cpp
-    src/exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.cpp
-    src/exchange/rabbitmq/consumer/RabbitMQConsumer.cpp
-    src/exchange/rabbitmq/order_handler/RabbitMQOrderHandler.cpp
+    src/exchange/rabbitmq/connection_handler/rmq_connection_handler.cpp
+    src/exchange/rabbitmq/consumer/rmq_consumer.cpp
+    src/exchange/rabbitmq/order_handler/rmq_order_handler.cpp
     src/exchange/rabbitmq/publisher/RabbitMQPublisher.cpp
     src/exchange/rabbitmq/queue_manager/RabbitMQQueueManager.cpp
 

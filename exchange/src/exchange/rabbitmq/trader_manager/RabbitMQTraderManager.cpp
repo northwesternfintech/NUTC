@@ -1,7 +1,7 @@
 #include "RabbitMQTraderManager.hpp"
 
 #include "exchange/logging.hpp"
-#include "exchange/rabbitmq/consumer/RabbitMQConsumer.hpp"
+#include "exchange/rabbitmq/consumer/rmq_consumer.hpp"
 #include "exchange/rabbitmq/publisher/RabbitMQPublisher.hpp"
 
 namespace nutc {
