@@ -1,6 +1,6 @@
 #include "rmq_order_handler.hpp"
 
-#include "exchange/tick_manager/tick_manager.hpp"
+#include "exchange/tick_scheduler/tick_scheduler.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
 #include "exchange/tickers/manager/ticker_manager.hpp"
 #include "exchange/traders/trader_manager.hpp"
@@ -19,7 +19,7 @@ RabbitMQOrderHandler::handle_incoming_market_order(
     if (!engine_manager.has_engine(order.ticker))
         return;
 
-    auto current_tick = ticks::TickManager::get_instance().get_current_tick();
+    auto current_tick = ticks::TickJobScheduler::get().get_current_tick();
     auto trader = manager::TraderManager::get_instance().get_trader(order.client_id);
     auto stored_order =
         matching::StoredOrder{trader,         order.side,  order.ticker,

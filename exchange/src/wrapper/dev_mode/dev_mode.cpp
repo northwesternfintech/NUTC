@@ -27,9 +27,8 @@ read_file_content(const std::string& filename)
 std::string
 get_algo_from_file(const std::string& algo_id)
 {
-    std::string filename = fmt::format("./{}.py", algo_id);
-    assert(file_exists(filename));
-    return read_file_content(filename);
+    assert(file_exists(algo_id));
+    return read_file_content(algo_id);
 }
 } // namespace dev_mode
 } // namespace nutc

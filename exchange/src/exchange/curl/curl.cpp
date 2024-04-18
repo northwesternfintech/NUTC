@@ -28,12 +28,13 @@ request_to_file(
     CURL* curl = curl_easy_init();
 
     if (curl == nullptr)
-        throw std::runtime_error("Failed to initialize curl");
+        throw std::runtime_error("Failed to init curl");
 
     FILE* into_file = fopen(filepath.c_str(), "wb");
     if (into_file == nullptr) {
         throw std::runtime_error(fmt::format("failed to open file: {}", filepath));
     }
+
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, into_file);
@@ -68,7 +69,7 @@ request_to_string(
 )
 {
     CURL* curl = curl_easy_init();
-    std::string read_buffer;
+    std::string read_buffer{};
 
     if (curl == nullptr)
         throw std::runtime_error("Failed to initialize curl");
@@ -110,7 +111,7 @@ request_to_json(
     if (error) {
         std::string descriptive_error = glz::format_error(error, read_buffer);
         throw std::runtime_error(
-            fmt::format("glz::read_json() failed: {}", descriptive_error)
+            fmt::format("glz::read_json() failed: {}", std::move(descriptive_error))
         );
     }
     return json;

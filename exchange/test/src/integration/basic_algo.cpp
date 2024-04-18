@@ -42,7 +42,7 @@ protected:
 
 TEST_F(IntegrationBasicAlgo, InitialLiquidity)
 {
-    std::vector<std::string> names{"test_algos/buy_tsla_at_100"};
+    std::vector<std::string> names{"test_algos/buy_tsla_at_100.py"};
     if (!nutc::testing_utils::initialize_testing_clients(users_, names)) {
         FAIL() << "Failed to initialize testing clients";
     }
@@ -67,13 +67,13 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
 
     nutc::messages::market_order actual = std::get<nutc::messages::market_order>(mess);
     ASSERT_EQ_MARKET_ORDER(
-        actual, "test_algos/buy_tsla_at_100", "TSLA", nutc::util::Side::buy, 100, 10
+        actual, "test_algos/buy_tsla_at_100.py", "TSLA", nutc::util::Side::buy, 100, 10
     );
 }
 
 TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
 {
-    std::vector<std::string> names{"test_algos/buy_tsla_on_trade"};
+    std::vector<std::string> names{"test_algos/buy_tsla_on_trade.py"};
     if (!nutc::testing_utils::initialize_testing_clients(users_, names)) {
         FAIL() << "Failed to initialize testing clients";
     }
@@ -99,8 +99,8 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
     nutc::messages::market_order actual_mo =
         std::get<nutc::messages::market_order>(mess1);
     ASSERT_EQ_MARKET_ORDER(
-        actual_mo, "test_algos/buy_tsla_on_trade", "TSLA", nutc::util::Side::buy, 102,
-        10
+        actual_mo, "test_algos/buy_tsla_on_trade.py", "TSLA", nutc::util::Side::buy,
+        102, 10
     );
 
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(
@@ -115,13 +115,14 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
     nutc::messages::market_order actual2 =
         std::get<nutc::messages::market_order>(mess2);
     ASSERT_EQ_MARKET_ORDER(
-        actual2, "test_algos/buy_tsla_on_trade", "APPL", nutc::util::Side::buy, 100, 1
+        actual2, "test_algos/buy_tsla_on_trade.py", "APPL", nutc::util::Side::buy, 100,
+        1
     );
 }
 
 TEST_F(IntegrationBasicAlgo, OnAccountUpdate)
 {
-    std::vector<std::string> names{"test_algos/buy_tsla_on_account"};
+    std::vector<std::string> names{"test_algos/buy_tsla_on_account.py"};
     if (!nutc::testing_utils::initialize_testing_clients(users_, names)) {
         FAIL() << "Failed to initialize testing clients";
     }
@@ -147,8 +148,8 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdate)
     nutc::messages::market_order actual_mo =
         std::get<nutc::messages::market_order>(mess1);
     ASSERT_EQ_MARKET_ORDER(
-        actual_mo, "test_algos/buy_tsla_on_account", "TSLA", nutc::util::Side::buy, 102,
-        10
+        actual_mo, "test_algos/buy_tsla_on_account.py", "TSLA", nutc::util::Side::buy,
+        102, 10
     );
 
     rmq::RabbitMQOrderHandler::handle_incoming_market_order(
@@ -163,13 +164,14 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdate)
     nutc::messages::market_order actual2 =
         std::get<nutc::messages::market_order>(mess2);
     ASSERT_EQ_MARKET_ORDER(
-        actual2, "test_algos/buy_tsla_on_account", "APPL", nutc::util::Side::buy, 100, 1
+        actual2, "test_algos/buy_tsla_on_account.py", "APPL", nutc::util::Side::buy,
+        100, 1
     );
 }
 
 TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
 {
-    std::vector<std::string> names{"test_algos/buy_tsla_at_100"};
+    std::vector<std::string> names{"test_algos/buy_tsla_at_100.py"};
     if (!nutc::testing_utils::initialize_testing_clients(
             users_, names, /*has_delay=*/true
         )) {

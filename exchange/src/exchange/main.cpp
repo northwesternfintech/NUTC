@@ -6,7 +6,7 @@
 #include "exchange/concurrency/pin_threads.hpp"
 #include "exchange/config/argparse.hpp"
 #include "exchange/dashboard/state/global_metrics.hpp"
-#include "exchange/tick_manager/tick_manager.hpp"
+#include "exchange/tick_scheduler/tick_scheduler.hpp"
 #include "logging.hpp"
 #include "process_spawning/spawning.hpp"
 #include "rabbitmq/connection_handler/rmq_connection_handler.hpp"
@@ -44,17 +44,15 @@ void
 initialize_indiv_ticker(const std::string& ticker, double starting_price)
 {
     using engine_manager::EngineManager;
-    using ticks::PRIORITY;
-    using ticks::TickManager;
+    using ticks::TickJobScheduler;
 
-    auto& tick_manager = TickManager::get_instance();
     EngineManager::get_instance().add_engine(ticker, starting_price);
 
     bots::BotContainer& bot_container =
         EngineManager::get_instance().get_bot_container(ticker);
 
     // Should run after stale order removal, so they can react to removed orders
-    tick_manager.attach(&bot_container, PRIORITY::second, "Bot Engine");
+    TickJobScheduler::get().on_tick(&bot_container, /*priority=*/2, "Bot Engine");
 
     dashboard::DashboardState::get_instance().add_ticker(ticker, starting_price);
 }
@@ -72,9 +70,7 @@ void
 initialize_dashboard()
 {
     auto& dashboard = dashboard::Dashboard::get_instance();
-    ticks::TickManager::get_instance().attach(
-        &dashboard, ticks::PRIORITY::third, "Dashboard Manager"
-    );
+    ticks::TickJobScheduler::get().on_tick(&dashboard, /*priority=*/3, "Dashboard");
 }
 
 void
@@ -97,8 +93,8 @@ initialize_bots()
         }
     }
     // TODO(stevenewald): should this be somewhere else?
-    ticks::TickManager::get_instance().attach(
-        &engine_manager, ticks::PRIORITY::first, "Matching Engine"
+    ticks::TickJobScheduler::get().on_tick(
+        &engine_manager, /*priority=*/1, "Matching Engine"
     );
 }
 
@@ -116,10 +112,10 @@ initialize_wrappers()
 }
 
 void
-start_tick_manager()
+start_tick_scheduler()
 {
     auto tick_hz = config::Config::get_instance().constants().TICK_HZ;
-    ticks::TickManager::get_instance().start(tick_hz);
+    ticks::TickJobScheduler::get().start(tick_hz);
 }
 
 void
@@ -165,7 +161,7 @@ main(int argc, const char** argv)
     initialize_tickers();
     initialize_bots();
     initialize_dashboard();
-    start_tick_manager();
+    start_tick_scheduler();
 
     concurrency::pin_to_core(0, "main");
 

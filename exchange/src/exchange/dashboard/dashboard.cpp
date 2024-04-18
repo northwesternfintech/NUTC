@@ -1,6 +1,6 @@
 #include "dashboard.hpp"
 
-#include "exchange/tick_manager/tick_manager.hpp"
+#include "exchange/tick_scheduler/tick_scheduler.hpp"
 #include "exchange/tickers/manager/ticker_manager.hpp"
 #include "exchange/traders/trader_manager.hpp"
 #include "exchange/traders/trader_types/generic_trader.hpp"
@@ -261,20 +261,12 @@ Dashboard::display_performance(WINDOW* window, int start_y)
 {
     mvwprintw(window, start_y, window->_maxx / 2 - 5, "Performance");
 
-    ticks::TickManager& tick_manager = ticks::TickManager::get_instance();
-    ticks::TickManager::tick_metrics_t metrics = tick_manager.get_tick_metrics();
+    ticks::TickJobScheduler& tick_scheduler = ticks::TickJobScheduler::get();
+    ticks::TickJobScheduler::tick_metrics_t metrics = tick_scheduler.get_tick_metrics();
     start_y++;
-    if (tick_manager.get_current_tick() < 100) {
-        mvwprintw(
-            window, start_y + 4, window->_maxx / 2 - 23,
-            "Current tick (%lu) below 100. Not enough data",
-            tick_manager.get_current_tick()
-        );
-        return;
-    }
     mvwprintw(
         window, start_y++, window->_maxx / 2 - 8, "Current Tick: %lu",
-        tick_manager.get_current_tick()
+        tick_scheduler.get_current_tick()
     );
     mvwprintw(
         window, start_y++, window->_maxx / 2 - 13, "Top 1p tick times(ms): %lu",
@@ -295,10 +287,6 @@ Dashboard::display_performance(WINDOW* window, int start_y)
     mvwprintw(
         window, start_y++, window->_maxx / 2 - 13, "Average tick time(ms): %lu",
         metrics.avg_tick_ms.count()
-    );
-    mvwprintw(
-        window, start_y++, window->_maxx / 2 - 12, "Median tick time(ms): %lu",
-        metrics.median_tick_ms.count()
     );
     mvwprintw(
         window, start_y++, window->_maxx / 2 - 12, "Theoretical max hz: %.2f",

@@ -1,6 +1,6 @@
 #pragma once
 
-#define DEBUG_NUM_USERS  1
+#define DEBUG_NUM_USERS  3
 
 // logging
 #define LOG_BACKTRACE_SIZE 10

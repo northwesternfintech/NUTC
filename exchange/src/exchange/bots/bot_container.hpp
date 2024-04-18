@@ -2,7 +2,7 @@
 #include "exchange/bots/bot_types/market_maker.hpp"
 #include "exchange/bots/bot_types/retail.hpp"
 #include "exchange/theo/brownian.hpp"
-#include "exchange/tick_manager/tick_observer.hpp"
+#include "exchange/tick_scheduler/tick_observer.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
 
 #include <cstdint>

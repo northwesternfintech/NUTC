@@ -58,7 +58,7 @@ add_library(
     
     src/exchange/theo/brownian.cpp
     
-    src/exchange/tick_manager/tick_manager.cpp
+    src/exchange/tick_scheduler/tick_scheduler.cpp
     
     src/exchange/dashboard/state/ticker_state.cpp
     src/exchange/concurrency/pin_threads.cpp
