@@ -65,12 +65,12 @@ void
 RabbitMQ::handleIncomingMessages(const std::string& uid)
 {
     while (true) {
-        std::variant<StartTime, ObUpdate, Match> data = consumeMessage();
+        std::variant<start_time, orderbook_update, Match> data = consumeMessage();
         std::visit(
             [&](auto&& arg) {
                 using T = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<T, ObUpdate>) {
-                    ObUpdate update = std::get<ObUpdate>(data);
+                if constexpr (std::is_same_v<T, orderbook_update>) {
+                    orderbook_update update = std::get<orderbook_update>(data);
                     std::string side = update.side == util::Side::buy ? "BUY" : "SELL";
                     nutc::pywrapper::get_ob_update_function()(
                         update.ticker, side, update.price, update.quantity
@@ -140,7 +140,7 @@ RabbitMQ::publishMessage(const std::string& queueName, const std::string& messag
     return true;
 }
 
-std::variant<StartTime, ObUpdate, Match>
+std::variant<start_time, orderbook_update, Match>
 RabbitMQ::consumeMessage()
 {
     std::string buf = consumeMessageAsString();
@@ -149,7 +149,7 @@ RabbitMQ::consumeMessage()
         exit(1);
     }
 
-    std::variant<StartTime, ObUpdate, Match> data{};
+    std::variant<start_time, orderbook_update, Match> data{};
     auto err = glz::read_json(data, buf);
     if (err) {
         std::string error = glz::format_error(err, buf);
@@ -173,7 +173,7 @@ RabbitMQ::consumeMessageAsString()
     }
 
     std::string message(
-        reinterpret_cast<char*>(envelope.message.body.bytes), envelope.message.body.len
+        static_cast<char*>(envelope.message.body.bytes), envelope.message.body.len
     );
     amqp_destroy_envelope(&envelope);
     return message;
@@ -227,12 +227,12 @@ RabbitMQ::initializeConsume(const std::string& queueName)
     return true;
 }
 
-RabbitMQ::RabbitMQ(const std::string& id)
+RabbitMQ::RabbitMQ(const std::string& user_id)
 {
-    if (!initializeConnection(id)) {
+    if (!initializeConnection(user_id)) {
         log_c(wrapper_rabbitmq, "Failed to initialize connection to RabbitMQ");
         // attempt to say we didn't init correctly
-        bool published_init = publishInit(id, false);
+        bool published_init = publishInit(user_id, /*ready=*/false);
         if (!published_init) {
             log_e(wrapper_rabbitmq, "Failed to publish init message");
         }
@@ -242,61 +242,53 @@ RabbitMQ::RabbitMQ(const std::string& id)
 }
 
 std::function<bool(const std::string&, const std::string&, double, double)>
-RabbitMQ::getMarketFunc(const std::string& id)
+RabbitMQ::getMarketFunc(const std::string& user_id)
 {
-    return std::bind(
-        &RabbitMQ::publishmarket_order, this, id, std::placeholders::_1,
-        std::placeholders::_2, std::placeholders::_3, std::placeholders::_4
-    );
+    return [&](const std::string& side, const auto& ticker, const auto& quantity,
+               const auto& price) {
+        return RabbitMQ::publishmarket_order(user_id, side, ticker, quantity, price);
+    };
 }
 
 bool
-RabbitMQ::publishInit(const std::string& id, bool ready)
+RabbitMQ::publishInit(const std::string& user_id, bool ready)
 {
-    std::string message = glz::write_json(init_message{id, ready});
-    // log_i(wrapper_rabbitmq, "Publishing init message: {}", message);
-    bool rVal = publishMessage("market_order", message);
-    return rVal;
+    std::string message = glz::write_json(init_message{user_id, ready});
+    return publishMessage("market_order", message);
 }
 
 // If wait_blocking is disabled, we block until we *receive* the message, but not
 // after Otherwise, we block until the start time
 void
-RabbitMQ::waitForStartTime(bool skip_start_wait)
+RabbitMQ::wait_for_start_time(bool skip_start_wait)
 {
     auto message = consumeMessage();
-    if (std::holds_alternative<StartTime>(message)) {
-        if (skip_start_wait) {
-            return;
-        }
+    if (!std::holds_alternative<start_time>(message))
+        throw std::runtime_error("Received unexpected message type");
 
-        StartTime start = std::get<StartTime>(message);
-        log_i(
-            wrapper_rabbitmq, "Received start time: {}, sleeping until then.",
-            start.start_time_ns
-        );
-
-        std::chrono::high_resolution_clock::time_point wait_until =
-            std::chrono::high_resolution_clock::time_point(
-                std::chrono::nanoseconds(start.start_time_ns)
-            );
-        std::this_thread::sleep_until(wait_until);
-
-        log_i(wrapper_rabbitmq, "Done sleeping, start time: {}", start.start_time_ns);
-
+    if (skip_start_wait)
         return;
-    }
-    else {
-        log_e(wrapper_rabbitmq, "Received unexpected message type");
-        exit(1);
-    }
+
+    start_time start = std::get<start_time>(message);
+    log_i(
+        wrapper_rabbitmq, "Received start time: {}, sleeping until then.",
+        start.start_time_ns
+    );
+
+    std::chrono::high_resolution_clock::time_point wait_until =
+        std::chrono::high_resolution_clock::time_point(
+            std::chrono::nanoseconds(start.start_time_ns)
+        );
+    std::this_thread::sleep_until(wait_until);
+
+    log_i(wrapper_rabbitmq, "Done sleeping, start time: {}", start.start_time_ns);
 }
 
 bool
-RabbitMQ::initializeQueue(const std::string& queueName)
+RabbitMQ::initializeQueue(const std::string& queue_name)
 {
     amqp_queue_declare(
-        conn, 1, amqp_cstring_bytes(queueName.c_str()), 0, 0, 0, 1, amqp_empty_table
+        conn, 1, amqp_cstring_bytes(queue_name.c_str()), 0, 0, 0, 1, amqp_empty_table
     );
 
     amqp_rpc_reply_t res = amqp_get_rpc_reply(conn);
@@ -304,7 +296,7 @@ RabbitMQ::initializeQueue(const std::string& queueName)
         log_e(wrapper_rabbitmq, "Failed to declare queue.");
         return false;
     }
-    log_d(wrapper_rabbitmq, "Declared queue: {}", queueName);
+    log_d(wrapper_rabbitmq, "Declared queue: {}", queue_name);
 
     return true;
 }

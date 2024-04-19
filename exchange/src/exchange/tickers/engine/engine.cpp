@@ -7,8 +7,8 @@ namespace nutc {
 namespace matching {
 
 using side = nutc::util::Side;
-using ob_update = nutc::messages::ObUpdate;
-using match = nutc::messages::Match;
+using ob_update = nutc::messages::orderbook_update;
+using match = nutc::messages::match;
 
 namespace {
 constexpr double

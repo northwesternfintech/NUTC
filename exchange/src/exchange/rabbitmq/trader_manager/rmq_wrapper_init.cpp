@@ -60,7 +60,7 @@ RabbitMQWrapperInitializer::send_start_time(
                           .time_since_epoch()
                           .count();
 
-    messages::StartTime message{time_ns};
+    messages::start_time message{time_ns};
     std::string buf = glz::write_json(message);
 
     const auto& traders = manager.get_traders();

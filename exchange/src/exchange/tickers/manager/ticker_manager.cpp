@@ -23,7 +23,7 @@ EngineManager::on_tick(uint64_t new_tick)
         }
 
         // TODO: do this in a converter
-        std::vector<messages::Match> glz_matches;
+        std::vector<messages::match> glz_matches;
         glz_matches.reserve(matches_.size());
         for (const auto& match : matches_) {
             glz_matches.emplace_back(
@@ -33,7 +33,7 @@ EngineManager::on_tick(uint64_t new_tick)
             );
         }
 
-        std::vector<messages::ObUpdate> updates = matching::get_updates(
+        std::vector<messages::orderbook_update> updates = matching::get_updates(
             ticker, last_order_containers_[ticker], engine.get_order_container()
         );
         last_order_containers_[ticker] = engine.get_order_container();

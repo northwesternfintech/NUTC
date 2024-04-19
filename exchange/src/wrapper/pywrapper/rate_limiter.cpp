@@ -7,15 +7,13 @@ RateLimiter::should_rate_limit()
 {
     auto now = std::chrono::steady_clock::now();
 
-    while (!timestamps.empty() && (now - timestamps.front()) > TIME_WINDOW) {
-        timestamps.pop();
-    }
+    while (!timestamps_.empty() && (now - timestamps_.front()) > TIME_WINDOW)
+        timestamps_.pop();
 
-    if (timestamps.size() >= MAX_CALLS) {
+    if (timestamps_.size() >= MAX_CALLS)
         return true;
-    }
 
-    timestamps.push(now);
+    timestamps_.push(now);
     return false;
 }
 } // namespace rate_limiter

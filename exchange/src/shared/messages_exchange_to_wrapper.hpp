@@ -13,30 +13,30 @@ namespace nutc {
  */
 namespace messages {
 
-struct StartTime {
-    int64_t start_time_ns;
+struct start_time {
+    int64_t start_time_ns{};
 
-    StartTime() = default;
+    start_time() = default;
 
-    StartTime(int64_t stns) : start_time_ns(stns) {}
+    explicit start_time(int64_t stns) : start_time_ns(stns) {}
 };
 
 /**
  * @brief Sent by exchange to a client to indicate a match has occurred
  */
-struct Match {
-    std::string ticker;
+struct match {
+    std::string ticker{};
     util::Side side;
-    double price;
-    double quantity;
-    std::string buyer_id;
-    std::string seller_id;
-    double buyer_capital;
-    double seller_capital;
+    double price{};
+    double quantity{};
+    std::string buyer_id{};
+    std::string seller_id{};
+    double buyer_capital{};
+    double seller_capital{};
 
-    Match() = default;
+    match() = default;
 
-    Match(
+    match(
         std::string ticker, util::Side side, double price, double quantity,
         std::string bid, std::string sid, double bcap, double scap
     ) :
@@ -49,24 +49,22 @@ struct Match {
 /**
  * @brief Sent by exchange to clients to indicate an orderbook update
  */
-struct ObUpdate {
-    std::string ticker;
-    util::Side side;
-    double price;
-    double quantity;
+struct orderbook_update {
+    std::string ticker{};
+    util::Side side{};
+    double price{};
+    double quantity{};
 
-    ObUpdate() = default;
+    orderbook_update() = default;
 
-    ObUpdate(std::string ticker, util::Side side, double price, double quantity) :
-        ticker(std::move(ticker)), side(side), price(price), quantity(quantity)
+    orderbook_update(
+        std::string ticker, util::Side side, double price, double quantity
+    ) :
+        ticker(std::move(ticker)),
+        side(side), price(price), quantity(quantity)
     {}
 
-    bool
-    operator==(const ObUpdate& other) const
-    {
-        return ticker == other.ticker && side == other.side && price == other.price
-               && quantity == other.quantity;
-    }
+    bool operator==(const orderbook_update& other) const = default;
 };
 
 } // namespace messages
@@ -74,28 +72,29 @@ struct ObUpdate {
 
 /// \cond
 template <>
-struct glz::meta<nutc::messages::ObUpdate> {
-    using T = nutc::messages::ObUpdate;
-    static constexpr auto value = object(
-        "security", &T::ticker, "side", &T::side, "price", &T::price, "quantity",
-        &T::quantity
+struct glz::meta<nutc::messages::orderbook_update> {
+    using t = nutc::messages::orderbook_update;
+    static constexpr auto value = object( // NOLINT
+        "security", &t::ticker, "side", &t::side, "price", &t::price, "quantity",
+        &t::quantity
     );
 };
 
 /// \cond
 template <>
-struct glz::meta<nutc::messages::Match> {
-    using T = nutc::messages::Match;
-    static constexpr auto value = object(
-        "ticker", &T::ticker, "buyer_id", &T::buyer_id, "seller_id", &T::seller_id,
-        "side", &T::side, "price", &T::price, "quantity", &T::quantity, "buyer_capital",
-        &T::buyer_capital, "seller_capital", &T::seller_capital
+struct glz::meta<nutc::messages::match> {
+    using t = nutc::messages::match;
+    static constexpr auto value = object( // NOLINT
+        "ticker", &t::ticker, "buyer_id", &t::buyer_id, "seller_id", &t::seller_id,
+        "side", &t::side, "price", &t::price, "quantity", &t::quantity, "buyer_capital",
+        &t::buyer_capital, "seller_capital", &t::seller_capital
     );
 };
 
 /// \cond
 template <>
-struct glz::meta<nutc::messages::StartTime> {
-    using T = nutc::messages::StartTime;
-    static constexpr auto value = object("start_time_ns", &T::start_time_ns);
+struct glz::meta<nutc::messages::start_time> {
+    using t = nutc::messages::start_time;
+    static constexpr auto value = // NOLINT
+        object("start_time_ns", &t::start_time_ns);
 };

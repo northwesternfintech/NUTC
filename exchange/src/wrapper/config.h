@@ -3,15 +3,6 @@
 /***************************** Configuration *********************************/
 
 // Version info
-/* clang-format off */
-/* NOLINTBEGIN */
-#define VERSION_MAJOR @NUTC-client_VERSION_MAJOR@
-#define VERSION_MINOR @NUTC-client_VERSION_MINOR@
-#define VERSION_PATCH @NUTC-client_VERSION_PATCH@
-
-#define VERSION "@NUTC-client_VERSION@"
-/* clang-format on */
-/* NOLINTEND */
 
 // Logging
 #define LOG_BACKTRACE_SIZE 10
@@ -21,7 +12,6 @@
 #define LOG_FILE_SIZE      (1024 * 1024 / 2) // 512 KB
 #define LOG_BACKUP_COUNT   5
 
-#define FIREBASE_URL "https://nutc-web-default-rtdb.firebaseio.com/"
 
 
 /**

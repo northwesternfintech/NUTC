@@ -13,9 +13,9 @@
 
 using init_message = nutc::messages::init_message;
 using market_order = nutc::messages::market_order;
-using ObUpdate = nutc::messages::ObUpdate;
-using Match = nutc::messages::Match;
-using StartTime = nutc::messages::StartTime;
+using orderbook_update = nutc::messages::orderbook_update;
+using Match = nutc::messages::match;
+using start_time = nutc::messages::start_time;
 
 /**
  * @brief The namespace for the NUTC client
@@ -39,6 +39,8 @@ namespace rabbitmq {
  * update, account update, etc)
  */
 class RabbitMQ {
+    amqp_connection_state_t conn{};
+
 public:
     /**
      * @brief Constructor for RabbitMQ (RAII)
@@ -48,7 +50,7 @@ public:
      *
      * @param uid The unique identifier for the client
      */
-    RabbitMQ(const std::string& uid);
+    explicit RabbitMQ(const std::string& user_id);
 
     bool bind_queue_to_exchange(
         const std::string& queue_name, const std::string& exchange_name
@@ -73,7 +75,7 @@ public:
      *
      * @returns True if the message was successfully published, false otherwise
      */
-    [[nodiscard]] bool publishInit(const std::string& uid, bool ready);
+    [[nodiscard]] bool publishInit(const std::string& user_id, bool ready);
 
     /**
      * @brief Callback for the market order function
@@ -85,9 +87,9 @@ public:
      * @returns A function that takes the order parameters and publishes the order
      */
     std::function<bool(const std::string&, const std::string&, double, double)>
-    getMarketFunc(const std::string& uid);
+    getMarketFunc(const std::string& user_id);
 
-    void waitForStartTime(bool skip_start_wait);
+    void wait_for_start_time(bool skip_start_wait);
 
     /**
      * @brief Main event loop; handles incoming messages from exchange
@@ -102,24 +104,23 @@ public:
 
 private:
     rate_limiter::RateLimiter limiter;
-    [[nodiscard]] bool initializeConnection(const std::string& queueName);
+    [[nodiscard]] bool initializeConnection(const std::string& queue_name);
     [[nodiscard]] bool initializeConsume(const std::string& queueName);
     [[nodiscard]] bool connectToRabbitMQ(
         const std::string& hostname, int port, const std::string& username,
         const std::string& password
     );
 
-    amqp_connection_state_t conn;
     [[nodiscard]] bool
     publishMessage(const std::string& queueName, const std::string& message);
     [[nodiscard]] bool initializeQueue(const std::string& queueName);
     [[nodiscard]] bool publishmarket_order(
-        const std::string& client_uid, const std::string& side,
+        const std::string& client_id, const std::string& side,
         const std::string& ticker, double quantity, double price
     );
 
     std::string consumeMessageAsString();
-    std::variant<StartTime, ObUpdate, Match> consumeMessage();
+    std::variant<start_time, orderbook_update, Match> consumeMessage();
 };
 
 } // namespace rabbitmq

@@ -32,7 +32,7 @@ For managing and processing orders within the trading system.
     - `quantity`: Amount of the security to be traded.
     - `price`: Price at which the order should be executed.
 
-- **ObUpdate**
+- **orderbook_update**
   - Purpose: Update the order book.
     - `client_id`: Identifier for the client placing the update.
     - `security`: The security's identifier.

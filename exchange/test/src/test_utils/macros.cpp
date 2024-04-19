@@ -42,8 +42,8 @@ validate_match(
 
 bool
 validate_ob_update(
-    const ObUpdate& update, const std::string& ticker, util::Side side, double price,
-    double quantity
+    const orderbook_update& update, const std::string& ticker, util::Side side,
+    double price, double quantity
 )
 {
     return update.ticker == ticker && update.side == side

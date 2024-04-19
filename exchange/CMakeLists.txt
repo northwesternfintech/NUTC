@@ -50,6 +50,7 @@ add_library(
     
     src/exchange/traders/trader_types/generic_trader.cpp
     src/exchange/traders/trader_types/bot_trader.cpp
+
     
     src/exchange/utils/logger/logger.cpp
 
@@ -58,7 +59,9 @@ add_library(
     
     src/exchange/tick_scheduler/tick_scheduler.cpp
     
+    src/exchange/dashboard/dashboard.cpp
     src/exchange/dashboard/state/ticker_state.cpp
+
     src/exchange/concurrency/pin_threads.cpp
     src/exchange/concurrency/exchange_lock.cpp
 
@@ -107,24 +110,10 @@ option(DASHBOARD "Enable NUTC Dashboard" OFF)
 
 if(DASHBOARD)
   add_definitions(-DDASHBOARD)
-  add_library(
-      DASHBOARD_lib OBJECT
-      src/exchange/dashboard/dashboard.cpp
-  )
 
-  target_link_libraries(DASHBOARD_lib PUBLIC EXCHANGE_lib)
-
-  target_include_directories(
-      DASHBOARD_lib ${warning_guard}
-      PUBLIC
-      "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
-  )
-
-# ncurses 
+  # ncurses 
   find_package(Curses REQUIRED)
-  target_link_libraries(DASHBOARD_lib PUBLIC Curses::Curses)
-
-  target_compile_features(DASHBOARD_lib PUBLIC cxx_std_20)
+  target_link_libraries(EXCHANGE_lib PUBLIC Curses::Curses)
 endif()
 
 # ---- Declare executable ----
@@ -137,11 +126,6 @@ set_property(TARGET EXCHANGE_exe PROPERTY OUTPUT_NAME NUTC)
 target_compile_features(EXCHANGE_exe PRIVATE cxx_std_20)
 
 target_link_libraries(EXCHANGE_exe PRIVATE EXCHANGE_lib)
-
-if(DASHBOARD)
-  target_link_libraries(EXCHANGE_exe PRIVATE DASHBOARD_lib)
-  target_link_libraries(EXCHANGE_exe PRIVATE Curses::Curses)
-endif()
 
 # quill
 target_link_libraries(EXCHANGE_exe PRIVATE quill::quill)

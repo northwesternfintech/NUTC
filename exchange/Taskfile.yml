@@ -6,7 +6,7 @@ vars:
   # BOTS, DEV, or NORMAL
   MODE: "BOTS"
   
-  DASHBOARD_ENABLED: True 
+  DASHBOARD_ENABLED: False
   
   RELEASE_BUILD: False
   RELEASE_PRESET: "ci-ubuntu"
@@ -24,10 +24,9 @@ tasks:
   deps:
     dir: .
     vars:
-      CONANFILE: '{{if eq .DASHBOARD_ENABLED "True"}}conanfile.py{{else}}conanfile_no_ncurses.py{{end}}'
       BUILD_TYPE: '{{if eq .RELEASE_BUILD "True"}}Release{{else}}Debug{{end}}'
     cmds:
-      - conan install {{.CONANFILE}} -s build_type={{.BUILD_TYPE}} -b missing -pr cpp20 -pr:b cpp20
+      - conan install . -s build_type={{.BUILD_TYPE}} -b missing -pr cpp20 -pr:b cpp20
     
   fmt:
     dir: .

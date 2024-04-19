@@ -11,7 +11,7 @@ using Engine = nutc::matching::Engine;
 using market_order = nutc::messages::market_order;
 using stored_order = nutc::matching::stored_order;
 using Logger = nutc::events::Logger;
-using ObUpdate = nutc::messages::ObUpdate;
+using orderbook_update = nutc::messages::orderbook_update;
 using TraderContainer = nutc::traders::TraderContainer;
 
 namespace nutc {
@@ -27,8 +27,8 @@ bool validate_match(
 );
 
 bool validate_ob_update(
-    const ObUpdate& update, const std::string& ticker, util::Side side, double price,
-    double quantity
+    const orderbook_update& update, const std::string& ticker, util::Side side,
+    double price, double quantity
 );
 
 bool validate_market_order(

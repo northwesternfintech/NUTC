@@ -1,6 +1,6 @@
 #include "firebase.hpp"
 
-#include "wrapper/config.h"
+#include "shared/config/config.h"
 
 #include <fmt/format.h>
 

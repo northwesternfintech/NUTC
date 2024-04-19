@@ -32,7 +32,7 @@ struct market_order {
 template <>
 struct glz::meta<nutc::messages::market_order> {
     using t = nutc::messages::market_order;
-    static constexpr auto value = object(
+    static constexpr auto value = object( // NOLINT
         "trader_id", &t::client_id, "ticker", &t::ticker, "side", &t::side, "quantity",
         &t::quantity, "price", &t::price
     );
@@ -41,7 +41,7 @@ struct glz::meta<nutc::messages::market_order> {
 /// \cond
 template <>
 struct glz::meta<nutc::messages::init_message> {
-    using T = nutc::messages::init_message;
-    static constexpr auto value =
-        object("trader_id", &T::client_id, "ready", &T::ready);
+    using t = nutc::messages::init_message;
+    static constexpr auto value = // NOLINT
+        object("trader_id", &t::client_id, "ready", &t::ready);
 };

@@ -1,5 +1,7 @@
+#include "shared/config/config.h"
 #include "shared/file_operations/file_operations.hpp"
 #include "wrapper/firebase/firebase.hpp"
+#include "wrapper/logging.hpp"
 #include "wrapper/pywrapper/pywrapper.hpp"
 #include "wrapper/rabbitmq/rabbitmq.hpp"
 
@@ -95,7 +97,7 @@ process_arguments(int argc, const char** argv)
 
 class NullBuffer : public std::streambuf {
 public:
-    NullBuffer() {} // Public constructor
+    NullBuffer() = default;
 };
 
 int
@@ -139,7 +141,7 @@ main(int argc, const char** argv)
     if (!algo.has_value()) {
         return 0;
     }
-    conn.waitForStartTime(no_start_delay);
+    conn.wait_for_start_time(no_start_delay);
 
     // Initialize the algorithm. For now, only designed for py
     nutc::pywrapper::create_api_module(conn.getMarketFunc(uid));
