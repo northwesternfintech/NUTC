@@ -11,9 +11,9 @@
 #include <unordered_map>
 
 namespace nutc {
-namespace manager {
+namespace traders {
 
-class TraderManager {
+class TraderContainer {
     std::unordered_map<std::string, const std::shared_ptr<GenericTrader>> traders_;
 
 public:
@@ -71,23 +71,23 @@ private:
         return traders_.contains(user_id);
     }
 
-    TraderManager() = default;
-    ~TraderManager() = default;
+    TraderContainer() = default;
+    ~TraderContainer() = default;
 
 public:
     // Singleton
-    static TraderManager&
+    static TraderContainer&
     get_instance()
     {
-        static TraderManager instance;
+        static TraderContainer instance;
         return instance;
     }
 
-    TraderManager(const TraderManager&) = delete;
-    TraderManager(TraderManager&&) = delete;
-    TraderManager& operator=(const TraderManager&) = delete;
-    TraderManager& operator=(TraderManager&&) = delete;
+    TraderContainer(const TraderContainer&) = delete;
+    TraderContainer(TraderContainer&&) = delete;
+    TraderContainer& operator=(const TraderContainer&) = delete;
+    TraderContainer& operator=(TraderContainer&&) = delete;
 };
 
-} // namespace manager
+} // namespace traders
 } // namespace nutc

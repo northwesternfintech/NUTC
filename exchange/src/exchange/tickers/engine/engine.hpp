@@ -21,9 +21,9 @@ public:
         return order_container_;
     }
 
-    std::vector<StoredMatch> match_order(const StoredOrder& order);
+    std::vector<stored_match> match_order(const stored_order& order);
 
-    std::vector<StoredOrder>
+    std::vector<stored_order>
     expire_old_orders(uint64_t new_tick)
     {
         auto orders = order_container_.expire_orders(new_tick - ORDER_EXPIRATION_TICKS);
@@ -32,11 +32,12 @@ public:
     }
 
 private:
-    bool order_can_execute_(const StoredOrder& buyer, const StoredOrder& seller);
+    bool order_can_execute_(const stored_order& buyer, const stored_order& seller);
 
-    static StoredMatch build_match(const StoredOrder& buyer, const StoredOrder& seller);
+    static stored_match
+    build_match(const stored_order& buyer, const stored_order& seller);
 
-    std::vector<StoredMatch> attempt_matches_();
+    std::vector<stored_match> attempt_matches_();
 };
 
 } // namespace matching

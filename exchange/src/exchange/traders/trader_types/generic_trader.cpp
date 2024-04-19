@@ -1,7 +1,7 @@
 #include "generic_trader.hpp"
 
 namespace nutc {
-namespace manager {
+namespace traders {
 
 void
 GenericTrader::process_order_match(
@@ -19,5 +19,5 @@ GenericTrader::process_order_match(
     }
 }
 
-} // namespace manager
+} // namespace traders
 } // namespace nutc

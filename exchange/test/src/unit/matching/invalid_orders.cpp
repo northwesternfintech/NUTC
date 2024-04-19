@@ -1,5 +1,5 @@
 #include "config.h"
-#include "exchange/traders/trader_manager.hpp"
+#include "exchange/traders/trader_container.hpp"
 #include "exchange/traders/trader_types/local_trader.hpp"
 #include "shared/util.hpp"
 #include "test_utils/macros.hpp"
@@ -11,7 +11,7 @@ using nutc::util::Side::sell;
 
 class UnitInvalidOrders : public ::testing::Test {
 protected:
-    using LocalTrader = nutc::manager::LocalTrader;
+    using LocalTrader = nutc::traders::LocalTrader;
     static constexpr const int DEFAULT_QUANTITY = 1000;
 
     void
@@ -24,11 +24,12 @@ protected:
         manager_.get_trader("DEF")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     }
 
-    TraderManager& manager_ = nutc::manager::TraderManager::get_instance(); // NOLINT(*)
-    Engine engine_{TEST_ORDER_EXPIRATION_TICKS}; // NOLINT (*)
+    TraderContainer& manager_ =
+        nutc::traders::TraderContainer::get_instance(); // NOLINT(*)
+    Engine engine_{TEST_ORDER_EXPIRATION_TICKS};        // NOLINT (*)
 
-    std::vector<nutc::matching::StoredMatch>
-    add_to_engine_(const StoredOrder& order)
+    std::vector<nutc::matching::stored_match>
+    add_to_engine_(const stored_order& order)
     {
         return engine_.match_order(order);
     }
@@ -38,10 +39,10 @@ TEST_F(UnitInvalidOrders, RemoveThenAddFunds)
 {
     manager_.get_trader("ABC")->modify_capital(-TEST_STARTING_CAPITAL);
 
-    StoredOrder order2{
+    stored_order order2{
         manager_.get_trader("DEF"), nutc::util::Side::sell, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order1{
+    stored_order order1{
         manager_.get_trader("ABC"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
     };
 
@@ -69,10 +70,10 @@ TEST_F(UnitInvalidOrders, MatchingInvalidFunds)
 {
     manager_.get_trader("ABC")->modify_capital(-TEST_STARTING_CAPITAL);
 
-    StoredOrder order1{
+    stored_order order1{
         manager_.get_trader("ABC"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order2{
+    stored_order order2{
         manager_.get_trader("DEF"), nutc::util::Side::sell, "ETHUSD", 1, 1, 0
     };
 
@@ -97,16 +98,16 @@ TEST_F(UnitInvalidOrders, SimpleManyInvalidOrder)
     manager_.get_trader("C")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     manager_.get_trader("D")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
 
-    StoredOrder order1{
+    stored_order order1{
         manager_.get_trader("A"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order2{
+    stored_order order2{
         manager_.get_trader("B"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order3{
+    stored_order order3{
         manager_.get_trader("C"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order4{
+    stored_order order4{
         manager_.get_trader("D"), nutc::util::Side::sell, "ETHUSD", 3, 1, 0
     };
 

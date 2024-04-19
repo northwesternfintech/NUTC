@@ -1,6 +1,6 @@
 #pragma once
 
-#include "exchange/traders/trader_manager.hpp"
+#include "exchange/traders/trader_container.hpp"
 #include "shared/util.hpp"
 
 namespace nutc {
@@ -22,11 +22,12 @@ class AlgoInitializer {
      * For example, dev_mode spawns in n algorithms in algos/algo_n.py
      */
     virtual void initialize_files() = 0;
-    virtual void initialize_trader_container(manager::TraderManager& manager) const = 0;
+    virtual void initialize_trader_container(traders::TraderContainer& manager
+    ) const = 0;
 
 public:
     void
-    initialize_algo_management(manager::TraderManager& trader_container)
+    initialize_algo_management(traders::TraderContainer& trader_container)
     {
         initialize_files();
         initialize_trader_container(trader_container);
@@ -36,6 +37,11 @@ public:
     get_algo_initializer(util::Mode mode, std::optional<util::algorithm> sandbox);
 
     virtual ~AlgoInitializer() = default;
+    AlgoInitializer() = default;
+    AlgoInitializer(const AlgoInitializer&) = delete;
+    AlgoInitializer(AlgoInitializer&&) = delete;
+    AlgoInitializer& operator=(const AlgoInitializer&) = delete;
+    AlgoInitializer& operator=(AlgoInitializer&&) = delete;
 };
 
 } // namespace algos

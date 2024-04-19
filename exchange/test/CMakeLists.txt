@@ -40,6 +40,7 @@ target_include_directories(
 target_link_libraries(
   NUTC_tests PRIVATE
   EXCHANGE_lib 
+  SHARED_lib
   GTest::gtest_main
 )
 

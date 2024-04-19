@@ -11,12 +11,12 @@
 #include "process_spawning/spawning.hpp"
 #include "rabbitmq/connection_handler/rmq_connection_handler.hpp"
 #include "rabbitmq/consumer/rmq_consumer.hpp"
-#include "rabbitmq/trader_manager/RabbitMQTraderManager.hpp"
+#include "rabbitmq/trader_manager/rmq_wrapper_init.hpp"
 #include "shared/config/config_loader.hpp"
 #include "shared/file_operations/file_operations.hpp"
 #include "shared/util.hpp"
 #include "tickers/manager/ticker_manager.hpp"
-#include "traders/trader_manager.hpp"
+#include "traders/trader_container.hpp"
 #include "utils/logger/logger.hpp"
 
 #include <csignal>
@@ -101,14 +101,14 @@ initialize_bots()
 void
 initialize_wrappers()
 {
-    manager::TraderManager& users = manager::TraderManager::get_instance();
+    traders::TraderContainer& users = traders::TraderContainer::get_instance();
     rabbitmq::RabbitMQConnectionManager::get_instance().initialize_connection();
 
     spawning::spawn_all_clients(users);
 
-    rabbitmq::RabbitMQTraderManager::wait_for_clients(users);
+    rabbitmq::RabbitMQWrapperInitializer::wait_for_clients(users);
     size_t wait_secs = config::Config::get_instance().constants().WAIT_SECS;
-    rabbitmq::RabbitMQTraderManager::send_start_time(users, wait_secs);
+    rabbitmq::RabbitMQWrapperInitializer::send_start_time(users, wait_secs);
 }
 
 void
@@ -121,7 +121,7 @@ start_tick_scheduler()
 void
 initialize_algos(const auto& mode, const auto& sandbox)
 {
-    manager::TraderManager& users = manager::TraderManager::get_instance();
+    traders::TraderContainer& users = traders::TraderContainer::get_instance();
     auto algo_mgr = algos::AlgoInitializer::get_algo_initializer(mode, sandbox);
     algo_mgr->initialize_algo_management(users);
 }

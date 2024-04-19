@@ -13,7 +13,7 @@ namespace nutc {
 namespace algos {
 
 void
-NormalModeAlgoInitializer::initialize_trader_container(manager::TraderManager& traders
+NormalModeAlgoInitializer::initialize_trader_container(traders::TraderContainer& traders
 ) const
 {
     constexpr const std::array<const char*, 3> REQUIRED_DB_FIELDS = {
@@ -40,7 +40,7 @@ NormalModeAlgoInitializer::initialize_trader_container(manager::TraderManager& t
             user["lastName"].get<std::string>()
         );
         std::string algo_id = user["latestAlgoId"].get<std::string>();
-        traders.add_trader<manager::RemoteTrader>(
+        traders.add_trader<traders::RemoteTrader>(
             user_id, full_name, algo_id, starting_capital
         );
     }

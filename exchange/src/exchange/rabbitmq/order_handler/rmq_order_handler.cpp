@@ -3,7 +3,7 @@
 #include "exchange/tick_scheduler/tick_scheduler.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
 #include "exchange/tickers/manager/ticker_manager.hpp"
-#include "exchange/traders/trader_manager.hpp"
+#include "exchange/traders/trader_container.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
 namespace nutc {
@@ -20,10 +20,10 @@ RabbitMQOrderHandler::handle_incoming_market_order(
         return;
 
     auto current_tick = ticks::TickJobScheduler::get().get_current_tick();
-    auto trader = manager::TraderManager::get_instance().get_trader(order.client_id);
+    auto trader = traders::TraderContainer::get_instance().get_trader(order.client_id);
     auto stored_order =
-        matching::StoredOrder{trader,         order.side,  order.ticker,
-                              order.quantity, order.price, current_tick};
+        matching::stored_order{trader,         order.side,  order.ticker,
+                               order.quantity, order.price, current_tick};
 
     engine_manager.match_order(stored_order);
 }

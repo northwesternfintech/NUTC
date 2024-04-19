@@ -5,11 +5,11 @@
 
 namespace {
 struct price_level {
-    const double price_delta;
-    const double quantity_factor;
+    const double PRICE_DELTA;
+    const double QUANTITY_FACTOR;
 
     consteval price_level(double price_delta, double quantity_factor) :
-        price_delta(price_delta), quantity_factor(quantity_factor)
+        PRICE_DELTA(price_delta), QUANTITY_FACTOR(quantity_factor)
     {}
 };
 
@@ -52,22 +52,22 @@ MarketMakerBot::avg_level_price(double new_theo)
 {
     double total_price = 0;
     for (const price_level& level : BID_LEVELS) {
-        total_price += (new_theo + level.price_delta) * level.quantity_factor;
+        total_price += (new_theo + level.PRICE_DELTA) * level.QUANTITY_FACTOR;
     }
     for (const price_level& level : ASK_LEVELS) {
-        total_price += (new_theo + level.price_delta) * level.quantity_factor;
+        total_price += (new_theo + level.PRICE_DELTA) * level.QUANTITY_FACTOR;
     }
 
     return total_price;
 }
 
-std::shared_ptr<manager::GenericTrader>
+std::shared_ptr<traders::GenericTrader>
 MarketMakerBot::get_self_pointer_()
 {
-    return std::static_pointer_cast<manager::GenericTrader>(shared_from_this());
+    return std::static_pointer_cast<traders::GenericTrader>(shared_from_this());
 }
 
-std::vector<matching::StoredOrder>
+std::vector<matching::stored_order>
 MarketMakerBot::take_action(double new_theo, uint64_t current_tick)
 {
     double capital_tolerance = compute_capital_tolerance_();
@@ -76,14 +76,14 @@ MarketMakerBot::take_action(double new_theo, uint64_t current_tick)
 
     auto trader = get_self_pointer_();
 
-    std::vector<matching::StoredOrder> orders;
+    std::vector<matching::stored_order> orders;
     orders.reserve(static_cast<size_t>(LEVELS) * 2);
 
     auto create_order = [&](const price_level& level, const util::Side side) {
-        double price = new_theo + level.price_delta;
-        double quantity = total_quantity * level.quantity_factor;
-        return matching::StoredOrder{trader,   side,  this->TICKER,
-                                     quantity, price, current_tick};
+        double price = new_theo + level.PRICE_DELTA;
+        double quantity = total_quantity * level.QUANTITY_FACTOR;
+        return matching::stored_order{trader,   side,  this->TICKER,
+                                      quantity, price, current_tick};
     };
 
     std::ranges::transform(BID_LEVELS, std::back_inserter(orders), [&](auto level) {
@@ -93,7 +93,7 @@ MarketMakerBot::take_action(double new_theo, uint64_t current_tick)
         return create_order(level, util::Side::sell);
     });
 
-    auto update_position = [&](const matching::StoredOrder& order) {
+    auto update_position = [&](const matching::stored_order& order) {
         if (order.side == util::Side::buy) {
             modify_open_bids(order.quantity);
             modify_long_capital(order.quantity * order.price);

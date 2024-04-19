@@ -7,7 +7,6 @@
 #include <chrono>
 
 #include <list>
-#include <ranges>
 #include <thread>
 
 namespace nutc {
@@ -30,7 +29,6 @@ class TickJobScheduler {
     std::thread tick_thread_{};
     std::vector<scheduled_job> on_tick_jobs_{};
 
-    // TODO(john) replace with cleaner solution
     std::list<milliseconds> tick_times_{};
 
 public:
@@ -87,7 +85,8 @@ public:
     stop()
     {
         running_ = false;
-        tick_thread_.join();
+        if (tick_thread_.joinable())
+            tick_thread_.join();
     }
 
 private:
@@ -100,6 +99,8 @@ public:
     TickJobScheduler(TickJobScheduler&&) = delete;
     TickJobScheduler& operator=(const TickJobScheduler&) = delete;
     TickJobScheduler& operator=(TickJobScheduler&&) = delete;
+
+    ~TickJobScheduler() { stop(); }
 
     static TickJobScheduler&
     get()

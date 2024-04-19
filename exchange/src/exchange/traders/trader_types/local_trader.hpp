@@ -3,7 +3,7 @@
 #include "generic_trader.hpp"
 
 namespace nutc {
-namespace manager {
+namespace traders {
 
 class LocalTrader : public GenericTrader {
     pid_t pid_{};
@@ -44,5 +44,5 @@ public:
     }
 };
 
-} // namespace manager
+} // namespace traders
 } // namespace nutc

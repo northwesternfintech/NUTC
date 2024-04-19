@@ -35,7 +35,8 @@ protected:
         users_.reset();
     }
 
-    TraderManager& users_ = nutc::manager::TraderManager::get_instance(); // NOLINT(*)
+    TraderContainer& users_ =
+        nutc::traders::TraderContainer::get_instance(); // NOLINT(*)
     nutc::engine_manager::EngineManager& engine_manager_ =
         nutc::engine_manager::EngineManager::get_instance(); // NOLINT(*)
 };

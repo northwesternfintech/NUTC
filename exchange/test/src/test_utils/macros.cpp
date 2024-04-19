@@ -1,14 +1,14 @@
 #include "macros.hpp"
 
-#include "exchange/traders/trader_manager.hpp"
+#include "exchange/traders/trader_container.hpp"
 
 namespace nutc {
 namespace testing_utils {
 
-StoredOrder
-make_stored_order(market_order& order, const manager::TraderManager& manager)
+stored_order
+make_stored_order(market_order& order, const traders::TraderContainer& manager)
 {
-    return StoredOrder{
+    return stored_order{
         manager.get_trader(order.client_id),
         order.side,
         order.ticker,
@@ -29,7 +29,7 @@ is_nearly_equal(double f_a, double f_b, double epsilon)
 
 bool
 validate_match(
-    const nutc::matching::StoredMatch& match, const std::string& ticker,
+    const nutc::matching::stored_match& match, const std::string& ticker,
     const std::string& buyer_id, const std::string& seller_id, util::Side side,
     double price, double quantity
 )

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "exchange/traders/trader_manager.hpp"
+#include "exchange/traders/trader_container.hpp"
 
 #include <glaze/glaze.hpp>
 #include <sys/types.h>
@@ -16,11 +16,11 @@ namespace spawning {
 namespace fs = std::filesystem;
 
 /**
- * @brief Spawns all clients in the given TraderManager
- * @param users The TraderManager to spawn clients for
+ * @brief Spawns all clients in the given TraderContainer
+ * @param users The TraderContainer to spawn clients for
  * @returns the number of clients spawned
  */
-size_t spawn_all_clients(nutc::manager::TraderManager& users);
+size_t spawn_all_clients(nutc::traders::TraderContainer& users);
 const fs::path& wrapper_binary_path();
 
 } // namespace spawning

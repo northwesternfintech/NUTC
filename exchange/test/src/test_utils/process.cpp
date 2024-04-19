@@ -4,7 +4,7 @@
 #include "exchange/algos/dev_mode/dev_mode.hpp"
 #include "exchange/logging.hpp"
 #include "exchange/process_spawning/spawning.hpp"
-#include "exchange/rabbitmq/trader_manager/RabbitMQTraderManager.hpp"
+#include "exchange/rabbitmq/trader_manager/rmq_wrapper_init.hpp"
 
 #include <future>
 #include <ranges>
@@ -13,7 +13,7 @@ namespace nutc {
 namespace testing_utils {
 
 void
-kill_all_processes(const manager::TraderManager& users)
+kill_all_processes(const traders::TraderContainer& users)
 {
     std::ranges::for_each(users.get_traders(), [](const auto& trader_pair) {
         auto pid = trader_pair.second->get_pid();
@@ -24,8 +24,8 @@ kill_all_processes(const manager::TraderManager& users)
 
 bool
 initialize_testing_clients(
-    nutc::manager::TraderManager& users, const std::vector<std::string>& algo_filenames,
-    bool has_delay
+    nutc::traders::TraderContainer& users,
+    const std::vector<std::string>& algo_filenames, bool has_delay
 )
 {
     auto init_clients = [&]() {
@@ -40,14 +40,16 @@ initialize_testing_clients(
             users.get_traders(),
             [&has_delay](const auto& trader_pair) {
                 const auto& trader = trader_pair.second;
-                if (trader->get_type() == manager::TraderType::local) {
+                if (trader->get_type() == traders::TraderType::local) {
                     trader->set_start_delay(has_delay);
                 }
             }
         );
         spawning::spawn_all_clients(users);
-        rabbitmq::RabbitMQTraderManager::wait_for_clients(users);
-        rabbitmq::RabbitMQTraderManager::send_start_time(users, TEST_CLIENT_WAIT_SECS);
+        rabbitmq::RabbitMQWrapperInitializer::wait_for_clients(users);
+        rabbitmq::RabbitMQWrapperInitializer::send_start_time(
+            users, TEST_CLIENT_WAIT_SECS
+        );
         logging::init(quill::LogLevel::Info);
     };
 

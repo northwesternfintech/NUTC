@@ -3,7 +3,7 @@
 #include "generic_trader.hpp"
 
 namespace nutc {
-namespace manager {
+namespace traders {
 class RemoteTrader : public GenericTrader {
     const std::string FULL_NAME;
     const std::string ALGO_ID;
@@ -53,5 +53,5 @@ public:
         return ALGO_ID;
     }
 };
-} // namespace manager
+} // namespace traders
 } // namespace nutc

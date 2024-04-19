@@ -31,7 +31,7 @@ public:
 
     [[nodiscard]] bool is_active() const override;
 
-    std::optional<matching::StoredOrder>
+    std::optional<matching::stored_order>
     take_action(double current, double theo, uint64_t current_tick);
 
 private:

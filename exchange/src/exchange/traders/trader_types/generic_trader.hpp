@@ -7,7 +7,7 @@
 #include <unordered_map>
 
 namespace nutc {
-namespace manager {
+namespace traders {
 enum class TraderType { remote, local, bot };
 
 class GenericTrader : public std::enable_shared_from_this<GenericTrader> {
@@ -125,5 +125,5 @@ public:
 
     virtual const std::string& get_algo_id() const = 0;
 };
-} // namespace manager
+} // namespace traders
 } // namespace nutc

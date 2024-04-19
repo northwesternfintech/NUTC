@@ -1,7 +1,7 @@
 #include "rmq_connection_handler.hpp"
 
 #include "exchange/logging.hpp"
-#include "exchange/rabbitmq/queue_manager/RabbitMQQueueManager.hpp"
+#include "exchange/rabbitmq/queue_manager/rmq_queue_manager.hpp"
 
 #include <glaze/glaze.hpp>
 

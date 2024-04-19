@@ -10,7 +10,6 @@
 namespace nutc {
 namespace concurrency {
 
-// TODO: name thread
 #ifdef __linux__
 void
 pin_to_core(size_t core_num, const std::string& thread_name)
@@ -25,10 +24,14 @@ pin_to_core(size_t core_num, const std::string& thread_name)
 
     pthread_t current_thread = pthread_self();
     int result = pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
-    if (result != 0) {
-        log_e(main, "Failed to set thread affinity");
-        abort();
-    }
+
+    if (result != 0)
+        throw std::runtime_error("Failed to set thread affinity");
+
+    result = pthread_setname_np(current_thread, thread_name.c_str());
+    if (result != 0)
+        throw std::runtime_error("Failed to set thread name");
+
     log_i(main, "Pinned {} thread to core {}", thread_name, core_num);
 }
 #else
@@ -45,7 +48,7 @@ pin_to_core(size_t, const std::string&)
 void
 pin_to_core(size_t core_num)
 {
-    pin_to_core(core_num, "");
+    pin_to_core(core_num, "DEFAULT");
 }
 
 } // namespace concurrency

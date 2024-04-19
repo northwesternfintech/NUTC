@@ -48,7 +48,7 @@ public:
         return retail_bots_;
     }
 
-    std::vector<matching::StoredOrder>
+    std::vector<matching::stored_order>
     on_new_theo(double new_theo, double current, uint64_t current_tick);
 
     template <class BotType>

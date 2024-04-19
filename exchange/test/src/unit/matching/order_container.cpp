@@ -1,7 +1,7 @@
 #include "exchange/tickers/engine/order_container.hpp"
 
 #include "config.h"
-#include "exchange/traders/trader_manager.hpp"
+#include "exchange/traders/trader_container.hpp"
 #include "exchange/traders/trader_types/local_trader.hpp"
 #include "test_utils/macros.hpp"
 
@@ -15,7 +15,7 @@ using nutc::util::Side::sell;
 
 class UnitOrderContainerTest : public ::testing::Test {
 protected:
-    using LocalTrader = nutc::manager::LocalTrader;
+    using LocalTrader = nutc::traders::LocalTrader;
     static constexpr const int DEFAULT_QUANTITY = 1000;
 
     void
@@ -28,16 +28,17 @@ protected:
         manager_.get_trader("DEF")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     }
 
-    TraderManager& manager_ = nutc::manager::TraderManager::get_instance(); // NOLINT(*)
-    nutc::matching::OrderContainer container_;                              // NOLINT
+    TraderContainer& manager_ =
+        nutc::traders::TraderContainer::get_instance(); // NOLINT(*)
+    nutc::matching::OrderContainer container_;          // NOLINT
 };
 
 TEST_F(UnitOrderContainerTest, SimpleAddRemove)
 {
     market_order order1{"ABC", nutc::util::Side::buy, "ETHUSD", 1, 1};
     market_order order2{"ABC", nutc::util::Side::sell, "ETHUSD", 1, 1};
-    StoredOrder so1 = make_stored_order(order1, manager_);
-    StoredOrder so2 = make_stored_order(order2, manager_);
+    stored_order so1 = make_stored_order(order1, manager_);
+    stored_order so2 = make_stored_order(order2, manager_);
 
     container_.add_order(so1);
     ASSERT_EQ(container_.get_level(nutc::util::Side::buy, 1), 1);
@@ -58,8 +59,8 @@ TEST_F(UnitOrderContainerTest, ModifyQuantity)
 {
     market_order order1{"ABC", nutc::util::Side::buy, "ETHUSD", 1, 1};
     market_order order2{"ABC", nutc::util::Side::sell, "ETHUSD", 1, 1};
-    StoredOrder so1 = make_stored_order(order1, manager_);
-    StoredOrder so2 = make_stored_order(order2, manager_);
+    stored_order so1 = make_stored_order(order1, manager_);
+    stored_order so2 = make_stored_order(order2, manager_);
 
     container_.add_order(so1);
     container_.add_order(so2);

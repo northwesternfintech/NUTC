@@ -19,7 +19,7 @@ class OrderContainer {
     std::set<order_index, ask_comparator> asks_;
 
     // order index -> order
-    std::unordered_map<uint64_t, StoredOrder> orders_by_id_;
+    std::unordered_map<uint64_t, stored_order> orders_by_id_;
 
     // tick -> queue of order ids
     std::map<uint64_t, std::vector<uint64_t>> orders_by_tick_;
@@ -84,13 +84,13 @@ public:
             .can_match(get_top_order(util::Side::sell));
     }
 
-    void add_order(StoredOrder order);
+    void add_order(stored_order order);
 
     /**
      * @brief Expire all orders that were created tick-EXPIRATION_TIME ago
      * This should be called every tick
      */
-    std::vector<StoredOrder> expire_orders(uint64_t tick);
+    std::vector<stored_order> expire_orders(uint64_t tick);
 
     /**
      * @brief Modify the quantity of an order
@@ -101,22 +101,22 @@ public:
     /**
      * @brief Remove an order from all data structures
      */
-    StoredOrder remove_order(uint64_t order_id);
+    stored_order remove_order(uint64_t order_id);
 
     /**
      * @brief Get the top order on a side
      */
-    const StoredOrder& get_top_order(util::Side side) const;
+    const stored_order& get_top_order(util::Side side) const;
 
 private:
-    const StoredOrder&
+    const stored_order&
     get_order_(uint64_t order_id) const
     {
         assert(order_exists_(order_id));
         return orders_by_id_.at(order_id);
     }
 
-    StoredOrder&
+    stored_order&
     get_order_(uint64_t order_id)
     {
         assert(order_exists_(order_id));

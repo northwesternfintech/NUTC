@@ -20,7 +20,7 @@ public:
 
     bool constexpr can_leverage() const override { return true; }
 
-    std::vector<matching::StoredOrder>
+    std::vector<matching::stored_order>
     take_action(double new_theo, uint64_t current_tick);
 
     [[nodiscard]] bool
@@ -44,7 +44,7 @@ private:
 
     static constexpr double avg_level_price(double new_theo);
 
-    std::shared_ptr<manager::GenericTrader> get_self_pointer_();
+    std::shared_ptr<traders::GenericTrader> get_self_pointer_();
 
     void process_order_match(
         const std::string& ticker, util::Side side, double price, double quantity

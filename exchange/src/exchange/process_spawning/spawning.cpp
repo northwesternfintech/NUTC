@@ -6,8 +6,6 @@
 
 #include <cstdlib>
 
-#include <ranges>
-
 namespace nutc {
 namespace spawning {
 
@@ -24,7 +22,7 @@ const fs::path&
 wrapper_binary_path()
 {
     static const char* wrapper_binary_location =
-        std::getenv("NUTC_WRAPPER_BINARY_PATH");
+        std::getenv("NUTC_WRAPPER_BINARY_PATH"); // NOLINT
     if (wrapper_binary_location == nullptr) [[unlikely]] {
         throw std::runtime_error("NUTC_WRAPPER_BINARY_PATH environment variable not set"
         );
@@ -38,16 +36,16 @@ wrapper_binary_path()
 }
 
 pid_t
-spawn_algo_wrapper(const std::shared_ptr<manager::GenericTrader>& trader)
+spawn_algo_wrapper(const std::shared_ptr<traders::GenericTrader>& trader)
 {
     static const fs::path& wrapper_binpath = wrapper_binary_path();
-    if (trader->get_type() == manager::TraderType::local) {
+    if (trader->get_type() == traders::TraderType::local) {
         // missing py?
         if (!file_ops::file_exists(trader->get_algo_id())) [[unlikely]] {
             std::string err_str = fmt::format(
                 "Unable to find local algorithm file: {}", trader->get_algo_id()
             );
-            throw std::runtime_error(std::move(err_str));
+            throw std::runtime_error(err_str);
         }
     }
 
@@ -55,7 +53,7 @@ spawn_algo_wrapper(const std::shared_ptr<manager::GenericTrader>& trader)
 
     if (pid > 0)
         return pid;
-    else if (pid < 0)
+    if (pid < 0)
         throw std::runtime_error("Failed to fork algo wrapper");
 
     std::vector<std::string> args{
@@ -63,7 +61,7 @@ spawn_algo_wrapper(const std::shared_ptr<manager::GenericTrader>& trader)
         quote_id(trader->get_algo_id())
     };
 
-    if (trader->get_type() == manager::TraderType::local)
+    if (trader->get_type() == traders::TraderType::local)
         args.emplace_back("--dev");
 
     if (!trader->has_start_delay())
@@ -81,13 +79,13 @@ spawn_algo_wrapper(const std::shared_ptr<manager::GenericTrader>& trader)
 }
 
 size_t
-spawn_all_clients(nutc::manager::TraderManager& users)
+spawn_all_clients(nutc::traders::TraderContainer& users)
 {
     size_t num_clients{};
     auto spawn_one_trader = [&](const auto& trader_pair) {
         const auto& [id, trader] = trader_pair;
         // Bots do not have algo wrappers
-        if (trader->get_type() == manager::TraderType::bot)
+        if (trader->get_type() == traders::TraderType::bot)
             return;
 
         if (trader->is_active())

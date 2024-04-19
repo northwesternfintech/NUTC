@@ -4,7 +4,6 @@
 #include "exchange/concurrency/pin_threads.hpp"
 
 #include <numeric>
-#include <queue>
 
 namespace nutc {
 namespace ticks {
@@ -28,18 +27,17 @@ TickJobScheduler::get_tick_metrics() const
 {
     std::vector<milliseconds> tmp_ticks{};
     std::ranges::copy(tick_times_, std::back_inserter(tmp_ticks));
-    std::ranges::sort(tmp_ticks, std::greater<milliseconds>());
+    std::ranges::sort(tmp_ticks, std::greater<>());
 
     auto avg_top_ms = [&](auto num) {
-        return std::accumulate(
-                   tmp_ticks.begin(),
-                   std::next(tmp_ticks.begin(), static_cast<int>(num)),
-                   std::chrono::milliseconds(0)
-               )
-               / num;
+        auto time = std::accumulate(
+            tmp_ticks.begin(), std::next(tmp_ticks.begin(), static_cast<int>(num)),
+            std::chrono::milliseconds(0)
+        );
+        return num > 0 ? time / num : std::chrono::milliseconds(0);
     };
 
-    size_t num_ticks = tick_times_.size();
+    int num_ticks = static_cast<int>(tick_times_.size());
     return {
         avg_top_ms(num_ticks / 100), avg_top_ms(num_ticks / 20),
         avg_top_ms(num_ticks / 10), avg_top_ms(num_ticks / 2), avg_top_ms(num_ticks)

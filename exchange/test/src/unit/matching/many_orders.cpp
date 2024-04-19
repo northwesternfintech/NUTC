@@ -1,5 +1,5 @@
 #include "config.h"
-#include "exchange/traders/trader_manager.hpp"
+#include "exchange/traders/trader_container.hpp"
 #include "exchange/traders/trader_types/local_trader.hpp"
 #include "test_utils/macros.hpp"
 
@@ -10,7 +10,7 @@ using nutc::util::Side::sell;
 
 class UnitManyOrders : public ::testing::Test {
 protected:
-    using LocalTrader = nutc::manager::LocalTrader;
+    using LocalTrader = nutc::traders::LocalTrader;
     static constexpr const int DEFAULT_QUANTITY = 1000;
 
     void
@@ -27,11 +27,12 @@ protected:
         manager_.get_trader("D")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     }
 
-    TraderManager& manager_ = nutc::manager::TraderManager::get_instance(); // NOLINT(*)
-    Engine engine_{TEST_ORDER_EXPIRATION_TICKS}; // NOLINT (*)
+    TraderContainer& manager_ =
+        nutc::traders::TraderContainer::get_instance(); // NOLINT(*)
+    Engine engine_{TEST_ORDER_EXPIRATION_TICKS};        // NOLINT (*)
 
-    std::vector<nutc::matching::StoredMatch>
-    add_to_engine_(const StoredOrder& order)
+    std::vector<nutc::matching::stored_match>
+    add_to_engine_(const stored_order& order)
     {
         return engine_.match_order(order);
     }
@@ -39,19 +40,19 @@ protected:
 
 TEST_F(UnitManyOrders, CorrectTimePriority)
 {
-    StoredOrder order1{
+    stored_order order1{
         manager_.get_trader("A"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order2{
+    stored_order order2{
         manager_.get_trader("B"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order3{
+    stored_order order3{
         manager_.get_trader("C"), nutc::util::Side::sell, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order4{
+    stored_order order4{
         manager_.get_trader("D"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order5{
+    stored_order order5{
         manager_.get_trader("C"), nutc::util::Side::sell, "ETHUSD", 5, 1, 0
     };
 
@@ -72,10 +73,10 @@ TEST_F(UnitManyOrders, CorrectTimePriority)
 
 TEST_F(UnitManyOrders, OnlyMatchesOne)
 {
-    StoredOrder order1{
+    stored_order order1{
         manager_.get_trader("A"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order2{
+    stored_order order2{
         manager_.get_trader("B"), nutc::util::Side::sell, "ETHUSD", 1, 1, 0
     };
 
@@ -91,16 +92,16 @@ TEST_F(UnitManyOrders, OnlyMatchesOne)
 
 TEST_F(UnitManyOrders, SimpleManyOrder)
 {
-    StoredOrder order1{
+    stored_order order1{
         manager_.get_trader("A"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order2{
+    stored_order order2{
         manager_.get_trader("B"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order3{
+    stored_order order3{
         manager_.get_trader("C"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order4{
+    stored_order order4{
         manager_.get_trader("D"), nutc::util::Side::sell, "ETHUSD", 3, 1, 0
     };
 
@@ -121,16 +122,16 @@ TEST_F(UnitManyOrders, SimpleManyOrder)
 
 TEST_F(UnitManyOrders, PassiveAndAggressivePartial)
 {
-    StoredOrder order1{
+    stored_order order1{
         manager_.get_trader("A"), nutc::util::Side::sell, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order2{
+    stored_order order2{
         manager_.get_trader("B"), nutc::util::Side::sell, "ETHUSD", 10, 1, 0
     };
-    StoredOrder order3{
+    stored_order order3{
         manager_.get_trader("C"), nutc::util::Side::buy, "ETHUSD", 2, 3, 0
     };
-    StoredOrder order4{
+    stored_order order4{
         manager_.get_trader("D"), nutc::util::Side::buy, "ETHUSD", 10, 4, 0
     };
 

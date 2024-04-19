@@ -2,7 +2,7 @@
 
 #include "exchange/bots/bot_container.hpp"
 #include "exchange/logging.hpp"
-#include "exchange/rabbitmq/publisher/RabbitMQPublisher.hpp"
+#include "exchange/rabbitmq/publisher/rmq_publisher.hpp"
 #include "exchange/tickers/engine/level_update_generator.hpp"
 #include "shared/config/config_loader.hpp"
 
@@ -13,7 +13,7 @@ void
 EngineManager::on_tick(uint64_t new_tick)
 {
     for (auto& [ticker, engine] : engines_) {
-        std::vector<matching::StoredOrder> expired_orders =
+        std::vector<matching::stored_order> expired_orders =
             engine.expire_old_orders(new_tick);
 
         for (const auto& order : expired_orders) {

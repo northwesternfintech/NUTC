@@ -1,5 +1,5 @@
 #include "config.h"
-#include "exchange/traders/trader_manager.hpp"
+#include "exchange/traders/trader_container.hpp"
 #include "exchange/traders/trader_types/local_trader.hpp"
 #include "test_utils/macros.hpp"
 
@@ -10,7 +10,7 @@ using nutc::util::Side::sell;
 
 class UnitBasicMatching : public ::testing::Test {
 protected:
-    using LocalTrader = nutc::manager::LocalTrader;
+    using LocalTrader = nutc::traders::LocalTrader;
     static constexpr const int DEFAULT_QUANTITY = 1000;
 
     void
@@ -30,11 +30,12 @@ protected:
         SetUp();
     }
 
-    TraderManager& manager_ = nutc::manager::TraderManager::get_instance(); // NOLINT(*)
-    Engine engine_{TEST_ORDER_EXPIRATION_TICKS}; // NOLINT (*)
+    TraderContainer& manager_ =
+        nutc::traders::TraderContainer::get_instance(); // NOLINT(*)
+    Engine engine_{TEST_ORDER_EXPIRATION_TICKS};        // NOLINT (*)
 
-    std::vector<nutc::matching::StoredMatch>
-    add_to_engine_(const StoredOrder& order)
+    std::vector<nutc::matching::stored_match>
+    add_to_engine_(const stored_order& order)
     {
         return engine_.match_order(order);
     }
@@ -42,10 +43,10 @@ protected:
 
 TEST_F(UnitBasicMatching, SimpleMatch)
 {
-    StoredOrder order1{
+    stored_order order1{
         manager_.get_trader("ABC"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order2{
+    stored_order order2{
         manager_.get_trader("DEF"), nutc::util::Side::sell, "ETHUSD", 1, 1, 0
     };
     auto matches = add_to_engine_(order1);
@@ -57,19 +58,19 @@ TEST_F(UnitBasicMatching, SimpleMatch)
 
 TEST_F(UnitBasicMatching, CorrectBuyPricingOrder)
 {
-    StoredOrder buy1{
+    stored_order buy1{
         manager_.get_trader("ABC"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
     };
-    StoredOrder buy2{
+    stored_order buy2{
         manager_.get_trader("ABC"), nutc::util::Side::buy, "ETHUSD", 1, 2, 0
     };
-    StoredOrder buy3{
+    stored_order buy3{
         manager_.get_trader("ABC"), nutc::util::Side::buy, "ETHUSD", 1, 3, 0
     };
-    StoredOrder buy4{
+    stored_order buy4{
         manager_.get_trader("ABC"), nutc::util::Side::buy, "ETHUSD", 1, 4, 0
     };
-    StoredOrder sell1{
+    stored_order sell1{
         manager_.get_trader("DEF"), nutc::util::Side::sell, "ETHUSD", 1, 1, 0
     };
 
@@ -92,13 +93,13 @@ TEST_F(UnitBasicMatching, CorrectBuyPricingOrder)
 
 TEST_F(UnitBasicMatching, NoMatchThenMatchBuy)
 {
-    StoredOrder order1{
+    stored_order order1{
         manager_.get_trader("ABC"), nutc::util::Side::sell, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order2{
+    stored_order order2{
         manager_.get_trader("DEF"), nutc::util::Side::sell, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order3{
+    stored_order order3{
         manager_.get_trader("DEF"), nutc::util::Side::buy, "ETHUSD", 1, 2, 0
     };
     auto matches = add_to_engine_(order1);
@@ -112,13 +113,13 @@ TEST_F(UnitBasicMatching, NoMatchThenMatchBuy)
 
 TEST_F(UnitBasicMatching, NoMatchThenMatchSell)
 {
-    StoredOrder order1{
+    stored_order order1{
         manager_.get_trader("ABC"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order2{
+    stored_order order2{
         manager_.get_trader("DEF"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order3{
+    stored_order order3{
         manager_.get_trader("DEF"), nutc::util::Side::sell, "ETHUSD", 2, 0, 0
     };
 
@@ -136,10 +137,10 @@ TEST_F(UnitBasicMatching, NoMatchThenMatchSell)
 
 TEST_F(UnitBasicMatching, PassivePriceMatch)
 {
-    StoredOrder order1{
+    stored_order order1{
         manager_.get_trader("ABC"), nutc::util::Side::buy, "ETHUSD", 1, 2, 0
     };
-    StoredOrder order2{
+    stored_order order2{
         manager_.get_trader("DEF"), nutc::util::Side::sell, "ETHUSD", 1, 1, 0
     };
     auto matches = add_to_engine_(order1);
@@ -152,10 +153,10 @@ TEST_F(UnitBasicMatching, PassivePriceMatch)
 
 TEST_F(UnitBasicMatching, PartialFill)
 {
-    StoredOrder order1{
+    stored_order order1{
         manager_.get_trader("ABC"), nutc::util::Side::buy, "ETHUSD", 2, 1, 0
     };
-    StoredOrder order2{
+    stored_order order2{
         manager_.get_trader("DEF"), nutc::util::Side::sell, "ETHUSD", 1, 1, 0
     };
     auto matches = add_to_engine_(order1);
@@ -170,13 +171,13 @@ TEST_F(UnitBasicMatching, PartialFill)
 
 TEST_F(UnitBasicMatching, MultipleFill)
 {
-    StoredOrder order1{
+    stored_order order1{
         manager_.get_trader("ABC"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order2{
+    stored_order order2{
         manager_.get_trader("ABC"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order3{
+    stored_order order3{
         manager_.get_trader("DEF"), nutc::util::Side::sell, "ETHUSD", 2, 1, 0
     };
     auto matches = add_to_engine_(order1);
@@ -197,13 +198,13 @@ TEST_F(UnitBasicMatching, MultipleFill)
 
 TEST_F(UnitBasicMatching, MultiplePartialFill)
 {
-    StoredOrder order1{
+    stored_order order1{
         manager_.get_trader("ABC"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order2{
+    stored_order order2{
         manager_.get_trader("ABC"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order3{
+    stored_order order3{
         manager_.get_trader("DEF"), nutc::util::Side::sell, "ETHUSD", 3, 1, 0
     };
     auto matches = add_to_engine_(order1);
@@ -224,10 +225,10 @@ TEST_F(UnitBasicMatching, MultiplePartialFill)
 
 TEST_F(UnitBasicMatching, SimpleMatchReversed)
 {
-    StoredOrder order1{
+    stored_order order1{
         manager_.get_trader("ABC"), nutc::util::Side::sell, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order2{
+    stored_order order2{
         manager_.get_trader("DEF"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
     };
     auto matches = add_to_engine_(order1);
@@ -239,10 +240,10 @@ TEST_F(UnitBasicMatching, SimpleMatchReversed)
 
 TEST_F(UnitBasicMatching, PassivePriceMatchReversed)
 {
-    StoredOrder order1{
+    stored_order order1{
         manager_.get_trader("ABC"), nutc::util::Side::sell, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order2{
+    stored_order order2{
         manager_.get_trader("DEF"), nutc::util::Side::buy, "ETHUSD", 1, 2, 0
     };
     auto matches = add_to_engine_(order1);
@@ -256,10 +257,10 @@ TEST_F(UnitBasicMatching, PassivePriceMatchReversed)
 
 TEST_F(UnitBasicMatching, PartialFillReversed)
 {
-    StoredOrder order1{
+    stored_order order1{
         manager_.get_trader("ABC"), nutc::util::Side::sell, "ETHUSD", 2, 1, 0
     };
-    StoredOrder order2{
+    stored_order order2{
         manager_.get_trader("DEF"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
     };
     auto matches = add_to_engine_(order1);
@@ -271,13 +272,13 @@ TEST_F(UnitBasicMatching, PartialFillReversed)
 
 TEST_F(UnitBasicMatching, MultipleFillReversed)
 {
-    StoredOrder order1{
+    stored_order order1{
         manager_.get_trader("ABC"), nutc::util::Side::sell, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order2{
+    stored_order order2{
         manager_.get_trader("ABC"), nutc::util::Side::sell, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order3{
+    stored_order order3{
         manager_.get_trader("DEF"), nutc::util::Side::buy, "ETHUSD", 2, 1, 0
     };
     auto matches = add_to_engine_(order1);
@@ -294,13 +295,13 @@ TEST_F(UnitBasicMatching, MultipleFillReversed)
 
 TEST_F(UnitBasicMatching, MultiplePartialFillReversed)
 {
-    StoredOrder order1{
+    stored_order order1{
         manager_.get_trader("ABC"), nutc::util::Side::sell, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order2{
+    stored_order order2{
         manager_.get_trader("ABC"), nutc::util::Side::sell, "ETHUSD", 1, 1, 0
     };
-    StoredOrder order3{
+    stored_order order3{
         manager_.get_trader("DEF"), nutc::util::Side::buy, "ETHUSD", 3, 1, 0
     };
     auto matches = add_to_engine_(order1);

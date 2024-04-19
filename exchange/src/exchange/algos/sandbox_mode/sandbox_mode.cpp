@@ -8,13 +8,13 @@
 namespace nutc {
 namespace algos {
 void
-SandboxAlgoInitializer::initialize_trader_container(manager::TraderManager& traders
+SandboxAlgoInitializer::initialize_trader_container(traders::TraderContainer& traders
 ) const
 {
     int starting_cap = config::Config::get_instance().constants().STARTING_CAPITAL;
     // In sandbox, we aren't given their full name
-    traders.add_trader<manager::RemoteTrader>(
-        user_id_, "UNKNOWN", algo_id_, starting_cap
+    traders.add_trader<traders::RemoteTrader>(
+        USER_ID, "SANDBOX_USER", ALGO_ID, starting_cap
     );
 }
 

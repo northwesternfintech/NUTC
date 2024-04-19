@@ -1,8 +1,7 @@
 #include "curl.hpp"
 
-#include "exchange/logging.hpp"
-
 #include <curl/curl.h>
+#include <fmt/format.h>
 
 namespace nutc {
 namespace curl {

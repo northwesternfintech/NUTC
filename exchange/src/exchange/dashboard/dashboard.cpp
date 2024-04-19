@@ -2,7 +2,7 @@
 
 #include "exchange/tick_scheduler/tick_scheduler.hpp"
 #include "exchange/tickers/manager/ticker_manager.hpp"
-#include "exchange/traders/trader_manager.hpp"
+#include "exchange/traders/trader_container.hpp"
 #include "exchange/traders/trader_types/generic_trader.hpp"
 #include "exchange/traders/trader_types/remote_trader.hpp"
 #include "shared/config/config_loader.hpp"
@@ -205,7 +205,7 @@ Dashboard::display_leaderboard(WINDOW* window, int start_y)
 {
     mvwprintw(window, start_y, window->_maxx / 2 - 5, "Leaderboard");
 
-    manager::TraderManager& client_manager = manager::TraderManager::get_instance();
+    traders::TraderContainer& client_manager = traders::TraderContainer::get_instance();
     int start_x = 2;
     int orig_start_y = start_y;
     // todo: move to class member variable
@@ -224,9 +224,9 @@ Dashboard::display_leaderboard(WINDOW* window, int start_y)
         return pnl;
     };
 
-    std::vector<std::shared_ptr<manager::GenericTrader>> ordered_traders;
+    std::vector<std::shared_ptr<traders::GenericTrader>> ordered_traders;
     for (const auto& [user_id, trader] : client_manager.get_traders()) {
-        if (trader->get_type() != manager::TraderType::remote)
+        if (trader->get_type() != traders::TraderType::remote)
             continue;
         ordered_traders.push_back(trader);
     }
@@ -244,7 +244,7 @@ Dashboard::display_leaderboard(WINDOW* window, int start_y)
                      - config::Config::get_instance().constants().STARTING_CAPITAL;
         if (pnl == 0)
             continue;
-        auto name = std::static_pointer_cast<manager::RemoteTrader>(trader)->get_name();
+        auto name = std::static_pointer_cast<traders::RemoteTrader>(trader)->get_name();
         mvwprintw(window, start_y++, start_x, "Competitor: %s", name.c_str());
         mvwprintw(window, start_y++, start_x, "  Portfolio Value: %.2f", portfolio);
         mvwprintw(window, start_y++, start_x, "  Capital: %.2f", capital);
