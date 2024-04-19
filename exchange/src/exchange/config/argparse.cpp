@@ -5,7 +5,7 @@
 namespace nutc {
 namespace config {
 
-std::tuple<Mode, std::optional<algorithm>>
+std::tuple<mode, std::optional<algorithm>>
 process_arguments(int argc, const char** argv)
 {
     argparse::ArgumentParser program(
@@ -41,16 +41,19 @@ process_arguments(int argc, const char** argv)
     try {
         program.parse_args(argc, argv);
     } catch (const std::runtime_error& err) {
-        std::cerr << err.what() << std::endl;
+        std::cerr << err.what() << std::endl; // NOLINT
         std::cerr << program;
         exit(1); // NOLINT(concurrency-*)
     }
 
-    std::optional<algorithm> algo = std::nullopt;
-    if (program.is_used("--sandbox")) {
+    auto get_sandbox_algo = [&]() -> std::optional<algorithm> {
+        if (!program.is_used("--sandbox")) {
+            return std::nullopt;
+        }
         auto sandbox = program.get<std::vector<std::string>>("--sandbox");
         if (sandbox.size() != 2) {
-            std::cerr << "Invalid number of arguments for --sandbox" << std::endl;
+            std::cerr << "Invalid number of arguments for --sandbox"
+                      << std::endl; // NOLINT
             std::cerr << program;
             exit(1); // NOLINT(concurrency-*)
         }
@@ -61,19 +64,20 @@ process_arguments(int argc, const char** argv)
         std::replace(uid.begin(), uid.end(), ' ', '-');
         std::replace(algo_id.begin(), algo_id.end(), ' ', '-');
 
-        algo = algorithm{uid, algo_id};
-    }
+        return algorithm{uid, algo_id};
+    };
 
+    auto algo = get_sandbox_algo();
     bool dev_mode = program.get<bool>("--dev");
     bool bots_only = program.get<bool>("--bots-only");
-    auto get_mode = [&]() -> Mode {
+    auto get_mode = [&]() -> mode {
         if (dev_mode)
-            return Mode::DEV;
+            return mode::dev;
         if (algo.has_value())
-            return Mode::SANDBOX;
+            return mode::sandbox;
         if (bots_only)
-            return Mode::BOTS_ONLY;
-        return Mode::NORMAL;
+            return mode::bots_only;
+        return mode::normal;
     };
 
     return std::make_tuple(get_mode(), algo);

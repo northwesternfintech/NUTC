@@ -1,8 +1,7 @@
 #include "curl.hpp"
 
-#include "exchange/logging.hpp"
-
 #include <curl/curl.h>
+#include <fmt/format.h>
 
 namespace nutc {
 namespace curl {
@@ -27,40 +26,40 @@ request_to_file(
 {
     CURL* curl = curl_easy_init();
 
-    if (curl != nullptr) {
-        FILE* into_file = fopen(filepath.c_str(), "wb");
-        if (into_file == nullptr) {
-            log_e(firebase_fetching, "failed to open file: {}", filepath);
-            return;
-        }
-        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, into_file);
+    if (curl == nullptr)
+        throw std::runtime_error("Failed to init curl");
 
-        if (method == "POST") {
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
-        }
-        else if (method == "PUT") {
-            curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
-        }
-        else if (method == "DELETE") {
-            curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
-        }
-
-        CURLcode res = curl_easy_perform(curl);
-        if (res != CURLE_OK) {
-            log_e(
-                firebase_fetching, "curl_easy_perform() failed: {}",
-                curl_easy_strerror(res)
-            );
-        }
-
-        curl_easy_cleanup(curl);
-        int err = fclose(into_file);
-        if (err != 0)
-            log_e(firebase_fetching, "Failed to close filestream");
+    FILE* into_file = fopen(filepath.c_str(), "wb");
+    if (into_file == nullptr) {
+        throw std::runtime_error(fmt::format("failed to open file: {}", filepath));
     }
+
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, into_file);
+
+    if (method == "POST") {
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
+    }
+    else if (method == "PUT") {
+        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
+    }
+    else if (method == "DELETE") {
+        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+    }
+
+    CURLcode res = curl_easy_perform(curl);
+    if (res != CURLE_OK) {
+        throw std::runtime_error(
+            fmt::format("curl_easy_perform() failed: {}", curl_easy_strerror(res))
+        );
+    }
+
+    curl_easy_cleanup(curl);
+    int err = fclose(into_file);
+    if (err != 0)
+        throw std::runtime_error("Failed to close filestream");
 }
 
 std::string
@@ -69,34 +68,34 @@ request_to_string(
 )
 {
     CURL* curl = curl_easy_init();
-    std::string read_buffer;
+    std::string read_buffer{};
 
-    if (curl != nullptr) {
-        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &read_buffer);
+    if (curl == nullptr)
+        throw std::runtime_error("Failed to initialize curl");
 
-        if (method == "POST") {
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
-        }
-        else if (method == "PUT") {
-            curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
-        }
-        else if (method == "DELETE") {
-            curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
-        }
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &read_buffer);
 
-        CURLcode res = curl_easy_perform(curl);
-        if (res != CURLE_OK) {
-            log_e(
-                firebase_fetching, "curl_easy_perform() failed: {}",
-                curl_easy_strerror(res)
-            );
-        }
-
-        curl_easy_cleanup(curl);
+    if (method == "POST") {
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
     }
+    else if (method == "PUT") {
+        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
+    }
+    else if (method == "DELETE") {
+        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+    }
+
+    CURLcode res = curl_easy_perform(curl);
+    if (res != CURLE_OK) {
+        throw std::runtime_error(
+            fmt::format("curl_easy_perform() failed: {}", curl_easy_strerror(res))
+        );
+    }
+
+    curl_easy_cleanup(curl);
     return read_buffer;
 }
 
@@ -106,11 +105,13 @@ request_to_json(
 )
 {
     std::string read_buffer = request_to_string(method, url, data);
-    glz::json_t json{};
+    glz::json_t json;
     auto error = glz::read_json(json, read_buffer);
     if (error) {
         std::string descriptive_error = glz::format_error(error, read_buffer);
-        log_e(firebase_fetching, "glz::read_json() failed: {}", descriptive_error);
+        throw std::runtime_error(
+            fmt::format("glz::read_json() failed: {}", std::move(descriptive_error))
+        );
     }
     return json;
 }

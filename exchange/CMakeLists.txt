@@ -31,12 +31,12 @@ add_library(
     
     src/exchange/process_spawning/spawning.cpp
     
-    src/exchange/rabbitmq/trader_manager/RabbitMQTraderManager.cpp
-    src/exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.cpp
-    src/exchange/rabbitmq/consumer/RabbitMQConsumer.cpp
-    src/exchange/rabbitmq/order_handler/RabbitMQOrderHandler.cpp
-    src/exchange/rabbitmq/publisher/RabbitMQPublisher.cpp
-    src/exchange/rabbitmq/queue_manager/RabbitMQQueueManager.cpp
+    src/exchange/rabbitmq/trader_manager/rmq_wrapper_init.cpp
+    src/exchange/rabbitmq/connection_handler/rmq_connection_handler.cpp
+    src/exchange/rabbitmq/consumer/rmq_consumer.cpp
+    src/exchange/rabbitmq/order_handler/rmq_order_handler.cpp
+    src/exchange/rabbitmq/publisher/rmq_publisher.cpp
+    src/exchange/rabbitmq/queue_manager/rmq_queue_manager.cpp
 
     src/exchange/bots/bot_container.cpp
     src/exchange/bots/bot_types/retail.cpp
@@ -50,18 +50,20 @@ add_library(
     
     src/exchange/traders/trader_types/generic_trader.cpp
     src/exchange/traders/trader_types/bot_trader.cpp
+
     
     src/exchange/utils/logger/logger.cpp
 
-    src/shared/file_operations/file_operations.cpp
-    src/shared/config/config_loader.cpp
     
     src/exchange/theo/brownian.cpp
     
-    src/exchange/tick_manager/tick_manager.cpp
+    src/exchange/tick_scheduler/tick_scheduler.cpp
     
+    src/exchange/dashboard/dashboard.cpp
     src/exchange/dashboard/state/ticker_state.cpp
+
     src/exchange/concurrency/pin_threads.cpp
+    src/exchange/concurrency/exchange_lock.cpp
 
     src/exchange/config/argparse.cpp
 )
@@ -108,24 +110,10 @@ option(DASHBOARD "Enable NUTC Dashboard" OFF)
 
 if(DASHBOARD)
   add_definitions(-DDASHBOARD)
-  add_library(
-      DASHBOARD_lib OBJECT
-      src/exchange/dashboard/dashboard.cpp
-  )
 
-  target_link_libraries(DASHBOARD_lib PUBLIC EXCHANGE_lib)
-
-  target_include_directories(
-      DASHBOARD_lib ${warning_guard}
-      PUBLIC
-      "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
-  )
-
-# ncurses 
+  # ncurses 
   find_package(Curses REQUIRED)
-  target_link_libraries(DASHBOARD_lib PUBLIC Curses::Curses)
-
-  target_compile_features(DASHBOARD_lib PUBLIC cxx_std_20)
+  target_link_libraries(EXCHANGE_lib PUBLIC Curses::Curses)
 endif()
 
 # ---- Declare executable ----
@@ -138,11 +126,6 @@ set_property(TARGET EXCHANGE_exe PROPERTY OUTPUT_NAME NUTC)
 target_compile_features(EXCHANGE_exe PRIVATE cxx_std_20)
 
 target_link_libraries(EXCHANGE_exe PRIVATE EXCHANGE_lib)
-
-if(DASHBOARD)
-  target_link_libraries(EXCHANGE_exe PRIVATE DASHBOARD_lib)
-  target_link_libraries(EXCHANGE_exe PRIVATE Curses::Curses)
-endif()
 
 # quill
 target_link_libraries(EXCHANGE_exe PRIVATE quill::quill)
@@ -178,7 +161,6 @@ add_library(
     src/wrapper/rabbitmq/rabbitmq.cpp
     src/wrapper/firebase/firebase.cpp
     src/wrapper/pywrapper/pywrapper.cpp
-    src/wrapper/dev_mode/dev_mode.cpp
     src/wrapper/pywrapper/rate_limiter.cpp
     # Utils
     src/wrapper/logging.cpp
@@ -222,6 +204,30 @@ target_link_libraries(WRAPPER_exe PRIVATE glaze::glaze)
 target_link_libraries(WRAPPER_exe PRIVATE pybind11::pybind11)
 target_link_libraries(WRAPPER_exe PRIVATE Python3::Python)
 target_link_libraries(WRAPPER_exe PRIVATE ${Python3_LIBRARIES})
+
+# ---- SHARED ----------
+
+add_library(SHARED_lib OBJECT     
+    src/shared/file_operations/file_operations.cpp
+    src/shared/config/config_loader.cpp
+)
+
+target_include_directories(
+    SHARED_lib ${warning_guard}
+    PUBLIC
+    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
+)
+
+target_link_libraries(SHARED_lib PUBLIC fmt::fmt)
+target_link_libraries(SHARED_lib PUBLIC yaml-cpp::yaml-cpp)
+
+target_link_libraries(EXCHANGE_lib PUBLIC SHARED_lib)
+target_link_libraries(EXCHANGE_exe PUBLIC SHARED_lib)
+
+target_link_libraries(WRAPPER_lib PUBLIC SHARED_lib)
+target_link_libraries(WRAPPER_exe PUBLIC SHARED_lib)
+
+target_compile_features(SHARED_lib PUBLIC cxx_std_20)
 
 # Enable lto for release builds
 include(CheckIPOSupported)

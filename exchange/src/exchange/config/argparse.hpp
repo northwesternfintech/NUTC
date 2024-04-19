@@ -8,10 +8,10 @@
 namespace nutc {
 namespace config {
 
-using Mode = util::Mode;
+using mode = util::Mode;
 using algorithm = util::algorithm;
 
-std::tuple<Mode, std::optional<algorithm>>
+std::tuple<mode, std::optional<algorithm>>
 process_arguments(int argc, const char** argv);
 
 } // namespace config

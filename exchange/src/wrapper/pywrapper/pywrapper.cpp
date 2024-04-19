@@ -9,14 +9,14 @@ create_api_module(
         publish_market_order
 )
 {
-    py::module m = py::module::create_extension_module(
+    py::module module = py::module::create_extension_module(
         "nutc_api", "NUTC Exchange API", new py::module::module_def
     );
-    m.def("publish_market_order", publish_market_order);
+    module.def("publish_market_order", publish_market_order);
 
     py::module_ sys = py::module_::import("sys");
-    py::dict sys_modules = sys.attr("modules").cast<py::dict>();
-    sys_modules["nutc_api"] = m;
+    auto sys_modules = sys.attr("modules").cast<py::dict>();
+    sys_modules["nutc_api"] = module;
 
     py::exec(R"(import nutc_api)");
 }

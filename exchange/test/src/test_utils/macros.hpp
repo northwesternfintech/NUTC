@@ -1,18 +1,18 @@
 #include "exchange/tickers/engine/engine.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
-#include "exchange/traders/trader_manager.hpp"
+#include "exchange/traders/trader_container.hpp"
 #include "exchange/utils/logger/logger.hpp"
+#include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
 #include <limits>
 
 using Engine = nutc::matching::Engine;
-using MarketOrder = nutc::messages::MarketOrder;
-using StoredOrder = nutc::matching::StoredOrder;
+using market_order = nutc::messages::market_order;
+using stored_order = nutc::matching::stored_order;
 using Logger = nutc::events::Logger;
-using ObUpdate = nutc::messages::ObUpdate;
-using TraderManager = nutc::manager::TraderManager;
-using SIDE = nutc::messages::SIDE;
+using orderbook_update = nutc::messages::orderbook_update;
+using TraderContainer = nutc::traders::TraderContainer;
 
 namespace nutc {
 namespace testing_utils {
@@ -21,23 +21,23 @@ bool is_nearly_equal(
 );
 
 bool validate_match(
-    const nutc::matching::StoredMatch& match, const std::string& ticker,
-    const std::string& buyer_id, const std::string& seller_id, messages::SIDE side,
+    const nutc::matching::stored_match& match, const std::string& ticker,
+    const std::string& buyer_id, const std::string& seller_id, util::Side side,
     double price, double quantity
 );
 
 bool validate_ob_update(
-    const ObUpdate& update, const std::string& ticker, messages::SIDE side,
+    const orderbook_update& update, const std::string& ticker, util::Side side,
     double price, double quantity
 );
 
 bool validate_market_order(
-    const MarketOrder& update, const std::string& client_id, const std::string& ticker,
-    messages::SIDE side, double price, double quantity
+    const market_order& update, const std::string& client_id, const std::string& ticker,
+    util::Side side, double price, double quantity
 );
 
-StoredOrder
-make_stored_order(MarketOrder& order, const manager::TraderManager& manager);
+stored_order
+make_stored_order(market_order& order, const traders::TraderContainer& manager);
 
 } // namespace testing_utils
 } // namespace nutc

@@ -6,9 +6,9 @@
 
 namespace nutc {
 namespace matching {
-using messages::ObUpdate;
+using ob_update = messages::orderbook_update;
 
-std::vector<ObUpdate> get_updates(
+std::vector<ob_update> get_updates(
     const std::string& ticker, const OrderContainer& before, const OrderContainer& after
 );
 

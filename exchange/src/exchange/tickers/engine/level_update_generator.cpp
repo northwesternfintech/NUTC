@@ -8,45 +8,45 @@ namespace matching {
 // There is a more efficient way to do this, but it's O(levels) which will be <=100
 // in most cases and only called on tick
 // so simplicity > performance
-std::vector<ObUpdate>
+std::vector<ob_update>
 get_updates(
     const std::string& ticker, const OrderContainer& before, const OrderContainer& after
 )
 {
     std::unordered_set<double> buy_levels;
     std::unordered_set<double> ask_levels;
-    for (auto [price, quantity] : before.get_levels(SIDE::BUY)) {
+    for (auto [price, quantity] : before.get_levels(util::Side::buy)) {
         buy_levels.insert(price);
     }
-    for (auto [price, quantity] : before.get_levels(SIDE::SELL)) {
+    for (auto [price, quantity] : before.get_levels(util::Side::sell)) {
         ask_levels.insert(price);
     }
-    for (auto [price, quantity] : after.get_levels(SIDE::BUY)) {
+    for (auto [price, quantity] : after.get_levels(util::Side::buy)) {
         buy_levels.insert(price);
     }
-    for (auto [price, quantity] : after.get_levels(SIDE::SELL)) {
+    for (auto [price, quantity] : after.get_levels(util::Side::sell)) {
         ask_levels.insert(price);
     }
 
-    std::vector<ObUpdate> updates;
+    std::vector<ob_update> updates;
     for (auto price : buy_levels) {
-        double before_quantity = before.get_level(SIDE::BUY, price);
-        double after_quantity = after.get_level(SIDE::BUY, price);
+        double before_quantity = before.get_level(util::Side::buy, price);
+        double after_quantity = after.get_level(util::Side::buy, price);
 
         if (before_quantity == after_quantity)
             continue;
 
-        updates.push_back(ObUpdate{ticker, SIDE::BUY, price, after_quantity});
+        updates.emplace_back(ticker, util::Side::buy, price, after_quantity);
     }
 
     for (auto price : ask_levels) {
-        double before_quantity = before.get_level(SIDE::SELL, price);
-        double after_quantity = after.get_level(SIDE::SELL, price);
+        double before_quantity = before.get_level(util::Side::sell, price);
+        double after_quantity = after.get_level(util::Side::sell, price);
 
         if (before_quantity == after_quantity)
             continue;
 
-        updates.push_back(ObUpdate{ticker, SIDE::SELL, price, after_quantity});
+        updates.emplace_back(ticker, util::Side::sell, price, after_quantity);
     }
 
     return updates;

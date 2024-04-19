@@ -1,18 +1,18 @@
 #include "config.h"
 #include "exchange/tickers/engine/order_storage.hpp"
-#include "exchange/traders/trader_manager.hpp"
+#include "exchange/traders/trader_container.hpp"
 #include "exchange/traders/trader_types/local_trader.hpp"
 #include "test_utils/macros.hpp"
 
 #include <gtest/gtest.h>
 
-using nutc::messages::SIDE::BUY;
-using nutc::messages::SIDE::SELL;
+using nutc::util::Side::buy;
+using nutc::util::Side::sell;
 
 class UnitLoggingOrders : public ::testing::Test {
 protected:
     static constexpr const int DEFAULT_QUANTITY = 1000;
-    using LocalTrader = nutc::manager::LocalTrader;
+    using LocalTrader = nutc::traders::LocalTrader;
 
     void
     SetUp() override
@@ -24,22 +24,23 @@ protected:
         manager_.get_trader("DEF")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     }
 
-    TraderManager& manager_ = nutc::manager::TraderManager::get_instance(); // NOLINT(*)
-    Engine engine_{TEST_ORDER_EXPIRATION_TICKS}; // NOLINT (*)
+    TraderContainer& manager_ =
+        nutc::traders::TraderContainer::get_instance(); // NOLINT(*)
+    Engine engine_{TEST_ORDER_EXPIRATION_TICKS};        // NOLINT (*)
 
-    std::vector<nutc::matching::StoredMatch>
-    add_to_engine_(const StoredOrder& order)
+    std::vector<nutc::matching::stored_match>
+    add_to_engine_(const stored_order& order)
     {
         return engine_.match_order(order);
     }
 };
 
-TEST_F(UnitLoggingOrders, LogMarketOrders)
+TEST_F(UnitLoggingOrders, Logmarket_orders)
 {
     manager_.get_trader("ABC")->modify_capital(-TEST_STARTING_CAPITAL);
 
-    MarketOrder order2{"DEF", SELL, "ETHUSD", 1, 1};
-    MarketOrder order1{"ABC", BUY, "ETHUSD", 1, 1};
+    market_order order2{"DEF", nutc::util::Side::sell, "ETHUSD", 1, 1};
+    market_order order1{"ABC", nutc::util::Side::buy, "ETHUSD", 1, 1};
 
     auto& logger = Logger::get_logger();
 
@@ -49,8 +50,12 @@ TEST_F(UnitLoggingOrders, LogMarketOrders)
 
 TEST_F(UnitLoggingOrders, LogMatches)
 {
-    StoredOrder order1{manager_.get_trader("ABC"), BUY, "ETHUSD", 1, 1, 0};
-    StoredOrder order2{manager_.get_trader("DEF"), SELL, "ETHUSD", 1, 1, 0};
+    stored_order order1{
+        manager_.get_trader("ABC"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
+    };
+    stored_order order2{
+        manager_.get_trader("DEF"), nutc::util::Side::sell, "ETHUSD", 1, 1, 0
+    };
 
     auto matches = add_to_engine_(order1);
     auto matches2 = add_to_engine_(order2);

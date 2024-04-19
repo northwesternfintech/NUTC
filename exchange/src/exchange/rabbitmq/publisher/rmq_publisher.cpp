@@ -1,7 +1,7 @@
-#include "RabbitMQPublisher.hpp"
+#include "rmq_publisher.hpp"
 
 #include "exchange/logging.hpp"
-#include "exchange/rabbitmq/connection_manager/RabbitMQConnectionManager.hpp"
+#include "exchange/rabbitmq/connection_handler/rmq_connection_handler.hpp"
 
 namespace nutc {
 namespace rabbitmq {
@@ -46,7 +46,7 @@ RabbitMQPublisher::publish_message(
 }
 
 void
-RabbitMQPublisher::broadcast_matches(const std::vector<messages::Match>& matches)
+RabbitMQPublisher::broadcast_matches(const std::vector<messages::match>& matches)
 {
     for (const auto& match : matches) {
         std::string buffer;
@@ -56,7 +56,9 @@ RabbitMQPublisher::broadcast_matches(const std::vector<messages::Match>& matches
 }
 
 void
-RabbitMQPublisher::broadcast_ob_updates(const std::vector<messages::ObUpdate>& updates)
+RabbitMQPublisher::broadcast_ob_updates(
+    const std::vector<messages::orderbook_update>& updates
+)
 {
     for (const auto& update : updates) {
         std::string buffer;

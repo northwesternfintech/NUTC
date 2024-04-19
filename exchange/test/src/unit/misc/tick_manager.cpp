@@ -1,23 +1,21 @@
-#include "exchange/tick_manager/tick_manager.hpp"
-
-#include "exchange/tick_manager/tick_observer.hpp"
+#include "exchange/tick_scheduler/tick_observer.hpp"
+#include "exchange/tick_scheduler/tick_scheduler.hpp"
 
 #include <gtest/gtest.h>
 
 // NOLINTBEGIN
 
-class UnitTickManagerTest : public ::testing::Test {
-    using TickManager = nutc::ticks::TickManager;
+class UnitTickJobSchedulerTest : public ::testing::Test {
+    using TickJobScheduler = nutc::ticks::TickJobScheduler;
 
 protected:
-    using PRIORITY = nutc::ticks::PRIORITY;
     static constexpr uint16_t START_TICK_RATE = 100;
 
     void
     SetUp() override
     {}
 
-    TickManager& manager_ = TickManager::get_instance();
+    TickJobScheduler& manager_ = TickJobScheduler::get();
 };
 
 class TestObserver : public nutc::ticks::TickObserver {
@@ -45,15 +43,15 @@ public:
     }
 };
 
-TEST_F(UnitTickManagerTest, AttachDetachObserver)
+TEST_F(UnitTickJobSchedulerTest, AttachDetachObserver)
 {
-    TestObserver observer;
-    manager_.attach(&observer, PRIORITY::first);
+    TestObserver observer{};
+    manager_.on_tick(&observer, /*priority=*/1);
     manager_.start(START_TICK_RATE);
     // wait for 100 ms, should be around 10 ticks
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     manager_.stop();
-    manager_.detach(&observer, PRIORITY::first);
+    manager_.detach(&observer);
     ASSERT_GE(observer.get_tick_count(), 1);
     ASSERT_LE(observer.get_tick_count(), 12);
     ASSERT_GE(observer.get_current_tick(), 1);

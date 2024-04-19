@@ -1,7 +1,7 @@
 #pragma once
 
 #include "exchange/bots/bot_container.hpp"
-#include "exchange/tick_manager/tick_observer.hpp"
+#include "exchange/tick_scheduler/tick_observer.hpp"
 #include "exchange/tickers/engine/engine.hpp"
 #include "exchange/tickers/engine/order_container.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
@@ -16,7 +16,7 @@ using Engine = matching::Engine;
 class EngineManager : public nutc::ticks::TickObserver {
     // these should probably be combined into a single map. later problem :P
     std::map<std::string, Engine> engines_;
-    std::vector<matching::StoredMatch> matches_;
+    std::vector<matching::stored_match> matches_;
     std::unordered_map<std::string, matching::OrderContainer> last_order_containers_;
     std::unordered_map<std::string, uint64_t> num_matches_;
     std::unordered_map<std::string, bots::BotContainer> bot_containers_;
@@ -43,9 +43,9 @@ public:
     }
 
     void
-    match_order(const matching::StoredOrder& order)
+    match_order(const matching::stored_order& order)
     {
-        std::vector<matching::StoredMatch> matches =
+        std::vector<matching::stored_match> matches =
             get_engine(order.ticker).match_order(order);
         num_matches_[order.ticker] += matches.size();
         matches_.insert(matches_.end(), matches.begin(), matches.end());

@@ -3,7 +3,7 @@
 #include "generic_trader.hpp"
 
 namespace nutc {
-namespace manager {
+namespace traders {
 
 class LocalTrader : public GenericTrader {
     pid_t pid_{};
@@ -16,7 +16,7 @@ public:
     TraderType
     get_type() const override
     {
-        return TraderType::LOCAL;
+        return TraderType::local;
     }
 
     bool
@@ -44,5 +44,5 @@ public:
     }
 };
 
-} // namespace manager
+} // namespace traders
 } // namespace nutc

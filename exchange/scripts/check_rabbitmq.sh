@@ -7,6 +7,7 @@ wait_for_rabbitmq() {
     fi
     echo "Waiting for RabbitMQ to be ready..."
     rabbitmqctl wait "$pid_path"
+    sleep 2
     echo "RabbitMQ is ready."
 }
 

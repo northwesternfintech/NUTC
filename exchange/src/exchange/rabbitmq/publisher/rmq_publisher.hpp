@@ -19,10 +19,11 @@ public:
         return publish_message(target_name, message, /*is_exchange=*/false);
     }
 
-    static void broadcast_matches(const std::vector<messages::Match>& matches);
+    static void broadcast_matches(const std::vector<messages::match>& matches);
 
     // ignore id because we shouldn't send ob update to user who placed order
-    static void broadcast_ob_updates(const std::vector<messages::ObUpdate>& updates);
+    static void
+    broadcast_ob_updates(const std::vector<messages::orderbook_update>& updates);
 };
 
 } // namespace rabbitmq

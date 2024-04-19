@@ -1,8 +1,8 @@
 #include "dashboard.hpp"
 
-#include "exchange/tick_manager/tick_manager.hpp"
+#include "exchange/tick_scheduler/tick_scheduler.hpp"
 #include "exchange/tickers/manager/ticker_manager.hpp"
-#include "exchange/traders/trader_manager.hpp"
+#include "exchange/traders/trader_container.hpp"
 #include "exchange/traders/trader_types/generic_trader.hpp"
 #include "exchange/traders/trader_types/remote_trader.hpp"
 #include "shared/config/config_loader.hpp"
@@ -15,9 +15,9 @@
 #include <algorithm>
 #include <memory>
 
+#ifdef DASHBOARD
 namespace nutc {
 namespace dashboard {
-
 Dashboard::Dashboard() :
     err_file_(freopen("logs/error_log.txt", "w", stderr)),
     TICK_HZ(config::Config::get_instance().constants().TICK_HZ),
@@ -205,7 +205,7 @@ Dashboard::display_leaderboard(WINDOW* window, int start_y)
 {
     mvwprintw(window, start_y, window->_maxx / 2 - 5, "Leaderboard");
 
-    manager::TraderManager& client_manager = manager::TraderManager::get_instance();
+    traders::TraderContainer& client_manager = traders::TraderContainer::get_instance();
     int start_x = 2;
     int orig_start_y = start_y;
     // todo: move to class member variable
@@ -224,9 +224,9 @@ Dashboard::display_leaderboard(WINDOW* window, int start_y)
         return pnl;
     };
 
-    std::vector<std::shared_ptr<manager::GenericTrader>> ordered_traders;
+    std::vector<std::shared_ptr<traders::GenericTrader>> ordered_traders;
     for (const auto& [user_id, trader] : client_manager.get_traders()) {
-        if (trader->get_type() != manager::TraderType::REMOTE)
+        if (trader->get_type() != traders::TraderType::remote)
             continue;
         ordered_traders.push_back(trader);
     }
@@ -244,7 +244,7 @@ Dashboard::display_leaderboard(WINDOW* window, int start_y)
                      - config::Config::get_instance().constants().STARTING_CAPITAL;
         if (pnl == 0)
             continue;
-        auto name = std::static_pointer_cast<manager::RemoteTrader>(trader)->get_name();
+        auto name = std::static_pointer_cast<traders::RemoteTrader>(trader)->get_name();
         mvwprintw(window, start_y++, start_x, "Competitor: %s", name.c_str());
         mvwprintw(window, start_y++, start_x, "  Portfolio Value: %.2f", portfolio);
         mvwprintw(window, start_y++, start_x, "  Capital: %.2f", capital);
@@ -261,44 +261,32 @@ Dashboard::display_performance(WINDOW* window, int start_y)
 {
     mvwprintw(window, start_y, window->_maxx / 2 - 5, "Performance");
 
-    ticks::TickManager& tick_manager = ticks::TickManager::get_instance();
-    ticks::TickManager::tick_metrics_t metrics = tick_manager.get_tick_metrics();
+    ticks::TickJobScheduler& tick_scheduler = ticks::TickJobScheduler::get();
+    ticks::TickJobScheduler::tick_metrics_t metrics = tick_scheduler.get_tick_metrics();
     start_y++;
-    if (tick_manager.get_current_tick() < 100) {
-        mvwprintw(
-            window, start_y + 4, window->_maxx / 2 - 23,
-            "Current tick (%llu) below 100. Not enough data",
-            tick_manager.get_current_tick()
-        );
-        return;
-    }
     mvwprintw(
-        window, start_y++, window->_maxx / 2 - 8, "Current Tick: %llu",
-        tick_manager.get_current_tick()
+        window, start_y++, window->_maxx / 2 - 8, "Current Tick: %lu",
+        tick_scheduler.get_current_tick()
     );
     mvwprintw(
-        window, start_y++, window->_maxx / 2 - 13, "Top 1p tick times(ms): %llu",
+        window, start_y++, window->_maxx / 2 - 13, "Top 1p tick times(ms): %lu",
         metrics.top_1p_ms.count()
     );
     mvwprintw(
-        window, start_y++, window->_maxx / 2 - 13, "Top 5p tick times(ms): %llu",
+        window, start_y++, window->_maxx / 2 - 13, "Top 5p tick times(ms): %lu",
         metrics.top_5p_ms.count()
     );
     mvwprintw(
-        window, start_y++, window->_maxx / 2 - 13, "Top 10p tick times(ms): %llu",
+        window, start_y++, window->_maxx / 2 - 13, "Top 10p tick times(ms): %lu",
         metrics.top_10p_ms.count()
     );
     mvwprintw(
-        window, start_y++, window->_maxx / 2 - 13, "Top 50p tick times(ms): %llu",
+        window, start_y++, window->_maxx / 2 - 13, "Top 50p tick times(ms): %lu",
         metrics.top_50p_ms.count()
     );
     mvwprintw(
-        window, start_y++, window->_maxx / 2 - 13, "Average tick time(ms): %llu",
+        window, start_y++, window->_maxx / 2 - 13, "Average tick time(ms): %lu",
         metrics.avg_tick_ms.count()
-    );
-    mvwprintw(
-        window, start_y++, window->_maxx / 2 - 12, "Median tick time(ms): %llu",
-        metrics.median_tick_ms.count()
     );
     mvwprintw(
         window, start_y++, window->_maxx / 2 - 12, "Theoretical max hz: %.2f",
@@ -406,3 +394,4 @@ Dashboard::main_loop_(uint64_t tick)
 
 } // namespace dashboard
 } // namespace nutc
+#endif
