@@ -1,6 +1,6 @@
 #include "config.h"
 #include "exchange/tickers/engine/order_storage.hpp"
-#include "exchange/traders/trader_types/local_trader.hpp"
+#include "test_utils/helpers/test_trader.hpp"
 #include "test_utils/macros.hpp"
 
 #include <gtest/gtest.h>
@@ -9,7 +9,7 @@ using nutc::util::Side::buy;
 using nutc::util::Side::sell;
 
 class UnitOrderExpiration : public ::testing::Test {
-    using LocalTrader = nutc::traders::LocalTrader;
+    using TestTrader = nutc::test_utils::TestTrader;
 
 protected:
     static constexpr const int DEFAULT_QUANTITY = 1000;
@@ -17,8 +17,8 @@ protected:
     void
     SetUp() override
     {
-        manager_.add_trader<LocalTrader>("ABC", TEST_STARTING_CAPITAL);
-        manager_.add_trader<LocalTrader>("DEF", TEST_STARTING_CAPITAL);
+        manager_.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
+        manager_.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
 
         manager_.get_trader("ABC")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
         manager_.get_trader("DEF")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);

@@ -11,6 +11,7 @@ RabbitMQPublisher::publish_message(
     const std::string& target_name, const std::string& message, bool is_exchange
 )
 {
+    assert(false);
     auto check_reply = [&](amqp_rpc_reply_t reply, const char* error_msg) -> bool {
         if (reply.reply_type != AMQP_RESPONSE_NORMAL) {
             log_e(rabbitmq, "{}", error_msg);

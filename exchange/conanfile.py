@@ -18,9 +18,13 @@ class Recipe(ConanFile):
         self.requires("glaze/2.4.0")
         self.requires("yaml-cpp/0.8.0")
         self.requires("ncurses/6.4")
+        self.requires("boost/1.80.0")
 
         # Wrapper
         self.requires("pybind11/2.12.0")
+
+    def configure(self):
+        self.options["boost"].without_test=True
 
     def build_requirements(self):
         self.test_requires("gtest/1.13.0")

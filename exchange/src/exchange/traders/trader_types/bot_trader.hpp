@@ -1,6 +1,6 @@
 #pragma once
 
-#include "exchange/traders/trader_types/generic_trader.hpp"
+#include "exchange/traders/trader_types/trader_interface.hpp"
 
 #include <cassert>
 
@@ -8,7 +8,7 @@
 #include <string>
 
 namespace nutc {
-namespace bots {
+namespace traders {
 
 class BotTrader : public traders::GenericTrader {
     static uint64_t
@@ -57,18 +57,6 @@ public:
     can_leverage() const override
     {
         return true;
-    }
-
-    pid_t
-    get_pid() const override
-    {
-        return -1;
-    }
-
-    void
-    set_pid(const pid_t&) override
-    {
-        throw std::runtime_error("Not implemented");
     }
 
     const std::string&
@@ -166,5 +154,5 @@ public:
     ) override;
 };
 
-} // namespace bots
+} // namespace traders
 } // namespace nutc

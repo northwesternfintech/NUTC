@@ -66,7 +66,7 @@ RabbitMQWrapperInitializer::send_start_time(
     const auto& traders = manager.get_traders();
     for (const auto& [id, trader] : traders) {
         if (trader->is_active())
-            RabbitMQPublisher::publish_message(id, buf);
+            trader->send_message(buf);
     }
 }
 

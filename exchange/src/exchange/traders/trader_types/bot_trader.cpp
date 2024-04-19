@@ -5,7 +5,7 @@
 #include <string>
 
 namespace nutc {
-namespace bots {
+namespace traders {
 
 void
 BotTrader::process_order_expiration(
@@ -25,5 +25,5 @@ BotTrader::process_order_expiration(
     }
 }
 
-} // namespace bots
+} // namespace traders
 } // namespace nutc

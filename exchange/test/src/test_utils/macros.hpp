@@ -15,7 +15,7 @@ using orderbook_update = nutc::messages::orderbook_update;
 using TraderContainer = nutc::traders::TraderContainer;
 
 namespace nutc {
-namespace testing_utils {
+namespace test_utils {
 bool is_nearly_equal(
     double f_a, double f_b, double epsilon = std::numeric_limits<double>::epsilon()
 );
@@ -39,7 +39,7 @@ bool validate_market_order(
 stored_order
 make_stored_order(market_order& order, const traders::TraderContainer& manager);
 
-} // namespace testing_utils
+} // namespace test_utils
 } // namespace nutc
 
 #define ASSERT_EQ_MATCH(/* NOLINT(cppcoreguidelines-macro-usage) */                    \
@@ -47,7 +47,7 @@ make_stored_order(market_order& order, const traders::TraderContainer& manager);
                         quantity_                                                      \
 )                                                                                      \
     do {                                                                               \
-        bool isMatchValid = nutc::testing_utils::validate_match(                       \
+        bool isMatchValid = nutc::test_utils::validate_match(                          \
             (match), (ticker_), (buyer_id_), (seller_id_), (side_), (price_),          \
             (quantity_)                                                                \
         );                                                                             \
@@ -67,7 +67,7 @@ make_stored_order(market_order& order, const traders::TraderContainer& manager);
                             update, ticker_, side_, price_, quantity_                  \
 )                                                                                      \
     do {                                                                               \
-        bool isUpdateValid = nutc::testing_utils::validate_ob_update(                  \
+        bool isUpdateValid = nutc::test_utils::validate_ob_update(                     \
             (update), (ticker_), (side_), (price_), (quantity_)                        \
         );                                                                             \
         EXPECT_TRUE(isUpdateValid)                                                     \
@@ -83,7 +83,7 @@ make_stored_order(market_order& order, const traders::TraderContainer& manager);
                                update, client_id_, ticker_, side_, price_, quantity_   \
 )                                                                                      \
     do {                                                                               \
-        bool isUpdateValid = nutc::testing_utils::validate_market_order(               \
+        bool isUpdateValid = nutc::test_utils::validate_market_order(                  \
             (update), (client_id_), (ticker_), (side_), (price_), (quantity_)          \
         );                                                                             \
         EXPECT_TRUE(isUpdateValid)                                                     \

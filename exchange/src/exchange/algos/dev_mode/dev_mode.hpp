@@ -14,6 +14,7 @@ namespace algos {
 namespace fs = std::filesystem;
 
 class DevModeAlgoInitializer : public AlgoInitializer {
+protected:
     // Limit to 255
     const uint8_t NUM_ALGOS;
 
@@ -36,9 +37,15 @@ public:
         }
     }
 
-    void initialize_trader_container(traders::TraderContainer& traders) const final;
+    void initialize_trader_container(traders::TraderContainer& traders) const override;
 
     void initialize_files() final;
+
+    const std::vector<fs::path>&
+    get_algo_filepaths()
+    {
+        return algo_filepaths_;
+    }
 };
 
 } // namespace algos

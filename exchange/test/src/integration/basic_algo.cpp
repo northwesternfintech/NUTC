@@ -14,7 +14,7 @@ namespace rmq = nutc::rabbitmq;
 
 class IntegrationBasicAlgo : public ::testing::Test {
 protected:
-    using BotTrader = nutc::bots::BotTrader;
+    using BotTrader = nutc::traders::BotTrader;
 
     void
     SetUp() override
@@ -30,7 +30,6 @@ protected:
     void
     TearDown() override
     {
-        nutc::testing_utils::kill_all_processes(users_);
         rmq::RabbitMQConnectionManager::reset_instance();
         users_.reset();
     }
@@ -44,7 +43,7 @@ protected:
 TEST_F(IntegrationBasicAlgo, InitialLiquidity)
 {
     std::vector<std::string> names{"test_algos/buy_tsla_at_100.py"};
-    if (!nutc::testing_utils::initialize_testing_clients(users_, names)) {
+    if (!nutc::test_utils::initialize_testing_clients(users_, names)) {
         FAIL() << "Failed to initialize testing clients";
     }
 
@@ -75,7 +74,7 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
 TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
 {
     std::vector<std::string> names{"test_algos/buy_tsla_on_trade.py"};
-    if (!nutc::testing_utils::initialize_testing_clients(users_, names)) {
+    if (!nutc::test_utils::initialize_testing_clients(users_, names)) {
         FAIL() << "Failed to initialize testing clients";
     }
 
@@ -124,7 +123,7 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
 TEST_F(IntegrationBasicAlgo, OnAccountUpdate)
 {
     std::vector<std::string> names{"test_algos/buy_tsla_on_account.py"};
-    if (!nutc::testing_utils::initialize_testing_clients(users_, names)) {
+    if (!nutc::test_utils::initialize_testing_clients(users_, names)) {
         FAIL() << "Failed to initialize testing clients";
     }
 
@@ -173,7 +172,7 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdate)
 TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
 {
     std::vector<std::string> names{"test_algos/buy_tsla_at_100.py"};
-    if (!nutc::testing_utils::initialize_testing_clients(
+    if (!nutc::test_utils::initialize_testing_clients(
             users_, names, /*has_delay=*/true
         )) {
         FAIL() << "Failed to initialize testing clients";

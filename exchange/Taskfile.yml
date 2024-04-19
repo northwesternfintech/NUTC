@@ -126,7 +126,7 @@ tasks:
   run-itest:
     dir: '{{if eq .RELEASE_BUILD "False"}}.{{else}}build{{end}}'
     vars:
-      WRAPPER_RELATIVE_PATH: 'build{{if eq .RELEASE_BUILD "False"}}/dev{{end}}/WRAPPER'
+      WRAPPER_RELATIVE_PATH: './build{{if eq .RELEASE_BUILD "False"}}/dev{{end}}/WRAPPER'
       DEV_TEST_FLAGS: '--timeout 4 --preset=dev'
       RELEASE_TEST_FLAGS: '--output-on-failure --no-tests=error --timeout 10 -C Release'
       TEST_FLAGS: '{{if eq .RELEASE_BUILD "True"}}{{.RELEASE_TEST_FLAGS}}{{else}}{{.DEV_TEST_FLAGS}}{{end}}'

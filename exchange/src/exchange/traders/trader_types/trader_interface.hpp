@@ -1,6 +1,9 @@
 #pragma once
 
+#include "exchange/process_spawning/wrapper_handle.hpp"
 #include "shared/util.hpp"
+
+#include <boost/process.hpp>
 
 #include <memory>
 #include <string>
@@ -17,6 +20,7 @@ class GenericTrader : public std::enable_shared_from_this<GenericTrader> {
     bool is_active_ = false;
     bool has_start_delay_ = true;
     std::unordered_map<std::string, double> holdings_{};
+    // spawning::WrapperHandle wrapper_handle_{};
 
 public:
     explicit GenericTrader(std::string user_id, double capital) :
@@ -110,8 +114,6 @@ public:
     process_order_expiration(const std::string&, util::Side, double, double)
     {}
 
-    // NOLINTEND
-
     /**
      * @brief Triggered when an order this bot created matches
      * @note Implementing classes MUST update capital and holdings respectively
@@ -120,8 +122,13 @@ public:
         const std::string& ticker, util::Side side, double price, double quantity
     );
 
-    virtual void set_pid(const pid_t& pid) = 0;
-    virtual pid_t get_pid() const = 0;
+    virtual void
+    send_message(const std::string&)
+    {}
+
+    virtual void
+    set_wrapper_handle(spawning::WrapperHandle&&)
+    {}
 
     virtual const std::string& get_algo_id() const = 0;
 };

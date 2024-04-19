@@ -30,7 +30,7 @@ TickerState::calculate_metrics()
     matches_since_last_tick_ = new_num_matches - num_matches_;
     num_matches_ = new_num_matches;
 
-    auto calculate_pnl = [&engine_ref](const std::shared_ptr<bots::BotTrader>& bot) {
+    auto calculate_pnl = [&engine_ref](const std::shared_ptr<traders::BotTrader>& bot) {
         double capital_delta = bot->get_capital_delta();
 
         // Held stock can be negative due to leverage

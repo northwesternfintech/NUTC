@@ -5,6 +5,8 @@
 
 #include <chrono>
 
+#include <iostream>
+
 namespace nutc {
 namespace rabbitmq {
 
@@ -157,18 +159,19 @@ RabbitMQHandler::publish_message(
 std::variant<start_time, orderbook_update, match>
 RabbitMQHandler::consume_message()
 {
-    std::string buf = consume_message_as_string();
-    if (buf.empty()) {
-        log_e(wrapper_rabbitmq, "Failed to consume message.");
-        exit(1);
+    std::string buf{};
+    std::getline(std::cin, buf);
+    while (buf.empty()) {
+        std::getline(std::cin, buf);
+        throw std::runtime_error("Wrapper failed to consume message.");
     }
+    std::cout << buf << std::endl;
 
     std::variant<start_time, orderbook_update, match> data{};
     auto err = glz::read_json(data, buf);
     if (err) {
         std::string error = glz::format_error(err, buf);
-        log_e(wrapper_rabbitmq, "Failed to parse message: {}", error);
-        exit(1);
+        throw std::runtime_error(fmt::format("Failed to parse message: {}", error));
     }
     return data;
 }
@@ -182,7 +185,7 @@ RabbitMQHandler::consume_message_as_string()
     amqp_rpc_reply_t res = amqp_consume_message(conn, &envelope, NULL, 0);
 
     if (res.reply_type != AMQP_RESPONSE_NORMAL) {
-        log_e(wrapper_rabbitmq, "Failed to consume message.");
+        log_e(wrapper_rabbitmq, "Wrapper failed to consume message.");
         return "";
     }
 

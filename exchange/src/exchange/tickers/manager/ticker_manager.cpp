@@ -4,6 +4,7 @@
 #include "exchange/logging.hpp"
 #include "exchange/rabbitmq/publisher/rmq_publisher.hpp"
 #include "exchange/tickers/engine/level_update_generator.hpp"
+#include "exchange/traders/trader_container.hpp"
 #include "shared/config/config_loader.hpp"
 
 namespace nutc {
@@ -26,23 +27,38 @@ EngineManager::on_tick(uint64_t new_tick)
         std::vector<messages::match> glz_matches;
         glz_matches.reserve(matches_.size());
         for (const auto& match : matches_) {
-            glz_matches.emplace_back(
-                match.ticker, match.side, match.price, match.quantity,
-                match.buyer->get_id(), match.seller->get_id(),
-                match.buyer->get_capital(), match.seller->get_capital()
-            );
+            messages::match glz_match = {
+                match.ticker,
+                match.side,
+                match.price,
+                match.quantity,
+                match.buyer->get_id(),
+                match.seller->get_id(),
+                match.buyer->get_capital(),
+                match.seller->get_capital()
+            };
+            std::string buf = glz::write_json(glz_match);
+            match.seller->send_message(buf);
+            match.buyer->send_message(buf);
         }
 
         std::vector<messages::orderbook_update> updates = matching::get_updates(
             ticker, last_order_containers_[ticker], engine.get_order_container()
         );
+        for (const auto& update : updates) {
+            std::string update_str = glz::write_json(update);
+            for (const auto& trader :
+                 traders::TraderContainer::get_instance().get_traders()) {
+                trader.second->send_message(update_str);
+            }
+        }
         last_order_containers_[ticker] = engine.get_order_container();
 
         log_i(main, "Broadcasting {} updates for {}", updates.size(), ticker);
 
-        rabbitmq::RabbitMQPublisher::broadcast_ob_updates(updates);
+        // rabbitmq::RabbitMQPublisher::broadcast_ob_updates(updates);
 
-        rabbitmq::RabbitMQPublisher::broadcast_matches(glz_matches);
+        // rabbitmq::RabbitMQPublisher::broadcast_matches(glz_matches);
         matches_.clear();
     }
 }

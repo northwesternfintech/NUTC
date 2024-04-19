@@ -15,7 +15,7 @@ public:
         USER_ID(std::move(user_id)), ALGO_ID(std::move(algo_id))
     {}
 
-    void initialize_trader_container(traders::TraderContainer& traders) const final;
+    void initialize_trader_container(traders::TraderContainer& traders) const override;
 
     void
     initialize_files() final

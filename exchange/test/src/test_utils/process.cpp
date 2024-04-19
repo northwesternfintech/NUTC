@@ -1,26 +1,16 @@
 #include "process.hpp"
 
 #include "config.h"
-#include "exchange/algos/dev_mode/dev_mode.hpp"
 #include "exchange/logging.hpp"
 #include "exchange/process_spawning/spawning.hpp"
 #include "exchange/rabbitmq/trader_manager/rmq_wrapper_init.hpp"
+#include "test_utils/helpers/test_mode.hpp"
 
 #include <future>
 #include <ranges>
 
 namespace nutc {
-namespace testing_utils {
-
-void
-kill_all_processes(const traders::TraderContainer& users)
-{
-    std::ranges::for_each(users.get_traders(), [](const auto& trader_pair) {
-        auto pid = trader_pair.second->get_pid();
-        if (pid != -1)
-            kill(pid, SIGKILL);
-    });
-}
+namespace test_utils {
 
 bool
 initialize_testing_clients(
@@ -34,7 +24,7 @@ initialize_testing_clients(
         std::vector<std::filesystem::path> algo_filepaths{};
         std::ranges::copy(algo_filenames, std::back_inserter(algo_filepaths));
 
-        DevModeAlgoInitializer algo_manager{algo_filepaths};
+        TestModeAlgoInitializer algo_manager{algo_filepaths};
         algo_manager.initialize_trader_container(users);
         std::ranges::for_each(
             users.get_traders(),
@@ -61,5 +51,5 @@ initialize_testing_clients(
         future.wait_for(std::chrono::milliseconds(100)) != std::future_status::timeout
     );
 }
-} // namespace testing_utils
+} // namespace test_utils
 } // namespace nutc

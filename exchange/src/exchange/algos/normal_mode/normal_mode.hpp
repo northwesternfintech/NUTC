@@ -9,7 +9,7 @@ class NormalModeAlgoInitializer : public AlgoInitializer {
 public:
     constexpr NormalModeAlgoInitializer() = default;
 
-    void initialize_trader_container(traders::TraderContainer& traders) const final;
+    void initialize_trader_container(traders::TraderContainer& traders) const override;
 
     // No files to initialize
     constexpr void

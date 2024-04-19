@@ -1,7 +1,7 @@
 #pragma once
 #include "exchange/tickers/engine/order_storage.hpp"
 #include "exchange/traders/trader_types/bot_trader.hpp"
-#include "exchange/traders/trader_types/generic_trader.hpp"
+#include "exchange/traders/trader_types/trader_interface.hpp"
 
 #include <sys/types.h>
 
@@ -12,7 +12,7 @@ namespace bots {
 
 // TODO for hardening: if price gets close to 0, quantity will get very high because we
 // divide by price. Maybe something to think about?
-class MarketMakerBot : public BotTrader {
+class MarketMakerBot : public traders::BotTrader {
 public:
     MarketMakerBot(std::string ticker, double interest_limit) :
         BotTrader(std::move(ticker), interest_limit)

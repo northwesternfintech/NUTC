@@ -29,8 +29,7 @@ RabbitMQConsumer::handle_incoming_messages(engine_manager::EngineManager& engine
             [&](auto&& arg) {
                 using t = std::decay_t<decltype(arg)>;
                 if constexpr (std::is_same_v<t, messages::init_message>) {
-                    log_c(rabbitmq, "Not expecting initialization message");
-                    std::abort();
+                    throw std::runtime_error("Not expecting initialization message");
                 }
                 else if constexpr (std::is_same_v<t, messages::market_order>) {
                     RabbitMQOrderHandler::handle_incoming_market_order(
@@ -38,8 +37,7 @@ RabbitMQConsumer::handle_incoming_messages(engine_manager::EngineManager& engine
                     );
                 }
                 else {
-                    log_e(rabbitmq, "Unknown message type");
-                    std::abort();
+                    throw std::runtime_error("Unknown message type");
                 }
             },
             std::move(incoming_message.value())
@@ -110,7 +108,8 @@ RabbitMQConsumer::consume_message(int timeout_us)
     std::variant<messages::init_message, messages::market_order> data;
     auto err = glz::read_json(data, buf.value());
     if (err) {
-        std::abort();
+        std::string error = glz::format_error(err, buf.value());
+        throw std::runtime_error(fmt::format("Failed to consume message: {}", error));
     }
     return data;
 }

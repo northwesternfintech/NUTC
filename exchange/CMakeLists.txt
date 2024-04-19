@@ -48,7 +48,7 @@ add_library(
 
     src/exchange/tickers/manager/ticker_manager.cpp
     
-    src/exchange/traders/trader_types/generic_trader.cpp
+    src/exchange/traders/trader_types/trader_interface.cpp
     src/exchange/traders/trader_types/bot_trader.cpp
 
     
@@ -105,6 +105,10 @@ target_link_libraries(EXCHANGE_lib PUBLIC CURL::libcurl)
 find_package(glaze REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC glaze::glaze)
 
+# boost
+find_package(boost REQUIRED)
+target_link_libraries(EXCHANGE_lib PUBLIC boost::boost)
+
 # ---- DASHBOARD ----------
 option(DASHBOARD "Enable NUTC Dashboard" OFF)
 
@@ -136,7 +140,7 @@ target_link_libraries(EXCHANGE_exe PRIVATE fmt::fmt)
 
 # yaml-cpp
 find_package(yaml-cpp REQUIRED)
-target_link_libraries(EXCHANGE_exe PUBLIC yaml-cpp::yaml-cpp)
+target_link_libraries(EXCHANGE_exe PRIVATE yaml-cpp::yaml-cpp)
 
 
 # rabbitmq
@@ -152,6 +156,8 @@ target_link_libraries(EXCHANGE_exe PRIVATE argparse::argparse)
 # glaze
 find_package(glaze REQUIRED)
 target_link_libraries(EXCHANGE_exe PRIVATE glaze::glaze)
+
+target_link_libraries(EXCHANGE_exe PRIVATE boost::boost)
 
 # ---- WRAPPER ----------
 
@@ -184,6 +190,7 @@ target_link_libraries(WRAPPER_lib PUBLIC CURL::libcurl)
 target_link_libraries(WRAPPER_lib PUBLIC glaze::glaze)
 target_link_libraries(WRAPPER_lib PUBLIC pybind11::pybind11)
 target_link_libraries(WRAPPER_lib PUBLIC Python3::Python)
+target_link_libraries(WRAPPER_lib PRIVATE boost::boost)
 target_link_libraries(WRAPPER_lib PUBLIC ${Python3_LIBRARIES})
 
 add_executable(WRAPPER_exe src/wrapper/main.cpp)
@@ -203,6 +210,7 @@ target_link_libraries(WRAPPER_exe PRIVATE CURL::libcurl)
 target_link_libraries(WRAPPER_exe PRIVATE glaze::glaze)
 target_link_libraries(WRAPPER_exe PRIVATE pybind11::pybind11)
 target_link_libraries(WRAPPER_exe PRIVATE Python3::Python)
+target_link_libraries(WRAPPER_exe PRIVATE boost::boost)
 target_link_libraries(WRAPPER_exe PRIVATE ${Python3_LIBRARIES})
 
 # ---- SHARED ----------
@@ -222,10 +230,10 @@ target_link_libraries(SHARED_lib PUBLIC fmt::fmt)
 target_link_libraries(SHARED_lib PUBLIC yaml-cpp::yaml-cpp)
 
 target_link_libraries(EXCHANGE_lib PUBLIC SHARED_lib)
-target_link_libraries(EXCHANGE_exe PUBLIC SHARED_lib)
+target_link_libraries(EXCHANGE_exe PRIVATE SHARED_lib)
 
 target_link_libraries(WRAPPER_lib PUBLIC SHARED_lib)
-target_link_libraries(WRAPPER_exe PUBLIC SHARED_lib)
+target_link_libraries(WRAPPER_exe PRIVATE SHARED_lib)
 
 target_compile_features(SHARED_lib PUBLIC cxx_std_20)
 

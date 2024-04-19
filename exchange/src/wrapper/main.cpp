@@ -95,11 +95,6 @@ process_arguments(int argc, const char** argv)
 }
 } // namespace
 
-class NullBuffer : public std::streambuf {
-public:
-    NullBuffer() = default;
-};
-
 int
 main(int argc, const char** argv)
 {
@@ -107,14 +102,6 @@ main(int argc, const char** argv)
     auto [verbosity, uid, algo_id, development_mode, no_start_delay] =
         process_arguments(argc, argv);
     pybind11::scoped_interpreter guard{};
-
-    if (!development_mode) {
-        NullBuffer null_buffer;
-        std::cout.rdbuf(&null_buffer);
-        std::cerr.rdbuf(&null_buffer);
-        freopen("/dev/null", "w", stdout);
-        freopen("/dev/null", "w", stderr);
-    }
 
     // Start logging and print build info
     nutc::logging::init(verbosity);
