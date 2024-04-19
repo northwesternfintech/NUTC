@@ -121,9 +121,9 @@ main(int argc, const char** argv)
     log_i(main, "Starting NUTC wrapper for UID {}", uid);
 
     // Initialize the RMQ connection to the exchange
-    nutc::rabbitmq::RabbitMQ conn(uid);
+    nutc::rabbitmq::RabbitMQHandler conn{uid};
 
-    std::optional<std::string> algo;
+    std::optional<std::string> algo{};
     if (development_mode) {
         log_i(main, "Running in development mode");
         algo = nutc::file_ops::read_file_content(algo_id);
@@ -133,9 +133,9 @@ main(int argc, const char** argv)
     }
 
     // Send message to exchange to let it know we successfully initialized
-    bool published_init = conn.publishInit(uid, algo.has_value());
+    bool published_init = conn.publish_init_message(uid, algo.has_value());
     if (!published_init) {
-        log_e(main, "Failed to publish init message");
+        throw std::runtime_error("Failed to publish init message to exchange");
         return 1;
     }
     if (!algo.has_value()) {
@@ -144,10 +144,10 @@ main(int argc, const char** argv)
     conn.wait_for_start_time(no_start_delay);
 
     // Initialize the algorithm. For now, only designed for py
-    nutc::pywrapper::create_api_module(conn.getMarketFunc(uid));
+    nutc::pywrapper::create_api_module(conn.market_order_func(uid));
     nutc::pywrapper::run_code_init(algo.value());
 
     // Main event loop
-    conn.handleIncomingMessages(uid);
+    conn.main_event_loop(uid);
     return 0;
 }
