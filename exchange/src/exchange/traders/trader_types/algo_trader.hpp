@@ -1,13 +1,10 @@
 #pragma once
 
-#include "exchange/process_spawning/wrapper_handle.hpp"
+#include "exchange/wrappers/handle/wrapper_handle.hpp"
 #include "shared/file_operations/file_operations.hpp"
-#include "signal.h"
 #include "trader_interface.hpp"
 
 #include <fmt/format.h>
-
-#include <filesystem>
 
 namespace nutc {
 namespace traders {
@@ -16,7 +13,7 @@ class LocalTrader : public GenericTrader {
     const TraderType TRADER_TYPE;
     const std::string NAME;
     const std::string ALGO_ID;
-    spawning::WrapperHandle wrapper_handle_{};
+    wrappers::WrapperHandle wrapper_handle_{};
 
 public:
     // Remote (firebase)
@@ -67,15 +64,21 @@ public:
     }
 
     void
-    send_message(const std::string& message) final
+    send_messages(std::vector<std::string> messages) final
     {
-        wrapper_handle_.send_message(message);
+        wrapper_handle_.send_messages(messages);
     }
 
     void
-    set_wrapper_handle(spawning::WrapperHandle&& handle) final
+    terminate() final
     {
-        wrapper_handle_ = std::move(handle);
+        wrapper_handle_.terminate();
+    }
+
+    void
+    start_wrapper(const std::string& path, const std::vector<std::string>& args) final
+    {
+        wrapper_handle_.start(path, args);
     }
 };
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "exchange/process_spawning/wrapper_handle.hpp"
 #include "shared/util.hpp"
 
 #include <boost/process.hpp>
@@ -16,11 +15,10 @@ enum class TraderType { remote, local, bot };
 class GenericTrader : public std::enable_shared_from_this<GenericTrader> {
     const std::string USER_ID;
     const double INITIAL_CAPITAL;
-    double capital_delta_ = 0;
-    bool is_active_ = false;
-    bool has_start_delay_ = true;
+    double capital_delta_{};
+    bool is_active_{false};
+    bool has_start_delay_{true};
     std::unordered_map<std::string, double> holdings_{};
-    // spawning::WrapperHandle wrapper_handle_{};
 
 public:
     explicit GenericTrader(std::string user_id, double capital) :
@@ -123,11 +121,15 @@ public:
     );
 
     virtual void
-    send_message(const std::string&)
+    send_messages(std::vector<std::string>)
     {}
 
     virtual void
-    set_wrapper_handle(spawning::WrapperHandle&&)
+    terminate()
+    {}
+
+    virtual void
+    start_wrapper(const std::string&, const std::vector<std::string>&)
     {}
 
     virtual const std::string& get_algo_id() const = 0;

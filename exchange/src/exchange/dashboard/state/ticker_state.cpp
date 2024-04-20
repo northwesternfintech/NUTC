@@ -16,7 +16,8 @@ TickerState::calculate_metrics()
         engine_manager::EngineManager::get_instance().get_bot_container(TICKER);
 
     auto& engine_ref = engine_manager::EngineManager::get_instance();
-    const auto& order_container = engine_ref.get_engine(TICKER).get_order_container();
+    const auto& order_container =
+        engine_ref.get_engine(TICKER).engine.get_order_container();
 
     midprice_ = engine_ref.get_midprice(TICKER);
     spread_ = order_container.get_spread();

@@ -79,18 +79,6 @@ struct stored_order {
                && util::is_close_to_zero(quantity - other.quantity);
     }
 
-    // toString
-    [[nodiscard]] std::string
-    to_string() const
-    {
-        std::string side_str = side == util::Side::buy ? "BUY" : "SELL";
-        return fmt::format(
-            "stored_order(client_id={}, side={}, ticker={}, quantity={}, "
-            "price={})",
-            trader->get_id(), side_str, ticker, quantity, price
-        );
-    }
-
     int
     operator<=>(const stored_order& other) const
     {

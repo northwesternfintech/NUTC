@@ -5,6 +5,7 @@
 #include "shared/config/config_loader.hpp"
 #include "shared/file_operations/file_operations.hpp"
 
+#include <iostream>
 #include <stdexcept>
 
 namespace nutc {
@@ -27,7 +28,7 @@ DevModeAlgoInitializer::initialize_files()
         return;
 
     for (size_t i = 0; i < NUM_ALGOS; i++) {
-        auto relative_path = fmt::format("{}/algo_{}.py", ALGO_DIR, i++);
+        auto relative_path = fmt::format("{}/algo_{}.py", ALGO_DIR, i);
         algo_filepaths_.emplace_back(relative_path);
     }
 

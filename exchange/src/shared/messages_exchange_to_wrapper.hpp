@@ -67,6 +67,20 @@ struct orderbook_update {
     bool operator==(const orderbook_update& other) const = default;
 };
 
+struct tick_update {
+    std::vector<orderbook_update> ob_updates{};
+    std::vector<match> matches{};
+
+    tick_update() = default;
+
+    explicit tick_update(
+        std::vector<orderbook_update> ob_updates, std::vector<match> matches
+    ) :
+        ob_updates(std::move(ob_updates)),
+        matches(std::move(matches))
+    {}
+};
+
 } // namespace messages
 } // namespace nutc
 
@@ -77,6 +91,15 @@ struct glz::meta<nutc::messages::orderbook_update> {
     static constexpr auto value = object( // NOLINT
         "security", &t::ticker, "side", &t::side, "price", &t::price, "quantity",
         &t::quantity
+    );
+};
+
+/// \cond
+template <>
+struct glz::meta<nutc::messages::tick_update> {
+    using t = nutc::messages::tick_update;
+    static constexpr auto value = object( // NOLINT
+        "ob_updates", &t::ob_updates, "matches", &t::matches
     );
 };
 

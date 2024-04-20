@@ -1,9 +1,7 @@
 #include "config.h"
-#include "exchange/rabbitmq/connection_handler/rmq_connection_handler.hpp"
-#include "exchange/rabbitmq/consumer/rmq_consumer.hpp"
-#include "exchange/rabbitmq/order_handler/rmq_order_handler.hpp"
 #include "exchange/tickers/manager/ticker_manager.hpp"
 #include "exchange/traders/trader_types/bot_trader.hpp"
+#include "exchange/wrappers/messaging/consumer.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 #include "test_utils/macros.hpp"
 #include "test_utils/process.hpp"
@@ -17,20 +15,8 @@ protected:
     using BotTrader = nutc::traders::BotTrader;
 
     void
-    SetUp() override
-    {
-        auto& rmq_conn = rmq::RabbitMQConnectionManager::get_instance();
-        bool connected = rmq_conn.initialize_connection();
-
-        if (!connected) {
-            FAIL() << "Failed to connect to rabbitmq";
-        }
-    }
-
-    void
     TearDown() override
     {
-        rmq::RabbitMQConnectionManager::reset_instance();
         users_.reset();
     }
 
@@ -53,7 +39,7 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
     auto bot = users_.add_trader<BotTrader>("", 0);
     bot->modify_holdings("TSLA", 1000); // NOLINT
 
-    rmq::RabbitMQOrderHandler::handle_incoming_market_order(
+    rmq::RabbitMQConsumer::match_new_order(
         engine_manager_,
         nutc::messages::market_order{
             bot->get_id(), nutc::util::Side::sell, "TSLA", 100, 100
@@ -71,6 +57,39 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
     );
 }
 
+TEST_F(IntegrationBasicAlgo, ManyUpdates)
+{
+    std::vector<std::string> names{"test_algos/confirm_1000.py"};
+    if (!nutc::test_utils::initialize_testing_clients(users_, names)) {
+        FAIL() << "Failed to initialize testing clients";
+    }
+
+    // want to see if it buys
+    engine_manager_.add_engine("TSLA");
+
+    auto bot = users_.add_trader<BotTrader>("", 0);
+    bot->modify_holdings("TSLA", 100000); // NOLINT
+
+    for (double i = 0; i < 100000; i++) {
+        rmq::RabbitMQConsumer::match_new_order(
+            engine_manager_,
+            nutc::messages::market_order{
+                bot->get_id(), nutc::util::Side::sell, "TSLA", 1, i
+            }
+        );
+    }
+
+    nutc::engine_manager::EngineManager::get_instance().on_tick(0);
+
+    auto mess = rmq::RabbitMQConsumer::consume_message();
+    ASSERT_TRUE(std::holds_alternative<nutc::messages::market_order>(mess));
+
+    nutc::messages::market_order actual = std::get<nutc::messages::market_order>(mess);
+    ASSERT_EQ_MARKET_ORDER(
+        actual, "test_algos/confirm_1000.py", "TSLA", nutc::util::Side::buy, 100, 10
+    );
+}
+
 TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
 {
     std::vector<std::string> names{"test_algos/buy_tsla_on_trade.py"};
@@ -84,7 +103,7 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
     auto bot = users_.add_trader<BotTrader>("", 0);
     bot->modify_holdings("TSLA", 1000); // NOLINT
 
-    rmq::RabbitMQOrderHandler::handle_incoming_market_order(
+    rmq::RabbitMQConsumer::match_new_order(
         engine_manager_,
         nutc::messages::market_order{
             bot->get_id(), nutc::util::Side::sell, "TSLA", 100, 100
@@ -103,9 +122,7 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
         102, 10
     );
 
-    rmq::RabbitMQOrderHandler::handle_incoming_market_order(
-        engine_manager_, std::move(actual_mo)
-    );
+    rmq::RabbitMQConsumer::match_new_order(engine_manager_, std::move(actual_mo));
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 
     // on_trade_match triggers one user to place autil::Side::buy order of 1 TSLA at 100
@@ -133,7 +150,7 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdate)
     auto bot = users_.add_trader<BotTrader>("", 0);
     bot->modify_holdings("TSLA", 1000); // NOLINT
 
-    rmq::RabbitMQOrderHandler::handle_incoming_market_order(
+    rmq::RabbitMQConsumer::match_new_order(
         engine_manager_,
         nutc::messages::market_order{
             bot->get_id(), nutc::util::Side::sell, "TSLA", 100, 100
@@ -152,9 +169,7 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdate)
         102, 10
     );
 
-    rmq::RabbitMQOrderHandler::handle_incoming_market_order(
-        engine_manager_, std::move(actual_mo)
-    );
+    rmq::RabbitMQConsumer::match_new_order(engine_manager_, std::move(actual_mo));
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 
     // on_trade_match triggers one user to place autil::Side::buy order of 1 TSLA at 100
@@ -184,7 +199,7 @@ TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
     auto bot = users_.add_trader<BotTrader>("", 0);
     bot->modify_holdings("TSLA", 1000); // NOLINT
 
-    rmq::RabbitMQOrderHandler::handle_incoming_market_order(
+    rmq::RabbitMQConsumer::match_new_order(
         engine_manager_,
         nutc::messages::market_order{
             bot->get_id(), nutc::util::Side::sell, "TSLA", 100, 100

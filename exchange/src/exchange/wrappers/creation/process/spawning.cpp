@@ -1,8 +1,8 @@
 #include "spawning.hpp"
 
 #include "exchange/logging.hpp"
-#include "exchange/process_spawning/wrapper_handle.hpp"
 #include "exchange/traders/trader_types/trader_interface.hpp"
+#include "exchange/wrappers/handle/wrapper_handle.hpp"
 #include "shared/file_operations/file_operations.hpp"
 
 #include <boost/process.hpp>
@@ -11,7 +11,6 @@
 
 namespace nutc {
 namespace spawning {
-namespace bp = boost::process;
 
 namespace {
 std::string
@@ -21,10 +20,6 @@ quote_id(std::string user_id)
     return user_id;
 }
 
-struct algo_spawn_results {
-    bp::child prox;
-    bp::opstream pipe_to_child;
-};
 } // namespace
 
 const fs::path&
@@ -44,7 +39,7 @@ wrapper_binary_path()
     return wrapper_binary_path;
 }
 
-algo_spawn_results
+void
 spawn_algo_wrapper(const std::shared_ptr<traders::GenericTrader>& trader)
 {
     static const fs::path& wrapper_binpath = wrapper_binary_path();
@@ -60,13 +55,7 @@ spawn_algo_wrapper(const std::shared_ptr<traders::GenericTrader>& trader)
     if (!trader->has_start_delay())
         args.emplace_back("--no-start-delay");
 
-    bp::opstream parent_to_child{};
-    bp::child c{
-        bp::exe(std::string{wrapper_binpath}), bp::args(args),
-        bp::std_in<parent_to_child, bp::std_err> stderr, bp::std_out > stdout
-    };
-
-    return {std::move(c), std::move(parent_to_child)};
+    trader->start_wrapper(wrapper_binpath, args);
 }
 
 size_t
@@ -82,11 +71,7 @@ spawn_all_clients(nutc::traders::TraderContainer& users)
         if (trader->is_active())
             return;
 
-        auto spawn_results = spawn_algo_wrapper(trader);
-        WrapperHandle handle{
-            std::move(spawn_results.prox), std::move(spawn_results.pipe_to_child)
-        };
-        trader->set_wrapper_handle(std::move(handle));
+        spawn_algo_wrapper(trader);
         num_clients++;
     };
 

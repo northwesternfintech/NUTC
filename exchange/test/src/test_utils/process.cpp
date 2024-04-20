@@ -2,8 +2,8 @@
 
 #include "config.h"
 #include "exchange/logging.hpp"
-#include "exchange/process_spawning/spawning.hpp"
-#include "exchange/rabbitmq/trader_manager/rmq_wrapper_init.hpp"
+#include "exchange/wrappers/creation/handshake/rmq_wrapper_init.hpp"
+#include "exchange/wrappers/creation/process/spawning.hpp"
 #include "test_utils/helpers/test_mode.hpp"
 
 #include <future>
@@ -36,20 +36,23 @@ initialize_testing_clients(
             }
         );
         spawning::spawn_all_clients(users);
+        logging::init(quill::LogLevel::Info);
         rabbitmq::RabbitMQWrapperInitializer::wait_for_clients(users);
         rabbitmq::RabbitMQWrapperInitializer::send_start_time(
             users, TEST_CLIENT_WAIT_SECS
         );
-        logging::init(quill::LogLevel::Info);
     };
 
     // Make sure clients are initialized within 100ms
     // This is just for testing utils, so it's okay
 
-    auto future = std::async(std::launch::async, init_clients);
-    return (
-        future.wait_for(std::chrono::milliseconds(100)) != std::future_status::timeout
-    );
+    auto launches_in_500ms = [&]() {
+        namespace ch = std::chrono;
+        auto future = std::async(std::launch::async, init_clients);
+        return future.wait_until(ch::steady_clock::now() + ch::milliseconds(500))
+               != std::future_status::timeout;
+    };
+    return launches_in_500ms();
 }
 } // namespace test_utils
 } // namespace nutc

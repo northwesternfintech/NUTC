@@ -1,8 +1,8 @@
 #include "rmq_wrapper_init.hpp"
 
 #include "exchange/logging.hpp"
-#include "exchange/rabbitmq/consumer/rmq_consumer.hpp"
-#include "exchange/rabbitmq/publisher/rmq_publisher.hpp"
+#include "exchange/wrappers/messaging/consumer.hpp"
+#include "shared/messages_exchange_to_wrapper.hpp"
 
 namespace nutc {
 namespace rabbitmq {
@@ -31,15 +31,14 @@ RabbitMQWrapperInitializer::wait_for_clients(traders::TraderContainer& manager)
                 manager.get_trader(message.client_id)->set_active(/*active=*/true);
                 num_running++;
             }
+            return true;
         }
-        return true; // indicate that function should continue
+        return false;
     };
 
     for (size_t i = 0; i < num_clients; i++) {
         auto data = RabbitMQConsumer::consume_message();
-        if (!std::visit(process_message, data)) {
-            return;
-        }
+        while (!std::visit(process_message, data)) {}
     }
 
     log_i(
@@ -66,7 +65,7 @@ RabbitMQWrapperInitializer::send_start_time(
     const auto& traders = manager.get_traders();
     for (const auto& [id, trader] : traders) {
         if (trader->is_active())
-            trader->send_message(buf);
+            trader->send_messages({buf});
     }
 }
 

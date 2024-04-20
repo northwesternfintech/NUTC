@@ -41,7 +41,7 @@ private:
 #  include "exchange/dashboard/state/ticker_state.hpp"
 
 #  include <ncurses.h>
-
+#  undef timeout
 #  include <deque>
 #  include <fstream>
 
@@ -88,7 +88,8 @@ public:
     Dashboard& operator=(Dashboard&&) = delete;
     Dashboard(Dashboard&&) = delete;
     void close();
-    ~Dashboard() override = default;
+
+    ~Dashboard() override { close(); }
 
 private:
     void static draw_ticker_layout(WINDOW* window, int start_y, size_t num_tickers);
@@ -107,7 +108,7 @@ private:
     static void* read_pipe_and_log(void* args);
 
     Dashboard();
-};
+}; // namespace dashboard
 
 } // namespace dashboard
 } // namespace nutc

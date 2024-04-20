@@ -1,6 +1,7 @@
 #pragma once
 
 #include "exchange/traders/trader_types/trader_interface.hpp"
+#include "shared/messages_exchange_to_wrapper.hpp"
 
 #include <glaze/glaze.hpp>
 
@@ -35,6 +36,14 @@ public:
     {
         assert(user_exists_(trader_id));
         return traders_.at(trader_id);
+    }
+
+    void
+    shutdown_traders() const
+    {
+        for (const auto& trader : traders_) {
+            trader.second->terminate();
+        }
     }
 
     std::unordered_map<std::string, const std::shared_ptr<GenericTrader>>&

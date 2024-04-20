@@ -100,7 +100,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip3 install conan
+        pip3 install conan numpy
 
         sudo apt install libssl-dev -y
         
@@ -169,7 +169,7 @@ jobs:
     - name: Install dependencies
       shell: bash
       run: |
-        pip3 install conan 
+        pip3 install conan numpy
         conan profile detect
         python3 ../.github/scripts/write_config.py
         conan install . -s build_type=Release -b missing
@@ -255,7 +255,7 @@ jobs:
     - name: Install dependencies
       shell: bash
       run: |
-        pip3 install conan
+        pip3 install conan numpy
         
         sudo apt install libssl-dev -y
         
@@ -343,7 +343,7 @@ jobs:
     - name: Install dependencies
       shell: bash
       run: |
-        pip3 install conan
+        pip3 install conan numpy
         
         sudo apt install libssl-dev rabbitmq-server -y
         

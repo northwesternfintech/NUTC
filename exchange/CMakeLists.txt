@@ -4,8 +4,8 @@ include(cmake/prelude.cmake)
 
 project(
     NUTC
-    VERSION 0.1.0
-    DESCRIPTION "Northwestern University Trading Competition, 2024"
+    VERSION 0.8.0
+    DESCRIPTION "Northwestern University Trading Competition"
     HOMEPAGE_URL "https://github.com/northwesternfintech/NUTC"
     LANGUAGES CXX
 )
@@ -29,14 +29,12 @@ add_library(
 
     src/exchange/curl/curl.cpp
     
-    src/exchange/process_spawning/spawning.cpp
+    src/exchange/wrappers/creation/process/spawning.cpp
+    src/exchange/wrappers/handle/wrapper_handle.cpp
+    src/exchange/wrappers/creation/handshake/rmq_wrapper_init.cpp
+    src/exchange/wrappers/messaging/consumer.cpp
+    src/exchange/wrappers/messaging/async_pipe_receiver.cpp
     
-    src/exchange/rabbitmq/trader_manager/rmq_wrapper_init.cpp
-    src/exchange/rabbitmq/connection_handler/rmq_connection_handler.cpp
-    src/exchange/rabbitmq/consumer/rmq_consumer.cpp
-    src/exchange/rabbitmq/order_handler/rmq_order_handler.cpp
-    src/exchange/rabbitmq/publisher/rmq_publisher.cpp
-    src/exchange/rabbitmq/queue_manager/rmq_queue_manager.cpp
 
     src/exchange/bots/bot_container.cpp
     src/exchange/bots/bot_types/retail.cpp
@@ -59,7 +57,6 @@ add_library(
     
     src/exchange/tick_scheduler/tick_scheduler.cpp
     
-    src/exchange/dashboard/dashboard.cpp
     src/exchange/dashboard/state/ticker_state.cpp
 
     src/exchange/concurrency/pin_threads.cpp
@@ -93,10 +90,6 @@ target_link_libraries(EXCHANGE_lib PUBLIC fmt::fmt)
 find_package(quill REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC quill::quill)
 
-# rabbitmq
-find_package(rabbitmq-c REQUIRED)
-target_link_libraries(EXCHANGE_lib PUBLIC rabbitmq::rabbitmq-static)
-
 # libcurl
 find_package(CURL REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC CURL::libcurl)
@@ -106,21 +99,9 @@ find_package(glaze REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC glaze::glaze)
 
 # boost
-find_package(boost REQUIRED)
+find_package(Boost REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC boost::boost)
 
-# ---- DASHBOARD ----------
-option(DASHBOARD "Enable NUTC Dashboard" OFF)
-
-if(DASHBOARD)
-  add_definitions(-DDASHBOARD)
-
-  # ncurses 
-  find_package(Curses REQUIRED)
-  target_link_libraries(EXCHANGE_lib PUBLIC Curses::Curses)
-endif()
-
-# ---- Declare executable ----
 
 add_executable(EXCHANGE_exe src/exchange/main.cpp)
 add_executable(EXCHANGE::exe ALIAS EXCHANGE_exe)
@@ -143,10 +124,6 @@ find_package(yaml-cpp REQUIRED)
 target_link_libraries(EXCHANGE_exe PRIVATE yaml-cpp::yaml-cpp)
 
 
-# rabbitmq
-find_package(rabbitmq-c REQUIRED)
-target_link_libraries(EXCHANGE_exe PRIVATE rabbitmq::rabbitmq-static)
-
 # curl
 find_package(CURL REQUIRED)
 target_link_libraries(EXCHANGE_exe PRIVATE CURL::libcurl)
@@ -159,12 +136,39 @@ target_link_libraries(EXCHANGE_exe PRIVATE glaze::glaze)
 
 target_link_libraries(EXCHANGE_exe PRIVATE boost::boost)
 
+# ---- DASHBOARD ----------
+option(DASHBOARD "Enable NUTC Dashboard" OFF)
+
+if(DASHBOARD)
+  # Must be a separate lib to avoid linker errors with gtest
+  add_definitions(-DDASHBOARD)
+  add_library(DASHBOARD_lib OBJECT
+    src/exchange/dashboard/dashboard.cpp
+  )
+  target_include_directories(
+      DASHBOARD_lib ${warning_guard}
+      PUBLIC
+      "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
+  )
+
+  find_package(Curses REQUIRED)
+  target_link_libraries(DASHBOARD_lib PUBLIC Curses::Curses)
+  target_link_libraries(DASHBOARD_lib PRIVATE quill::quill)
+  target_link_libraries(DASHBOARD_lib PRIVATE fmt::fmt)
+  target_link_libraries(DASHBOARD_lib PRIVATE boost::boost)
+  target_link_libraries(DASHBOARD_lib PRIVATE glaze::glaze)
+  target_link_libraries(DASHBOARD_lib PRIVATE yaml-cpp::yaml-cpp)
+  target_link_libraries(EXCHANGE_exe PRIVATE DASHBOARD_lib)
+endif()
+
+# ---- Declare executable ----
+
 # ---- WRAPPER ----------
 
 add_library(
     WRAPPER_lib OBJECT
     
-    src/wrapper/rabbitmq/rabbitmq.cpp
+    src/wrapper/messaging/comms.cpp
     src/wrapper/firebase/firebase.cpp
     src/wrapper/pywrapper/pywrapper.cpp
     src/wrapper/pywrapper/rate_limiter.cpp
@@ -185,7 +189,6 @@ target_link_libraries(WRAPPER_lib PUBLIC fmt::fmt)
 target_link_libraries(WRAPPER_lib PUBLIC quill::quill)
 
 target_link_libraries(WRAPPER_lib PUBLIC argparse::argparse)
-target_link_libraries(WRAPPER_lib PUBLIC rabbitmq::rabbitmq-static)
 target_link_libraries(WRAPPER_lib PUBLIC CURL::libcurl)
 target_link_libraries(WRAPPER_lib PUBLIC glaze::glaze)
 target_link_libraries(WRAPPER_lib PUBLIC pybind11::pybind11)
@@ -205,7 +208,6 @@ target_link_libraries(WRAPPER_exe PRIVATE fmt::fmt)
 target_link_libraries(WRAPPER_exe PRIVATE quill::quill)
 
 target_link_libraries(WRAPPER_exe PRIVATE argparse::argparse)
-target_link_libraries(WRAPPER_exe PRIVATE rabbitmq::rabbitmq-static)
 target_link_libraries(WRAPPER_exe PRIVATE CURL::libcurl)
 target_link_libraries(WRAPPER_exe PRIVATE glaze::glaze)
 target_link_libraries(WRAPPER_exe PRIVATE pybind11::pybind11)

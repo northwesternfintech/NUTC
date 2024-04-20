@@ -4,9 +4,9 @@ vars:
   NAME: NUTC
   
   # BOTS, DEV, or NORMAL
-  MODE: "BOTS"
+  MODE: "NORMAL"
   
-  DASHBOARD_ENABLED: False
+  DASHBOARD_ENABLED: True
   
   RELEASE_BUILD: False
   RELEASE_PRESET: "ci-ubuntu"
@@ -55,10 +55,6 @@ tasks:
     cmds:
       - cmake --preset={{.PRESET}} {{.DASH_FLAG}}
 
-  check-and-start-rmq:
-    cmds:
-      - if [ "{{.MODE}}" != "BOTS" ]; then ./scripts/check_rabbitmq.sh; fi
-
   build:
     dir: .
     vars:
@@ -75,7 +71,6 @@ tasks:
       NUTC_PATH: '{{if eq .RELEASE_BUILD "True"}}build/{{.NAME}}{{else}}build/dev/{{.NAME}}{{end}}'
     cmds:
       - task: build
-      - task: check-and-start-rmq
       - task: new-log-dir
       - gdb ./{{ .NUTC_PATH }}
 
@@ -87,7 +82,6 @@ tasks:
       MODE_FLAG: '{{if eq .MODE "BOTS"}}--bots-only{{else if eq .MODE "DEV"}}--dev{{end}}'
     cmds:
       - task: build
-      - task: check-and-start-rmq
       - task: new-log-dir
       - ./{{ .NUTC_PATH }} {{ .MODE_FLAG }}
       - task: kill-wrappers
@@ -117,7 +111,6 @@ tasks:
     cmds:
       - task: build
         # Don't want to check the mode
-      - ./scripts/check_rabbitmq.sh
       - echo $NUTC_WRAPPER_BINARY_PATH
       - cp -r test/test_algos {{.TEST_DIR}}
       - cp config.yml {{.TEST_DIR}}/config.yml

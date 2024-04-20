@@ -11,8 +11,6 @@
 namespace nutc {
 namespace test_utils {
 
-namespace bp = boost::process;
-
 class TestTrader : public traders::LocalTrader {
     bool has_algo{};
 
