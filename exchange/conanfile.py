@@ -18,6 +18,7 @@ class Recipe(ConanFile):
         self.requires("yaml-cpp/0.8.0")
         self.requires("ncurses/6.4")
         self.requires("boost/1.83.0")
+        self.requires("prometheus-cpp/1.1.0")
 
         # Wrapper
         self.requires("pybind11/2.12.0")
