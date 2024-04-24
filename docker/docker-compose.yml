@@ -1,0 +1,93 @@
+version: '3'
+services:
+  sandbox:
+    image: nutc-exchange
+    build:
+      context: ..
+      dockerfile: docker/SandboxDockerfile
+      args:
+        release_build: "false"
+    restart: unless-stopped
+    ports:
+      - "4152:4152" # prometheus server
+      - "18080:18080" # sandbox server
+    command: ["--bots-only"]
+    networks:
+      - net
+
+  linter:
+    image: nutc-linter
+    restart: unless-stopped
+    build:
+      context: ..
+      dockerfile: docker/LinterDockerfile
+      args:
+        release_build: "false"
+    ports:
+      - "18081:18081" # linter server
+    networks:
+      - net
+
+  firebase:
+    image: spine3/firebase-emulator
+    restart: unless-stopped
+    ports:
+      - "4000:4000" 
+      - "4400:4400" 
+      - "5001:5001"
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9099:9099"
+      - "127.0.0.1:9199:9199"
+    environment:
+      GCP_PROJECT: "nutc-web"
+      ENABLE_UI: true
+    volumes:
+      - "../web/firebase.json:/firebase/firebase.json"
+      - "../web/baseline-data:/firebase/baseline-data"
+      - "../web/database.rules.json:/firebase/database.rules.json"
+      - "../web/storage.rules:/firebase/storage.rules"
+      - "../web/functions:/firebase/functions"
+    networks:
+      - net
+
+  web:
+    image: node:18
+    restart: unless-stopped
+    working_dir: /app
+    volumes: 
+      - "../web:/app"
+    ports:
+      - "3001:3001"
+    command: npm run dev
+    environment:
+      - NODE_ENV=development
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    restart: unless-stopped
+    networks:
+      - net
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    environment:
+    - GF_SECURITY_ALLOW_EMBEDDING=true
+    volumes:
+      - ./grafana_data:/var/lib/grafana
+    networks:
+      - net
+
+networks:
+  net:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

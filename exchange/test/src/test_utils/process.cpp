@@ -35,8 +35,8 @@ initialize_testing_clients(
         DevModeAlgoInitializer algo_manager{algo_filepaths};
         algo_manager.initialize_trader_container(users);
         logging::init(quill::LogLevel::Info);
-        rabbitmq::RabbitMQWrapperInitializer::wait_for_clients(users);
-        rabbitmq::RabbitMQWrapperInitializer::send_start_time(users, start_delay);
+        rabbitmq::WrapperInitializer::wait_for_clients(users);
+        rabbitmq::WrapperInitializer::send_start_time(users, start_delay);
     };
 
     // Make sure clients are initialized within 100ms

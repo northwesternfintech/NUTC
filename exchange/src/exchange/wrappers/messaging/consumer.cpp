@@ -1,9 +1,11 @@
 #include "consumer.hpp"
 
 #include "exchange/concurrency/exchange_lock.hpp"
+#include "exchange/logging.hpp"
 #include "exchange/tick_scheduler/tick_scheduler.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "exchange/wrappers/messaging/async_pipe_runner.hpp"
+#include "shared/messages_exchange_to_wrapper.hpp"
 
 #include <utility>
 
@@ -16,7 +18,7 @@ concept ExchangeReceivableMessage =
     || std::is_same_v<std::decay_t<T>, messages::market_order>;
 
 void
-RabbitMQConsumer::consumer_event_loop(engine_manager::EngineManager& engine_manager)
+WrapperConsumer::consumer_event_loop(engine_manager::EngineManager& engine_manager)
 {
     while (true) {
         concurrency::ExchangeLock::lock();
@@ -30,7 +32,7 @@ RabbitMQConsumer::consumer_event_loop(engine_manager::EngineManager& engine_mana
         requires ExchangeReceivableMessage<t>
         {
             if constexpr (std::is_same_v<t, messages::init_message>) {
-                throw std::runtime_error("Not expecting initialization message");
+                handle_sandbox_init(std::forward<t>(arg));
             }
             if constexpr (std::is_same_v<t, messages::market_order>) {
                 match_new_order(engine_manager, std::forward<t>(arg));
@@ -43,7 +45,25 @@ RabbitMQConsumer::consumer_event_loop(engine_manager::EngineManager& engine_mana
 }
 
 void
-RabbitMQConsumer::match_new_order(
+WrapperConsumer::handle_sandbox_init(messages::init_message&& message)
+{
+    auto& trader_container = traders::TraderContainer::get_instance();
+    if (!message.ready) {
+        log_i(
+            main, "Sandbox wrapper with id {} reported bad initialization",
+            message.client_id
+        );
+        trader_container.get_instance().remove_trader(message.client_id);
+        return;
+    }
+    trader_container.get_instance()
+        .get_trader(message.client_id)
+        ->send_messages({glz::write_json(messages::start_time{0})});
+    log_i(main, "Sandbox wrapper with id {} fully initialized", message.client_id);
+}
+
+void
+WrapperConsumer::match_new_order(
     engine_manager::EngineManager& engine_manager, messages::market_order&& order
 )
 {
@@ -62,13 +82,13 @@ RabbitMQConsumer::match_new_order(
 }
 
 std::optional<std::string>
-RabbitMQConsumer::consume_message_as_string()
+WrapperConsumer::consume_message_as_string()
 {
     return wrappers::AsyncPipeRunner::get().get_message();
 }
 
 std::optional<std::variant<messages::init_message, messages::market_order>>
-RabbitMQConsumer::consume_message_nonblocking()
+WrapperConsumer::consume_message_nonblocking()
 {
     std::optional<std::string> buf = consume_message_as_string();
     if (!buf.has_value()) {
@@ -79,6 +99,8 @@ RabbitMQConsumer::consume_message_nonblocking()
     auto err = glz::read_json(data, buf.value());
     if (err) {
         std::string error = glz::format_error(err, buf.value());
+        log_e(main, "{}", error);
+        log_e(main, "{}", buf.value());
         return std::nullopt;
     }
     return data;

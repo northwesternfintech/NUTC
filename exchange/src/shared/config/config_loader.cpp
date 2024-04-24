@@ -1,12 +1,24 @@
 #include "config_loader.hpp"
 
+#include <yaml-cpp/yaml.h>
+
 namespace nutc {
 namespace config {
+namespace {
+void
+throw_undef_err(const std::string& undefined_err)
+{
+    throw std::runtime_error(
+        fmt::format("{} is not defined in configuration file", undefined_err)
+    );
+}
+
+} // namespace
 
 std::vector<bot_config>
-Config::get_bots_config_() const
+Config::get_bot_config_(const YAML::Node& full_config)
 {
-    const auto& bots_n = CONFIG["bots"];
+    const auto& bots_n = full_config["bots"];
     if (!bots_n.IsDefined() || !bots_n.IsSequence())
         throw_undef_err("bots");
 
@@ -48,9 +60,9 @@ Config::get_bots_config_() const
 }
 
 std::vector<ticker_config>
-Config::get_tickers_config_() const
+Config::get_ticker_config_(const YAML::Node& full_config)
 {
-    const auto& tickers_n = CONFIG["tickers"];
+    const auto& tickers_n = full_config["tickers"];
     if (!tickers_n.IsDefined() || !tickers_n.IsSequence())
         throw_undef_err("tickers");
 
@@ -74,9 +86,9 @@ Config::get_tickers_config_() const
 }
 
 global_config
-Config::get_global_config_() const
+Config::get_global_config_(const YAML::Node& full_config)
 {
-    const auto& global = CONFIG["global"][0];
+    const auto& global = full_config["global"][0];
     if (!global.IsDefined())
         throw_undef_err("global");
     const auto& starting_capital = global["starting_capital"];
@@ -84,6 +96,7 @@ Config::get_global_config_() const
     const auto& exp_ticks = global["order_expiration_ticks"];
     const auto& tick_hz = global["exchange_tick_hz"];
     const auto& display_hz = global["display_refresh_hz"];
+    const auto& sandbox_secs = global["sandbox_trial_seconds"];
     if (!starting_capital.IsDefined())
         throw_undef_err("global/starting_capital");
     if (!wait_secs.IsDefined())
@@ -94,19 +107,11 @@ Config::get_global_config_() const
         throw_undef_err("global/exchange_tick_hz");
     if (!display_hz.IsDefined())
         throw_undef_err("global/display_hz");
-    return {
-        starting_capital.as<int>(), wait_secs.as<size_t>(), exp_ticks.as<size_t>(),
-        tick_hz.as<uint16_t>(), display_hz.as<uint8_t>()
-    };
-}
-
-std::string
-Config::to_lower(std::string str)
-{
-    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char chr) {
-        return std::tolower(chr);
-    });
-    return str;
+    if (!sandbox_secs.IsDefined())
+        throw_undef_err("global/sandbox_trial_seconds");
+    return {starting_capital.as<int>(), wait_secs.as<size_t>(),
+            exp_ticks.as<size_t>(),     tick_hz.as<uint16_t>(),
+            display_hz.as<uint8_t>(),   sandbox_secs.as<unsigned int>()};
 }
 
 } // namespace config

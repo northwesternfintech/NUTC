@@ -33,8 +33,7 @@ public:
         initialize_trader_container(trader_container);
     }
 
-    static std::unique_ptr<AlgoInitializer>
-    get_algo_initializer(util::Mode mode, std::optional<util::algorithm> sandbox);
+    static std::unique_ptr<AlgoInitializer> get_algo_initializer(util::Mode mode);
 
     virtual ~AlgoInitializer() = default;
     AlgoInitializer() = default;

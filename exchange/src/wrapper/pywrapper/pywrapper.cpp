@@ -20,7 +20,6 @@ create_api_module(
             pass  # Do nothing on flush
 
     sys.stdout = SuppressOutput()
-    sys.stderr = SuppressOutput()
     )");
     py::module module = py::module::create_extension_module(
         "nutc_api", "NUTC Exchange API", new py::module::module_def

@@ -11,6 +11,8 @@ global:
 
     display_refresh_hz: 2
 
+    sandbox_trial_seconds: 300
+
 tickers:
   - ticker: "ETH"
     start_price: 100
@@ -25,37 +27,37 @@ bots:
   # Market Makers
   - associated_ticker: "ETH"
     type: "market_maker"
-    number_of_bots: 5
+    number_of_bots: 2
     average_capital: 100000
     std_dev_capital: 10000
 
   - associated_ticker: "BTC"
     type: "market_maker"
-    number_of_bots: 10
+    number_of_bots: 2
     average_capital: 25000
     std_dev_capital: 5000
 
   - associated_ticker: "LTC"
     type: "market_maker"
-    number_of_bots: 3
+    number_of_bots: 2
     average_capital: 100000
     std_dev_capital: 25000
 
   # Retail
   - associated_ticker: "ETH"
     type: "retail"
-    number_of_bots: 200
+    number_of_bots: 10
     average_capital: 1000
     std_dev_capital: 200
 
   - associated_ticker: "BTC"
     type: "retail"
-    number_of_bots: 500
+    number_of_bots: 10
     average_capital: 2000
     std_dev_capital: 1000
 
   - associated_ticker: "LTC"
     type: "retail"
-    number_of_bots: 100
+    number_of_bots: 10
     average_capital: 750
     std_dev_capital: 100

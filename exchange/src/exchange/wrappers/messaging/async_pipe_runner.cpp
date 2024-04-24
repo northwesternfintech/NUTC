@@ -1,10 +1,22 @@
 #include "async_pipe_runner.hpp"
 
 #include <boost/asio/error.hpp>
+#include <boost/asio/read_until.hpp>
 #include <fmt/format.h>
+
+#include <ranges>
 
 namespace nutc {
 namespace wrappers {
+
+void
+AsyncPipeRunner::remove_pipe(std::shared_ptr<bp::async_pipe> pipe)
+{
+    std::lock_guard<std::mutex> lock{message_lock_};
+    pipe->cancel();
+
+    std::erase_if(pipes_, [&pipe](const auto& pipe_ptr) { return pipe_ptr == pipe; });
+}
 
 AsyncPipeRunner::~AsyncPipeRunner()
 {
@@ -49,18 +61,20 @@ AsyncPipeRunner::get_message()
 }
 
 void
-AsyncPipeRunner::async_read_pipe(std::shared_ptr<bp::async_pipe> pipe_in)
+AsyncPipeRunner::async_read_pipe(
+    std::shared_ptr<bp::async_pipe> pipe_in, std::shared_ptr<std::string> buffer
+)
 {
-    auto buffer = std::make_shared<std::array<char, 1024>>();
     auto prox_message = [this, buffer, pipe_in](const auto& ec, auto length) {
         if (!ec) [[likely]] {
             message_lock_.lock();
             messages_.push(std::string(buffer->data(), length));
+            buffer->erase(0, length);
             message_lock_.unlock();
-            async_read_pipe(pipe_in);
+            async_read_pipe(std::move(pipe_in), std::move(buffer));
         }
         else if (ec == boost::asio::error::eof) {
-            async_read_pipe(pipe_in);
+            async_read_pipe(std::move(pipe_in));
         }
         else {
             throw std::runtime_error(
@@ -68,7 +82,7 @@ AsyncPipeRunner::async_read_pipe(std::shared_ptr<bp::async_pipe> pipe_in)
             );
         }
     };
-    pipe_in->async_read_some(ba::buffer(*buffer), prox_message);
+    ba::async_read_until(*pipe_in, ba::dynamic_buffer(*buffer), "\n", prox_message);
 }
 
 } // namespace wrappers

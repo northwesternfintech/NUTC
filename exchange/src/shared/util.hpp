@@ -6,8 +6,13 @@
 
 namespace nutc {
 namespace util {
+
+std::string trader_id(const std::string& user_id, const std::string& algo_id);
+
+std::string get_firebase_endpoint(const std::string& params);
+
 enum class Side { buy, sell };
-enum class Mode { sandbox, dev, normal, bots_only };
+enum class Mode { dev, normal, bots_only };
 
 struct algorithm {
     const std::string UID;

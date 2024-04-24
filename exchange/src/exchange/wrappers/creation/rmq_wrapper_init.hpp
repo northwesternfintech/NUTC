@@ -4,7 +4,7 @@
 
 namespace nutc {
 namespace rabbitmq {
-class RabbitMQWrapperInitializer {
+class WrapperInitializer {
 public:
     /**
      * @brief On startup, waits for all clients to send an initialization message

@@ -3,6 +3,7 @@ export default interface AlgorithmType {
   uploadDate: string;
   downloadURL: string;
   fileIdKey: string;
+  uploadTime: number;
   name: string;
   description: string;
   sandboxLogFileURL?: string;

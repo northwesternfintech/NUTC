@@ -41,6 +41,12 @@ public:
         return USER_ID;
     }
 
+    virtual bool
+    should_display() const
+    {
+        return false;
+    }
+
     const std::string&
     get_id() const
     {
@@ -79,6 +85,12 @@ public:
     get_capital_delta() const
     {
         return capital_delta_;
+    }
+
+    double
+    get_initial_capital() const
+    {
+        return INITIAL_CAPITAL;
     }
 
     /**

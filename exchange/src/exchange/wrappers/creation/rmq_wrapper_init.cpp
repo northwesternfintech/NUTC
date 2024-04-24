@@ -8,7 +8,7 @@ namespace nutc {
 namespace rabbitmq {
 
 void
-RabbitMQWrapperInitializer::wait_for_clients(traders::TraderContainer& manager)
+WrapperInitializer::wait_for_clients(traders::TraderContainer& manager)
 {
     size_t num_clients = manager.num_traders();
     log_i(rabbitmq, "Blocking until all {} clients are ready to start...", num_clients);
@@ -31,6 +31,8 @@ RabbitMQWrapperInitializer::wait_for_clients(traders::TraderContainer& manager)
             // TODO: maybe send some warning?
             if (!message.ready) {
                 manager.remove_trader(message.client_id);
+            }
+            else {
                 num_running++;
             }
             return true;
@@ -39,18 +41,18 @@ RabbitMQWrapperInitializer::wait_for_clients(traders::TraderContainer& manager)
     };
 
     for (size_t i = 0; i < num_clients; i++) {
-        auto data = RabbitMQConsumer::consume_message();
+        auto data = WrapperConsumer::consume_message();
         while (!std::visit(process_message, data)) {}
     }
 
     log_i(
-        rabbitmq, "All {} clients ready. Starting exchange with {} ready clients",
+        rabbitmq, "All {} clients initialized. Starting exchange with {} ready clients",
         num_clients, num_running
     );
 }
 
 void
-RabbitMQWrapperInitializer::send_start_time(
+WrapperInitializer::send_start_time(
     traders::TraderContainer& manager, size_t wait_seconds
 )
 {
