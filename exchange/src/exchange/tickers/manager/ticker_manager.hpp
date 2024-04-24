@@ -13,41 +13,48 @@ namespace engine_manager {
 
 using Engine = matching::Engine;
 
+struct ticker_info {
+    Engine engine;
+    bots::BotContainer bot_container;
+    matching::OrderContainer last_order_container;
+    uint64_t num_matches{};
+    double midprice{};
+
+    ticker_info(std::string ticker, size_t ex_ticks, double starting_price) :
+        engine(ex_ticks), bot_container(std::move(ticker), starting_price)
+    {}
+};
+
 class EngineManager : public nutc::ticks::TickObserver {
-    // these should probably be combined into a single map. later problem :P
-    std::map<std::string, Engine> engines_;
     std::vector<matching::stored_match> matches_;
-    std::unordered_map<std::string, matching::OrderContainer> last_order_containers_;
-    std::unordered_map<std::string, uint64_t> num_matches_;
-    std::unordered_map<std::string, bots::BotContainer> bot_containers_;
-    std::unordered_map<std::string, double> midprices_;
+    std::unordered_map<std::string, ticker_info> engines_;
     EngineManager() = default;
 
 public:
     double get_midprice(const std::string& ticker);
-    Engine& get_engine(const std::string& ticker);
+    const ticker_info& get_engine(const std::string& ticker) const;
+    ticker_info& get_engine(const std::string& ticker);
     bool has_engine(const std::string& ticker) const;
 
     uint64_t
     get_num_matches(const std::string& ticker) const
     {
-        if (num_matches_.find(ticker) == num_matches_.end())
-            return 0;
-        return num_matches_.at(ticker);
+        assert(has_engine(ticker));
+        return get_engine(ticker).num_matches;
     }
 
     bots::BotContainer&
     get_bot_container(const std::string& ticker)
     {
-        return bot_containers_.at(ticker);
+        return get_engine(ticker).bot_container;
     }
 
     void
     match_order(const matching::stored_order& order)
     {
-        std::vector<matching::stored_match> matches =
-            get_engine(order.ticker).match_order(order);
-        num_matches_[order.ticker] += matches.size();
+        auto& engine = get_engine(order.ticker);
+        std::vector<matching::stored_match> matches = engine.engine.match_order(order);
+        engine.num_matches += matches.size();
         matches_.insert(matches_.end(), matches.begin(), matches.end());
     }
 
@@ -61,7 +68,6 @@ public:
     reset()
     {
         engines_.clear();
-        bot_containers_.clear();
     }
 
     static EngineManager&

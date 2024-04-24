@@ -9,12 +9,24 @@ create_api_module(
         publish_market_order
 )
 {
+    py::module_ sys = py::module_::import("sys");
+    py::exec(R"(
+    import sys
+    import os
+    class SuppressOutput(object):
+        def write(self, txt):
+            pass  # Do nothing on write
+        def flush(self):
+            pass  # Do nothing on flush
+
+    sys.stdout = SuppressOutput()
+    sys.stderr = SuppressOutput()
+    )");
     py::module module = py::module::create_extension_module(
         "nutc_api", "NUTC Exchange API", new py::module::module_def
     );
     module.def("publish_market_order", publish_market_order);
 
-    py::module_ sys = py::module_::import("sys");
     auto sys_modules = sys.attr("modules").cast<py::dict>();
     sys_modules["nutc_api"] = module;
 

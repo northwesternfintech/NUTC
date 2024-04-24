@@ -2,6 +2,8 @@
 
 #include "shared/util.hpp"
 
+#include <boost/process.hpp>
+
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -13,9 +15,9 @@ enum class TraderType { remote, local, bot };
 class GenericTrader : public std::enable_shared_from_this<GenericTrader> {
     const std::string USER_ID;
     const double INITIAL_CAPITAL;
-    double capital_delta_ = 0;
-    bool is_active_ = false;
-    bool has_start_delay_ = true;
+    double capital_delta_{};
+    bool is_active_{false};
+    bool has_start_delay_{true};
     std::unordered_map<std::string, double> holdings_{};
 
 public:
@@ -110,8 +112,6 @@ public:
     process_order_expiration(const std::string&, util::Side, double, double)
     {}
 
-    // NOLINTEND
-
     /**
      * @brief Triggered when an order this bot created matches
      * @note Implementing classes MUST update capital and holdings respectively
@@ -120,8 +120,17 @@ public:
         const std::string& ticker, util::Side side, double price, double quantity
     );
 
-    virtual void set_pid(const pid_t& pid) = 0;
-    virtual pid_t get_pid() const = 0;
+    virtual void
+    send_messages(std::vector<std::string>)
+    {}
+
+    virtual void
+    terminate()
+    {}
+
+    virtual void
+    start_wrapper(const std::string&, const std::vector<std::string>&)
+    {}
 
     virtual const std::string& get_algo_id() const = 0;
 };

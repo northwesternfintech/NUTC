@@ -3,8 +3,8 @@
 #include "exchange/tick_scheduler/tick_scheduler.hpp"
 #include "exchange/tickers/manager/ticker_manager.hpp"
 #include "exchange/traders/trader_container.hpp"
-#include "exchange/traders/trader_types/generic_trader.hpp"
-#include "exchange/traders/trader_types/remote_trader.hpp"
+#include "exchange/traders/trader_types/algo_trader.hpp"
+#include "exchange/traders/trader_types/trader_interface.hpp"
 #include "shared/config/config_loader.hpp"
 #include "state/global_metrics.hpp"
 
@@ -244,7 +244,7 @@ Dashboard::display_leaderboard(WINDOW* window, int start_y)
                      - config::Config::get_instance().constants().STARTING_CAPITAL;
         if (pnl == 0)
             continue;
-        auto name = std::static_pointer_cast<traders::RemoteTrader>(trader)->get_name();
+        auto name = std::static_pointer_cast<traders::LocalTrader>(trader)->get_name();
         mvwprintw(window, start_y++, start_x, "Competitor: %s", name.c_str());
         mvwprintw(window, start_y++, start_x, "  Portfolio Value: %.2f", portfolio);
         mvwprintw(window, start_y++, start_x, "  Capital: %.2f", capital);

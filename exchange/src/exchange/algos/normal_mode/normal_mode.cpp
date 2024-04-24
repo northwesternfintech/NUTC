@@ -2,7 +2,7 @@
 
 #include "exchange/config.h"
 #include "exchange/curl/curl.hpp"
-#include "exchange/traders/trader_types/remote_trader.hpp"
+#include "exchange/traders/trader_types/algo_trader.hpp"
 #include "shared/config/config_loader.hpp"
 
 #include <fmt/format.h>
@@ -40,7 +40,7 @@ NormalModeAlgoInitializer::initialize_trader_container(traders::TraderContainer&
             user["lastName"].get<std::string>()
         );
         std::string algo_id = user["latestAlgoId"].get<std::string>();
-        traders.add_trader<traders::RemoteTrader>(
+        traders.add_trader<traders::LocalTrader>(
             user_id, full_name, algo_id, starting_capital
         );
     }

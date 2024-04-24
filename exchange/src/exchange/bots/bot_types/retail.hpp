@@ -12,7 +12,7 @@ namespace nutc {
 
 namespace bots {
 
-class RetailBot : public BotTrader {
+class RetailBot : public traders::BotTrader {
     std::mt19937 gen_{}; // NOLINT
     std::poisson_distribution<> poisson_dist_{};
 

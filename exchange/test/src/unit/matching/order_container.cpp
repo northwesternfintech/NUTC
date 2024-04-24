@@ -2,27 +2,27 @@
 
 #include "config.h"
 #include "exchange/traders/trader_container.hpp"
-#include "exchange/traders/trader_types/local_trader.hpp"
+#include "test_utils/helpers/test_trader.hpp"
 #include "test_utils/macros.hpp"
 
 #include <gtest/gtest.h>
 
 // TODO: expiration tests
 
-using nutc::testing_utils::make_stored_order;
+using nutc::test_utils::make_stored_order;
 using nutc::util::Side::buy;
 using nutc::util::Side::sell;
 
 class UnitOrderContainerTest : public ::testing::Test {
 protected:
-    using LocalTrader = nutc::traders::LocalTrader;
+    using TestTrader = nutc::test_utils::TestTrader;
     static constexpr const int DEFAULT_QUANTITY = 1000;
 
     void
     SetUp() override
     {
-        manager_.add_trader<LocalTrader>("ABC", TEST_STARTING_CAPITAL);
-        manager_.add_trader<LocalTrader>("DEF", TEST_STARTING_CAPITAL);
+        manager_.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
+        manager_.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
 
         manager_.get_trader("ABC")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
         manager_.get_trader("DEF")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);

@@ -1,4 +1,5 @@
 #include "algos/algo_manager.hpp"
+#include "concurrency/exchange_lock.hpp"
 #include "dashboard/dashboard.hpp"
 #include "exchange/algos/algo_manager.hpp"
 #include "exchange/bots/bot_container.hpp"
@@ -8,22 +9,19 @@
 #include "exchange/dashboard/state/global_metrics.hpp"
 #include "exchange/tick_scheduler/tick_scheduler.hpp"
 #include "logging.hpp"
-#include "process_spawning/spawning.hpp"
-#include "rabbitmq/connection_handler/rmq_connection_handler.hpp"
-#include "rabbitmq/consumer/rmq_consumer.hpp"
-#include "rabbitmq/trader_manager/rmq_wrapper_init.hpp"
 #include "shared/config/config_loader.hpp"
 #include "shared/file_operations/file_operations.hpp"
 #include "shared/util.hpp"
 #include "tickers/manager/ticker_manager.hpp"
 #include "traders/trader_container.hpp"
-#include "utils/logger/logger.hpp"
+#include "wrappers/creation/handshake/rmq_wrapper_init.hpp"
+#include "wrappers/creation/process/spawning.hpp"
+#include "wrappers/messaging/async_pipe_receiver.hpp"
+#include "wrappers/messaging/consumer.hpp"
 
 #include <csignal>
 
 #include <string>
-
-#include <rabbitmq-c/amqp.h>
 
 namespace {
 using namespace nutc; // NOLINT
@@ -31,11 +29,11 @@ using namespace nutc; // NOLINT
 void
 flush_log(int)
 {
-    events::Logger::get_logger().flush();
-
-    dashboard::Dashboard::get_instance().close();
-
     file_ops::print_file_contents("logs/error_log.txt");
+
+    concurrency::ExchangeLock::unlock();
+    ticks::TickJobScheduler::get().stop();
+    traders::TraderContainer::get_instance().shutdown_traders();
     std::exit(0); // NOLINT(concurrency-*)
 }
 
@@ -102,7 +100,6 @@ void
 initialize_wrappers()
 {
     traders::TraderContainer& users = traders::TraderContainer::get_instance();
-    rabbitmq::RabbitMQConnectionManager::get_instance().initialize_connection();
 
     spawning::spawn_all_clients(users);
 
@@ -134,7 +131,7 @@ blocking_event_loop(const auto& mode)
     }
     else {
         auto& eng_mgr = engine_manager::EngineManager::get_instance();
-        rabbitmq::RabbitMQConsumer::handle_incoming_messages(eng_mgr);
+        rabbitmq::RabbitMQConsumer::consumer_event_loop(eng_mgr);
     }
 }
 } // namespace
@@ -146,7 +143,7 @@ main(int argc, const char** argv)
     logging::init(quill::LogLevel::Info);
 
     std::signal(SIGINT, flush_log);
-    std::signal(SIGABRT, flush_log);
+    std::signal(SIGPIPE, SIG_IGN);
 
     auto prox_args = config::process_arguments(argc, argv);
     auto mode = std::get<0>(prox_args);

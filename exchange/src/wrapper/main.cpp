@@ -2,8 +2,8 @@
 #include "shared/file_operations/file_operations.hpp"
 #include "wrapper/firebase/firebase.hpp"
 #include "wrapper/logging.hpp"
+#include "wrapper/messaging/comms.hpp"
 #include "wrapper/pywrapper/pywrapper.hpp"
-#include "wrapper/rabbitmq/rabbitmq.hpp"
 
 #include <argparse/argparse.hpp>
 #include <pybind11/pybind11.h>
@@ -95,37 +95,25 @@ process_arguments(int argc, const char** argv)
 }
 } // namespace
 
-class NullBuffer : public std::streambuf {
-public:
-    NullBuffer() = default;
-};
+// We stop the exchange with sigint. The wrapper should exit gracefully
+void
+catch_sigint(int)
+{
+    // Wait until we're forced to terminate
+    while (true) {}
+}
 
 int
 main(int argc, const char** argv)
 {
-    // Parse args
+    std::signal(SIGINT, catch_sigint);
+    using comms = nutc::comms::ExchangeProxy;
     auto [verbosity, uid, algo_id, development_mode, no_start_delay] =
         process_arguments(argc, argv);
     pybind11::scoped_interpreter guard{};
 
-    if (!development_mode) {
-        NullBuffer null_buffer;
-        std::cout.rdbuf(&null_buffer);
-        std::cerr.rdbuf(&null_buffer);
-        freopen("/dev/null", "w", stdout);
-        freopen("/dev/null", "w", stderr);
-    }
-
-    // Start logging and print build info
-    nutc::logging::init(verbosity);
-    log_i(main, "Starting NUTC wrapper for UID {}", uid);
-
-    // Initialize the RMQ connection to the exchange
-    nutc::rabbitmq::RabbitMQHandler conn{uid};
-
     std::optional<std::string> algo{};
     if (development_mode) {
-        log_i(main, "Running in development mode");
         algo = nutc::file_ops::read_file_content(algo_id);
     }
     else {
@@ -133,21 +121,16 @@ main(int argc, const char** argv)
     }
 
     // Send message to exchange to let it know we successfully initialized
-    bool published_init = conn.publish_init_message(uid, algo.has_value());
-    if (!published_init) {
-        throw std::runtime_error("Failed to publish init message to exchange");
-        return 1;
-    }
+    comms::publish_init_message(uid, algo.has_value());
     if (!algo.has_value()) {
         return 0;
     }
-    conn.wait_for_start_time(no_start_delay);
+    comms::wait_for_start_time(no_start_delay);
 
-    // Initialize the algorithm. For now, only designed for py
-    nutc::pywrapper::create_api_module(conn.market_order_func(uid));
+    comms exchange_conn{};
+    nutc::pywrapper::create_api_module(exchange_conn.market_order_func(uid));
     nutc::pywrapper::run_code_init(algo.value());
 
-    // Main event loop
-    conn.main_event_loop(uid);
+    exchange_conn.main_event_loop(uid);
     return 0;
 }

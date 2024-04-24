@@ -1,10 +1,11 @@
 #include "dev_mode.hpp"
 
 #include "exchange/config.h"
-#include "exchange/traders/trader_types/local_trader.hpp"
+#include "exchange/traders/trader_types/algo_trader.hpp"
 #include "shared/config/config_loader.hpp"
 #include "shared/file_operations/file_operations.hpp"
 
+#include <iostream>
 #include <stdexcept>
 
 namespace nutc {
@@ -17,7 +18,7 @@ DevModeAlgoInitializer::initialize_trader_container(traders::TraderContainer& tr
     int starting_cap = config::Config::get_instance().constants().STARTING_CAPITAL;
 
     for (const fs::path& filepath : algo_filepaths_)
-        traders.add_trader<traders::LocalTrader>(filepath.string(), starting_cap);
+        traders.add_trader<traders::LocalTrader>(filepath, starting_cap);
 }
 
 void
@@ -27,7 +28,7 @@ DevModeAlgoInitializer::initialize_files()
         return;
 
     for (size_t i = 0; i < NUM_ALGOS; i++) {
-        auto relative_path = fmt::format("{}/algo_{}.py", ALGO_DIR, i++);
+        auto relative_path = fmt::format("{}/algo_{}.py", ALGO_DIR, i);
         algo_filepaths_.emplace_back(relative_path);
     }
 

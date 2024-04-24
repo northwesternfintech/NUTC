@@ -1,4 +1,4 @@
-#include "generic_trader.hpp"
+#include "trader_interface.hpp"
 
 namespace nutc {
 namespace traders {

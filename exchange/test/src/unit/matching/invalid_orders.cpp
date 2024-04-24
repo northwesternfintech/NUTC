@@ -1,7 +1,7 @@
 #include "config.h"
 #include "exchange/traders/trader_container.hpp"
-#include "exchange/traders/trader_types/local_trader.hpp"
 #include "shared/util.hpp"
+#include "test_utils/helpers/test_trader.hpp"
 #include "test_utils/macros.hpp"
 
 #include <gtest/gtest.h>
@@ -11,14 +11,14 @@ using nutc::util::Side::sell;
 
 class UnitInvalidOrders : public ::testing::Test {
 protected:
-    using LocalTrader = nutc::traders::LocalTrader;
+    using TestTrader = nutc::test_utils::TestTrader;
     static constexpr const int DEFAULT_QUANTITY = 1000;
 
     void
     SetUp() override
     {
-        manager_.add_trader<LocalTrader>("ABC", TEST_STARTING_CAPITAL);
-        manager_.add_trader<LocalTrader>("DEF", TEST_STARTING_CAPITAL);
+        manager_.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
+        manager_.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
 
         manager_.get_trader("ABC")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
         manager_.get_trader("DEF")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
@@ -88,10 +88,10 @@ TEST_F(UnitInvalidOrders, MatchingInvalidFunds)
 
 TEST_F(UnitInvalidOrders, SimpleManyInvalidOrder)
 {
-    manager_.add_trader<LocalTrader>("A", TEST_STARTING_CAPITAL);
-    manager_.add_trader<LocalTrader>("B", 0);
-    manager_.add_trader<LocalTrader>("C", TEST_STARTING_CAPITAL);
-    manager_.add_trader<LocalTrader>("D", TEST_STARTING_CAPITAL);
+    manager_.add_trader<TestTrader>(std::string("A"), TEST_STARTING_CAPITAL);
+    manager_.add_trader<TestTrader>(std::string("B"), 0);
+    manager_.add_trader<TestTrader>(std::string("C"), TEST_STARTING_CAPITAL);
+    manager_.add_trader<TestTrader>(std::string("D"), TEST_STARTING_CAPITAL);
 
     manager_.get_trader("A")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     manager_.get_trader("B")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);

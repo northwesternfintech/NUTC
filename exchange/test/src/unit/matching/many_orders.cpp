@@ -1,6 +1,6 @@
 #include "config.h"
 #include "exchange/traders/trader_container.hpp"
-#include "exchange/traders/trader_types/local_trader.hpp"
+#include "test_utils/helpers/test_trader.hpp"
 #include "test_utils/macros.hpp"
 
 #include <gtest/gtest.h>
@@ -10,16 +10,16 @@ using nutc::util::Side::sell;
 
 class UnitManyOrders : public ::testing::Test {
 protected:
-    using LocalTrader = nutc::traders::LocalTrader;
+    using TestTrader = nutc::test_utils::TestTrader;
     static constexpr const int DEFAULT_QUANTITY = 1000;
 
     void
     SetUp() override
     {
-        manager_.add_trader<LocalTrader>("A", TEST_STARTING_CAPITAL);
-        manager_.add_trader<LocalTrader>("B", TEST_STARTING_CAPITAL);
-        manager_.add_trader<LocalTrader>("C", TEST_STARTING_CAPITAL);
-        manager_.add_trader<LocalTrader>("D", TEST_STARTING_CAPITAL);
+        manager_.add_trader<TestTrader>(std::string("A"), TEST_STARTING_CAPITAL);
+        manager_.add_trader<TestTrader>(std::string("B"), TEST_STARTING_CAPITAL);
+        manager_.add_trader<TestTrader>(std::string("C"), TEST_STARTING_CAPITAL);
+        manager_.add_trader<TestTrader>(std::string("D"), TEST_STARTING_CAPITAL);
 
         manager_.get_trader("A")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
         manager_.get_trader("B")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);

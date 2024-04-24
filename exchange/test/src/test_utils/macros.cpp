@@ -3,7 +3,7 @@
 #include "exchange/traders/trader_container.hpp"
 
 namespace nutc {
-namespace testing_utils {
+namespace test_utils {
 
 stored_order
 make_stored_order(market_order& order, const traders::TraderContainer& manager)
@@ -62,5 +62,5 @@ validate_market_order(
            && is_nearly_equal(update.quantity, quantity);
 }
 
-} // namespace testing_utils
+} // namespace test_utils
 } // namespace nutc

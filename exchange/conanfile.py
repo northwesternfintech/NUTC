@@ -12,15 +12,18 @@ class Recipe(ConanFile):
         # Exchange
         self.requires("fmt/10.2.1")
         self.requires("quill/3.7.0")
-        self.requires("rabbitmq-c/0.14.0")
         self.requires("libcurl/8.6.0")
         self.requires("argparse/3.0")
         self.requires("glaze/2.4.0")
         self.requires("yaml-cpp/0.8.0")
         self.requires("ncurses/6.4")
+        self.requires("boost/1.83.0")
 
         # Wrapper
         self.requires("pybind11/2.12.0")
+
+    def configure(self):
+        self.options["boost"].without_test=True
 
     def build_requirements(self):
         self.test_requires("gtest/1.13.0")

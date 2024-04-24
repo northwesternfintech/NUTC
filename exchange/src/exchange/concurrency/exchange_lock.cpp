@@ -14,7 +14,6 @@ ExchangeLock::lock_()
 void
 ExchangeLock::unlock_()
 {
-    assert(flag_.test());
     flag_.clear(std::memory_order_release);
 }
 

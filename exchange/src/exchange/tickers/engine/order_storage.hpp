@@ -1,5 +1,5 @@
 #pragma once
-#include "exchange/traders/trader_types/generic_trader.hpp"
+#include "exchange/traders/trader_types/trader_interface.hpp"
 
 #include <fmt/format.h>
 
@@ -77,18 +77,6 @@ struct stored_order {
         return trader->get_id() == other.trader->get_id() && ticker == other.ticker
                && side == other.side && util::is_close_to_zero(price - other.price)
                && util::is_close_to_zero(quantity - other.quantity);
-    }
-
-    // toString
-    [[nodiscard]] std::string
-    to_string() const
-    {
-        std::string side_str = side == util::Side::buy ? "BUY" : "SELL";
-        return fmt::format(
-            "stored_order(client_id={}, side={}, ticker={}, quantity={}, "
-            "price={})",
-            trader->get_id(), side_str, ticker, quantity, price
-        );
     }
 
     int
