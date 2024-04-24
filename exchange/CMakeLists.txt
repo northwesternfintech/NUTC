@@ -82,6 +82,10 @@ target_link_libraries(EXCHANGE_lib PUBLIC argparse::argparse)
 find_package(yaml-cpp REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC yaml-cpp::yaml-cpp)
 
+# Prometheus
+find_package(prometheus-cpp REQUIRED)
+target_link_libraries(EXCHANGE_lib PUBLIC prometheus-cpp::prometheus-cpp)
+
 # Fmt
 find_package(fmt REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC fmt::fmt)
@@ -135,6 +139,10 @@ find_package(glaze REQUIRED)
 target_link_libraries(EXCHANGE_exe PRIVATE glaze::glaze)
 
 target_link_libraries(EXCHANGE_exe PRIVATE boost::boost)
+
+# Prometheus
+find_package(prometheus-cpp REQUIRED)
+target_link_libraries(EXCHANGE_exe PRIVATE prometheus-cpp::prometheus-cpp)
 
 # ---- DASHBOARD ----------
 option(DASHBOARD "Enable NUTC Dashboard" OFF)
