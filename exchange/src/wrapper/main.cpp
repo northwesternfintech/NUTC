@@ -18,7 +18,6 @@ struct wrapper_args {
     std::string uid;
     std::string algo_id;
     bool dev_mode;
-    bool no_start_delay;
 };
 
 namespace {
@@ -53,13 +52,6 @@ process_arguments(int argc, const char** argv)
         })
         .required();
 
-    program.add_argument("--no-start-delay")
-        .help("Disable the start time delay. Start running immediately after "
-              "initialization message")
-        .default_value(false)
-        .implicit_value(true)
-        .nargs(0);
-
     program.add_argument("-V", "--version")
         .help("prints version information and exits")
         .action([&](const auto& /* unused */) {
@@ -88,9 +80,10 @@ process_arguments(int argc, const char** argv)
     }
 
     return {
-        verbosity, program.get<std::string>("--uid"),
-        program.get<std::string>("--algo_id"), program.get<bool>("--dev"),
-        program.get<bool>("--no-start-delay")
+        verbosity,
+        program.get<std::string>("--uid"),
+        program.get<std::string>("--algo_id"),
+        program.get<bool>("--dev"),
     };
 }
 } // namespace
@@ -108,8 +101,7 @@ main(int argc, const char** argv)
 {
     std::signal(SIGINT, catch_sigint);
     using comms = nutc::comms::ExchangeProxy;
-    auto [verbosity, uid, algo_id, development_mode, no_start_delay] =
-        process_arguments(argc, argv);
+    auto [verbosity, uid, algo_id, development_mode] = process_arguments(argc, argv);
     pybind11::scoped_interpreter guard{};
 
     std::optional<std::string> algo{};
@@ -125,7 +117,7 @@ main(int argc, const char** argv)
     if (!algo.has_value()) {
         return 0;
     }
-    comms::wait_for_start_time(no_start_delay);
+    comms::wait_for_start_time();
 
     comms exchange_conn{};
     nutc::pywrapper::create_api_module(exchange_conn.market_order_func(uid));

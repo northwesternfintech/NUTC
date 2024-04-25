@@ -6,14 +6,15 @@
 
 #include <fmt/format.h>
 
+#include <filesystem>
+
 namespace nutc {
 namespace traders {
 
 class LocalTrader : public GenericTrader {
-    const TraderType TRADER_TYPE;
-    const std::string NAME;
+    const std::string DISPLAY_NAME;
     const std::string ALGO_ID;
-    wrappers::WrapperHandle wrapper_handle_{};
+    wrappers::WrapperHandle wrapper_handle_;
 
 public:
     // Remote (firebase)
@@ -21,27 +22,27 @@ public:
         std::string remote_uid, std::string full_name, std::string algo_id,
         double capital
     ) :
-        GenericTrader(std::move(remote_uid), capital),
-        TRADER_TYPE(TraderType::remote), NAME(std::move(full_name)),
-        ALGO_ID(std::move(algo_id))
+        GenericTrader(remote_uid, capital),
+        DISPLAY_NAME(std::move(full_name)), ALGO_ID(algo_id),
+        wrapper_handle_(remote_uid, algo_id)
     {}
 
     // Local (algo .py on disk)
     explicit LocalTrader(std::string algo_path, double capital) :
-        GenericTrader(algo_path, capital), TRADER_TYPE(TraderType::local),
-        ALGO_ID(std::move(algo_path))
+        GenericTrader(algo_path, capital), DISPLAY_NAME(algo_path), ALGO_ID(algo_path),
+        wrapper_handle_(algo_path)
     {
-        if (!file_ops::file_exists(get_algo_id())) [[unlikely]] {
+        if (!file_ops::file_exists(ALGO_ID)) [[unlikely]] {
             std::string err_str =
                 fmt::format("Unable to find local algorithm file: {}", algo_path);
             throw std::runtime_error(err_str);
         }
     }
 
-    TraderType
-    get_type() const override
+    const std::string&
+    get_display_name() const override
     {
-        return TRADER_TYPE;
+        return DISPLAY_NAME;
     }
 
     bool
@@ -50,35 +51,10 @@ public:
         return false;
     }
 
-    const std::string&
-    get_algo_id() const override
-    {
-        return ALGO_ID;
-    }
-
-    const std::string&
-    get_name() const
-    {
-        assert(TRADER_TYPE == TraderType::remote);
-        return NAME;
-    }
-
     void
     send_messages(std::vector<std::string> messages) final
     {
         wrapper_handle_.send_messages(messages);
-    }
-
-    void
-    terminate() final
-    {
-        wrapper_handle_.terminate();
-    }
-
-    void
-    start_wrapper(const std::string& path, const std::vector<std::string>& args) final
-    {
-        wrapper_handle_.start(path, args);
     }
 };
 

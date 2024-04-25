@@ -15,7 +15,7 @@ void
 DevModeAlgoInitializer::initialize_trader_container(traders::TraderContainer& traders
 ) const
 {
-    int starting_cap = config::Config::get_instance().constants().STARTING_CAPITAL;
+    int starting_cap = config::Config::get().constants().STARTING_CAPITAL;
 
     for (const fs::path& filepath : algo_filepaths_)
         traders.add_trader<traders::LocalTrader>(filepath, starting_cap);

@@ -14,8 +14,7 @@
 #include "shared/util.hpp"
 #include "tickers/manager/ticker_manager.hpp"
 #include "traders/trader_container.hpp"
-#include "wrappers/creation/handshake/rmq_wrapper_init.hpp"
-#include "wrappers/creation/process/spawning.hpp"
+#include "wrappers/creation/rmq_wrapper_init.hpp"
 #include "wrappers/messaging/async_pipe_receiver.hpp"
 #include "wrappers/messaging/consumer.hpp"
 
@@ -33,7 +32,6 @@ flush_log(int)
 
     concurrency::ExchangeLock::unlock();
     ticks::TickJobScheduler::get().stop();
-    traders::TraderContainer::get_instance().shutdown_traders();
     std::exit(0); // NOLINT(concurrency-*)
 }
 
@@ -58,7 +56,7 @@ initialize_indiv_ticker(const std::string& ticker, double starting_price)
 void
 initialize_tickers()
 {
-    const auto& tickers = config::Config::get_instance().get_tickers();
+    const auto& tickers = config::Config::get().get_tickers();
     for (const auto& ticker : tickers) {
         initialize_indiv_ticker(ticker.TICKER, ticker.STARTING_PRICE);
     }
@@ -74,7 +72,7 @@ initialize_dashboard()
 void
 initialize_bots()
 {
-    auto bots = config::Config::get_instance().get_bots();
+    auto bots = config::Config::get().get_bots();
     auto& engine_manager = engine_manager::EngineManager::get_instance();
     for (const auto& bot : bots) {
         auto& container = engine_manager.get_bot_container(bot.ASSOC_TICKER);
@@ -101,17 +99,15 @@ initialize_wrappers()
 {
     traders::TraderContainer& users = traders::TraderContainer::get_instance();
 
-    spawning::spawn_all_clients(users);
-
     rabbitmq::RabbitMQWrapperInitializer::wait_for_clients(users);
-    size_t wait_secs = config::Config::get_instance().constants().WAIT_SECS;
+    size_t wait_secs = config::Config::get().constants().WAIT_SECS;
     rabbitmq::RabbitMQWrapperInitializer::send_start_time(users, wait_secs);
 }
 
 void
 start_tick_scheduler()
 {
-    auto tick_hz = config::Config::get_instance().constants().TICK_HZ;
+    auto tick_hz = config::Config::get().constants().TICK_HZ;
     ticks::TickJobScheduler::get().start(tick_hz);
 }
 

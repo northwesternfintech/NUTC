@@ -5,11 +5,14 @@
 namespace nutc {
 namespace test_utils {
 
-void kill_all_processes(const traders::TraderContainer& users);
+[[nodiscard]] bool initialize_testing_clients(
+    nutc::traders::TraderContainer& users,
+    const std::vector<std::string>& algo_filenames, size_t start_delay
+);
 
 [[nodiscard]] bool initialize_testing_clients(
     nutc::traders::TraderContainer& users,
-    const std::vector<std::string>& algo_filenames, bool has_delay = false
+    const std::vector<std::string>& algo_filenames
 );
 
 } // namespace test_utils

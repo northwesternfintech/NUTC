@@ -46,23 +46,11 @@ public:
     BotTrader& operator=(const BotTrader& other) = delete;
     BotTrader& operator=(BotTrader&& other) = delete;
 
-    traders::TraderType
-    get_type() const override
-    {
-        return traders::TraderType::bot;
-    }
-
     // Bots should override if they shouldn't be able to leverage
     bool
     can_leverage() const override
     {
         return true;
-    }
-
-    const std::string&
-    get_algo_id() const override
-    {
-        throw std::runtime_error("Not implemented");
     }
 
     void

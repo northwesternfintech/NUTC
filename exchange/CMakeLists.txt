@@ -29,9 +29,8 @@ add_library(
 
     src/exchange/curl/curl.cpp
     
-    src/exchange/wrappers/creation/process/spawning.cpp
     src/exchange/wrappers/handle/wrapper_handle.cpp
-    src/exchange/wrappers/creation/handshake/rmq_wrapper_init.cpp
+    src/exchange/wrappers/creation/rmq_wrapper_init.cpp
     src/exchange/wrappers/messaging/consumer.cpp
     src/exchange/wrappers/messaging/async_pipe_receiver.cpp
     

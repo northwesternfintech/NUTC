@@ -5,12 +5,12 @@
 #include <boost/process.hpp>
 
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 
 namespace nutc {
 namespace traders {
-enum class TraderType { remote, local, bot };
 
 class GenericTrader : public std::enable_shared_from_this<GenericTrader> {
     const std::string USER_ID;
@@ -31,9 +31,17 @@ public:
     GenericTrader(GenericTrader&& other) = default;
     GenericTrader(const GenericTrader& other) = delete;
 
-    virtual bool can_leverage() const = 0;
+    virtual bool
+    can_leverage() const
+    {
+        return false;
+    }
 
-    virtual TraderType get_type() const = 0;
+    virtual const std::string&
+    get_display_name() const
+    {
+        return USER_ID;
+    }
 
     const std::string&
     get_id() const
@@ -123,16 +131,6 @@ public:
     virtual void
     send_messages(std::vector<std::string>)
     {}
-
-    virtual void
-    terminate()
-    {}
-
-    virtual void
-    start_wrapper(const std::string&, const std::vector<std::string>&)
-    {}
-
-    virtual const std::string& get_algo_id() const = 0;
 };
 } // namespace traders
 } // namespace nutc
