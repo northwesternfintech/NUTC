@@ -20,8 +20,8 @@ namespace nutc {
 namespace dashboard {
 Dashboard::Dashboard() :
     err_file_(freopen("logs/error_log.txt", "w", stderr)),
-    TICK_HZ(config::Config::get_instance().constants().TICK_HZ),
-    DISPLAY_HZ(config::Config::get_instance().constants().DISPLAY_HZ)
+    TICK_HZ(config::Config::get().constants().TICK_HZ),
+    DISPLAY_HZ(config::Config::get().constants().DISPLAY_HZ)
 {
     quill::stdout_handler("console")->set_log_level(quill::LogLevel::Error);
     std::ofstream create_file("logs/app.log");
@@ -209,7 +209,7 @@ Dashboard::display_leaderboard(WINDOW* window, int start_y)
     int start_x = 2;
     int orig_start_y = start_y;
     // todo: move to class member variable
-    const auto& tickers = config::Config::get_instance().get_tickers();
+    const auto& tickers = config::Config::get().get_tickers();
 
     auto portfolio_value = [&](const auto& trader) {
         double pnl = 0.0;
@@ -226,8 +226,6 @@ Dashboard::display_leaderboard(WINDOW* window, int start_y)
 
     std::vector<std::shared_ptr<traders::GenericTrader>> ordered_traders;
     for (const auto& [user_id, trader] : client_manager.get_traders()) {
-        if (trader->get_type() != traders::TraderType::remote)
-            continue;
         ordered_traders.push_back(trader);
     }
     std::sort(
@@ -240,11 +238,12 @@ Dashboard::display_leaderboard(WINDOW* window, int start_y)
     for (const auto& trader : ordered_traders) {
         double capital = trader->get_capital();
         double portfolio = portfolio_value(trader);
-        double pnl = capital + portfolio
-                     - config::Config::get_instance().constants().STARTING_CAPITAL;
+        double pnl =
+            capital + portfolio - config::Config::get().constants().STARTING_CAPITAL;
         if (pnl == 0)
             continue;
-        auto name = std::static_pointer_cast<traders::LocalTrader>(trader)->get_name();
+        auto name =
+            std::static_pointer_cast<traders::LocalTrader>(trader)->get_display_name();
         mvwprintw(window, start_y++, start_x, "Competitor: %s", name.c_str());
         mvwprintw(window, start_y++, start_x, "  Portfolio Value: %.2f", portfolio);
         mvwprintw(window, start_y++, start_x, "  Capital: %.2f", capital);

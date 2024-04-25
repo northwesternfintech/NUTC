@@ -188,7 +188,7 @@ TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
 {
     std::vector<std::string> names{"test_algos/buy_tsla_at_100.py"};
     if (!nutc::test_utils::initialize_testing_clients(
-            users_, names, /*has_delay=*/true
+            users_, names, TEST_CLIENT_WAIT_SECS
         )) {
         FAIL() << "Failed to initialize testing clients";
     }

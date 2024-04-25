@@ -38,14 +38,6 @@ public:
         return traders_.at(trader_id);
     }
 
-    void
-    shutdown_traders() const
-    {
-        for (const auto& trader : traders_) {
-            trader.second->terminate();
-        }
-    }
-
     std::unordered_map<std::string, const std::shared_ptr<GenericTrader>>&
     get_traders()
     {

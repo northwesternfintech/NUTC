@@ -15,7 +15,6 @@ include(GoogleTest)
 add_executable(NUTC_tests
   src/test_utils/macros.cpp 
   src/test_utils/process.cpp
-  src/test_utils/helpers/test_mode.cpp
 
   src/unit/matching/invalid_orders.cpp
   src/unit/matching/many_orders.cpp

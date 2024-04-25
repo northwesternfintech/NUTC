@@ -47,7 +47,7 @@ class Config {
 
 public:
     static const Config&
-    get_instance()
+    get()
     {
         static const char* config_file_path = std::getenv("NUTC_CONFIG_FILE");
         static const char* effective_path =

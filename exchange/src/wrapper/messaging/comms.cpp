@@ -143,16 +143,13 @@ ExchangeProxy::publish_init_message(const std::string& user_id, bool ready)
 // If wait_blocking is disabled, we block until we *receive* the message, but not
 // after Otherwise, we block until the start time
 void
-ExchangeProxy::wait_for_start_time(bool skip_start_wait)
+ExchangeProxy::wait_for_start_time()
 {
     using nanoseconds = std::chrono::nanoseconds;
     using time_point = std::chrono::high_resolution_clock::time_point;
     auto message = consume_message();
     if (!std::holds_alternative<start_time>(message))
         throw std::runtime_error("Received unexpected message type");
-
-    if (skip_start_wait)
-        return;
 
     start_time start = std::get<start_time>(message);
 

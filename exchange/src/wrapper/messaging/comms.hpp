@@ -25,7 +25,7 @@ public:
     std::function<bool(const std::string&, const std::string&, double, double)>
     market_order_func(const std::string& user_id);
 
-    static void wait_for_start_time(bool skip_start_wait);
+    static void wait_for_start_time();
 
     void main_event_loop(const std::string& uid);
 

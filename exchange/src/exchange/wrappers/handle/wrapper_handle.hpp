@@ -21,22 +21,22 @@ class WrapperHandle {
 
     void write_out(std::string message);
 
-public:
-    WrapperHandle() = default;
+    void spawn_wrapper(const std::vector<std::string>& args);
 
-    void
-    terminate()
+public:
+    // Remote (algo in firebase)
+    WrapperHandle(const std::string& remote_uid, const std::string& algo_id);
+
+    // Local (.py on disk)
+    WrapperHandle(const std::string& algo_path);
+
+    void send_messages(std::vector<std::string> messages);
+
+    ~WrapperHandle()
     {
         if (wrapper_.running())
             wrapper_.terminate();
     }
-
-    void send_messages(std::vector<std::string> messages);
-
-    void start(const std::string& path, const std::vector<std::string>& args);
-    void stop();
-
-    ~WrapperHandle() { terminate(); }
 };
 } // namespace wrappers
 } // namespace nutc
