@@ -14,10 +14,10 @@ namespace ba = boost::asio;
 namespace bp = boost::process;
 
 /**
- * @brief Singleton that handles async receiving of messages from incoming pipes
- * @note Currently, incoming pipes are exclusively from Wrappers
+ * @brief Singleton that handles async io messages from  pipes
+ * @note This allows us to have one thread for all pipes
  */
-class AsyncPipeReceiver {
+class AsyncPipeRunner {
     ba::io_context ios{};
     std::thread ios_thread;
     ba::executor_work_guard<ba::io_context::executor_type> work_guard;
@@ -26,27 +26,27 @@ class AsyncPipeReceiver {
     std::queue<std::string> messages_{};
     std::vector<std::shared_ptr<bp::async_pipe>> pipes_{};
 
-    AsyncPipeReceiver() : work_guard(ios.get_executor()) {}
+    AsyncPipeRunner() : work_guard(ios.get_executor()) {}
 
     void async_read_pipe(std::shared_ptr<bp::async_pipe> pipe);
 
 public:
-    ~AsyncPipeReceiver();
+    ~AsyncPipeRunner();
     void close();
 
-    AsyncPipeReceiver& operator=(const AsyncPipeReceiver&) = delete;
-    AsyncPipeReceiver& operator=(AsyncPipeReceiver&&) = delete;
-    AsyncPipeReceiver(AsyncPipeReceiver&&) = delete;
-    AsyncPipeReceiver(const AsyncPipeReceiver&) = delete;
+    AsyncPipeRunner& operator=(const AsyncPipeRunner&) = delete;
+    AsyncPipeRunner& operator=(AsyncPipeRunner&&) = delete;
+    AsyncPipeRunner(AsyncPipeRunner&&) = delete;
+    AsyncPipeRunner(const AsyncPipeRunner&) = delete;
 
-    static AsyncPipeReceiver&
+    static AsyncPipeRunner&
     get()
     {
-        static AsyncPipeReceiver instance{};
+        static AsyncPipeRunner instance{};
         return instance;
     }
 
-    std::shared_ptr<bp::async_pipe> create_pipe(bool start_read);
+    std::weak_ptr<bp::async_pipe> create_pipe(bool start_read);
 
     std::optional<std::string> get_message();
 };

@@ -14,8 +14,7 @@ public:
      */
     static void wait_for_clients(traders::TraderContainer& manager);
 
-    static void
-    send_start_time(const traders::TraderContainer& manager, size_t wait_seconds);
+    static void send_start_time(traders::TraderContainer& manager, size_t wait_seconds);
 };
 } // namespace rabbitmq
 } // namespace nutc

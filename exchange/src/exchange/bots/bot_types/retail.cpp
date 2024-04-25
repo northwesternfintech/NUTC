@@ -20,11 +20,11 @@ RetailBot::is_active() const
 std::optional<matching::stored_order>
 RetailBot::take_action(double current, double theo, uint64_t current_tick)
 {
+    if (!is_active())
+        return std::nullopt;
+
     static std::uniform_real_distribution<> dis{0.0, 1.0};
 
-    if (!is_active()) {
-        return std::nullopt;
-    }
     double p_trade = (1 - get_capital_utilization());
 
     double noise_factor = dis(gen_);

@@ -15,7 +15,7 @@
 #include "tickers/manager/ticker_manager.hpp"
 #include "traders/trader_container.hpp"
 #include "wrappers/creation/rmq_wrapper_init.hpp"
-#include "wrappers/messaging/async_pipe_receiver.hpp"
+#include "wrappers/messaging/async_pipe_runner.hpp"
 #include "wrappers/messaging/consumer.hpp"
 
 #include <csignal>
