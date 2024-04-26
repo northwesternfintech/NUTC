@@ -204,6 +204,7 @@ void
 Dashboard::display_leaderboard(WINDOW* window, int start_y)
 {
     mvwprintw(window, start_y, window->_maxx / 2 - 5, "Leaderboard");
+    // TODO: use prometheus client
 
     traders::TraderContainer& client_manager = traders::TraderContainer::get_instance();
     int start_x = 2;

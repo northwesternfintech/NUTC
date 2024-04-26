@@ -29,7 +29,7 @@ public:
         AGGRESSIVENESS(generate_aggresiveness_())
     {}
 
-    [[nodiscard]] bool is_active() const override;
+    [[nodiscard]] bool is_active() const;
 
     std::optional<matching::stored_order>
     take_action(double current, double theo, uint64_t current_tick);

@@ -16,8 +16,6 @@ class GenericTrader : public std::enable_shared_from_this<GenericTrader> {
     const std::string USER_ID;
     const double INITIAL_CAPITAL;
     double capital_delta_{};
-    bool is_active_{false};
-    bool has_start_delay_{true};
     std::unordered_map<std::string, double> holdings_{};
 
 public:
@@ -53,30 +51,6 @@ public:
     get_capital() const
     {
         return INITIAL_CAPITAL + capital_delta_;
-    }
-
-    bool
-    is_active() const
-    {
-        return is_active_;
-    }
-
-    void
-    set_active(bool active)
-    {
-        is_active_ = active;
-    }
-
-    bool
-    has_start_delay() const
-    {
-        return has_start_delay_;
-    }
-
-    void
-    set_start_delay(bool start_delay)
-    {
-        has_start_delay_ = start_delay;
     }
 
     double

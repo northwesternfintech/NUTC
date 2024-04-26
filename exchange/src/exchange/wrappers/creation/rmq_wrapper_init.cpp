@@ -10,7 +10,7 @@ namespace rabbitmq {
 void
 RabbitMQWrapperInitializer::wait_for_clients(traders::TraderContainer& manager)
 {
-    size_t num_clients = manager.get_traders().size();
+    size_t num_clients = manager.num_traders();
     log_i(rabbitmq, "Blocking until all {} clients are ready to start...", num_clients);
     int num_running = 0;
 
@@ -27,8 +27,10 @@ RabbitMQWrapperInitializer::wait_for_clients(traders::TraderContainer& manager)
                 rabbitmq, "Received init message from client {} with status {}",
                 message.client_id, message.ready ? "ready" : "not ready"
             );
-            if (message.ready) {
-                manager.get_trader(message.client_id)->set_active(/*active=*/true);
+
+            // TODO: maybe send some warning?
+            if (!message.ready) {
+                manager.remove_trader(message.client_id);
                 num_running++;
             }
             return true;
@@ -49,7 +51,7 @@ RabbitMQWrapperInitializer::wait_for_clients(traders::TraderContainer& manager)
 
 void
 RabbitMQWrapperInitializer::send_start_time(
-    const traders::TraderContainer& manager, size_t wait_seconds
+    traders::TraderContainer& manager, size_t wait_seconds
 )
 {
     using time_point = std::chrono::high_resolution_clock::time_point;
@@ -62,11 +64,7 @@ RabbitMQWrapperInitializer::send_start_time(
     messages::start_time message{time_ns};
     std::string buf = glz::write_json(message);
 
-    const auto& traders = manager.get_traders();
-    for (const auto& [id, trader] : traders) {
-        if (trader->is_active())
-            trader->send_messages({buf});
-    }
+    manager.broadcast_messages({buf});
 }
 
 } // namespace rabbitmq

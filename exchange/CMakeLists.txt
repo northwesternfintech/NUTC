@@ -32,7 +32,7 @@ add_library(
     src/exchange/wrappers/handle/wrapper_handle.cpp
     src/exchange/wrappers/creation/rmq_wrapper_init.cpp
     src/exchange/wrappers/messaging/consumer.cpp
-    src/exchange/wrappers/messaging/async_pipe_receiver.cpp
+    src/exchange/wrappers/messaging/async_pipe_runner.cpp
     
 
     src/exchange/bots/bot_container.cpp

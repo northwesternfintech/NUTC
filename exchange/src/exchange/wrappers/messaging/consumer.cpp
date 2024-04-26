@@ -3,7 +3,7 @@
 #include "exchange/concurrency/exchange_lock.hpp"
 #include "exchange/tick_scheduler/tick_scheduler.hpp"
 #include "exchange/traders/trader_container.hpp"
-#include "exchange/wrappers/messaging/async_pipe_receiver.hpp"
+#include "exchange/wrappers/messaging/async_pipe_runner.hpp"
 
 #include <utility>
 
@@ -64,7 +64,7 @@ RabbitMQConsumer::match_new_order(
 std::optional<std::string>
 RabbitMQConsumer::consume_message_as_string()
 {
-    return wrappers::AsyncPipeReceiver::get().get_message();
+    return wrappers::AsyncPipeRunner::get().get_message();
 }
 
 std::optional<std::variant<messages::init_message, messages::market_order>>

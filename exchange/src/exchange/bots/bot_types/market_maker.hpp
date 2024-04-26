@@ -23,12 +23,6 @@ public:
     std::vector<matching::stored_order>
     take_action(double new_theo, uint64_t current_tick);
 
-    [[nodiscard]] bool
-    is_active() const override
-    {
-        return true;
-    }
-
 private:
     [[nodiscard]] double
     compute_net_exposure_() const

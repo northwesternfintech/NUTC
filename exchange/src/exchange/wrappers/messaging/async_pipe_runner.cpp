@@ -1,4 +1,4 @@
-#include "async_pipe_receiver.hpp"
+#include "async_pipe_runner.hpp"
 
 #include <boost/asio/error.hpp>
 #include <fmt/format.h>
@@ -6,7 +6,7 @@
 namespace nutc {
 namespace wrappers {
 
-AsyncPipeReceiver::~AsyncPipeReceiver()
+AsyncPipeRunner::~AsyncPipeRunner()
 {
     for (const std::shared_ptr<bp::async_pipe>& pipe : pipes_) {
         pipe->cancel();
@@ -19,8 +19,8 @@ AsyncPipeReceiver::~AsyncPipeReceiver()
         ios_thread.join();
 }
 
-std::shared_ptr<bp::async_pipe>
-AsyncPipeReceiver::create_pipe(bool start_read)
+std::weak_ptr<bp::async_pipe>
+AsyncPipeRunner::create_pipe(bool start_read)
 {
     std::lock_guard<std::mutex> lock{message_lock_};
     pipes_.emplace_back(std::make_shared<bp::async_pipe>(ios));
@@ -37,7 +37,7 @@ AsyncPipeReceiver::create_pipe(bool start_read)
 }
 
 std::optional<std::string>
-AsyncPipeReceiver::get_message()
+AsyncPipeRunner::get_message()
 {
     std::lock_guard<std::mutex> lock{message_lock_};
     if (messages_.empty())
@@ -49,7 +49,7 @@ AsyncPipeReceiver::get_message()
 }
 
 void
-AsyncPipeReceiver::async_read_pipe(std::shared_ptr<bp::async_pipe> pipe_in)
+AsyncPipeRunner::async_read_pipe(std::shared_ptr<bp::async_pipe> pipe_in)
 {
     auto buffer = std::make_shared<std::array<char, 1024>>();
     auto prox_message = [this, buffer, pipe_in](const auto& ec, auto length) {
@@ -62,7 +62,6 @@ AsyncPipeReceiver::async_read_pipe(std::shared_ptr<bp::async_pipe> pipe_in)
         else if (ec == boost::asio::error::eof) {
             async_read_pipe(pipe_in);
         }
-        // else if (ec == boost::asio::error::operation_aborted) {exit(1);}
         else {
             throw std::runtime_error(
                 fmt::format("Error reading from wrapper pipe: {}", ec.message())

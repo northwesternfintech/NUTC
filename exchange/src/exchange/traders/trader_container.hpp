@@ -31,6 +31,13 @@ public:
         return std::static_pointer_cast<T>(trader);
     }
 
+    void
+    remove_trader(const std::string& trader_id)
+    {
+        assert(traders_.find(trader_id) != traders_.end());
+        traders_.erase(trader_id);
+    }
+
     [[nodiscard]] std::shared_ptr<GenericTrader>
     get_trader(const std::string& trader_id) const
     {
@@ -38,13 +45,22 @@ public:
         return traders_.at(trader_id);
     }
 
-    std::unordered_map<std::string, const std::shared_ptr<GenericTrader>>&
-    get_traders()
+    void
+    broadcast_messages(const std::vector<std::string>& messages)
     {
-        return traders_;
+        for (const auto& trader_pair : traders_) {
+            trader_pair.second->send_messages(messages);
+        }
     }
 
-    const std::unordered_map<std::string, const std::shared_ptr<GenericTrader>>&
+    size_t
+    num_traders() const
+    {
+        return traders_.size();
+    }
+
+    // TODO: REMOVE AFTER IMPROVING DASHBOARD
+    const auto&
     get_traders() const
     {
         return traders_;
