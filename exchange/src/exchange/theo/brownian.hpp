@@ -19,62 +19,64 @@ namespace nutc {
 
 namespace stochastic {
 
-enum class Signedness { Negative = -1, DoesntMatter = 0, Positive = 1 };
+enum class Signedness { Negative = -1, Either = 0, Positive = 1 };
 
 class BrownianMotion {
-    std::mt19937 random_number_generator_; // It's pretty obvious what this does
-    double cur_value_;                     // Current value, used to generate next one
-    double probability_ = 0.95;            // probability of no market event
+    std::minstd_rand0 random_number_generator_;
+    double cur_magnitude_;
 
-    // Control the actual ticking, whereby market events are slowed over many ticks
-    size_t ticker_ = 0;
-    Signedness signedness_ = Signedness::DoesntMatter;
+    size_t event_ticks_remaining_ = 0;
+    Signedness event_direction_ = Signedness::Either;
 
 public:
     [[nodiscard]] double
-    get_price() const
+    get_magnitude() const
     {
-        return cur_value_;
+        return cur_magnitude_;
     }
 
     // Default constructor for BrownianMotion, takes nothing
-    explicit BrownianMotion() : cur_value_(0)
+    explicit BrownianMotion() : cur_magnitude_(0)
     {
         std::random_device rd;
-        random_number_generator_ = std::mt19937(rd());
+        random_number_generator_ = std::minstd_rand0(rd());
     }
 
     // Constructor for BrownianMotion, takes a seed
-    explicit BrownianMotion(const unsigned int seed) : cur_value_(0) { set_seed(seed); }
-
-    // Generates and returns the next price based on previous prices
-    double generate_next_price();
-
-    // Force set the current price
-    void
-    set_price(double new_price)
+    explicit BrownianMotion(const unsigned int seed) : cur_magnitude_(0)
     {
-        cur_value_ = new_price;
+        set_seed(seed);
     }
 
-    // Force set the probability of market event
+    // Generates and returns the next magnitude based on previous magnitudes
+    double generate_next_magnitude();
+
+    // Force set the current magnitude
     void
-    set_probability(double new_probability)
+    set_magnitude(double new_magnitude)
     {
-        probability_ = new_probability;
+        cur_magnitude_ = new_magnitude;
     }
 
     // Force set the seed to something else
     void
     set_seed(unsigned int new_seed)
     {
-        random_number_generator_ = std::mt19937(new_seed);
+        random_number_generator_ = std::minstd_rand0(new_seed);
     }
 
 private:
-    // Generates and returns the change in price, i.e. dp/dt
-    [[nodiscard]] double
-    generate_change_in_price_(double mean, double stdev, Signedness sign);
+    double
+    generate_norm_(double mean, double stdev, Signedness sign = Signedness::Either);
+    double generate_uniform_(double low, double high);
+    bool generate_bool_(double probability_of_true);
+
+    double
+    generate_brownian_motion_(double mean, Signedness direction = Signedness::Either);
+    double generate_market_tick_();
+    double generate_nonmarket_tick_();
+    bool should_start_new_market_event_();
+    void config_new_market_event_();
 };
 
 } // namespace stochastic
