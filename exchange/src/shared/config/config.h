@@ -2,6 +2,11 @@
 
 // Compile-time config shared between exchange and wrapper
 
-#define VERSION          "1.0"
+#define NUTC_VERSION          "1.0"
 #define DEFAULT_CONFIG_FILE "config.yml" 
+
+#ifdef NUTC_LOCAL_DEV
+#define FIREBASE_URL "http://firebase:9000/"
+#else
 #define FIREBASE_URL "https://nutc-web-default-rtdb.firebaseio.com/"
+#endif

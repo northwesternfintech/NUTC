@@ -9,6 +9,7 @@
 #include "exchange/dashboard/state/global_metrics.hpp"
 #include "exchange/tick_scheduler/tick_scheduler.hpp"
 #include "logging.hpp"
+#include "sandbox/server/crow.hpp"
 #include "shared/config/config_loader.hpp"
 #include "shared/file_operations/file_operations.hpp"
 #include "shared/util.hpp"
@@ -48,7 +49,9 @@ initialize_indiv_ticker(const std::string& ticker, double starting_price)
         EngineManager::get_instance().get_bot_container(ticker);
 
     // Should run after stale order removal, so they can react to removed orders
-    TickJobScheduler::get().on_tick(&bot_container, /*priority=*/2, "Bot Engine");
+    TickJobScheduler::get().on_tick(
+        &bot_container, /*priority=*/2, fmt::format("Bot Engine for ticker {}", ticker)
+    );
 
     dashboard::DashboardState::get_instance().add_ticker(ticker, starting_price);
 }
@@ -99,9 +102,9 @@ initialize_wrappers()
 {
     traders::TraderContainer& users = traders::TraderContainer::get_instance();
 
-    rabbitmq::RabbitMQWrapperInitializer::wait_for_clients(users);
+    rabbitmq::WrapperInitializer::wait_for_clients(users);
     size_t wait_secs = config::Config::get().constants().WAIT_SECS;
-    rabbitmq::RabbitMQWrapperInitializer::send_start_time(users, wait_secs);
+    rabbitmq::WrapperInitializer::send_start_time(users, wait_secs);
 }
 
 void
@@ -112,23 +115,18 @@ start_tick_scheduler()
 }
 
 void
-initialize_algos(const auto& mode, const auto& sandbox)
+initialize_algos(const auto& mode)
 {
     traders::TraderContainer& users = traders::TraderContainer::get_instance();
-    auto algo_mgr = algos::AlgoInitializer::get_algo_initializer(mode, sandbox);
+    auto algo_mgr = algos::AlgoInitializer::get_algo_initializer(mode);
     algo_mgr->initialize_algo_management(users);
 }
 
 void
-blocking_event_loop(const auto& mode)
+blocking_event_loop()
 {
-    if (mode == util::Mode::bots_only) {
-        while (true) {}
-    }
-    else {
-        auto& eng_mgr = engine_manager::EngineManager::get_instance();
-        rabbitmq::RabbitMQConsumer::consumer_event_loop(eng_mgr);
-    }
+    auto& eng_mgr = engine_manager::EngineManager::get_instance();
+    rabbitmq::WrapperConsumer::consumer_event_loop(eng_mgr);
 }
 } // namespace
 
@@ -141,12 +139,10 @@ main(int argc, const char** argv)
     std::signal(SIGINT, flush_log);
     std::signal(SIGPIPE, SIG_IGN);
 
-    auto prox_args = config::process_arguments(argc, argv);
-    auto mode = std::get<0>(prox_args);
-    auto sandbox = std::get<1>(prox_args);
+    auto mode = config::process_arguments(argc, argv);
 
     // Algos must init before wrappers
-    initialize_algos(mode, sandbox);
+    initialize_algos(mode);
 
     if (mode != util::Mode::bots_only)
         initialize_wrappers();
@@ -158,6 +154,8 @@ main(int argc, const char** argv)
 
     concurrency::pin_to_core(0, "main");
 
-    blocking_event_loop(mode);
+    sandbox::CrowServer::get_instance();
+
+    blocking_event_loop();
     return 0;
 }

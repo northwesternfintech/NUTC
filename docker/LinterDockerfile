@@ -1,0 +1,42 @@
+#build stage
+FROM python:3.12 as build
+
+RUN pip install conan numpy pandas polars scipy scikit-learn \
+    # c++ stuff
+    && apt update \
+    && apt install -y --no-install-recommends build-essential libssl-dev cmake git
+
+WORKDIR /app/linter
+COPY ./linter/conanfile.py /app/linter/conanfile.py
+COPY ./.github/scripts/conan-profile.sh /app/linter
+
+RUN cat conan-profile.sh | bash \
+    && conan install . -b missing
+
+COPY ./linter/src /app/linter/src
+COPY ./linter/CMakeLists.txt /app/linter
+COPY ./linter/CMakePresets.json /app/linter
+COPY ./linter/cmake /app/linter/cmake
+COPY ./linter/test /app/linter/test
+
+ARG release_build=false
+
+RUN if [ "$release_build" = "true" ]; then \
+    cmake --preset=ci-docker; \
+    else \
+    cmake --preset=ci-docker -DLOCAL_DEV=ON; \
+    fi
+
+RUN cmake --build build --config Release -j6
+
+# Main stage
+FROM python:3.12-slim
+
+RUN pip install numpy pandas polars scipy scikit-learn
+
+COPY --from=build /app/linter/build/NUTC-linter-spawner /bin/NUTC-linter-spawner
+COPY --from=build /app/linter/build/NUTC-linter /bin/NUTC-linter
+
+RUN chmod +x /bin/NUTC-linter
+
+CMD NUTC-linter

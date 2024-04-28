@@ -131,12 +131,6 @@ public:
 
     ~BotTrader() override = default;
 
-    [[nodiscard]] virtual bool
-    is_active() const
-    {
-        return false;
-    }
-
     void process_order_expiration(
         const std::string& ticker, util::Side side, double price, double quantity
     ) override;

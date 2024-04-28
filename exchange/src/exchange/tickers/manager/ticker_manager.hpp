@@ -49,13 +49,14 @@ public:
         return get_engine(ticker).bot_container;
     }
 
-    void
+    size_t
     match_order(const matching::stored_order& order)
     {
         auto& engine = get_engine(order.ticker);
         std::vector<matching::stored_match> matches = engine.engine.match_order(order);
         engine.num_matches += matches.size();
         matches_.insert(matches_.end(), matches.begin(), matches.end());
+        return matches.size();
     }
 
     void add_engine(const std::string& ticker, double starting_price);

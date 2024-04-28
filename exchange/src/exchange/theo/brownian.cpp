@@ -1,13 +1,9 @@
-/**
- * @file brownian.cpp
- * @author Andrew Li (andrewli@u.northwestern.edu)
- * @brief Brownian motion theo to simulate market chaos
- * @version 0.1
- * @date 2024-01-12
- *
- * @copyright Copyright (c) 2024
- *
- */
+#define BROWNIAN_MOTION_MEAN_SIZE_EVENT  15
+#define BROWNIAN_MOTION_STDEV_EVENT_SIZE 5
+#define BROWNIAN_MOTION_DEVIATION        0.1
+#define SKEW_SCALE                                                                     \
+    20000 // Factor by which the market wants to return to baseline (larger = less)
+#define SKEW_FACTOR 4 // How much more market events skew than normal
 
 #include "brownian.hpp"
 

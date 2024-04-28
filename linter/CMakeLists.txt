@@ -25,10 +25,16 @@ find_package(quill REQUIRED)     # Logging
 find_package(argparse REQUIRED)  # Argument parsing
 find_package(CURL REQUIRED)
 find_package(glaze REQUIRED)
-find_package(Python 3.11 COMPONENTS Interpreter Development EXACT REQUIRED)
-find_package(PythonLibs 3.11 EXACT REQUIRED)
+find_package(Python3 3.12 COMPONENTS Interpreter Development EXACT REQUIRED)
 find_package(pybind11 REQUIRED)
 find_package(Crow REQUIRED)
+
+option(LOCAL_DEV "Enable local dev endpoints" OFF)
+
+if(LOCAL_DEV)
+  add_definitions(-DNUTC_LOCAL_DEV)
+endif()
+
 
 # ---- Declare library ----
 
@@ -70,7 +76,7 @@ target_link_libraries(NUTC-linter_lib PUBLIC CURL::libcurl)
 target_link_libraries(NUTC-linter_lib PUBLIC glaze::glaze)
 target_link_libraries(NUTC-linter_lib PUBLIC pybind11::pybind11)
 target_link_libraries(NUTC-linter_lib PUBLIC Crow::Crow)
-target_link_libraries(NUTC-linter_lib PUBLIC Python::Python)
+target_link_libraries(NUTC-linter_lib PUBLIC Python3::Python)
 target_link_libraries(NUTC-linter_lib PUBLIC argparse::argparse)
 
 # ---- The other executable's libs ----
@@ -85,6 +91,7 @@ target_include_directories(
 target_link_libraries(NUTC-linter-spawner_lib PRIVATE quill::quill)
 target_link_libraries(NUTC-linter-spawner_lib PRIVATE glaze::glaze)
 target_link_libraries(NUTC-linter-spawner_lib PRIVATE pybind11::pybind11)
+target_link_libraries(NUTC-linter-spawner_lib PRIVATE Python3::Python)
 target_link_libraries(NUTC-linter-spawner_lib PRIVATE CURL::libcurl)
 
 # ---- Declare main executable ----
@@ -105,7 +112,7 @@ target_link_libraries(NUTC-linter_exe PRIVATE CURL::libcurl)
 target_link_libraries(NUTC-linter_exe PRIVATE glaze::glaze)
 target_link_libraries(NUTC-linter_exe PRIVATE pybind11::pybind11)
 target_link_libraries(NUTC-linter_exe PRIVATE Crow::Crow)
-target_link_libraries(NUTC-linter_exe PRIVATE Python::Python)
+target_link_libraries(NUTC-linter_exe PRIVATE Python3::Python)
 
 # ---- Declare secondary (process spawning) executable ----
 
@@ -122,7 +129,7 @@ target_link_libraries(NUTC-linter-spawner_exe PRIVATE argparse::argparse)
 target_link_libraries(NUTC-linter-spawner_exe PRIVATE pybind11::pybind11)
 target_link_libraries(NUTC-linter-spawner_exe PRIVATE quill::quill)
 target_link_libraries(NUTC-linter-spawner_exe PRIVATE glaze::glaze)
-target_link_libraries(NUTC-linter-spawner_exe PRIVATE Python::Python)
+target_link_libraries(NUTC-linter-spawner_exe PRIVATE Python3::Python)
 
 # ---- Install rules ----
 

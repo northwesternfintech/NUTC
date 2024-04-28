@@ -25,7 +25,7 @@ wrapper_args
 process_arguments(int argc, const char** argv)
 {
     argparse::ArgumentParser program(
-        "NUTC Wrapper", VERSION, argparse::default_arguments::help
+        "NUTC Wrapper", NUTC_VERSION, argparse::default_arguments::help
     );
 
     program.add_argument("-D", "--dev")
@@ -55,7 +55,7 @@ process_arguments(int argc, const char** argv)
     program.add_argument("-V", "--version")
         .help("prints version information and exits")
         .action([&](const auto& /* unused */) {
-            fmt::println("NUTC wrapper v{}", VERSION);
+            fmt::println("NUTC wrapper v{}", NUTC_VERSION);
             exit(0); // NOLINT(concurrency-*)
         })
         .default_value(false)
@@ -105,24 +105,27 @@ main(int argc, const char** argv)
     pybind11::scoped_interpreter guard{};
 
     std::optional<std::string> algo{};
+    std::string trader_id{};
     if (development_mode) {
         algo = nutc::file_ops::read_file_content(algo_id);
+        trader_id = algo_id;
     }
     else {
         algo = nutc::firebase::get_algo(uid, algo_id);
+        trader_id = nutc::util::trader_id(uid, algo_id);
     }
 
     // Send message to exchange to let it know we successfully initialized
-    comms::publish_init_message(uid, algo.has_value());
+    comms::publish_init_message(trader_id, algo.has_value());
     if (!algo.has_value()) {
-        return 0;
+        return 1;
     }
     comms::wait_for_start_time();
 
     comms exchange_conn{};
-    nutc::pywrapper::create_api_module(exchange_conn.market_order_func(uid));
+    nutc::pywrapper::create_api_module(exchange_conn.market_order_func(trader_id));
     nutc::pywrapper::run_code_init(algo.value());
 
-    exchange_conn.main_event_loop(uid);
+    exchange_conn.main_event_loop(trader_id);
     return 0;
 }

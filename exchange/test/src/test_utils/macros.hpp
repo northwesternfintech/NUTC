@@ -1,7 +1,6 @@
 #include "exchange/tickers/engine/engine.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
 #include "exchange/traders/trader_container.hpp"
-#include "exchange/utils/logger/logger.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
@@ -10,7 +9,6 @@
 using Engine = nutc::matching::Engine;
 using market_order = nutc::messages::market_order;
 using stored_order = nutc::matching::stored_order;
-using Logger = nutc::events::Logger;
 using orderbook_update = nutc::messages::orderbook_update;
 using TraderContainer = nutc::traders::TraderContainer;
 
@@ -36,8 +34,7 @@ bool validate_market_order(
     util::Side side, double price, double quantity
 );
 
-stored_order
-make_stored_order(market_order& order, const traders::TraderContainer& manager);
+stored_order make_stored_order(market_order& order, traders::TraderContainer& manager);
 
 } // namespace test_utils
 } // namespace nutc

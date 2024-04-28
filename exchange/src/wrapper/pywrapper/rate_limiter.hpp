@@ -9,7 +9,7 @@ class RateLimiter {
 
     // TODO(stevenewald): make configurable
     static constexpr size_t MAX_CALLS = 30;
-    static constexpr std::chrono::seconds TIME_WINDOW = std::chrono::seconds(10);
+    static constexpr std::chrono::seconds TIME_WINDOW = std::chrono::seconds(1);
 
 public:
     bool should_rate_limit();

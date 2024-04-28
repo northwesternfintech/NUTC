@@ -1,6 +1,6 @@
 "use client";
 import { CheckIcon, PaperClipIcon } from "@heroicons/react/24/solid";
-import { linterEndpoint } from "@/config";
+import { linterEndpoint, sandboxEndpoint } from "@/config";
 import axios from "axios";
 import { useRef, useState } from "react";
 import AlgorithmType from "@/app/dash/algoType";
@@ -26,7 +26,8 @@ async function uploadAlgo(
   const algoRef = sRef(storageRef, `algos/${fileIdKey}.${fileType}`);
   try {
     const snapshot = await uploadBytes(algoRef, file);
-    const downloadURL = await getDownloadURL(snapshot.ref); //in theory, we should be saving the ID, rather than URL. this is easier.
+    const tmpDownloadURL = await getDownloadURL(snapshot.ref); //in theory, we should be saving the ID, rather than URL. this is easier.
+    const downloadURL = tmpDownloadURL.replace("localhost", "firebase");
     return { downloadURL, fileIdKey, fileRef };
   } catch (e) {
     console.log(e);
@@ -73,6 +74,7 @@ export default function Submission() {
     fileIdKey: "",
     name: "",
     description: "",
+    uploadTime: 0,
   };
 
   const handleInputChange = (e: any) => {
@@ -140,6 +142,7 @@ export default function Submission() {
         ...prevState,
         downloadURL: downloadLink.downloadURL,
         fileIdKey: downloadLink.fileIdKey,
+        uploadTime: Date.now(),
       }));
       setAlgoRef(downloadLink.fileRef);
       Swal.fire({
@@ -302,8 +305,8 @@ export default function Submission() {
                 ) //bad practice, fix later
               ) {
                 Swal.fire({
-                  title: "Algorithm submitted. Waiting for linting to complete...",
-                  text: "This may take up to 2 minutes.",
+                  title: "Algorithm submitted. Waiting for initial results...",
+                  text: "This may take up to 30 seconds.",
                   icon: "info",
                   allowOutsideClick: false,
                   allowEscapeKey: false,
@@ -313,6 +316,7 @@ export default function Submission() {
                 await axios.get(
                   linterEndpoint(userInfo?.user?.uid || "", algoRef.key),
                 );
+                await axios.get(sandboxEndpoint(userInfo?.user?.uid || "", algoRef.key));
                 Swal.close();
                 Swal.fire({
                   title: "Linting complete!",

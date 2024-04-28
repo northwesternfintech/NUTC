@@ -40,7 +40,7 @@ NormalModeAlgoInitializer::initialize_trader_container(traders::TraderContainer&
         );
         std::string algo_id = user["latestAlgoId"].get<std::string>();
         traders.add_trader<traders::LocalTrader>(
-            user_id, full_name, algo_id, starting_capital
+            user_id, algo_id, full_name, starting_capital
         );
     }
 }
@@ -48,7 +48,7 @@ NormalModeAlgoInitializer::initialize_trader_container(traders::TraderContainer&
 glz::json_t::object_t
 NormalModeAlgoInitializer::get_remote_traders()
 {
-    const std::string endpoint = std::string(FIREBASE_URL) + std::string("users.json");
+    const std::string endpoint = util::get_firebase_endpoint("users.json");
     glz::json_t res = curl::request_to_json("GET", endpoint);
     return res.get<glz::json_t::object_t>();
 }

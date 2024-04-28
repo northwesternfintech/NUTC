@@ -20,6 +20,7 @@ struct global_config {
     const size_t ORDER_EXPIRATION_TICKS;
     const uint16_t TICK_HZ;
     const uint8_t DISPLAY_HZ;
+    const unsigned int SANDBOX_TRIAL_SECS;
 };
 
 struct ticker_config {
@@ -36,14 +37,10 @@ struct bot_config {
 };
 
 class Config {
-    const YAML::Node CONFIG;
-
     // Globals
     const global_config GLOBAL_CONFIG;
     const std::vector<ticker_config> TICKERS_CONFIG;
     const std::vector<bot_config> BOTS_CONFIG;
-
-    static std::string to_lower(std::string str);
 
 public:
     static const Config&
@@ -82,24 +79,16 @@ public:
     ~Config() = default;
 
 private:
-    explicit Config(const std::string& filename) :
-        CONFIG(YAML::LoadFile(filename)), GLOBAL_CONFIG(get_global_config_()),
-        TICKERS_CONFIG(get_tickers_config_()), BOTS_CONFIG(get_bots_config_())
+    explicit Config(const std::string& filename) : Config(YAML::LoadFile(filename)) {}
+
+    explicit Config(const YAML::Node& config) :
+        GLOBAL_CONFIG(get_global_config_(config)),
+        TICKERS_CONFIG(get_ticker_config_(config)), BOTS_CONFIG(get_bot_config_(config))
     {}
 
-    static void
-    throw_undef_err(const std::string& undefined_err)
-    {
-        throw std::runtime_error(
-            fmt::format("{} is not defined in configuration file", undefined_err)
-        );
-    }
-
-    global_config get_global_config_() const;
-
-    std::vector<ticker_config> get_tickers_config_() const;
-
-    std::vector<bot_config> get_bots_config_() const;
+    static global_config get_global_config_(const YAML::Node& full_config);
+    static std::vector<ticker_config> get_ticker_config_(const YAML::Node& full_config);
+    static std::vector<bot_config> get_bot_config_(const YAML::Node& full_config);
 };
 } // namespace config
 } // namespace nutc

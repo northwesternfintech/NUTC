@@ -9,7 +9,7 @@
 namespace nutc {
 namespace rabbitmq {
 
-class RabbitMQConsumer {
+class WrapperConsumer {
 public:
     static std::optional<std::variant<messages::init_message, messages::market_order>>
     consume_message_nonblocking();
@@ -35,6 +35,7 @@ public:
      * messages from the exchange
      */
     static void consumer_event_loop(engine_manager::EngineManager& engine_manager);
+    static void handle_sandbox_init(messages::init_message&& message);
 
 private:
     static std::optional<std::string> consume_message_as_string();

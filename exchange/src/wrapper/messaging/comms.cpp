@@ -148,8 +148,11 @@ ExchangeProxy::wait_for_start_time()
     using nanoseconds = std::chrono::nanoseconds;
     using time_point = std::chrono::high_resolution_clock::time_point;
     auto message = consume_message();
-    if (!std::holds_alternative<start_time>(message))
-        throw std::runtime_error("Received unexpected message type");
+
+    // Sandbox may get ob updates before it's initialized
+    while (!std::holds_alternative<start_time>(message)) {
+        message = consume_message();
+    }
 
     start_time start = std::get<start_time>(message);
 
