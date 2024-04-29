@@ -39,4 +39,7 @@ COPY --from=build /app/linter/build/NUTC-linter /bin/NUTC-linter
 
 RUN chmod +x /bin/NUTC-linter
 
+EXPOSE 18081
+
+
 CMD NUTC-linter

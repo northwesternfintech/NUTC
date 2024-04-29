@@ -39,4 +39,6 @@ RUN chmod +x /usr/bin/NUTC-exchange /usr/bin/WRAPPER
 ENV NUTC_WRAPPER_BINARY_PATH="/usr/bin/WRAPPER"
 ENV NUTC_CONFIG_FILE="/app/exchange/config.yml"
 
+EXPOSE 4152 18080
+
 ENTRYPOINT ["/usr/bin/NUTC-exchange"]
