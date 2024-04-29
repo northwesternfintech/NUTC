@@ -35,7 +35,7 @@ jobs:
         submodules: 'recursive'
 
     - uses: actions/setup-python@v4
-      with: { python-version: "3.11" }
+      with: { python-version: "3.12" }
 
     - name: Install LLVM 17
       run: |
@@ -75,10 +75,11 @@ jobs:
 
     - name: Install Python
       uses: actions/setup-python@v4
-      with: { python-version: "3.11" }
+      with: { python-version: "3.12" }
 
-    - name: Install Python Developer Headers
-      run: sudo apt install python3.11-dev
+    - name: Install Python 
+      uses: actions/setup-python@v4
+      with: { python-version: "3.12-dev" }
 
     - name: Install LLVM 17
       run: |
@@ -165,11 +166,12 @@ jobs:
 
     - name: Install Python
       uses: actions/setup-python@v4
-      with: { python-version: "3.11" }
-    
-    - name: Install Python Developer Headers
-      run: sudo apt install python3.11-dev
+      with: { python-version: "3.12" }
 
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with: { python-version: "3.12-dev" }
+    
     - name: Install dependencies
       shell: bash
       run: |
@@ -213,10 +215,10 @@ jobs:
         working-directory: linter
 
     env:
-      CC: /opt/homebrew/opt/llvm/bin/clang
-      CXX: /opt/homebrew/opt/llvm/bin/clang++
-      CLANG_DIR: '/opt/homebrew/opt/llvm/bin/clang'
-      LLVM_DIR: '/opt/homebrew/opt/llvm'
+      CC: /opt/homebrew/opt/llvm@17/bin/clang
+      CXX: /opt/homebrew/opt/llvm@17/bin/clang++
+      CLANG_DIR: '/opt/homebrew/opt/llvm@17/bin/clang'
+      LLVM_DIR: '/opt/homebrew/opt/llvm@17'
 
     steps:
     - uses: actions/checkout@v3
@@ -236,9 +238,10 @@ jobs:
     - name: Install Python
       uses: actions/setup-python@v4
       with: { python-version: "3.12" }
-    
-    - name: Install Python Developer Headers
-      run: brew install python@3.12
+
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with: { python-version: "3.12-dev" }
 
     - name: Install dependencies
       shell: bash
@@ -300,7 +303,7 @@ jobs:
         submodules: 'recursive'
 
     - uses: actions/setup-python@v4
-      with: { python-version: "3.11" }
+      with: { python-version: "3.12" }
 
     - name: Install m.css dependencies
       run: pip3 install jinja2 Pygments
@@ -318,75 +321,3 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: build/docs/html
-
-  create-dockerimage:
-      needs: [lint]
-
-      # dockerimage will compile when deploying on push, so no need to run twice
-      if: github.event_name == 'pull_request'
-
-      runs-on: ubuntu-22.04
-      defaults:
-        run:
-          working-directory: linter
-
-      steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: 'recursive'
-
-      - name: Copy conan-profile.sh to linter directory
-        run: cp ../.github/scripts/conan-profile.sh conan-profile.sh
-
-      - name: Create Dockerimage
-        run: docker build -t nutc-linter:latest .
-
-
-  deploy-dockerimage:
-      needs: [lint, sanitize, test-darwin, test-linux]
-
-      # don't want to deploy if PR
-      if: github.event_name == 'push'
-
-      runs-on: ubuntu-22.04
-      defaults:
-        run:
-          working-directory: linter
-
-      steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: 'recursive'
-
-      - name: Configure gcloud
-        run: |
-          gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
-          gcloud auth configure-docker
-
-      - name: Write GCP Service Account Key to File
-        run: echo "$GCP_SA_KEY" > ../.github/gcp-sa-key.json
-        env:
-          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
-
-      - name: Authenticate with Google Cloud
-        run: gcloud auth activate-service-account --key-file=../.github/gcp-sa-key.json
-
-      - name: Copy conan-profile.sh to linter directory
-        run: cp ../.github/scripts/conan-profile.sh conan-profile.sh
-
-      - name: Create Dockerimage
-        run: docker build -t nutc-linter:latest .
-
-      - name: Push Docker image
-        run: |
-          docker tag nutc-linter:latest gcr.io/${{ secrets.GCP_PROJECT_ID }}/nutc-linter:latest
-          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/nutc-linter:latest
-
-      - name: Deploy to Cloud Run
-        run: >
-          gcloud run deploy nutc-linter 
-          --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/nutc-linter:latest 
-          --region us-central1 
-          --platform managed
-
-

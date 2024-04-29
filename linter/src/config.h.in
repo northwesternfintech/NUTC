@@ -22,8 +22,8 @@
 #define LOG_FILE_SIZE      (1024 * 1024 / 2) // 512 KB
 #define LOG_BACKUP_COUNT   5
 
-#ifdef NUTC_LINTER_LOCAL_DEV_MODE
-#  define FIREBASE_URL "http://127.0.0.1:9000/"
+#ifdef NUTC_LOCAL_DEV
+#  define FIREBASE_URL "http://firebase:9000/"
 #else
 #  define FIREBASE_URL "https://nutc-web-default-rtdb.firebaseio.com/"
 #endif

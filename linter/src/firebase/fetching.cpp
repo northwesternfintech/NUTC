@@ -6,7 +6,7 @@ namespace client {
 static std::string
 get_firebase_endpoint(const std::string& params)
 {
-#ifdef NUTC_LINTER_LOCAL_DEV_MODE
+#ifdef NUTC_LOCAL_DEV
     return FIREBASE_URL + params + "?ns=nutc-web-default-rtdb";
 #else
     return FIREBASE_URL + params;

@@ -4,7 +4,7 @@ vars:
   NAME: NUTC
   
   # BOTS, DEV, or NORMAL
-  MODE: "NORMAL"
+  MODE: "DEV"
   
   DASHBOARD_ENABLED: True
   

@@ -11,8 +11,7 @@ namespace config {
 using mode = util::Mode;
 using algorithm = util::algorithm;
 
-std::tuple<mode, std::optional<algorithm>>
-process_arguments(int argc, const char** argv);
+mode process_arguments(int argc, const char** argv);
 
 } // namespace config
 } // namespace nutc

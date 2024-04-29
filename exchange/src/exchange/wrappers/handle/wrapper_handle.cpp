@@ -43,6 +43,13 @@ WrapperHandle::~WrapperHandle()
         wrapper_.terminate();
         wrapper_.wait();
     }
+    auto pipe_in_ptr = pipe_in.lock();
+    if (pipe_in_ptr != nullptr)
+        AsyncPipeRunner::get().remove_pipe(pipe_in_ptr);
+
+    auto pipe_out_ptr = pipe_out.lock();
+    if (pipe_out_ptr != nullptr)
+        AsyncPipeRunner::get().remove_pipe(pipe_out_ptr);
 }
 
 WrapperHandle::WrapperHandle(const std::string& remote_uid, const std::string& algo_id)
@@ -75,7 +82,7 @@ WrapperHandle::spawn_wrapper(const std::vector<std::string>& args)
     assert(pipe_in_ptr != nullptr);
     assert(pipe_out_ptr != nullptr);
     wrapper_ = bp::child(
-        bp::exe(path), bp::args(args), bp::std_in<*pipe_out_ptr, bp::std_err> bp::null,
+        bp::exe(path), bp::args(args), bp::std_in<*pipe_out_ptr, bp::std_err> stderr,
         bp::std_out > *pipe_in_ptr
     );
 }

@@ -237,14 +237,12 @@ Dashboard::display_leaderboard(WINDOW* window, int start_y)
         }
     ); // NOLINT
     for (const auto& trader : ordered_traders) {
+        if (!trader->should_display())
+            continue;
         double capital = trader->get_capital();
         double portfolio = portfolio_value(trader);
-        double pnl =
-            capital + portfolio - config::Config::get().constants().STARTING_CAPITAL;
-        if (pnl == 0)
-            continue;
-        auto name =
-            std::static_pointer_cast<traders::LocalTrader>(trader)->get_display_name();
+        double pnl = capital + portfolio - trader->get_initial_capital();
+        auto name = trader->get_display_name();
         mvwprintw(window, start_y++, start_x, "Competitor: %s", name.c_str());
         mvwprintw(window, start_y++, start_x, "  Portfolio Value: %.2f", portfolio);
         mvwprintw(window, start_y++, start_x, "  Capital: %.2f", capital);

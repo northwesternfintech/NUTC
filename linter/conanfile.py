@@ -10,14 +10,14 @@ class Recipe(ConanFile):
 
     def requirements(self):
         self.requires("zlib/1.3", override=True)
-        self.requires("fmt/[>=10.1.0]")    # string formatting
-        self.requires("quill/3.3.1")   # logging
-        self.requires("libcurl/8.2.1")
-        self.requires("glaze/[^1.3.5]")
-        self.requires("pybind11/2.10.4")
+        self.requires("fmt/10.2.1")
+        self.requires("quill/3.7.0")   # logging
+        self.requires("libcurl/8.6.0")
+        self.requires("glaze/2.4.0")
+        self.requires("pybind11/2.12.0")
 
-        self.requires("argparse/2.9")  # argument parsing
-        self.requires("crowcpp-crow/1.0+5")
+        self.requires("argparse/3.0")
+        self.requires("crowcpp-crow/1.1.0")
 
     def build_requirements(self):
-        self.test_requires("gtest/1.14.0")
+        self.test_requires("gtest/1.13.0")

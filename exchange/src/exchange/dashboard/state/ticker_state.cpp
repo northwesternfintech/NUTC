@@ -45,9 +45,6 @@ TickerState::calculate_metrics()
         for (const auto& [id, bot] : container) {
             state.total_capital_held_ +=
                 bot->get_interest_limit() + bot->get_capital_delta();
-            if (!bot->is_active()) {
-                continue;
-            }
             state.num_bots_active_++;
             state.min_open_bids_ = std::min(state.min_open_bids_, bot->get_open_bids());
             state.min_open_asks_ = std::min(state.min_open_asks_, bot->get_open_asks());

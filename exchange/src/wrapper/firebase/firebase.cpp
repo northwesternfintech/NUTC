@@ -1,6 +1,7 @@
 #include "firebase.hpp"
 
 #include "shared/config/config.h"
+#include "shared/util.hpp"
 
 #include <fmt/format.h>
 
@@ -10,7 +11,8 @@ namespace firebase {
 glz::json_t
 get_user_info(const std::string& uid)
 {
-    auto url = fmt::format("{}/users/{}.json", std::string(FIREBASE_URL), uid);
+    auto params = fmt::format("users/{}.json", uid);
+    auto url = util::get_firebase_endpoint(params);
     return firebase_request("GET", url);
 }
 

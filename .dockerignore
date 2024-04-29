@@ -1,0 +1,4 @@
+web/node_modules
+web/functions/node_modules
+web/build
+web/functions/lib

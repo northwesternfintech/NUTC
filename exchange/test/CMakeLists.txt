@@ -24,8 +24,6 @@ add_executable(NUTC_tests
 
   src/unit/expiration/basic_expiration.cpp
 
-  src/unit/logging/logging_orders.cpp
-
   src/unit/misc/tick_manager.cpp
 
   src/integration/basic_algo.cpp

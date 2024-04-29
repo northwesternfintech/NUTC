@@ -13,6 +13,12 @@ project(
 include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
 
+option(LOCAL_DEV "Enable local dev endpoints" OFF)
+
+if(LOCAL_DEV)
+  add_definitions(-DNUTC_LOCAL_DEV)
+endif()
+
 # ---- EXCHANGE ----------
 
 # ---- Declare library ----
@@ -20,7 +26,6 @@ include(cmake/variables.cmake)
 add_library(
     EXCHANGE_lib OBJECT
     
-    src/exchange/algos/sandbox_mode/sandbox_mode.cpp
     src/exchange/algos/dev_mode/dev_mode.cpp
     src/exchange/algos/normal_mode/normal_mode.cpp
     src/exchange/algos/algo_manager.cpp
@@ -34,6 +39,7 @@ add_library(
     src/exchange/wrappers/messaging/consumer.cpp
     src/exchange/wrappers/messaging/async_pipe_runner.cpp
     
+    src/exchange/sandbox/server/crow.cpp
 
     src/exchange/bots/bot_container.cpp
     src/exchange/bots/bot_types/retail.cpp
@@ -48,10 +54,6 @@ add_library(
     src/exchange/traders/trader_types/trader_interface.cpp
     src/exchange/traders/trader_types/bot_trader.cpp
 
-    
-    src/exchange/utils/logger/logger.cpp
-
-    
     src/exchange/theo/brownian.cpp
     
     src/exchange/tick_scheduler/tick_scheduler.cpp
@@ -84,6 +86,10 @@ target_link_libraries(EXCHANGE_lib PUBLIC yaml-cpp::yaml-cpp)
 # Prometheus
 find_package(prometheus-cpp REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC prometheus-cpp::prometheus-cpp)
+
+# Crow 
+find_package(Crow REQUIRED)
+target_link_libraries(EXCHANGE_lib PUBLIC Crow::Crow)
 
 # Fmt
 find_package(fmt REQUIRED)
@@ -139,6 +145,8 @@ target_link_libraries(EXCHANGE_exe PRIVATE glaze::glaze)
 
 target_link_libraries(EXCHANGE_exe PRIVATE boost::boost)
 
+target_link_libraries(EXCHANGE_exe PRIVATE Crow::Crow)
+
 # Prometheus
 find_package(prometheus-cpp REQUIRED)
 target_link_libraries(EXCHANGE_exe PRIVATE prometheus-cpp::prometheus-cpp)
@@ -159,12 +167,13 @@ if(DASHBOARD)
   )
 
   find_package(Curses REQUIRED)
-  target_link_libraries(DASHBOARD_lib PUBLIC Curses::Curses)
+  target_link_libraries(DASHBOARD_lib PRIVATE Curses::Curses)
+  target_link_libraries(DASHBOARD_lib PRIVATE boost::boost)
   target_link_libraries(DASHBOARD_lib PRIVATE quill::quill)
   target_link_libraries(DASHBOARD_lib PRIVATE fmt::fmt)
-  target_link_libraries(DASHBOARD_lib PRIVATE boost::boost)
   target_link_libraries(DASHBOARD_lib PRIVATE glaze::glaze)
   target_link_libraries(DASHBOARD_lib PRIVATE yaml-cpp::yaml-cpp)
+  target_link_libraries(DASHBOARD_lib PRIVATE prometheus-cpp::prometheus-cpp)
   target_link_libraries(EXCHANGE_exe PRIVATE DASHBOARD_lib)
 endif()
 
@@ -227,6 +236,7 @@ target_link_libraries(WRAPPER_exe PRIVATE ${Python3_LIBRARIES})
 add_library(SHARED_lib OBJECT     
     src/shared/file_operations/file_operations.cpp
     src/shared/config/config_loader.cpp
+    src/shared/util.cpp
 )
 
 target_include_directories(

@@ -19,10 +19,10 @@ class LocalTrader : public GenericTrader {
 public:
     // Remote (firebase)
     explicit LocalTrader(
-        std::string remote_uid, std::string full_name, std::string algo_id,
+        std::string remote_uid, std::string algo_id, std::string full_name,
         double capital
     ) :
-        GenericTrader(remote_uid, capital),
+        GenericTrader(util::trader_id(remote_uid, algo_id), capital),
         DISPLAY_NAME(std::move(full_name)), ALGO_ID(algo_id),
         wrapper_handle_(remote_uid, algo_id)
     {}
@@ -37,6 +37,12 @@ public:
                 fmt::format("Unable to find local algorithm file: {}", algo_path);
             throw std::runtime_error(err_str);
         }
+    }
+
+    bool
+    should_display() const override
+    {
+        return true;
     }
 
     const std::string&

@@ -14,7 +14,14 @@
 #include <thread>
 #include <tuple>
 
-static std::tuple<uint8_t, std::string, std::string>
+namespace {
+struct wrapper_args {
+    const uint8_t VERBOSITY;
+    const std::string USER_ID;
+    const std::string ALGO_ID;
+};
+
+wrapper_args
 process_arguments(int argc, const char** argv)
 {
     argparse::ArgumentParser program(
@@ -56,28 +63,32 @@ process_arguments(int argc, const char** argv)
         exit(1); // NOLINT(concurrency-*)
     }
 
-    return std::make_tuple(
+    return {
         verbosity,
         program.get<std::string>("--uid"),
         program.get<std::string>("--algoid")
-    );
+    };
 }
+} // namespace
 
 int
 main(int argc, const char** argv)
 {
     // Parse args
-    auto [verbosity, uid, algoid] = process_arguments(argc, argv);
+    auto args = process_arguments(argc, argv);
+    auto [verbosity, uid, algoid] = args;
 
     // Start logging and print build info
-    nutc::logging::init(verbosity);
+    nutc::logging::init(args.VERBOSITY);
 
     // Move a string stream from the loop to this process
     std::stringstream ss;
     bool has_exited = false;
 
     // Watchdog to kill after LINT_AUTO_TIMEOUT_SECONDS (default 120)
-    std::thread timeout_thread([&ss, &has_exited, algoid, uid]() {
+    std::thread timeout_thread([&ss, &has_exited, args]() {
+        auto algoid = args.ALGO_ID;
+        auto uid = args.USER_ID;
         auto start_time = std::chrono::steady_clock::now();
         while (std::chrono::steady_clock::now() - start_time
                < std::chrono::seconds(LINT_AUTO_TIMEOUT_SECONDS)) {
