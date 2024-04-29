@@ -1214,6 +1214,7 @@ dependencies = [
  "actix-cors",
  "actix-web",
  "reqwest",
+ "serde",
  "tracing",
  "tracing-actix-web",
  "tracing-subscriber",
