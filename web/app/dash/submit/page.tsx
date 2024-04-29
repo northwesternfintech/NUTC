@@ -324,7 +324,7 @@ export default function Submission() {
                   timer: 5000,
                   timerProgressBar: true,
                   willClose: () => {
-                    window.location.reload();
+                    window.location.href = "submissions/" + algoRef.key;
                   },
                 });
               }

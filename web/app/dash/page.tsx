@@ -122,6 +122,12 @@ export default function Dashboard() {
     setAlgos(tmpAlgos);
   }, [user]);
 
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
   return (
     <div>
       <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-6 border-b border-white/5 bg-gray-900 px-4 shadow-sm sm:px-6 lg:px-8">
@@ -141,6 +147,8 @@ export default function Dashboard() {
                 placeholder="Search..."
                 type="search"
                 name="search"
+                value={searchTerm}
+                onChange={handleSearchChange}
               />
             </div>
           </form>
@@ -218,7 +226,11 @@ export default function Dashboard() {
         {/* Deployment list */}
         <ul role="list" className="divide-y divide-white/5">
           {algos.length === 0 && <NoSubmissions />}
-          {algos.map((deployment: any) => (
+          {algos
+            .filter((algo: any) =>
+              searchTerm === "" || algo.projectName && algo.projectName.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+            .map((deployment: any) => (
             <li
               key={deployment.id}
               className="relative flex items-center space-x-4 px-4 py-4 sm:px-6 lg:px-8"
