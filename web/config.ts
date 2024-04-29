@@ -4,6 +4,6 @@ export function apiEndpoint(): string {
   if (isLocalhost()) {
     return "http://localhost:26389/";
   } else {
-    return "https://directapi.nutc.io/";
+    return "https://black.tailf7f8d.ts.net/";
   }
 }
