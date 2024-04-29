@@ -314,7 +314,7 @@ export default function Submission() {
                 });
                 Swal.showLoading();
                 await axios.post(
-                  `${apiEndpoint()}/webserver/submit/${userInfo?.user?.uid}/${algoRef.key}`,
+                  `${apiEndpoint()}webserver/submit/${userInfo?.user?.uid}/${algoRef.key}`,
                 );
                 Swal.close();
                 Swal.fire({
