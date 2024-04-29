@@ -6,12 +6,18 @@ services:
       context: ..
       dockerfile: docker/SandboxDockerfile
       args:
-        release_build: "false"
+        release_build: "true"
     restart: unless-stopped
-    ports:
-      - "4152:4152" # prometheus server
-      - "18080:18080" # sandbox server
     command: ["--bots-only"]
+    networks:
+      - net
+
+  webserver:
+    image: nutc-webserver
+    build:
+      context: ..
+      dockerfile: docker/WebserverDockerfile
+    restart: unless-stopped
     networks:
       - net
 
@@ -22,9 +28,7 @@ services:
       context: ..
       dockerfile: docker/LinterDockerfile
       args:
-        release_build: "false"
-    ports:
-      - "18081:18081" # linter server
+        release_build: "true"
     networks:
       - net
 
@@ -62,10 +66,9 @@ services:
     environment:
       - NODE_ENV=development
 
+  # Exposed on port 9000
   prometheus:
     image: prom/prometheus
-    ports:
-      - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     command:
@@ -74,10 +77,21 @@ services:
     networks:
       - net
 
+  reverse-proxy:
+    image: nginx:latest
+    ports:
+      - "26389:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    restart: unless-stopped
+    depends_on:
+      - webserver
+      - grafana
+    networks:
+      - net
+
   grafana:
     image: grafana/grafana
-    ports:
-      - "3000:3000"
     restart: unless-stopped
     environment:
     - GF_SECURITY_ALLOW_EMBEDDING=true

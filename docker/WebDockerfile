@@ -1,7 +1,0 @@
-FROM oven/bun
-
-WORKDIR /app
-
-EXPOSE 3001
-
-CMD ["bun", "dev":

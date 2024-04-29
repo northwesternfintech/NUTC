@@ -1,6 +1,6 @@
 "use client";
 import { CheckIcon, PaperClipIcon } from "@heroicons/react/24/solid";
-import { linterEndpoint, sandboxEndpoint } from "@/config";
+import { apiEndpoint } from "@/config";
 import axios from "axios";
 import { useRef, useState } from "react";
 import AlgorithmType from "@/app/dash/algoType";
@@ -310,13 +310,12 @@ export default function Submission() {
                   icon: "info",
                   allowOutsideClick: false,
                   allowEscapeKey: false,
-                  allowEnterKey: false
+                  allowEnterKey: false,
                 });
                 Swal.showLoading();
-                await axios.get(
-                  linterEndpoint(userInfo?.user?.uid || "", algoRef.key),
+                await axios.post(
+                  `${apiEndpoint()}/webserver/submit/${userInfo?.user?.uid}/${algoRef.key}`,
                 );
-                await axios.get(sandboxEndpoint(userInfo?.user?.uid || "", algoRef.key));
                 Swal.close();
                 Swal.fire({
                   title: "Linting complete!",

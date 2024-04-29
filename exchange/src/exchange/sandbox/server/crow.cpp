@@ -7,11 +7,8 @@ namespace sandbox {
 
 CrowServer::CrowServer() : work_guard_(io_context_.get_executor())
 {
-    CROW_ROUTE(app, "/sandbox/<string>/<string>/<string>")
-    ([this](
-         const crow::request& req, std::string user_id, std::string algo_id,
-         std::string display_name
-     ) {
+    CROW_ROUTE(app, "/sandbox/<string>/<string>")
+    ([this](const crow::request& req, std::string user_id, std::string algo_id) {
         crow::response res;
         res.code = 200;
         // Set CORS headers
@@ -37,7 +34,7 @@ CrowServer::CrowServer() : work_guard_(io_context_.get_executor())
                 nutc::config::Config::get().constants().STARTING_CAPITAL;
             auto trader = traders::TraderContainer::get_instance()
                               .add_trader<traders::LocalTrader>(
-                                  user_id, algo_id, display_name, STARTING_CAPITAL
+                                  user_id, algo_id, "SANDBOX_USER", STARTING_CAPITAL
                               );
             trader->send_messages({glz::write_json(messages::start_time{0})});
             start_remove_timer(trial_secs, trader->get_id());
