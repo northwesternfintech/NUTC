@@ -17,6 +17,12 @@ get_firebase_endpoint(const std::string& params)
 }
 
 std::string
+to_string(Side side)
+{
+    return side == Side::buy ? "BUY" : "SELL";
+}
+
+std::string
 trader_id(const std::string& user_id, const std::string& algo_id)
 {
     return fmt::format("{}-{}", user_id, algo_id);

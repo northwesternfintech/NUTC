@@ -3,9 +3,12 @@
 #include "exchange/bots/bot_container.hpp"
 #include "exchange/config.h"
 #include "exchange/logging.hpp"
+#include "exchange/metrics/prometheus.hpp"
 #include "exchange/tickers/engine/level_update_generator.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "shared/config/config_loader.hpp"
+
+#include <prometheus/counter.h>
 
 #include <iostream>
 #include <iterator>
@@ -16,14 +19,21 @@ namespace engine_manager {
 namespace {
 using tick_update = messages::tick_update;
 
+// NOTE: we can still run into buffer errors if we have an extremely large message
+// buffer to send and we split it up into very small chunks This only happens in the
+// extreme extreme case (say, 100k orders with 8k max msg size)
 std::vector<std::string>
 split_tick_updates(const tick_update& update)
 {
     std::string buf = glz::write_json(update);
-    if (false && buf.size() > MAX_PIPE_MSG_SIZE) {
+    if (buf.size() > MAX_PIPE_MSG_SIZE) {
         assert(update.matches.size() > 1 || update.ob_updates.size() > 1);
-        auto mid_obs = update.ob_updates.begin() + (update.ob_updates.size() / 2);
-        auto mid_matches = update.matches.begin() + (update.matches.size() / 2);
+        auto mid_obs =
+            update.ob_updates.begin()
+            + static_cast<std::ptrdiff_t>((update.ob_updates.size() + 1) / 2);
+        auto mid_matches =
+            update.matches.begin()
+            + static_cast<std::ptrdiff_t>((update.matches.size() + 1) / 2);
         tick_update tick_update_1{
             {update.ob_updates.begin(), mid_obs    },
             {update.matches.begin(),    mid_matches}
@@ -34,14 +44,43 @@ split_tick_updates(const tick_update& update)
         };
         auto res1 = split_tick_updates(tick_update_1);
         auto res2 = split_tick_updates(tick_update_2);
-        std::ranges::move(res2, std::back_inserter(res1));
+        std::ranges::copy(res2, std::back_inserter(res1));
         return res1;
     }
     return {buf};
 }
 } // namespace
 
-// TODO: helper functions
+void
+log_match(const matching::stored_match& order)
+{
+    static auto& match_counter = prometheus::BuildCounter()
+                                     .Name("matched_orders")
+                                     .Register(*metrics::Prometheus::get_registry());
+    if (order.seller->record_metrics()) {
+        match_counter
+            .Add({
+                {"traderid", order.seller->get_id()        },
+                {"ticker",   order.ticker                  },
+                {"side",     "SELL"                        },
+                {"quantity", std::to_string(order.quantity)}
+        })
+            .Increment(order.quantity);
+    }
+
+    if (order.buyer->record_metrics()) {
+        match_counter
+            .Add({
+                {"traderid", order.buyer->get_id()         },
+                {"ticker",   order.ticker                  },
+                {"side",     "BUY"                         },
+                {"quantity", std::to_string(order.quantity)}
+        })
+            .Increment(order.quantity);
+    }
+}
+
+// TODO: helper functions/cleanup
 void
 EngineManager::on_tick(uint64_t new_tick)
 {
@@ -56,9 +95,10 @@ EngineManager::on_tick(uint64_t new_tick)
         }
 
         // TODO: do this in a converter
-        std::vector<messages::match> glz_matches;
+        std::vector<messages::match> glz_matches{};
         glz_matches.reserve(matches_.size());
         for (const auto& match : matches_) {
+            log_match(match);
             glz_matches.emplace_back(messages::match{
                 match.ticker, match.side, match.price, match.quantity,
                 match.buyer->get_id(), match.seller->get_id(),
@@ -72,10 +112,6 @@ EngineManager::on_tick(uint64_t new_tick)
             ),
             glz_matches
         };
-        log_i(
-            main, "Broadcasting {} ob updates and {} matches for {}",
-            updates.ob_updates.size(), updates.matches.size(), ticker
-        );
         auto update_strs = split_tick_updates(updates);
         traders::TraderContainer::get_instance().broadcast_messages(update_strs);
         engine.last_order_container = engine.engine.get_order_container();

@@ -92,11 +92,12 @@ WrapperHandle::send_messages(std::vector<std::string> messages)
 {
     if (!wrapper_.running()) [[unlikely]]
         return;
+
     std::lock_guard<std::mutex> lock{messages_lock_};
-    if (queued_messages_.size() > MAX_OUTGOING_MQ_SIZE) [[unlikely]] {
-        return;
-    }
     std::ranges::move(messages, std::back_inserter(queued_messages_));
+    while (queued_messages_.size() > MAX_OUTGOING_MQ_SIZE) [[unlikely]] {
+        queued_messages_.pop_front();
+    }
 
     // It will enqueue these messages anyway
     if (is_writing_.test_and_set(std::memory_order_acquire)) {

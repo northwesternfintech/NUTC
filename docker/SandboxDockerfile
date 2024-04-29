@@ -18,9 +18,9 @@ COPY ./exchange/CMakePresets.json /app/exchange
 COPY ./exchange/cmake /app/exchange/cmake
 COPY ./exchange/test /app/exchange/test
 
-ARG release_build=false
+ARG firebase_emulator=false
 
-RUN if [ "$release_build" = "true" ]; then \
+RUN if [ "$firebase_emulator" = "false" ]; then \
     cmake --preset=ci-docker; \
     else \
     cmake --preset=ci-docker -DLOCAL_DEV=ON; \

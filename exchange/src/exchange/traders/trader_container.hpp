@@ -41,17 +41,25 @@ public:
     remove_trader(const std::string& trader_id)
     {
         lock_guard lock{trader_lock_};
-        if (traders_.find(trader_id) == traders_.end())
+        if (!user_exists_(trader_id))
             return;
         traders_.erase(trader_id);
     }
 
-    // This shouldn't need to be thread safe
     std::shared_ptr<GenericTrader>
     get_trader(const std::string& trader_id)
     {
         lock_guard lock{trader_lock_};
         assert(user_exists_(trader_id));
+        return traders_.at(trader_id);
+    }
+
+    std::optional<std::shared_ptr<GenericTrader>>
+    try_get_trader(const std::string& trader_id)
+    {
+        lock_guard lock{trader_lock_};
+        if (!user_exists_(trader_id))
+            return std::nullopt;
         return traders_.at(trader_id);
     }
 

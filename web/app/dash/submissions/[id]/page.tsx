@@ -36,7 +36,7 @@ export default function Page({ params }: { params: { id: string } }) {
   const upTime = algoDetails?.uploadTime || 0;
   function panelUrl(panelNum: number) {
     return apiEndpoint() +
-      `d-solo/cdk4teh4zl534a/ppl?orgId=1&var-traderid=${userInfo?.user?.uid}-${params.id}&from=${upTime}&theme=dark&panelId=${panelNum}&` +
+      `/d-solo/cdk4teh4zl534a/ppl?orgId=1&var-traderid=${userInfo?.user?.uid}-${params.id}&from=${upTime}&theme=dark&panelId=${panelNum}&` +
       (upTime + 300000 < Date.now() ? `&to=${upTime + 300000}` : "&refresh=5s");
   }
 

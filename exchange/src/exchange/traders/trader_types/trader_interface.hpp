@@ -42,7 +42,7 @@ public:
     }
 
     virtual bool
-    should_display() const
+    record_metrics() const
     {
         return false;
     }

@@ -19,9 +19,9 @@ COPY ./linter/CMakePresets.json /app/linter
 COPY ./linter/cmake /app/linter/cmake
 COPY ./linter/test /app/linter/test
 
-ARG release_build=false
+ARG firebase_emulator=false
 
-RUN if [ "$release_build" = "true" ]; then \
+RUN if [ "$firebase_emulator" = "false" ]; then \
     cmake --preset=ci-docker; \
     else \
     cmake --preset=ci-docker -DLOCAL_DEV=ON; \

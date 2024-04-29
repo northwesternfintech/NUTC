@@ -66,7 +66,7 @@ Engine::build_match(const stored_order& buyer, const stored_order& seller)
     double quantity = order_quantity(buyer, seller);
     double price = order_price(buyer, seller);
     util::Side aggressive_side =
-        buyer.order_index < seller.order_index ? seller.side : buyer.side;
+        buyer.order_index < seller.order_index ? util::Side::sell : util::Side::buy;
     return stored_match{
         buyer.trader, seller.trader, buyer.ticker, aggressive_side, price, quantity,
     };
@@ -85,6 +85,10 @@ Engine::order_can_execute_(const stored_order& buyer, const stored_order& seller
     if (!seller.trader->can_leverage()
         && seller.trader->get_holdings(seller.ticker) < quantity) {
         order_container_.remove_order(seller.order_index);
+        return false;
+    }
+    if (seller.trader == buyer.trader) [[unlikely]] {
+        order_container_.remove_order(std::min(seller.order_index, buyer.order_index));
         return false;
     }
     return true;

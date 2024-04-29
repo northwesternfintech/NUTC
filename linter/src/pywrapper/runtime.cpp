@@ -39,7 +39,7 @@ import_py_code(const std::string& code)
     }
     py::exec(R"(
         def place_market_order(side, ticker, quantity, price):
-            nutc_api.publish_market_order(side, ticker, quantity, price))");
+            return nutc_api.publish_market_order(side, ticker, quantity, price))");
 
     return std::nullopt;
 }
