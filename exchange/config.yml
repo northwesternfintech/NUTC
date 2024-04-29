@@ -10,6 +10,8 @@ global:
     exchange_tick_hz: 30
 
     display_refresh_hz: 2
+    
+    order_fee: .0001
 
 tickers:
   - ticker: "ETH"

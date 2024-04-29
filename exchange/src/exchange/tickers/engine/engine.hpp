@@ -7,12 +7,17 @@ namespace matching {
 
 class Engine {
     const size_t ORDER_EXPIRATION_TICKS = 0;
+    const double ORDER_FEE = 0;
     OrderContainer order_container_;
     uint64_t current_tick_ = 0;
 
 public:
     explicit Engine(size_t order_expiration_ticks) :
         ORDER_EXPIRATION_TICKS(order_expiration_ticks)
+    {}
+
+    explicit Engine(size_t order_expiration_ticks, double order_fee) :
+        ORDER_EXPIRATION_TICKS(order_expiration_ticks), ORDER_FEE(order_fee)
     {}
 
     const OrderContainer&
