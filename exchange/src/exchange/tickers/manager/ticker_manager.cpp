@@ -120,15 +120,9 @@ EngineManager::on_tick(uint64_t new_tick)
 }
 
 double
-EngineManager::get_midprice(const std::string& ticker)
+EngineManager::get_midprice(const std::string& ticker) const
 {
-    auto& engine = get_engine(ticker);
-    double real_midprice = engine.engine.get_order_container().get_midprice();
-    if (real_midprice == 0) {
-        return engine.midprice;
-    }
-    engine.midprice = real_midprice;
-    return real_midprice;
+    return get_engine(ticker).engine.get_order_container().get_midprice();
 }
 
 bool

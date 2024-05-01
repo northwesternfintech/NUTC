@@ -18,7 +18,6 @@ struct ticker_info {
     bots::BotContainer bot_container;
     matching::OrderContainer last_order_container;
     uint64_t num_matches{};
-    double midprice{};
 
     ticker_info(std::string ticker, size_t ex_ticks, double starting_price) :
         engine(ex_ticks), bot_container(std::move(ticker), starting_price)
@@ -31,7 +30,7 @@ class EngineManager : public nutc::ticks::TickObserver {
     EngineManager() = default;
 
 public:
-    double get_midprice(const std::string& ticker);
+    double get_midprice(const std::string& ticker) const;
     const ticker_info& get_engine(const std::string& ticker) const;
     ticker_info& get_engine(const std::string& ticker);
     bool has_engine(const std::string& ticker) const;
