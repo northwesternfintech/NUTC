@@ -79,8 +79,9 @@ public:
         return traders_.size();
     }
 
-    // TODO: REMOVE AFTER IMPROVING DASHBOARD
-    const auto&
+    // TODO: remove after improving dashboard
+    // Return a copy of the map so we have copies of the shared pointers
+    auto
     get_traders()
     {
         lock_guard lock{trader_lock_};
