@@ -79,19 +79,28 @@ Engine::order_can_execute_(const stored_order& buyer, const stored_order& seller
     double price = order_price(buyer, seller);
     if (!buyer.trader->can_leverage()
         && buyer.trader->get_capital() < price * quantity) {
-        order_container_.remove_order(buyer.order_index);
+        drop_order(buyer.order_index);
         return false;
     }
     if (!seller.trader->can_leverage()
         && seller.trader->get_holdings(seller.ticker) < quantity) {
-        order_container_.remove_order(seller.order_index);
+        drop_order(seller.order_index);
         return false;
     }
     if (seller.trader == buyer.trader) [[unlikely]] {
-        order_container_.remove_order(std::min(seller.order_index, buyer.order_index));
+        drop_order(std::min(seller.order_index, buyer.order_index));
         return false;
     }
     return true;
+}
+
+void
+Engine::drop_order(uint64_t order_index)
+{
+    stored_order removed = order_container_.remove_order(order_index);
+    removed.trader->process_order_expiration(
+        removed.ticker, removed.side, removed.price, removed.quantity
+    );
 }
 
 std::vector<stored_match>
