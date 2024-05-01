@@ -7,13 +7,13 @@ import * as functions from "firebase-functions";
 import * as crypto from "crypto";
 import * as admin from "firebase-admin";
 import * as nodemailer from "nodemailer";
-
+const dev_mode = process.env.FUNCTIONS_EMULATOR;
 const transporter = nodemailer.createTransport({
   host: "smtp-relay.sendinblue.com",
   port: 587,
   auth: {
-    user: functions.config().sendinblue.user,
-    pass: functions.config().sendinblue.password,
+    user: dev_mode ? "" : functions.config().sendinblue.user,
+    pass: dev_mode ? "" : functions.config().sendinblue.password,
   },
 });
 
@@ -31,6 +31,10 @@ export const emailApplication = functions.https.onCall(
       );
     }
     const uid = context.auth.uid;
+    if(dev_mode) {
+      await admin.database().ref("users").child(uid).child("isApprovedApplicant").set(true);
+      return true;
+    }
     const approvalLink = await generateApprovalLink(uid);
     const rejectionLink = await generateRejectionLink(uid);
     const userInfo =

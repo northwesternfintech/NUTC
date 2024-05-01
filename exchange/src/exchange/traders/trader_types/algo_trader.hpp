@@ -40,7 +40,7 @@ public:
     }
 
     bool
-    should_display() const override
+    record_metrics() const override
     {
         return true;
     }

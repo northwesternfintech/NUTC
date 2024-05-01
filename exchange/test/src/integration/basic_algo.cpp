@@ -1,5 +1,6 @@
 #include "config.h"
 #include "exchange/tickers/manager/ticker_manager.hpp"
+#include "exchange/traders/trader_container.hpp"
 #include "exchange/traders/trader_types/bot_trader.hpp"
 #include "exchange/wrappers/messaging/consumer.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
@@ -137,7 +138,102 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
     );
 }
 
-TEST_F(IntegrationBasicAlgo, OnAccountUpdate)
+// Sanity check that it goes through the orderbook
+TEST_F(IntegrationBasicAlgo, MultipleLevelOrder)
+{
+    std::vector<std::string> names{"test_algos/buy_tsla_at_100.py"};
+    if (!nutc::test_utils::initialize_testing_clients(users_, names)) {
+        FAIL() << "Failed to initialize testing clients";
+    }
+
+    engine_manager_.add_engine("TSLA");
+
+    auto bot = users_.add_trader<BotTrader>("", 0);
+    bot->modify_holdings("TSLA", 1000); // NOLINT
+
+    rmq::WrapperConsumer::match_new_order(
+        engine_manager_,
+        nutc::messages::market_order{
+            bot->get_id(), nutc::util::Side::sell, "TSLA", 5, 100
+        }
+    ); // NOLINT
+    rmq::WrapperConsumer::match_new_order(
+        engine_manager_,
+        nutc::messages::market_order{
+            bot->get_id(), nutc::util::Side::sell, "TSLA", 5, 95
+        }
+    ); // NOLINT
+    nutc::engine_manager::EngineManager::get_instance().on_tick(0);
+
+    auto mess1 = rmq::WrapperConsumer::consume_message();
+    EXPECT_TRUE(std::holds_alternative<nutc::messages::market_order>(mess1));
+
+    nutc::messages::market_order actual_mo =
+        std::get<nutc::messages::market_order>(mess1);
+    ASSERT_EQ_MARKET_ORDER(
+        actual_mo, "test_algos/buy_tsla_at_100.py", "TSLA", nutc::util::Side::buy, 100,
+        10
+    );
+
+    rmq::WrapperConsumer::match_new_order(engine_manager_, std::move(actual_mo));
+    nutc::engine_manager::EngineManager::get_instance().on_tick(0);
+
+    const auto& trader = nutc::traders::TraderContainer::get_instance().get_trader(
+        "test_algos/buy_tsla_at_100.py"
+    );
+
+    ASSERT_EQ(trader->get_capital() - trader->get_initial_capital(), -975);
+}
+
+TEST_F(IntegrationBasicAlgo, OnAccountUpdateSell)
+{
+    std::vector<std::string> names{"test_algos/sell_tsla_on_account.py"};
+    if (!nutc::test_utils::initialize_testing_clients(users_, names)) {
+        FAIL() << "Failed to initialize testing clients";
+    }
+
+    engine_manager_.add_engine("TSLA");
+    engine_manager_.add_engine("APPL");
+
+    auto bot = users_.add_trader<BotTrader>("", 100000);
+    users_.get_trader("test_algos/sell_tsla_on_account.py")
+        ->modify_holdings("TSLA", 1000);
+
+    rmq::WrapperConsumer::match_new_order(
+        engine_manager_,
+        nutc::messages::market_order{
+            bot->get_id(), nutc::util::Side::buy, "TSLA", 102, 102
+        }
+    ); // NOLINT
+    nutc::engine_manager::EngineManager::get_instance().on_tick(0);
+
+    // obupdate triggers one user to place autil::Side::buy order of 10 TSLA at 102
+    auto mess1 = rmq::WrapperConsumer::consume_message();
+    EXPECT_TRUE(std::holds_alternative<nutc::messages::market_order>(mess1));
+
+    nutc::messages::market_order actual_mo =
+        std::get<nutc::messages::market_order>(mess1);
+    ASSERT_EQ_MARKET_ORDER(
+        actual_mo, "test_algos/sell_tsla_on_account.py", "TSLA", nutc::util::Side::sell,
+        100, 10
+    );
+
+    rmq::WrapperConsumer::match_new_order(engine_manager_, std::move(actual_mo));
+    nutc::engine_manager::EngineManager::get_instance().on_tick(0);
+
+    // on_trade_match triggers one user to place autil::Side::buy order of 1 TSLA at 100
+    auto mess2 = rmq::WrapperConsumer::consume_message();
+    EXPECT_TRUE(std::holds_alternative<nutc::messages::market_order>(mess2));
+
+    // nutc::messages::market_order actual2 =
+    // std::get<nutc::messages::market_order>(mess2);
+    // ASSERT_EQ_MARKET_ORDER(
+    // actual2, "test_algos/sell_tsla_on_account.py", "APPL", nutc::util::Side::sell,
+    // 100, 1
+    // );
+}
+
+TEST_F(IntegrationBasicAlgo, OnAccountUpdateBuy)
 {
     std::vector<std::string> names{"test_algos/buy_tsla_on_account.py"};
     if (!nutc::test_utils::initialize_testing_clients(users_, names)) {

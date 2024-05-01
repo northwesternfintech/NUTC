@@ -1,5 +1,6 @@
 #pragma once
 
+#include "exchange/metrics/prometheus.hpp"
 #include "exchange/tickers/manager/ticker_manager.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 

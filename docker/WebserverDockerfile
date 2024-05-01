@@ -3,16 +3,12 @@ FROM rust:latest as builder
 RUN USER=root cargo new --bin app
 WORKDIR /app
 
-COPY ./webserver/Cargo.lock ./Cargo.lock
 COPY ./webserver/Cargo.toml ./Cargo.toml
-
-RUN cargo build --release
-
+COPY ./webserver/Cargo.lock ./Cargo.lock
 COPY ./webserver/src ./src
 
 RUN cargo build --release
 
-EXPOSE 5126
+EXPOSE 16124
 
-#COPY --from=builder /app/target/release/rust-server /usr/local/bin/app
-ENTRYPOINT ["/app/target/release/rust-server"]
+CMD ["/app/target/release/rust-server"]

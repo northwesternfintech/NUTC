@@ -1,12 +1,13 @@
 #include "algos/algo_manager.hpp"
 #include "concurrency/exchange_lock.hpp"
-#include "dashboard/dashboard.hpp"
 #include "exchange/algos/algo_manager.hpp"
 #include "exchange/bots/bot_container.hpp"
 #include "exchange/bots/bot_types/market_maker.hpp"
 #include "exchange/concurrency/pin_threads.hpp"
 #include "exchange/config/argparse.hpp"
-#include "exchange/dashboard/state/global_metrics.hpp"
+#include "exchange/metrics/dashboard.hpp"
+#include "exchange/metrics/on_tick_metrics.hpp"
+#include "exchange/metrics/state/global_metrics.hpp"
 #include "exchange/tick_scheduler/tick_scheduler.hpp"
 #include "logging.hpp"
 #include "sandbox/server/crow.hpp"
@@ -155,6 +156,10 @@ main(int argc, const char** argv)
     concurrency::pin_to_core(0, "main");
 
     sandbox::CrowServer::get_instance();
+
+    ticks::TickJobScheduler::get().on_tick(
+        &(metrics::OnTickMetricsPush::get()), /*priority=*/5, "Metrics Pushing"
+    );
 
     blocking_event_loop();
     return 0;

@@ -20,7 +20,7 @@ BrownianMotion::generate_change_in_price_(double mean, double stdev, Signedness 
     }
     else {
         short multiplier = static_cast<short>(sign);
-        return multiplier * abs(distribution(random_number_generator_));
+        return fabs(distribution(random_number_generator_)) * multiplier;
     }
 }
 
@@ -43,7 +43,7 @@ BrownianMotion::generate_next_price()
         std::normal_distribution<double> distribution(
             BROWNIAN_MOTION_MEAN_SIZE_EVENT, BROWNIAN_MOTION_STDEV_EVENT_SIZE
         );
-        ticker_ = static_cast<size_t>(abs(distribution(random_number_generator_)));
+        ticker_ = static_cast<size_t>(fabs(distribution(random_number_generator_)));
 
         // Whether to tick up or tick down
         bool ticking_up = distribution(random_number_generator_) > 0.5;

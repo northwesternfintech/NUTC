@@ -237,7 +237,7 @@ Dashboard::display_leaderboard(WINDOW* window, int start_y)
         }
     ); // NOLINT
     for (const auto& trader : ordered_traders) {
-        if (!trader->should_display())
+        if (!trader->record_metrics())
             continue;
         double capital = trader->get_capital();
         double portfolio = portfolio_value(trader);

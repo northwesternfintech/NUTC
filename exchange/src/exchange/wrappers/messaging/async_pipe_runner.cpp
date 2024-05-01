@@ -77,9 +77,10 @@ AsyncPipeRunner::async_read_pipe(
             async_read_pipe(std::move(pipe_in));
         }
         else {
-            throw std::runtime_error(
-                fmt::format("Error reading from wrapper pipe: {}", ec.message())
-            );
+            // TODO: report a better way
+            // throw std::runtime_error(
+            // fmt::format("Error reading from wrapper pipe: {}", ec.message())
+            // );
         }
     };
     ba::async_read_until(*pipe_in, ba::dynamic_buffer(*buffer), "\n", prox_message);

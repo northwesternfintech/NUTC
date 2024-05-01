@@ -56,9 +56,9 @@ WrapperConsumer::handle_sandbox_init(messages::init_message&& message)
         trader_container.get_instance().remove_trader(message.client_id);
         return;
     }
-    trader_container.get_instance()
-        .get_trader(message.client_id)
-        ->send_messages({glz::write_json(messages::start_time{0})});
+    auto trader = trader_container.get_instance().try_get_trader(message.client_id);
+    assert(trader.has_value());
+    trader.value()->send_messages({glz::write_json(messages::start_time{0})});
     log_i(main, "Sandbox wrapper with id {} fully initialized", message.client_id);
 }
 
@@ -73,9 +73,12 @@ WrapperConsumer::match_new_order(
         return;
 
     auto current_tick = ticks::TickJobScheduler::get().get_current_tick();
-    auto trader = traders::TraderContainer::get_instance().get_trader(order.client_id);
+    auto trader =
+        traders::TraderContainer::get_instance().try_get_trader(order.client_id);
+    if (!trader.has_value())
+        return;
     auto stored_order =
-        matching::stored_order{trader,         order.side,  order.ticker,
+        matching::stored_order{trader.value(), order.side,  order.ticker,
                                order.quantity, order.price, current_tick};
 
     engine_manager.match_order(stored_order);
