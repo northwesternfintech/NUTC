@@ -122,7 +122,7 @@ export default function Submission() {
         toast: true,
         position: "top-end",
         showConfirmButton: false,
-        timer: 4000,
+        timer: 2000,
         timerProgressBar: true,
         didOpen: (toast) => {
           toast.addEventListener("mouseenter", Swal.stopTimer);
@@ -313,20 +313,37 @@ export default function Submission() {
                   allowEnterKey: false,
                 });
                 Swal.showLoading();
-                await axios.post(
+                axios.post(
                   `${apiEndpoint()}/webserver/submit/${userInfo?.user?.uid}/${algoRef.key}`,
-                );
-                Swal.close();
-                Swal.fire({
-                  title: "Linting complete!",
-                  text: "View results in the dashboard.",
-                  icon: "success",
-                  timer: 5000,
-                  timerProgressBar: true,
-                  willClose: () => {
-                    window.location.href = "submissions/" + algoRef.key;
-                  },
-                });
+                ).then(() => {
+                  Swal.close();
+                  Swal.fire({
+                    title: "Linting complete!",
+                    text: "View results in the dashboard.",
+                    icon: "success",
+                    timer: 2000,
+                    timerProgressBar: true,
+                    willClose: () => {
+                      window.location.href = "submissions/" + algoRef.key;
+                    },
+                  });
+                })
+                  .catch((error) => {
+                    if (error.response) {
+                      Swal.fire({
+                        icon: "error",
+                        title: "Error linting algorithm",
+                        text: "View results...",
+                        timer: 4000,
+                        timerProgressBar: true,
+                        willClose: () => {
+                          window.location.href = "submissions/" + algoRef.key;
+                        },
+                      });
+                    } else {
+                      Swal.fire({icon: "error", title: "Server error - contact NUTC dev support"});
+                    }
+                  });
               }
             }}
             className="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
