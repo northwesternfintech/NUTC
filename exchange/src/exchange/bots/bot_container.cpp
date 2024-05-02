@@ -31,7 +31,7 @@ BotContainer::on_tick(uint64_t current_tick)
     auto& manager = engine_manager::EngineManager::get_instance();
     auto current = manager.get_midprice(TICKER);
 
-    auto theo = fabs(theo_generator_.generate_next_price() + BROWNIAN_OFFSET);
+    auto theo = fabs(theo_generator_.generate_next_magnitude() + BROWNIAN_OFFSET);
     auto orders = BotContainer::on_new_theo(theo, current, current_tick);
 
     for (auto& order : orders) {
