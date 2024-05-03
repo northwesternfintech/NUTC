@@ -1,11 +1,11 @@
 import { isLocalhost } from "@/app/firebase/config";
 
 export function emulatorEndpoint(): string {
-    return "100.70.204.62";
+    return "localhost";
 }
 export function apiEndpoint(): string {
   if (isLocalhost()) {
-    return "http://100.70.204.62";
+    return "http://localhost:26389";
   } else {
     return "https://black.tailf7f8d.ts.net";
   }
