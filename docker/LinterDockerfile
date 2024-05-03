@@ -1,7 +1,7 @@
 #build stage
 FROM python:3.12 as build
 
-RUN pip install conan numpy pandas polars scipy scikit-learn \
+RUN pip install conan numpy pandas polars scipy scikit-learn sortedcontainers \
     # c++ stuff
     && apt update \
     && apt install -y --no-install-recommends build-essential libssl-dev cmake git
