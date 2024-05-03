@@ -5,19 +5,9 @@
 namespace nutc {
 namespace bots {
 
-bool
-BollingerBot::is_active() const
-{
-    return get_capital() > -get_interest_limit() * .9;
-}
-
 std::optional<messages::market_order>
 BollingerBot::take_action(double current, double theo)
 {
-    if (!is_active()) {
-        return std::nullopt;
-    }
-
     update_statistics(current);
 
     // Ensure enough data to calculate Bollinger Bands.
@@ -28,14 +18,10 @@ BollingerBot::take_action(double current, double theo)
     auto [lower_band, upper_band] = calculate_bollinger_bands();
 
     if (current < lower_band) {
-        return messages::market_order{
-            get_ticker(), util::Side::buy, calculate_order_size(), 0
-        };
+        return messages::market_order{get_id(), util::Side::buy, TICKER, 1, 1000};
     }
     else if (current > upper_band) {
-        return messages::market_order{
-            get_ticker(), util::Side::sell, calculate_order_size(), 0
-        };
+        return messages::market_order{get_id(), util::Side::sell, TICKER, 1, 0};
     }
 
     return std::nullopt;

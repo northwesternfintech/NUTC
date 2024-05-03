@@ -1,4 +1,6 @@
 #pragma once
+#include "bot_types/bollinger.hpp"
+#include "exchange/bots/bot_types/bollinger.hpp"
 #include "exchange/bots/bot_types/market_maker.hpp"
 #include "exchange/bots/bot_types/retail.hpp"
 #include "exchange/theo/brownian.hpp"
@@ -11,8 +13,9 @@ namespace nutc {
 namespace bots {
 
 template <typename T>
-concept HandledBotType =
-    std::disjunction_v<std::is_same<T, RetailBot>, std::is_same<T, MarketMakerBot>>;
+concept HandledBotType = std::disjunction_v<
+    std::is_same<T, RetailBot>, std::is_same<T, MarketMakerBot>,
+    std::is_same<T, BollingerBot>>;
 
 /**
  * @brief Container for all bots in the exchange for a given ticker
