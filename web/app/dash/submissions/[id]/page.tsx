@@ -33,7 +33,7 @@ export default function Page({ params }: { params: { id: string } }) {
   const lintFailureMessage = algoDetails?.lintFailureMessage;
   const lintSuccessMessage = algoDetails?.lintSuccessMessage;
   const stringToRender = lintFailureMessage || lintSuccessMessage || "";
-  const upTime = (algoDetails?.uploadTime || 0)+1000;
+  const upTime = (algoDetails?.uploadTime || 0) + 1000;
   const sandboxTimeMs = 300000;
   const baseEndpoint = apiEndpoint() +
     `/d-solo/cdk4teh4zl534a/ppl?orgId=1&var-traderid=${userInfo?.user?.uid}-${params.id}&from=${upTime}&theme=dark`;
@@ -57,10 +57,9 @@ export default function Page({ params }: { params: { id: string } }) {
         <p>Waiting on output...</p>
       </div>
     );
-  } else {
-    return (stringToRender.includes("succeeded") && (
+  } else if (stringToRender.includes("succeeded")) {
+    return (
       <div className="flex flex-col items-center">
-        {formatNewLines(stringToRender)}
         <iframe
           src={url + "&panelId=1"}
           width="900"
@@ -76,6 +75,8 @@ export default function Page({ params }: { params: { id: string } }) {
         >
         </iframe>
       </div>
-    ));
+    );
+  } else {
+    return formatNewLines(stringToRender);
   }
 }

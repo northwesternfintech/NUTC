@@ -341,7 +341,11 @@ export default function Submission() {
                         },
                       });
                     } else {
-                      Swal.fire({icon: "error", title: "Server error - contact NUTC dev support"});
+                      Swal.fire({
+                        icon: "error",
+                        title:
+                          "Your code timed out - if you don't see results on the submissions page within 2 minutes, contact NUTC dev support",
+                      });
                     }
                   });
               }
