@@ -29,15 +29,11 @@ RUN if [ "$firebase_emulator" = "false" ]; then \
 
 RUN cmake --build build --config Release -j6
 
-# Main stage
-FROM python:3.12-slim
-
-RUN pip install numpy pandas polars scipy scikit-learn
-
-COPY --from=build /app/linter/build/NUTC-linter-spawner /bin/NUTC-linter-spawner
-COPY --from=build /app/linter/build/NUTC-linter /bin/NUTC-linter
+RUN mv /app/linter/build/NUTC-linter-spawner /bin/NUTC-linter-spawner
+RUN mv /app/linter/build/NUTC-linter /bin/NUTC-linter
 
 RUN chmod +x /bin/NUTC-linter
+RUN chmod +x /bin/NUTC-linter-spawner
 
 EXPOSE 18081
 
