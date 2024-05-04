@@ -1,8 +1,8 @@
 #include "rmq_wrapper_init.hpp"
 
 #include "exchange/logging.hpp"
-#include "exchange/wrappers/messaging/consumer.hpp"
-#include "shared/messages_exchange_to_wrapper.hpp"
+
+#include <iostream>
 
 namespace nutc {
 namespace rabbitmq {
@@ -14,23 +14,18 @@ WrapperInitializer::wait_for_clients(traders::TraderContainer& manager)
     log_i(rabbitmq, "Blocking until all {} clients are ready to start...", num_clients);
     int num_running = 0;
 
-    auto process_message = [&](const auto& message) {
+    auto is_init = [&](const auto& message) {
         using t = std::decay_t<decltype(message)>;
-        if constexpr (std::is_same_v<t, messages::market_order>) {
+        if constexpr (std::is_same_v<t, messages::init_message>) {
             log_i(
-                rabbitmq,
-                "Received market order before initialization complete. Ignoring..."
-            );
-        }
-        else if constexpr (std::is_same_v<t, messages::init_message>) {
-            log_i(
-                rabbitmq, "Received init message from client {} with status {}",
-                message.client_id, message.ready ? "ready" : "not ready"
+                rabbitmq, "Received init message with status {}",
+                message.ready ? "ready" : "not ready"
             );
 
             // TODO: maybe send some warning?
             if (!message.ready) {
-                manager.remove_trader(message.client_id);
+                // TODO
+                //  manager.remove_trader(message.trader_id);
             }
             else {
                 num_running++;
@@ -40,9 +35,20 @@ WrapperInitializer::wait_for_clients(traders::TraderContainer& manager)
         return false;
     };
 
-    for (size_t i = 0; i < num_clients; i++) {
-        auto data = WrapperConsumer::consume_message();
-        while (!std::visit(process_message, data)) {}
+    for (const auto& [id, trader] : manager.get_traders()) {
+        if (!trader->record_metrics())
+            continue;
+        while (true) {
+            auto messages = trader->read_messages();
+            bool should_break = false;
+            for (const auto& mess : messages) {
+                if (std::visit(is_init, mess)) {
+                    should_break = true;
+                }
+            }
+            if (should_break)
+                break;
+        }
     }
 
     log_i(

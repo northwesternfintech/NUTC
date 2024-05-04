@@ -4,10 +4,6 @@
 #include <boost/process.hpp>
 #include <boost/process/pipe.hpp>
 
-#include <iostream>
-#include <optional>
-#include <queue>
-
 namespace nutc {
 namespace wrappers {
 
@@ -21,24 +17,15 @@ namespace bp = boost::process;
  */
 class AsyncPipeRunner {
     ba::io_context ios{};
-    std::thread ios_thread;
     ba::executor_work_guard<ba::io_context::executor_type> work_guard;
+    std::thread ios_thread;
 
-    std::mutex message_lock_{};
-    std::queue<std::string> messages_{};
+    std::mutex pipe_lock_{};
     std::vector<std::shared_ptr<bp::async_pipe>> pipes_{};
 
-    AsyncPipeRunner() : work_guard(ios.get_executor()) {}
-
-    void
-    async_read_pipe(std::shared_ptr<bp::async_pipe> pipe)
-    {
-        return async_read_pipe(std::move(pipe), std::make_shared<std::string>());
-    }
-
-    void async_read_pipe(
-        std::shared_ptr<bp::async_pipe> pipe, std::shared_ptr<std::string> buf
-    );
+    AsyncPipeRunner() :
+        work_guard(ios.get_executor()), ios_thread([this]() { ios.run(); })
+    {}
 
 public:
     ~AsyncPipeRunner();
@@ -56,10 +43,8 @@ public:
         return instance;
     }
 
-    std::weak_ptr<bp::async_pipe> create_pipe(bool start_read);
+    std::weak_ptr<bp::async_pipe> create_pipe();
     void remove_pipe(std::shared_ptr<bp::async_pipe> pipe);
-
-    std::optional<std::string> get_message();
 };
 
 } // namespace wrappers

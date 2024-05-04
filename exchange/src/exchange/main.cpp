@@ -17,7 +17,6 @@
 #include "tickers/manager/ticker_manager.hpp"
 #include "traders/trader_container.hpp"
 #include "wrappers/creation/rmq_wrapper_init.hpp"
-#include "wrappers/messaging/async_pipe_runner.hpp"
 #include "wrappers/messaging/consumer.hpp"
 
 #include <csignal>
@@ -51,7 +50,7 @@ initialize_indiv_ticker(const std::string& ticker, double starting_price)
 
     // Should run after stale order removal, so they can react to removed orders
     TickJobScheduler::get().on_tick(
-        &bot_container, /*priority=*/2, fmt::format("Bot Engine for ticker {}", ticker)
+        &bot_container, /*priority=*/3, fmt::format("Bot Engine for ticker {}", ticker)
     );
 
     dashboard::DashboardState::get_instance().add_ticker(ticker, starting_price);
@@ -70,7 +69,7 @@ void
 initialize_dashboard()
 {
     auto& dashboard = dashboard::Dashboard::get_instance();
-    ticks::TickJobScheduler::get().on_tick(&dashboard, /*priority=*/3, "Dashboard");
+    ticks::TickJobScheduler::get().on_tick(&dashboard, /*priority=*/4, "Dashboard");
 }
 
 void
@@ -94,7 +93,7 @@ initialize_bots()
     }
     // TODO(stevenewald): should this be somewhere else?
     ticks::TickJobScheduler::get().on_tick(
-        &engine_manager, /*priority=*/1, "Matching Engine"
+        &engine_manager, /*priority=*/2, "Matching Engine"
     );
 }
 
@@ -126,8 +125,8 @@ initialize_algos(const auto& mode)
 void
 blocking_event_loop()
 {
-    auto& eng_mgr = engine_manager::EngineManager::get_instance();
-    rabbitmq::WrapperConsumer::consumer_event_loop(eng_mgr);
+    static rabbitmq::WrapperConsumer consumer{};
+    ticks::TickJobScheduler::get().on_tick(&consumer, /*priority=*/1, "consumer");
 }
 } // namespace
 
@@ -155,11 +154,11 @@ main(int argc, const char** argv)
 
     concurrency::pin_to_core(0, "main");
 
-    sandbox::CrowServer::get_instance();
-
     ticks::TickJobScheduler::get().on_tick(
         &(metrics::OnTickMetricsPush::get()), /*priority=*/5, "Metrics Pushing"
     );
+
+    sandbox::CrowServer::get_instance();
 
     blocking_event_loop();
     return 0;

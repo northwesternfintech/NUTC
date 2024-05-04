@@ -1,5 +1,4 @@
 #pragma once
-#include "exchange/tickers/engine/order_storage.hpp"
 #include "exchange/traders/trader_types/bot_trader.hpp"
 #include "exchange/traders/trader_types/trader_interface.hpp"
 
@@ -12,6 +11,9 @@ namespace bots {
 
 // TODO for hardening: if price gets close to 0, quantity will get very high because we
 // divide by price. Maybe something to think about?
+/**
+ * No thread safety - do not run functions on multiple threads
+ */
 class MarketMakerBot : public traders::BotTrader {
 public:
     MarketMakerBot(std::string ticker, double interest_limit) :
@@ -20,33 +22,10 @@ public:
 
     bool constexpr can_leverage() const override { return true; }
 
-    std::vector<matching::stored_order>
-    take_action(double new_theo, uint64_t current_tick);
+    void take_action(double midprice, double theo) override;
 
 private:
-    [[nodiscard]] double
-    compute_net_exposure_() const
-    {
-        return (get_long_interest() - get_short_interest());
-    }
-
-    double
-    compute_capital_tolerance_()
-    {
-        return (1 - get_capital_utilization()) * (get_interest_limit() / 3);
-    }
-
     static constexpr double avg_level_price(double new_theo);
-
-    std::shared_ptr<traders::GenericTrader> get_self_pointer_();
-
-    void process_order_match(
-        const std::string& ticker, util::Side side, double price, double quantity
-    ) override;
-
-    void process_order_expiration(
-        const std::string& ticker, util::Side side, double price, double quantity
-    ) override;
 };
 
 } // namespace bots

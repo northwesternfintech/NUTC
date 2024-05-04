@@ -180,7 +180,6 @@ Dashboard::display_stock_ticker_data(
     };
 
     display_bot_stats(ticker.mm_state_, "MM");
-    display_bot_stats(ticker.retail_state_, "Retail");
 }
 
 void

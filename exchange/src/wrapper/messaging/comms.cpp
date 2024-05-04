@@ -85,8 +85,7 @@ ExchangeProxy::publish_market_order(
         return false;
     }
     market_order order{
-        client_id, side == "BUY" ? util::Side::buy : util::Side::sell, ticker, quantity,
-        price
+        side == "BUY" ? util::Side::buy : util::Side::sell, ticker, quantity, price
     };
     std::string message = glz::write_json(order);
 
@@ -136,7 +135,7 @@ ExchangeProxy::market_order_func(const std::string& user_id)
 void
 ExchangeProxy::publish_init_message(const std::string& user_id, bool ready)
 {
-    std::string message = glz::write_json(init_message{user_id, ready});
+    std::string message = glz::write_json(init_message{ready});
     publish_message(message);
 }
 

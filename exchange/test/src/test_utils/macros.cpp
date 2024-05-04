@@ -1,21 +1,22 @@
 #include "macros.hpp"
 
-#include "exchange/traders/trader_container.hpp"
-
 namespace nutc {
 namespace test_utils {
 
-stored_order
-make_stored_order(market_order& order, traders::TraderContainer& manager)
+std::variant<init_message, market_order>
+consume_message(const std::shared_ptr<traders::GenericTrader>& trader)
 {
-    return stored_order{
-        manager.get_trader(order.client_id),
-        order.side,
-        order.ticker,
-        order.quantity,
-        order.price,
-        /*tick=*/0
-    };
+    while (true) {
+        auto messages = trader->read_messages();
+        switch (messages.size()) {
+            case 0:
+                continue;
+            case 1:
+                return messages.at(0);
+            default:
+                throw std::runtime_error("Huh");
+        }
+    }
 }
 
 bool
@@ -57,8 +58,8 @@ validate_market_order(
     util::Side side, double price, double quantity
 )
 {
-    return update.client_id == client_id && update.ticker == ticker
-           && update.side == side && is_nearly_equal(update.price, price)
+    return update.ticker == ticker && update.side == side
+           && is_nearly_equal(update.price, price)
            && is_nearly_equal(update.quantity, quantity);
 }
 

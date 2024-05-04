@@ -1,6 +1,7 @@
 #include "exchange/tickers/engine/engine.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
 #include "exchange/traders/trader_container.hpp"
+#include "exchange/traders/trader_types/trader_interface.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
@@ -14,6 +15,10 @@ using TraderContainer = nutc::traders::TraderContainer;
 
 namespace nutc {
 namespace test_utils {
+
+std::variant<init_message, market_order>
+consume_message(const std::shared_ptr<traders::GenericTrader>& trader);
+
 bool is_nearly_equal(
     double f_a, double f_b, double epsilon = std::numeric_limits<double>::epsilon()
 );
@@ -33,8 +38,6 @@ bool validate_market_order(
     const market_order& update, const std::string& client_id, const std::string& ticker,
     util::Side side, double price, double quantity
 );
-
-stored_order make_stored_order(market_order& order, traders::TraderContainer& manager);
 
 } // namespace test_utils
 } // namespace nutc
@@ -87,7 +90,8 @@ stored_order make_stored_order(market_order& order, traders::TraderContainer& ma
             << "Expected market order with client_id = " << (client_id_)               \
             << ", ticker =" << (ticker_) << ", side = " << static_cast<int>(side_)     \
             << ", price = " << (price_) << ", quantity = " << (quantity_)              \
-            << ". Actual update: client_id = " << (update).client_id                   \
+            << ". Actual update: client_id = "                                         \
+            << ""                                                                      \
             << ", ticker = " << (update).ticker                                        \
             << ", side = " << static_cast<int>((update).side)                          \
             << ", price = " << (update).price << ", quantity = " << (update).quantity; \

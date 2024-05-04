@@ -38,6 +38,7 @@ add_library(
     src/exchange/wrappers/creation/rmq_wrapper_init.cpp
     src/exchange/wrappers/messaging/consumer.cpp
     src/exchange/wrappers/messaging/async_pipe_runner.cpp
+    src/exchange/wrappers/messaging/pipe_reader.cpp
     
     src/exchange/sandbox/server/crow.cpp
 

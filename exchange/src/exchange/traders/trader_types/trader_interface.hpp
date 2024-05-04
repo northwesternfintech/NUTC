@@ -1,18 +1,17 @@
 #pragma once
 
 #include "shared/util.hpp"
+#include "wrapper/messaging/comms.hpp"
 
 #include <boost/process.hpp>
 
-#include <memory>
-#include <stdexcept>
 #include <string>
 #include <unordered_map>
 
 namespace nutc {
 namespace traders {
 
-class GenericTrader : public std::enable_shared_from_this<GenericTrader> {
+class GenericTrader {
     const std::string USER_ID;
     const double INITIAL_CAPITAL;
     double capital_delta_{};
@@ -117,6 +116,12 @@ public:
     virtual void
     send_messages(std::vector<std::string>)
     {}
+
+    virtual std::vector<std::variant<init_message, market_order>>
+    read_messages()
+    {
+        return {};
+    }
 };
 } // namespace traders
 } // namespace nutc

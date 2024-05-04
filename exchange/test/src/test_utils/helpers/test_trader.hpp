@@ -1,12 +1,8 @@
 #pragma once
 
 #include "exchange/traders/trader_types/trader_interface.hpp"
-#include "shared/file_operations/file_operations.hpp"
-#include "signal.h"
 
 #include <fmt/format.h>
-
-#include <filesystem>
 
 namespace nutc {
 namespace test_utils {

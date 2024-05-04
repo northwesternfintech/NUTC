@@ -1,12 +1,10 @@
 #include "process.hpp"
 
-#include "config.h"
 #include "exchange/algos/dev_mode/dev_mode.hpp"
 #include "exchange/logging.hpp"
 #include "exchange/wrappers/creation/rmq_wrapper_init.hpp"
 
 #include <future>
-#include <ranges>
 
 namespace nutc {
 namespace test_utils {
@@ -45,7 +43,7 @@ initialize_testing_clients(
     auto launches_in_500ms = [&]() {
         namespace ch = std::chrono;
         auto future = std::async(std::launch::async, init_clients);
-        return future.wait_until(ch::steady_clock::now() + ch::milliseconds(500))
+        return future.wait_until(ch::system_clock::now() + ch::milliseconds(500))
                != std::future_status::timeout;
     };
     return launches_in_500ms();

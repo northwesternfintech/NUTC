@@ -1,5 +1,7 @@
 #pragma once
 
+#include "exchange/wrappers/messaging/pipe_reader.hpp"
+
 #include <boost/process.hpp>
 #include <boost/process/pipe.hpp>
 
@@ -18,10 +20,12 @@ class WrapperHandle {
     std::mutex messages_lock_{};
     std::deque<std::string> queued_messages_{};
     std::atomic_flag is_writing_{false};
+    PipeReader reader_;
 
     void async_write_pipe(std::string message);
 
-    void spawn_wrapper(const std::vector<std::string>& args);
+    void
+    spawn_wrapper(const std::vector<std::string>& args, const std::string& trader_id);
 
     const fs::path& wrapper_binary_path();
 
@@ -31,6 +35,12 @@ public:
 
     // Local (.py on disk)
     WrapperHandle(const std::string& algo_path);
+
+    std::vector<std::variant<init_message, market_order>>
+    read_messages()
+    {
+        return reader_.get_messages();
+    }
 
     void send_messages(std::vector<std::string> messages);
 

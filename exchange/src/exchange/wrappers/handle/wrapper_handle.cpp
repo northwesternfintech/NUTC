@@ -2,7 +2,7 @@
 
 #include "exchange/config.h"
 #include "exchange/wrappers/messaging/async_pipe_runner.hpp"
-#include "shared/config/config_loader.hpp"
+#include "shared/util.hpp"
 
 #include <boost/asio.hpp>
 #include <fmt/format.h>
@@ -52,31 +52,37 @@ WrapperHandle::~WrapperHandle()
         AsyncPipeRunner::get().remove_pipe(pipe_out_ptr);
 }
 
-WrapperHandle::WrapperHandle(const std::string& remote_uid, const std::string& algo_id)
+WrapperHandle::WrapperHandle(
+    const std::string& remote_uid, const std::string& algo_id
+) :
+    pipe_in(AsyncPipeRunner::get().create_pipe()),
+    pipe_out(AsyncPipeRunner::get().create_pipe()), reader_(pipe_in)
 {
     std::vector<std::string> args{
         "--uid", quote_id(remote_uid), "--algo_id", quote_id(algo_id)
     };
-    spawn_wrapper(args);
+    spawn_wrapper(args, util::trader_id(remote_uid, algo_id));
 }
 
-WrapperHandle::WrapperHandle(const std::string& algo_path)
+WrapperHandle::WrapperHandle(const std::string& algo_path) :
+    pipe_in(AsyncPipeRunner::get().create_pipe()),
+    pipe_out(AsyncPipeRunner::get().create_pipe()), reader_(pipe_in)
 {
     std::vector<std::string> args{
         "--uid", quote_id(algo_path), "--algo_id", quote_id(algo_path), "--dev"
     };
-    spawn_wrapper(args);
+    spawn_wrapper(args, algo_path);
 }
 
 void
-WrapperHandle::spawn_wrapper(const std::vector<std::string>& args)
+WrapperHandle::spawn_wrapper(
+    const std::vector<std::string>& args, const std::string& trader_id
+)
 {
     static const std::string path{wrapper_binary_path()};
     // While we receive a shared_ptr to the pipe, we dereference it to get the actual
     // pipe. This is risky, as we need to make sure we close the pipe before we shut
     // down the wrapper
-    pipe_in = AsyncPipeRunner::get().create_pipe(true);
-    pipe_out = AsyncPipeRunner::get().create_pipe(false);
     auto pipe_in_ptr = pipe_in.lock();
     auto pipe_out_ptr = pipe_out.lock();
     assert(pipe_in_ptr != nullptr);
