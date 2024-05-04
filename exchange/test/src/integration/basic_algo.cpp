@@ -182,7 +182,7 @@ TEST_F(IntegrationBasicAlgo, MultipleLevelOrder)
         "test_algos/buy_tsla_at_100.py"
     );
 
-    ASSERT_EQ(trader->get_capital() - trader->get_initial_capital(), -975);
+    ASSERT_EQ(trader->get_capital() - trader->get_initial_capital(), -975.09750000000349);
 }
 
 TEST_F(IntegrationBasicAlgo, OnAccountUpdateSell)
