@@ -1,5 +1,12 @@
 #include "fetching.hpp"
 
+#include "config.h"
+
+#include <fmt/core.h>
+
+#include <iostream>
+#include <regex>
+
 namespace nutc {
 namespace client {
 
@@ -11,16 +18,6 @@ get_firebase_endpoint(const std::string& params)
 #else
     return FIREBASE_URL + params;
 #endif
-}
-
-void
-print_algo_info(const glz::json_t& algo, const std::string& algo_id)
-{
-    log_i(firebase, "Running {}", algo["name"].get<std::string>());
-    log_i(firebase, "Description: {}", algo["description"].get<std::string>());
-    log_i(firebase, "Upload date: {}", algo["uploadDate"].get<std::string>());
-    log_d(firebase, "Downloading at url {}", algo["downloadURL"].get<std::string>());
-    log_i(firebase, "Algo id: {}", algo_id);
 }
 
 void
@@ -52,7 +49,6 @@ set_lint_success(
 )
 {
     std::string json_success = "\"" + replaceDisallowedValues(success) + "\"";
-    log_i(main, "Setting lint success: {}", json_success);
     std::string params1 =
         fmt::format("users/{}/algos/{}/lintSuccessMessage.json", uid, algo_id);
     std::string params2 = fmt::format("users/{}/latestAlgoId.json", uid);
@@ -70,7 +66,6 @@ set_lint_failure(
 )
 {
     std::string json_failure = "\"" + replaceDisallowedValues(failure) + "\"";
-    log_e(main, "Setting lint failure: {}", json_failure);
     std::string params =
         fmt::format("users/{}/algos/{}/lintFailureMessage.json", uid, algo_id);
     glz::json_t res =
@@ -127,18 +122,10 @@ get_algo(const std::string& uid, const std::string& algo_id)
     glz::json_t user_info = get_user_info(uid);
     // if not has "algos"
     if (!user_info.contains("algos")) {
-        log_w(
-            firebase, "User {} has no algos. Will not participate in simulation.", uid
-        );
-        return std::nullopt;
-    }
-    if (!user_info["algos"].contains(algo_id)) {
-        log_w(firebase, "User {} does not have algo id {}.", uid, algo_id);
         return std::nullopt;
     }
     glz::json_t algo_info = user_info["algos"][algo_id];
     std::string downloadURL = algo_info["downloadURL"].get<std::string>();
-    print_algo_info(algo_info, algo_id);
     std::string algo_file = storage_request(downloadURL);
     return algo_file;
 }
@@ -149,27 +136,17 @@ get_algo_status(const std::string& uid, const std::string& algo_id)
     glz::json_t user_info = get_user_info(uid);
     // if not has "algos"
     if (!user_info.contains("algos")) {
-        log_w(
-            firebase, "User {} has no algos. Will not participate in simulation.", uid
-        );
         return nutc::client::LintingResultOption::UNKNOWN;
     }
 
     // check if algo id exists
     if (!user_info["algos"].contains(algo_id)) {
-        log_w(firebase, "User {} does not have algo id {}.", uid, algo_id);
         return nutc::client::LintingResultOption::UNKNOWN;
     }
     glz::json_t algo_info = user_info["algos"][algo_id];
 
     // check if this algo id has lint results
     if (!algo_info.contains("lintResults")) {
-        log_w(
-            firebase,
-            "User {} algoid {} has no lint result, assuming unknown.",
-            uid,
-            algo_id
-        );
         return nutc::client::LintingResultOption::UNKNOWN;
     }
 
@@ -212,9 +189,6 @@ firebase_request(
         }
 
         res = curl_easy_perform(curl);
-        if (res != CURLE_OK) {
-            log_e(firebase, "curl_easy_perform() failed: {}", curl_easy_strerror(res));
-        }
 
         curl_easy_cleanup(curl);
     }
@@ -222,7 +196,6 @@ firebase_request(
     auto error = glz::read_json(json, readBuffer);
     if (error) {
         std::string descriptive_error = glz::format_error(error, readBuffer);
-        log_e(firebase, "glz::read_json() failed: {}", descriptive_error);
     }
     return json;
 }

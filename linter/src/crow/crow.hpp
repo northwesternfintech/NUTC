@@ -1,8 +1,4 @@
 #pragma once
-
-#include "logging.hpp"
-#include "spawning/spawning.hpp"
-
 #include <crow/app.h>
 
 #include <thread>

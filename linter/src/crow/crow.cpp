@@ -1,8 +1,8 @@
 #include "crow.hpp"
 
-#include "common.hpp"
-#include "config.h"
 #include "firebase/fetching.hpp"
+#include "logging.hpp"
+#include "spawning/spawning.hpp"
 
 namespace nutc {
 namespace crow {
@@ -11,6 +11,7 @@ std::thread
 get_server_thread()
 {
     std::thread server_thread([]() {
+        spawning::SpawnerManager spawner_manager;
         namespace crow = ::crow;
         ::crow::SimpleApp app;
         CROW_ROUTE(app, "/")
@@ -43,82 +44,43 @@ get_server_thread()
             std::string uid = req.url_params.get("uid");
             std::string algo_id = req.url_params.get("algo_id");
 
-            // Watchdog to check for crash/pending after
-            // LINT_ABSOLUTE_TIMEOUT_SECONDS seconds (default 130s)
-            std::thread check_pending_thread([algo_id, uid]() {
-                for (int i = 0; i <= LINT_ABSOLUTE_TIMEOUT_SECONDS; i++) {
-                    if (nutc::client::get_algo_status(uid, algo_id)
-                        != nutc::client::LintingResultOption::PENDING) {
-                        log_i(
-                            crow_watchdog,
-                            "Algo id {} for uid {} firebase result detected as set by "
-                            "crow-level watchdog {}s",
-                            algo_id,
-                            uid,
-                            i
-                        );
-                        return;
-                    }
-                    std::this_thread::sleep_for(std::chrono::seconds(1));
-                }
-                // Check status from Firebase
-                nutc::client::LintingResultOption linting_status =
-                    nutc::client::get_algo_status(uid, algo_id);
+            std::optional<std::string> algo_code = nutc::client::get_algo(uid, algo_id);
+            if (!algo_code.has_value()) {
+                nutc::client::set_lint_failure(
+                    uid,
+                    algo_id,
+                    fmt::format(
+                        "[linter] FAILURE - could not find algo {} for id {}\n",
+                        algo_id,
+                        uid
+                    )
+                );
+                crow::json::wvalue response = crow::json::wvalue({
+                    {"linting_status",
+                     static_cast<int>(client::LintingResultOption::UNKNOWN)}
+                });
 
-                // If status is pending, force push a failure
-                switch (linting_status) {
-                    case nutc::client::LintingResultOption::PENDING:
-                        {
-                            // Push failure
-                            std::string error_msg = fmt::format(
-                                "Internal server error. Reach out to "
-                                "nuft@u.northwestern.edu for support",
-                                LINT_ABSOLUTE_TIMEOUT_SECONDS
-                            );
+                res.body = response.dump();
+                res.code = 200;
 
-                            nutc::client::set_lint_failure(uid, algo_id, error_msg);
+                return res;
+            }
 
-                            log_e(
-                                crow_watchdog,
-                                "Algo id {} for uid {} still pending after {}s. FORCE "
-                                "PUSHING "
-                                "failure to Firebase.",
-                                algo_id,
-                                uid,
-                                LINT_ABSOLUTE_TIMEOUT_SECONDS
-                            );
-                            break;
-                        }
-                    case nutc::client::LintingResultOption::UNKNOWN:
-                        {
-                            // can add a push to firebase here
-                            log_e(
-                                crow_watchdog,
-                                "Algo id {} for uid {} unknown status after {}s.",
-                                algo_id,
-                                uid,
-                                LINT_ABSOLUTE_TIMEOUT_SECONDS
-                            );
-                            nutc::client::set_lint_failure(
-                                uid,
-                                algo_id,
-                                "Unknown status. Reach out to #nuft-support."
-                            );
-                            break;
-                        }
-                    default:
-                        {
-                            break;
-                        }
-                }
+            client::LintingResultOption algo_status_code;
+            auto lint_res = spawner_manager.spawn_client(algo_code.value());
+            std::cout << lint_res.message << '\n';
+            if (lint_res.success) {
+                nutc::client::set_lint_success(uid, algo_id, lint_res.message);
+                algo_status_code = client::LintingResultOption::SUCCESS;
+            }
+            else {
+                nutc::client::set_lint_failure(uid, algo_id, lint_res.message);
+                algo_status_code = client::LintingResultOption::FAILURE;
+            }
+
+            crow::json::wvalue response({
+                {"linting_status", static_cast<int>(algo_status_code)}
             });
-
-            spawning::spawn_client(uid, algo_id);
-
-            check_pending_thread.join();
-
-            auto algo_status_code = nutc::client::get_algo_status(uid, algo_id);
-            crow::json::wvalue response({{"linting_status", static_cast<int>(algo_status_code)}});
 
             res.body = response.dump();
             res.code = 200;

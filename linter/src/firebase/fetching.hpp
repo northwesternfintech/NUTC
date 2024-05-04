@@ -1,15 +1,9 @@
 #pragma once
 
-#include "config.h"
-#include "logging.hpp"
-
 #include <curl/curl.h>
 #include <glaze/glaze.hpp>
 
-#include <iostream>
-#include <map>
 #include <optional>
-#include <regex>
 #include <string>
 
 namespace nutc {

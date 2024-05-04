@@ -1,13 +1,12 @@
 #define CROW_MAIN
-#include "common.hpp"
+#include "config.h"
 #include "crow/crow.hpp"
-#include "spawning/spawning.hpp"
+#include "logging.hpp"
 
 #include <argparse/argparse.hpp>
+#include <fmt/core.h>
 
-#include <algorithm>
 #include <iostream>
-#include <sstream>
 #include <string>
 #include <thread>
 #include <tuple>

@@ -1,5 +1,8 @@
 #include "runtime.hpp"
 
+#include <fmt/format.h>
+#include <pybind11/embed.h>
+
 namespace py = pybind11;
 
 namespace nutc {
@@ -67,7 +70,6 @@ import_py_code(const std::string& code)
 std::optional<std::string>
 run_initialization()
 {
-    log_i(mock_runtime, "Running initialization code");
     try {
         py::exec("strategy = Strategy()");
     }
@@ -93,7 +95,6 @@ run_initialization()
 std::optional<std::string>
 trigger_callbacks()
 {
-    log_i(mock_runtime, "Triggering callbacks");
     try {
         py::exec(R"(place_market_order("BUY", "ETH", 1.0, 1.0))");
     } catch (const std::exception& e) {

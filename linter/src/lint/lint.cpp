@@ -1,58 +1,52 @@
 #include "lint.hpp"
 
+#include "mock_api/mock_api.hpp"
+#include "pywrapper/runtime.hpp"
+
+#include <fmt/core.h>
+#include <pybind11/pybind11.h>
+
+#include <optional>
+#include <string>
+
 namespace nutc {
 namespace lint {
-bool
-lint(
-    const std::string& uid, const std::string& algo_id, std::stringstream& output_stream
-)
-{
-    std::optional<std::string> algoCode = nutc::client::get_algo(uid, algo_id);
-    if (!algoCode.has_value()) {
-        output_stream << "[linter] FAILURE - could not find algo id " << algo_id
-                      << " for uid " << uid << "\n";
-        nutc::client::set_lint_failure(uid, algo_id, "Could not find algo id");
-        return false;
-    }
 
+lint_result
+lint(const std::string& algo_code)
+{
+    std::string out_message = "[linter] starting to lint algorithm\n";
     bool e = nutc::pywrapper::create_api_module(nutc::mock_api::getMarketFunc());
     if (!e) {
-        log_e(linting, "Failed to create API module");
-        output_stream << "[linter] failed to create API module\n";
-        nutc::client::set_lint_failure(uid, algo_id, "Failed to create API module");
-        return false;
+        out_message += "[linter] failed to create API module\n";
+        return {false, out_message};
+    }
+    e = nutc::pywrapper::supress_stdout();
+    if (!e) {
+        out_message += "[linter] failed to initialize python environment\n";
+        return {false, out_message};
     }
 
-    std::optional<std::string> err = nutc::pywrapper::import_py_code(algoCode.value());
+    std::optional<std::string> err = nutc::pywrapper::import_py_code(algo_code);
     if (err.has_value()) {
-        log_e(linting, "{}", err.value());
-        output_stream << err.value() << "\n";
-        nutc::client::set_lint_failure(uid, algo_id, err.value());
-        return false;
+        out_message += fmt::format("{}\n", err.value());
+        return {false, out_message};
     }
 
     err = nutc::pywrapper::run_initialization();
     if (err.has_value()) {
-        log_e(linting, "{}", err.value());
-        output_stream << err.value() << "\n";
-        nutc::client::set_lint_failure(uid, algo_id, err.value());
-        return false;
+        out_message += fmt::format("{}\n", err.value());
+        return {false, out_message};
     }
 
     err = nutc::pywrapper::trigger_callbacks();
     if (err.has_value()) {
-        log_e(linting, "{}", err.value());
-        output_stream << err.value() << "\n";
-        nutc::client::set_lint_failure(uid, algo_id, err.value());
-        return false;
+        out_message += fmt::format("{}\n", err.value());
+        return {false, out_message};
     }
-
-    output_stream << "\n[linter] linting process succeeded!"
-                  << "\n";
-
-    nutc::client::set_lint_success(uid, algo_id, output_stream.str());
-
-    return true;
+    out_message += "\n[linter] linting process succeeded!\n";
+    return {true, out_message};
 }
+
 } // namespace lint
 } // namespace nutc

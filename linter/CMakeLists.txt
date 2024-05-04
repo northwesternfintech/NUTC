@@ -28,6 +28,7 @@ find_package(glaze REQUIRED)
 find_package(Python3 3.12 COMPONENTS Interpreter Development EXACT REQUIRED)
 find_package(pybind11 REQUIRED)
 find_package(Crow REQUIRED)
+find_package(Boost REQUIRED)
 
 option(LOCAL_DEV "Enable local dev endpoints" OFF)
 
@@ -78,6 +79,7 @@ target_link_libraries(NUTC-linter_lib PUBLIC pybind11::pybind11)
 target_link_libraries(NUTC-linter_lib PUBLIC Crow::Crow)
 target_link_libraries(NUTC-linter_lib PUBLIC Python3::Python)
 target_link_libraries(NUTC-linter_lib PUBLIC argparse::argparse)
+target_link_libraries(NUTC-linter_lib PUBLIC boost::boost)
 
 # ---- The other executable's libs ----
 
@@ -93,6 +95,7 @@ target_link_libraries(NUTC-linter-spawner_lib PRIVATE glaze::glaze)
 target_link_libraries(NUTC-linter-spawner_lib PRIVATE pybind11::pybind11)
 target_link_libraries(NUTC-linter-spawner_lib PRIVATE Python3::Python)
 target_link_libraries(NUTC-linter-spawner_lib PRIVATE CURL::libcurl)
+target_link_libraries(NUTC-linter-spawner_lib PRIVATE boost::boost)
 
 # ---- Declare main executable ----
 
@@ -113,6 +116,7 @@ target_link_libraries(NUTC-linter_exe PRIVATE glaze::glaze)
 target_link_libraries(NUTC-linter_exe PRIVATE pybind11::pybind11)
 target_link_libraries(NUTC-linter_exe PRIVATE Crow::Crow)
 target_link_libraries(NUTC-linter_exe PRIVATE Python3::Python)
+target_link_libraries(NUTC-linter_exe PRIVATE boost::boost)
 
 # ---- Declare secondary (process spawning) executable ----
 
@@ -125,11 +129,11 @@ target_compile_features(NUTC-linter-spawner_exe PRIVATE cxx_std_20)
 
 target_link_libraries(NUTC-linter-spawner_exe PRIVATE NUTC-linter-spawner_lib)
 target_link_libraries(NUTC-linter-spawner_exe PRIVATE CURL::libcurl)
-target_link_libraries(NUTC-linter-spawner_exe PRIVATE argparse::argparse)
 target_link_libraries(NUTC-linter-spawner_exe PRIVATE pybind11::pybind11)
 target_link_libraries(NUTC-linter-spawner_exe PRIVATE quill::quill)
 target_link_libraries(NUTC-linter-spawner_exe PRIVATE glaze::glaze)
 target_link_libraries(NUTC-linter-spawner_exe PRIVATE Python3::Python)
+target_link_libraries(NUTC-linter-spawner_exe PRIVATE boost::boost)
 
 # ---- Install rules ----
 
