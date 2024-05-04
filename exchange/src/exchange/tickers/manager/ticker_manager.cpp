@@ -113,7 +113,10 @@ EngineManager::on_tick(uint64_t new_tick)
             glz_matches
         };
         auto update_strs = split_tick_updates(updates);
-        traders::TraderContainer::get_instance().broadcast_messages(update_strs);
+        for (const auto& trader :
+             traders::TraderContainer::get_instance().get_traders()) {
+            trader->send_messages(update_strs);
+        }
         engine.last_order_container = engine.engine.get_order_container();
         matches_.clear();
     }

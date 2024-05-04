@@ -38,7 +38,7 @@ pin_to_core(size_t core_num, const std::string& thread_name)
 void
 pin_to_core(size_t, const std::string&)
 {
-    log_e(
+    log_w(
         main, "pin_to_core not implemented for this platform. Both threads may run on "
               "the same core. This is okay for testing, but not for production."
     );

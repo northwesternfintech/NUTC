@@ -13,16 +13,21 @@ namespace messages {
  * not be participating in the competition
  */
 struct init_message {
-    std::string client_id;
-    bool ready;
+    int test{5};
+    init_message() = default;
 };
 
 struct market_order {
-    std::string client_id;
     util::Side side;
     std::string ticker;
     double quantity;
     double price;
+
+    market_order(util::Side side, std::string ticker, double quantity, double price) :
+        side(side), ticker(ticker), quantity(quantity), price(price)
+    {}
+
+    market_order() = default;
 };
 
 } // namespace messages
@@ -32,16 +37,12 @@ struct market_order {
 template <>
 struct glz::meta<nutc::messages::market_order> {
     using t = nutc::messages::market_order;
-    static constexpr auto value = object( // NOLINT
-        "trader_id", &t::client_id, "ticker", &t::ticker, "side", &t::side, "quantity",
-        &t::quantity, "price", &t::price
-    );
+    static constexpr auto value = object(&t::ticker, &t::side, &t::quantity, &t::price);
 };
 
 /// \cond
 template <>
 struct glz::meta<nutc::messages::init_message> {
     using t = nutc::messages::init_message;
-    static constexpr auto value = // NOLINT
-        object("trader_id", &t::client_id, "ready", &t::ready);
+    static constexpr auto value = object("init", &t::test);
 };
