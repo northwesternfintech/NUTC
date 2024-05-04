@@ -1,6 +1,6 @@
 FROM python:3.12 as build
 
-RUN pip install conan numpy pandas polars scipy scikit-learn \
+RUN pip install conan numpy pandas polars scipy sortedcontainers scikit-learn \
     # c++ stuff
     && apt update \
     && apt install -y --no-install-recommends build-essential libssl-dev cmake git
@@ -18,9 +18,9 @@ COPY ./exchange/CMakePresets.json /app/exchange
 COPY ./exchange/cmake /app/exchange/cmake
 COPY ./exchange/test /app/exchange/test
 
-ARG release_build=false
+ARG firebase_emulator=false
 
-RUN if [ "$release_build" = "true" ]; then \
+RUN if [ "$firebase_emulator" = "false" ]; then \
     cmake --preset=ci-docker; \
     else \
     cmake --preset=ci-docker -DLOCAL_DEV=ON; \
@@ -38,5 +38,7 @@ RUN chmod +x /usr/bin/NUTC-exchange /usr/bin/WRAPPER
 
 ENV NUTC_WRAPPER_BINARY_PATH="/usr/bin/WRAPPER"
 ENV NUTC_CONFIG_FILE="/app/exchange/config.yml"
+
+EXPOSE 4152 18080
 
 ENTRYPOINT ["/usr/bin/NUTC-exchange"]

@@ -134,6 +134,10 @@ public:
     void process_order_expiration(
         const std::string& ticker, util::Side side, double price, double quantity
     ) override;
+
+    void process_order_match(
+        const std::string& ticker, util::Side side, double price, double quantity
+    ) override;
 };
 
 } // namespace traders

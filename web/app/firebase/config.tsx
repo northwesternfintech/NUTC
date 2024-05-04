@@ -1,6 +1,7 @@
 "use client";
 import { connectDatabaseEmulator, getDatabase } from "firebase/database";
 import { connectStorageEmulator, getStorage } from "firebase/storage";
+import { apiEndpoint, emulatorEndpoint } from "@/config"
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "firebase/compat/functions";
@@ -27,10 +28,10 @@ export const isLocalhost = () => {
 if (isLocalhost()) {
   database = getDatabase();
   storage = getStorage();
-  connectDatabaseEmulator(database, "localhost", 9000);
-  connectStorageEmulator(storage, "localhost", 9199);
-  firebase.functions().useEmulator("localhost", 5001);
-  firebase.auth().useEmulator("http://localhost:9099");
+  connectDatabaseEmulator(database, emulatorEndpoint(), 9000);
+  connectStorageEmulator(storage, emulatorEndpoint(), 9199);
+  firebase.functions().useEmulator(emulatorEndpoint(), 5001);
+  firebase.auth().useEmulator(apiEndpoint()+":9099");
   functions = firebase.functions();
   if (
     typeof sessionStorage != "undefined" &&

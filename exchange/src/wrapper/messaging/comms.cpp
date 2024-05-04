@@ -64,12 +64,12 @@ ExchangeProxy::handle_match(const match& match, const std::string& uid)
 
         if (match.buyer_id == uid) {
             nutc::pywrapper::get_account_update_function()(
-                match.ticker, side, match.price, match.quantity, match.buyer_capital
+                match.ticker, "BUY", match.price, match.quantity, match.buyer_capital
             );
         }
-        else if (match.seller_id == uid) {
+        if (match.seller_id == uid) {
             nutc::pywrapper::get_account_update_function()(
-                match.ticker, side, match.price, match.quantity, match.seller_capital
+                match.ticker, "SELL", match.price, match.quantity, match.seller_capital
             );
         }
     } catch (const py::error_already_set& e) {}

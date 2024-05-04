@@ -6,12 +6,14 @@ namespace spawning {
 void
 spawn_client(const std::string& uid, std::string& algoid)
 {
-    std::replace(algoid.begin(), algoid.end(), '-', ' ');
+    // we don't want to modify the original algo id because we want to use it later on
+    std::string sanitized_algoid = algoid;
+    std::replace(sanitized_algoid.begin(), sanitized_algoid.end(), '-', ' ');
     pid_t pid = fork();
 
     if (pid == 0) {
         std::vector<std::string> args = {
-            "NUTC-linter-spawner", "--uid", uid, "--algoid", algoid
+            "NUTC-linter-spawner", "--uid", uid, "--algoid", sanitized_algoid
         };
 
         std::vector<char*> c_args;
@@ -21,7 +23,7 @@ spawn_client(const std::string& uid, std::string& algoid)
 
         execvp(c_args[0], c_args.data());
 
-        log_e(linting, "Failed to lint algoid {} for uid {}", algoid, uid);
+        log_e(linting, "Failed to lint algoid {} for uid {}", sanitized_algoid, uid);
 
         exit(1);
     }

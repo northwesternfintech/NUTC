@@ -1,0 +1,14 @@
+FROM rust:latest as builder
+
+RUN USER=root cargo new --bin app
+WORKDIR /app
+
+COPY ./webserver/Cargo.toml ./Cargo.toml
+COPY ./webserver/Cargo.lock ./Cargo.lock
+COPY ./webserver/src ./src
+
+RUN cargo build --release
+
+EXPOSE 16124
+
+CMD ["/app/target/release/rust-server"]

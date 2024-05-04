@@ -18,9 +18,11 @@ protected:
     {
         manager_.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
         manager_.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
+        manager_.add_trader<TestTrader>(std::string("GHI"), TEST_STARTING_CAPITAL);
 
         manager_.get_trader("ABC")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
         manager_.get_trader("DEF")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+        manager_.get_trader("GHI")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     }
 
     void
@@ -120,7 +122,7 @@ TEST_F(UnitBasicMatching, NoMatchThenMatchSell)
         manager_.get_trader("DEF"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
     };
     stored_order order3{
-        manager_.get_trader("DEF"), nutc::util::Side::sell, "ETHUSD", 2, 0, 0
+        manager_.get_trader("GHI"), nutc::util::Side::sell, "ETHUSD", 2, 0, 0
     };
 
     auto matches = add_to_engine_(order1);
@@ -131,8 +133,8 @@ TEST_F(UnitBasicMatching, NoMatchThenMatchSell)
     ASSERT_EQ(matches.size(), 0);
     matches = add_to_engine_(order3);
     ASSERT_EQ(matches.size(), 2);
-    ASSERT_EQ_MATCH(matches[0], "ETHUSD", "ABC", "DEF", nutc::util::Side::sell, 1, 1);
-    ASSERT_EQ_MATCH(matches[1], "ETHUSD", "DEF", "DEF", nutc::util::Side::sell, 1, 1);
+    ASSERT_EQ_MATCH(matches[0], "ETHUSD", "ABC", "GHI", nutc::util::Side::sell, 1, 1);
+    ASSERT_EQ_MATCH(matches[1], "ETHUSD", "DEF", "GHI", nutc::util::Side::sell, 1, 1);
 }
 
 TEST_F(UnitBasicMatching, PassivePriceMatch)

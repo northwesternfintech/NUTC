@@ -117,7 +117,10 @@ get_server_thread()
 
             check_pending_thread.join();
 
-            res.body = "OK";
+            auto algo_status_code = nutc::client::get_algo_status(uid, algo_id);
+            crow::json::wvalue response({{"linting_status", static_cast<int>(algo_status_code)}});
+
+            res.body = response.dump();
             res.code = 200;
 
             return res;

@@ -1,6 +1,6 @@
 "use client";
 import { CheckIcon, PaperClipIcon } from "@heroicons/react/24/solid";
-import { linterEndpoint, sandboxEndpoint } from "@/config";
+import { apiEndpoint } from "@/config";
 import axios from "axios";
 import { useRef, useState } from "react";
 import AlgorithmType from "@/app/dash/algoType";
@@ -122,7 +122,7 @@ export default function Submission() {
         toast: true,
         position: "top-end",
         showConfirmButton: false,
-        timer: 4000,
+        timer: 2000,
         timerProgressBar: true,
         didOpen: (toast) => {
           toast.addEventListener("mouseenter", Swal.stopTimer);
@@ -310,24 +310,44 @@ export default function Submission() {
                   icon: "info",
                   allowOutsideClick: false,
                   allowEscapeKey: false,
-                  allowEnterKey: false
+                  allowEnterKey: false,
                 });
                 Swal.showLoading();
-                await axios.get(
-                  linterEndpoint(userInfo?.user?.uid || "", algoRef.key),
-                );
-                await axios.get(sandboxEndpoint(userInfo?.user?.uid || "", algoRef.key));
-                Swal.close();
-                Swal.fire({
-                  title: "Linting complete!",
-                  text: "View results in the dashboard.",
-                  icon: "success",
-                  timer: 5000,
-                  timerProgressBar: true,
-                  willClose: () => {
-                    window.location.reload();
-                  },
-                });
+                axios.post(
+                  `${apiEndpoint()}/webserver/submit/${userInfo?.user?.uid}/${algoRef.key}`,
+                ).then(() => {
+                  Swal.close();
+                  Swal.fire({
+                    title: "Linting complete!",
+                    text: "View results in the dashboard.",
+                    icon: "success",
+                    timer: 2000,
+                    timerProgressBar: true,
+                    willClose: () => {
+                      window.location.href = "submissions/" + algoRef.key;
+                    },
+                  });
+                })
+                  .catch((error) => {
+                    if (error.response) {
+                      Swal.fire({
+                        icon: "error",
+                        title: "Error linting algorithm",
+                        text: "View results...",
+                        timer: 4000,
+                        timerProgressBar: true,
+                        willClose: () => {
+                          window.location.href = "submissions/" + algoRef.key;
+                        },
+                      });
+                    } else {
+                      Swal.fire({
+                        icon: "error",
+                        title:
+                          "Your code timed out - if you don't see results on the submissions page within 2 minutes, contact NUTC dev support",
+                      });
+                    }
+                  });
               }
             }}
             className="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"

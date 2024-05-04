@@ -58,7 +58,8 @@ add_library(
     
     src/exchange/tick_scheduler/tick_scheduler.cpp
     
-    src/exchange/dashboard/state/ticker_state.cpp
+    src/exchange/metrics/state/ticker_state.cpp
+    src/exchange/metrics/on_tick_metrics.cpp
 
     src/exchange/concurrency/pin_threads.cpp
     src/exchange/concurrency/exchange_lock.cpp
@@ -158,7 +159,7 @@ if(DASHBOARD)
   # Must be a separate lib to avoid linker errors with gtest
   add_definitions(-DDASHBOARD)
   add_library(DASHBOARD_lib OBJECT
-    src/exchange/dashboard/dashboard.cpp
+    src/exchange/metrics/dashboard.cpp
   )
   target_include_directories(
       DASHBOARD_lib ${warning_guard}

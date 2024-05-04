@@ -105,12 +105,12 @@ request_to_json(
 )
 {
     std::string read_buffer = request_to_string(method, url, data);
-    glz::json_t json;
+    glz::json_t json{};
     auto error = glz::read_json(json, read_buffer);
     if (error) {
         std::string descriptive_error = glz::format_error(error, read_buffer);
         throw std::runtime_error(
-            fmt::format("glz::read_json() failed: {}", std::move(descriptive_error))
+            fmt::format("glz::read_json() failed: {}", descriptive_error)
         );
     }
     return json;

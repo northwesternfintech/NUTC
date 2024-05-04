@@ -33,7 +33,7 @@ public:
     double
     get_theo() const
     {
-        return BROWNIAN_OFFSET + theo_generator_.get_price();
+        return BROWNIAN_OFFSET + theo_generator_.get_magnitude();
     }
 
     const auto&

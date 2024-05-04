@@ -43,6 +43,7 @@ private:
     build_match(const stored_order& buyer, const stored_order& seller);
 
     std::vector<stored_match> attempt_matches_();
+    void drop_order(uint64_t order_index);
 };
 
 } // namespace matching

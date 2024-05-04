@@ -1,7 +1,8 @@
 "use client";
 import { useUserInfo } from "@/app/login/auth/context";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { apiEndpoint } from "@/config";
 import React from "react";
 export default function Page({ params }: { params: { id: string } }) {
   const userInfo = useUserInfo();
@@ -32,17 +33,23 @@ export default function Page({ params }: { params: { id: string } }) {
   const lintFailureMessage = algoDetails?.lintFailureMessage;
   const lintSuccessMessage = algoDetails?.lintSuccessMessage;
   const stringToRender = lintFailureMessage || lintSuccessMessage || "";
-  const upTime = algoDetails?.uploadTime || 0;
-  function panelUrl(panelNum: number) {
-    return upTime + 300000 < Date.now()
-      ? `http://localhost:3000/d-solo/cdk4teh4zl534a/ppl?orgId=1&var-traderid=${userInfo?.user?.uid}-${params.id}&from=${upTime}&to=${
-        upTime + 300000
-      }&theme=dark&panelId=${panelNum}`
-      : `http://localhost:3000/d-solo/cdk4teh4zl534a/ppl?orgId=1&refresh=5s&var-traderid=${userInfo?.user?.uid}-${params.id}&from=${upTime}
-    &theme=dark&panelId=${panelNum}`;
-  }
+  const upTime = (algoDetails?.uploadTime || 0) + 1000;
+  const sandboxTimeMs = 300000;
+  const baseEndpoint = apiEndpoint() +
+    `/d-solo/cdk4teh4zl534a/ppl?orgId=1&var-traderid=${userInfo?.user?.uid}-${params.id}&from=${upTime}&theme=dark`;
 
-  // TODO: set timeout for 5mins from start to change to no refresh
+  const [url, setUrl] = useState(baseEndpoint + `&refresh=5s`);
+
+  useEffect(() => {
+    if (upTime + sandboxTimeMs > Date.now()) {
+      setUrl(baseEndpoint + "&refresh=5s");
+      setTimeout(() => {
+        setUrl(baseEndpoint + `&to=${upTime + sandboxTimeMs}`);
+      }, upTime + sandboxTimeMs - Date.now());
+    } else {
+      setUrl(baseEndpoint + `&to=${upTime + sandboxTimeMs}`);
+    }
+  }, [userInfo.user]);
 
   if (stringToRender === "") {
     return (
@@ -50,19 +57,18 @@ export default function Page({ params }: { params: { id: string } }) {
         <p>Waiting on output...</p>
       </div>
     );
-  } else {
+  } else if (stringToRender.includes("succeeded")) {
     return (
       <div className="flex flex-col items-center">
-        {formatNewLines(stringToRender)}
         <iframe
-          src={panelUrl(1)}
+          src={url + "&panelId=1"}
           width="900"
           height="400"
           frameBorder="0"
         >
         </iframe>
         <iframe
-          src={panelUrl(2)}
+          src={url + "&panelId=2"}
           width="900"
           height="400"
           frameBorder="0"
@@ -70,5 +76,7 @@ export default function Page({ params }: { params: { id: string } }) {
         </iframe>
       </div>
     );
+  } else {
+    return formatNewLines(stringToRender);
   }
 }

@@ -1,7 +1,7 @@
 #build stage
 FROM python:3.12 as build
 
-RUN pip install conan numpy pandas polars scipy scikit-learn \
+RUN pip install conan numpy pandas polars scipy scikit-learn sortedcontainers \
     # c++ stuff
     && apt update \
     && apt install -y --no-install-recommends build-essential libssl-dev cmake git
@@ -19,9 +19,9 @@ COPY ./linter/CMakePresets.json /app/linter
 COPY ./linter/cmake /app/linter/cmake
 COPY ./linter/test /app/linter/test
 
-ARG release_build=false
+ARG firebase_emulator=false
 
-RUN if [ "$release_build" = "true" ]; then \
+RUN if [ "$firebase_emulator" = "false" ]; then \
     cmake --preset=ci-docker; \
     else \
     cmake --preset=ci-docker -DLOCAL_DEV=ON; \
@@ -29,14 +29,13 @@ RUN if [ "$release_build" = "true" ]; then \
 
 RUN cmake --build build --config Release -j6
 
-# Main stage
-FROM python:3.12-slim
-
-RUN pip install numpy pandas polars scipy scikit-learn
-
-COPY --from=build /app/linter/build/NUTC-linter-spawner /bin/NUTC-linter-spawner
-COPY --from=build /app/linter/build/NUTC-linter /bin/NUTC-linter
+RUN mv /app/linter/build/NUTC-linter-spawner /bin/NUTC-linter-spawner
+RUN mv /app/linter/build/NUTC-linter /bin/NUTC-linter
 
 RUN chmod +x /bin/NUTC-linter
+RUN chmod +x /bin/NUTC-linter-spawner
+
+EXPOSE 18081
+
 
 CMD NUTC-linter

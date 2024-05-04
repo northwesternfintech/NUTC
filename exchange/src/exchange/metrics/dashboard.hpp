@@ -1,19 +1,12 @@
 #pragma once
 
+#include "exchange/metrics/prometheus.hpp"
 #include "exchange/tick_scheduler/tick_observer.hpp"
 
 #ifndef DASHBOARD
-#  include "exchange/tickers/manager/ticker_manager.hpp"
-#  include "exchange/traders/trader_container.hpp"
-#  include "shared/config/config_loader.hpp"
-
-#  include <prometheus/exposer.h>
-#  include <prometheus/gauge.h>
-#  include <prometheus/registry.h>
 
 namespace nutc {
 namespace dashboard {
-namespace ps = prometheus;
 
 // THIS IS AN EMPTY VERSION OF DASHBOARD FOR WHEN WE DISABLE IT
 // IF YOU WANT TO MODIFY THE ACTUAL DASHBOARD, SCROLL DOWN
@@ -22,60 +15,7 @@ class Dashboard : public ticks::TickObserver {
 public:
     void
     on_tick(uint64_t) override
-    {
-        static ps::Exposer exposer{"0.0.0.0:4152"};
-        static auto registry = std::make_shared<ps::Registry>();
-        static auto& pnl_gauge = ps::BuildGauge().Name("pnl").Register(*registry);
-        static auto& capital_gauge =
-            ps::BuildGauge().Name("capital").Register(*registry);
-        static auto& portfolio_gauge =
-            ps::BuildGauge().Name("portfolio_value").Register(*registry);
-        static bool have_reg = false;
-        if (!have_reg) {
-            have_reg = true;
-            exposer.RegisterCollectable(registry);
-        }
-        const auto& tickers = config::Config::get().get_tickers();
-
-        auto portfolio_value = [&](const auto& trader) {
-            double pnl = 0.0;
-            for (const auto& ticker_conf : tickers) {
-                double amount_held = trader->get_holdings(ticker_conf.TICKER);
-                double midprice =
-                    engine_manager::EngineManager::get_instance().get_midprice(
-                        ticker_conf.TICKER
-                    );
-                pnl += amount_held * midprice;
-            }
-            return pnl;
-        };
-
-        traders::TraderContainer& client_manager =
-            traders::TraderContainer::get_instance();
-        for (const auto& trader_p : client_manager.get_traders()) {
-            auto trader = trader_p.second;
-
-            double capital = trader->get_capital();
-            double portfolio = portfolio_value(trader);
-            double pnl = capital + portfolio - trader->get_initial_capital();
-            auto name = trader->get_id();
-            pnl_gauge
-                .Add({
-                    {"name", name}
-            })
-                .Set(pnl);
-            capital_gauge
-                .Add({
-                    {"name", name}
-            })
-                .Set(capital);
-            portfolio_gauge
-                .Add({
-                    {"name", name}
-            })
-                .Set(portfolio);
-        }
-    }
+    {}
 
     static Dashboard&
     get_instance()
@@ -101,7 +41,7 @@ private:
 } // namespace dashboard
 } // namespace nutc
 #else
-#  include "exchange/dashboard/state/ticker_state.hpp"
+#  include "exchange/metrics/state/ticker_state.hpp"
 
 #  include <ncurses.h>
 #  undef timeout

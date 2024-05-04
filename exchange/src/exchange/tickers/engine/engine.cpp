@@ -67,7 +67,7 @@ Engine::build_match(const stored_order& buyer, const stored_order& seller)
     double quantity = order_quantity(buyer, seller);
     double price = order_price(buyer, seller);
     util::Side aggressive_side =
-        buyer.order_index < seller.order_index ? seller.side : buyer.side;
+        buyer.order_index < seller.order_index ? util::Side::sell : util::Side::buy;
     return stored_match{
         buyer.trader, seller.trader, buyer.ticker, aggressive_side, price, quantity,
     };
@@ -80,15 +80,28 @@ Engine::order_can_execute_(const stored_order& buyer, const stored_order& seller
     double price = order_price(buyer, seller);
     if (!buyer.trader->can_leverage()
         && buyer.trader->get_capital() < (1 + ORDER_FEE) * price * quantity) {
-        order_container_.remove_order(buyer.order_index);
+        drop_order(buyer.order_index);
         return false;
     }
     if (!seller.trader->can_leverage()
         && seller.trader->get_holdings(seller.ticker) < quantity) {
-        order_container_.remove_order(seller.order_index);
+        drop_order(seller.order_index);
+        return false;
+    }
+    if (seller.trader == buyer.trader) [[unlikely]] {
+        drop_order(std::min(seller.order_index, buyer.order_index));
         return false;
     }
     return true;
+}
+
+void
+Engine::drop_order(uint64_t order_index)
+{
+    stored_order removed = order_container_.remove_order(order_index);
+    removed.trader->process_order_expiration(
+        removed.ticker, removed.side, removed.price, removed.quantity
+    );
 }
 
 std::vector<stored_match>
