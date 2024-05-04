@@ -64,18 +64,31 @@ export default function Page({ params }: { params: { id: string } }) {
   } else if (stringToRender.includes("succeeded")) {
     return (
       <div className="flex flex-col items-center">
-        <iframe
-          src={url + "&panelId=1"}
-          width="900"
-          height="400"
-          frameBorder="0"
-        ></iframe>
-        <iframe
-          src={url + "&panelId=2"}
-          width="900"
-          height="400"
-          frameBorder="0"
-        ></iframe>
+        <h1 className="text-3xl font-bold mb-4 pt-5">Sandbox View of {algoDetails?.name}</h1>
+        
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-2">Profit and Loss</h2>
+          <iframe
+            className="border border-gray-300"
+            src={url + "&panelId=1"}
+            width="900"
+            height="400"
+            frameBorder="0"
+            title="Panel 1"
+          ></iframe>
+        </div>
+        
+        <div>
+          <h2 className="text-xl font-semibold mb-2">Capital</h2>
+          <iframe
+            className="border border-gray-300"
+            src={url + "&panelId=2"}
+            width="900"
+            height="400"
+            frameBorder="0"
+            title="Panel 2"
+          ></iframe>
+        </div>
       </div>
     );
   } else {
