@@ -48,6 +48,13 @@ public:
         set_seed(seed);
     }
 
+    // Constructor for BrownianMotion with initial price
+    explicit BrownianMotion(const double starting_magnitude) : cur_magnitude_(starting_magnitude)
+    {
+        std::random_device rd;
+        random_number_generator_ = std::minstd_rand0(rd());
+    }
+
     // Generates and returns the next magnitude based on previous magnitudes
     double generate_next_magnitude();
 

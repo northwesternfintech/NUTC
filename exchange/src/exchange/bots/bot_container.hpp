@@ -20,7 +20,6 @@ concept HandledBotType =
  */
 class BotContainer : public ticks::TickObserver {
     const std::string TICKER;
-    const double BROWNIAN_OFFSET;
     stochastic::BrownianMotion theo_generator_;
 
     std::unordered_map<std::string, const std::shared_ptr<RetailBot>> retail_bots_{};
@@ -33,7 +32,7 @@ public:
     double
     get_theo() const
     {
-        return BROWNIAN_OFFSET + theo_generator_.get_magnitude();
+        return theo_generator_.get_magnitude();
     }
 
     const auto&
@@ -55,10 +54,10 @@ public:
     void add_bots(double mean_capital, double stddev_capital, size_t num_bots)
     requires HandledBotType<BotType>;
 
-    BotContainer() : BROWNIAN_OFFSET(0.0) {}
+    BotContainer() : theo_generator_(0.0) {}
 
     explicit BotContainer(std::string ticker, double starting_price) :
-        TICKER(std::move(ticker)), BROWNIAN_OFFSET(starting_price)
+        TICKER(std::move(ticker)), theo_generator_(starting_price)
     {}
 
 private:
