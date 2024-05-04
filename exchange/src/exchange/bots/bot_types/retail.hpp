@@ -1,11 +1,7 @@
 #pragma once
 
-#include "exchange/tickers/engine/order_storage.hpp"
 #include "exchange/traders/trader_types/bot_trader.hpp"
 
-#include <cstdint>
-
-#include <optional>
 #include <random>
 
 namespace nutc {
@@ -29,10 +25,9 @@ public:
         AGGRESSIVENESS(generate_aggresiveness_())
     {}
 
-    [[nodiscard]] bool is_active() const;
+    [[nodiscard]] bool is_active() const override;
 
-    std::optional<matching::stored_order>
-    take_action(double current, double theo, uint64_t current_tick);
+    void take_action(double midprice, double theo) override;
 
 private:
     const double AGGRESSIVENESS;

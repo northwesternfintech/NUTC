@@ -1,6 +1,5 @@
 #include "tick_scheduler.hpp"
 
-#include "exchange/concurrency/exchange_lock.hpp"
 #include "exchange/concurrency/pin_threads.hpp"
 
 #include <numeric>
@@ -11,13 +10,11 @@ namespace ticks {
 auto
 TickJobScheduler::notify_tick_()
 {
-    concurrency::ExchangeLock::lock();
     auto start = std::chrono::high_resolution_clock::now();
     for (const auto& job : on_tick_jobs_) {
         job.job_ptr->on_tick(current_tick_);
     }
 
-    concurrency::ExchangeLock::unlock();
     auto end = std::chrono::high_resolution_clock::now();
     return end - start;
 }
