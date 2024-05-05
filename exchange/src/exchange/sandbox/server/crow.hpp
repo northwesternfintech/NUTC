@@ -38,7 +38,9 @@ public:
     ~CrowServer();
 
 private:
-    void start_remove_timer(unsigned int time_ms, const std::string& trader_id);
+    void start_remove_timer(
+        unsigned int time_ms, std::weak_ptr<traders::GenericTrader> trader_ptr
+    );
 };
 
 } // namespace sandbox

@@ -18,8 +18,7 @@ WrapperConsumer::on_tick(uint64_t)
     const auto& traders = traders::TraderContainer::get_instance().get_traders();
     auto& engine_manager = engine_manager::EngineManager::get_instance();
 
-    for (const auto& pair : traders) {
-        const auto& trader = pair.second;
+    for (const auto& trader : traders) {
         auto messages = trader->read_orders();
         for (auto order : messages) {
             match_new_order(engine_manager, trader, std::move(order));

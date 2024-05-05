@@ -224,10 +224,7 @@ Dashboard::display_leaderboard(WINDOW* window, int start_y)
         return pnl;
     };
 
-    std::vector<std::shared_ptr<traders::GenericTrader>> ordered_traders;
-    for (const auto& [user_id, trader] : client_manager.get_traders()) {
-        ordered_traders.push_back(trader);
-    }
+    auto ordered_traders = client_manager.get_traders();
     std::sort(
         ordered_traders.begin(), ordered_traders.end(),
         [&portfolio_value](const auto& a, const auto& b) {

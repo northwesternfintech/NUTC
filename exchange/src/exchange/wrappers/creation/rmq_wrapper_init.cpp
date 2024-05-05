@@ -20,9 +20,11 @@ WrapperInitializer::send_start_time(
                           .count();
 
     messages::start_time message{time_ns};
-    std::string buf = glz::write_json(message);
+    std::vector<std::string> buf = {glz::write_json(message)};
 
-    manager.broadcast_messages({buf});
+    for (const auto& trader : manager.get_traders()) {
+        trader->send_messages(buf);
+    }
 }
 
 } // namespace rabbitmq
