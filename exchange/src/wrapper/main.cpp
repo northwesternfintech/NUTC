@@ -116,14 +116,14 @@ main(int argc, const char** argv)
     }
 
     // Send message to exchange to let it know we successfully initialized
-    comms::publish_init_message(trader_id, algo.has_value());
+    comms::publish_init_message(algo.has_value());
     if (!algo.has_value()) {
         return 1;
     }
     comms::wait_for_start_time();
 
     comms exchange_conn{};
-    nutc::pywrapper::create_api_module(exchange_conn.market_order_func(trader_id));
+    nutc::pywrapper::create_api_module(exchange_conn.market_order_func());
     nutc::pywrapper::run_code_init(algo.value());
 
     exchange_conn.main_event_loop(trader_id);
