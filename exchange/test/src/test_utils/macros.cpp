@@ -54,8 +54,8 @@ validate_ob_update(
 
 bool
 validate_market_order(
-    const market_order& update, const std::string& client_id, const std::string& ticker,
-    util::Side side, double price, double quantity
+    const market_order& update, const std::string& ticker, util::Side side,
+    double price, double quantity
 )
 {
     return update.ticker == ticker && update.side == side

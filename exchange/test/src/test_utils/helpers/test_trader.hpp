@@ -10,7 +10,7 @@ namespace test_utils {
 // Basically a generic trader but
 class TestTrader : public traders::GenericTrader {
 public:
-    TestTrader(std::string trader_id, double capital) :
+    TestTrader(const std::string& trader_id, double capital) :
         GenericTrader(trader_id, capital)
     {}
 };

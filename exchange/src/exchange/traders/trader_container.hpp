@@ -18,7 +18,7 @@ using lock_guard = std::lock_guard<std::mutex>;
 // The traders themselves shouldn't need thread safety - maybe we should still consider
 // adding, though
 class TraderContainer {
-    std::mutex trader_lock_{};
+    mutable std::mutex trader_lock_{};
     std::vector<std::shared_ptr<GenericTrader>> traders_{};
 
 public:
@@ -46,7 +46,7 @@ public:
     }
 
     size_t
-    num_traders()
+    num_traders() const
     {
         lock_guard lock{trader_lock_};
         return traders_.size();
@@ -54,8 +54,8 @@ public:
 
     // TODO: remove after improving dashboard
     // Return a copy of the map so we have copies of the shared pointers
-    auto
-    get_traders()
+    const std::vector<std::shared_ptr<GenericTrader>>
+    get_traders() const
     {
         lock_guard lock{trader_lock_};
         return traders_;
@@ -82,11 +82,10 @@ private:
     ~TraderContainer() = default;
 
 public:
-    // Singleton
     static TraderContainer&
     get_instance()
     {
-        static TraderContainer instance;
+        static TraderContainer instance{};
         return instance;
     }
 
