@@ -19,30 +19,27 @@ namespace bp = boost::process;
 class PipeReader {
     std::mutex message_lock_{};
     std::vector<std::variant<init_message, messages::market_order>> message_queue_{};
+    std::weak_ptr<bp::async_pipe> pipe_in_ptr;
 
-    void add_message_(const std::string& message);
+    void store_message_(const std::string& message);
 
-    void async_read_pipe(
-        std::weak_ptr<bp::async_pipe> pipe_in_ptr, std::shared_ptr<std::string> buffer
-    );
-
-    void
-    async_read_pipe(std::weak_ptr<bp::async_pipe> pipe_in_ptr)
-    {
-        async_read_pipe(pipe_in_ptr, std::make_shared<std::string>());
-    }
+    // Continues until pipe closed/canceled, so we can use RAII
+    void async_read_pipe();
+    void async_read_pipe(std::shared_ptr<std::string> buffer);
 
 public:
-    PipeReader(std::weak_ptr<bp::async_pipe> pipe_in) { async_read_pipe(pipe_in); }
+    std::weak_ptr<bp::async_pipe>
+    get_pipe()
+    {
+        return pipe_in_ptr;
+    }
+
+    PipeReader();
+
+    ~PipeReader();
 
     std::vector<std::variant<messages::init_message, messages::market_order>>
-    get_messages()
-    {
-        std::lock_guard<std::mutex> lock{message_lock_};
-        auto ret = message_queue_;
-        message_queue_.clear();
-        return ret;
-    }
+    get_messages();
 };
 
 } // namespace wrappers

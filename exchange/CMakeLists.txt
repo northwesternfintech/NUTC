@@ -39,6 +39,7 @@ add_library(
     src/exchange/wrappers/messaging/consumer.cpp
     src/exchange/wrappers/messaging/async_pipe_runner.cpp
     src/exchange/wrappers/messaging/pipe_reader.cpp
+    src/exchange/wrappers/messaging/pipe_writer.cpp
     
     src/exchange/sandbox/server/crow.cpp
 

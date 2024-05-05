@@ -63,14 +63,12 @@ WrapperConsumer::match_new_order(
 )
 {
     if (order.price < 0 || order.quantity <= 0) {
-        assert(false);
         trader->process_order_expiration(
             order.ticker, order.side, order.price, order.quantity
         );
         return;
     }
     else if (!engine_manager.has_engine(order.ticker)) {
-        assert(false);
         return;
     }
 

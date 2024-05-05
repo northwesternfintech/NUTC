@@ -1,5 +1,8 @@
 #include "pipe_reader.hpp"
 
+#include "async_pipe_runner.hpp"
+#include "exchange/logging.hpp"
+
 #include <boost/asio.hpp>
 #include <glaze/glaze.hpp>
 
@@ -9,36 +12,65 @@ namespace wrappers {
 namespace ba = boost::asio;
 
 void
-PipeReader::add_message_(const std::string& message)
+PipeReader::async_read_pipe()
+{
+    async_read_pipe(std::make_shared<std::string>());
+}
+
+std::vector<std::variant<messages::init_message, messages::market_order>>
+PipeReader::get_messages()
+{
+    std::lock_guard<std::mutex> lock{message_lock_};
+    auto ret = message_queue_;
+    message_queue_.clear();
+    return ret;
+}
+
+PipeReader::~PipeReader()
+{
+    auto pipe = pipe_in_ptr.lock();
+    if (pipe == nullptr)
+        return;
+    AsyncPipeRunner::get().remove_pipe(pipe);
+}
+
+PipeReader::PipeReader() : pipe_in_ptr(AsyncPipeRunner::get().create_pipe())
+{
+    async_read_pipe();
+}
+
+void
+PipeReader::store_message_(const std::string& message)
 {
     std::variant<init_message, market_order> data;
     auto err = glz::read_json(data, message);
 
     // TODO: handle better
     if (err)
-        throw std::runtime_error("idk");
+        log_e(
+            main, "Error processing message from wrapper: {}",
+            glz::format_error(err, message)
+        );
 
     std::lock_guard<std::mutex> lock{message_lock_};
     message_queue_.push_back(std::move(data));
 }
 
 void
-PipeReader::async_read_pipe(
-    std::weak_ptr<bp::async_pipe> pipe_in_ptr, std::shared_ptr<std::string> buffer
-)
+PipeReader::async_read_pipe(std::shared_ptr<std::string> buffer)
 {
     auto pipe_in = pipe_in_ptr.lock();
     if (pipe_in == nullptr)
         return;
-    auto prox_message = [this, buffer, pipe_in_ptr](const auto& ec, auto length) {
+    auto prox_message = [this, buffer](const auto& ec, auto length) {
         if (!ec) [[likely]] {
             auto mess = std::string(buffer->data(), length);
-            add_message_(mess);
+            store_message_(mess);
             buffer->erase(0, length);
-            async_read_pipe(pipe_in_ptr, std::move(buffer));
+            async_read_pipe(std::move(buffer));
         }
         else if (ec == boost::asio::error::eof) {
-            async_read_pipe(pipe_in_ptr);
+            async_read_pipe();
         }
         else {
             // TODO: report a better way

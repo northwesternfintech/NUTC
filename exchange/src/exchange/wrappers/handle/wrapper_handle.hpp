@@ -1,6 +1,7 @@
 #pragma once
 
 #include "exchange/wrappers/messaging/pipe_reader.hpp"
+#include "exchange/wrappers/messaging/pipe_writer.hpp"
 
 #include <boost/process.hpp>
 #include <boost/process/pipe.hpp>
@@ -15,17 +16,10 @@ namespace fs = std::filesystem;
 
 class WrapperHandle {
     bp::child wrapper_;
-    std::weak_ptr<bp::async_pipe> pipe_in;
-    std::weak_ptr<bp::async_pipe> pipe_out;
-    std::mutex messages_lock_{};
-    std::deque<std::string> queued_messages_{};
-    std::atomic_flag is_writing_{false};
-    PipeReader reader_;
+    PipeReader reader_{};
+    PipeWriter writer_{};
 
-    void async_write_pipe(std::string message);
-
-    void
-    spawn_wrapper(const std::vector<std::string>& args, const std::string& trader_id);
+    void spawn_wrapper(const std::vector<std::string>& args);
 
     const fs::path& wrapper_binary_path();
 
@@ -42,7 +36,11 @@ public:
         return reader_.get_messages();
     }
 
-    void send_messages(std::vector<std::string> messages);
+    void
+    send_messages(std::vector<std::string> messages)
+    {
+        return writer_.send_messages(messages);
+    }
 
     ~WrapperHandle();
 };
