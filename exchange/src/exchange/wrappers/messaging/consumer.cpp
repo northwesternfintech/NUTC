@@ -20,40 +20,11 @@ WrapperConsumer::on_tick(uint64_t)
 
     for (const auto& pair : traders) {
         const auto& trader = pair.second;
-        auto messages = trader->read_messages();
-        for (auto message : messages) {
-            auto handle_message = [&](auto&& arg) {
-                using t = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<t, init_message>) {
-                    handle_sandbox_init(trader, std::forward<t>(arg));
-                }
-                if constexpr (std::is_same_v<t, market_order>) {
-                    match_new_order(engine_manager, trader, std::forward<t>(arg));
-                }
-            };
-
-            std::visit(handle_message, message);
+        auto messages = trader->read_orders();
+        for (auto order : messages) {
+            match_new_order(engine_manager, trader, std::move(order));
         }
     }
-}
-
-void
-WrapperConsumer::handle_sandbox_init(
-    const std::shared_ptr<traders::GenericTrader>& trader, init_message&& message
-)
-{
-    auto& trader_container = traders::TraderContainer::get_instance();
-    if (!message.ready) {
-        log_i(
-            main, "Sandbox wrapper with id {} reported bad initialization",
-            trader->get_id()
-        );
-        // TODO
-        trader_container.get_instance().remove_trader(trader->get_id());
-        return;
-    }
-    trader->send_messages({glz::write_json(messages::start_time{0})});
-    log_i(main, "Sandbox wrapper with id {} fully initialized", trader->get_id());
 }
 
 void

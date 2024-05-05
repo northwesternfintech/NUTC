@@ -50,11 +50,8 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
     auto mess = nutc::test_utils::consume_message(
         users_.get_trader("test_algos/buy_tsla_at_100.py")
     );
-    ASSERT_TRUE(std::holds_alternative<nutc::messages::market_order>(mess));
-
-    nutc::messages::market_order actual = std::get<nutc::messages::market_order>(mess);
     ASSERT_EQ_MARKET_ORDER(
-        actual, "test_algos/buy_tsla_at_100.py", "TSLA", nutc::util::Side::buy, 100, 10
+        mess, "test_algos/buy_tsla_at_100.py", "TSLA", nutc::util::Side::buy, 100, 10
     );
 }
 
@@ -83,11 +80,8 @@ TEST_F(IntegrationBasicAlgo, ManyUpdates)
     auto mess =
         nutc::test_utils::consume_message(users_.get_trader("test_algos/confirm_1000.py"
         ));
-    ASSERT_TRUE(std::holds_alternative<nutc::messages::market_order>(mess));
-
-    nutc::messages::market_order actual = std::get<nutc::messages::market_order>(mess);
     ASSERT_EQ_MARKET_ORDER(
-        actual, "test_algos/confirm_1000.py", "TSLA", nutc::util::Side::buy, 100, 10
+        mess, "test_algos/confirm_1000.py", "TSLA", nutc::util::Side::buy, 100, 10
     );
 }
 
@@ -114,18 +108,13 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
     auto mess1 = nutc::test_utils::consume_message(
         users_.get_trader("test_algos/buy_tsla_on_trade.py")
     );
-    EXPECT_TRUE(std::holds_alternative<nutc::messages::market_order>(mess1));
-
-    nutc::messages::market_order actual_mo =
-        std::get<nutc::messages::market_order>(mess1);
     ASSERT_EQ_MARKET_ORDER(
-        actual_mo, "test_algos/buy_tsla_on_trade.py", "TSLA", nutc::util::Side::buy,
-        102, 10
+        mess1, "test_algos/buy_tsla_on_trade.py", "TSLA", nutc::util::Side::buy, 102, 10
     );
 
     rmq::WrapperConsumer::match_new_order(
         engine_manager_, users_.get_trader("test_algos/buy_tsla_on_trade.py"),
-        std::move(actual_mo)
+        std::move(mess1)
     );
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 
@@ -133,13 +122,8 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
     auto mess2 = nutc::test_utils::consume_message(
         users_.get_trader("test_algos/buy_tsla_on_trade.py")
     );
-    EXPECT_TRUE(std::holds_alternative<nutc::messages::market_order>(mess2));
-
-    nutc::messages::market_order actual2 =
-        std::get<nutc::messages::market_order>(mess2);
     ASSERT_EQ_MARKET_ORDER(
-        actual2, "test_algos/buy_tsla_on_trade.py", "APPL", nutc::util::Side::buy, 100,
-        1
+        mess2, "test_algos/buy_tsla_on_trade.py", "APPL", nutc::util::Side::buy, 100, 1
     );
 }
 
@@ -169,18 +153,13 @@ TEST_F(IntegrationBasicAlgo, MultipleLevelOrder)
     auto mess1 = nutc::test_utils::consume_message(
         users_.get_trader("test_algos/buy_tsla_at_100.py")
     );
-    EXPECT_TRUE(std::holds_alternative<nutc::messages::market_order>(mess1));
-
-    nutc::messages::market_order actual_mo =
-        std::get<nutc::messages::market_order>(mess1);
     ASSERT_EQ_MARKET_ORDER(
-        actual_mo, "test_algos/buy_tsla_at_100.py", "TSLA", nutc::util::Side::buy, 100,
-        10
+        mess1, "test_algos/buy_tsla_at_100.py", "TSLA", nutc::util::Side::buy, 100, 10
     );
 
     rmq::WrapperConsumer::match_new_order(
         engine_manager_, users_.get_trader("test_algos/buy_tsla_at_100.py"),
-        std::move(actual_mo)
+        std::move(mess1)
     );
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 
@@ -215,18 +194,14 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateSell)
     auto mess1 = nutc::test_utils::consume_message(
         users_.get_trader("test_algos/sell_tsla_on_account.py")
     );
-    EXPECT_TRUE(std::holds_alternative<nutc::messages::market_order>(mess1));
-
-    nutc::messages::market_order actual_mo =
-        std::get<nutc::messages::market_order>(mess1);
     ASSERT_EQ_MARKET_ORDER(
-        actual_mo, "test_algos/sell_tsla_on_account.py", "TSLA", nutc::util::Side::sell,
+        mess1, "test_algos/sell_tsla_on_account.py", "TSLA", nutc::util::Side::sell,
         100, 10
     );
 
     rmq::WrapperConsumer::match_new_order(
         engine_manager_, users_.get_trader("test_algos/sell_tsla_on_account.py"),
-        std::move(actual_mo)
+        std::move(mess1)
     );
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 
@@ -234,13 +209,9 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateSell)
     auto mess2 = nutc::test_utils::consume_message(
         users_.get_trader("test_algos/sell_tsla_on_account.py")
     );
-    EXPECT_TRUE(std::holds_alternative<nutc::messages::market_order>(mess2));
-
-    nutc::messages::market_order actual2 =
-        std::get<nutc::messages::market_order>(mess2);
     ASSERT_EQ_MARKET_ORDER(
-        actual2, "test_algos/sell_tsla_on_account.py", "APPL", nutc::util::Side::buy,
-        100, 1
+        mess2, "test_algos/sell_tsla_on_account.py", "APPL", nutc::util::Side::buy, 100,
+        1
     );
 }
 
@@ -267,18 +238,14 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateBuy)
     auto mess1 = nutc::test_utils::consume_message(
         users_.get_trader("test_algos/buy_tsla_on_account.py")
     );
-    EXPECT_TRUE(std::holds_alternative<nutc::messages::market_order>(mess1));
-
-    nutc::messages::market_order actual_mo =
-        std::get<nutc::messages::market_order>(mess1);
     ASSERT_EQ_MARKET_ORDER(
-        actual_mo, "test_algos/buy_tsla_on_account.py", "TSLA", nutc::util::Side::buy,
-        102, 10
+        mess1, "test_algos/buy_tsla_on_account.py", "TSLA", nutc::util::Side::buy, 102,
+        10
     );
 
     rmq::WrapperConsumer::match_new_order(
         engine_manager_, users_.get_trader("test_algos/buy_tsla_on_account.py"),
-        std::move(actual_mo)
+        std::move(mess1)
     );
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 
@@ -286,13 +253,9 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateBuy)
     auto mess2 = nutc::test_utils::consume_message(
         users_.get_trader("test_algos/buy_tsla_on_account.py")
     );
-    EXPECT_TRUE(std::holds_alternative<nutc::messages::market_order>(mess2));
-
-    nutc::messages::market_order actual2 =
-        std::get<nutc::messages::market_order>(mess2);
     ASSERT_EQ_MARKET_ORDER(
-        actual2, "test_algos/buy_tsla_on_account.py", "APPL", nutc::util::Side::buy,
-        100, 1
+        mess2, "test_algos/buy_tsla_on_account.py", "APPL", nutc::util::Side::buy, 100,
+        1
     );
 }
 

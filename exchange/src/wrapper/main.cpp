@@ -116,7 +116,7 @@ main(int argc, const char** argv)
     }
 
     // Send message to exchange to let it know we successfully initialized
-    comms::publish_init_message(algo.has_value());
+    comms::publish_init_message();
     if (!algo.has_value()) {
         return 1;
     }

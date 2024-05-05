@@ -3,11 +3,11 @@
 namespace nutc {
 namespace test_utils {
 
-std::variant<init_message, market_order>
+market_order
 consume_message(const std::shared_ptr<traders::GenericTrader>& trader)
 {
     while (true) {
-        auto messages = trader->read_messages();
+        auto messages = trader->read_orders();
         switch (messages.size()) {
             case 0:
                 continue;

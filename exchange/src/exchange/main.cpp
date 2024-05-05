@@ -33,6 +33,7 @@ flush_log(int)
 
     concurrency::ExchangeLock::unlock();
     ticks::TickJobScheduler::get().stop();
+    traders::TraderContainer::get_instance().reset();
     std::exit(0); // NOLINT(concurrency-*)
 }
 
@@ -102,7 +103,6 @@ initialize_wrappers()
 {
     traders::TraderContainer& users = traders::TraderContainer::get_instance();
 
-    rabbitmq::WrapperInitializer::wait_for_clients(users);
     size_t wait_secs = config::Config::get().constants().WAIT_SECS;
     rabbitmq::WrapperInitializer::send_start_time(users, wait_secs);
 }

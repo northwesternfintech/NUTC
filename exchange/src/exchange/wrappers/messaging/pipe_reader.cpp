@@ -17,6 +17,20 @@ PipeReader::async_read_pipe()
     async_read_pipe(std::make_shared<std::string>());
 }
 
+std::variant<init_message, market_order>
+PipeReader::get_message()
+{
+    while (true) {
+        std::lock_guard<std::mutex> lock{message_lock_};
+        if (message_queue_.empty()) [[likely]]
+            continue;
+
+        auto val = message_queue_.back();
+        message_queue_.pop_back();
+        return val;
+    }
+}
+
 std::vector<std::variant<messages::init_message, messages::market_order>>
 PipeReader::get_messages()
 {
@@ -28,13 +42,12 @@ PipeReader::get_messages()
 
 PipeReader::~PipeReader()
 {
-    auto pipe = pipe_in_ptr.lock();
-    if (pipe == nullptr)
-        return;
-    AsyncPipeRunner::get().remove_pipe(pipe);
+    pipe_in_.cancel();
+    pipe_in_.close();
 }
 
-PipeReader::PipeReader() : pipe_in_ptr(AsyncPipeRunner::get().create_pipe())
+PipeReader::PipeReader() :
+    pipe_context_(AsyncPipeRunner::get_context()), pipe_in_(*pipe_context_)
 {
     async_read_pipe();
 }
@@ -46,11 +59,13 @@ PipeReader::store_message_(const std::string& message)
     auto err = glz::read_json(data, message);
 
     // TODO: handle better
-    if (err)
+    if (err) {
         log_e(
             main, "Error processing message from wrapper: {}",
             glz::format_error(err, message)
         );
+        return;
+    }
 
     std::lock_guard<std::mutex> lock{message_lock_};
     message_queue_.push_back(std::move(data));
@@ -59,9 +74,6 @@ PipeReader::store_message_(const std::string& message)
 void
 PipeReader::async_read_pipe(std::shared_ptr<std::string> buffer)
 {
-    auto pipe_in = pipe_in_ptr.lock();
-    if (pipe_in == nullptr)
-        return;
     auto prox_message = [this, buffer](const auto& ec, auto length) {
         if (!ec) [[likely]] {
             auto mess = std::string(buffer->data(), length);
@@ -69,17 +81,14 @@ PipeReader::async_read_pipe(std::shared_ptr<std::string> buffer)
             buffer->erase(0, length);
             async_read_pipe(std::move(buffer));
         }
-        else if (ec == boost::asio::error::eof) {
-            async_read_pipe();
-        }
         else {
             // TODO: report a better way
             // throw std::runtime_error(
-            // fmt::format("Error reading from wrapper pipe: {}", ec.message())
+            //     fmt::format("Error reading from wrapper pipe: {}", ec.message())
             // );
         }
     };
-    ba::async_read_until(*pipe_in, ba::dynamic_buffer(*buffer), "\n", prox_message);
+    ba::async_read_until(pipe_in_, ba::dynamic_buffer(*buffer), "\n", prox_message);
 }
 
 } // namespace wrappers

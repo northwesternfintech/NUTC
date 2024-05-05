@@ -6,6 +6,8 @@
 #include <boost/asio.hpp>
 #include <fmt/format.h>
 
+#include <iostream>
+
 namespace {
 std::string
 quote_id(std::string user_id)
@@ -44,34 +46,41 @@ WrapperHandle::~WrapperHandle()
     }
 }
 
-WrapperHandle::WrapperHandle(const std::string& remote_uid, const std::string& algo_id)
-{
-    std::vector<std::string> args{
-        "--uid", quote_id(remote_uid), "--algo_id", quote_id(algo_id)
-    };
-    spawn_wrapper(args);
-}
+WrapperHandle::WrapperHandle(
+    const std::string& remote_uid, const std::string& algo_id
+) :
+    WrapperHandle({"--uid", quote_id(remote_uid), "--algo_id", quote_id(algo_id)})
+{}
 
-WrapperHandle::WrapperHandle(const std::string& algo_path)
-{
-    std::vector<std::string> args{
-        "--uid", quote_id(algo_path), "--algo_id", quote_id(algo_path), "--dev"
-    };
-    spawn_wrapper(args);
-}
+WrapperHandle::WrapperHandle(const std::string& algo_path) :
+    WrapperHandle(
+        {"--uid", quote_id(algo_path), "--algo_id", quote_id(algo_path), "--dev"}
+    )
+{}
 
 void
-WrapperHandle::spawn_wrapper(const std::vector<std::string>& args)
+WrapperHandle::block_on_init()
+{
+    auto message = reader_.get_message();
+    if (std::holds_alternative<init_message>(message)) {
+        return;
+    }
+    throw std::runtime_error("Received non-init message on initialization");
+}
+
+WrapperHandle::WrapperHandle(const std::vector<std::string>& args)
 {
     static const std::string path{wrapper_binary_path()};
-    auto pipe_in_ptr = reader_.get_pipe().lock();
-    auto pipe_out_ptr = writer_.get_pipe().lock();
-    assert(pipe_in_ptr != nullptr);
-    assert(pipe_out_ptr != nullptr);
+
+    auto& pipe_in_ptr = reader_.get_pipe();
+    auto& pipe_out_ptr = writer_.get_pipe();
+
     wrapper_ = bp::child(
-        bp::exe(path), bp::args(args), bp::std_in<*pipe_out_ptr, bp::std_err> stderr,
-        bp::std_out > *pipe_in_ptr
+        bp::exe(path), bp::args(args), bp::std_in<pipe_out_ptr, bp::std_err> stderr,
+        bp::std_out > pipe_in_ptr
     );
+
+    block_on_init();
 }
 
 } // namespace wrappers

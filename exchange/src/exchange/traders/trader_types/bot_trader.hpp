@@ -95,11 +95,10 @@ public:
     take_action(double, double)
     {}
 
-    std::vector<std::variant<init_message, market_order>>
-    read_messages() override
+    std::vector<market_order>
+    read_orders() override
     {
-        std::vector<std::variant<init_message, market_order>> ret{};
-        std::ranges::move(orders_, std::back_inserter(ret));
+        auto ret = orders_;
         orders_.clear();
         return ret;
     }

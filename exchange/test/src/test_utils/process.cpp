@@ -33,7 +33,6 @@ initialize_testing_clients(
         DevModeAlgoInitializer algo_manager{algo_filepaths};
         algo_manager.initialize_trader_container(users);
         logging::init(quill::LogLevel::Info);
-        rabbitmq::WrapperInitializer::wait_for_clients(users);
         rabbitmq::WrapperInitializer::send_start_time(users, start_delay);
     };
 

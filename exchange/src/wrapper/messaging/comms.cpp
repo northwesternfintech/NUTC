@@ -130,9 +130,9 @@ ExchangeProxy::market_order_func()
 }
 
 void
-ExchangeProxy::publish_init_message(bool ready)
+ExchangeProxy::publish_init_message()
 {
-    std::string message = glz::write_json(init_message{ready});
+    std::string message = glz::write_json(init_message{});
     publish_message(message);
 }
 

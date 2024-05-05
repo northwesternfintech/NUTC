@@ -61,8 +61,8 @@ public:
         wrapper_handle_.send_messages(messages);
     }
 
-    std::vector<std::variant<init_message, market_order>>
-    read_messages() override
+    std::vector<market_order>
+    read_orders() override
     {
         return wrapper_handle_.read_messages();
     }

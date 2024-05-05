@@ -34,6 +34,12 @@ public:
         return false;
     }
 
+    virtual bool
+    is_active() const
+    {
+        return true;
+    }
+
     virtual const std::string&
     get_display_name() const
     {
@@ -117,8 +123,8 @@ public:
     send_messages(std::vector<std::string>)
     {}
 
-    virtual std::vector<std::variant<init_message, market_order>>
-    read_messages()
+    virtual std::vector<market_order>
+    read_orders()
     {
         return {};
     }

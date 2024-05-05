@@ -6,14 +6,14 @@
 namespace nutc {
 namespace wrappers {
 
-PipeWriter::PipeWriter() : pipe_out_ptr(AsyncPipeRunner::get().create_pipe()) {}
+PipeWriter::PipeWriter() :
+    pipe_context_(AsyncPipeRunner::get_context()), pipe_out_(*pipe_context_)
+{}
 
 PipeWriter::~PipeWriter()
 {
-    auto pipe = pipe_out_ptr.lock();
-    if (pipe == nullptr)
-        return;
-    AsyncPipeRunner::get().remove_pipe(pipe);
+    pipe_out_.cancel();
+    pipe_out_.close();
 }
 
 void
@@ -38,11 +38,8 @@ void
 PipeWriter::async_write_pipe(std::string message)
 {
     auto buf = std::make_shared<std::string>(std::move(message));
-    auto pipe_out = pipe_out_ptr.lock();
-    if (pipe_out == nullptr)
-        return;
     boost::asio::async_write(
-        *pipe_out, bp::buffer(*buf),
+        pipe_out_, bp::buffer(*buf),
         [this, buf](boost::system::error_code ec, std::size_t) {
             if (!ec) [[likely]] {
                 std::lock_guard<std::mutex> lock{message_lock_};

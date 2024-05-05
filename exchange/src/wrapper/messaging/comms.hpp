@@ -20,7 +20,7 @@ namespace nutc {
 namespace comms {
 class ExchangeProxy {
 public:
-    static void publish_init_message(bool ready);
+    static void publish_init_message();
 
     std::function<bool(const std::string&, const std::string&, double, double)>
     market_order_func();

@@ -19,21 +19,39 @@ class WrapperHandle {
     PipeReader reader_{};
     PipeWriter writer_{};
 
-    void spawn_wrapper(const std::vector<std::string>& args);
+    WrapperHandle(const std::vector<std::string>& args);
+    void block_on_init();
 
     const fs::path& wrapper_binary_path();
 
 public:
+    /* Both constructors will block on an init messages, ensuring proper construction
+     * There should *not* be a case (incl submitted code errors) where the wrapper does
+     * not send an init_message
+     */
+
     // Remote (algo in firebase)
     WrapperHandle(const std::string& remote_uid, const std::string& algo_id);
 
     // Local (.py on disk)
     WrapperHandle(const std::string& algo_path);
 
-    std::vector<std::variant<init_message, market_order>>
+    std::vector<market_order>
     read_messages()
     {
-        return reader_.get_messages();
+        auto messages = reader_.get_messages();
+        std::vector<market_order> orders{};
+        orders.reserve(messages.size());
+
+        if (std::ranges::any_of(messages, [](auto&& mess) {
+                return std::holds_alternative<init_message>(mess);
+            }))
+            throw std::runtime_error("Unexpected init message");
+
+        for (const auto& message : messages) {
+            orders.push_back(std::move(std::get<market_order>(message)));
+        }
+        return orders;
     }
 
     void

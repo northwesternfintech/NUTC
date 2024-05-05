@@ -18,9 +18,6 @@ public:
         engine_manager::EngineManager& engine_manager,
         const std::shared_ptr<traders::GenericTrader>& trader, market_order&& order
     );
-    static void handle_sandbox_init(
-        const std::shared_ptr<traders::GenericTrader>& trader, init_message&& message
-    );
 };
 
 } // namespace rabbitmq

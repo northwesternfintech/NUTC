@@ -25,7 +25,7 @@ public:
         AGGRESSIVENESS(generate_aggresiveness_())
     {}
 
-    [[nodiscard]] bool is_active() const;
+    [[nodiscard]] bool is_active() const override;
 
     void take_action(double midprice, double theo) override;
 

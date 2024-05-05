@@ -13,10 +13,7 @@ namespace messages {
  * not be participating in the competition
  */
 struct init_message {
-    bool ready;
-
-    init_message(bool ready) : ready(ready) {}
-
+    int test{5};
     init_message() = default;
 };
 
@@ -40,15 +37,12 @@ struct market_order {
 template <>
 struct glz::meta<nutc::messages::market_order> {
     using t = nutc::messages::market_order;
-    static constexpr auto value = object( // NOLINT
-        &t::ticker, &t::side, &t::quantity, &t::price
-    );
+    static constexpr auto value = object(&t::ticker, &t::side, &t::quantity, &t::price);
 };
 
 /// \cond
 template <>
 struct glz::meta<nutc::messages::init_message> {
     using t = nutc::messages::init_message;
-    static constexpr auto value = // NOLINT
-        object("init", &t::ready);
+    static constexpr auto value = object("init", &t::test);
 };

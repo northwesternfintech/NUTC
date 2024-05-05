@@ -24,6 +24,12 @@ public:
 
     void take_action(double midprice, double theo) override;
 
+    bool
+    is_active() const override
+    {
+        return true;
+    }
+
 private:
     static constexpr double avg_level_price(double new_theo);
 };

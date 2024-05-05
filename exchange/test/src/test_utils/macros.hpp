@@ -16,8 +16,7 @@ using TraderContainer = nutc::traders::TraderContainer;
 namespace nutc {
 namespace test_utils {
 
-std::variant<init_message, market_order>
-consume_message(const std::shared_ptr<traders::GenericTrader>& trader);
+market_order consume_message(const std::shared_ptr<traders::GenericTrader>& trader);
 
 bool is_nearly_equal(
     double f_a, double f_b, double epsilon = std::numeric_limits<double>::epsilon()

@@ -4,7 +4,7 @@ vars:
   NAME: NUTC
   
   # BOTS, DEV, or NORMAL
-  MODE: "BOTS"
+  MODE: "DEV"
   
   DASHBOARD_ENABLED: True
   
@@ -72,7 +72,7 @@ tasks:
     cmds:
       - task: build
       - task: new-log-dir
-      - gdb ./{{ .NUTC_PATH }}
+      - lldb ./{{ .NUTC_PATH }}
 
   run:
     env:

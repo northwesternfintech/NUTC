@@ -12,14 +12,16 @@ using init_message = messages::init_message;
 using market_order = messages::market_order;
 
 namespace bp = boost::process;
+namespace ba = boost::asio;
 
 /**
  * Singleton that stores incoming messages from wrappers
  */
 class PipeReader {
     std::mutex message_lock_{};
-    std::vector<std::variant<init_message, messages::market_order>> message_queue_{};
-    std::weak_ptr<bp::async_pipe> pipe_in_ptr;
+    std::vector<std::variant<init_message, market_order>> message_queue_{};
+    std::shared_ptr<ba::io_context> pipe_context_;
+    bp::async_pipe pipe_in_;
 
     void store_message_(const std::string& message);
 
@@ -28,18 +30,22 @@ class PipeReader {
     void async_read_pipe(std::shared_ptr<std::string> buffer);
 
 public:
-    std::weak_ptr<bp::async_pipe>
+    bp::async_pipe&
     get_pipe()
     {
-        return pipe_in_ptr;
+        return pipe_in_;
     }
 
     PipeReader();
 
     ~PipeReader();
 
-    std::vector<std::variant<messages::init_message, messages::market_order>>
-    get_messages();
+    // Nonblocking, all available messages
+    std::vector<std::variant<init_message, market_order>> get_messages();
+
+    // Blocking, O(messages) due to erase
+    // Use sparingly
+    std::variant<init_message, market_order> get_message();
 };
 
 } // namespace wrappers
