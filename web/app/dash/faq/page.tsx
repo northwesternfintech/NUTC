@@ -70,7 +70,7 @@ const faqs = [
   },
   {
     question: "What if I have other questions or have issues with the website?",
-    answer: "Please reach out in the #nutc-support channel in the NUFT slack!",
+    answer: "Please reach out in the piazza",
   },
 ];
 
