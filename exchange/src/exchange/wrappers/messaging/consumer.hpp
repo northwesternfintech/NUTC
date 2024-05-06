@@ -1,45 +1,23 @@
 #pragma once
 
-#include "exchange/metrics/prometheus.hpp"
+#include "exchange/tick_scheduler/tick_observer.hpp"
 #include "exchange/tickers/manager/ticker_manager.hpp"
+#include "exchange/traders/trader_types/trader_interface.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
-
-#include <optional>
-#include <string>
 
 namespace nutc {
 namespace rabbitmq {
+using market_order = messages::market_order;
+using init_message = messages::init_message;
 
-class WrapperConsumer {
+class WrapperConsumer : public ticks::TickObserver {
 public:
-    static std::optional<std::variant<messages::init_message, messages::market_order>>
-    consume_message_nonblocking();
-
-    static std::variant<messages::init_message, messages::market_order>
-    consume_message()
-    {
-        auto result = consume_message_nonblocking();
-        while (!result.has_value()) {
-            result = consume_message_nonblocking();
-        }
-        return result.value();
-    }
+    void on_tick(uint64_t new_tick) override;
 
     static void match_new_order(
-        engine_manager::EngineManager& engine_manager, messages::market_order&& order
+        engine_manager::EngineManager& engine_manager,
+        const std::shared_ptr<traders::GenericTrader>& trader, market_order&& order
     );
-
-    /**
-     * @brief Main event loop, handles incoming messages from exchange
-     *
-     * Handles incoming orderbook updates, trade updates, account updates, and shutdown
-     * messages from the exchange
-     */
-    static void consumer_event_loop(engine_manager::EngineManager& engine_manager);
-    static void handle_sandbox_init(messages::init_message&& message);
-
-private:
-    static std::optional<std::string> consume_message_as_string();
 };
 
 } // namespace rabbitmq

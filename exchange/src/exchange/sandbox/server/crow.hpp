@@ -1,15 +1,10 @@
 #pragma once
 
-#include "exchange/logging.hpp"
-#include "exchange/traders/trader_container.hpp"
-#include "exchange/traders/trader_types/algo_trader.hpp"
-#include "shared/config/config_loader.hpp"
+#include "exchange/traders/trader_types/trader_interface.hpp"
 
 #include <boost/asio.hpp>
 #include <crow/app.h>
 
-#include <iostream>
-#include <string>
 #include <thread>
 
 namespace nutc {
@@ -38,7 +33,9 @@ public:
     ~CrowServer();
 
 private:
-    void start_remove_timer(unsigned int time_ms, const std::string& trader_id);
+    void start_remove_timer_(
+        unsigned int time_ms, const std::weak_ptr<traders::GenericTrader>& trader_ptr
+    );
 };
 
 } // namespace sandbox

@@ -19,15 +19,12 @@ struct BotStates {
     double max_open_asks_{};
     double min_utilization_{};
     double max_utilization_{};
-    double min_pnl_{};
-    double max_pnl_{};
 
     double avg_open_bids_{};
     double avg_open_asks_{};
     double avg_bid_interest_{};
     double avg_ask_interest_{};
     double avg_utilization_{};
-    double avg_pnl_{};
 };
 
 struct TickerState {
@@ -72,14 +69,11 @@ private:
             bot_states.max_open_asks_ = std::numeric_limits<double>::min();
             bot_states.min_utilization_ = std::numeric_limits<double>::max();
             bot_states.max_utilization_ = std::numeric_limits<double>::min();
-            bot_states.min_pnl_ = std::numeric_limits<double>::max();
-            bot_states.max_pnl_ = std::numeric_limits<double>::min();
             bot_states.avg_open_bids_ = 0;
             bot_states.avg_open_asks_ = 0;
             bot_states.avg_bid_interest_ = 0;
             bot_states.avg_ask_interest_ = 0;
             bot_states.avg_utilization_ = 0;
-            bot_states.avg_pnl_ = 0;
         };
 
         reset_bot_states(mm_state_);
