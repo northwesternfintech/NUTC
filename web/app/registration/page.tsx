@@ -35,7 +35,7 @@ async function uploadResume(
 async function writeNewUser(functions: any, database: any, user: UserInfoType) {
   //iterate over fields in user
   for (const [key, value] of Object.entries(user)) {
-    if (!(key === "isFilledFromDB") && !value) {
+    if (!(key === "isFilledFromDB") && !(key === "isInAGroup") && !value) {
       Swal.fire({
         title: "Please fill out all fields",
         icon: "warning",
