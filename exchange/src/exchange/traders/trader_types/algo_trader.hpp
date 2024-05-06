@@ -6,6 +6,8 @@
 
 #include <fmt/format.h>
 
+#include <filesystem>
+
 namespace nutc {
 namespace traders {
 
@@ -59,12 +61,6 @@ public:
     send_messages(std::vector<std::string> messages) final
     {
         wrapper_handle_.send_messages(messages);
-    }
-
-    std::vector<market_order>
-    read_orders() override
-    {
-        return wrapper_handle_.read_messages();
     }
 };
 

@@ -37,7 +37,7 @@ CrowServer::CrowServer() : work_guard_(io_context_.get_executor())
                                   user_id, algo_id, "SANDBOX_USER", STARTING_CAPITAL
                               );
             trader->send_messages({glz::write_json(messages::start_time{0})});
-            start_remove_timer(trial_secs, trader);
+            start_remove_timer(trial_secs, trader->get_id());
             return res;
         } catch (...) {
             return crow::response(500);
@@ -65,22 +65,17 @@ CrowServer::~CrowServer()
 }
 
 void
-CrowServer::start_remove_timer(
-    unsigned int time_s, std::weak_ptr<traders::GenericTrader> trader_ptr
-)
+CrowServer::start_remove_timer(unsigned int time_s, const std::string& trader_id)
 {
     auto timer =
         std::make_shared<ba::steady_timer>(io_context_, ba::chrono::seconds(time_s));
-    timer->async_wait([timer, trader_ptr](const boost::system::error_code& ec) {
-        auto trader = trader_ptr.lock();
-        if (trader == nullptr)
-            return;
+    timer->async_wait([timer, trader_id](const boost::system::error_code& ec) {
         if (!ec) {
-            log_i(main, "Removing trader {}", trader->get_display_name());
-            traders::TraderContainer::get_instance().remove_trader(trader);
+            log_i(main, "Removing trader {}", trader_id);
+            traders::TraderContainer::get_instance().remove_trader(trader_id);
         }
         else {
-            log_e(main, "Unable to remove trader {}", trader->get_display_name());
+            log_e(main, "Unable to remove trader {}", trader_id);
         }
     });
     timers_.push_back(timer);

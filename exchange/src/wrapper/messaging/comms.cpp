@@ -77,14 +77,16 @@ ExchangeProxy::handle_match(const match& match, const std::string& uid)
 
 bool
 ExchangeProxy::publish_market_order(
-    const std::string& side, const std::string& ticker, double quantity, double price
+    const std::string& client_id, const std::string& side, const std::string& ticker,
+    double quantity, double price
 )
 {
     if (limiter.should_rate_limit()) {
         return false;
     }
     market_order order{
-        side == "BUY" ? util::Side::buy : util::Side::sell, ticker, quantity, price
+        client_id, side == "BUY" ? util::Side::buy : util::Side::sell, ticker, quantity,
+        price
     };
     std::string message = glz::write_json(order);
 
@@ -121,18 +123,20 @@ ExchangeProxy::consume_message()
 }
 
 std::function<bool(const std::string&, const std::string&, double, double)>
-ExchangeProxy::market_order_func()
+ExchangeProxy::market_order_func(const std::string& user_id)
 {
     return [&](const std::string& side, const auto& ticker, const auto& quantity,
                const auto& price) {
-        return ExchangeProxy::publish_market_order(side, ticker, quantity, price);
+        return ExchangeProxy::publish_market_order(
+            user_id, side, ticker, quantity, price
+        );
     };
 }
 
 void
-ExchangeProxy::publish_init_message()
+ExchangeProxy::publish_init_message(const std::string& user_id, bool ready)
 {
-    std::string message = glz::write_json(init_message{});
+    std::string message = glz::write_json(init_message{user_id, ready});
     publish_message(message);
 }
 

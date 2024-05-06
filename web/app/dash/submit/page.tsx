@@ -241,11 +241,13 @@ export default function Submission() {
                   Algorithm Upload
                 </label>
                 <div
-                  className={algo.downloadURL
-                    ? "mt-2 flex justify-center rounded-lg border border-solid border-green-400 px-6 py-10"
-                    : isDragOver
-                    ? "mt-2 flex justify-center rounded-lg border border-solid border-indigo-500 px-6 py-10"
-                    : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"}
+                  className={
+                    algo.downloadURL
+                      ? "mt-2 flex justify-center rounded-lg border border-solid border-green-400 px-6 py-10"
+                      : isDragOver
+                      ? "mt-2 flex justify-center rounded-lg border border-solid border-indigo-500 px-6 py-10"
+                      : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"
+                  }
                   ref={dropRef}
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
@@ -313,21 +315,25 @@ export default function Submission() {
                   allowEnterKey: false,
                 });
                 Swal.showLoading();
-                axios.post(
-                  `${apiEndpoint()}/webserver/submit/${userInfo?.user?.uid}/${algoRef.key}`,
-                ).then(() => {
-                  Swal.close();
-                  Swal.fire({
-                    title: "Linting complete!",
-                    text: "View results in the dashboard.",
-                    icon: "success",
-                    timer: 2000,
-                    timerProgressBar: true,
-                    willClose: () => {
-                      window.location.href = "submissions/" + algoRef.key;
-                    },
-                  });
-                })
+                axios
+                  .post(
+                    `${apiEndpoint()}/webserver/submit/${userInfo?.user?.uid}/${
+                      algoRef.key
+                    }`,
+                  )
+                  .then(() => {
+                    Swal.close();
+                    Swal.fire({
+                      title: "Linting complete!",
+                      text: "View results in the dashboard.",
+                      icon: "success",
+                      timer: 2000,
+                      timerProgressBar: true,
+                      willClose: () => {
+                        window.location.href = "submissions/" + algoRef.key;
+                      },
+                    });
+                  })
                   .catch((error) => {
                     if (error.response) {
                       Swal.fire({

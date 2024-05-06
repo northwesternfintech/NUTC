@@ -20,10 +20,10 @@ namespace nutc {
 namespace comms {
 class ExchangeProxy {
 public:
-    static void publish_init_message();
+    static void publish_init_message(const std::string& user_id, bool ready);
 
     std::function<bool(const std::string&, const std::string&, double, double)>
-    market_order_func();
+    market_order_func(const std::string& user_id);
 
     static void wait_for_start_time();
 
@@ -39,8 +39,8 @@ private:
 
     static void publish_message(const std::string& message);
     [[nodiscard]] bool publish_market_order(
-        const std::string& side, const std::string& ticker, double quantity,
-        double price
+        const std::string& client_id, const std::string& side,
+        const std::string& ticker, double quantity, double price
     );
 
     static std::variant<start_time, tick_update> consume_message();

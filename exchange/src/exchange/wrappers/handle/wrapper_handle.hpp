@@ -1,8 +1,5 @@
 #pragma once
 
-#include "exchange/wrappers/messaging/pipe_reader.hpp"
-#include "exchange/wrappers/messaging/pipe_writer.hpp"
-
 #include <boost/process.hpp>
 #include <boost/process/pipe.hpp>
 
@@ -16,49 +13,26 @@ namespace fs = std::filesystem;
 
 class WrapperHandle {
     bp::child wrapper_;
-    PipeReader reader_{};
-    PipeWriter writer_{};
+    std::weak_ptr<bp::async_pipe> pipe_in;
+    std::weak_ptr<bp::async_pipe> pipe_out;
+    std::mutex messages_lock_{};
+    std::deque<std::string> queued_messages_{};
+    std::atomic_flag is_writing_{false};
 
-    WrapperHandle(const std::vector<std::string>& args);
-    void block_on_init();
+    void async_write_pipe(std::string message);
+
+    void spawn_wrapper(const std::vector<std::string>& args);
 
     const fs::path& wrapper_binary_path();
 
 public:
-    /* Both constructors will block on an init messages, ensuring proper construction
-     * There should *not* be a case (incl submitted code errors) where the wrapper does
-     * not send an init_message
-     */
-
     // Remote (algo in firebase)
     WrapperHandle(const std::string& remote_uid, const std::string& algo_id);
 
     // Local (.py on disk)
     WrapperHandle(const std::string& algo_path);
 
-    std::vector<market_order>
-    read_messages()
-    {
-        auto messages = reader_.get_messages();
-        std::vector<market_order> orders{};
-        orders.reserve(messages.size());
-
-        if (std::ranges::any_of(messages, [](auto&& mess) {
-                return std::holds_alternative<init_message>(mess);
-            }))
-            throw std::runtime_error("Unexpected init message");
-
-        for (const auto& message : messages) {
-            orders.push_back(std::move(std::get<market_order>(message)));
-        }
-        return orders;
-    }
-
-    void
-    send_messages(std::vector<std::string> messages)
-    {
-        return writer_.send_messages(messages);
-    }
+    void send_messages(std::vector<std::string> messages);
 
     ~WrapperHandle();
 };

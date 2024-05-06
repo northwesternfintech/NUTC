@@ -3,6 +3,7 @@
 #include "exchange/bots/bot_types/retail.hpp"
 #include "exchange/theo/brownian.hpp"
 #include "exchange/tick_scheduler/tick_observer.hpp"
+#include "exchange/tickers/engine/order_storage.hpp"
 
 #include <cstdint>
 
@@ -21,7 +22,9 @@ class BotContainer : public ticks::TickObserver {
     const std::string TICKER;
     stochastic::BrownianMotion theo_generator_;
 
-    std::vector<std::shared_ptr<traders::BotTrader>> bots_{};
+    std::unordered_map<std::string, const std::shared_ptr<RetailBot>> retail_bots_{};
+    std::unordered_map<std::string, const std::shared_ptr<MarketMakerBot>>
+        market_makers_{};
 
 public:
     void on_tick(uint64_t) override;
@@ -33,12 +36,19 @@ public:
     }
 
     const auto&
-    get_bots() const
+    get_market_makers() const
     {
-        return bots_;
+        return market_makers_;
     }
 
-    void generate_orders(double midprice, double new_theo);
+    const auto&
+    get_retail_traders() const
+    {
+        return retail_bots_;
+    }
+
+    std::vector<matching::stored_order>
+    on_new_theo(double new_theo, double current, uint64_t current_tick);
 
     template <class BotType>
     void add_bots(double mean_capital, double stddev_capital, size_t num_bots)
@@ -49,6 +59,11 @@ public:
     explicit BotContainer(std::string ticker, double starting_price) :
         TICKER(std::move(ticker)), theo_generator_(starting_price)
     {}
+
+private:
+    template <class BotType>
+    void add_single_bot_(double starting_capital)
+    requires HandledBotType<BotType>;
 };
 } // namespace bots
 } // namespace nutc

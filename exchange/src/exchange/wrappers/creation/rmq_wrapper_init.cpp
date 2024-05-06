@@ -1,11 +1,55 @@
 #include "rmq_wrapper_init.hpp"
 
 #include "exchange/logging.hpp"
-
-#include <iostream>
+#include "exchange/wrappers/messaging/consumer.hpp"
+#include "shared/messages_exchange_to_wrapper.hpp"
 
 namespace nutc {
 namespace rabbitmq {
+
+void
+WrapperInitializer::wait_for_clients(traders::TraderContainer& manager)
+{
+    size_t num_clients = manager.num_traders();
+    log_i(rabbitmq, "Blocking until all {} clients are ready to start...", num_clients);
+    int num_running = 0;
+
+    auto process_message = [&](const auto& message) {
+        using t = std::decay_t<decltype(message)>;
+        if constexpr (std::is_same_v<t, messages::market_order>) {
+            log_i(
+                rabbitmq,
+                "Received market order before initialization complete. Ignoring..."
+            );
+        }
+        else if constexpr (std::is_same_v<t, messages::init_message>) {
+            log_i(
+                rabbitmq, "Received init message from client {} with status {}",
+                message.client_id, message.ready ? "ready" : "not ready"
+            );
+
+            // TODO: maybe send some warning?
+            if (!message.ready) {
+                manager.remove_trader(message.client_id);
+            }
+            else {
+                num_running++;
+            }
+            return true;
+        }
+        return false;
+    };
+
+    for (size_t i = 0; i < num_clients; i++) {
+        auto data = WrapperConsumer::consume_message();
+        while (!std::visit(process_message, data)) {}
+    }
+
+    log_i(
+        rabbitmq, "All {} clients initialized. Starting exchange with {} ready clients",
+        num_clients, num_running
+    );
+}
 
 void
 WrapperInitializer::send_start_time(
@@ -20,11 +64,9 @@ WrapperInitializer::send_start_time(
                           .count();
 
     messages::start_time message{time_ns};
-    std::vector<std::string> buf = {glz::write_json(message)};
+    std::string buf = glz::write_json(message);
 
-    for (const auto& trader : manager.get_traders()) {
-        trader->send_messages(buf);
-    }
+    manager.broadcast_messages({buf});
 }
 
 } // namespace rabbitmq

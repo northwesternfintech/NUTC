@@ -18,8 +18,8 @@ using lock_guard = std::lock_guard<std::mutex>;
 // The traders themselves shouldn't need thread safety - maybe we should still consider
 // adding, though
 class TraderContainer {
-    mutable std::mutex trader_lock_{};
-    std::vector<std::shared_ptr<GenericTrader>> traders_{};
+    std::mutex trader_lock_{};
+    boost::unordered_map<std::string, const std::shared_ptr<GenericTrader>> traders_{};
 
 public:
     /**
@@ -33,20 +33,47 @@ public:
 
         std::shared_ptr<GenericTrader> trader =
             make_shared_trader_<T>(std::forward<Args>(args)...);
-        traders_.emplace_back(trader);
+        traders_.insert({trader->get_id(), trader});
         return std::static_pointer_cast<T>(trader);
     }
 
     void
-    remove_trader(std::shared_ptr<traders::GenericTrader> trader)
+    remove_trader(const std::string& trader_id)
     {
         lock_guard lock{trader_lock_};
-        auto it = std::ranges::find(traders_, trader);
-        traders_.erase(it);
+        if (!user_exists_(trader_id))
+            return;
+        traders_.erase(trader_id);
+    }
+
+    std::shared_ptr<GenericTrader>
+    get_trader(const std::string& trader_id)
+    {
+        lock_guard lock{trader_lock_};
+        assert(user_exists_(trader_id));
+        return traders_.at(trader_id);
+    }
+
+    std::optional<std::shared_ptr<GenericTrader>>
+    try_get_trader(const std::string& trader_id)
+    {
+        lock_guard lock{trader_lock_};
+        if (!user_exists_(trader_id))
+            return std::nullopt;
+        return traders_.at(trader_id);
+    }
+
+    void
+    broadcast_messages(const std::vector<std::string>& messages)
+    {
+        lock_guard lock{trader_lock_};
+        for (const auto& trader_pair : traders_) {
+            trader_pair.second->send_messages(messages);
+        }
     }
 
     size_t
-    num_traders() const
+    num_traders()
     {
         lock_guard lock{trader_lock_};
         return traders_.size();
@@ -54,8 +81,8 @@ public:
 
     // TODO: remove after improving dashboard
     // Return a copy of the map so we have copies of the shared pointers
-    const std::vector<std::shared_ptr<GenericTrader>>
-    get_traders() const
+    auto
+    get_traders()
     {
         lock_guard lock{trader_lock_};
         return traders_;
@@ -78,14 +105,21 @@ private:
         return std::make_shared<T>(std::forward<Args>(args)...);
     }
 
+    bool
+    user_exists_(const std::string& user_id) const
+    {
+        return traders_.contains(user_id);
+    }
+
     TraderContainer() = default;
     ~TraderContainer() = default;
 
 public:
+    // Singleton
     static TraderContainer&
     get_instance()
     {
-        static TraderContainer instance{};
+        static TraderContainer instance;
         return instance;
     }
 

@@ -4,7 +4,7 @@ vars:
   NAME: NUTC
   
   # BOTS, DEV, or NORMAL
-  MODE: "DEV"
+  MODE: "BOTS"
   
   DASHBOARD_ENABLED: True
   
@@ -72,7 +72,7 @@ tasks:
     cmds:
       - task: build
       - task: new-log-dir
-      - lldb ./{{ .NUTC_PATH }}
+      - gdb ./{{ .NUTC_PATH }}
 
   run:
     env:
@@ -120,7 +120,7 @@ tasks:
     dir: '{{if eq .RELEASE_BUILD "False"}}.{{else}}build{{end}}'
     vars:
       WRAPPER_RELATIVE_PATH: './build{{if eq .RELEASE_BUILD "False"}}/dev{{end}}/WRAPPER'
-      DEV_TEST_FLAGS: '--timeout 2 --preset=dev'
+      DEV_TEST_FLAGS: '--timeout 10 --preset=dev'
       RELEASE_TEST_FLAGS: '--output-on-failure --no-tests=error --timeout 10 -C Release'
       TEST_FLAGS: '{{if eq .RELEASE_BUILD "True"}}{{.RELEASE_TEST_FLAGS}}{{else}}{{.DEV_TEST_FLAGS}}{{end}}'
     env:

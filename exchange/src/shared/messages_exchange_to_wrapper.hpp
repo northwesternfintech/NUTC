@@ -89,7 +89,8 @@ template <>
 struct glz::meta<nutc::messages::orderbook_update> {
     using t = nutc::messages::orderbook_update;
     static constexpr auto value = object( // NOLINT
-        &t::ticker, &t::side, &t::price, &t::quantity
+        "security", &t::ticker, "side", &t::side, "price", &t::price, "quantity",
+        &t::quantity
     );
 };
 
@@ -98,7 +99,7 @@ template <>
 struct glz::meta<nutc::messages::tick_update> {
     using t = nutc::messages::tick_update;
     static constexpr auto value = object( // NOLINT
-        &t::ob_updates, &t::matches
+        "ob_updates", &t::ob_updates, "matches", &t::matches
     );
 };
 
@@ -107,8 +108,9 @@ template <>
 struct glz::meta<nutc::messages::match> {
     using t = nutc::messages::match;
     static constexpr auto value = object( // NOLINT
-        &t::ticker, &t::buyer_id, &t::seller_id, &t::side, &t::price, &t::quantity,
-        &t::buyer_capital, &t::seller_capital
+        "ticker", &t::ticker, "buyer_id", &t::buyer_id, "seller_id", &t::seller_id,
+        "side", &t::side, "price", &t::price, "quantity", &t::quantity, "buyer_capital",
+        &t::buyer_capital, "seller_capital", &t::seller_capital
     );
 };
 
@@ -117,5 +119,5 @@ template <>
 struct glz::meta<nutc::messages::start_time> {
     using t = nutc::messages::start_time;
     static constexpr auto value = // NOLINT
-        object(&t::start_time_ns);
+        object("start_time_ns", &t::start_time_ns);
 };

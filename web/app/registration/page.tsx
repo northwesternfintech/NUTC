@@ -1,5 +1,9 @@
 "use client";
-import { PhotoIcon, CheckIcon, UserCircleIcon } from "@heroicons/react/24/solid";
+import {
+  PhotoIcon,
+  CheckIcon,
+  UserCircleIcon,
+} from "@heroicons/react/24/solid";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { UserInfoType, useUserInfo } from "@/app/login/auth/context";
@@ -121,6 +125,7 @@ export default function Registration() {
   const defaultUser: UserInfoType = {
     uid: userInfo.user?.uid || "-1",
     isFilledFromDB: false,
+    isInAGroup: false,
     username: "",
     about: "",
     resumeURL: "",
@@ -239,11 +244,13 @@ export default function Registration() {
                 Resume
               </label>
               <div
-                className={currUser.resumeURL
-                  ? "mt-2 flex justify-center rounded-lg border border-solid border-green-400 px-6 py-10"
-                  : isDragOver
-                  ? "mt-2 flex justify-center rounded-lg border border-dashed border-indigo-500 px-6 py-10"
-                  : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"}
+                className={
+                  currUser.resumeURL
+                    ? "mt-2 flex justify-center rounded-lg border border-solid border-green-400 px-6 py-10"
+                    : isDragOver
+                    ? "mt-2 flex justify-center rounded-lg border border-dashed border-indigo-500 px-6 py-10"
+                    : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"
+                }
                 ref={dropRef}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -273,7 +280,7 @@ export default function Registration() {
                         id="file-upload"
                         name="file-upload"
                         type="file"
-                        onChange={(e:any) => {
+                        onChange={(e: any) => {
                           //@ts-ignore
                           handleResumeChange(e.target.files[0]);
                         }}
@@ -381,84 +388,6 @@ export default function Registration() {
                 </select>
               </div>
             </div>
-          </div>
-        </div>
-
-        <div className="border-b border-white/10 pb-12">
-          <h2 className="text-base font-semibold leading-7 text-white">
-            Notifications
-          </h2>
-          <p className="mt-1 text-sm leading-6 text-gray-400">
-            We&#39;ll always let you know about important updates, but you pick
-            what else you want to hear about.
-          </p>
-
-          <div className="mt-10 space-y-10">
-            <fieldset>
-              <legend className="text-sm font-semibold leading-6 text-white">
-                By Email
-              </legend>
-              <div className="mt-6 space-y-6">
-                <div className="relative flex gap-x-3">
-                  <div className="flex h-6 items-center">
-                    <input
-                      id="test-runs"
-                      name="test-runs"
-                      type="checkbox"
-                      className="h-4 w-4 rounded border-white/10 bg-white/5 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-gray-900"
-                    />
-                  </div>
-                  <div className="text-sm leading-6">
-                    <label
-                      htmlFor="test-runs"
-                      className="font-medium text-white"
-                    >
-                      Test Runs
-                    </label>
-                    <p className="text-gray-400">
-                      Get notified when your script passes or fails linting
-                    </p>
-                  </div>
-                </div>
-                <div className="relative flex gap-x-3">
-                  <div className="flex h-6 items-center">
-                    <input
-                      id="results"
-                      name="results"
-                      type="checkbox"
-                      className="h-4 w-4 rounded border-white/10 bg-white/5 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-gray-900"
-                    />
-                  </div>
-                  <div className="text-sm leading-6">
-                    <label htmlFor="results" className="font-medium text-white">
-                      Results
-                    </label>
-                    <p className="text-gray-400">
-                      Get notified when results are announced
-                    </p>
-                  </div>
-                </div>
-                <div className="relative flex gap-x-3">
-                  <div className="flex h-6 items-center">
-                    <input
-                      id="news"
-                      name="news"
-                      type="checkbox"
-                      className="h-4 w-4 rounded border-white/10 bg-white/5 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-gray-900"
-                    />
-                  </div>
-                  <div className="text-sm leading-6">
-                    <label htmlFor="news" className="font-medium text-white">
-                      News
-                    </label>
-                    <p className="text-gray-400">
-                      Get notified regarding new events and announcements for
-                      NUFT
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </fieldset>
           </div>
         </div>
       </div>

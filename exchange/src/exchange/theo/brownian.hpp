@@ -49,8 +49,7 @@ public:
     }
 
     // Constructor for BrownianMotion with initial price
-    explicit BrownianMotion(const double starting_magnitude) :
-        cur_magnitude_(starting_magnitude)
+    explicit BrownianMotion(const double starting_magnitude) : cur_magnitude_(starting_magnitude)
     {
         std::random_device rd;
         random_number_generator_ = std::minstd_rand0(rd());

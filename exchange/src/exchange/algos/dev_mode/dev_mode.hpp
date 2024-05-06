@@ -22,7 +22,7 @@ protected:
     std::vector<fs::path> algo_filepaths_;
 
 public:
-    explicit DevModeAlgoInitializer(uint8_t num_algos) :
+    constexpr explicit DevModeAlgoInitializer(uint8_t num_algos) :
         NUM_ALGOS(num_algos), algo_filepaths_({})
     {}
 

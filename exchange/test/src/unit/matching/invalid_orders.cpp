@@ -13,18 +13,15 @@ class UnitInvalidOrders : public ::testing::Test {
 protected:
     using TestTrader = nutc::test_utils::TestTrader;
     static constexpr const int DEFAULT_QUANTITY = 1000;
-    std::shared_ptr<nutc::traders::GenericTrader> trader1, trader2;
 
     void
     SetUp() override
     {
-        trader1 =
-            manager_.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
-        trader2 =
-            manager_.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
+        manager_.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
+        manager_.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
 
-        trader1->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
-        trader2->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+        manager_.get_trader("ABC")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+        manager_.get_trader("DEF")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     }
 
     TraderContainer& manager_ =
@@ -40,10 +37,14 @@ protected:
 
 TEST_F(UnitInvalidOrders, RemoveThenAddFunds)
 {
-    trader1->modify_capital(-TEST_STARTING_CAPITAL);
+    manager_.get_trader("ABC")->modify_capital(-TEST_STARTING_CAPITAL);
 
-    stored_order order2{trader2, sell, "ETHUSD", 1, 1, 0};
-    stored_order order1{trader1, buy, "ETHUSD", 1, 1, 0};
+    stored_order order2{
+        manager_.get_trader("DEF"), nutc::util::Side::sell, "ETHUSD", 1, 1, 0
+    };
+    stored_order order1{
+        manager_.get_trader("ABC"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
+    };
 
     // Thrown out
     auto matches = add_to_engine_(order1);
@@ -53,7 +54,7 @@ TEST_F(UnitInvalidOrders, RemoveThenAddFunds)
     matches = add_to_engine_(order2);
     ASSERT_EQ(matches.size(), 0);
 
-    trader1->modify_capital(TEST_STARTING_CAPITAL);
+    manager_.get_trader("ABC")->modify_capital(TEST_STARTING_CAPITAL);
 
     // Kept, but not matched
     matches = add_to_engine_(order2);
@@ -62,15 +63,19 @@ TEST_F(UnitInvalidOrders, RemoveThenAddFunds)
     // Kept and matched
     matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 1);
-    ASSERT_EQ_MATCH(matches[0], "ETHUSD", "ABC", "DEF", buy, 1, 1);
+    ASSERT_EQ_MATCH(matches[0], "ETHUSD", "ABC", "DEF", nutc::util::Side::buy, 1, 1);
 }
 
 TEST_F(UnitInvalidOrders, MatchingInvalidFunds)
 {
-    trader1->modify_capital(-TEST_STARTING_CAPITAL);
+    manager_.get_trader("ABC")->modify_capital(-TEST_STARTING_CAPITAL);
 
-    stored_order order1{trader1, buy, "ETHUSD", 1, 1, 0};
-    stored_order order2{trader2, sell, "ETHUSD", 1, 1, 0};
+    stored_order order1{
+        manager_.get_trader("ABC"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
+    };
+    stored_order order2{
+        manager_.get_trader("DEF"), nutc::util::Side::sell, "ETHUSD", 1, 1, 0
+    };
 
     // Thrown out
     auto matches = add_to_engine_(order1);
@@ -83,20 +88,28 @@ TEST_F(UnitInvalidOrders, MatchingInvalidFunds)
 
 TEST_F(UnitInvalidOrders, SimpleManyInvalidOrder)
 {
-    auto t1 = manager_.add_trader<TestTrader>(std::string("A"), TEST_STARTING_CAPITAL);
-    auto t2 = manager_.add_trader<TestTrader>(std::string("B"), 0);
-    auto t3 = manager_.add_trader<TestTrader>(std::string("C"), TEST_STARTING_CAPITAL);
-    auto t4 = manager_.add_trader<TestTrader>(std::string("D"), TEST_STARTING_CAPITAL);
+    manager_.add_trader<TestTrader>(std::string("A"), TEST_STARTING_CAPITAL);
+    manager_.add_trader<TestTrader>(std::string("B"), 0);
+    manager_.add_trader<TestTrader>(std::string("C"), TEST_STARTING_CAPITAL);
+    manager_.add_trader<TestTrader>(std::string("D"), TEST_STARTING_CAPITAL);
 
-    t1->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
-    t2->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
-    t3->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
-    t4->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+    manager_.get_trader("A")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+    manager_.get_trader("B")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+    manager_.get_trader("C")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+    manager_.get_trader("D")->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
 
-    stored_order order1{t1, buy, "ETHUSD", 1, 1, 0};
-    stored_order order2{t2, buy, "ETHUSD", 1, 1, 0};
-    stored_order order3{t3, buy, "ETHUSD", 1, 1, 0};
-    stored_order order4{t4, sell, "ETHUSD", 3, 1, 0};
+    stored_order order1{
+        manager_.get_trader("A"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
+    };
+    stored_order order2{
+        manager_.get_trader("B"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
+    };
+    stored_order order3{
+        manager_.get_trader("C"), nutc::util::Side::buy, "ETHUSD", 1, 1, 0
+    };
+    stored_order order4{
+        manager_.get_trader("D"), nutc::util::Side::sell, "ETHUSD", 3, 1, 0
+    };
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
@@ -109,6 +122,6 @@ TEST_F(UnitInvalidOrders, SimpleManyInvalidOrder)
     matches = add_to_engine_(order4);
     ASSERT_EQ(matches.size(), 2);
 
-    ASSERT_EQ_MATCH(matches[0], "ETHUSD", "A", "D", sell, 1, 1);
-    ASSERT_EQ_MATCH(matches[1], "ETHUSD", "C", "D", sell, 1, 1);
+    ASSERT_EQ_MATCH(matches[0], "ETHUSD", "A", "D", nutc::util::Side::sell, 1, 1);
+    ASSERT_EQ_MATCH(matches[1], "ETHUSD", "C", "D", nutc::util::Side::sell, 1, 1);
 }

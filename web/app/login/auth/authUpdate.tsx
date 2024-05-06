@@ -18,7 +18,8 @@ export default function AuthUpdate() {
       if (user) return;
       if (!authUser) return;
 
-      const uid = authUser.uid;
+      let uid = authUser.uid;
+
       const snapshot = await get(child(ref(database), `users/${uid}`));
       localStorage.setItem("isLoggedIn", "true");
       if (!snapshot.exists()) {
@@ -32,6 +33,7 @@ export default function AuthUpdate() {
           firstName: "",
           lastName: "",
           email: authUser.email || "",
+          isInAGroup: false,
           school: "",
           hasCompletedReg: false,
           isApprovedApplicant: false,
@@ -39,7 +41,13 @@ export default function AuthUpdate() {
         };
         setUser(newUser);
       } else {
-        const dbUser: UserInfoType = snapshot.val();
+        var dbUser: UserInfoType = snapshot.val();
+        if (dbUser?.isPairedTo) {
+          uid = dbUser?.isPairedTo;
+          dbUser = (
+            await get(child(ref(database), `users/${dbUser?.isPairedTo}`))
+          ).val();
+        }
         const entries = Object.entries(dbUser.algos || {});
         const sortedEntries = entries.sort((a, b) => {
           const dateA: any = new Date(a[1].uploadDate);
@@ -61,6 +69,7 @@ export default function AuthUpdate() {
           lastName: dbUser.lastName || "",
           email: dbUser.email || authUser.email || "",
           school: dbUser.school || "",
+          isInAGroup: dbUser.isInAGroup || false,
           hasCompletedReg: true,
           isApprovedApplicant: dbUser.isApprovedApplicant || false,
           isRejectedApplicant: dbUser.isRejectedApplicant || false,

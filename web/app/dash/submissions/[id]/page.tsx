@@ -35,7 +35,8 @@ export default function Page({ params }: { params: { id: string } }) {
   const stringToRender = lintFailureMessage || lintSuccessMessage || "";
   const upTime = (algoDetails?.uploadTime || 0) + 1000;
   const sandboxTimeMs = 300000;
-  const baseEndpoint = apiEndpoint() +
+  const baseEndpoint =
+    apiEndpoint() +
     `/d-solo/cdk4teh4zl534a/ppl?orgId=1&var-traderid=${userInfo?.user?.uid}-${params.id}&from=${upTime}&theme=dark`;
 
   const [url, setUrl] = useState(baseEndpoint + `&refresh=5s`);
@@ -43,9 +44,12 @@ export default function Page({ params }: { params: { id: string } }) {
   useEffect(() => {
     if (upTime + sandboxTimeMs > Date.now()) {
       setUrl(baseEndpoint + "&refresh=5s");
-      setTimeout(() => {
-        setUrl(baseEndpoint + `&to=${upTime + sandboxTimeMs}`);
-      }, upTime + sandboxTimeMs - Date.now());
+      setTimeout(
+        () => {
+          setUrl(baseEndpoint + `&to=${upTime + sandboxTimeMs}`);
+        },
+        upTime + sandboxTimeMs - Date.now(),
+      );
     } else {
       setUrl(baseEndpoint + `&to=${upTime + sandboxTimeMs}`);
     }
@@ -65,15 +69,13 @@ export default function Page({ params }: { params: { id: string } }) {
           width="900"
           height="400"
           frameBorder="0"
-        >
-        </iframe>
+        ></iframe>
         <iframe
           src={url + "&panelId=2"}
           width="900"
           height="400"
           frameBorder="0"
-        >
-        </iframe>
+        ></iframe>
       </div>
     );
   } else {

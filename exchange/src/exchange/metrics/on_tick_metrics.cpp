@@ -72,7 +72,7 @@ OnTickMetricsPush::record_trader_metrics()
         return pnl;
     };
 
-    for (const auto& trader : trader_container.get_traders()) {
+    for (const auto& [trader_id, trader] : trader_container.get_traders()) {
         if (!trader->record_metrics())
             continue;
 
