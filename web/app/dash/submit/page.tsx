@@ -1,14 +1,25 @@
 "use client";
-import { CheckIcon, PaperClipIcon } from "@heroicons/react/24/solid";
+import { CheckIcon, PaperClipIcon, ChevronUpDownIcon } from "@heroicons/react/24/solid";
 import { apiEndpoint } from "@/config";
 import axios from "axios";
-import { useRef, useState } from "react";
+import { Fragment, useRef, useState } from "react";
 import AlgorithmType from "@/app/dash/algoType";
 import Swal from "sweetalert2";
 import { push, ref, set } from "firebase/database";
 import { getDownloadURL, ref as sRef, uploadBytes } from "firebase/storage";
 import { useFirebase } from "@/app/firebase/context";
 import { useUserInfo } from "@/app/login/auth/context";
+import { Listbox, Transition } from '@headlessui/react'
+import Link from "next/link";
+
+const CASES = [
+  { id: 1, name: 'HFT' },
+  { id: 2, name: 'Crypto Trading' },
+]
+
+function classNames(...classes: any) {
+  return classes.filter(Boolean).join(' ')
+}
 
 async function uploadAlgo(
   database: any,
@@ -34,6 +45,8 @@ async function uploadAlgo(
     return { downloadURL: "", fileIdKey: "", fileRef: "" };
   }
 }
+
+const CASE_DOCUMENT_URL= "https://docs.google.com/document/d/1FfWrKIXGO7oPKTTTwyprH3kM8WrnIuZmp9kcH4lo6CA/"
 
 async function writeNewAlgo(
   algo: AlgorithmType,
@@ -75,7 +88,16 @@ export default function Submission() {
     name: "",
     description: "",
     uploadTime: 0,
+    caseType: CASES[0].name,
   };
+
+  const handleCaseChange = (e: any) => {
+    setAlgo((prevState) => ({
+      ...prevState,
+      caseType: e.name,
+    }));
+  }
+
 
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
@@ -211,6 +233,71 @@ export default function Submission() {
                 </div>
               </div>
 
+
+              <div className="col-span-full">
+                <Listbox value={algo.caseType} onChange={handleCaseChange}>
+                  {({ open }) => (
+                    <>
+                      <div className="div flex flex-cols items-center gap-x-1">
+                        <Listbox.Label className="block text-sm font-medium leading-6 text-white">Case:</Listbox.Label>
+                        <Link href={CASE_DOCUMENT_URL} target="_blank">
+                        <QuestionMarkSVG className={"w-4 h-4 opacity-90"} />
+                        </Link>
+                      </div>
+                      <div className="relative mt-2 ring-white">
+                        <Listbox.Button className="relative w-full cursor-default rounded-md bg-white/5 py-1.5 pl-3 pr-10 text-left text-white shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                          <span className="block truncate">{algo.caseType}</span>
+                          <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                            <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                          </span>
+                        </Listbox.Button>
+
+                        <Transition
+                          show={open}
+                          as={Fragment}
+                          leave="transition ease-in duration-100"
+                          leaveFrom="opacity-100"
+                          leaveTo="opacity-0"
+                        >
+                          <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-gray-900 py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                            {CASES.map((c) => (
+                              <Listbox.Option
+                                key={c.id}
+                                className={({ active }) =>
+                                  classNames(
+                                    active ? 'bg-indigo-600 text-white' : 'text-white',
+                                    'relative cursor-default select-none py-2 pl-3 pr-9'
+                                  )
+                                }
+                                value={c}
+                              >
+                                {({ selected, active }) => (
+                                  <>
+                                    <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'block truncate')}>
+                                      {c.name}
+                                    </span>
+
+                                    {selected ? (
+                                      <span
+                                        className={classNames(
+                                          active ? 'text-white' : 'text-indigo-600',
+                                          'absolute inset-y-0 right-0 flex items-center pr-4'
+                                        )}
+                                      >
+                                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                      </span>
+                                    ) : null}
+                                  </>
+                                )}
+                              </Listbox.Option>
+                            ))}
+                          </Listbox.Options>
+                        </Transition>
+                      </div>
+                    </>
+                  )}
+                </Listbox>
+              </div>
               <div className="col-span-full">
                 <label
                   htmlFor="description"
@@ -364,4 +451,12 @@ export default function Submission() {
       </div>
     </div>
   );
+}
+
+const QuestionMarkSVG = ({ className }: { className?: string }) => {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
+    </svg>
+  )
 }
