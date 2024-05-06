@@ -6,7 +6,7 @@ services:
       context: ..
       dockerfile: docker/SandboxDockerfile
       args:
-        firebase_emulator: "false"
+        firebase_emulator: "true"
     restart: unless-stopped
     environment:
       - NUTC_EXPOSE_METRICS=1
@@ -30,7 +30,7 @@ services:
       context: ..
       dockerfile: docker/LinterDockerfile
       args:
-        firebase_emulator: "false"
+        firebase_emulator: "true"
     networks:
       - net
 
@@ -59,7 +59,7 @@ services:
       - net
 
   website:
-    image: node:18
+    image: node:20
     restart: unless-stopped
     working_dir: /app
     volumes: 
