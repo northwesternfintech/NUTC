@@ -15,9 +15,6 @@ def place_market_order(side: str, ticker: str, quantity: float, price: float) ->
     Returns
     -------
     True if order succeeded, False if order failed due to rate limiting
-
-    ((IMPORTANT))
-    You should handle the case where the order fails due to rate limiting (maybe wait and try again?)
     """
 
 class Strategy:
@@ -46,6 +43,7 @@ class Strategy:
         self, ticker: str, side: str, price: float, quantity: float
     ) -> None:
         """Called whenever the orderbook changes. This could be because of a trade, or because of a new order, or both.
+        Returns the total quantity available at the given level
 
         Parameters
         ----------

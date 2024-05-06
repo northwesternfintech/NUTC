@@ -81,12 +81,12 @@ export default function Dash(content: React.ReactNode) {
         name: value.name,
         href: `/dash/submissions/${key}`,
         initial: String(i),
-        current: false,
+	// So janky lmfao
+        current: window.location.href.includes(key),
       });
       i++;
     }
     if (tmpSubmissions.length > 0) {
-      tmpSubmissions[0].current = true;
       setSubmissions(tmpSubmissions);
     }
   }, [user]);
