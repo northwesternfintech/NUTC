@@ -28,10 +28,30 @@ create_api_module(
     return true;
 }
 
+bool
+supress_stdout()
+{
+    try {
+        py::exec(R"(
+    import sys
+    import os
+    class SuppressOutput(object):
+        def write(self, txt):
+            pass  # Do nothing on write
+        def flush(self):
+            pass  # Do nothing on flush
+
+    sys.stdout = SuppressOutput()
+    )");
+    } catch (const std::exception& e) {
+        return false;
+    }
+    return true;
+}
+
 std::optional<std::string>
 import_py_code(const std::string& code)
 {
-    log_i(mock_runtime, "Importing algorithm code into python interpreter");
     try {
         py::exec(code);
     } catch (const std::exception& e) {
