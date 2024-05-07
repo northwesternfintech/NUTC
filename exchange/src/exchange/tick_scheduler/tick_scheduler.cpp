@@ -1,7 +1,5 @@
 #include "tick_scheduler.hpp"
 
-#include "exchange/concurrency/pin_threads.hpp"
-
 #include <numeric>
 
 namespace nutc {
@@ -42,13 +40,13 @@ TickJobScheduler::get_tick_metrics() const
 }
 
 void
-TickJobScheduler::run_()
+TickJobScheduler::start(uint16_t tick_hz)
 {
+    delay_time_ = milliseconds(MS_PER_SECOND / tick_hz);
     using steady_clock = std::chrono::steady_clock;
     auto next_tick = steady_clock::now() + delay_time_;
-    concurrency::pin_to_core(1, "on_tick");
 
-    while (running_) {
+    while (true) {
         std::this_thread::sleep_until(next_tick);
         current_tick_++;
         auto time = notify_tick_();

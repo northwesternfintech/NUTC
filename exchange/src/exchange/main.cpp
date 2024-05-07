@@ -1,7 +1,6 @@
 #include "algos/algo_manager.hpp"
 #include "exchange/algos/algo_manager.hpp"
 #include "exchange/bots/bot_container.hpp"
-#include "exchange/concurrency/pin_threads.hpp"
 #include "exchange/config/argparse.hpp"
 #include "exchange/metrics/dashboard.hpp"
 #include "exchange/metrics/on_tick_metrics.hpp"
@@ -28,8 +27,6 @@ void
 flush_log(int)
 {
     file_ops::print_file_contents("logs/error_log.txt");
-
-    ticks::TickJobScheduler::get().stop();
     std::exit(0); // NOLINT(concurrency-*)
 }
 

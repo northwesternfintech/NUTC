@@ -18,7 +18,7 @@ class CrowServer {
 
     crow::SimpleApp app{};
     std::thread server_thread;
-    std::vector<std::shared_ptr<ba::steady_timer>> timers_{};
+    std::vector<ba::steady_timer> timers_{};
 
 public:
     static CrowServer&
@@ -34,7 +34,7 @@ public:
 
 private:
     void start_remove_timer_(
-        unsigned int time_ms, const std::weak_ptr<traders::GenericTrader>& trader_ptr
+        unsigned int time_ms, std::weak_ptr<traders::GenericTrader> trader_ptr
     );
 };
 
