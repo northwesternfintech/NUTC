@@ -47,7 +47,7 @@ const faqs = [
   {
     question: "How many algorithms can I submit?",
     answer:
-      "As many as you want, but the last algorithm that passes linting will be the one to run in the contest.",
+      "As many as you want, but the last algorithm that passes linting (per pair) will be the one to run in the contest.",
   },
   {
     question: "How does order matching work?",
@@ -56,7 +56,7 @@ const faqs = [
   },
   {
     question: "When is the deadline to submit algorithms?",
-    answer: "11:59pm on 5/3.",
+    answer: "11:59pm on 5/10.",
   },
   {
     question: "How are algorithms evaluated?",
