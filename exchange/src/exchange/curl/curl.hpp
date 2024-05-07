@@ -19,6 +19,8 @@ void request_to_file(
     const std::string& data = ""
 );
 
+std::string upload_file(const std::string& filepath);
+
 /**
  * @brief Sends a request to the firebase server
  * @param method The HTTP method to use

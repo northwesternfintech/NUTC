@@ -12,6 +12,8 @@
 #define LOG_FILE_SIZE      (1024 * 1024 / 2) // 512 KB
 #define LOG_BACKUP_COUNT   5
 
+#define SANDBOX_MAX_PRINTS 100
+
 
 
 /**

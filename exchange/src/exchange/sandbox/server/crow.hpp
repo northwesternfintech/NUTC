@@ -34,7 +34,7 @@ public:
 
 private:
     void start_remove_timer_(
-        unsigned int time_ms, std::weak_ptr<traders::GenericTrader> trader_ptr
+        unsigned int time_s, const std::weak_ptr<traders::GenericTrader>& trader_ptr, const std::string& sandbox_log_path
     );
 };
 

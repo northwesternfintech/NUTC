@@ -1,6 +1,6 @@
 #include "comms.hpp"
 
-#include "shared/messages_exchange_to_wrapper.hpp"
+#include "wrapper/config.h"
 #include "wrapper/logging.hpp"
 #include "wrapper/pywrapper/pywrapper.hpp"
 
@@ -49,7 +49,10 @@ ExchangeProxy::handle_orderbook_update(const orderbook_update& update)
         nutc::pywrapper::get_ob_update_function()(
             update.ticker, side, update.price, update.quantity
         );
-    } catch (const py::error_already_set& e) {}
+    } catch (py::error_already_set& e) {
+        log_e(python_error, "{}", e.what());
+        e.restore();
+    }
 }
 
 void
@@ -72,7 +75,10 @@ ExchangeProxy::handle_match(const match& match, const std::string& uid)
                 match.ticker, "SELL", match.price, match.quantity, match.seller_capital
             );
         }
-    } catch (const py::error_already_set& e) {}
+    } catch (py::error_already_set& e) {
+        log_e(python_error, "{}", e.what());
+        e.restore();
+    }
 }
 
 bool

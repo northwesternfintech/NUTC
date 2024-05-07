@@ -6,7 +6,9 @@ namespace pywrapper {
 void
 create_api_module(
     std::function<bool(const std::string&, const std::string&, double, double)>
-        publish_market_order
+        publish_market_order,
+    std::function<void(const std::string&)>
+        save_log
 )
 {
     py::module_ sys = py::module_::import("sys");
@@ -25,6 +27,7 @@ create_api_module(
         "nutc_api", "NUTC Exchange API", new py::module::module_def
     );
     module.def("publish_market_order", publish_market_order);
+    module.def("save_log", save_log);
 
     auto sys_modules = sys.attr("modules").cast<py::dict>();
     sys_modules["nutc_api"] = module;
@@ -57,6 +60,10 @@ run_code_init(const std::string& py_code)
     py::exec(R"(
         def place_market_order(side, ticker, quantity, price):
             return nutc_api.publish_market_order(side, ticker, quantity, price)
+    )");
+    py::exec(R"(
+        def print(output: str):
+            return nutc_api.save_log(output)
     )");
     py::exec("strategy = Strategy()");
 }

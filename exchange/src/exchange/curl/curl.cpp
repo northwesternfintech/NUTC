@@ -3,6 +3,8 @@
 #include <curl/curl.h>
 #include <fmt/format.h>
 
+#include <regex>
+
 namespace nutc {
 namespace curl {
 
@@ -17,6 +19,44 @@ write_callback(void* contents, size_t size, size_t nmemb, void* userp)
     return size * nmemb;
 }
 } // namespace
+
+std::string
+upload_file(const std::string& filepath) // NOLINT
+{
+    std::string read_buffer{};
+
+    auto* curl = curl_easy_init();
+    curl_mime* form = nullptr;
+    curl_mimepart* field = nullptr;
+
+    // Create the form
+    form = curl_mime_init(curl);
+
+    // Fill in the file upload field
+    field = curl_mime_addpart(form);
+    curl_mime_name(field, "file");
+    curl_mime_filedata(field, filepath.c_str());
+
+    // Set the URL
+    curl_easy_setopt(curl, CURLOPT_URL, "https://0x0.st");
+
+    // Set the form post data
+    curl_easy_setopt(curl, CURLOPT_MIMEPOST, form);
+
+    // Set the callback function to receive the response
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &read_buffer);
+
+    // Perform the request, res will get the return code
+    auto res = curl_easy_perform(curl);
+    if (res != CURLE_OK) {
+        throw std::runtime_error("Res failed");
+    }
+    curl_mime_free(form);
+    curl_easy_cleanup(curl);
+
+    return read_buffer;
+}
 
 void
 request_to_file(
@@ -62,11 +102,24 @@ request_to_file(
         throw std::runtime_error("Failed to close filestream");
 }
 
+namespace {
+std::string
+replace_disallowed(const std::string& input)
+{
+    std::regex newlinePattern("\\n");
+    std::string input2 = std::regex_replace(input, newlinePattern, "\\n");
+    std::regex disallowedPattern("[.$#\\[\\]]");
+
+    return std::regex_replace(input2, disallowedPattern, "");
+}
+} // namespace
+
 std::string
 request_to_string(
     const std::string& method, const std::string& url, const std::string& data
 )
 {
+    auto fixed_data = "\"" + replace_disallowed(data) + "\"";
     CURL* curl = curl_easy_init();
     std::string read_buffer{};
 
@@ -82,7 +135,7 @@ request_to_string(
     }
     else if (method == "PUT") {
         curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, fixed_data.c_str());
     }
     else if (method == "DELETE") {
         curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");

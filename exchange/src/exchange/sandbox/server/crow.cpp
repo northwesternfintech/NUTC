@@ -1,5 +1,6 @@
 #include "crow.hpp"
 
+#include "exchange/curl/curl.hpp"
 #include "exchange/logging.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "exchange/traders/trader_types/algo_trader.hpp"
@@ -42,7 +43,10 @@ CrowServer::CrowServer() :
                               .add_trader<traders::LocalTrader>(
                                   user_id, algo_id, "SANDBOX_USER", STARTING_CAPITAL
                               );
-            start_remove_timer_(trial_secs, trader);
+            start_remove_timer_(
+                trial_secs, trader,
+                fmt::format("users/{}/algos/{}/sandbox_results.json", user_id, algo_id)
+            );
             trader->send_messages({glz::write_json(messages::start_time{0})});
             return res;
         } catch (...) {
@@ -67,17 +71,20 @@ CrowServer::~CrowServer()
 
 void
 CrowServer::start_remove_timer_(
-    unsigned int time_s, std::weak_ptr<traders::GenericTrader> trader_ptr
+    unsigned int time_s, const std::weak_ptr<traders::GenericTrader>& trader_ptr,
+    const std::string& sandbox_log_path
 )
 {
-    auto timer = ba::steady_timer{io_context_, std::chrono::seconds(time_s)};
+    auto timer = ba::steady_timer{io_context_, std::chrono::seconds(10)};
 
-    timer.async_wait([trader_ptr](const boost::system::error_code& err_code) {
+    timer.async_wait([trader_ptr,
+                      sandbox_log_path](const boost::system::error_code& err_code) {
         auto trader = trader_ptr.lock();
         if (trader == nullptr) {
             log_i(main, "Trader already removed: {}", trader->get_display_name());
             return;
         }
+        std::string trader_id = trader->get_id();
         if (!err_code) {
             log_i(main, "Removing trader {}", trader->get_display_name());
             traders::TraderContainer::get_instance().remove_trader(trader);
@@ -85,6 +92,13 @@ CrowServer::start_remove_timer_(
         else {
             log_e(main, "Unable to remove trader {}", trader->get_display_name());
         }
+
+        std::string loc = curl::upload_file(fmt::format("logs/{}", trader_id));
+
+	std::string res = curl::request_to_string(
+            "PUT", util::get_firebase_endpoint(sandbox_log_path), loc
+        );
+	log_i(main, "Result of upload: {} {}", loc, res);
     });
     timers_.push_back(std::move(timer));
 }

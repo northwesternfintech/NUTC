@@ -1,4 +1,5 @@
 #include "algos/algo_manager.hpp"
+#include "curl/curl.hpp"
 #include "exchange/algos/algo_manager.hpp"
 #include "exchange/bots/bot_container.hpp"
 #include "exchange/config/argparse.hpp"

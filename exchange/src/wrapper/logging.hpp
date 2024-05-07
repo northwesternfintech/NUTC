@@ -50,13 +50,13 @@ set_thread_name(const std::string& name)
 /**
  * Set up logging.
  */
-void init(quill::LogLevel log_level = DEFAULT_LOG_LEVEL);
+void init(const std::string& trader_id, quill::LogLevel log_level = DEFAULT_LOG_LEVEL);
 
 /**
  * Set up logging.
  */
 inline void
-init(uint8_t verbosity = 0)
+init(const std::string& trader_id, uint8_t verbosity = 0)
 {
     auto log_level = static_cast<uint8_t>(DEFAULT_LOG_LEVEL);
 
@@ -65,7 +65,7 @@ init(uint8_t verbosity = 0)
     else // protect from underflow
         log_level = 0;
 
-    init(static_cast<quill::LogLevel>(log_level));
+    init(trader_id, static_cast<quill::LogLevel>(log_level));
 }
 
 /******************************************************************************
@@ -97,6 +97,8 @@ CREATE_LOG_CATEGORY(wrapper_web);
 CREATE_LOG_CATEGORY(wrapper_libcurl);
 CREATE_LOG_CATEGORY(wrapper_rabbitmq);
 CREATE_LOG_CATEGORY(wrapper_firebase);
+CREATE_LOG_CATEGORY(print_output);
+CREATE_LOG_CATEGORY(python_error);
 
 #undef CREATE_LOG_CATEGORY
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)

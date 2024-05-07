@@ -1,5 +1,6 @@
 #include "shared/config/config.h"
 #include "shared/file_operations/file_operations.hpp"
+#include "wrapper/config.h"
 #include "wrapper/firebase/firebase.hpp"
 #include "wrapper/logging.hpp"
 #include "wrapper/messaging/comms.hpp"
@@ -93,6 +94,7 @@ process_arguments(int argc, const char** argv)
 void
 catch_sigint(int)
 {
+    quill::flush();
     // Wait until we're forced to terminate
     while (true) {}
 }
@@ -118,6 +120,8 @@ main(int argc, const char** argv)
         trader_id = nutc::util::trader_id(uid, algo_id);
     }
 
+    nutc::logging::init(trader_id, quill::LogLevel::Info);
+
     // Send message to exchange to let it know we successfully initialized
     comms::publish_init_message();
     if (!algo.has_value()) {
@@ -126,7 +130,9 @@ main(int argc, const char** argv)
     comms::wait_for_start_time();
 
     comms exchange_conn{};
-    nutc::pywrapper::create_api_module(exchange_conn.market_order_func());
+
+    auto log_info = [](const std::string& mess) { log_i(print_output, "{}", mess); };
+    nutc::pywrapper::create_api_module(exchange_conn.market_order_func(), log_info);
     nutc::pywrapper::run_code_init(algo.value());
 
     exchange_conn.main_event_loop(trader_id);
