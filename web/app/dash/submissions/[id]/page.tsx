@@ -53,7 +53,7 @@ export default function Page({ params }: { params: { id: string } }) {
         () => {
           setUrl(baseEndpoint + `&to=${upTime + sandboxTimeMs}`);
         },
-        upTime + sandboxTimeMs - Date.now(),
+        upTime + sandboxTimeMs - Date.now()+2000,
       );
     } else {
       setUrl(baseEndpoint + `&to=${upTime + sandboxTimeMs}`);
@@ -82,7 +82,7 @@ export default function Page({ params }: { params: { id: string } }) {
         Download Submission
         <ArrowDownTrayIcon className="-mr-0.5 h-5 w-5" aria-hidden="true" />
       </a>
-	<a
+	{algoDetails?.sandbox_results &&  <a
         type="button"
 	target="_blank"
 	href={hr}
@@ -90,7 +90,7 @@ export default function Page({ params }: { params: { id: string } }) {
       >
         Download Logs
         <ArrowDownTrayIcon className="-mr-0.5 h-5 w-5" aria-hidden="true" />
-      </a></div>
+      </a>}</div>
         
         <div className="my-8">
           <h2 className="text-xl font-semibold mb-2">Profit and Loss</h2>
