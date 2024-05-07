@@ -66,7 +66,7 @@ export default function Page({ params }: { params: { id: string } }) {
     return (
       <div className="flex flex-col items-center">
         <h1 className="text-3xl font-bold mb-2 pt-5">Sandbox View of {algoDetails?.name}</h1>
-        <h3 className="text-lg font-normal mb-4 pt-2 text-gray-400">Ensure to review the <a className="font-bold text-indigo-300" href="https://docs.google.com/document/d/1FfWrKIXGO7oPKTTTwyprH3kM8WrnIuZmp9kcH4lo6CA/edit?usp=sharing" target="_blank">case packet</a>.</h3>
+        <h3 className="text-lg font-normal mb-4 pt-2 text-gray-400">Ensure to review the <a className="font-bold text-indigo-300" href="https://docs.google.com/document/d/1FfWrKIXGO7oPKTTTwyprH3kM8WrnIuZmp9kcH4lo6CA/edit?usp=sharing" target="_blank">case packet</a>. Results may be deleted after 24 hours.</h3>
 
 	<a
         type="button"

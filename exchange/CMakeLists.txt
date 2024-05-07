@@ -63,8 +63,6 @@ add_library(
     src/exchange/metrics/state/ticker_state.cpp
     src/exchange/metrics/on_tick_metrics.cpp
 
-    src/exchange/concurrency/pin_threads.cpp
-
     src/exchange/config/argparse.cpp
 )
 
