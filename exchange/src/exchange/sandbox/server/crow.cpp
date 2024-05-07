@@ -75,7 +75,7 @@ CrowServer::start_remove_timer_(
     const std::string& sandbox_log_path
 )
 {
-    auto timer = ba::steady_timer{io_context_, std::chrono::seconds(10)};
+    auto timer = ba::steady_timer{io_context_, std::chrono::seconds(time_s)};
 
     timer.async_wait([trader_ptr,
                       sandbox_log_path](const boost::system::error_code& err_code) {

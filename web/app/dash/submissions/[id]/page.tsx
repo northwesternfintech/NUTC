@@ -41,8 +41,12 @@ export default function Page({ params }: { params: { id: string } }) {
     `/d-solo/cdk4teh4zl534a/ppl?orgId=1&var-traderid=${userInfo?.user?.uid}-${params.id}&from=${upTime}&theme=dark`;
 
   const [url, setUrl] = useState(baseEndpoint + `&refresh=5s`);
+  const [hr, setHr] = useState("#");
 
   useEffect(() => {
+  if(algoDetails?.sandbox_results) {
+	  setHr(algoDetails?.sandbox_results.replaceAll("0x0st", "0x0.st")?.replaceAll("txt",".txt"));
+  }
     if (upTime + sandboxTimeMs > Date.now()) {
       setUrl(baseEndpoint + "&refresh=5s");
       setTimeout(
@@ -68,6 +72,7 @@ export default function Page({ params }: { params: { id: string } }) {
         <h1 className="text-3xl font-bold mb-2 pt-5">Sandbox View of {algoDetails?.name}</h1>
         <h3 className="text-lg font-normal mb-4 pt-2 text-gray-400">Ensure to review the <a className="font-bold text-indigo-300" href="https://docs.google.com/document/d/1FfWrKIXGO7oPKTTTwyprH3kM8WrnIuZmp9kcH4lo6CA/edit?usp=sharing" target="_blank">case packet</a>. Results may be deleted after 24 hours.</h3>
 
+<div className="flex flex-row gap-x-2">
 	<a
         type="button"
 	target="_blank"
@@ -77,6 +82,15 @@ export default function Page({ params }: { params: { id: string } }) {
         Download Submission
         <ArrowDownTrayIcon className="-mr-0.5 h-5 w-5" aria-hidden="true" />
       </a>
+	<a
+        type="button"
+	target="_blank"
+	href={hr}
+        className="inline-flex items-center gap-x-1.5 rounded-md bg-indigo-700 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-700"
+      >
+        Download Logs
+        <ArrowDownTrayIcon className="-mr-0.5 h-5 w-5" aria-hidden="true" />
+      </a></div>
         
         <div className="my-8">
           <h2 className="text-xl font-semibold mb-2">Profit and Loss</h2>

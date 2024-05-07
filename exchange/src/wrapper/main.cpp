@@ -99,10 +99,17 @@ catch_sigint(int)
     while (true) {}
 }
 
+void
+catch_sigterm(int)
+{
+    quill::flush();
+}
+
 int
 main(int argc, const char** argv)
 {
     std::signal(SIGINT, catch_sigint);
+    std::signal(SIGTERM, catch_sigterm);
     using comms = nutc::comms::ExchangeProxy;
     auto [verbosity, uid, algo_id, development_mode] = process_arguments(argc, argv);
     pybind11::scoped_interpreter guard{};
