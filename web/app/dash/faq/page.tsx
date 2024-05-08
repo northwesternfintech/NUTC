@@ -28,13 +28,11 @@ const faqs = [
     answer:
       "You can place an order (BUY or SELL) at a given price/quantity for a given stock ticker. Importantly, it returns True if the order was placed, or False if it was not placed (due to you placing more than 30 orders in a minute). You may want to handle the case where you aren't able to place an order due to the rate limit.",
   },
-  { question: "How much starting capital do I have?",
-    answer: 
-        "100,000" 
-  },
+  { question: "How much starting capital do I have?", answer: "100,000" },
   {
     question: "What libraries can I use?",
-    answer: "numpy, pandas, scipy, polars, and scikit-learn are currently available, all at latest. More libraries may be made available upon request.",
+    answer:
+      "numpy, pandas, scipy, polars, and scikit-learn are currently available, all at latest. More libraries may be made available upon request.",
   },
   {
     question: "How can I do well in the competition?",
@@ -66,15 +64,13 @@ const faqs = [
       "By the amount of capital they hold at the end of the competition (incl. value of held stocks, which are automatically liquidated at a fair market price, with market impact.)",
   },
   {
-    question:
-      "How does the market start?",
+    question: "How does the market start?",
     answer:
       "There are many liquidity providing bots on the exchange who will automatically trade with one another. Your algorithm should react to these trades - placing trades during initialization is heavily advised against.",
   },
   {
     question: "What if I have other questions or have issues with the website?",
-    answer:
-      "Please reach out in the #nutc-support channel in the NUFT slack!",
+    answer: "Please reach out in the piazza",
   },
 ];
 
@@ -97,19 +93,17 @@ export default function FAQs() {
                           {faq.question}
                         </span>
                         <span className="ml-6 flex h-7 items-center">
-                          {open
-                            ? (
-                              <MinusSmallIcon
-                                className="h-6 w-6"
-                                aria-hidden="true"
-                              />
-                            )
-                            : (
-                              <PlusSmallIcon
-                                className="h-6 w-6"
-                                aria-hidden="true"
-                              />
-                            )}
+                          {open ? (
+                            <MinusSmallIcon
+                              className="h-6 w-6"
+                              aria-hidden="true"
+                            />
+                          ) : (
+                            <PlusSmallIcon
+                              className="h-6 w-6"
+                              aria-hidden="true"
+                            />
+                          )}
                         </span>
                       </Disclosure.Button>
                     </dt>

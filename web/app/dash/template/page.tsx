@@ -4,23 +4,187 @@ const CodeBlock = () => {
   return (
     <pre className="text-white p-4 select-none">
       <code>
-        <span className="text-blue-400">def </span>place_market_order<span className="text-red-400">(</span><span className="text-blue-400">side</span><span className="text-red-400">: </span><span className="text-red-400">str</span><span className="text-red-400">, </span><span className="text-blue-400">ticker</span><span className="text-red-400">: </span><span className="text-red-400">str</span><span className="text-red-400">, </span><span className="text-blue-400">quantity</span><span className="text-red-400">: </span><span className="text-red-400">float</span><span className="text-red-400">, </span><span className="text-blue-400">price</span><span className="text-red-400">: </span><span className="text-red-400">float</span><span className="text-red-400">)</span> -&gt; <span className="text-red-400">None</span>:<br />
-        <span className="text-green-400">    &quot;&quot;&quot;Place an order - DO NOT MODIFY&quot;&quot;&quot;</span><br />
-        <span>    </span><br />
-        <span className="text-blue-400">class</span> Strategy:<br />
-        <span className="text-green-400">    &quot;&quot;&quot;Template for a strategy.&quot;&quot;&quot;</span><br />
+        <span className="text-blue-400">def </span>place_market_order
+        <span className="text-red-400">(</span>
+        <span className="text-blue-400">side</span>
+        <span className="text-red-400">: </span>
+        <span className="text-red-400">str</span>
+        <span className="text-red-400">, </span>
+        <span className="text-blue-400">ticker</span>
+        <span className="text-red-400">: </span>
+        <span className="text-red-400">str</span>
+        <span className="text-red-400">, </span>
+        <span className="text-blue-400">quantity</span>
+        <span className="text-red-400">: </span>
+        <span className="text-red-400">float</span>
+        <span className="text-red-400">, </span>
+        <span className="text-blue-400">price</span>
+        <span className="text-red-400">: </span>
+        <span className="text-red-400">float</span>
+        <span className="text-red-400">)</span> -&gt;{" "}
+        <span className="text-red-400">None</span>:<br />
+        <span className="text-green-400">
+          {" "}
+          &quot;&quot;&quot;Place an order - DO NOT MODIFY&quot;&quot;&quot;
+        </span>
         <br />
-        <span className="text-blue-400">    def</span> __init__<span className="text-red-400">(</span><span className="text-blue-400">self</span><span className="text-red-400">)</span> -&gt; <span className="text-red-400">None</span>:<br />
-        <span className="text-green-400">        &quot;&quot;&quot;Your initialization code goes here.&quot;&quot;&quot;</span><br />
+        <span> </span>
         <br />
-        <span className="text-blue-400">    def</span> on_trade_update<span className="text-red-400">(</span><span className="text-blue-400">self</span><span className="text-red-400">, </span><span className="text-blue-400">ticker</span><span className="text-red-400">: </span><span className="text-red-400">str</span><span className="text-red-400">, </span><span className="text-blue-400">side</span><span className="text-red-400">: </span><span className="text-red-400">str</span><span className="text-red-400">, </span><span className="text-blue-400">price</span><span className="text-red-400">: </span><span className="text-red-400">float</span><span className="text-red-400">, </span><span className="text-blue-400">quantity</span><span className="text-red-400">: </span><span className="text-red-400">float</span><span className="text-red-400">)</span> -&gt; <span className="text-red-400">None</span>:<br />
-        <span className="text-white">        print</span><span className="text-red-400">(</span><span className="text-green-400">f&quot;Python Trade update: </span><span className="text-red-400">&#123;</span><span className="text-white">ticker</span><span className="text-red-400">&#125;</span><span className="text-green-400"> </span><span className="text-red-400">&#123;</span><span className="text-white">side</span><span className="text-red-400">&#125;</span><span className="text-green-400"> </span><span className="text-red-400">&#123;</span><span className="text-white">price</span><span className="text-red-400">&#125;</span><span className="text-green-400"> </span><span className="text-red-400">&#123;</span><span className="text-white">quantity</span><span className="text-red-400">&#125;</span><span className="text-green-400">&quot;</span><span className="text-red-400">)</span><br />
+        <span className="text-blue-400">class</span> Strategy:
         <br />
-        <span className="text-blue-400">    def</span> on_orderbook_update<span className="text-red-400">(</span><span className="text-blue-400">self</span><span className="text-red-400">, </span><span className="text-blue-400">ticker</span><span className="text-red-400">: </span><span className="text-red-400">str</span><span className="text-red-400">, </span><span className="text-blue-400">side</span><span className="text-red-400">: </span><span className="text-red-400">str</span><span className="text-red-400">, </span><span className="text-blue-400">price</span><span className="text-red-400">: </span><span className="text-red-400">float</span><span className="text-red-400">, </span><span className="text-blue-400">quantity</span><span className="text-red-400">: </span><span className="text-red-400">bool</span><span className="text-red-400">)</span> -&gt; <span className="text-red-400">None</span>:<br />
-        <span className="text-white">        print</span><span className="text-red-400">(</span><span className="text-green-400">f&quot;Python Orderbook update: </span><span className="text-red-400">&#123;</span><span className="text-white">ticker</span><span className="text-red-400">&#125;</span><span className="text-green-400"> </span><span className="text-red-400">&#123;</span><span className="text-white">side</span><span className="text-red-400">&#125;</span><span className="text-green-400"> </span><span className="text-red-400">&#123;</span><span className="text-white">price</span><span className="text-red-400">&#125;</span><span className="text-green-400"> </span><span className="text-red-400">&#123;</span><span className="text-white">quantity</span><span className="text-red-400">&#125;</span><span className="text-green-400">&quot;</span><span className="text-red-400">)</span><br />
+        <span className="text-green-400">
+          {" "}
+          &quot;&quot;&quot;Template for a strategy.&quot;&quot;&quot;
+        </span>
         <br />
-        <span className="text-blue-400">    def</span> on_account_update<span className="text-red-400">(</span><span className="text-blue-400">self</span><span className="text-red-400">, </span><span className="text-blue-400">ticker</span><span className="text-red-400">: </span><span className="text-red-400">str</span><span className="text-red-400">, </span><span className="text-blue-400">side</span><span className="text-red-400">: </span><span className="text-red-400">str</span><span className="text-red-400">, </span><span className="text-blue-400">price</span><span className="text-red-400">: </span><span className="text-red-400">float</span><span className="text-red-400">, </span><span className="text-blue-400">quantity</span><span className="text-red-400">: </span><span className="text-red-400">float</span><span className="text-red-400">, </span><span className="text-blue-400">capital_remaining</span><span className="text-red-400">: </span><span className="text-red-400">float</span><span className="text-red-400">)</span> -&gt; <span className="text-red-400">None</span>:<br />
-        <span className="text-white">        print</span><span className="text-red-400">(</span><span className="text-green-400">f&quot;Python Account update: </span><span className="text-red-400">&#123;</span><span className="text-white">ticker</span><span className="text-red-400">&#125;</span><span className="text-green-400"> </span><span className="text-red-400">&#123;</span><span className="text-white">side</span><span className="text-red-400">&#125;</span><span className="text-green-400"> </span><span className="text-red-400">&#123;</span><span className="text-white">price</span><span className="text-red-400">&#125;</span><span className="text-green-400"> </span><span className="text-red-400">&#123;</span><span className="text-white">quantity</span><span className="text-red-400">&#125;</span><span className="text-green-400"> </span><span className="text-red-400">&#123;</span><span className="text-white">capital_remaining</span><span className="text-red-400">&#125;</span><span className="text-green-400">&quot;</span><span className="text-red-400">)</span>
+        <br />
+        <span className="text-blue-400"> def</span> __init__
+        <span className="text-red-400">(</span>
+        <span className="text-blue-400">self</span>
+        <span className="text-red-400">)</span> -&gt;{" "}
+        <span className="text-red-400">None</span>:<br />
+        <span className="text-green-400">
+          {" "}
+          &quot;&quot;&quot;Your initialization code goes
+          here.&quot;&quot;&quot;
+        </span>
+        <br />
+        <br />
+        <span className="text-blue-400"> def</span> on_trade_update
+        <span className="text-red-400">(</span>
+        <span className="text-blue-400">self</span>
+        <span className="text-red-400">, </span>
+        <span className="text-blue-400">ticker</span>
+        <span className="text-red-400">: </span>
+        <span className="text-red-400">str</span>
+        <span className="text-red-400">, </span>
+        <span className="text-blue-400">side</span>
+        <span className="text-red-400">: </span>
+        <span className="text-red-400">str</span>
+        <span className="text-red-400">, </span>
+        <span className="text-blue-400">price</span>
+        <span className="text-red-400">: </span>
+        <span className="text-red-400">float</span>
+        <span className="text-red-400">, </span>
+        <span className="text-blue-400">quantity</span>
+        <span className="text-red-400">: </span>
+        <span className="text-red-400">float</span>
+        <span className="text-red-400">)</span> -&gt;{" "}
+        <span className="text-red-400">None</span>:<br />
+        <span className="text-white"> print</span>
+        <span className="text-red-400">(</span>
+        <span className="text-green-400">f&quot;Python Trade update: </span>
+        <span className="text-red-400">&#123;</span>
+        <span className="text-white">ticker</span>
+        <span className="text-red-400">&#125;</span>
+        <span className="text-green-400"> </span>
+        <span className="text-red-400">&#123;</span>
+        <span className="text-white">side</span>
+        <span className="text-red-400">&#125;</span>
+        <span className="text-green-400"> </span>
+        <span className="text-red-400">&#123;</span>
+        <span className="text-white">price</span>
+        <span className="text-red-400">&#125;</span>
+        <span className="text-green-400"> </span>
+        <span className="text-red-400">&#123;</span>
+        <span className="text-white">quantity</span>
+        <span className="text-red-400">&#125;</span>
+        <span className="text-green-400">&quot;</span>
+        <span className="text-red-400">)</span>
+        <br />
+        <br />
+        <span className="text-blue-400"> def</span> on_orderbook_update
+        <span className="text-red-400">(</span>
+        <span className="text-blue-400">self</span>
+        <span className="text-red-400">, </span>
+        <span className="text-blue-400">ticker</span>
+        <span className="text-red-400">: </span>
+        <span className="text-red-400">str</span>
+        <span className="text-red-400">, </span>
+        <span className="text-blue-400">side</span>
+        <span className="text-red-400">: </span>
+        <span className="text-red-400">str</span>
+        <span className="text-red-400">, </span>
+        <span className="text-blue-400">price</span>
+        <span className="text-red-400">: </span>
+        <span className="text-red-400">float</span>
+        <span className="text-red-400">, </span>
+        <span className="text-blue-400">quantity</span>
+        <span className="text-red-400">: </span>
+        <span className="text-red-400">bool</span>
+        <span className="text-red-400">)</span> -&gt;{" "}
+        <span className="text-red-400">None</span>:<br />
+        <span className="text-white"> print</span>
+        <span className="text-red-400">(</span>
+        <span className="text-green-400">f&quot;Python Orderbook update: </span>
+        <span className="text-red-400">&#123;</span>
+        <span className="text-white">ticker</span>
+        <span className="text-red-400">&#125;</span>
+        <span className="text-green-400"> </span>
+        <span className="text-red-400">&#123;</span>
+        <span className="text-white">side</span>
+        <span className="text-red-400">&#125;</span>
+        <span className="text-green-400"> </span>
+        <span className="text-red-400">&#123;</span>
+        <span className="text-white">price</span>
+        <span className="text-red-400">&#125;</span>
+        <span className="text-green-400"> </span>
+        <span className="text-red-400">&#123;</span>
+        <span className="text-white">quantity</span>
+        <span className="text-red-400">&#125;</span>
+        <span className="text-green-400">&quot;</span>
+        <span className="text-red-400">)</span>
+        <br />
+        <br />
+        <span className="text-blue-400"> def</span> on_account_update
+        <span className="text-red-400">(</span>
+        <span className="text-blue-400">self</span>
+        <span className="text-red-400">, </span>
+        <span className="text-blue-400">ticker</span>
+        <span className="text-red-400">: </span>
+        <span className="text-red-400">str</span>
+        <span className="text-red-400">, </span>
+        <span className="text-blue-400">side</span>
+        <span className="text-red-400">: </span>
+        <span className="text-red-400">str</span>
+        <span className="text-red-400">, </span>
+        <span className="text-blue-400">price</span>
+        <span className="text-red-400">: </span>
+        <span className="text-red-400">float</span>
+        <span className="text-red-400">, </span>
+        <span className="text-blue-400">quantity</span>
+        <span className="text-red-400">: </span>
+        <span className="text-red-400">float</span>
+        <span className="text-red-400">, </span>
+        <span className="text-blue-400">capital_remaining</span>
+        <span className="text-red-400">: </span>
+        <span className="text-red-400">float</span>
+        <span className="text-red-400">)</span> -&gt;{" "}
+        <span className="text-red-400">None</span>:<br />
+        <span className="text-white"> print</span>
+        <span className="text-red-400">(</span>
+        <span className="text-green-400">f&quot;Python Account update: </span>
+        <span className="text-red-400">&#123;</span>
+        <span className="text-white">ticker</span>
+        <span className="text-red-400">&#125;</span>
+        <span className="text-green-400"> </span>
+        <span className="text-red-400">&#123;</span>
+        <span className="text-white">side</span>
+        <span className="text-red-400">&#125;</span>
+        <span className="text-green-400"> </span>
+        <span className="text-red-400">&#123;</span>
+        <span className="text-white">price</span>
+        <span className="text-red-400">&#125;</span>
+        <span className="text-green-400"> </span>
+        <span className="text-red-400">&#123;</span>
+        <span className="text-white">quantity</span>
+        <span className="text-red-400">&#125;</span>
+        <span className="text-green-400"> </span>
+        <span className="text-red-400">&#123;</span>
+        <span className="text-white">capital_remaining</span>
+        <span className="text-red-400">&#125;</span>
+        <span className="text-green-400">&quot;</span>
+        <span className="text-red-400">)</span>
       </code>
     </pre>
   );
@@ -36,9 +200,7 @@ export default function Template() {
               <div className="border-b border-r border-b-white/20 border-r-white/10 bg-white/5 px-4 py-2 text-white">
                 Template.py
               </div>
-              <div className="border-r border-gray-600/10 px-4 py-2">
-                
-              </div>
+              <div className="border-r border-gray-600/10 px-4 py-2"></div>
             </div>
           </div>
           <div className="px-6 pb-14 pt-6">

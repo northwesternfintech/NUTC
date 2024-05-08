@@ -7,7 +7,6 @@
 #include <chrono>
 
 #include <list>
-#include <thread>
 
 namespace nutc {
 namespace ticks {
@@ -25,8 +24,6 @@ class TickJobScheduler {
 
     uint64_t current_tick_{};
     milliseconds delay_time_{};
-    std::atomic<bool> running_{};
-    std::thread tick_thread_{};
     std::vector<scheduled_job> on_tick_jobs_{};
 
     std::list<milliseconds> tick_times_{};
@@ -73,26 +70,11 @@ public:
 
     [[nodiscard]] tick_metrics_t get_tick_metrics() const;
 
-    void
-    start(uint16_t tick_hz)
-    {
-        delay_time_ = milliseconds(MS_PER_SECOND / tick_hz);
-        running_ = true;
-        tick_thread_ = std::thread(&TickJobScheduler::run_, this);
-    }
-
-    void
-    stop()
-    {
-        running_ = false;
-        if (tick_thread_.joinable())
-            tick_thread_.join();
-    }
+    void start(uint16_t tick_hz);
 
 private:
     TickJobScheduler() = default;
     auto notify_tick_();
-    void run_();
 
 public:
     TickJobScheduler(const TickJobScheduler&) = delete;
@@ -100,7 +82,7 @@ public:
     TickJobScheduler& operator=(const TickJobScheduler&) = delete;
     TickJobScheduler& operator=(TickJobScheduler&&) = delete;
 
-    ~TickJobScheduler() { stop(); }
+    ~TickJobScheduler() = default;
 
     static TickJobScheduler&
     get()

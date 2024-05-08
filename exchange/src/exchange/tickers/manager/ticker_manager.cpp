@@ -1,8 +1,6 @@
 #include "ticker_manager.hpp"
 
-#include "exchange/bots/bot_container.hpp"
 #include "exchange/config.h"
-#include "exchange/logging.hpp"
 #include "exchange/metrics/prometheus.hpp"
 #include "exchange/tickers/engine/level_update_generator.hpp"
 #include "exchange/traders/trader_container.hpp"
@@ -10,20 +8,19 @@
 
 #include <prometheus/counter.h>
 
-#include <iostream>
+#include <algorithm>
 #include <iterator>
 
 namespace nutc {
 namespace engine_manager {
 
-namespace {
 using tick_update = messages::tick_update;
 
 // NOTE: we can still run into buffer errors if we have an extremely large message
 // buffer to send and we split it up into very small chunks This only happens in the
 // extreme extreme case (say, 100k orders with 8k max msg size)
 std::vector<std::string>
-split_tick_updates(const tick_update& update)
+EngineManager::split_tick_updates_(const tick_update& update)
 {
     std::string buf = glz::write_json(update);
     if (buf.size() > MAX_PIPE_MSG_SIZE) {
@@ -42,14 +39,13 @@ split_tick_updates(const tick_update& update)
             {mid_obs,     update.ob_updates.end()},
             {mid_matches, update.matches.end()   }
         };
-        auto res1 = split_tick_updates(tick_update_1);
-        auto res2 = split_tick_updates(tick_update_2);
+        auto res1 = split_tick_updates_(tick_update_1);
+        auto res2 = split_tick_updates_(tick_update_2);
         std::ranges::copy(res2, std::back_inserter(res1));
         return res1;
     }
     return {buf};
 }
-} // namespace
 
 void
 log_match(const matching::stored_match& order)
@@ -99,11 +95,11 @@ EngineManager::on_tick(uint64_t new_tick)
         glz_matches.reserve(matches_.size());
         for (const auto& match : matches_) {
             log_match(match);
-            glz_matches.emplace_back(messages::match{
+            glz_matches.emplace_back(
                 match.ticker, match.side, match.price, match.quantity,
                 match.buyer->get_id(), match.seller->get_id(),
                 match.buyer->get_capital(), match.seller->get_capital()
-            });
+            );
         }
 
         messages::tick_update updates{
@@ -112,8 +108,11 @@ EngineManager::on_tick(uint64_t new_tick)
             ),
             glz_matches
         };
-        auto update_strs = split_tick_updates(updates);
-        traders::TraderContainer::get_instance().broadcast_messages(update_strs);
+        auto update_strs = split_tick_updates_(updates);
+        for (const auto& trader :
+             traders::TraderContainer::get_instance().get_traders()) {
+            trader->send_messages(update_strs);
+        }
         engine.last_order_container = engine.engine.get_order_container();
         matches_.clear();
     }

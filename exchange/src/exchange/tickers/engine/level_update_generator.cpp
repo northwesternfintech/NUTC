@@ -13,28 +13,32 @@ get_updates(
     const std::string& ticker, const OrderContainer& before, const OrderContainer& after
 )
 {
-    std::unordered_set<double> buy_levels;
-    std::unordered_set<double> ask_levels;
-    for (auto [price, quantity] : before.get_levels(util::Side::buy)) {
+    std::unordered_set<double> buy_levels{};
+    std::unordered_set<double> ask_levels{};
+    for (auto [price, _] : before.get_levels(util::Side::buy)) {
         buy_levels.insert(price);
     }
-    for (auto [price, quantity] : before.get_levels(util::Side::sell)) {
+    for (auto [price, _] : before.get_levels(util::Side::sell)) {
         ask_levels.insert(price);
     }
-    for (auto [price, quantity] : after.get_levels(util::Side::buy)) {
+    for (auto [price, _] : after.get_levels(util::Side::buy)) {
         buy_levels.insert(price);
     }
-    for (auto [price, quantity] : after.get_levels(util::Side::sell)) {
+    for (auto [price, _] : after.get_levels(util::Side::sell)) {
         ask_levels.insert(price);
     }
 
-    std::vector<ob_update> updates;
+    std::vector<ob_update> updates{};
     for (auto price : buy_levels) {
         double before_quantity = before.get_level(util::Side::buy, price);
         double after_quantity = after.get_level(util::Side::buy, price);
 
         if (before_quantity == after_quantity)
             continue;
+
+        // Round to 3 places
+        before_quantity = std::round(before_quantity * 1000) / 1000;
+        after_quantity = std::round(after_quantity * 1000) / 1000;
 
         updates.emplace_back(ticker, util::Side::buy, price, after_quantity);
     }

@@ -84,6 +84,9 @@ public:
     EngineManager operator=(EngineManager const&) = delete;
     EngineManager(EngineManager&&) = delete;
     EngineManager operator=(EngineManager&&) = delete;
+
+private:
+    std::vector<std::string> split_tick_updates_(const tick_update& update);
 };
 } // namespace engine_manager
 } // namespace nutc

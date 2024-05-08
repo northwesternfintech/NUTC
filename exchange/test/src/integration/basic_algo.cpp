@@ -4,16 +4,19 @@
 #include "exchange/traders/trader_types/bot_trader.hpp"
 #include "exchange/wrappers/messaging/consumer.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
+#include "test_utils/helpers/test_trader.hpp"
 #include "test_utils/macros.hpp"
 #include "test_utils/process.hpp"
 
 #include <gtest/gtest.h>
 
 namespace rmq = nutc::rabbitmq;
+using nutc::util::Side::buy;
+using nutc::util::Side::sell;
 
 class IntegrationBasicAlgo : public ::testing::Test {
 protected:
-    using BotTrader = nutc::traders::BotTrader;
+    using TestTrader = nutc::test_utils::TestTrader;
 
     void
     TearDown() override
@@ -30,280 +33,185 @@ protected:
 TEST_F(IntegrationBasicAlgo, InitialLiquidity)
 {
     std::vector<std::string> names{"test_algos/buy_tsla_at_100.py"};
-    if (!nutc::test_utils::initialize_testing_clients(users_, names)) {
-        FAIL() << "Failed to initialize testing clients";
-    }
+    auto traders = nutc::test_utils::initialize_testing_clients(users_, names);
+    auto trader = traders.at(0);
 
     // want to see if it buys
     engine_manager_.add_engine("TSLA");
 
-    auto bot = users_.add_trader<BotTrader>("", 0);
+    auto bot = users_.add_trader<TestTrader>("TSLA", 0);
     bot->modify_holdings("TSLA", 1000); // NOLINT
 
     rmq::WrapperConsumer::match_new_order(
-        engine_manager_,
-        nutc::messages::market_order{
-            bot->get_id(), nutc::util::Side::sell, "TSLA", 100, 100
-        }
+        engine_manager_, bot, nutc::messages::market_order{sell, "TSLA", 100, 100}
     );
 
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 
-    auto mess = rmq::WrapperConsumer::consume_message();
-    ASSERT_TRUE(std::holds_alternative<nutc::messages::market_order>(mess));
-
-    nutc::messages::market_order actual = std::get<nutc::messages::market_order>(mess);
-    ASSERT_EQ_MARKET_ORDER(
-        actual, "test_algos/buy_tsla_at_100.py", "TSLA", nutc::util::Side::buy, 100, 10
-    );
+    auto mess = nutc::test_utils::consume_message(trader);
+    ASSERT_EQ_MARKET_ORDER(mess, "TSLA", buy, 100, 10);
 }
 
 TEST_F(IntegrationBasicAlgo, ManyUpdates)
 {
     std::vector<std::string> names{"test_algos/confirm_1000.py"};
-    if (!nutc::test_utils::initialize_testing_clients(users_, names)) {
-        FAIL() << "Failed to initialize testing clients";
-    }
+    auto traders = nutc::test_utils::initialize_testing_clients(users_, names);
+    auto trader = traders.at(0);
 
     // want to see if it buys
     engine_manager_.add_engine("TSLA");
 
-    auto bot = users_.add_trader<BotTrader>("", 0);
+    auto bot = users_.add_trader<TestTrader>("TSLA", 0);
     bot->modify_holdings("TSLA", 100000); // NOLINT
 
     for (double i = 0; i < 100000; i++) {
         rmq::WrapperConsumer::match_new_order(
-            engine_manager_,
-            nutc::messages::market_order{
-                bot->get_id(), nutc::util::Side::sell, "TSLA", 1, i
-            }
+            engine_manager_, bot, nutc::messages::market_order{sell, "TSLA", 1, i}
         );
     }
 
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 
-    auto mess = rmq::WrapperConsumer::consume_message();
-    ASSERT_TRUE(std::holds_alternative<nutc::messages::market_order>(mess));
-
-    nutc::messages::market_order actual = std::get<nutc::messages::market_order>(mess);
-    ASSERT_EQ_MARKET_ORDER(
-        actual, "test_algos/confirm_1000.py", "TSLA", nutc::util::Side::buy, 100, 10
-    );
+    auto mess = nutc::test_utils::consume_message(trader);
+    ASSERT_EQ_MARKET_ORDER(mess, "TSLA", buy, 100, 10);
 }
 
 TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
 {
     std::vector<std::string> names{"test_algos/buy_tsla_on_trade.py"};
-    if (!nutc::test_utils::initialize_testing_clients(users_, names)) {
-        FAIL() << "Failed to initialize testing clients";
-    }
+    auto traders = nutc::test_utils::initialize_testing_clients(users_, names);
+    auto trader = traders.at(0);
 
     engine_manager_.add_engine("TSLA");
     engine_manager_.add_engine("APPL");
 
-    auto bot = users_.add_trader<BotTrader>("", 0);
+    auto bot = users_.add_trader<TestTrader>("TSLA", 0);
     bot->modify_holdings("TSLA", 1000); // NOLINT
 
     rmq::WrapperConsumer::match_new_order(
-        engine_manager_,
-        nutc::messages::market_order{
-            bot->get_id(), nutc::util::Side::sell, "TSLA", 100, 100
-        }
+        engine_manager_, bot, nutc::messages::market_order{sell, "TSLA", 100, 100}
     ); // NOLINT
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 
     // obupdate triggers one user to place autil::Side::buy order of 10 TSLA at 100
-    auto mess1 = rmq::WrapperConsumer::consume_message();
-    EXPECT_TRUE(std::holds_alternative<nutc::messages::market_order>(mess1));
+    auto mess1 = nutc::test_utils::consume_message(trader);
+    ASSERT_EQ_MARKET_ORDER(mess1, "TSLA", buy, 102, 10);
 
-    nutc::messages::market_order actual_mo =
-        std::get<nutc::messages::market_order>(mess1);
-    ASSERT_EQ_MARKET_ORDER(
-        actual_mo, "test_algos/buy_tsla_on_trade.py", "TSLA", nutc::util::Side::buy,
-        102, 10
-    );
-
-    rmq::WrapperConsumer::match_new_order(engine_manager_, std::move(actual_mo));
+    rmq::WrapperConsumer::match_new_order(engine_manager_, trader, std::move(mess1));
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 
     // on_trade_match triggers one user to place autil::Side::buy order of 1 TSLA at 100
-    auto mess2 = rmq::WrapperConsumer::consume_message();
-    EXPECT_TRUE(std::holds_alternative<nutc::messages::market_order>(mess2));
-
-    nutc::messages::market_order actual2 =
-        std::get<nutc::messages::market_order>(mess2);
-    ASSERT_EQ_MARKET_ORDER(
-        actual2, "test_algos/buy_tsla_on_trade.py", "APPL", nutc::util::Side::buy, 100,
-        1
-    );
+    auto mess2 = nutc::test_utils::consume_message(trader);
+    ASSERT_EQ_MARKET_ORDER(mess2, "APPL", buy, 100, 1);
 }
 
 // Sanity check that it goes through the orderbook
 TEST_F(IntegrationBasicAlgo, MultipleLevelOrder)
 {
     std::vector<std::string> names{"test_algos/buy_tsla_at_100.py"};
-    if (!nutc::test_utils::initialize_testing_clients(users_, names)) {
-        FAIL() << "Failed to initialize testing clients";
-    }
+    auto traders = nutc::test_utils::initialize_testing_clients(users_, names);
+    auto trader = traders.at(0);
 
     engine_manager_.add_engine("TSLA");
 
-    auto bot = users_.add_trader<BotTrader>("", 0);
+    auto bot = users_.add_trader<TestTrader>("TSLA", 0);
     bot->modify_holdings("TSLA", 1000); // NOLINT
 
     rmq::WrapperConsumer::match_new_order(
-        engine_manager_,
-        nutc::messages::market_order{
-            bot->get_id(), nutc::util::Side::sell, "TSLA", 5, 100
-        }
+        engine_manager_, bot, nutc::messages::market_order{sell, "TSLA", 5, 100}
     ); // NOLINT
     rmq::WrapperConsumer::match_new_order(
-        engine_manager_,
-        nutc::messages::market_order{
-            bot->get_id(), nutc::util::Side::sell, "TSLA", 5, 95
-        }
+        engine_manager_, bot, nutc::messages::market_order{sell, "TSLA", 5, 95}
     ); // NOLINT
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 
-    auto mess1 = rmq::WrapperConsumer::consume_message();
-    EXPECT_TRUE(std::holds_alternative<nutc::messages::market_order>(mess1));
+    auto mess1 = nutc::test_utils::consume_message(trader);
+    ASSERT_EQ_MARKET_ORDER(mess1, "TSLA", buy, 100, 10);
 
-    nutc::messages::market_order actual_mo =
-        std::get<nutc::messages::market_order>(mess1);
-    ASSERT_EQ_MARKET_ORDER(
-        actual_mo, "test_algos/buy_tsla_at_100.py", "TSLA", nutc::util::Side::buy, 100,
-        10
-    );
-
-    rmq::WrapperConsumer::match_new_order(engine_manager_, std::move(actual_mo));
+    rmq::WrapperConsumer::match_new_order(engine_manager_, trader, std::move(mess1));
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 
-    const auto& trader = nutc::traders::TraderContainer::get_instance().get_trader(
-        "test_algos/buy_tsla_at_100.py"
-    );
-
     ASSERT_EQ(trader->get_capital() - trader->get_initial_capital(), -975.09750000000349);
+
 }
 
 TEST_F(IntegrationBasicAlgo, OnAccountUpdateSell)
 {
     std::vector<std::string> names{"test_algos/sell_tsla_on_account.py"};
-    if (!nutc::test_utils::initialize_testing_clients(users_, names)) {
-        FAIL() << "Failed to initialize testing clients";
-    }
+    auto traders = nutc::test_utils::initialize_testing_clients(users_, names);
+    auto trader = traders.at(0);
+    trader->modify_holdings("TSLA", 1000);
+    auto bot = users_.add_trader<TestTrader>("TSLA", 100000);
 
     engine_manager_.add_engine("TSLA");
     engine_manager_.add_engine("APPL");
 
-    auto bot = users_.add_trader<BotTrader>("", 100000);
-    users_.get_trader("test_algos/sell_tsla_on_account.py")
-        ->modify_holdings("TSLA", 1000);
-
     rmq::WrapperConsumer::match_new_order(
-        engine_manager_,
-        nutc::messages::market_order{
-            bot->get_id(), nutc::util::Side::buy, "TSLA", 102, 102
-        }
+        engine_manager_, bot, nutc::messages::market_order{buy, "TSLA", 102, 102}
     ); // NOLINT
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 
     // obupdate triggers one user to place autil::Side::buy order of 10 TSLA at 102
-    auto mess1 = rmq::WrapperConsumer::consume_message();
-    EXPECT_TRUE(std::holds_alternative<nutc::messages::market_order>(mess1));
+    auto mess1 = nutc::test_utils::consume_message(trader);
+    ASSERT_EQ_MARKET_ORDER(mess1, "TSLA", sell, 100, 10);
 
-    nutc::messages::market_order actual_mo =
-        std::get<nutc::messages::market_order>(mess1);
-    ASSERT_EQ_MARKET_ORDER(
-        actual_mo, "test_algos/sell_tsla_on_account.py", "TSLA", nutc::util::Side::sell,
-        100, 10
-    );
-
-    rmq::WrapperConsumer::match_new_order(engine_manager_, std::move(actual_mo));
+    rmq::WrapperConsumer::match_new_order(engine_manager_, trader, std::move(mess1));
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 
     // on_trade_match triggers one user to place autil::Side::buy order of 1 TSLA at 100
-    auto mess2 = rmq::WrapperConsumer::consume_message();
-    EXPECT_TRUE(std::holds_alternative<nutc::messages::market_order>(mess2));
-
-    // nutc::messages::market_order actual2 =
-    // std::get<nutc::messages::market_order>(mess2);
-    // ASSERT_EQ_MARKET_ORDER(
-    // actual2, "test_algos/sell_tsla_on_account.py", "APPL", nutc::util::Side::sell,
-    // 100, 1
-    // );
+    auto mess2 = nutc::test_utils::consume_message(trader);
+    ASSERT_EQ_MARKET_ORDER(mess2, "APPL", buy, 100, 1);
 }
 
 TEST_F(IntegrationBasicAlgo, OnAccountUpdateBuy)
 {
     std::vector<std::string> names{"test_algos/buy_tsla_on_account.py"};
-    if (!nutc::test_utils::initialize_testing_clients(users_, names)) {
-        FAIL() << "Failed to initialize testing clients";
-    }
+    auto traders = nutc::test_utils::initialize_testing_clients(users_, names);
+    auto trader = traders.at(0);
 
     engine_manager_.add_engine("TSLA");
     engine_manager_.add_engine("APPL");
 
-    auto bot = users_.add_trader<BotTrader>("", 0);
+    auto bot = users_.add_trader<TestTrader>("TSLA", 0);
     bot->modify_holdings("TSLA", 1000); // NOLINT
 
     rmq::WrapperConsumer::match_new_order(
-        engine_manager_,
-        nutc::messages::market_order{
-            bot->get_id(), nutc::util::Side::sell, "TSLA", 100, 100
-        }
+        engine_manager_, bot, nutc::messages::market_order{sell, "TSLA", 100, 100}
     ); // NOLINT
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 
     // obupdate triggers one user to place autil::Side::buy order of 10 TSLA at 102
-    auto mess1 = rmq::WrapperConsumer::consume_message();
-    EXPECT_TRUE(std::holds_alternative<nutc::messages::market_order>(mess1));
+    auto mess1 = nutc::test_utils::consume_message(trader);
+    ASSERT_EQ_MARKET_ORDER(mess1, "TSLA", buy, 102, 10);
 
-    nutc::messages::market_order actual_mo =
-        std::get<nutc::messages::market_order>(mess1);
-    ASSERT_EQ_MARKET_ORDER(
-        actual_mo, "test_algos/buy_tsla_on_account.py", "TSLA", nutc::util::Side::buy,
-        102, 10
-    );
-
-    rmq::WrapperConsumer::match_new_order(engine_manager_, std::move(actual_mo));
+    rmq::WrapperConsumer::match_new_order(engine_manager_, trader, std::move(mess1));
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 
     // on_trade_match triggers one user to place autil::Side::buy order of 1 TSLA at 100
-    auto mess2 = rmq::WrapperConsumer::consume_message();
-    EXPECT_TRUE(std::holds_alternative<nutc::messages::market_order>(mess2));
-
-    nutc::messages::market_order actual2 =
-        std::get<nutc::messages::market_order>(mess2);
-    ASSERT_EQ_MARKET_ORDER(
-        actual2, "test_algos/buy_tsla_on_account.py", "APPL", nutc::util::Side::buy,
-        100, 1
-    );
+    auto mess2 = nutc::test_utils::consume_message(trader);
+    ASSERT_EQ_MARKET_ORDER(mess2, "APPL", buy, 100, 1);
 }
 
 TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
 {
     std::vector<std::string> names{"test_algos/buy_tsla_at_100.py"};
-    if (!nutc::test_utils::initialize_testing_clients(
-            users_, names, TEST_CLIENT_WAIT_SECS
-        )) {
-        FAIL() << "Failed to initialize testing clients";
-    }
+    auto traders = nutc::test_utils::initialize_testing_clients(
+        users_, names, TEST_CLIENT_WAIT_SECS
+    );
+    auto trader = traders.at(0);
 
     auto start = std::chrono::high_resolution_clock::now();
 
     engine_manager_.add_engine("TSLA");
-    auto bot = users_.add_trader<BotTrader>("", 0);
+    auto bot = users_.add_trader<TestTrader>("TSLA", 0);
     bot->modify_holdings("TSLA", 1000); // NOLINT
 
     rmq::WrapperConsumer::match_new_order(
-        engine_manager_,
-        nutc::messages::market_order{
-            bot->get_id(), nutc::util::Side::sell, "TSLA", 100, 100
-        }
+        engine_manager_, bot, nutc::messages::market_order{sell, "TSLA", 100, 100}
     ); // NOLINT
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 
-    auto mess = rmq::WrapperConsumer::consume_message();
+    auto mess2 = nutc::test_utils::consume_message(trader);
 
     auto end = std::chrono::high_resolution_clock::now();
     const int64_t duration_ms =

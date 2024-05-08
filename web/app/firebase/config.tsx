@@ -1,7 +1,7 @@
 "use client";
 import { connectDatabaseEmulator, getDatabase } from "firebase/database";
 import { connectStorageEmulator, getStorage } from "firebase/storage";
-import { apiEndpoint, emulatorEndpoint } from "@/config"
+import { apiEndpoint, emulatorEndpoint } from "@/config";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "firebase/compat/functions";
@@ -31,14 +31,14 @@ if (isLocalhost()) {
   connectDatabaseEmulator(database, emulatorEndpoint(), 9000);
   connectStorageEmulator(storage, emulatorEndpoint(), 9199);
   firebase.functions().useEmulator(emulatorEndpoint(), 5001);
-  firebase.auth().useEmulator(apiEndpoint()+":9099");
+  firebase.auth().useEmulator("http://" + emulatorEndpoint() + ":9099");
   functions = firebase.functions();
   if (
     typeof sessionStorage != "undefined" &&
     !sessionStorage.getItem("givenWarning")
   ) {
     alert(
-      "Initializing in emulator mode. If you aren't a developer, contact support@nuft_getdomain.com immediately."
+      "Initializing in emulator mode. If you aren't a developer, contact support@nuft_getdomain.com immediately.",
     );
     sessionStorage.setItem("givenWarning", "true");
   }

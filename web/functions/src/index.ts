@@ -31,14 +31,20 @@ export const emailApplication = functions.https.onCall(
       );
     }
     const uid = context.auth.uid;
-    if(dev_mode) {
-      await admin.database().ref("users").child(uid).child("isApprovedApplicant").set(true);
+    if (dev_mode) {
+      await admin
+        .database()
+        .ref("users")
+        .child(uid)
+        .child("isApprovedApplicant")
+        .set(true);
       return true;
     }
     const approvalLink = await generateApprovalLink(uid);
     const rejectionLink = await generateRejectionLink(uid);
-    const userInfo =
-      (await admin.database().ref("users").child(uid).once("value")).val();
+    const userInfo = (
+      await admin.database().ref("users").child(uid).once("value")
+    ).val();
     const userName = userInfo.username;
     const about = userInfo.about;
     const email = userInfo.email;
@@ -66,15 +72,47 @@ export const emailApplication = functions.https.onCall(
     };
     transporter.sendMail(mailOptions, (errno: any, _: any) => {
       if (errno) {
-        throw new functions.https.HttpsError(
-          "internal",
-          errno.toString(),
-        );
+        throw new functions.https.HttpsError("internal", errno.toString());
       }
     });
     return true;
   },
 );
+
+export const addUserToGroup = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    return false;
+  }
+  
+   if (!data.groupId) {
+     return false;
+   }
+
+ const uid = context.auth.uid;
+ const groupId = data.groupId;
+ if(uid==groupId) {
+	 return false;
+ }
+
+   const snapshot = await admin
+     .database()
+     .ref("users")
+     .child(data.groupId)
+     .once("value");
+  
+ if (!snapshot.exists()) {
+   return false;
+ }
+
+ 
+ await Promise.all([
+   admin.database().ref("users").child(uid).child("isPairedTo").set(groupId),
+   admin.database().ref("users").child(uid).child("isInAGroup").set(true),
+   admin.database().ref("users").child(groupId).child("isInAGroup").set(true),
+ ]);
+
+  return true;
+});
 
 async function generateApprovalLink(uid: any) {
   const token: string = crypto.randomBytes(16).toString("hex");
@@ -109,16 +147,24 @@ export const approveApplicant = functions.https.onRequest(async (req, res) => {
     return;
   }
   const uid: string = uid_to_approve.val();
-  const newref = admin.database().ref("users").child(uid).child(
-    "isApprovedApplicant",
-  );
-  const emailpromise = await admin.database().ref("users").child(uid).child(
-    "email",
-  ).once("value");
+  const newref = admin
+    .database()
+    .ref("users")
+    .child(uid)
+    .child("isApprovedApplicant");
+  const emailpromise = await admin
+    .database()
+    .ref("users")
+    .child(uid)
+    .child("email")
+    .once("value");
   const email = emailpromise.val();
-  const namePromise = await admin.database().ref("users").child(uid).child(
-    "firstName",
-  ).once("value");
+  const namePromise = await admin
+    .database()
+    .ref("users")
+    .child(uid)
+    .child("firstName")
+    .once("value");
   const name = namePromise.val();
   await newref.set(true);
   const mailOptions = {
@@ -145,16 +191,24 @@ export const rejectApplicant = functions.https.onRequest(async (req, res) => {
     return;
   }
   const uid: string = uid_to_approve.val();
-  const newref = admin.database().ref("users").child(uid).child(
-    "isRejectedApplicant",
-  );
-  const emailpromise = await admin.database().ref("users").child(uid).child(
-    "email",
-  ).once("value");
+  const newref = admin
+    .database()
+    .ref("users")
+    .child(uid)
+    .child("isRejectedApplicant");
+  const emailpromise = await admin
+    .database()
+    .ref("users")
+    .child(uid)
+    .child("email")
+    .once("value");
   const email = emailpromise.val();
-  const namePromise = await admin.database().ref("users").child(uid).child(
-    "firstName",
-  ).once("value");
+  const namePromise = await admin
+    .database()
+    .ref("users")
+    .child(uid)
+    .child("firstName")
+    .once("value");
   const name = namePromise.val();
   await newref.set(true);
   const mailOptions = {

@@ -15,6 +15,10 @@ export interface UserInfoType {
   school: string;
   hasCompletedReg: boolean;
   isApprovedApplicant?: boolean;
+
+  // Only set on the subservient user
+  isPairedTo?: string;
+  isInAGroup: boolean;
   isRejectedApplicant?: boolean;
   algos?: Map<string, AlgorithmType>;
   latestAlgoId?: string;

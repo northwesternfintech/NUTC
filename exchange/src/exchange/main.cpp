@@ -1,9 +1,6 @@
 #include "algos/algo_manager.hpp"
-#include "concurrency/exchange_lock.hpp"
 #include "exchange/algos/algo_manager.hpp"
 #include "exchange/bots/bot_container.hpp"
-#include "exchange/bots/bot_types/market_maker.hpp"
-#include "exchange/concurrency/pin_threads.hpp"
 #include "exchange/config/argparse.hpp"
 #include "exchange/metrics/dashboard.hpp"
 #include "exchange/metrics/on_tick_metrics.hpp"
@@ -17,7 +14,6 @@
 #include "tickers/manager/ticker_manager.hpp"
 #include "traders/trader_container.hpp"
 #include "wrappers/creation/rmq_wrapper_init.hpp"
-#include "wrappers/messaging/async_pipe_runner.hpp"
 #include "wrappers/messaging/consumer.hpp"
 
 #include <csignal>
@@ -31,9 +27,6 @@ void
 flush_log(int)
 {
     file_ops::print_file_contents("logs/error_log.txt");
-
-    concurrency::ExchangeLock::unlock();
-    ticks::TickJobScheduler::get().stop();
     std::exit(0); // NOLINT(concurrency-*)
 }
 
@@ -51,7 +44,7 @@ initialize_indiv_ticker(const std::string& ticker, double starting_price)
 
     // Should run after stale order removal, so they can react to removed orders
     TickJobScheduler::get().on_tick(
-        &bot_container, /*priority=*/2, fmt::format("Bot Engine for ticker {}", ticker)
+        &bot_container, /*priority=*/3, fmt::format("Bot Engine for ticker {}", ticker)
     );
 
     dashboard::DashboardState::get_instance().add_ticker(ticker, starting_price);
@@ -70,7 +63,7 @@ void
 initialize_dashboard()
 {
     auto& dashboard = dashboard::Dashboard::get_instance();
-    ticks::TickJobScheduler::get().on_tick(&dashboard, /*priority=*/3, "Dashboard");
+    ticks::TickJobScheduler::get().on_tick(&dashboard, /*priority=*/4, "Dashboard");
 }
 
 void
@@ -94,7 +87,7 @@ initialize_bots()
     }
     // TODO(stevenewald): should this be somewhere else?
     ticks::TickJobScheduler::get().on_tick(
-        &engine_manager, /*priority=*/1, "Matching Engine"
+        &engine_manager, /*priority=*/2, "Matching Engine"
     );
 }
 
@@ -103,7 +96,6 @@ initialize_wrappers()
 {
     traders::TraderContainer& users = traders::TraderContainer::get_instance();
 
-    rabbitmq::WrapperInitializer::wait_for_clients(users);
     size_t wait_secs = config::Config::get().constants().WAIT_SECS;
     rabbitmq::WrapperInitializer::send_start_time(users, wait_secs);
 }
@@ -124,10 +116,10 @@ initialize_algos(const auto& mode)
 }
 
 void
-blocking_event_loop()
+on_tick_consumer()
 {
-    auto& eng_mgr = engine_manager::EngineManager::get_instance();
-    rabbitmq::WrapperConsumer::consumer_event_loop(eng_mgr);
+    static rabbitmq::WrapperConsumer consumer{};
+    ticks::TickJobScheduler::get().on_tick(&consumer, /*priority=*/1, "consumer");
 }
 } // namespace
 
@@ -151,16 +143,14 @@ main(int argc, const char** argv)
     initialize_tickers();
     initialize_bots();
     initialize_dashboard();
-    start_tick_scheduler();
-
-    concurrency::pin_to_core(0, "main");
-
-    sandbox::CrowServer::get_instance();
+    on_tick_consumer();
 
     ticks::TickJobScheduler::get().on_tick(
         &(metrics::OnTickMetricsPush::get()), /*priority=*/5, "Metrics Pushing"
     );
 
-    blocking_event_loop();
+    sandbox::CrowServer::get_instance();
+
+    start_tick_scheduler();
     return 0;
 }

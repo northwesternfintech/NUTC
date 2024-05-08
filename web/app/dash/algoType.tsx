@@ -9,4 +9,5 @@ export default interface AlgorithmType {
   sandboxLogFileURL?: string;
   lintFailureMessage?: string;
   lintSuccessMessage?: string;
+  caseType: string;
 }

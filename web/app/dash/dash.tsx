@@ -12,6 +12,7 @@ import {
   Bars3Icon,
   QuestionMarkCircleIcon,
   XMarkIcon,
+  UserPlusIcon,
 } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 
@@ -40,23 +41,12 @@ const navigation = [
     icon: ArrowUpTrayIcon,
     activeName: "/dash/submit",
   },
-  // {
-  // name: "Team Profile",
-  // href: "#",
-  // icon: UserGroupIcon,
-  // activeName: "team-profile",
-  // },
-];
-const submissions2 = [
   {
-    id: 1,
-    name: "new-experimental-algo",
-    href: "#",
-    initial: "1",
-    current: false,
+    name: "Partner Settings",
+    href: "/dash/group",
+    icon: UserPlusIcon,
+    activeName: "/dash/group",
   },
-  { id: 2, name: "RL-buggy-test", href: "#", initial: "2", current: false },
-  { id: 3, name: "DL-test-4", href: "#", initial: "2", current: false },
 ];
 
 function classNames(...classes: any) {
@@ -91,12 +81,12 @@ export default function Dash(content: React.ReactNode) {
         name: value.name,
         href: `/dash/submissions/${key}`,
         initial: String(i),
-        current: false,
+	// So janky lmfao
+        current: window.location.href.includes(key),
       });
       i++;
     }
     if (tmpSubmissions.length > 0) {
-      tmpSubmissions[0].current = true;
       setSubmissions(tmpSubmissions);
     }
   }, [user]);

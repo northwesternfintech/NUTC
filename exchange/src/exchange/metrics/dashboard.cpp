@@ -172,15 +172,10 @@ Dashboard::display_stock_ticker_data(
             bot_type, state.min_utilization_, state.max_utilization_,
             state.avg_utilization_
         );
-        mvwprintw(
-            window, start_y++, start_x, "%s min/max/avg PnL: %.2f %.2f %.2f", bot_type,
-            state.min_pnl_, state.max_pnl_, state.avg_pnl_
-        );
         start_y++;
     };
 
     display_bot_stats(ticker.mm_state_, "MM");
-    display_bot_stats(ticker.retail_state_, "Retail");
 }
 
 void
@@ -225,10 +220,7 @@ Dashboard::display_leaderboard(WINDOW* window, int start_y)
         return pnl;
     };
 
-    std::vector<std::shared_ptr<traders::GenericTrader>> ordered_traders;
-    for (const auto& [user_id, trader] : client_manager.get_traders()) {
-        ordered_traders.push_back(trader);
-    }
+    auto ordered_traders = client_manager.get_traders();
     std::sort(
         ordered_traders.begin(), ordered_traders.end(),
         [&portfolio_value](const auto& a, const auto& b) {

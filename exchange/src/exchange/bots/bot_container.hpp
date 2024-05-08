@@ -3,7 +3,6 @@
 #include "exchange/bots/bot_types/retail.hpp"
 #include "exchange/theo/brownian.hpp"
 #include "exchange/tick_scheduler/tick_observer.hpp"
-#include "exchange/tickers/engine/order_storage.hpp"
 
 #include <cstdint>
 
@@ -20,12 +19,9 @@ concept HandledBotType =
  */
 class BotContainer : public ticks::TickObserver {
     const std::string TICKER;
-    const double BROWNIAN_OFFSET;
     stochastic::BrownianMotion theo_generator_;
 
-    std::unordered_map<std::string, const std::shared_ptr<RetailBot>> retail_bots_{};
-    std::unordered_map<std::string, const std::shared_ptr<MarketMakerBot>>
-        market_makers_{};
+    std::vector<std::shared_ptr<traders::BotTrader>> bots_{};
 
 public:
     void on_tick(uint64_t) override;
@@ -33,38 +29,26 @@ public:
     double
     get_theo() const
     {
-        return BROWNIAN_OFFSET + theo_generator_.get_magnitude();
+        return theo_generator_.get_magnitude();
     }
 
     const auto&
-    get_market_makers() const
+    get_bots() const
     {
-        return market_makers_;
+        return bots_;
     }
 
-    const auto&
-    get_retail_traders() const
-    {
-        return retail_bots_;
-    }
-
-    std::vector<matching::stored_order>
-    on_new_theo(double new_theo, double current, uint64_t current_tick);
+    void generate_orders(double midprice, double new_theo);
 
     template <class BotType>
     void add_bots(double mean_capital, double stddev_capital, size_t num_bots)
     requires HandledBotType<BotType>;
 
-    BotContainer() : BROWNIAN_OFFSET(0.0) {}
+    BotContainer() : theo_generator_(0.0) {}
 
     explicit BotContainer(std::string ticker, double starting_price) :
-        TICKER(std::move(ticker)), BROWNIAN_OFFSET(starting_price)
+        TICKER(std::move(ticker)), theo_generator_(starting_price)
     {}
-
-private:
-    template <class BotType>
-    void add_single_bot_(double starting_capital)
-    requires HandledBotType<BotType>;
 };
 } // namespace bots
 } // namespace nutc

@@ -59,7 +59,7 @@ services:
       - net
 
   website:
-    image: node:18
+    image: node:20
     restart: unless-stopped
     working_dir: /app
     volumes: 
