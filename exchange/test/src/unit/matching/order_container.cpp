@@ -36,6 +36,18 @@ protected:
     nutc::matching::OrderContainer container_;          // NOLINT
 };
 
+TEST_F(UnitOrderContainerTest, TestStorageRounding)
+{
+    stored_order order1{trader_1, buy, "ETHUSD", 1, 1.000001, 1};
+    ASSERT_EQ(order1.price, 1.0);
+
+    stored_order order2{trader_2, buy, "ETHUSD", 0.00001, .9999, 1};
+    ASSERT_EQ(order2.price, 1.0);
+
+    stored_order order3{trader_2, buy, "ETHUSD", 1, .994, 2};
+    ASSERT_EQ(order3.price, 0.99);
+}
+
 TEST_F(UnitOrderContainerTest, SimpleAddRemove)
 {
     stored_order order1{trader_1, buy, "ETHUSD", 1, 1, 1};
