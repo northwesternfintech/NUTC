@@ -18,7 +18,7 @@ OrderContainer::modify_level_(util::Side side, double price, double qualtity)
 {
     auto& levels = side == util::Side::buy ? bid_levels_ : ask_levels_;
     levels[price] += qualtity;
-    if (levels[price] == 0) {
+    if (util::is_close_to_zero(levels[price])) {
         levels.erase(price);
     }
 }
