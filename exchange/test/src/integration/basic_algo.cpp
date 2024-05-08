@@ -131,8 +131,9 @@ TEST_F(IntegrationBasicAlgo, MultipleLevelOrder)
     rmq::WrapperConsumer::match_new_order(engine_manager_, trader, std::move(mess1));
     nutc::engine_manager::EngineManager::get_instance().on_tick(0);
 
-    ASSERT_EQ(trader->get_capital() - trader->get_initial_capital(), -975.09750000000349);
-
+    ASSERT_NEAR(
+        trader->get_capital() - trader->get_initial_capital(), -975.0975, .0000001
+    );
 }
 
 TEST_F(IntegrationBasicAlgo, OnAccountUpdateSell)
