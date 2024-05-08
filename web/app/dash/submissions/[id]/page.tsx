@@ -104,7 +104,7 @@ export default function Page({ params }: { params: { id: string } }) {
           ></iframe>
         </div>
         
-        <div className="mb-8">
+        <div className="my-8">
           <h2 className="text-xl font-semibold mb-2">Capital</h2>
           <iframe
             className="border border-gray-300 "
@@ -113,6 +113,18 @@ export default function Page({ params }: { params: { id: string } }) {
             height="400"
             frameBorder="0"
             title="Panel 2"
+          ></iframe>
+        </div>
+
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-2">Portfolio Value</h2>
+          <iframe
+            className="border border-gray-300 "
+            src={url + "&panelId=4"}
+            width="950"
+            height="400"
+            frameBorder="0"
+            title="Panel 4"
           ></iframe>
         </div>
       </div>
