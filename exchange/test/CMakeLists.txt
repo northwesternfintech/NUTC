@@ -21,6 +21,7 @@ add_executable(NUTC_tests
   
   src/unit/matching/basic_matching.cpp
   src/unit/matching/order_container.cpp
+  src/unit/matching/get_update.cpp
 
   src/unit/expiration/basic_expiration.cpp
 
