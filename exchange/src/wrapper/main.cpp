@@ -4,6 +4,7 @@
 #include "wrapper/logging.hpp"
 #include "wrapper/messaging/comms.hpp"
 #include "wrapper/pywrapper/pywrapper.hpp"
+#include "wrapper/resource_limits.hpp"
 
 #include <argparse/argparse.hpp>
 #include <pybind11/pybind11.h>
@@ -103,6 +104,8 @@ main(int argc, const char** argv)
     using comms = nutc::comms::ExchangeProxy;
     auto [verbosity, uid, algo_id, development_mode] = process_arguments(argc, argv);
     pybind11::scoped_interpreter guard{};
+
+    nutc::limits::set_memory_limit(1024);
 
     std::optional<std::string> algo{};
     std::string trader_id{};
