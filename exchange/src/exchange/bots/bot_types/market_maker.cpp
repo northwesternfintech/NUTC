@@ -55,18 +55,15 @@ MarketMakerBot::take_action(double, double real_theo)
     double average_price = avg_level_price(theo);
     double total_quantity = capital_tolerance / average_price;
 
+    // TODO: long/short capital inaccurate if not aggressive order
     auto new_buy_order = [&](const price_level& level) {
         double price = theo + level.PRICE_DELTA;
         double quantity = total_quantity * level.QUANTITY_FACTOR;
-        modify_open_bids(quantity);
-        modify_long_capital(quantity * price);
         add_order(util::Side::buy, quantity, price);
     };
     auto new_sell_order = [&](const price_level& level) {
         double price = theo + level.PRICE_DELTA;
         double quantity = total_quantity * level.QUANTITY_FACTOR;
-        modify_open_asks(quantity);
-        modify_short_capital(quantity * price);
         add_order(util::Side::sell, quantity, price);
     };
 

@@ -48,6 +48,8 @@ Config::get_bot_config_(const YAML::Node& full_config)
             type = BotType::market_maker;
         else if (type_s == "retail")
             type = BotType::retail;
+        else if (type_s == "bollinger")
+            type = BotType::bollinger;
         else
             throw std::runtime_error("Unknown bot type");
 

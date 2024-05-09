@@ -84,6 +84,11 @@ initialize_bots()
                 bot.AVERAGE_CAPITAL, bot.STD_DEV_CAPITAL, bot.NUM_BOTS
             );
         }
+        else if (bot.TYPE == config::BotType::bollinger) {
+            container.add_bots<bots::BollingerBot>(
+                bot.AVERAGE_CAPITAL, bot.STD_DEV_CAPITAL, bot.NUM_BOTS
+            );
+        }
     }
     // TODO(stevenewald): should this be somewhere else?
     ticks::TickJobScheduler::get().on_tick(

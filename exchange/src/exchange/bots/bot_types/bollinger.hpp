@@ -1,14 +1,8 @@
 #pragma once
 
 #include "exchange/traders/trader_types/bot_trader.hpp"
-#include "shared/messages_wrapper_to_exchange.hpp"
-
-#include <cmath>
 
 #include <deque>
-#include <numeric>
-#include <random>
-#include <vector>
 
 namespace nutc {
 
@@ -33,11 +27,11 @@ public:
 
     bool constexpr can_leverage() const override { return true; }
 
-    std::optional<messages::market_order> take_action(double current, double theo);
+    void take_action(double current, double theo) override;
 
 private:
     void update_statistics(double new_price);
-    std::pair<double, double> calculate_bollinger_bands();
+    std::pair<double, double> calculate_bollinger_bands() const;
 };
 
 } // namespace bots

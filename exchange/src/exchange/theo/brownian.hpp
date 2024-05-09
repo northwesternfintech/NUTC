@@ -25,7 +25,7 @@ class BrownianMotion {
     std::minstd_rand0 random_number_generator_;
     double cur_magnitude_;
 
-    size_t event_ticks_remaining_ = 0;
+    int event_ticks_remaining_ = 0;
     Signedness event_direction_ = Signedness::Either;
 
 public:

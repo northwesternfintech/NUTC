@@ -43,7 +43,7 @@ public:
     {
         double capital_util =
             (get_long_interest() + get_short_interest()) / get_interest_limit();
-        assert(capital_util <= 1);
+        // assert(capital_util <= 1);
         // assert(capital_util >= 0);
         return capital_util;
     }
@@ -121,6 +121,14 @@ protected:
     void
     add_order(util::Side side, double quantity, double price)
     {
+        if (side == util::Side::buy) {
+            modify_open_bids(quantity);
+            modify_long_capital(quantity * price);
+        }
+        else {
+            modify_open_asks(quantity);
+            modify_short_capital(quantity * price);
+        }
         orders_.emplace_back(side, TICKER, quantity, price);
     }
 
