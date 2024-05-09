@@ -21,6 +21,7 @@ struct global_config {
     const uint16_t TICK_HZ;
     const uint8_t DISPLAY_HZ;
     const unsigned int SANDBOX_TRIAL_SECS;
+    const double ORDER_FEE;
 };
 
 struct ticker_config {

@@ -42,11 +42,12 @@ Engine::attempt_matches_()
         assert(match.quantity > 0);
 
         match.buyer->process_order_match(
-            match.ticker, util::Side::buy, match.price, match.quantity
+            match.ticker, util::Side::buy, match.price * (1 + ORDER_FEE), match.quantity
         );
 
         match.seller->process_order_match(
-            match.ticker, util::Side::sell, match.price, match.quantity
+            match.ticker, util::Side::sell, match.price * (1 - ORDER_FEE),
+            match.quantity
         );
         matches.push_back(std::move(match));
         order_container_.modify_order_quantity(
@@ -78,7 +79,7 @@ Engine::order_can_execute_(const stored_order& buyer, const stored_order& seller
     double quantity = order_quantity(buyer, seller);
     double price = order_price(buyer, seller);
     if (!buyer.trader->can_leverage()
-        && buyer.trader->get_capital() < price * quantity) {
+        && buyer.trader->get_capital() < (1 + ORDER_FEE) * price * quantity) {
         drop_order(buyer.order_index);
         return false;
     }

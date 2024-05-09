@@ -19,8 +19,11 @@ struct ticker_info {
     matching::OrderContainer last_order_container;
     uint64_t num_matches{};
 
-    ticker_info(std::string ticker, size_t ex_ticks, double starting_price) :
-        engine(ex_ticks), bot_container(std::move(ticker), starting_price)
+    ticker_info(
+        std::string ticker, size_t ex_ticks, double starting_price, double order_fee
+    ) :
+        engine(ex_ticks, order_fee),
+        bot_container(std::move(ticker), starting_price)
     {}
 };
 

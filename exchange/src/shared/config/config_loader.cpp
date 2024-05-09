@@ -97,6 +97,7 @@ Config::get_global_config_(const YAML::Node& full_config)
     const auto& tick_hz = global["exchange_tick_hz"];
     const auto& display_hz = global["display_refresh_hz"];
     const auto& sandbox_secs = global["sandbox_trial_seconds"];
+    const auto& order_fee = global["order_fee"];
     if (!starting_capital.IsDefined())
         throw_undef_err("global/starting_capital");
     if (!wait_secs.IsDefined())
@@ -109,9 +110,15 @@ Config::get_global_config_(const YAML::Node& full_config)
         throw_undef_err("global/display_hz");
     if (!sandbox_secs.IsDefined())
         throw_undef_err("global/sandbox_trial_seconds");
-    return {starting_capital.as<int>(), wait_secs.as<size_t>(),
-            exp_ticks.as<size_t>(),     tick_hz.as<uint16_t>(),
-            display_hz.as<uint8_t>(),   sandbox_secs.as<unsigned int>()};
+    return {
+        starting_capital.as<int>(),
+        wait_secs.as<size_t>(),
+        exp_ticks.as<size_t>(),
+        tick_hz.as<uint16_t>(),
+        display_hz.as<uint8_t>(),
+        sandbox_secs.as<unsigned int>(),
+        order_fee.IsDefined() ? order_fee.as<double>() : 0
+    };
 }
 
 } // namespace config

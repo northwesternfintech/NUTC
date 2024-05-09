@@ -151,7 +151,8 @@ void
 EngineManager::add_engine(const std::string& ticker, double starting_price)
 {
     size_t exp_ticks = config::Config::get().constants().ORDER_EXPIRATION_TICKS;
-    engines_.emplace(ticker, ticker_info(ticker, exp_ticks, starting_price));
+    double order_fee = config::Config::get().constants().ORDER_FEE;
+    engines_.emplace(ticker, ticker_info(ticker, exp_ticks, starting_price, order_fee));
 }
 
 void
