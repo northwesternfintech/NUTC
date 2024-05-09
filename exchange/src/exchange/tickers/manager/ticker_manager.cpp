@@ -59,7 +59,6 @@ log_match(const matching::stored_match& order)
                 {"traderid", order.seller->get_id()        },
                 {"ticker",   order.ticker                  },
                 {"side",     "SELL"                        },
-                {"quantity", std::to_string(order.quantity)}
         })
             .Increment(order.quantity);
     }
@@ -70,7 +69,6 @@ log_match(const matching::stored_match& order)
                 {"traderid", order.buyer->get_id()         },
                 {"ticker",   order.ticker                  },
                 {"side",     "BUY"                         },
-                {"quantity", std::to_string(order.quantity)}
         })
             .Increment(order.quantity);
     }
