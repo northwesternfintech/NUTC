@@ -121,6 +121,7 @@ protected:
     void
     add_order(util::Side side, double quantity, double price)
     {
+      price = std::max(price, 0.01);
         if (side == util::Side::buy) {
             modify_open_bids(quantity);
             modify_long_capital(quantity * price);

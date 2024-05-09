@@ -6,6 +6,7 @@ namespace bots {
 void
 BollingerBot::take_action(double current, double)
 {
+  if(current<1) return;
     update_statistics(current);
 
     // Ensure enough data to calculate Bollinger Bands.

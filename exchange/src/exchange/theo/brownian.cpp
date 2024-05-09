@@ -1,8 +1,8 @@
-#define BROWNIAN_MOTION_MAGNITUDE_STDEV 0.022 //.22
-#define MARKET_EVENT_MAGNITUDE_STDEV    0.03 //.03
+#define BROWNIAN_MOTION_MAGNITUDE_STDEV 0.22 //.22
+#define MARKET_EVENT_MAGNITUDE_STDEV    0.3 //.03
 #define MARKET_EVENT_PROBABILITY        0.02 //.02
-#define MARKET_DURATION_MEAN            15
-#define MARKET_DURATION_STDEV           15
+#define MARKET_DURATION_MEAN            20
+#define MARKET_DURATION_STDEV           10
 
 #include "brownian.hpp"
 
@@ -39,20 +39,13 @@ BrownianMotion::generate_bool_(double probability_of_true)
 {
     double random_number =
         generate_uniform_(-probability_of_true, 1 - probability_of_true);
-    static int count_false = 0;
-    static int count_true = 0;
-    if (random_number > 0)
-        count_true++;
-    else
-        count_false++;
-    log_i(main, "{} - {}", count_false, count_true);
     return random_number > 0;
 }
 
 double
 BrownianMotion::generate_brownian_motion_(double stdev, Signedness direction)
 {
-    return generate_norm_(0, stdev, direction) * std::pow((cur_magnitude_ / 100), .1);
+    return generate_norm_(0, stdev, direction);
 }
 
 void

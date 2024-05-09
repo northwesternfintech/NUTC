@@ -15,6 +15,7 @@ RetailBot::is_active() const
 void
 RetailBot::take_action(double midprice, double theo)
 {
+  if(midprice < 10) return;
     if (!is_active())
         return;
 

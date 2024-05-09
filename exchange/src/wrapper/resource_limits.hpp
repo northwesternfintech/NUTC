@@ -17,6 +17,17 @@ set_memory_limit(size_t limit_in_mb)
     }
     return true;
 }
+
+bool set_cpu_affinity(int cpu) {
+    cpu_set_t mask;
+    CPU_ZERO(&mask);
+    CPU_SET(cpu, &mask);
+
+    if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {
+        return false;
+    }
+    return true;
+}
 } // namespace limits
 } // namespace nutc
 #else

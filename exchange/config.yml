@@ -2,16 +2,16 @@ global:
   - starting_capital: 100000
 
     # How long to wait after exchange-wrapper handshake before wrappers can place orders
-    wait_secs: 1
+    wait_secs: 3
 
     # How many ticks for an order to expire
-    order_expiration_ticks: 10
+    order_expiration_ticks: 3
 
-    exchange_tick_hz: 30000
+    exchange_tick_hz: 60
 
-    display_refresh_hz: 30
+    display_refresh_hz: 3
     
-    order_fee: .0000
+    order_fee: .00001
 
     sandbox_trial_seconds: 300
 
@@ -29,56 +29,56 @@ bots:
   # Market Makers
   - associated_ticker: "ETH"
     type: "market_maker"
-    number_of_bots: 5
-    average_capital: 100000
-    std_dev_capital: 10000
+    number_of_bots: 1
+    average_capital: 2000000
+    std_dev_capital: 50000
 
   - associated_ticker: "BTC"
     type: "market_maker"
-    number_of_bots: 5
-    average_capital: 25000
-    std_dev_capital: 5000
+    number_of_bots: 1
+    average_capital: 2050000
+    std_dev_capital: 50000
 
   - associated_ticker: "LTC"
     type: "market_maker"
-    number_of_bots: 5
-    average_capital: 100000
+    number_of_bots: 1
+    average_capital: 2000000
     std_dev_capital: 25000
 
   # Bollinger
   - associated_ticker: "ETH"
     type: "bollinger"
-    number_of_bots: 10
+    number_of_bots: 0
     average_capital: 1000
     std_dev_capital: 200
 
   - associated_ticker: "BTC"
     type: "bollinger"
-    number_of_bots: 10
+    number_of_bots: 0
     average_capital: 2000
     std_dev_capital: 1000
 
   - associated_ticker: "LTC"
     type: "bollinger"
-    number_of_bots: 10
+    number_of_bots: 0
     average_capital: 750
     std_dev_capital: 100
 
   # Retail
   - associated_ticker: "ETH"
     type: "retail"
-    number_of_bots: 10
+    number_of_bots: 0
     average_capital: 1000
     std_dev_capital: 200
 
   - associated_ticker: "BTC"
     type: "retail"
-    number_of_bots: 10
+    number_of_bots: 0
     average_capital: 2000
     std_dev_capital: 1000
 
   - associated_ticker: "LTC"
     type: "retail"
-    number_of_bots: 10
+    number_of_bots: 0
     average_capital: 750
     std_dev_capital: 100

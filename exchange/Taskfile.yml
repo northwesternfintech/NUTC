@@ -6,7 +6,7 @@ vars:
   # BOTS, DEV, or NORMAL
   MODE: "DEV"
   
-  DASHBOARD_ENABLED: True
+  DASHBOARD_ENABLED: False
   
   RELEASE_BUILD: False
   RELEASE_PRESET: "ci-ubuntu"

@@ -125,7 +125,7 @@ void
 on_tick_consumer()
 {
     static rabbitmq::WrapperConsumer consumer{};
-    ticks::TickJobScheduler::get().on_tick(&consumer, /*priority=*/1, "consumer");
+    ticks::TickJobScheduler::get().on_tick(&consumer, /*priority=*/8, "consumer");
 }
 } // namespace
 
@@ -156,6 +156,14 @@ main(int argc, const char** argv)
     );
 
     sandbox::CrowServer::get_instance();
+
+    cpu_set_t mask;
+    CPU_ZERO(&mask);
+    CPU_SET(1, &mask);
+
+    if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {
+        return 0;
+    }
 
     start_tick_scheduler();
     return 0;

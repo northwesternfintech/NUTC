@@ -20,6 +20,7 @@ struct wrapper_args {
     std::string uid;
     std::string algo_id;
     bool dev_mode;
+    int core_num;
 };
 
 namespace {
@@ -54,6 +55,13 @@ process_arguments(int argc, const char** argv)
         })
         .required();
 
+    program.add_argument("-C", "--core_num")
+        .help("set the pinned core num")
+        .action([](const auto& value) {
+            return value;
+        })
+    .default_value("4").nargs(1);
+
     program.add_argument("-V", "--version")
         .help("prints version information and exits")
         .action([&](const auto& /* unused */) {
@@ -86,6 +94,7 @@ process_arguments(int argc, const char** argv)
         program.get<std::string>("--uid"),
         program.get<std::string>("--algo_id"),
         program.get<bool>("--dev"),
+        std::stoi(program.get<std::string>("--core_num"))
     };
 }
 } // namespace
@@ -111,10 +120,11 @@ main(int argc, const char** argv)
     std::signal(SIGINT, catch_sigint);
     std::signal(SIGTERM, catch_sigterm);
     using comms = nutc::comms::ExchangeProxy;
-    auto [verbosity, uid, algo_id, development_mode] = process_arguments(argc, argv);
+    auto [verbosity, uid, algo_id, development_mode, core_num] = process_arguments(argc, argv);
     pybind11::scoped_interpreter guard{};
 
     nutc::limits::set_memory_limit(1024);
+    nutc::limits::set_cpu_affinity(core_num);
 
     std::optional<std::string> algo{};
     std::string trader_id{};
