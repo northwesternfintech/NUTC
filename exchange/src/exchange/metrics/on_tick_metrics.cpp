@@ -82,17 +82,17 @@ OnTickMetricsPush::record_trader_metrics()
 
         pnl_gauge
             .Add({
-                {"name", trader->get_id()}
+                {"name", trader->get_display_name()}
         })
             .Set(pnl);
         capital_gauge
             .Add({
-                {"name", trader->get_id()}
+                {"name", trader->get_display_name()}
         })
             .Set(capital);
         portfolio_gauge
             .Add({
-                {"name", trader->get_id()}
+                {"name", trader->get_display_name()}
         })
             .Set(portfolio);
     }

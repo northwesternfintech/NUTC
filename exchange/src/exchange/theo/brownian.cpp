@@ -52,7 +52,7 @@ BrownianMotion::generate_bool_(double probability_of_true)
 double
 BrownianMotion::generate_brownian_motion_(double stdev, Signedness direction)
 {
-    return generate_norm_(0, stdev, direction);// * std::pow((cur_magnitude_ / 100), .1);
+    return generate_norm_(0, stdev, direction) * std::pow((cur_magnitude_ / 100), .1);
 }
 
 void

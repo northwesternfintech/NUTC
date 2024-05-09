@@ -6,11 +6,10 @@ services:
       context: ..
       dockerfile: docker/SandboxDockerfile
       args:
-        firebase_emulator: "true"
+        firebase_emulator: "false"
     restart: unless-stopped
     environment:
       - NUTC_EXPOSE_METRICS=1
-    command: ["--bots-only"]
     networks:
       - net
 
@@ -30,7 +29,7 @@ services:
       context: ..
       dockerfile: docker/LinterDockerfile
       args:
-        firebase_emulator: "true"
+        firebase_emulator: "false"
     networks:
       - net
 
