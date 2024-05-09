@@ -40,6 +40,7 @@ requires HandledBotType<BotType>
 
 template void BotContainer::add_bots<RetailBot>(double, double, size_t);
 template void BotContainer::add_bots<MarketMakerBot>(double, double, size_t);
+template void BotContainer::add_bots<BollingerBot>(double, double, size_t);
 
 void
 BotContainer::generate_orders(double midprice, double new_theo)

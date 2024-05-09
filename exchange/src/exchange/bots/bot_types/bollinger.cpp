@@ -1,30 +1,26 @@
 #include "bollinger.hpp"
 
-#include "exchange/config.h"
-
 namespace nutc {
 namespace bots {
 
-std::optional<messages::market_order>
-BollingerBot::take_action(double current, double theo)
+void
+BollingerBot::take_action(double current, double)
 {
     update_statistics(current);
 
     // Ensure enough data to calculate Bollinger Bands.
     if (price_history.size() < sma_period) {
-        return std::nullopt;
+        return;
     }
 
     auto [lower_band, upper_band] = calculate_bollinger_bands();
 
     if (current < lower_band) {
-        return messages::market_order{get_id(), util::Side::buy, TICKER, 1, 1000};
+        add_order(util::Side::buy, 1, current);
     }
     else if (current > upper_band) {
-        return messages::market_order{get_id(), util::Side::sell, TICKER, 1, 0};
+        add_order(util::Side::sell, 1, current);
     }
-
-    return std::nullopt;
 }
 
 // Updates SMA and variance incrementally when a new price point is received
@@ -48,7 +44,7 @@ BollingerBot::update_statistics(double new_price)
 }
 
 std::pair<double, double>
-BollingerBot::calculate_bollinger_bands()
+BollingerBot::calculate_bollinger_bands() const
 {
     double stdev = std::sqrt(current_variance);
     double lower_band = current_sma - multiplier * stdev;

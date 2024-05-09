@@ -2,16 +2,16 @@ global:
   - starting_capital: 100000
 
     # How long to wait after exchange-wrapper handshake before wrappers can place orders
-    wait_secs: 3
+    wait_secs: 1
 
     # How many ticks for an order to expire
     order_expiration_ticks: 10
 
-    exchange_tick_hz: 30
+    exchange_tick_hz: 30000
 
-    display_refresh_hz: 2
+    display_refresh_hz: 30
     
-    order_fee: .0001
+    order_fee: .0000
 
     sandbox_trial_seconds: 300
 
@@ -29,21 +29,40 @@ bots:
   # Market Makers
   - associated_ticker: "ETH"
     type: "market_maker"
-    number_of_bots: 2
+    number_of_bots: 5
     average_capital: 100000
     std_dev_capital: 10000
 
   - associated_ticker: "BTC"
     type: "market_maker"
-    number_of_bots: 2
+    number_of_bots: 5
     average_capital: 25000
     std_dev_capital: 5000
 
   - associated_ticker: "LTC"
     type: "market_maker"
-    number_of_bots: 2
+    number_of_bots: 5
     average_capital: 100000
     std_dev_capital: 25000
+
+  # Bollinger
+  - associated_ticker: "ETH"
+    type: "bollinger"
+    number_of_bots: 10
+    average_capital: 1000
+    std_dev_capital: 200
+
+  - associated_ticker: "BTC"
+    type: "bollinger"
+    number_of_bots: 10
+    average_capital: 2000
+    std_dev_capital: 1000
+
+  - associated_ticker: "LTC"
+    type: "bollinger"
+    number_of_bots: 10
+    average_capital: 750
+    std_dev_capital: 100
 
   # Retail
   - associated_ticker: "ETH"

@@ -1,10 +1,12 @@
-#define BROWNIAN_MOTION_MAGNITUDE_STDEV 0.15
-#define MARKET_EVENT_MAGNITUDE_STDEV    0.22
-#define MARKET_EVENT_PROBABILITY        0.03
+#define BROWNIAN_MOTION_MAGNITUDE_STDEV 0.022 //.22
+#define MARKET_EVENT_MAGNITUDE_STDEV    0.03 //.03
+#define MARKET_EVENT_PROBABILITY        0.02 //.02
 #define MARKET_DURATION_MEAN            15
-#define MARKET_DURATION_STDEV           3
+#define MARKET_DURATION_STDEV           15
 
 #include "brownian.hpp"
+
+#include "exchange/logging.hpp"
 
 namespace nutc {
 namespace stochastic {
@@ -20,7 +22,7 @@ BrownianMotion::generate_norm_(double mean, double stdev, Signedness sign)
         return norm;
     }
 
-    auto sign_multiplier = static_cast<short>(sign);
+    auto sign_multiplier = static_cast<int16_t>(sign);
     return (sign_multiplier * fabs(norm));
 }
 
@@ -37,21 +39,29 @@ BrownianMotion::generate_bool_(double probability_of_true)
 {
     double random_number =
         generate_uniform_(-probability_of_true, 1 - probability_of_true);
+    static int count_false = 0;
+    static int count_true = 0;
+    if (random_number > 0)
+        count_true++;
+    else
+        count_false++;
+    log_i(main, "{} - {}", count_false, count_true);
     return random_number > 0;
 }
 
 double
 BrownianMotion::generate_brownian_motion_(double stdev, Signedness direction)
 {
-    return generate_norm_(0, stdev, direction);
+    return generate_norm_(0, stdev, direction) * (cur_magnitude_ / 100);
 }
 
 void
 BrownianMotion::config_new_market_event_()
 {
-    event_ticks_remaining_ = static_cast<size_t>(generate_norm_(
+    auto val = generate_norm_(
         MARKET_DURATION_MEAN, MARKET_DURATION_STDEV, Signedness::Positive
-    ));
+    );
+    event_ticks_remaining_ = static_cast<int>(val);
 
     bool ticking_up = generate_bool_(0.5); // 50% true
     event_direction_ = ticking_up ? Signedness::Positive : Signedness::Negative;
@@ -63,8 +73,8 @@ BrownianMotion::generate_market_tick_()
     // Add one where the direction is locked, and then one where direction is not
     // locked to *trend* in one direction but not force directionality.
     double delta =
-        generate_brownian_motion_(BROWNIAN_MOTION_MAGNITUDE_STDEV, event_direction_);
-    delta += generate_brownian_motion_(BROWNIAN_MOTION_MAGNITUDE_STDEV);
+        generate_brownian_motion_(MARKET_EVENT_MAGNITUDE_STDEV, event_direction_);
+    delta += generate_brownian_motion_(MARKET_EVENT_MAGNITUDE_STDEV);
 
     return delta;
 }
