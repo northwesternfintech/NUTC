@@ -7,7 +7,7 @@ global:
     # How many ticks for an order to expire
     order_expiration_ticks: 3
 
-    exchange_tick_hz: 60
+    exchange_tick_hz: 100
 
     display_refresh_hz: 3
     
@@ -48,37 +48,37 @@ bots:
   # Bollinger
   - associated_ticker: "ETH"
     type: "bollinger"
-    number_of_bots: 0
+    number_of_bots: 10
     average_capital: 1000
     std_dev_capital: 200
 
   - associated_ticker: "BTC"
     type: "bollinger"
-    number_of_bots: 0
+    number_of_bots: 10
     average_capital: 2000
     std_dev_capital: 1000
 
   - associated_ticker: "LTC"
     type: "bollinger"
-    number_of_bots: 0
+    number_of_bots: 10
     average_capital: 750
     std_dev_capital: 100
 
   # Retail
   - associated_ticker: "ETH"
     type: "retail"
-    number_of_bots: 0
+    number_of_bots: 10
     average_capital: 1000
     std_dev_capital: 200
 
   - associated_ticker: "BTC"
     type: "retail"
-    number_of_bots: 0
+    number_of_bots: 10
     average_capital: 2000
     std_dev_capital: 1000
 
   - associated_ticker: "LTC"
     type: "retail"
-    number_of_bots: 0
+    number_of_bots: 10
     average_capital: 750
     std_dev_capital: 100

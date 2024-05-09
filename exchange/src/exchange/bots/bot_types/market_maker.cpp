@@ -14,17 +14,17 @@ struct price_level {
 };
 
 // TODO: parameterize
-constexpr double BASE_SPREAD = 0.16;
+constexpr double BASE_SPREAD = 1;
 constexpr uint8_t LEVELS = 3;
 constexpr std::array<price_level, LEVELS> BID_LEVELS{
-    price_level{-BASE_SPREAD - .10, 1.0 / 12},
-    price_level{-BASE_SPREAD - .05, 1.0 / 6 },
+    price_level{-BASE_SPREAD - 1, 1.0 / 12},
+    price_level{-BASE_SPREAD - 0.5, 1.0 / 6 },
     price_level{-BASE_SPREAD - .00, 1.0 / 4 }
 };
 constexpr std::array<price_level, LEVELS> ASK_LEVELS{
     price_level{BASE_SPREAD + .00, 1.0 / 4 },
-    price_level{BASE_SPREAD + .05, 1.0 / 6 },
-    price_level{BASE_SPREAD + .10, 1.0 / 12}
+    price_level{BASE_SPREAD + .5, 1.0 / 6 },
+    price_level{BASE_SPREAD + 1, 1.0 / 12}
 };
 
 } // namespace

@@ -1,8 +1,8 @@
 #define BROWNIAN_MOTION_MAGNITUDE_STDEV 0.22 //.22
-#define MARKET_EVENT_MAGNITUDE_STDEV    0.3 //.03
+#define MARKET_EVENT_MAGNITUDE_STDEV    0.2 //.03
 #define MARKET_EVENT_PROBABILITY        0.02 //.02
-#define MARKET_DURATION_MEAN            20
-#define MARKET_DURATION_STDEV           10
+#define MARKET_DURATION_MEAN            15
+#define MARKET_DURATION_STDEV           15
 
 #include "brownian.hpp"
 
@@ -45,7 +45,7 @@ BrownianMotion::generate_bool_(double probability_of_true)
 double
 BrownianMotion::generate_brownian_motion_(double stdev, Signedness direction)
 {
-    return generate_norm_(0, stdev, direction);
+    return generate_norm_(0, stdev, direction) * cur_magnitude_/200;
 }
 
 void
