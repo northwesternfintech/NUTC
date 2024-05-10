@@ -4,4 +4,4 @@ global:
 scrape_configs:
   - job_name: 'exchange-sandbox'
     static_configs:
-      - targets: ['docker-sandbox-1:4152', 'docker-sandbox-2:4152', 'docker-sandbox-3:4152']
+      - targets: ['docker-sandbox-1:4152', 'docker-sandbox-2:4152', 'docker-sandbox-3:4152', 'docker-sandbox-4:4152']

@@ -9,7 +9,7 @@ services:
         firebase_emulator: "false"
     restart: unless-stopped
     deploy:
-      replicas: 3
+      replicas: 4
     environment:
       - NUTC_EXPOSE_METRICS=1
     networks:
