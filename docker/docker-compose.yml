@@ -77,8 +77,11 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
       - '--storage.tsdb.retention.time=12h'
     restart: unless-stopped
+    ports:
+      - "9012:9090"
     networks:
       - net
 

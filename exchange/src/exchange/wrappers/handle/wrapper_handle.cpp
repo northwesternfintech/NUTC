@@ -78,12 +78,12 @@ WrapperHandle::WrapperHandle(const std::vector<std::string>& args)
     auto args2 = args;
     static int core_num = 0;
     core_num++;
-    core_num%=24;
+    core_num%=30;
     args2.emplace_back("--core_num");
     args2.emplace_back(std::to_string(2+core_num));
 
     wrapper_ = bp::child(
-        bp::exe(path), bp::args(args2), bp::std_in<pipe_out_ptr, bp::std_err> stderr,
+        bp::exe(path), bp::args(args2), bp::std_in<pipe_out_ptr, bp::std_err> bp::null,
         bp::std_out > pipe_in_ptr
     );
 

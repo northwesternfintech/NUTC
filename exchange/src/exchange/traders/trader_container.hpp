@@ -4,6 +4,7 @@
 
 #include <boost/unordered_map.hpp>
 #include <glaze/glaze.hpp>
+#include <random>
 
 #include <cassert>
 
@@ -52,8 +53,12 @@ public:
     }
 
     const std::vector<std::shared_ptr<GenericTrader>>&
-    get_traders() const
+    get_traders() 
     {
+        lock_guard lock{trader_lock_};
+      static std::random_device rd;
+      std::mt19937 g(rd());
+      std::shuffle(traders_.begin(), traders_.end(), g);
         return traders_;
     }
 

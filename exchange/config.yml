@@ -5,13 +5,13 @@ global:
     wait_secs: 3
 
     # How many ticks for an order to expire
-    order_expiration_ticks: 3
+    order_expiration_ticks: 5
 
-    exchange_tick_hz: 100
+    exchange_tick_hz: 50
 
     display_refresh_hz: 3
     
-    order_fee: .00001
+    order_fee: .0000
 
     sandbox_trial_seconds: 300
 
