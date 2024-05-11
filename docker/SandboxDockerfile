@@ -1,6 +1,6 @@
 FROM python:3.12 as build
 
-RUN pip install conan numpy pandas polars scipy sortedcontainers scikit-learn \
+RUN pip install conan numpy pandas polars scipy sortedcontainers scikit-learn lightgbm \
     # c++ stuff
     && apt update \
     && apt install -y --no-install-recommends build-essential libssl-dev cmake git
