@@ -148,7 +148,7 @@ main(int argc, const char** argv)
 
     comms exchange_conn{};
 
-    auto log_info = [](const std::string& mess) { log_i(print_output, "{}", mess); };
+    auto log_info = [](const std::string&) { };
     nutc::pywrapper::create_api_module(exchange_conn.market_order_func(), log_info);
     nutc::pywrapper::run_code_init(algo.value());
 

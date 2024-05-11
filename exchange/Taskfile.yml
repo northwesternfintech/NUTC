@@ -24,7 +24,7 @@ tasks:
   deps:
     dir: .
     vars:
-      BUILD_TYPE: '{{if eq .RELEASE_BUILD "True"}}Release{{else}}Debug{{end}}'
+      BUILD_TYPE: 'Debug'
     cmds:
       - conan install . -s build_type={{.BUILD_TYPE}} -b missing -pr cpp20 -pr:b cpp20
     
@@ -48,12 +48,11 @@ tasks:
   init:
     dir: .
     vars:
-      DASH_FLAG: '{{if eq .DASHBOARD_ENABLED "True"}}-DDASHBOARD=ON{{else}}{{end}}'
-      PRESET: '{{if eq .RELEASE_BUILD "True"}}{{.RELEASE_PRESET}}{{else}}dev{{end}}'
+      PRESET: 'dev'
     preconditions:
       - test -f CMakeUserPresets.json
     cmds:
-      - cmake --preset={{.PRESET}} {{.DASH_FLAG}}
+      - cmake --preset={{.PRESET}} 
 
   build:
     dir: .

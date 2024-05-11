@@ -11,6 +11,8 @@
 namespace nutc {
 namespace engine_manager {
 
+	void log_order(const matching::stored_order& order);
+
 using Engine = matching::Engine;
 
 struct ticker_info {
@@ -54,6 +56,7 @@ public:
     size_t
     match_order(const matching::stored_order& order)
     {
+	    log_order(order);
         auto& engine = get_engine(order.ticker);
         std::vector<matching::stored_match> matches = engine.engine.match_order(order);
         engine.num_matches += matches.size();

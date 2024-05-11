@@ -5,6 +5,7 @@
 #include "exchange/tickers/engine/level_update_generator.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "shared/config/config_loader.hpp"
+#include "shared/util.hpp"
 
 #include <prometheus/counter.h>
 
@@ -47,6 +48,21 @@ EngineManager::split_tick_updates_(const tick_update& update)
     return {buf};
 }
 
+void log_order(const matching::stored_order& order) {
+    static auto& match_counter = prometheus::BuildCounter()
+                                     .Name("incoming_orders")
+                                     .Register(*metrics::Prometheus::get_registry());
+    if (order.trader->record_metrics()) {
+        match_counter
+            .Add({
+                {"traderid", order.trader->get_display_name()        },
+                {"ticker",   order.ticker                  },
+                {"side",     order.side==util::Side::buy ? "BUY" : "SELL"                        },
+        })
+            .Increment(1);
+    }
+}
+
 void
 log_match(const matching::stored_match& order)
 {
@@ -56,7 +72,7 @@ log_match(const matching::stored_match& order)
     if (order.seller->record_metrics()) {
         match_counter
             .Add({
-                {"traderid", order.seller->get_id()        },
+                {"traderid", order.seller->get_display_name()        },
                 {"ticker",   order.ticker                  },
                 {"side",     "SELL"                        },
         })
@@ -66,7 +82,7 @@ log_match(const matching::stored_match& order)
     if (order.buyer->record_metrics()) {
         match_counter
             .Add({
-                {"traderid", order.buyer->get_id()         },
+                {"traderid", order.buyer->get_display_name()         },
                 {"ticker",   order.ticker                  },
                 {"side",     "BUY"                         },
         })

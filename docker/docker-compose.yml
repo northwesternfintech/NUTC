@@ -8,67 +8,13 @@ services:
       args:
         firebase_emulator: "false"
     restart: unless-stopped
+    deploy:
+      replicas: 4
     environment:
       - NUTC_EXPOSE_METRICS=1
+      - NUTC_CASE=CRYPTO
     networks:
       - net
-
-  webserver:
-    image: nutc-webserver
-    build:
-      context: ..
-      dockerfile: docker/WebserverDockerfile
-    restart: unless-stopped
-    networks:
-      - net
-
-  linter:
-    image: nutc-linter
-    restart: unless-stopped
-    build:
-      context: ..
-      dockerfile: docker/LinterDockerfile
-      args:
-        firebase_emulator: "false"
-    networks:
-      - net
-
-  firebase:
-    image: spine3/firebase-emulator
-    depends_on:
-      - website
-    restart: unless-stopped
-    ports:
-      - "4000:4000" 
-      - "4400:4400" 
-      - "5001:5001"
-      - "9000:9000"
-      - "9099:9099"
-      - "9199:9199"
-    environment:
-      GCP_PROJECT: "nutc-web"
-      ENABLE_UI: true
-    volumes:
-      - "../web/firebase.json:/firebase/firebase.json"
-      - "../web/baseline-data:/firebase/baseline-data"
-      - "../web/database.rules.json:/firebase/database.rules.json"
-      - "../web/storage.rules:/firebase/storage.rules"
-      - "../web/functions:/firebase/functions"
-    networks:
-      - net
-
-  website:
-    image: node:20
-    restart: unless-stopped
-    working_dir: /app
-    volumes: 
-      - "../web:/app"
-    ports:
-      - "3001:3001"
-    command: >
-      sh -c "npm i && cd functions && npm i && npm run build && cd .. && npm run dev"
-    environment:
-      - NODE_ENV=development
 
   # Exposed on port 9000
   prometheus:
@@ -93,7 +39,6 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf
     restart: unless-stopped
     depends_on:
-      - webserver
       - grafana
     networks:
       - net

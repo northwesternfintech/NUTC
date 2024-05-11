@@ -155,8 +155,6 @@ main(int argc, const char** argv)
         &(metrics::OnTickMetricsPush::get()), /*priority=*/5, "Metrics Pushing"
     );
 
-    sandbox::CrowServer::get_instance();
-
     start_tick_scheduler();
     return 0;
 }

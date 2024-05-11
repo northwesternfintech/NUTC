@@ -26,19 +26,16 @@ RUN if [ "$firebase_emulator" = "false" ]; then \
     cmake --preset=ci-docker -DLOCAL_DEV=ON; \
     fi
 
-RUN cmake --build build --config Release -j6
-
-RUN mv /app/exchange/build/NUTC /usr/bin/NUTC-exchange
-RUN mv /app/exchange/build/WRAPPER /usr/bin/WRAPPER
+RUN cmake --build build --config Release -j
 
 # Todo: make default?
 COPY ./exchange/config.yml /app/exchange/config.yml
 
-RUN chmod +x /usr/bin/NUTC-exchange /usr/bin/WRAPPER
+RUN chmod +x /app/exchange/build/NUTC /app/exchange/build/WRAPPER
 
-ENV NUTC_WRAPPER_BINARY_PATH="/usr/bin/WRAPPER"
+ENV NUTC_WRAPPER_BINARY_PATH="/app/exchange/build/WRAPPER"
 ENV NUTC_CONFIG_FILE="/app/exchange/config.yml"
 
 EXPOSE 4152 18080
 
-ENTRYPOINT ["/usr/bin/NUTC-exchange"]
+ENTRYPOINT ["/app/exchange/build/NUTC"]
