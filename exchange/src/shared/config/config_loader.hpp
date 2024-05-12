@@ -4,7 +4,6 @@
 
 #include <fmt/format.h>
 
-#include <stdexcept>
 #include <string>
 
 #include <yaml-cpp/yaml.h>
@@ -12,7 +11,7 @@
 namespace nutc {
 namespace config {
 
-enum class BotType { market_maker, retail };
+enum class BotType { market_maker, retail, bollinger };
 
 struct global_config {
     const int STARTING_CAPITAL;

@@ -39,8 +39,6 @@ RetailBot::take_action(double midprice, double theo)
         double quantity =
             (1 - get_capital_utilization()) * get_interest_limit() / price;
         quantity *= RETAIL_ORDER_SIZE;
-        modify_open_bids(quantity);
-        modify_long_capital(quantity * price);
         add_order(util::Side::buy, quantity, price);
     }
     else if (midprice > noised_theo) {
@@ -49,11 +47,8 @@ RetailBot::take_action(double midprice, double theo)
         double quantity =
             (1 - get_capital_utilization()) * get_interest_limit() / price;
         quantity *= RETAIL_ORDER_SIZE;
-        modify_open_asks(quantity);
-        modify_short_capital(quantity * price);
         add_order(util::Side::sell, quantity, price);
     }
-    return;
 }
 
 } // namespace bots
