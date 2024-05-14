@@ -1,10 +1,17 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+*.log
+bun.*
+baseline-data
+functions/__pycache__
+em-storage/**
+
+firebase-seed
 
 # dependencies
 /node_modules
 /.pnp
 .pnp.js
-.yarn/install-state.gz
+functions/venv
 
 # testing
 /coverage
