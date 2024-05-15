@@ -64,6 +64,7 @@ services:
     working_dir: /app
     volumes: 
       - "../web:/app"
+      - /app/node_modules
     ports:
       - "3001:3001"
     command: >
@@ -75,7 +76,7 @@ services:
   prometheus:
     image: prom/prometheus
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus:/etc/prometheus/
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.retention.time=12h'
@@ -88,7 +89,7 @@ services:
     ports:
       - "26389:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx:/etc/nginx/
     restart: unless-stopped
     depends_on:
       - webserver
