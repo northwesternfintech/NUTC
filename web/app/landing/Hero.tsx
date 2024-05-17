@@ -11,11 +11,12 @@ export default function Hero() {
       <div className='relative isolate min-h-screen pt-14'>
         <Image
           src='/images/background.jpeg'
-          alt=''
+          alt='Background'
           width={1500}
           height={1125}
           className='absolute inset-0 -z-10 h-full w-full object-cover'
         />
+        <div className='absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-b from-transparent to-gray-900 opacity-100'></div>
         <div
           className='absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80'
           aria-hidden='true'
@@ -32,7 +33,7 @@ export default function Hero() {
           <div className='hidden sm:mb-8 sm:flex sm:justify-center'>
             <div className='relative rounded-full px-3 py-1 text-sm leading-6 text-gray-400 ring-1 ring-white/10 hover:ring-white/20'>
               Applications open for Fall 2024.{' '}
-              <a href='#' className='font-semibold text-white'>
+              <a href='/construction' className='font-semibold text-white'>
                 <span className='absolute inset-0' aria-hidden='true' />
                 Apply <span aria-hidden='true'>&rarr;</span>
               </a>

@@ -9,7 +9,7 @@ export default function DesktopNavbar() {
         aria-label='Global'
       >
         <div className='flex flex-1'>
-          <a href='#' className='-m-1.5 p-1.5'>
+          <a href='/' className='-m-1.5 p-1.5'>
             <span className='sr-only'>NUFT</span>
             <Image
               src='/images/logo.png'
@@ -32,7 +32,7 @@ export default function DesktopNavbar() {
           ))}
         </div>
         <div className='flex flex-1 justify-end'>
-          <a href='#' className='text-md font-semibold leading-6 text-white'>
+          <a href='/construction' className='text-md font-semibold leading-6 text-white'>
             Dashboard <span aria-hidden='true'>&rarr;</span>
           </a>
         </div>
