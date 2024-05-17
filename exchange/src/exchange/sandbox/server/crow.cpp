@@ -54,6 +54,8 @@ CrowServer::CrowServer() :
 
 CrowServer::~CrowServer()
 {
+    // Quill deconstruction can cause segfault
+    app.loglevel(crow::LogLevel::CRITICAL);
     app.stop();
 
     io_context_.stop();
