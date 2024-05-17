@@ -4,6 +4,8 @@ import {
   TrophyIcon,
 } from '@heroicons/react/20/solid'
 
+import Image from 'next/image'
+
 const features = [
   {
     name: 'Build and Compete.',
@@ -55,13 +57,18 @@ export default function Example() {
               </dl>
             </div>
           </div>
-          <img
-            src='/images/crowd.jpeg'
-            alt='Product screenshot'
-            className='w-[48rem] max-w-none rounded-xl shadow-xl ring-1 ring-white/10 sm:w-[57rem] md:-ml-4 lg:-ml-0'
-            width={2432}
-            height={1442}
-          />
+          <div className='relative'>
+            <Image
+              src='/images/crowd.jpeg'
+              alt='Product screenshot'
+              className='w-[48rem] max-w-none rounded-xl shadow-xl ring-1 ring-white/10 sm:w-[57rem] md:-ml-4 lg:-ml-0'
+              width={2432}
+              height={1442}
+            />
+            <span className='absolute hidden xl:block bottom-[-30px] -right-12 text-white text-sm font-light italic'>
+              Spring 2024
+            </span>
+          </div>
         </div>
       </div>
     </div>
