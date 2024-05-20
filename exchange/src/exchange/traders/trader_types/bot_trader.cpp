@@ -2,45 +2,38 @@
 
 #include <cassert>
 
-#include <iostream>
-#include <string>
-
 namespace nutc {
 namespace traders {
 
 void
-BotTrader::process_order_expiration(
-    const std::string& ticker, util::Side side, double price, double quantity
-)
+BotTrader::process_order_add(market_order order)
 {
-    GenericTrader::process_order_expiration(ticker, side, price, quantity);
-    assert(ticker == TICKER);
+    assert(order.ticker == TICKER);
 
-    double total_cap = price * quantity;
-    if (side == util::Side::buy) {
-        modify_long_capital(-total_cap);
-        modify_open_bids(-quantity);
+    double total_cap = order.price * order.quantity;
+    if (order.side == util::Side::buy) {
+        modify_long_capital(total_cap);
+        modify_open_bids(order.quantity);
     }
     else {
-        modify_short_capital(-total_cap);
-        modify_open_asks(-quantity);
+        modify_short_capital(total_cap);
+        modify_open_asks(order.quantity);
     }
 }
 
 void
-BotTrader::process_order_match(
-    const std::string& ticker, util::Side side, double price, double quantity
-)
+BotTrader::process_order_remove(market_order order)
 {
-    GenericTrader::process_order_match(ticker, side, price, quantity);
-    double total_cap = price * quantity;
-    if (side == util::Side::buy) {
+    assert(order.ticker == TICKER);
+
+    double total_cap = order.price * order.quantity;
+    if (order.side == util::Side::buy) {
         modify_long_capital(-total_cap);
-        modify_open_bids(-quantity);
+        modify_open_bids(-order.quantity);
     }
     else {
         modify_short_capital(-total_cap);
-        modify_open_asks(-quantity);
+        modify_open_asks(-order.quantity);
     }
 }
 

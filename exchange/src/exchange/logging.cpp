@@ -1,7 +1,5 @@
 #include "logging.hpp"
 
-#include "config.h"
-
 #include <quill/Quill.h>
 
 #include <string>

@@ -37,10 +37,11 @@ public:
         }
     }
 
-    bool
-    record_metrics() const override
+    const std::string&
+    get_type() const override
     {
-        return true;
+        static constexpr std::string type = "ALGO";
+        return type;
     }
 
     const std::string&
@@ -56,9 +57,9 @@ public:
     }
 
     void
-    send_messages(const std::vector<std::string>& messages) final
+    send_message(const std::string& message) final
     {
-        wrapper_handle_.send_messages(messages);
+        wrapper_handle_.send_message(message);
     }
 
     std::vector<market_order>
@@ -66,6 +67,14 @@ public:
     {
         return wrapper_handle_.read_messages();
     }
+
+    void
+    process_order_remove(market_order) final
+    {}
+
+    void
+    process_order_add(market_order) final
+    {}
 };
 
 } // namespace traders

@@ -80,13 +80,8 @@ public:
 
     ~BotTrader() override = default;
 
-    void process_order_expiration(
-        const std::string& ticker, util::Side side, double price, double quantity
-    ) final;
-
-    void process_order_match(
-        const std::string& ticker, util::Side side, double price, double quantity
-    ) final;
+    void process_order_remove(market_order order) final;
+    void process_order_add(market_order order) final;
 
     /**
      * midprice, theo
@@ -161,7 +156,7 @@ protected:
     }
 
     void
-    send_messages(const std::vector<std::string>&) override
+    send_message(const std::string&) override
     {}
 
 private:

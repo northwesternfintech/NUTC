@@ -1,7 +1,7 @@
 #include "pipe_writer.hpp"
 
 #include "async_pipe_runner.hpp"
-#include "exchange/config.h"
+#include "exchange/config/static/config.h"
 
 namespace nutc {
 namespace wrappers {
@@ -17,11 +17,11 @@ PipeWriter::~PipeWriter()
 }
 
 void
-PipeWriter::send_messages(std::vector<std::string> messages)
+PipeWriter::send_message(const std::string& message)
 {
     std::lock_guard<std::mutex> lock{message_lock_};
-    std::ranges::move(messages, std::back_inserter(queued_messages_));
-    while (queued_messages_.size() > MAX_OUTGOING_MQ_SIZE) [[unlikely]] {
+    queued_messages_.push_back(message);
+    if (queued_messages_.size() > MAX_OUTGOING_MQ_SIZE) [[unlikely]] {
         queued_messages_.pop_front();
     }
 

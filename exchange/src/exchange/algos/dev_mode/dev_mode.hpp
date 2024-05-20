@@ -37,7 +37,9 @@ public:
         }
     }
 
-    void initialize_trader_container(traders::TraderContainer& traders) const override;
+    void initialize_trader_container(
+        traders::TraderContainer& traders, double start_capital
+    ) const override;
 
     void initialize_files() final;
 

@@ -6,44 +6,23 @@ namespace nutc {
 namespace matching {
 
 class Engine {
-    const size_t ORDER_EXPIRATION_TICKS = 0;
-    const double ORDER_FEE = 0;
-    OrderContainer order_container_;
-    uint64_t current_tick_ = 0;
+    const double ORDER_FEE;
 
 public:
-    explicit Engine(size_t order_expiration_ticks) :
-        ORDER_EXPIRATION_TICKS(order_expiration_ticks)
-    {}
+    explicit Engine(double order_fee = 0.0) : ORDER_FEE(order_fee) {}
 
-    explicit Engine(size_t order_expiration_ticks, double order_fee) :
-        ORDER_EXPIRATION_TICKS(order_expiration_ticks), ORDER_FEE(order_fee)
-    {}
-
-    const OrderContainer&
-    get_order_container() const
-    {
-        return order_container_;
-    }
-
-    std::vector<stored_match> match_order(const stored_order& order);
-
-    std::vector<stored_order>
-    expire_old_orders(uint64_t new_tick)
-    {
-        auto orders = order_container_.expire_orders(new_tick - ORDER_EXPIRATION_TICKS);
-        current_tick_ = new_tick;
-        return orders;
-    }
+    std::vector<stored_match>
+    match_order(OrderBook& orderbook, const stored_order& order);
 
 private:
-    bool order_can_execute_(const stored_order& buyer, const stored_order& seller);
+    bool order_can_execute_(
+        OrderBook& orderbook, const stored_order& buyer, const stored_order& seller
+    );
 
-    static stored_match
-    build_match(const stored_order& buyer, const stored_order& seller);
+    stored_match create_match(const stored_order& buyer, const stored_order& seller);
 
-    std::vector<stored_match> attempt_matches_();
-    void drop_order(uint64_t order_index);
+    std::vector<stored_match> attempt_matches_(OrderBook& orderbook);
+    static void drop_order(OrderBook& orderbook, uint64_t order_index);
 };
 
 } // namespace matching

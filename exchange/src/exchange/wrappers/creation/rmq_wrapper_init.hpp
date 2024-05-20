@@ -1,12 +1,14 @@
 #pragma once
 
-#include "exchange/traders/trader_container.hpp"
+#include "exchange/traders/trader_types/trader_interface.hpp"
 
 namespace nutc {
 namespace rabbitmq {
 class WrapperInitializer {
 public:
-    static void send_start_time(traders::TraderContainer& manager, size_t wait_seconds);
+    using TraderPtr = std::shared_ptr<traders::GenericTrader>;
+    static void
+    send_start_time(const std::vector<TraderPtr>& traders, size_t wait_seconds);
 };
 } // namespace rabbitmq
 } // namespace nutc

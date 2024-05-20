@@ -1,5 +1,6 @@
 #pragma once
 #include "exchange/traders/trader_types/trader_interface.hpp"
+#include "shared/messages_wrapper_to_exchange.hpp"
 
 #include <fmt/format.h>
 
@@ -19,7 +20,6 @@ struct stored_match {
 
 struct stored_order {
     std::shared_ptr<traders::GenericTrader> trader;
-    // TODO(stevenewald): can get rid of
     std::string ticker{};
     util::Side side{};
     double price{};
@@ -30,6 +30,8 @@ struct stored_order {
     uint64_t order_index{};
 
     stored_order() = default;
+
+    operator messages::market_order() { return {side, ticker, quantity, price}; }
 
     static uint64_t
     get_and_increment_global_index()
@@ -46,27 +48,6 @@ struct stored_order {
         ticker(std::move(ticker)), side(side), price(std::round(price * 100) / 100),
         quantity(quantity), tick(tick), order_index(get_and_increment_global_index())
     {}
-
-    stored_order(stored_order&& other) noexcept :
-        trader(std::move(other.trader)), ticker(std::move(other.ticker)),
-        side(other.side), price(other.price), quantity(other.quantity),
-        tick(other.tick), order_index(other.order_index)
-    {}
-
-    stored_order&
-    operator=(stored_order&& other) noexcept
-    {
-        if (this != &other) {
-            trader = std::move(other.trader);
-            ticker = std::move(other.ticker);
-            side = other.side;
-            price = other.price;
-            quantity = other.quantity;
-            tick = other.tick;
-            order_index = other.order_index;
-        }
-        return *this;
-    }
 
     stored_order(const stored_order& other) = default;
     stored_order& operator=(const stored_order& other) = default;

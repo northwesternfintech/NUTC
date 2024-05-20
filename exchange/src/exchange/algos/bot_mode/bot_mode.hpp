@@ -13,7 +13,7 @@ public:
     constexpr BotModeAlgoInitializer() = default;
 
     constexpr void
-    initialize_trader_container(traders::TraderContainer&) const final
+    initialize_trader_container(traders::TraderContainer&, double) const final
     {}
 
     constexpr void

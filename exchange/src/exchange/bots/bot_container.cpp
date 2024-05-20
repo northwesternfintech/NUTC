@@ -1,31 +1,33 @@
 #include "bot_container.hpp"
 
-#include "exchange/tickers/manager/ticker_manager.hpp"
+#include "exchange/bots/bot_types/market_maker.hpp"
+#include "exchange/bots/bot_types/retail.hpp"
 #include "exchange/traders/trader_container.hpp"
 
 #include <cmath>
-#include <cstdint>
 
+#include <iterator>
 #include <random>
 
 namespace nutc {
 
 namespace bots {
-void
-BotContainer::on_tick(uint64_t)
-{
-    auto& manager = engine_manager::EngineManager::get_instance();
-    auto midprice = manager.get_midprice(TICKER);
+template <typename T>
+concept HandledBotType =
+    std::disjunction_v<std::is_same<T, RetailBot>, std::is_same<T, MarketMakerBot>>;
 
+void
+BotContainer::generate_orders(double midprice)
+{
     auto theo = fabs(theo_generator_.generate_next_magnitude());
-    BotContainer::generate_orders(midprice, theo);
+    generate_orders(midprice, theo);
 }
 
 template <class BotType>
-void
+BotVector
 BotContainer::add_bots(double mean_capital, double stddev_capital, size_t num_bots)
-requires HandledBotType<BotType>
 {
+    BotVector bot_vec;
     traders::TraderContainer& users = nutc::traders::TraderContainer::get_instance();
 
     std::random_device rand;
@@ -34,12 +36,36 @@ requires HandledBotType<BotType>
     for (size_t i = 0; i < num_bots; i++) {
         auto capital = distr(gen);
         auto bot = users.add_trader<BotType>(TICKER, std::fabs(capital));
-        bots_.push_back(bot);
+        bot_vec.push_back(bot);
     }
+    return bot_vec;
 }
 
-template void BotContainer::add_bots<RetailBot>(double, double, size_t);
-template void BotContainer::add_bots<MarketMakerBot>(double, double, size_t);
+BotVector
+BotContainer::add_bots(const std::vector<config::bot_config>& bot_config)
+{
+    BotVector bot_vec;
+    for (auto& bots : bot_config) {
+        switch (bots.TYPE) {
+            case config::BotType::retail:
+                std::ranges::move(
+                    add_bots<RetailBot>(
+                        bots.AVERAGE_CAPITAL, bots.STD_DEV_CAPITAL, bots.NUM_BOTS
+                    ),
+                    std::back_inserter(bot_vec)
+                );
+                break;
+            case config::BotType::market_maker:
+                std::ranges::move(
+                    add_bots<MarketMakerBot>(
+                        bots.AVERAGE_CAPITAL, bots.STD_DEV_CAPITAL, bots.NUM_BOTS
+                    ),
+                    std::back_inserter(bot_vec)
+                );
+        }
+    }
+    return bot_vec;
+}
 
 void
 BotContainer::generate_orders(double midprice, double new_theo)

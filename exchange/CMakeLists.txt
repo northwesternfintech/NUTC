@@ -60,10 +60,10 @@ add_library(
     
     src/exchange/tick_scheduler/tick_scheduler.cpp
     
-    src/exchange/metrics/state/ticker_state.cpp
     src/exchange/metrics/on_tick_metrics.cpp
 
-    src/exchange/config/argparse.cpp
+    src/exchange/config/dynamic/argparse.cpp
+    src/exchange/config/dynamic/config.cpp
 )
 
 target_include_directories(
@@ -151,32 +151,6 @@ target_link_libraries(EXCHANGE_exe PRIVATE Crow::Crow)
 find_package(prometheus-cpp REQUIRED)
 target_link_libraries(EXCHANGE_exe PRIVATE prometheus-cpp::prometheus-cpp)
 
-# ---- DASHBOARD ----------
-option(DASHBOARD "Enable NUTC Dashboard" OFF)
-
-if(DASHBOARD)
-  # Must be a separate lib to avoid linker errors with gtest
-  add_definitions(-DDASHBOARD)
-  add_library(DASHBOARD_lib OBJECT
-    src/exchange/metrics/dashboard.cpp
-  )
-  target_include_directories(
-      DASHBOARD_lib ${warning_guard}
-      PUBLIC
-      "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
-  )
-
-  find_package(Curses REQUIRED)
-  target_link_libraries(DASHBOARD_lib PUBLIC Curses::Curses)
-  target_link_libraries(DASHBOARD_lib PRIVATE boost::boost)
-  target_link_libraries(DASHBOARD_lib PRIVATE quill::quill)
-  target_link_libraries(DASHBOARD_lib PRIVATE fmt::fmt)
-  target_link_libraries(DASHBOARD_lib PRIVATE glaze::glaze)
-  target_link_libraries(DASHBOARD_lib PRIVATE yaml-cpp::yaml-cpp)
-  target_link_libraries(DASHBOARD_lib PRIVATE prometheus-cpp::prometheus-cpp)
-  target_link_libraries(EXCHANGE_exe PRIVATE DASHBOARD_lib)
-endif()
-
 # ---- Declare executable ----
 
 # ---- WRAPPER ----------
@@ -235,7 +209,6 @@ target_link_libraries(WRAPPER_exe PRIVATE ${Python3_LIBRARIES})
 
 add_library(SHARED_lib OBJECT     
     src/shared/file_operations/file_operations.cpp
-    src/shared/config/config_loader.cpp
     src/shared/util.cpp
 )
 

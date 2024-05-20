@@ -1,4 +1,5 @@
 #include "config.h"
+#include "exchange/tickers/engine/order_container.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "shared/util.hpp"
 #include "test_utils/helpers/test_trader.hpp"
@@ -27,14 +28,14 @@ protected:
         trader2->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     }
 
-    TraderContainer& manager_ =
-        nutc::traders::TraderContainer::get_instance(); // NOLINT(*)
-    Engine engine_{TEST_ORDER_EXPIRATION_TICKS};        // NOLINT (*)
+    TraderContainer& manager_ = nutc::traders::TraderContainer::get_instance();
+    nutc::matching::OrderBook orderbook_;
+    Engine engine_{TEST_ORDER_EXPIRATION_TICKS};
 
     std::vector<nutc::matching::stored_match>
     add_to_engine_(const stored_order& order)
     {
-        return engine_.match_order(order);
+        return engine_.match_order(orderbook_, order);
     }
 };
 

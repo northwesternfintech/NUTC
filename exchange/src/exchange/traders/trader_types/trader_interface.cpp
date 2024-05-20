@@ -4,17 +4,15 @@ namespace nutc {
 namespace traders {
 
 void
-GenericTrader::process_order_match(
-    const std::string& ticker, util::Side side, double price, double quantity
-)
+GenericTrader::process_order_match(market_order match)
 {
-    double total_cap = price * quantity;
-    if (side == util::Side::buy) {
-        modify_holdings(ticker, quantity);
+    double total_cap = match.price * match.quantity;
+    if (match.side == util::Side::buy) {
+        modify_holdings(match.ticker, match.quantity);
         modify_capital(-total_cap);
     }
     else {
-        modify_holdings(ticker, -quantity);
+        modify_holdings(match.ticker, -match.quantity);
         modify_capital(total_cap);
     }
 }

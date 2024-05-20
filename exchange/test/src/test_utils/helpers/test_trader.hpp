@@ -15,13 +15,28 @@ public:
     {}
 
     void
-    send_messages(const std::vector<std::string>&) override
+    send_message(const std::string&) final
     {}
 
-    std::vector<market_order>
+    virtual void
+    process_order_remove(messages::market_order) final
+    {}
+
+    virtual void
+    process_order_add(messages::market_order) final
+    {}
+
+    std::vector<messages::market_order>
     read_orders() override
     {
         return {};
+    }
+
+    const std::string&
+    get_type() const final
+    {
+        static constexpr std::string type = "TEST";
+        return type;
     }
 };
 

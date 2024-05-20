@@ -22,15 +22,18 @@ class AlgoInitializer {
      * For example, dev_mode spawns in n algorithms in algos/algo_n.py
      */
     virtual void initialize_files() = 0;
-    virtual void initialize_trader_container(traders::TraderContainer& manager
+    virtual void initialize_trader_container(
+        traders::TraderContainer& manager, double start_cap
     ) const = 0;
 
 public:
     void
-    initialize_algo_management(traders::TraderContainer& trader_container)
+    initialize_algo_management(
+        traders::TraderContainer& trader_container, double start_cap
+    )
     {
         initialize_files();
-        initialize_trader_container(trader_container);
+        initialize_trader_container(trader_container, start_cap);
     }
 
     static std::unique_ptr<AlgoInitializer> get_algo_initializer(util::Mode mode);

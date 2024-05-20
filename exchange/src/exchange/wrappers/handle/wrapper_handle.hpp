@@ -55,9 +55,9 @@ public:
     }
 
     void
-    send_messages(std::vector<std::string> messages)
+    send_message(const std::string& message)
     {
-        return writer_.send_messages(messages);
+        return writer_.send_message(message);
     }
 
     ~WrapperHandle();

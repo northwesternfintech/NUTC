@@ -1,6 +1,6 @@
 #include "wrapper/logging.hpp"
 
-#include "wrapper/config.h"
+#include "config.h"
 
 #include <quill/Quill.h>
 

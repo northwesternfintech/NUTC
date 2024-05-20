@@ -3,7 +3,7 @@
 namespace nutc {
 namespace matching {
 const stored_order&
-OrderContainer::get_top_order(util::Side side) const
+OrderBook::get_top_order(util::Side side) const
 {
     if (side == util::Side::buy) {
         assert(!bids_.empty());
@@ -14,7 +14,7 @@ OrderContainer::get_top_order(util::Side side) const
 }
 
 void
-OrderContainer::modify_level_(util::Side side, double price, double qualtity)
+OrderBook::modify_level_(util::Side side, double price, double qualtity)
 {
     auto& levels = side == util::Side::buy ? bid_levels_ : ask_levels_;
     levels[price] += qualtity;
@@ -24,9 +24,11 @@ OrderContainer::modify_level_(util::Side side, double price, double qualtity)
 }
 
 stored_order
-OrderContainer::remove_order(uint64_t order_id)
+OrderBook::remove_order(uint64_t order_id)
 {
     stored_order order = std::move(get_order_(order_id));
+    order.trader->process_order_remove(order);
+
     order_index index{order.price, order_id};
     if (order.side == util::Side::buy) {
         assert(bids_.find(index) != bids_.end());
@@ -42,18 +44,18 @@ OrderContainer::remove_order(uint64_t order_id)
 }
 
 void
-OrderContainer::modify_order_quantity(uint64_t order_index, double delta)
+OrderBook::modify_order_quantity(uint64_t order_index, double delta)
 {
-    stored_order& order = get_order_(order_index);
+    stored_order order = remove_order(order_index);
     order.quantity += delta;
-    modify_level_(order.side, order.price, delta);
-    assert(order.quantity >= 0);
     if (util::is_close_to_zero(order.quantity))
-        remove_order(order_index);
+        return;
+
+    add_order(order);
 }
 
 std::vector<stored_order>
-OrderContainer::expire_orders(uint64_t tick)
+OrderBook::expire_orders(uint64_t tick)
 {
     if (orders_by_tick_.find(tick) == orders_by_tick_.end()) {
         return {};
@@ -71,8 +73,10 @@ OrderContainer::expire_orders(uint64_t tick)
 }
 
 void
-OrderContainer::add_order(stored_order order)
+OrderBook::add_order(stored_order order)
 {
+    order.trader->process_order_add(order);
+
     orders_by_tick_[order.tick].push_back(order.order_index);
     if (order.side == util::Side::buy) {
         bids_.insert(order_index{order.price, order.order_index});
