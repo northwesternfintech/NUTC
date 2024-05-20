@@ -43,7 +43,7 @@ BrownianMotion::generate_bool_(double probability_of_true)
 double
 BrownianMotion::generate_brownian_motion_(double stdev, Signedness direction)
 {
-    return generate_norm_(0, stdev, direction);
+    return generate_norm_(0, stdev, direction) * cur_magnitude_ / 200;
 }
 
 void

@@ -167,7 +167,7 @@ if(DASHBOARD)
   )
 
   find_package(Curses REQUIRED)
-  target_link_libraries(DASHBOARD_lib PRIVATE Curses::Curses)
+  target_link_libraries(DASHBOARD_lib PUBLIC Curses::Curses)
   target_link_libraries(DASHBOARD_lib PRIVATE boost::boost)
   target_link_libraries(DASHBOARD_lib PRIVATE quill::quill)
   target_link_libraries(DASHBOARD_lib PRIVATE fmt::fmt)
