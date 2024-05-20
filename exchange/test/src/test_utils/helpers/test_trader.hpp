@@ -1,6 +1,6 @@
 #pragma once
 
-#include "exchange/traders/trader_types/trader_interface.hpp"
+#include "exchange/traders/trader_types/generic_trader.hpp"
 
 #include <fmt/format.h>
 
@@ -15,13 +15,28 @@ public:
     {}
 
     void
-    send_messages(const std::vector<std::string>&) override
+    send_message(const std::string&) final
     {}
 
-    std::vector<market_order>
+    virtual void
+    process_order_remove(messages::market_order) final
+    {}
+
+    virtual void
+    process_order_add(messages::market_order) final
+    {}
+
+    std::vector<messages::market_order>
     read_orders() override
     {
         return {};
+    }
+
+    const std::string&
+    get_type() const final
+    {
+        static const std::string TYPE = "TEST";
+        return TYPE;
     }
 };
 

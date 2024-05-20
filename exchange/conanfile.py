@@ -16,7 +16,6 @@ class Recipe(ConanFile):
         self.requires("argparse/3.0")
         self.requires("glaze/2.4.0")
         self.requires("yaml-cpp/0.8.0")
-        self.requires("ncurses/6.4")
         self.requires("boost/1.83.0")
         self.requires("prometheus-cpp/1.1.0")
         self.requires("crowcpp-crow/1.1.0")

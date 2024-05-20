@@ -1,9 +1,9 @@
 #include "crow.hpp"
 
+#include "exchange/config/dynamic/config.hpp"
 #include "exchange/logging.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "exchange/traders/trader_types/algo_trader.hpp"
-#include "shared/config/config_loader.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
 
 namespace nutc {
@@ -43,7 +43,7 @@ CrowServer::CrowServer() :
                                   user_id, algo_id, "SANDBOX_USER", STARTING_CAPITAL
                               );
             start_remove_timer_(trial_secs, trader);
-            trader->send_messages({glz::write_json(messages::start_time{0})});
+            trader->send_message(glz::write_json(messages::start_time{0}));
             return res;
         } catch (...) {
             return crow::response(500);

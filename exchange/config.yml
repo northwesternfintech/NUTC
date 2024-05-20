@@ -1,65 +1,48 @@
 global:
-  - starting_capital: 100000
-
+    starting_capital: 100000
     # How long to wait after exchange-wrapper handshake before wrappers can place orders
     wait_secs: 3
 
     # How many ticks for an order to expire
     order_expiration_ticks: 10
-
-    exchange_tick_hz: 30
-
-    display_refresh_hz: 2
-    
-    order_fee: .0001
-
+    exchange_tick_hz: 100
+    order_fee: .0000
     sandbox_trial_seconds: 300
 
 tickers:
   - ticker: "ETH"
     start_price: 100
+    bots:
+      - type: "market_maker"
+        number_of_bots: 10
+        average_capital: 25000
+        std_dev_capital: 5000
+      - type: "retail"
+        number_of_bots: 10
+        average_capital: 1000
+        std_dev_capital: 200
 
   - ticker: "LTC"
     start_price: 200
+    bots:
+      - type: "market_maker"
+        number_of_bots: 10
+        average_capital: 100000
+        std_dev_capital: 25000
+
+      - type: "retail"
+        number_of_bots: 10
+        average_capital: 750
+        std_dev_capital: 100
 
   - ticker: "BTC"
     start_price: 50
-
-bots:
-  # Market Makers
-  - associated_ticker: "ETH"
-    type: "market_maker"
-    number_of_bots: 2
-    average_capital: 100000
-    std_dev_capital: 10000
-
-  - associated_ticker: "BTC"
-    type: "market_maker"
-    number_of_bots: 2
-    average_capital: 25000
-    std_dev_capital: 5000
-
-  - associated_ticker: "LTC"
-    type: "market_maker"
-    number_of_bots: 2
-    average_capital: 100000
-    std_dev_capital: 25000
-
-  # Retail
-  - associated_ticker: "ETH"
-    type: "retail"
-    number_of_bots: 10
-    average_capital: 1000
-    std_dev_capital: 200
-
-  - associated_ticker: "BTC"
-    type: "retail"
-    number_of_bots: 10
-    average_capital: 2000
-    std_dev_capital: 1000
-
-  - associated_ticker: "LTC"
-    type: "retail"
-    number_of_bots: 10
-    average_capital: 750
-    std_dev_capital: 100
+    bots:
+      - type: "market_maker"
+        number_of_bots: 10
+        average_capital: 100000
+        std_dev_capital: 10000
+      - type: "retail"
+        number_of_bots: 10
+        average_capital: 2000
+        std_dev_capital: 1000

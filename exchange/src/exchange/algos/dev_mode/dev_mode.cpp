@@ -1,8 +1,7 @@
 #include "dev_mode.hpp"
 
-#include "exchange/config.h"
+#include "exchange/config/static/config.h"
 #include "exchange/traders/trader_types/algo_trader.hpp"
-#include "shared/config/config_loader.hpp"
 #include "shared/file_operations/file_operations.hpp"
 
 #include <iostream>
@@ -12,13 +11,12 @@ namespace nutc {
 namespace algos {
 
 void
-DevModeAlgoInitializer::initialize_trader_container(traders::TraderContainer& traders
+DevModeAlgoInitializer::initialize_trader_container(
+    traders::TraderContainer& traders, double start_capital
 ) const
 {
-    int starting_cap = config::Config::get().constants().STARTING_CAPITAL;
-
     for (const fs::path& filepath : algo_filepaths_)
-        traders.add_trader<traders::LocalTrader>(filepath, starting_cap);
+        traders.add_trader<traders::LocalTrader>(filepath, start_capital);
 }
 
 void

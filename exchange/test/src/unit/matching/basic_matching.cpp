@@ -36,14 +36,14 @@ protected:
         SetUp();
     }
 
-    TraderContainer& manager_ =
-        nutc::traders::TraderContainer::get_instance(); // NOLINT(*)
-    Engine engine_{TEST_ORDER_EXPIRATION_TICKS};        // NOLINT (*)
+    TraderContainer& manager_ = nutc::traders::TraderContainer::get_instance();
+    nutc::matching::OrderBook orderbook_{};
+    Engine engine_{TEST_ORDER_EXPIRATION_TICKS}; // NOLINT (*)
 
     std::vector<nutc::matching::stored_match>
     add_to_engine_(const stored_order& order)
     {
-        return engine_.match_order(order);
+        return engine_.match_order(orderbook_, order);
     }
 };
 

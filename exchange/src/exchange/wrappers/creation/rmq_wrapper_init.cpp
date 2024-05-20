@@ -1,15 +1,13 @@
 #include "rmq_wrapper_init.hpp"
 
-#include "exchange/logging.hpp"
-
-#include <iostream>
+#include "shared/messages_exchange_to_wrapper.hpp"
 
 namespace nutc {
 namespace rabbitmq {
 
 void
 WrapperInitializer::send_start_time(
-    traders::TraderContainer& manager, size_t wait_seconds
+    const std::vector<TraderPtr>& traders, size_t wait_seconds
 )
 {
     using time_point = std::chrono::high_resolution_clock::time_point;
@@ -20,10 +18,10 @@ WrapperInitializer::send_start_time(
                           .count();
 
     messages::start_time message{time_ns};
-    std::vector<std::string> buf = {glz::write_json(message)};
+    auto buf = glz::write_json(message);
 
-    for (const auto& trader : manager.get_traders()) {
-        trader->send_messages(buf);
+    for (const auto& trader : traders) {
+        trader->send_message(buf);
     }
 }
 
