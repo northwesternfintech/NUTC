@@ -26,8 +26,8 @@ protected:
     void
     SetUp() override
     {
-        trader_1.modify_holdings("ETHUSD", DEFAULT_QUANTITY);
-        trader_2.modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+        trader_1.modify_holdings("ETH", DEFAULT_QUANTITY);
+        trader_2.modify_holdings("ETH", DEFAULT_QUANTITY);
     }
 
     nutc::matching::OrderBook container_;
@@ -35,20 +35,20 @@ protected:
 
 TEST_F(UnitOrderBookTest, TestStorageRounding)
 {
-    stored_order order1{trader_1, buy, "ETHUSD", 1, 1.000001, 1};
+    stored_order order1{trader_1, "ETH", buy, 1.000001, 1, 1};
     ASSERT_EQ(order1.price, 1.0);
 
-    stored_order order2{trader_2, buy, "ETHUSD", 0.00001, .9999, 1};
+    stored_order order2{trader_2, "ETH", buy, .9999, 0.00001, 1};
     ASSERT_EQ(order2.price, 1.0);
 
-    stored_order order3{trader_2, buy, "ETHUSD", 1, .994, 2};
+    stored_order order3{trader_2, "ETH", buy, .994, 1, 2};
     ASSERT_EQ(order3.price, 0.99);
 }
 
 TEST_F(UnitOrderBookTest, SimpleAddRemove)
 {
-    stored_order order1{trader_1, buy, "ETHUSD", 1, 1, 1};
-    // stored_order order2{trader_2, sell, "ETHUSD", 1, 1, 1};
+    stored_order order1{trader_1, "ETH", buy, 1, 1, 1};
+    // stored_order order2{trader_2, "ETH", sell, 1, 1, 1};
 
     container_.add_order(order1);
     // ASSERT_EQ(container_.get_level(buy, 1.0), 1);
@@ -67,8 +67,8 @@ TEST_F(UnitOrderBookTest, SimpleAddRemove)
 
 TEST_F(UnitOrderBookTest, ModifyQuantity)
 {
-    stored_order so1{trader_1, buy, "ETHUSD", 1, 1, 1};
-    stored_order so2{trader_1, sell, "ETHUSD", 1, 1, 1};
+    stored_order so1{trader_1, "ETH", buy, 1, 1, 1};
+    stored_order so2{trader_1, "ETH", sell, 1, 1, 1};
 
     container_.add_order(so1);
     container_.add_order(so2);

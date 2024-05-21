@@ -9,7 +9,7 @@
 #include <string>
 
 using init_message = nutc::messages::init_message;
-using market_order = nutc::messages::market_order;
+using limit_order = nutc::messages::limit_order;
 using tick_update = nutc::messages::tick_update;
 using orderbook_update = nutc::messages::orderbook_update;
 using match = nutc::messages::match;
@@ -24,6 +24,9 @@ public:
     static void publish_init_message();
 
     std::function<bool(const std::string&, const std::string&, double, double)>
+    limit_order_func();
+
+    std::function<bool(const std::string&, const std::string&, double)>
     market_order_func();
 
     static void wait_for_start_time();
@@ -31,7 +34,6 @@ public:
     void main_event_loop(const std::string& uid);
 
     static algorithm_t consume_algorithm();
-
 
 private:
     rate_limiter::RateLimiter limiter;
@@ -42,13 +44,14 @@ private:
     static void process_message(T&& message, const std::string& uid);
 
     static void publish_message(const std::string& message);
-    [[nodiscard]] bool publish_market_order(
-        const std::string& side, util::Ticker ticker, double quantity, double price
+    [[nodiscard]] bool publish_limit_order(
+        const std::string& side, util::Ticker ticker, double price, double quantity
     );
+    [[nodiscard]] bool
+    publish_market_order(const std::string& side, util::Ticker ticker, double quantity);
 
     template <typename T>
     static T consume_message();
-
 };
 
 } // namespace comms

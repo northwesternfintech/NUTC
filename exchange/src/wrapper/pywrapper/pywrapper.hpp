@@ -37,14 +37,16 @@ py::object get_account_update_function();
 /**
  * @brief Creates the Python API module
  *
- * Creates the Python API module and adds the publish_market_order function to it
+ * Creates the Python API module and adds the publish_limit_order function to it
  * This allows the client algorithm to place orders with the global function
- * "place_market_order" which is a callback to the rabbitmq class
+ * "place_limit_order" which is a callback to the rabbitmq class
  *
- * @param publish_market_order The callback function to place market orders
+ * @param publish_limit_order The callback function to place market orders
  */
 void create_api_module(
     std::function<bool(const std::string&, const std::string&, double, double)>
+        publish_limit_order, 
+    std::function<bool(const std::string&, const std::string&, double)>
         publish_market_order
 );
 

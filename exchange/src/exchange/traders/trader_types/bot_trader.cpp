@@ -6,7 +6,7 @@ namespace nutc {
 namespace traders {
 
 void
-BotTrader::process_order_add(market_order order)
+BotTrader::process_order_add(limit_order order)
 {
     assert(order.ticker == TICKER);
 
@@ -22,7 +22,7 @@ BotTrader::process_order_add(market_order order)
 }
 
 void
-BotTrader::process_order_remove(market_order order)
+BotTrader::process_order_remove(limit_order order)
 {
     assert(order.ticker == TICKER);
 

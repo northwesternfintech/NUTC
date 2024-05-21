@@ -29,7 +29,7 @@ struct stored_order {
     // Used to sort orders by time created
     uint64_t order_index;
 
-    operator messages::market_order() const { return {side, ticker, quantity, price}; }
+    operator messages::limit_order() const { return {side, ticker, price, quantity}; }
 
     static uint64_t
     get_and_increment_global_index()
@@ -39,8 +39,8 @@ struct stored_order {
     }
 
     stored_order(
-        traders::GenericTrader& trader, util::Side side, util::Ticker ticker,
-        double quantity, double price, uint64_t tick = 0
+        traders::GenericTrader& trader, util::Ticker ticker, util::Side side,
+        double price, double quantity, uint64_t tick = 0
     );
 
     stored_order(const stored_order& other) = default;

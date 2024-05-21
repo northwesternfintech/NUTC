@@ -23,8 +23,8 @@ protected:
     void
     SetUp() override
     {
-        trader1.modify_holdings("ETHUSD", DEFAULT_QUANTITY);
-        trader2.modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+        trader1.modify_holdings("ETH", DEFAULT_QUANTITY);
+        trader2.modify_holdings("ETH", DEFAULT_QUANTITY);
     }
 
     nutc::matching::OrderBook orderbook_;
@@ -41,8 +41,8 @@ TEST_F(UnitInvalidOrders, RemoveThenAddFunds)
 {
     trader1.modify_capital(-TEST_STARTING_CAPITAL);
 
-    stored_order order2{trader2, sell, "ETHUSD", 1, 1, 0};
-    stored_order order1{trader1, buy, "ETHUSD", 1, 1, 0};
+    stored_order order2{trader2, "ETH", sell, 1, 1, 0};
+    stored_order order1{trader1, "ETH", buy, 1, 1, 0};
 
     // Thrown out
     auto matches = add_to_engine_(order1);
@@ -61,15 +61,15 @@ TEST_F(UnitInvalidOrders, RemoveThenAddFunds)
     // Kept and matched
     matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 1);
-    ASSERT_EQ_MATCH(matches[0], "ETHUSD", "ABC", "DEF", buy, 1, 1);
+    ASSERT_EQ_MATCH(matches[0], "ETH", "ABC", "DEF", buy, 1, 1);
 }
 
 TEST_F(UnitInvalidOrders, MatchingInvalidFunds)
 {
     trader1.modify_capital(-TEST_STARTING_CAPITAL);
 
-    stored_order order1{trader1, buy, "ETHUSD", 1, 1, 0};
-    stored_order order2{trader2, sell, "ETHUSD", 1, 1, 0};
+    stored_order order1{trader1, "ETH", buy, 1, 1, 0};
+    stored_order order2{trader2, "ETH", sell, 1, 1, 0};
 
     // Thrown out
     auto matches = add_to_engine_(order1);
@@ -91,15 +91,15 @@ TEST_F(UnitInvalidOrders, SimpleManyInvalidOrder)
     nutc::traders::GenericTrader& t4 =
         *(manager_.add_trader<TestTrader>(std::string("D"), TEST_STARTING_CAPITAL));
 
-    t1.modify_holdings("ETHUSD", DEFAULT_QUANTITY);
-    t2.modify_holdings("ETHUSD", DEFAULT_QUANTITY);
-    t3.modify_holdings("ETHUSD", DEFAULT_QUANTITY);
-    t4.modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+    t1.modify_holdings("ETH", DEFAULT_QUANTITY);
+    t2.modify_holdings("ETH", DEFAULT_QUANTITY);
+    t3.modify_holdings("ETH", DEFAULT_QUANTITY);
+    t4.modify_holdings("ETH", DEFAULT_QUANTITY);
 
-    stored_order order1{t1, buy, "ETHUSD", 1, 1, 0};
-    stored_order order2{t2, buy, "ETHUSD", 1, 1, 0};
-    stored_order order3{t3, buy, "ETHUSD", 1, 1, 0};
-    stored_order order4{t4, sell, "ETHUSD", 3, 1, 0};
+    stored_order order1{t1, "ETH", buy, 1, 1, 0};
+    stored_order order2{t2, "ETH", buy, 1, 1, 0};
+    stored_order order3{t3, "ETH", buy, 1, 1, 0};
+    stored_order order4{t4, "ETH", sell, 1, 3, 0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
@@ -112,6 +112,6 @@ TEST_F(UnitInvalidOrders, SimpleManyInvalidOrder)
     matches = add_to_engine_(order4);
     ASSERT_EQ(matches.size(), 2);
 
-    ASSERT_EQ_MATCH(matches[0], "ETHUSD", "A", "D", sell, 1, 1);
-    ASSERT_EQ_MATCH(matches[1], "ETHUSD", "C", "D", sell, 1, 1);
+    ASSERT_EQ_MATCH(matches[0], "ETH", "A", "D", sell, 1, 1);
+    ASSERT_EQ_MATCH(matches[1], "ETH", "C", "D", sell, 1, 1);
 }

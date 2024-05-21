@@ -4,7 +4,7 @@ namespace nutc {
 namespace traders {
 
 void
-GenericTrader::process_order_match(market_order match)
+GenericTrader::process_order_match(limit_order match)
 {
     double total_cap = match.price * match.quantity;
     if (match.side == util::Side::buy) {

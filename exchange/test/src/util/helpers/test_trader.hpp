@@ -9,7 +9,7 @@ namespace test_utils {
 
 // Basically a generic trader but
 class TestTrader : public traders::GenericTrader {
-    std::vector<messages::market_order> pending_orders_;
+    std::vector<messages::limit_order> pending_orders_;
 
 public:
     TestTrader(double capital) : TestTrader("TEST", capital) {}
@@ -23,14 +23,14 @@ public:
     {}
 
     virtual void
-    process_order_remove(messages::market_order) final
+    process_order_remove(messages::limit_order) final
     {}
 
     virtual void
-    process_order_add(messages::market_order) final
+    process_order_add(messages::limit_order) final
     {}
 
-    std::vector<messages::market_order>
+    std::vector<messages::limit_order>
     read_orders() override
     {
         auto ret = std::move(pending_orders_);
@@ -39,9 +39,9 @@ public:
     }
 
     void
-    add_order(messages::market_order order)
+    add_order(messages::limit_order order)
     {
-        pending_orders_.push_back(std::move(order));
+        pending_orders_.push_back(order);
     }
 
     const std::string&

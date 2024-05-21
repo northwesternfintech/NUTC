@@ -1,5 +1,8 @@
-def place_market_order(side: str, ticker: str, quantity: float, price: float) -> None:
+def place_market_order(side: str, ticker: str, quantity: float) -> None:
     """Place a market order - DO NOT MODIFY""" 
+
+def place_limit_order(side: str, ticker: str, price: float, quantity: float) -> None:
+    """Place a limit order - DO NOT MODIFY""" 
 
 class Strategy:
     """Template for a strategy."""
@@ -40,10 +43,8 @@ class Strategy:
             Volume placed into orderbook
         """
         print(f"Python Orderbook update: {ticker} {side} {price} {quantity}")
-        import sys
-        print(ticker, file=sys.stderr)
         if(ticker=="ABC" and price<101.0 and price>99.0):
-            place_market_order("BUY", "ABC", 10, 100)
+            place_limit_order("BUY", "ABC", 100, 10)
 
     def on_account_update(
         self,

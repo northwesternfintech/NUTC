@@ -10,7 +10,7 @@
 namespace nutc {
 namespace traders {
 
-using market_order = messages::market_order;
+using limit_order = messages::limit_order;
 
 class GenericTrader {
     const std::string USER_ID;
@@ -90,13 +90,13 @@ public:
         return INITIAL_CAPITAL;
     }
 
-    virtual void process_order_remove(market_order) = 0;
-    virtual void process_order_add(market_order) = 0;
-    virtual void process_order_match(market_order);
+    virtual void process_order_remove(limit_order) = 0;
+    virtual void process_order_add(limit_order) = 0;
+    virtual void process_order_match(limit_order);
 
     virtual void send_message(const std::string&) = 0;
 
-    virtual std::vector<market_order> read_orders() = 0;
+    virtual std::vector<limit_order> read_orders() = 0;
 };
 } // namespace traders
 } // namespace nutc

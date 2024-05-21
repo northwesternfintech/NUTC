@@ -1,5 +1,25 @@
-def place_market_order(side: str, ticker: str, quantity: float, price: float) -> bool:
+def place_market_order(side: str, ticker: str, quantity: float) -> bool:
     """Place a market order - DO NOT MODIFY
+
+    Parameters
+    ----------
+    side
+        Side of order to place ("BUY" or "SELL")
+    ticker
+        Ticker of order to place ("ETH", "BTC", or "LTC")
+    quantity
+        Volume of order to place
+
+    Returns
+    -------
+    True if order succeeded, False if order failed due to rate limiting
+
+    ((IMPORTANT))
+    You should handle the case where the order fails due to rate limiting (maybe wait and try again?)
+    """
+
+def place_limit_order(side: str, ticker: str, quantity: float, price: float) -> bool:
+    """Place a limit order - DO NOT MODIFY
 
     Parameters
     ----------

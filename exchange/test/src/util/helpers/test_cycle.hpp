@@ -7,7 +7,7 @@
 #include <memory>
 #include <string>
 
-std::string mo_to_string(const nutc::messages::market_order& order);
+std::string mo_to_string(const nutc::messages::limit_order& order);
 
 namespace nutc {
 namespace test {
@@ -29,7 +29,7 @@ public:
     {}
 
     // Note: uses tick=0. If using something that relies on tick, it will not work
-    void wait_for_order(const messages::market_order& order);
+    void wait_for_order(const messages::limit_order& order);
 
 private:
     virtual std::vector<matching::stored_match>
