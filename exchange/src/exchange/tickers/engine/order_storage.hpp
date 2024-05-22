@@ -31,7 +31,7 @@ struct stored_order {
 
     stored_order() = default;
 
-    operator messages::market_order() { return {side, ticker, quantity, price}; }
+    operator messages::market_order() const { return {side, ticker, quantity, price}; }
 
     static uint64_t
     get_and_increment_global_index()
@@ -42,7 +42,7 @@ struct stored_order {
 
     stored_order(
         std::shared_ptr<traders::GenericTrader> trader, util::Side side,
-        std::string ticker, double quantity, double price, uint64_t tick
+        std::string ticker, double quantity, double price, uint64_t tick = 0
     ) :
         trader(std::move(trader)),
         ticker(std::move(ticker)), side(side), price(std::round(price * 100) / 100),

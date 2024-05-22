@@ -2,8 +2,6 @@
 
 #include "exchange/tick_scheduler/tick_observer.hpp"
 #include "exchange/tickers/manager/ticker_manager.hpp"
-#include "exchange/traders/trader_types/generic_trader.hpp"
-#include "shared/messages_wrapper_to_exchange.hpp"
 
 namespace nutc {
 namespace rabbitmq {
@@ -18,12 +16,10 @@ public:
         manager_(manager)
     {}
 
-    void on_tick(uint64_t new_tick) override;
+    void on_tick(uint64_t current_tick) override;
 
-    static void match_new_order(
-        engine_manager::EngineManager& engine_manager,
-        const std::shared_ptr<traders::GenericTrader>& trader, market_order&& order
-    );
+private:
+    void match_order(const matching::stored_order& order);
 };
 
 } // namespace rabbitmq

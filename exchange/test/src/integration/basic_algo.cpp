@@ -1,7 +1,6 @@
 #include "config.h"
 #include "exchange/tickers/manager/ticker_manager.hpp"
 #include "exchange/traders/trader_container.hpp"
-#include "exchange/wrappers/messaging/consumer.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 #include "test_utils/helpers/test_trader.hpp"
 #include "test_utils/macros.hpp"
@@ -9,7 +8,6 @@
 
 #include <gtest/gtest.h>
 
-namespace rmq = nutc::rabbitmq;
 using nutc::util::Side::buy;
 using nutc::util::Side::sell;
 
@@ -32,8 +30,9 @@ protected:
 
 TEST_F(IntegrationBasicAlgo, InitialLiquidity)
 {
-    std::vector<std::string> names{"test_algos/buy_tsla_at_100.py"};
-    auto traders = nutc::test_utils::initialize_testing_clients(users_, names);
+    auto traders = nutc::test_utils::initialize_testing_clients(
+        users_, {"test_algos/buy_tsla_at_100.py"}
+    );
     auto trader = traders.at(0);
 
     // want to see if it buys
@@ -42,10 +41,7 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
     auto bot = users_.add_trader<TestTrader>("TSLA", 0);
     bot->modify_holdings("TSLA", 1000); // NOLINT
 
-    rmq::WrapperConsumer::match_new_order(
-        engine_manager_, bot, nutc::messages::market_order{sell, "TSLA", 100, 100}
-    );
-
+    engine_manager_.match_order({bot, sell, "TSLA", 100, 100});
     engine_manager_.on_tick(0);
 
     auto mess = nutc::test_utils::consume_message(trader);
@@ -54,8 +50,9 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
 
 TEST_F(IntegrationBasicAlgo, ManyUpdates)
 {
-    std::vector<std::string> names{"test_algos/confirm_1000.py"};
-    auto traders = nutc::test_utils::initialize_testing_clients(users_, names);
+    auto traders = nutc::test_utils::initialize_testing_clients(
+        users_, {"test_algos/confirm_1000.py"}
+    );
     auto trader = traders.at(0);
 
     // want to see if it buys
@@ -65,9 +62,7 @@ TEST_F(IntegrationBasicAlgo, ManyUpdates)
     bot->modify_holdings("TSLA", 100000); // NOLINT
 
     for (double i = 0; i < 100000; i++) {
-        rmq::WrapperConsumer::match_new_order(
-            engine_manager_, bot, nutc::messages::market_order{sell, "TSLA", 1, i}
-        );
+        engine_manager_.match_order({bot, sell, "TSLA", 1, i, 1});
     }
 
     engine_manager_.on_tick(0);
@@ -78,8 +73,9 @@ TEST_F(IntegrationBasicAlgo, ManyUpdates)
 
 TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
 {
-    std::vector<std::string> names{"test_algos/buy_tsla_on_trade.py"};
-    auto traders = nutc::test_utils::initialize_testing_clients(users_, names);
+    auto traders = nutc::test_utils::initialize_testing_clients(
+        users_, {"test_algos/buy_tsla_on_trade.py"}
+    );
     auto trader = traders.at(0);
 
     engine_manager_.add_engine("TSLA");
@@ -88,19 +84,20 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
     auto bot = users_.add_trader<TestTrader>("TSLA", 0);
     bot->modify_holdings("TSLA", 1000); // NOLINT
 
-    rmq::WrapperConsumer::match_new_order(
-        engine_manager_, bot, nutc::messages::market_order{sell, "TSLA", 100, 100}
-    ); // NOLINT
+    engine_manager_.match_order({bot, sell, "TSLA", 100, 100, 0});
     engine_manager_.on_tick(0);
 
     // obupdate triggers one user to place autil::Side::buy order of 10 TSLA at 100
     auto mess1 = nutc::test_utils::consume_message(trader);
     ASSERT_EQ_MARKET_ORDER(mess1, "TSLA", buy, 102, 10);
 
-    rmq::WrapperConsumer::match_new_order(engine_manager_, trader, std::move(mess1));
+    engine_manager_.match_order(
+        {trader, mess1.side, mess1.ticker, mess1.quantity, mess1.price}
+    );
     engine_manager_.on_tick(0);
 
-    // on_trade_match triggers one user to place autil::Side::buy order of 1 TSLA at 100
+    // on_trade_match triggers one user to place autil::Side::buy order of 1 TSLA at
+    // 100
     auto mess2 = nutc::test_utils::consume_message(trader);
     ASSERT_EQ_MARKET_ORDER(mess2, "APPL", buy, 100, 1);
 }
@@ -108,8 +105,9 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
 // Sanity check that it goes through the orderbook
 TEST_F(IntegrationBasicAlgo, MultipleLevelOrder)
 {
-    std::vector<std::string> names{"test_algos/buy_tsla_at_100.py"};
-    auto traders = nutc::test_utils::initialize_testing_clients(users_, names);
+    auto traders = nutc::test_utils::initialize_testing_clients(
+        users_, {"test_algos/buy_tsla_at_100.py"}
+    );
     auto trader = traders.at(0);
 
     engine_manager_.add_engine("TSLA");
@@ -117,18 +115,16 @@ TEST_F(IntegrationBasicAlgo, MultipleLevelOrder)
     auto bot = users_.add_trader<TestTrader>("TSLA", 0);
     bot->modify_holdings("TSLA", 1000); // NOLINT
 
-    rmq::WrapperConsumer::match_new_order(
-        engine_manager_, bot, nutc::messages::market_order{sell, "TSLA", 5, 100}
-    ); // NOLINT
-    rmq::WrapperConsumer::match_new_order(
-        engine_manager_, bot, nutc::messages::market_order{sell, "TSLA", 5, 95}
-    ); // NOLINT
+    engine_manager_.match_order({bot, sell, "TSLA", 5, 100});
+    engine_manager_.match_order({bot, sell, "TSLA", 5, 95});
     engine_manager_.on_tick(0);
 
     auto mess1 = nutc::test_utils::consume_message(trader);
     ASSERT_EQ_MARKET_ORDER(mess1, "TSLA", buy, 100, 10);
 
-    rmq::WrapperConsumer::match_new_order(engine_manager_, trader, std::move(mess1));
+    engine_manager_.match_order(
+        {trader, mess1.side, mess1.ticker, mess1.quantity, mess1.price}
+    );
     engine_manager_.on_tick(0);
 
     ASSERT_NEAR(
@@ -138,8 +134,9 @@ TEST_F(IntegrationBasicAlgo, MultipleLevelOrder)
 
 TEST_F(IntegrationBasicAlgo, OnAccountUpdateSell)
 {
-    std::vector<std::string> names{"test_algos/sell_tsla_on_account.py"};
-    auto traders = nutc::test_utils::initialize_testing_clients(users_, names);
+    auto traders = nutc::test_utils::initialize_testing_clients(
+        users_, {"test_algos/sell_tsla_on_account.py"}
+    );
     auto trader = traders.at(0);
     trader->modify_holdings("TSLA", 1000);
     auto bot = users_.add_trader<TestTrader>("TSLA", 100000);
@@ -147,27 +144,29 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateSell)
     engine_manager_.add_engine("TSLA");
     engine_manager_.add_engine("APPL");
 
-    rmq::WrapperConsumer::match_new_order(
-        engine_manager_, bot, nutc::messages::market_order{buy, "TSLA", 102, 102}
-    ); // NOLINT
+    engine_manager_.match_order({bot, buy, "TSLA", 102, 102});
     engine_manager_.on_tick(0);
 
     // obupdate triggers one user to place autil::Side::buy order of 10 TSLA at 102
     auto mess1 = nutc::test_utils::consume_message(trader);
     ASSERT_EQ_MARKET_ORDER(mess1, "TSLA", sell, 100, 10);
 
-    rmq::WrapperConsumer::match_new_order(engine_manager_, trader, std::move(mess1));
+    engine_manager_.match_order(
+        {trader, mess1.side, mess1.ticker, mess1.quantity, mess1.price}
+    );
     engine_manager_.on_tick(0);
 
-    // on_trade_match triggers one user to place autil::Side::buy order of 1 TSLA at 100
+    // on_trade_match triggers one user to place autil::Side::buy order of 1 TSLA at
+    // 100
     auto mess2 = nutc::test_utils::consume_message(trader);
     ASSERT_EQ_MARKET_ORDER(mess2, "APPL", buy, 100, 1);
 }
 
 TEST_F(IntegrationBasicAlgo, OnAccountUpdateBuy)
 {
-    std::vector<std::string> names{"test_algos/buy_tsla_on_account.py"};
-    auto traders = nutc::test_utils::initialize_testing_clients(users_, names);
+    auto traders = nutc::test_utils::initialize_testing_clients(
+        users_, {"test_algos/buy_tsla_on_account.py"}
+    );
     auto trader = traders.at(0);
 
     engine_manager_.add_engine("TSLA");
@@ -176,28 +175,29 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateBuy)
     auto bot = users_.add_trader<TestTrader>("TSLA", 0);
     bot->modify_holdings("TSLA", 1000); // NOLINT
 
-    rmq::WrapperConsumer::match_new_order(
-        engine_manager_, bot, nutc::messages::market_order{sell, "TSLA", 100, 100}
-    ); // NOLINT
+    engine_manager_.match_order({bot, sell, "TSLA", 100, 100});
     engine_manager_.on_tick(0);
 
     // obupdate triggers one user to place autil::Side::buy order of 10 TSLA at 102
     auto mess1 = nutc::test_utils::consume_message(trader);
     ASSERT_EQ_MARKET_ORDER(mess1, "TSLA", buy, 102, 10);
 
-    rmq::WrapperConsumer::match_new_order(engine_manager_, trader, std::move(mess1));
+    engine_manager_.match_order(
+        {trader, mess1.side, mess1.ticker, mess1.quantity, mess1.price}
+    );
     engine_manager_.on_tick(0);
 
-    // on_trade_match triggers one user to place autil::Side::buy order of 1 TSLA at 100
+    // on_trade_match triggers one user to place autil::Side::buy order of 1 TSLA at
+    // 100
     auto mess2 = nutc::test_utils::consume_message(trader);
     ASSERT_EQ_MARKET_ORDER(mess2, "APPL", buy, 100, 1);
 }
 
 TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
 {
-    std::vector<std::string> names{"test_algos/buy_tsla_at_100.py"};
     auto traders = nutc::test_utils::initialize_testing_clients(
-        users_, names, TEST_STARTING_CAPITAL, TEST_CLIENT_WAIT_SECS
+        users_, {"test_algos/buy_tsla_at_100.py"}, TEST_STARTING_CAPITAL,
+        TEST_CLIENT_WAIT_SECS
     );
     auto trader = traders.at(0);
 
@@ -207,9 +207,7 @@ TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
     auto bot = users_.add_trader<TestTrader>("TSLA", 0);
     bot->modify_holdings("TSLA", 1000); // NOLINT
 
-    rmq::WrapperConsumer::match_new_order(
-        engine_manager_, bot, nutc::messages::market_order{sell, "TSLA", 100, 100}
-    ); // NOLINT
+    engine_manager_.match_order({bot, sell, "TSLA", 100, 100});
     engine_manager_.on_tick(0);
 
     auto mess2 = nutc::test_utils::consume_message(trader);
