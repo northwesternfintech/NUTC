@@ -72,6 +72,7 @@ main(int argc, const char** argv)
     logging::init(quill::LogLevel::Info);
 
     std::signal(SIGINT, [](auto) { std::exit(0); });
+    std::signal(SIGPIPE, SIG_IGN);
 
     auto mode = config::process_arguments(argc, argv);
 
