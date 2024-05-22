@@ -2,7 +2,7 @@
 
 #include "bot_mode/bot_mode.hpp"
 #include "dev_mode/dev_mode.hpp"
-#include "exchange/config.h"
+#include "exchange/config/static/config.h"
 #include "normal_mode/normal_mode.hpp"
 
 #include <memory>

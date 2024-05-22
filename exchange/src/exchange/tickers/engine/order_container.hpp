@@ -5,7 +5,6 @@
 
 #include <cassert>
 
-#include <map>
 #include <set>
 #include <unordered_map>
 #include <vector>
@@ -13,7 +12,7 @@
 namespace nutc {
 namespace matching {
 
-class OrderContainer {
+class OrderBook {
     // both map/sort price, order_index
     std::set<order_index, bid_comparator> bids_;
     std::set<order_index, ask_comparator> asks_;
@@ -22,7 +21,7 @@ class OrderContainer {
     std::unordered_map<uint64_t, stored_order> orders_by_id_;
 
     // tick -> queue of order ids
-    std::map<uint64_t, std::vector<uint64_t>> orders_by_tick_;
+    std::unordered_map<uint64_t, std::vector<uint64_t>> orders_by_tick_;
 
     std::unordered_map<double, double> bid_levels_;
     std::unordered_map<double, double> ask_levels_;

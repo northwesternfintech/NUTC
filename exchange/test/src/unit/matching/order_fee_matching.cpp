@@ -1,4 +1,5 @@
 #include "config.h"
+#include "exchange/tickers/engine/order_container.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "test_utils/helpers/test_trader.hpp"
 #include "test_utils/macros.hpp"
@@ -36,14 +37,14 @@ protected:
         SetUp();
     }
 
-    TraderContainer& manager_ =
-        nutc::traders::TraderContainer::get_instance();          // NOLINT(*)
-    Engine engine_{TEST_ORDER_EXPIRATION_TICKS, TEST_ORDER_FEE}; // NOLINT (*)
+    TraderContainer& manager_ = nutc::traders::TraderContainer::get_instance();
+    nutc::matching::OrderBook orderbook_;
+    Engine engine_{.5};
 
     std::vector<nutc::matching::stored_match>
     add_to_engine_(const stored_order& order)
     {
-        return engine_.match_order(order);
+        return engine_.match_order(orderbook_, order);
     }
 };
 

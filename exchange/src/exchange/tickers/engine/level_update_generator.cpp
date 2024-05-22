@@ -9,9 +9,7 @@ namespace matching {
 // in most cases and only called on tick
 // so simplicity > performance
 std::vector<ob_update>
-get_updates(
-    const std::string& ticker, const OrderContainer& before, const OrderContainer& after
-)
+get_updates(const std::string& ticker, const OrderBook& before, const OrderBook& after)
 {
     std::unordered_set<double> buy_levels{};
     std::unordered_set<double> ask_levels{};

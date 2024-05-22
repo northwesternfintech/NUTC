@@ -1,7 +1,6 @@
 #pragma once
 
-#include "shared/util.hpp"
-#include "wrapper/messaging/comms.hpp"
+#include "shared/messages_wrapper_to_exchange.hpp"
 
 #include <boost/process.hpp>
 
@@ -10,6 +9,8 @@
 
 namespace nutc {
 namespace traders {
+
+using market_order = messages::market_order;
 
 class GenericTrader {
     const std::string USER_ID;
@@ -34,22 +35,10 @@ public:
         return false;
     }
 
-    virtual bool
-    is_active() const
-    {
-        return true;
-    }
-
     virtual const std::string&
     get_display_name() const
     {
         return USER_ID;
-    }
-
-    virtual bool
-    record_metrics() const
-    {
-        return false;
     }
 
     const std::string&
@@ -57,6 +46,9 @@ public:
     {
         return USER_ID;
     }
+
+    // For metrics purposes
+    virtual const std::string& get_type() const = 0;
 
     virtual double
     get_capital() const
@@ -98,28 +90,11 @@ public:
         return INITIAL_CAPITAL;
     }
 
-    /**
-     * @brief Triggered when an order this bot created expires after
-     * order_expiration_ticks, we want to let the trader know
-     * @note For now, only bots care about this
-     * @param ticker
-     * @param quantity
-     * @param price
-     * @param quantity
-     */
-    virtual void
-    process_order_expiration(const std::string&, util::Side, double, double)
-    {}
+    virtual void process_order_remove(market_order) = 0;
+    virtual void process_order_add(market_order) = 0;
+    virtual void process_order_match(market_order);
 
-    /**
-     * @brief Triggered when an order this bot created matches
-     * @note Implementing classes MUST update capital and holdings respectively
-     */
-    virtual void process_order_match(
-        const std::string& ticker, util::Side side, double price, double quantity
-    );
-
-    virtual void send_messages(const std::vector<std::string>&) = 0;
+    virtual void send_message(const std::string&) = 0;
 
     virtual std::vector<market_order> read_orders() = 0;
 };

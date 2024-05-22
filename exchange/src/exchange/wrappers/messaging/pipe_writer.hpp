@@ -31,7 +31,7 @@ public:
         return pipe_out_;
     }
 
-    void send_messages(std::vector<std::string> messages);
+    void send_message(const std::string& message);
 };
 
 } // namespace wrappers

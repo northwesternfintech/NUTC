@@ -25,9 +25,14 @@ public:
         AGGRESSIVENESS(generate_aggresiveness_())
     {}
 
-    [[nodiscard]] bool is_active() const override;
-
     void take_action(double midprice, double theo) override;
+
+    const std::string&
+    get_type() const final
+    {
+        static const std::string TYPE = "RETAIL";
+        return TYPE;
+    }
 
 private:
     const double AGGRESSIVENESS;

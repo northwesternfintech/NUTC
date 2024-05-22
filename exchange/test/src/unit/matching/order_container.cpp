@@ -2,7 +2,6 @@
 
 #include "config.h"
 #include "exchange/traders/trader_container.hpp"
-#include "exchange/traders/trader_types/trader_interface.hpp"
 #include "test_utils/helpers/test_trader.hpp"
 #include "test_utils/macros.hpp"
 
@@ -13,7 +12,7 @@
 using nutc::util::Side::buy;
 using nutc::util::Side::sell;
 
-class UnitOrderContainerTest : public ::testing::Test {
+class UnitOrderBookTest : public ::testing::Test {
 protected:
     using TestTrader = nutc::test_utils::TestTrader;
     static constexpr const int DEFAULT_QUANTITY = 1000;
@@ -31,12 +30,11 @@ protected:
         trader_2->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     }
 
-    TraderContainer& manager_ =
-        nutc::traders::TraderContainer::get_instance(); // NOLINT(*)
-    nutc::matching::OrderContainer container_;          // NOLINT
+    TraderContainer& manager_ = nutc::traders::TraderContainer::get_instance();
+    nutc::matching::OrderBook container_;
 };
 
-TEST_F(UnitOrderContainerTest, TestStorageRounding)
+TEST_F(UnitOrderBookTest, TestStorageRounding)
 {
     stored_order order1{trader_1, buy, "ETHUSD", 1, 1.000001, 1};
     ASSERT_EQ(order1.price, 1.0);
@@ -48,7 +46,7 @@ TEST_F(UnitOrderContainerTest, TestStorageRounding)
     ASSERT_EQ(order3.price, 0.99);
 }
 
-TEST_F(UnitOrderContainerTest, SimpleAddRemove)
+TEST_F(UnitOrderBookTest, SimpleAddRemove)
 {
     stored_order order1{trader_1, buy, "ETHUSD", 1, 1, 1};
     stored_order order2{trader_2, sell, "ETHUSD", 1, 1, 1};
@@ -68,7 +66,7 @@ TEST_F(UnitOrderContainerTest, SimpleAddRemove)
     ASSERT_FALSE(container_.can_match_orders());
 }
 
-TEST_F(UnitOrderContainerTest, ModifyQuantity)
+TEST_F(UnitOrderBookTest, ModifyQuantity)
 {
     stored_order so1{trader_1, buy, "ETHUSD", 1, 1, 1};
     stored_order so2{trader_1, sell, "ETHUSD", 1, 1, 1};

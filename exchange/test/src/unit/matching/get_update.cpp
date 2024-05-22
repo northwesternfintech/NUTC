@@ -10,7 +10,7 @@
 #include <algorithm>
 
 using nutc::matching::get_updates;
-using nutc::matching::OrderContainer;
+using nutc::matching::OrderBook;
 using nutc::util::Side::buy;
 using nutc::util::Side::sell;
 
@@ -33,8 +33,8 @@ protected:
     TraderContainer& manager_ =
         nutc::traders::TraderContainer::get_instance(); // NOLINT(*)
 
-    OrderContainer before{}; // NOLINT (*)
-    OrderContainer after{};  // NOLINT (*)
+    OrderBook before{}; // NOLINT (*)
+    OrderBook after{};  // NOLINT (*)
 };
 
 TEST_F(UnitGetUpdate, NoOrders)

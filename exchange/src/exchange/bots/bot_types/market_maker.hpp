@@ -1,10 +1,7 @@
 #pragma once
 #include "exchange/traders/trader_types/bot_trader.hpp"
-#include "exchange/traders/trader_types/trader_interface.hpp"
 
 #include <sys/types.h>
-
-#include <vector>
 
 namespace nutc {
 namespace bots {
@@ -24,10 +21,11 @@ public:
 
     void take_action(double midprice, double theo) override;
 
-    bool
-    is_active() const override
+    const std::string&
+    get_type() const final
     {
-        return true;
+        static const std::string TYPE = "MARKET_MAKER";
+        return TYPE;
     }
 
 private:

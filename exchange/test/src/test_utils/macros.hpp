@@ -1,7 +1,7 @@
 #include "exchange/tickers/engine/engine.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
 #include "exchange/traders/trader_container.hpp"
-#include "exchange/traders/trader_types/trader_interface.hpp"
+#include "exchange/traders/trader_types/generic_trader.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 

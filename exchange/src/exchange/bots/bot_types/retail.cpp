@@ -1,21 +1,14 @@
 #include "retail.hpp"
 
-#include "exchange/config.h"
+#include "exchange/config/static/config.h"
 
 namespace nutc {
 namespace bots {
 
-bool
-RetailBot::is_active() const
-{
-    return get_capital()
-           > -get_interest_limit() * .9; // drop out if they lose 90% of their money
-}
-
 void
 RetailBot::take_action(double midprice, double theo)
 {
-    if (!is_active())
+    if (get_capital() < get_interest_limit() * .9)
         return;
 
     static std::uniform_real_distribution<> dis{0.0, 1.0};
@@ -39,8 +32,6 @@ RetailBot::take_action(double midprice, double theo)
         double quantity =
             (1 - get_capital_utilization()) * get_interest_limit() / price;
         quantity *= RETAIL_ORDER_SIZE;
-        modify_open_bids(quantity);
-        modify_long_capital(quantity * price);
         add_order(util::Side::buy, quantity, price);
     }
     else if (midprice > noised_theo) {
@@ -49,8 +40,6 @@ RetailBot::take_action(double midprice, double theo)
         double quantity =
             (1 - get_capital_utilization()) * get_interest_limit() / price;
         quantity *= RETAIL_ORDER_SIZE;
-        modify_open_asks(quantity);
-        modify_short_capital(quantity * price);
         add_order(util::Side::sell, quantity, price);
     }
     return;

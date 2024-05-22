@@ -1,9 +1,7 @@
 #include "normal_mode.hpp"
 
-#include "exchange/config.h"
 #include "exchange/curl/curl.hpp"
 #include "exchange/traders/trader_types/algo_trader.hpp"
-#include "shared/config/config_loader.hpp"
 
 #include <fmt/format.h>
 
@@ -13,14 +11,13 @@ namespace nutc {
 namespace algos {
 
 void
-NormalModeAlgoInitializer::initialize_trader_container(traders::TraderContainer& traders
+NormalModeAlgoInitializer::initialize_trader_container(
+    traders::TraderContainer& traders, double start_capital
 ) const
 {
     constexpr const std::array<const char*, 3> REQUIRED_DB_FIELDS = {
         "latestAlgoId", "firstName", "lastName"
     };
-    const int starting_capital = config::Config::get().constants().STARTING_CAPITAL;
-
     glz::json_t::object_t firebase_users = get_remote_traders();
     for (const auto& user_it : firebase_users) {
         const auto& user_id = user_it.first;
@@ -40,7 +37,7 @@ NormalModeAlgoInitializer::initialize_trader_container(traders::TraderContainer&
         );
         std::string algo_id = user["latestAlgoId"].get<std::string>();
         traders.add_trader<traders::LocalTrader>(
-            user_id, algo_id, full_name, starting_capital
+            user_id, algo_id, full_name, start_capital
         );
     }
 }

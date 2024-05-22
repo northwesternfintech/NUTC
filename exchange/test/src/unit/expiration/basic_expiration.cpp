@@ -1,4 +1,5 @@
 #include "config.h"
+#include "exchange/tickers/engine/order_container.hpp"
 #include "exchange/tickers/engine/order_storage.hpp"
 #include "test_utils/helpers/test_trader.hpp"
 #include "test_utils/macros.hpp"
@@ -29,12 +30,13 @@ protected:
 
     TraderContainer& manager_ =
         nutc::traders::TraderContainer::get_instance(); // NOLINT(*)
-    Engine engine_{TEST_ORDER_EXPIRATION_TICKS};        // NOLINT (*)
+    nutc::matching::OrderBook orderbook_;
+    Engine engine_{TEST_ORDER_EXPIRATION_TICKS}; // NOLINT (*)
 
     std::vector<nutc::matching::stored_match>
     add_to_engine_(const stored_order& order)
     {
-        return engine_.match_order(order);
+        return engine_.match_order(orderbook_, order);
     }
 };
 
@@ -45,9 +47,9 @@ TEST_F(UnitOrderExpiration, SimpleNoMatch)
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
 
-    ASSERT_EQ(1, engine_.expire_old_orders(TEST_ORDER_EXPIRATION_TICKS).size());
-    ASSERT_EQ(0, engine_.get_order_container().get_spread_nums().first);
-    ASSERT_EQ(0, engine_.get_order_container().get_spread_nums().second);
+    ASSERT_EQ(1, orderbook_.expire_orders(0).size());
+    ASSERT_EQ(0, orderbook_.get_spread_nums().first);
+    ASSERT_EQ(0, orderbook_.get_spread_nums().second);
 
     matches = add_to_engine_(order2);
     ASSERT_EQ(matches.size(), 0);
@@ -55,10 +57,10 @@ TEST_F(UnitOrderExpiration, SimpleNoMatch)
 
 TEST_F(UnitOrderExpiration, IncrementTick)
 {
-    engine_.expire_old_orders(TEST_ORDER_EXPIRATION_TICKS);
+    orderbook_.expire_orders(TEST_ORDER_EXPIRATION_TICKS);
     stored_order order1{trader1, buy, "ETHUSD", 1, 1, TEST_ORDER_EXPIRATION_TICKS};
     stored_order order2{trader2, sell, "ETHUSD", 1, 1, TEST_ORDER_EXPIRATION_TICKS};
 
     auto matches = add_to_engine_(order1);
-    ASSERT_EQ(1, engine_.expire_old_orders(TEST_ORDER_EXPIRATION_TICKS * 2).size());
+    ASSERT_EQ(1, orderbook_.expire_orders(TEST_ORDER_EXPIRATION_TICKS).size());
 }

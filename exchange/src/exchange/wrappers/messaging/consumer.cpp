@@ -1,12 +1,9 @@
 #include "consumer.hpp"
 
-#include "exchange/logging.hpp"
 #include "exchange/tick_scheduler/tick_scheduler.hpp"
 #include "exchange/traders/trader_container.hpp"
-#include "shared/messages_exchange_to_wrapper.hpp"
 
 #include <utility>
-#include <variant>
 
 namespace nutc {
 namespace rabbitmq {
@@ -15,12 +12,12 @@ void
 WrapperConsumer::on_tick(uint64_t)
 {
     const auto& traders = traders::TraderContainer::get_instance().get_traders();
-    auto& engine_manager = engine_manager::EngineManager::get_instance();
+    std::vector<market_order> orders;
 
     for (const auto& trader : traders) {
         auto messages = trader->read_orders();
         for (auto order : messages) {
-            match_new_order(engine_manager, trader, std::move(order));
+            match_new_order(*manager_, trader, std::move(order));
         }
     }
 }
@@ -32,9 +29,7 @@ WrapperConsumer::match_new_order(
 )
 {
     if (order.price < 0 || order.quantity <= 0) {
-        trader->process_order_expiration(
-            order.ticker, order.side, order.price, order.quantity
-        );
+        trader->process_order_remove(order);
         return;
     }
     else if (!engine_manager.has_engine(order.ticker)) {
@@ -42,9 +37,8 @@ WrapperConsumer::match_new_order(
     }
 
     auto current_tick = ticks::TickJobScheduler::get().get_current_tick();
-    auto stored_order =
-        matching::stored_order{trader,         order.side,  order.ticker,
-                               order.quantity, order.price, current_tick};
+    matching::stored_order stored_order{trader,         order.side,  order.ticker,
+                                        order.quantity, order.price, current_tick};
 
     engine_manager.match_order(stored_order);
 }

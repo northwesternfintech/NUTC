@@ -1,5 +1,6 @@
 #pragma once
 
+#define DEFAULT_CONFIG_FILE "config.yml" 
 #define DEBUG_NUM_USERS  2
 
 // How many outgoing messages for one wrapper before we start dropping
