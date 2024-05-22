@@ -27,9 +27,7 @@ initialize_bots(std::shared_ptr<engine_manager::EngineManager> manager)
         manager->add_engine(ticker);
     }
 
-    ticks::TickJobScheduler::get().on_tick(
-        manager.get(), /*priority=*/2, "Matching Engine"
-    );
+    ticks::TickJobScheduler::get().on_tick(manager, /*priority=*/2, "Matching Engine");
 }
 
 void
@@ -61,8 +59,8 @@ initialize_algos(const auto& mode)
 void
 on_tick_consumer(auto manager)
 {
-    static rabbitmq::WrapperConsumer consumer{manager};
-    ticks::TickJobScheduler::get().on_tick(&consumer, /*priority=*/1, "consumer");
+    auto consumer = std::make_shared<rabbitmq::WrapperConsumer>(manager);
+    ticks::TickJobScheduler::get().on_tick(consumer, /*priority=*/1, "consumer");
 }
 } // namespace
 
@@ -87,9 +85,9 @@ main(int argc, const char** argv)
     initialize_bots(engine_manager);
     on_tick_consumer(engine_manager);
 
-    metrics::OnTickMetricsPush metrics{engine_manager};
+    auto metrics = std::make_shared<metrics::OnTickMetricsPush>(engine_manager);
 
-    ticks::TickJobScheduler::get().on_tick(&metrics, /*priority=*/5, "Metrics Pushing");
+    ticks::TickJobScheduler::get().on_tick(metrics, /*priority=*/5, "Metrics Pushing");
 
     sandbox::CrowServer::get_instance();
 

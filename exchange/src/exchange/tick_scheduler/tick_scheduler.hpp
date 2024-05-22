@@ -19,7 +19,7 @@ class TickJobScheduler {
 
     struct scheduled_job {
         uint8_t priority;
-        TickObserver* job_ptr;
+        std::shared_ptr<TickObserver> job_ptr;
     };
 
     uint64_t current_tick_{};
@@ -37,7 +37,8 @@ public:
 
     void
     on_tick(
-        TickObserver* observer, uint8_t priority, const std::string& name = "UNNAMED"
+        std::shared_ptr<TickObserver> observer, uint8_t priority,
+        const std::string& name = "UNNAMED"
     )
     {
         // Assert we have not already added this job
@@ -53,7 +54,7 @@ public:
     }
 
     void
-    detach(TickObserver* observer)
+    detach(std::shared_ptr<TickObserver> observer)
     {
         std::erase_if(on_tick_jobs_, [&](const auto& job) {
             return job.job_ptr == observer;
