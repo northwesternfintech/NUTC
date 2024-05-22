@@ -14,8 +14,6 @@
 
 #include <csignal>
 
-#include <string>
-
 namespace {
 using namespace nutc; // NOLINT
 
@@ -26,10 +24,6 @@ initialize_bots(std::shared_ptr<engine_manager::EngineManager> manager)
     for (const auto& ticker : tickers) {
         manager->add_engine(ticker);
     }
-
-    ticks::TickJobScheduler::get().on_tick(
-        manager.get(), /*priority=*/2, "Matching Engine"
-    );
 }
 
 void
@@ -42,13 +36,6 @@ initialize_wrappers()
 }
 
 void
-start_tick_scheduler()
-{
-    auto tick_hz = config::Config::get().constants().TICK_HZ;
-    ticks::TickJobScheduler::get().start(tick_hz);
-}
-
-void
 initialize_algos(const auto& mode)
 {
     traders::TraderContainer& users = traders::TraderContainer::get_instance();
@@ -58,11 +45,17 @@ initialize_algos(const auto& mode)
     );
 }
 
-void
-on_tick_consumer(auto manager)
+auto
+create_runner(auto manager)
 {
-    static rabbitmq::WrapperConsumer consumer{manager};
-    ticks::TickJobScheduler::get().on_tick(&consumer, /*priority=*/1, "consumer");
+    auto consumer = std::make_shared<rabbitmq::WrapperConsumer>(manager);
+    auto metrics = std::make_shared<metrics::OnTickMetricsPush>(manager);
+
+    ticks::TickJobScheduler scheduler;
+    scheduler.on_tick(consumer, /*priority=*/1, "consumer");
+    scheduler.on_tick(manager, /*priority=*/2, "Matching Engine");
+    scheduler.on_tick(metrics, /*priority=*/3, "Metrics Pushing");
+    return scheduler;
 }
 } // namespace
 
@@ -85,14 +78,10 @@ main(int argc, const char** argv)
         initialize_wrappers();
 
     initialize_bots(engine_manager);
-    on_tick_consumer(engine_manager);
-
-    metrics::OnTickMetricsPush metrics{engine_manager};
-
-    ticks::TickJobScheduler::get().on_tick(&metrics, /*priority=*/5, "Metrics Pushing");
 
     sandbox::CrowServer::get_instance();
 
-    start_tick_scheduler();
+    auto tick_hz = config::Config::get().constants().TICK_HZ;
+    create_runner(engine_manager).run(tick_hz);
     return 0;
 }
