@@ -1,7 +1,10 @@
 #include "order_container.hpp"
 
+#include <memory>
+
 namespace nutc {
 namespace matching {
+
 const stored_order&
 OrderBook::get_top_order(util::Side side) const
 {
@@ -21,6 +24,8 @@ OrderBook::modify_level_(util::Side side, double price, double qualtity)
     if (util::is_close_to_zero(levels[price])) {
         levels.erase(price);
     }
+    if (level_update_generator_.get() != nullptr)
+        level_update_generator_->record_level_change(side, price);
 }
 
 stored_order

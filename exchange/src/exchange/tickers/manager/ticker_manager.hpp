@@ -4,6 +4,7 @@
 #include "exchange/config/dynamic/config.hpp"
 #include "exchange/tick_scheduler/tick_observer.hpp"
 #include "exchange/tickers/engine/engine.hpp"
+#include "exchange/tickers/engine/level_update_generator.hpp"
 #include "exchange/tickers/engine/order_container.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
 
@@ -16,9 +17,8 @@ using Engine = matching::Engine;
 using Orderbook = matching::OrderBook;
 
 struct ticker_info {
+    std::shared_ptr<matching::LevelUpdateGenerator> level_update_generator_;
     matching::OrderBook orderbook;
-    // For generating updates
-    matching::OrderBook old_orderbook;
 
     Engine engine;
     bots::BotContainer bot_container;
@@ -27,7 +27,8 @@ struct ticker_info {
         std::string ticker, double starting_price, double order_fee,
         std::vector<config::bot_config> config
     ) :
-        engine(order_fee),
+        level_update_generator_(std::make_shared<matching::LevelUpdateGenerator>()),
+        orderbook(level_update_generator_), engine(order_fee),
         bot_container(std::move(ticker), starting_price, std::move(config))
     {}
 };
@@ -51,15 +52,7 @@ public:
     double get_midprice(const std::string& ticker) const;
     bool has_engine(const std::string& ticker) const;
 
-    size_t
-    match_order(const matching::stored_order& order)
-    {
-        auto& ticker = get_engine(order.ticker);
-        std::vector<matching::stored_match> matches =
-            ticker.engine.match_order(ticker.orderbook, order);
-        std::ranges::move(matches, std::back_inserter(accum_matches_));
-        return matches.size();
-    }
+    size_t match_order(const matching::stored_order& order);
 
     void add_engine(const config::ticker_config& config);
     void add_engine(const std::string& ticker);
