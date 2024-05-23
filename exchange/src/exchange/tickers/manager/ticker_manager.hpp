@@ -51,15 +51,7 @@ public:
     double get_midprice(const std::string& ticker) const;
     bool has_engine(const std::string& ticker) const;
 
-    size_t
-    match_order(const matching::stored_order& order)
-    {
-        auto& ticker = get_engine(order.ticker);
-        std::vector<matching::stored_match> matches =
-            ticker.engine.match_order(ticker.orderbook, order);
-        std::ranges::move(matches, std::back_inserter(accum_matches_));
-        return matches.size();
-    }
+    size_t match_order(const matching::stored_order& order);
 
     void add_engine(const config::ticker_config& config);
     void add_engine(const std::string& ticker);
@@ -72,9 +64,14 @@ public:
     EngineManager operator=(EngineManager&&) = delete;
 
 private:
-    std::vector<std::string> split_tick_updates_(const messages::tick_update& update);
     ticker_info& get_engine(const std::string& ticker);
     const ticker_info& get_engine(const std::string& ticker) const;
+    std::vector<messages::match>
+    convert_to_glz(std::vector<matching::stored_match> matches);
+    void send_traders_updates(
+        const std::string& ticker, ticker_info& engine,
+        std::vector<messages::match>& glz_matches
+    );
 };
 } // namespace engine_manager
 } // namespace nutc

@@ -41,7 +41,16 @@ log_match(const matching::stored_match& order)
         .Increment(order.quantity);
 }
 
-// TODO: helper functions/cleanup
+size_t
+EngineManager::match_order(const matching::stored_order& order)
+{
+    auto& ticker = get_engine(order.ticker);
+    std::vector<matching::stored_match> matches =
+        ticker.engine.match_order(ticker.orderbook, order);
+    std::ranges::move(matches, std::back_inserter(accum_matches_));
+    return matches.size();
+}
+
 void
 EngineManager::on_tick(uint64_t new_tick)
 {
@@ -49,42 +58,59 @@ EngineManager::on_tick(uint64_t new_tick)
                                       .Name("ticker_midprice")
                                       .Register(*metrics::Prometheus::get_registry());
 
+    std::vector<messages::match> glz_matches = convert_to_glz(accum_matches_);
+
     for (auto& [ticker, engine] : engines_) {
         auto midprice = engine.orderbook.get_midprice();
+
         midprice_gauge
             .Add({
                 {"ticker", ticker}
         })
             .Set(midprice);
-        engine.bot_container.generate_orders(midprice);
-    }
 
-    for (auto& [ticker, engine] : engines_) {
-        engine.orderbook.expire_orders(new_tick - order_expiry_ticks);
-
-        // TODO: do this in a converter
-        std::vector<messages::match> glz_matches{};
-        glz_matches.reserve(accum_matches_.size());
         for (const auto& match : accum_matches_) {
             log_match(match);
-            glz_matches.emplace_back(
-                match.ticker, match.side, match.price, match.quantity,
-                match.buyer->get_id(), match.seller->get_id(),
-                match.buyer->get_capital(), match.seller->get_capital()
-            );
         }
 
-        messages::tick_update updates{
-            matching::get_updates(ticker, engine.old_orderbook, engine.orderbook),
-            glz_matches
-        };
-        std::string update_str = glz::write_json(updates);
-        for (const auto& trader :
-             traders::TraderContainer::get_instance().get_traders()) {
-            trader->send_message(update_str);
-        }
+        engine.bot_container.generate_orders(midprice);
+        engine.orderbook.expire_orders(new_tick - order_expiry_ticks);
+
+        send_traders_updates(ticker, engine, glz_matches);
+
         engine.old_orderbook = engine.orderbook;
         accum_matches_.clear();
+    }
+}
+
+std::vector<messages::match>
+EngineManager::convert_to_glz(std::vector<matching::stored_match> matches)
+{
+    std::vector<messages::match> glz_matches{};
+    glz_matches.reserve(matches.size());
+    for (const auto& match : matches) {
+        glz_matches.emplace_back(
+            match.ticker, match.side, match.price, match.quantity,
+            match.buyer->get_id(), match.seller->get_id(), match.buyer->get_capital(),
+            match.seller->get_capital()
+        );
+    }
+    return glz_matches;
+}
+
+void
+EngineManager::send_traders_updates(
+    const std::string& ticker, ticker_info& engine,
+    std::vector<messages::match>& glz_matches
+)
+{
+    messages::tick_update updates{
+        matching::get_updates(ticker, engine.old_orderbook, engine.orderbook),
+        glz_matches
+    };
+    std::string update_str = glz::write_json(updates);
+    for (const auto& trader : traders::TraderContainer::get_instance().get_traders()) {
+        trader->send_message(update_str);
     }
 }
 
