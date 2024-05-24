@@ -6,6 +6,7 @@ import {
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { UserInfoType } from "../types";
+import { useUser } from "@auth0/nextjs-auth0/client";
 
 export default function Registration() {
   const handleResumeChange = async (selectedFile: any) => {
@@ -44,6 +45,7 @@ export default function Registration() {
     hasCompletedReg: true, //will be after this
   };
 
+
   const [currUser, setCurrUser] = useState(defaultUser);
 
   const handleInputChange = (e: any) => {
@@ -74,6 +76,7 @@ export default function Registration() {
     handleResumeChange(files[0]);
   };
 
+  const { user } = useUser();
   const createNewUserHandler = async () => {
     // make request to /api/user post with name and email
 
@@ -111,6 +114,7 @@ export default function Registration() {
       body: JSON.stringify({
         name: currUser.firstName + " " + currUser.lastName,
         email: currUser.email,
+        uid: user?.sid,
       }),
     });
 
@@ -212,8 +216,8 @@ export default function Registration() {
                   currUser.resumeURL
                     ? "mt-2 flex justify-center rounded-lg border border-solid border-green-400 px-6 py-10"
                     : isDragOver
-                    ? "mt-2 flex justify-center rounded-lg border border-dashed border-indigo-500 px-6 py-10"
-                    : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"
+                      ? "mt-2 flex justify-center rounded-lg border border-dashed border-indigo-500 px-6 py-10"
+                      : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"
                 }
                 ref={dropRef}
                 onDragOver={handleDragOver}
@@ -376,3 +380,4 @@ export default function Registration() {
     </div>
   );
 }
+

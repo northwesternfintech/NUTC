@@ -7,8 +7,8 @@ export const revalidate = 1;
 
 export async function POST(request: any, res: NextApiResponse) {
   try {
-    const { name, email } = await request.json();
-    if (!name || !email) {
+    const { name, email, uid } = await request.json();
+    if (!name || !email || !uid) {
       return Response.json(
         { message: "Missing required fields" },
         { status: 400 }
@@ -26,6 +26,7 @@ export async function POST(request: any, res: NextApiResponse) {
       data: {
         name,
         email,
+        uid
       },
     });
 
