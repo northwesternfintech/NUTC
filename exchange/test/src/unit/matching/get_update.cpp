@@ -44,7 +44,7 @@ protected:
 TEST_F(UnitGetUpdate, NoOrders)
 {
     // auto updates = get_updates("A", before, after);
-    auto updates = generator_->get_updates("A", ob);
+    auto updates = generator_->get_updates("A");
 
     ASSERT_EQ(updates.size(), 0);
 }
@@ -55,7 +55,7 @@ TEST_F(UnitGetUpdate, OrderAdded)
 
     ob.add_order(order1);
 
-    auto updates = generator_->get_updates("A", ob);
+    auto updates = generator_->get_updates("A");
 
     ASSERT_EQ(updates.size(), 1);
     ASSERT_EQ_OB_UPDATE(updates[0], "A", buy, 1, 1);
@@ -74,7 +74,7 @@ TEST_F(UnitGetUpdate, OrderDeleted)
 
     ob.remove_order(order1.order_index);
 
-    auto updates = generator_->get_updates("A", ob);
+    auto updates = generator_->get_updates("A");
 
     ASSERT_EQ(updates.size(), 1);
     ASSERT_EQ_OB_UPDATE(updates[0], "A", buy, 1, 0);
@@ -88,7 +88,7 @@ TEST_F(UnitGetUpdate, OrderQuantityChange)
 
     double quantity_delta = 5;
     ob.modify_order_quantity(order1.order_index, quantity_delta);
-    auto updates = generator_->get_updates("A", ob);
+    auto updates = generator_->get_updates("A");
 
     ASSERT_EQ(updates.size(), 1);
     ASSERT_EQ_OB_UPDATE(updates[0], "A", buy, 1, quantity_delta + initial_quantity);
@@ -127,7 +127,7 @@ TEST_F(UnitGetUpdate, BuySellChange)
     ob.modify_order_quantity(order1.order_index, 4);
     ob.modify_order_quantity(order2.order_index, 4);
 
-    auto updates = generator_->get_updates("A", ob);
+    auto updates = generator_->get_updates("A");
 
     std::sort(updates.begin(), updates.end(), [](auto a, auto b) {
         return a.price < b.price;
@@ -159,7 +159,7 @@ TEST_F(UnitGetUpdate, ManyLevelChanges)
     ob.add_order(order5);
     ob.add_order(order6);
     ob.add_order(order7);
-    auto updates = generator_->get_updates("A", ob);
+    auto updates = generator_->get_updates("A");
 
     std::sort(updates.begin(), updates.end(), [](auto a, auto b) {
         return a.price < b.price;
@@ -196,7 +196,7 @@ TEST_F(UnitGetUpdate, ChangesAddsAndDeletes)
     ob.add_order(order8);
     ob.remove_order(order6.order_index);
 
-    auto updates = generator_->get_updates("A", ob);
+    auto updates = generator_->get_updates("A");
 
     std::sort(updates.begin(), updates.end(), [](auto a, auto b) {
         return a.price < b.price;

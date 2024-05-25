@@ -24,8 +24,9 @@ OrderBook::modify_level_(util::Side side, double price, double qualtity)
     if (util::is_close_to_zero(levels[price])) {
         levels.erase(price);
     }
-    if (level_update_generator_.get() != nullptr)
-        level_update_generator_->record_level_change(side, price);
+
+    if (level_update_generator_)
+        level_update_generator_->record_level_change(side, price, levels[price]);
 }
 
 stored_order

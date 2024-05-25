@@ -15,6 +15,7 @@ namespace matching {
 
 class OrderBook {
     std::shared_ptr<LevelUpdateGenerator> level_update_generator_;
+
     // both map/sort price, order_index
     std::set<order_index, bid_comparator> bids_;
     std::set<order_index, ask_comparator> asks_;
@@ -29,10 +30,7 @@ class OrderBook {
     std::unordered_map<double, double> ask_levels_;
 
 public:
-    // Create a orderbook that doesn't keep track of level updates
-    OrderBook() = default;
-
-    OrderBook(std::shared_ptr<LevelUpdateGenerator> level_update_generator) :
+    OrderBook(std::shared_ptr<LevelUpdateGenerator> level_update_generator = nullptr) :
         level_update_generator_(level_update_generator)
     {}
 

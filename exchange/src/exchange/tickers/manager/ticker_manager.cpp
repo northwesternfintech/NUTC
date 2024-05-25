@@ -83,8 +83,7 @@ EngineManager::on_tick(uint64_t new_tick)
                 match.buyer->get_capital(), match.seller->get_capital()
             );
         }
-        auto ob_updates =
-            engine.level_update_generator_->get_updates(ticker, engine.orderbook);
+        auto ob_updates = engine.level_update_generator_->get_updates(ticker);
         messages::tick_update updates{ob_updates, glz_matches};
         std::string update_str = glz::write_json(updates);
         for (const auto& trader :

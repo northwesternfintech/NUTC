@@ -10,8 +10,7 @@ namespace test_utils {
 initialize_testing_clients(
     nutc::traders::TraderContainer& users,
     const std::vector<std::string>& algo_filenames,
-    double starting_capital = TEST_STARTING_CAPITAL,
-    size_t start_delay = 0 
+    double starting_capital = TEST_STARTING_CAPITAL, size_t start_delay = 0
 );
 
 } // namespace test_utils
