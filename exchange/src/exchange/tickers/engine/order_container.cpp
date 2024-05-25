@@ -49,6 +49,34 @@ OrderBook::remove_order(uint64_t order_id)
     return order;
 }
 
+bool
+OrderBook::can_match_orders() const
+{
+    if (bids_.empty() || asks_.empty()) {
+        return false;
+    }
+    return get_top_order(util::Side::buy).can_match(get_top_order(util::Side::sell));
+}
+
+double
+OrderBook::get_midprice() const
+{
+    if (bids_.empty() || asks_.empty()) {
+        return 0;
+    }
+    return (bids_.begin()->price + asks_.begin()->price) / 2;
+}
+
+double
+OrderBook::get_level(util::Side side, double price) const
+{
+    const auto& levels = side == util::Side::buy ? bid_levels_ : ask_levels_;
+    if (levels.find(price) == levels.end()) {
+        return 0;
+    }
+    return levels.at(price);
+}
+
 void
 OrderBook::modify_order_quantity(uint64_t order_index, double delta)
 {

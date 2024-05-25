@@ -35,60 +35,13 @@ public:
     {}
 
     /**
-     * @brief Get the price->quantity map for a SIDE
-     */
-    const std::unordered_map<double, double>&
-    get_levels(util::Side side) const
-    {
-        return side == util::Side::buy ? bid_levels_ : ask_levels_;
-    }
-
-    /**
      * @brief Get the quantity at a specific price for a side
      */
-    double
-    get_level(util::Side side, double price) const
-    {
-        const auto& levels = side == util::Side::buy ? bid_levels_ : ask_levels_;
-        if (levels.find(price) == levels.end()) {
-            return 0;
-        }
-        return levels.at(price);
-    }
+    double get_level(util::Side side, double price) const;
 
-    double
-    get_midprice() const
-    {
-        if (bids_.empty() || asks_.empty()) {
-            return 0;
-        }
-        return (bids_.begin()->price + asks_.begin()->price) / 2;
-    }
+    double get_midprice() const;
 
-    std::pair<size_t, size_t>
-    get_spread_nums() const
-    {
-        return {asks_.size(), bids_.size()};
-    }
-
-    std::pair<double, double>
-    get_spread() const
-    {
-        if (asks_.empty() || bids_.empty()) [[unlikely]] {
-            return {0, 0};
-        }
-        return {asks_.begin()->price, bids_.rbegin()->price};
-    }
-
-    bool
-    can_match_orders() const
-    {
-        if (bids_.empty() || asks_.empty()) {
-            return false;
-        }
-        return get_top_order(util::Side::buy)
-            .can_match(get_top_order(util::Side::sell));
-    }
+    bool can_match_orders() const;
 
     void add_order(stored_order order);
 
@@ -132,7 +85,7 @@ private:
     bool
     order_exists_(uint64_t order_id) const
     {
-        return orders_by_id_.find(order_id) != orders_by_id_.end();
+        return orders_by_id_.contains(order_id);
     }
 
     void modify_level_(util::Side side, double price, double qualtity);

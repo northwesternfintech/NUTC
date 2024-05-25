@@ -47,12 +47,17 @@ TEST_F(UnitOrderExpiration, SimpleNoMatch)
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
 
-    ASSERT_EQ(1, orderbook_.expire_orders(0).size());
-    ASSERT_EQ(0, orderbook_.get_spread_nums().first);
-    ASSERT_EQ(0, orderbook_.get_spread_nums().second);
+    auto expired = orderbook_.expire_orders(0);
+    ASSERT_EQ(1, expired.size());
+    ASSERT_EQ(expired.at(0), order1);
 
+    // TODO: make a macro for if they aren't equal
     matches = add_to_engine_(order2);
     ASSERT_EQ(matches.size(), 0);
+
+    expired = orderbook_.expire_orders(0);
+    ASSERT_EQ(1, expired.size());
+    ASSERT_EQ(expired.at(0), order2);
 }
 
 TEST_F(UnitOrderExpiration, IncrementTick)
@@ -61,6 +66,38 @@ TEST_F(UnitOrderExpiration, IncrementTick)
     stored_order order1{trader1, buy, "ETHUSD", 1, 1, TEST_ORDER_EXPIRATION_TICKS};
     stored_order order2{trader2, sell, "ETHUSD", 1, 1, TEST_ORDER_EXPIRATION_TICKS};
 
-    auto matches = add_to_engine_(order1);
-    ASSERT_EQ(1, orderbook_.expire_orders(TEST_ORDER_EXPIRATION_TICKS).size());
+    add_to_engine_(order1);
+    auto expired = orderbook_.expire_orders(TEST_ORDER_EXPIRATION_TICKS);
+    ASSERT_EQ(1, expired.size());
+    ASSERT_EQ(expired.at(0), order1);
+}
+
+TEST_F(UnitOrderExpiration, ExpireOne)
+{
+    orderbook_.expire_orders(TEST_ORDER_EXPIRATION_TICKS);
+    stored_order order1{trader1, buy, "IDK", 1, 1, TEST_ORDER_EXPIRATION_TICKS};
+    stored_order order2{trader2, sell, "ETHUSD", 1, 1, TEST_ORDER_EXPIRATION_TICKS + 1};
+
+    add_to_engine_(order1);
+    add_to_engine_(order2);
+    auto expired = orderbook_.expire_orders(TEST_ORDER_EXPIRATION_TICKS);
+    ASSERT_EQ(1, expired.size());
+    ASSERT_EQ(expired.at(0), order1);
+}
+
+// More of an integration test between engine and orderbook
+TEST_F(UnitOrderExpiration, PartialExpiration)
+{
+    orderbook_.expire_orders(TEST_ORDER_EXPIRATION_TICKS);
+    stored_order order1{trader1, buy, "ETHUSD", 1, 1, TEST_ORDER_EXPIRATION_TICKS};
+    stored_order order2{trader2, sell, "ETHUSD", 2, 1, TEST_ORDER_EXPIRATION_TICKS};
+
+    add_to_engine_(order1);
+    add_to_engine_(order2);
+
+    // Confirms the expired order is the modified order 2 with reduced quantity
+    auto expired = orderbook_.expire_orders(TEST_ORDER_EXPIRATION_TICKS);
+    ASSERT_EQ(1, expired.size());
+    stored_order test_eq{trader2, sell, "ETHUSD", 1, 1, TEST_ORDER_EXPIRATION_TICKS};
+    ASSERT_EQ(expired.at(0), test_eq);
 }
