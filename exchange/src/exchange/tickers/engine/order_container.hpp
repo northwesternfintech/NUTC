@@ -30,7 +30,11 @@ class OrderBook {
     std::unordered_map<double, double> ask_levels_;
 
 public:
-    OrderBook(std::shared_ptr<LevelUpdateGenerator> level_update_generator = nullptr) :
+    // Default constructor for testing the orderbook function without the need of a
+    // LevelUpdateGenerator
+    explicit OrderBook() : level_update_generator_(nullptr) {}
+
+    explicit OrderBook(std::shared_ptr<LevelUpdateGenerator> level_update_generator) :
         level_update_generator_(level_update_generator)
     {}
 

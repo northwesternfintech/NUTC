@@ -70,8 +70,8 @@ OrderBook::get_midprice() const
 double
 OrderBook::get_level(util::Side side, double price) const
 {
-    const auto& levels = side == util::Side::buy ? bid_levels_ : ask_levels_;
-    if (levels.find(price) == levels.end()) {
+    const auto& levels = (side == util::Side::buy) ? bid_levels_ : ask_levels_;
+    if (!levels.contains(price)) {
         return 0;
     }
     return levels.at(price);

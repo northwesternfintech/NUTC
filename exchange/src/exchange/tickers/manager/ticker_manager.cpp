@@ -1,7 +1,6 @@
 #include "ticker_manager.hpp"
 
 #include "exchange/metrics/prometheus.hpp"
-#include "exchange/tickers/engine/level_update_generator.hpp"
 #include "exchange/traders/trader_container.hpp"
 
 #include <prometheus/counter.h>
@@ -45,10 +44,11 @@ size_t
 EngineManager::match_order(const matching::stored_order& order)
 {
     auto& ticker = get_engine(order.ticker);
-    std::vector<matching::stored_match> matches =
-        ticker.engine.match_order(ticker.orderbook, order);
+    auto matches = ticker.engine.match_order(ticker.orderbook, order);
+    size_t num_matches = matches.size();
+    
     std::ranges::move(matches, std::back_inserter(accum_matches_));
-    return matches.size();
+    return num_matches;
 }
 
 // TODO: helper functions/cleanup

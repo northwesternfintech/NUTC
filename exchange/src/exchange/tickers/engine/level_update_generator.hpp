@@ -11,7 +11,7 @@ class LevelUpdateGenerator {
 public:
     void record_level_change(util::Side side, double price, double new_quantity);
 
-    std::vector<ob_update> get_updates(const std::string& ticker);
+    std::vector<ob_update> get_updates(const std::string& ticker) const;
 
     void
     reset()

@@ -1,9 +1,10 @@
 #include "level_update_generator.hpp"
+#include <cassert>
 
 namespace nutc {
 namespace matching {
 std::vector<ob_update>
-LevelUpdateGenerator::get_updates(const std::string& ticker)
+LevelUpdateGenerator::get_updates(const std::string& ticker) const
 {
     std::vector<ob_update> updates;
     updates.reserve(updated_buy_levels_.size() + updated_sell_levels_.size());
