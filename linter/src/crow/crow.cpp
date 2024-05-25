@@ -11,7 +11,7 @@ std::thread
 get_server_thread()
 {
     std::thread server_thread([]() {
-        spawning::SpawnerManager spawner_manager;
+        spawning::LintProcessManager spawner_manager;
         namespace crow = ::crow;
         ::crow::SimpleApp app;
         CROW_ROUTE(app, "/")
@@ -44,7 +44,7 @@ get_server_thread()
             std::string uid = req.url_params.get("uid");
             std::string algo_id = req.url_params.get("algo_id");
 
-            std::optional<std::string> algo_code = nutc::client::get_algo(uid, algo_id);
+            auto algo_code = nutc::client::get_algo(uid, algo_id);
             if (!algo_code.has_value()) {
                 nutc::client::set_lint_failure(
                     uid,
@@ -68,7 +68,6 @@ get_server_thread()
 
             client::LintingResultOption algo_status_code;
             auto lint_res = spawner_manager.spawn_client(algo_code.value());
-            std::cout << lint_res.message << '\n';
             if (lint_res.success) {
                 nutc::client::set_lint_success(uid, algo_id, lint_res.message);
                 algo_status_code = client::LintingResultOption::SUCCESS;

@@ -27,7 +27,7 @@ LintProcessManager::spawn_client(const std::string& algo_code)
     auto kill_timer = std::make_shared<ba::steady_timer>(io_context);
     kill_timer->expires_after(ba::chrono::seconds(LINT_AUTO_TIMEOUT_SECONDS));
 
-    lint_result res;
+    nutc::lint::lint_result res;
 
     kill_timer->async_wait([child, in_pipe, &res](const auto& ec) {
         if (!ec) {
@@ -68,7 +68,7 @@ LintProcessManager::spawn_client(const std::string& algo_code)
                     child->terminate();
                 }
 
-                auto error = glz::read_json<lint_result>(res, message);
+                auto error = glz::read_json<nutc::lint::lint_result>(res, message);
                 if (error) {
                     res = {
                         false,

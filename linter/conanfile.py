@@ -20,5 +20,8 @@ class Recipe(ConanFile):
         self.requires("argparse/3.0")
         self.requires("crowcpp-crow/1.1.0")
 
+    def configure(self):
+        self.options["boost"].without_test = True
+
     def build_requirements(self):
         self.test_requires("gtest/1.13.0")

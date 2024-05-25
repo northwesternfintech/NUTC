@@ -1,6 +1,5 @@
 #include "lint.hpp"
 
-#include "mock_api/mock_api.hpp"
 #include "pywrapper/runtime.hpp"
 
 #include <fmt/core.h>
@@ -12,17 +11,25 @@
 namespace nutc {
 namespace lint {
 
+namespace {
+bool
+mock_market_func(const std::string&, const std::string&, float, float)
+{
+    return true;
+}
+} // namespace
+
 lint_result
 lint(const std::string& algo_code)
 {
     std::string out_message = "[linter] starting to lint algorithm\n";
-    bool e = nutc::pywrapper::create_api_module(nutc::mock_api::getMarketFunc());
-    if (!e) {
+    bool ok = nutc::pywrapper::create_api_module(mock_market_func);
+    if (!ok) {
         out_message += "[linter] failed to create API module\n";
         return {false, out_message};
     }
-    e = nutc::pywrapper::supress_stdout();
-    if (!e) {
+    ok = nutc::pywrapper::supress_stdout();
+    if (!ok) {
         out_message += "[linter] failed to initialize python environment\n";
         return {false, out_message};
     }

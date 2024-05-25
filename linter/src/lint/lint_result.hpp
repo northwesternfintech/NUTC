@@ -4,14 +4,20 @@
 
 #include <string>
 
+namespace nutc {
+namespace lint {
+
 struct lint_result {
     bool success;
     std::string message;
 };
 
+} // namespace lint
+} // namespace nutc
+
 template <>
-struct glz::meta<lint_result> {
-    using t = lint_result;
+struct glz::meta<nutc::lint::lint_result> {
+    using t = nutc::lint::lint_result;
     static constexpr auto value =
         object("success", &t::success, "message", &t::message);
 };

@@ -17,6 +17,7 @@ COPY ./linter/src /app/linter/src
 COPY ./linter/CMakeLists.txt /app/linter
 COPY ./linter/CMakePresets.json /app/linter
 COPY ./linter/cmake /app/linter/cmake
+COPY ./linter/test /app/linter/test
 
 ARG firebase_emulator=false
 

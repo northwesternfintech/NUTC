@@ -25,7 +25,7 @@ create_api_module(
         sys_modules["nutc_api"] = m;
 
         py::exec(R"(import nutc_api)");
-    } catch (const std::exception& e) {
+    } catch (...) {
         return false;
     }
     return true;
@@ -46,7 +46,7 @@ supress_stdout()
 
     sys.stdout = SuppressOutput()
     )");
-    } catch (const std::exception& e) {
+    } catch (...) {
         return false;
     }
     return true;

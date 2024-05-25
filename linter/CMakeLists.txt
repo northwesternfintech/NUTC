@@ -43,7 +43,6 @@ add_library(
     NUTC-linter_lib OBJECT 
     src/firebase/fetching.cpp
     src/pywrapper/runtime.cpp
-    src/mock_api/mock_api.cpp
     src/spawning/spawning.cpp
     src/crow/crow.cpp
     # Utils
@@ -53,11 +52,7 @@ add_library(
 add_library(
     NUTC-linter-spawner_lib OBJECT
     src/lint/lint.cpp
-    src/firebase/fetching.cpp
     src/pywrapper/runtime.cpp
-    src/mock_api/mock_api.cpp
-    # Utils
-    src/logging.cpp
 )
 
 # --- Main executable libs ----
@@ -116,7 +111,6 @@ target_link_libraries(NUTC-linter_exe PRIVATE glaze::glaze)
 target_link_libraries(NUTC-linter_exe PRIVATE pybind11::pybind11)
 target_link_libraries(NUTC-linter_exe PRIVATE Crow::Crow)
 target_link_libraries(NUTC-linter_exe PRIVATE Python3::Python)
-target_link_libraries(NUTC-linter_exe PRIVATE boost::boost)
 
 # ---- Declare secondary (process spawning) executable ----
 
@@ -133,7 +127,6 @@ target_link_libraries(NUTC-linter-spawner_exe PRIVATE pybind11::pybind11)
 target_link_libraries(NUTC-linter-spawner_exe PRIVATE quill::quill)
 target_link_libraries(NUTC-linter-spawner_exe PRIVATE glaze::glaze)
 target_link_libraries(NUTC-linter-spawner_exe PRIVATE Python3::Python)
-target_link_libraries(NUTC-linter-spawner_exe PRIVATE boost::boost)
 
 # ---- Install rules ----
 

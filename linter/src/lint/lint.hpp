@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lint_result.hpp"
+#include "lint/lint_result.hpp"
 
 #include <string>
 
