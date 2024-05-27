@@ -32,6 +32,8 @@ add_library(
     
     src/exchange/logging.cpp
 
+    src/exchange/firebase/firebase.cpp
+
     src/exchange/curl/curl.cpp
     
     src/exchange/wrappers/handle/wrapper_handle.cpp
@@ -159,7 +161,6 @@ add_library(
     WRAPPER_lib OBJECT
     
     src/wrapper/messaging/comms.cpp
-    src/wrapper/firebase/firebase.cpp
     src/wrapper/pywrapper/pywrapper.cpp
     src/wrapper/pywrapper/rate_limiter.cpp
     # Utils
