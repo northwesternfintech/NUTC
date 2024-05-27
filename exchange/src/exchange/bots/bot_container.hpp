@@ -30,8 +30,8 @@ public:
     BotContainer(
         std::string ticker, double starting_price, std::vector<config::bot_config> bots
     ) :
-        TICKER(std::move(ticker)), theo_generator_(starting_price),
-        bots_(add_bots(std::move(bots)))
+        TICKER(std::move(ticker)),
+        theo_generator_(starting_price), bots_(add_bots(std::move(bots)))
     {}
 
     double
