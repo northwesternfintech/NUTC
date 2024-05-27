@@ -22,8 +22,7 @@ OnTickMetricsPush::OnTickMetricsPush(
     std::shared_ptr<ps::Registry> reg,
     std::shared_ptr<engine_manager::EngineManager> manager
 ) :
-    manager_(manager),
-    pnl_gauge(ps::BuildGauge().Name("pnl").Register(*reg)),
+    manager_(manager), pnl_gauge(ps::BuildGauge().Name("pnl").Register(*reg)),
     capital_gauge(ps::BuildGauge().Name("capital").Register(*reg)),
     portfolio_gauge(ps::BuildGauge().Name("portfolio_value").Register(*reg)),
     current_tick(ps::BuildGauge().Name("current_tick").Register(*reg))
@@ -31,8 +30,7 @@ OnTickMetricsPush::OnTickMetricsPush(
 
 OnTickMetricsPush::OnTickMetricsPush(
     std::shared_ptr<engine_manager::EngineManager> manager
-) :
-    OnTickMetricsPush(metrics::Prometheus::get_registry(), manager)
+) : OnTickMetricsPush(metrics::Prometheus::get_registry(), manager)
 {}
 
 void

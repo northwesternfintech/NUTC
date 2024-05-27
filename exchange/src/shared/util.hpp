@@ -25,7 +25,6 @@ struct algorithm {
     const std::string ALGO_ID;
 };
 
-
 constexpr bool
 is_close_to_zero(double value, double epsilon = 1e-6)
 {

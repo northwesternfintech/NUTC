@@ -1,6 +1,6 @@
 #include "shared/config/config.h"
-#include "shared/util.hpp"
 #include "shared/file_operations/file_operations.hpp"
+#include "shared/util.hpp"
 #include "wrapper/logging.hpp"
 #include "wrapper/messaging/comms.hpp"
 #include "wrapper/pywrapper/pywrapper.hpp"
@@ -23,14 +23,13 @@ struct wrapper_args {
 };
 
 using Algorithm = nutc::util::algorithm_content;
+
 namespace glz {
-    template <>
-    struct meta<Algorithm> {
-        static constexpr auto value = object(
-            "algorithm", &Algorithm::algorithm
-        );
-    };
-}
+template <>
+struct meta<Algorithm> {
+    static constexpr auto value = object("algorithm", &Algorithm::algorithm);
+};
+} // namespace glz
 
 namespace {
 wrapper_args
@@ -108,7 +107,9 @@ catch_sigint(int)
     while (true) {}
 }
 
-std::optional<std::string> get_algorithm() {
+std::optional<std::string>
+get_algorithm()
+{
     std::string error_buffer;
     std::string algorithm_string;
     glz::json_t algorithm_message{};
@@ -121,7 +122,7 @@ std::optional<std::string> get_algorithm() {
         log_e(wrapper_init, "glz::read_json() failed: {}", descriptive_error);
         return {};
     }
-    
+
     try {
         return algorithm_message["algorithm"].get<std::string>();
     } catch (...) {
@@ -140,7 +141,7 @@ main(int argc, const char** argv)
     nutc::limits::set_memory_limit(1024);
 
     std::optional<std::string> algo = get_algorithm();
-    
+
     std::string trader_id = algo_id;
     if (!development_mode) {
         trader_id = nutc::util::trader_id(uid, algo_id);
