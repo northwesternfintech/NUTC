@@ -97,7 +97,6 @@ CREATE_LOG_CATEGORY(wrapper_redis);
 CREATE_LOG_CATEGORY(wrapper_web);
 CREATE_LOG_CATEGORY(wrapper_libcurl);
 CREATE_LOG_CATEGORY(wrapper_rabbitmq);
-CREATE_LOG_CATEGORY(wrapper_firebase);
 
 #undef CREATE_LOG_CATEGORY
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
