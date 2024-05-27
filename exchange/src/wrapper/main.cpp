@@ -1,4 +1,5 @@
 #include "shared/config/config.h"
+#include "shared/util.hpp"
 #include "shared/file_operations/file_operations.hpp"
 #include "wrapper/firebase/firebase.hpp"
 #include "wrapper/logging.hpp"
@@ -7,6 +8,7 @@
 #include "wrapper/resource_limits.hpp"
 
 #include <argparse/argparse.hpp>
+#include <glaze/glaze.hpp>
 #include <pybind11/pybind11.h>
 
 #include <algorithm>
@@ -20,6 +22,16 @@ struct wrapper_args {
     std::string algo_id;
     bool dev_mode;
 };
+
+using Algorithm = nutc::util::algorithm_content;
+namespace glz {
+    template <>
+    struct meta<Algorithm> {
+        static constexpr auto value = object(
+            "algorithm", &Algorithm::algorithm
+        );
+    };
+}
 
 namespace {
 wrapper_args
@@ -97,6 +109,27 @@ catch_sigint(int)
     while (true) {}
 }
 
+std::optional<std::string> get_algorithm() {
+    std::string error_buffer;
+    std::string algorithm_string;
+    glz::json_t algorithm_message{};
+
+    std::getline(std::cin, algorithm_string);
+    auto error = glz::read_json(algorithm_message, algorithm_string);
+
+    if (error) {
+        std::string descriptive_error = glz::format_error(error, error_buffer);
+        log_e(wrapper_init, "glz::read_json() failed: {}", descriptive_error);
+        return {};
+    }
+    
+    try {
+        return algorithm_message["algorithm"].get<std::string>();
+    } catch (...) {
+        return {};
+    }
+}
+
 int
 main(int argc, const char** argv)
 {
@@ -107,14 +140,10 @@ main(int argc, const char** argv)
 
     nutc::limits::set_memory_limit(1024);
 
-    std::optional<std::string> algo{};
-    std::string trader_id{};
-    if (development_mode) {
-        algo = nutc::file_ops::read_file_content(algo_id);
-        trader_id = algo_id;
-    }
-    else {
-        algo = nutc::firebase::get_algo(uid, algo_id);
+    std::optional<std::string> algo = get_algorithm();
+    
+    std::string trader_id = algo_id;
+    if (!development_mode) {
         trader_id = nutc::util::trader_id(uid, algo_id);
     }
 

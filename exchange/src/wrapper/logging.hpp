@@ -91,6 +91,7 @@ get_main_logger()
     class ____dummy_##category // makes you add a semicolon
 
 // Create loggers here for every category
+CREATE_LOG_CATEGORY(wrapper_init);
 CREATE_LOG_CATEGORY(wrapper_py_runtime);
 CREATE_LOG_CATEGORY(wrapper_redis);
 CREATE_LOG_CATEGORY(wrapper_web);
