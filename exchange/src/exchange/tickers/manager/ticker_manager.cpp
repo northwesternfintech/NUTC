@@ -58,7 +58,6 @@ EngineManager::on_tick(uint64_t new_tick)
                                       .Name("ticker_midprice")
                                       .Register(*metrics::Prometheus::get_registry());
 
-    std::vector<messages::match> glz_matches = convert_to_glz(accum_matches_);
 
     for (auto& [ticker, engine] : engines_) {
         auto midprice = engine.orderbook.get_midprice();
@@ -76,6 +75,7 @@ EngineManager::on_tick(uint64_t new_tick)
         engine.bot_container.generate_orders(midprice);
         engine.orderbook.expire_orders(new_tick - order_expiry_ticks);
 
+    	std::vector<messages::match> glz_matches = convert_to_glz(accum_matches_);
         send_traders_updates(ticker, engine, glz_matches);
 
         engine.old_orderbook = engine.orderbook;
