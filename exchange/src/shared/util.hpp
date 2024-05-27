@@ -16,10 +16,15 @@ std::string to_string(Side side);
 
 enum class Mode { dev, normal, bots_only };
 
+struct algorithm_content {
+    const std::string algorithm;
+};
+
 struct algorithm {
     const std::string UID;
     const std::string ALGO_ID;
 };
+
 
 constexpr bool
 is_close_to_zero(double value, double epsilon = 1e-6)
