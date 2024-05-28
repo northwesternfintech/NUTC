@@ -1,7 +1,10 @@
 #include "order_container.hpp"
 
+#include <memory>
+
 namespace nutc {
 namespace matching {
+
 const stored_order&
 OrderBook::get_top_order(util::Side side) const
 {
@@ -21,6 +24,9 @@ OrderBook::modify_level_(util::Side side, double price, double qualtity)
     if (util::is_close_to_zero(levels[price])) {
         levels.erase(price);
     }
+
+    if (level_update_generator_)
+        level_update_generator_->record_level_change(side, price, levels[price]);
 }
 
 stored_order
@@ -41,6 +47,34 @@ OrderBook::remove_order(uint64_t order_id)
     modify_level_(order.side, order.price, -order.quantity);
     orders_by_id_.erase(order_id);
     return order;
+}
+
+bool
+OrderBook::can_match_orders() const
+{
+    if (bids_.empty() || asks_.empty()) {
+        return false;
+    }
+    return get_top_order(util::Side::buy).can_match(get_top_order(util::Side::sell));
+}
+
+double
+OrderBook::get_midprice() const
+{
+    if (bids_.empty() || asks_.empty()) {
+        return 0;
+    }
+    return (bids_.begin()->price + asks_.begin()->price) / 2;
+}
+
+double
+OrderBook::get_level(util::Side side, double price) const
+{
+    const auto& levels = (side == util::Side::buy) ? bid_levels_ : ask_levels_;
+    if (!levels.contains(price)) {
+        return 0;
+    }
+    return levels.at(price);
 }
 
 void

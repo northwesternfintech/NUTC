@@ -8,6 +8,7 @@ consume_message(const std::shared_ptr<traders::GenericTrader>& trader)
 {
     while (true) {
         auto messages = trader->read_orders();
+
         switch (messages.size()) {
             case 0:
                 continue;

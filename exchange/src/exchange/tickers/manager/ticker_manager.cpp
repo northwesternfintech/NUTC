@@ -1,7 +1,6 @@
 #include "ticker_manager.hpp"
 
 #include "exchange/metrics/prometheus.hpp"
-#include "exchange/tickers/engine/level_update_generator.hpp"
 #include "exchange/traders/trader_container.hpp"
 
 #include <prometheus/counter.h>
@@ -41,6 +40,17 @@ log_match(const matching::stored_match& order)
         .Increment(order.quantity);
 }
 
+size_t
+EngineManager::match_order(const matching::stored_order& order)
+{
+    auto& ticker = get_engine(order.ticker);
+    auto matches = ticker.engine.match_order(ticker.orderbook, order);
+    size_t num_matches = matches.size();
+    
+    std::ranges::move(matches, std::back_inserter(accum_matches_));
+    return num_matches;
+}
+
 // TODO: helper functions/cleanup
 void
 EngineManager::on_tick(uint64_t new_tick)
@@ -73,18 +83,15 @@ EngineManager::on_tick(uint64_t new_tick)
                 match.buyer->get_capital(), match.seller->get_capital()
             );
         }
-
-        messages::tick_update updates{
-            matching::get_updates(ticker, engine.old_orderbook, engine.orderbook),
-            glz_matches
-        };
+        auto ob_updates = engine.level_update_generator_->get_updates(ticker);
+        messages::tick_update updates{ob_updates, glz_matches};
         std::string update_str = glz::write_json(updates);
         for (const auto& trader :
              traders::TraderContainer::get_instance().get_traders()) {
             trader->send_message(update_str);
         }
-        engine.old_orderbook = engine.orderbook;
         accum_matches_.clear();
+        engine.level_update_generator_->reset();
     }
 }
 
