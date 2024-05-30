@@ -6,7 +6,7 @@ vars:
   # BOTS, DEV, or NORMAL
   MODE: "BOTS"
   
-  RELEASE_BUILD: false
+  RELEASE_BUILD: "false"
   RELEASE_PRESET: "ci-ubuntu"
 
 tasks:
@@ -22,7 +22,7 @@ tasks:
   deps:
     dir: .
     vars:
-      BUILD_TYPE: '{{if eq .RELEASE_BUILD true}}Release{{else}}Debug{{end}}'
+      BUILD_TYPE: '{{if eq .RELEASE_BUILD "true"}}Release{{else}}Debug{{end}}'
     cmds:
       - conan install . -s build_type={{.BUILD_TYPE}} -b missing -pr cpp20 -pr:b cpp20
     
@@ -38,15 +38,10 @@ tasks:
       - rm -rf logs
       - mkdir logs
 
-  kill-wrappers:
-    cmds:
-      - cmd: pkill -f -9 WRAPPER
-        ignore_error: true
-
   init:
     dir: .
     vars:
-      PRESET: '{{if eq .RELEASE_BUILD true}}{{.RELEASE_PRESET}}{{else}}dev{{end}}'
+      PRESET: '{{if eq .RELEASE_BUILD "true"}}{{.RELEASE_PRESET}}{{else}}dev{{end}}'
     preconditions:
       - test -f CMakeUserPresets.json
     cmds:
@@ -55,7 +50,7 @@ tasks:
   build:
     dir: .
     vars:
-      CMAKE_SUFFIX: '{{if eq .RELEASE_BUILD true}}build --config Release{{else}}--preset=dev{{end}}'
+      CMAKE_SUFFIX: '{{if eq .RELEASE_BUILD "true"}}build --config Release{{else}}--preset=dev{{end}}'
     preconditions:
       - test -f CMakeUserPresets.json
     cmds:
@@ -63,9 +58,9 @@ tasks:
       
   run-gdb:
     env:
-      NUTC_WRAPPER_BINARY_PATH: '{{if eq .RELEASE_BUILD true}}./build/WRAPPER{{else}}./build/dev/WRAPPER{{end}}'
+      NUTC_WRAPPER_BINARY_PATH: '{{if eq .RELEASE_BUILD "true"}}./build/WRAPPER{{else}}./build/dev/WRAPPER{{end}}'
     vars:
-      NUTC_PATH: '{{if eq .RELEASE_BUILD true}}build/{{.NAME}}{{else}}build/dev/{{.NAME}}{{end}}'
+      NUTC_PATH: '{{if eq .RELEASE_BUILD "true"}}build/{{.NAME}}{{else}}build/dev/{{.NAME}}{{end}}'
     cmds:
       - task: build
       - task: new-log-dir
@@ -73,16 +68,15 @@ tasks:
 
   run:
     env:
-      NUTC_WRAPPER_BINARY_PATH: '{{if eq .RELEASE_BUILD true}}./build/WRAPPER{{else}}./build/dev/WRAPPER{{end}}'
+      NUTC_WRAPPER_BINARY_PATH: '{{if eq .RELEASE_BUILD "true"}}./build/WRAPPER{{else}}./build/dev/WRAPPER{{end}}'
       NUTC_EXPOSE_METRICS: 1
     vars:
-      NUTC_PATH: '{{if eq .RELEASE_BUILD true}}build/{{.NAME}}{{else}}build/dev/{{.NAME}}{{end}}'
+      NUTC_PATH: '{{if eq .RELEASE_BUILD "true"}}build/{{.NAME}}{{else}}build/dev/{{.NAME}}{{end}}'
       MODE_FLAG: '{{if eq .MODE "BOTS"}}--bots-only{{else if eq .MODE "DEV"}}--dev{{end}}'
     cmds:
       - task: build
       - task: new-log-dir
       - ./{{ .NUTC_PATH }} {{ .MODE_FLAG }}
-      - task: kill-wrappers
       
       # - ./build/dev/{{.NAME}} --sandbox "1Pd1lJUMPURc0ezL393vWwRz9g32" " NgMtXt5Ff_lwqtySBJ9"
 
@@ -93,11 +87,11 @@ tasks:
       - task: itest
 
   utest:
-    dir: '{{if eq .RELEASE_BUILD true}}./build{{else}}.{{end}}'
+    dir: '{{if eq .RELEASE_BUILD "true"}}./build{{else}}.{{end}}'
     vars:
       DEV_TEST_FLAGS: '--preset=dev'
       RELEASE_TEST_FLAGS: '--output-on-failure --no-tests=error -C Release'
-      TEST_FLAGS: '{{if eq .RELEASE_BUILD true}}{{.RELEASE_TEST_FLAGS}}{{else}}{{.DEV_TEST_FLAGS}}{{end}}'
+      TEST_FLAGS: '{{if eq .RELEASE_BUILD "true"}}{{.RELEASE_TEST_FLAGS}}{{else}}{{.DEV_TEST_FLAGS}}{{end}}'
     cmds:
       - task: build
       - ctest {{.TEST_FLAGS}} -R "Unit*"
@@ -105,7 +99,7 @@ tasks:
   itest:
     dir: '.'
     vars:
-      TEST_DIR: 'build{{if eq .RELEASE_BUILD false}}/dev{{end}}/test'
+      TEST_DIR: 'build{{if eq .RELEASE_BUILD "false"}}/dev{{end}}/test'
     cmds:
       - task: build
         # Don't want to check the mode
@@ -114,12 +108,12 @@ tasks:
       - task: run-itest
 
   run-itest:
-    dir: '{{if eq .RELEASE_BUILD false}}.{{else}}build{{end}}'
+    dir: '{{if eq .RELEASE_BUILD "false"}}.{{else}}build{{end}}'
     vars:
-      WRAPPER_RELATIVE_PATH: './build{{if eq .RELEASE_BUILD false}}/dev{{end}}/WRAPPER'
+      WRAPPER_RELATIVE_PATH: './build{{if eq .RELEASE_BUILD "false"}}/dev{{end}}/WRAPPER'
       DEV_TEST_FLAGS: '--timeout 4 --preset=dev'
       RELEASE_TEST_FLAGS: '--output-on-failure --no-tests=error --timeout 10 -C Release'
-      TEST_FLAGS: '{{if eq .RELEASE_BUILD true}}{{.RELEASE_TEST_FLAGS}}{{else}}{{.DEV_TEST_FLAGS}}{{end}}'
+      TEST_FLAGS: '{{if eq .RELEASE_BUILD "true"}}{{.RELEASE_TEST_FLAGS}}{{else}}{{.DEV_TEST_FLAGS}}{{end}}'
     env:
       NUTC_WRAPPER_BINARY_PATH: '{{.PWD}}/{{.WRAPPER_RELATIVE_PATH}}'
     cmds:
