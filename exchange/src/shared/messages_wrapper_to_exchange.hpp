@@ -26,6 +26,8 @@ struct market_order {
         side(side), ticker(ticker), quantity(quantity), price(price)
     {}
 
+    bool operator==(const market_order& other) const = default;
+
     market_order() = default;
 };
 

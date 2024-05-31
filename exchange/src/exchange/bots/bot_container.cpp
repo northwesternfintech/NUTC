@@ -35,7 +35,7 @@ BotContainer::add_bots(double mean_capital, double stddev_capital, size_t num_bo
     std::normal_distribution<> distr(mean_capital, stddev_capital);
     for (size_t i = 0; i < num_bots; i++) {
         auto capital = distr(gen);
-        auto bot = users.add_trader<BotType>(TICKER, std::fabs(capital));
+        auto bot = users.add_trader<BotType>(ticker, std::fabs(capital));
         bot_vec.push_back(bot);
     }
     return bot_vec;

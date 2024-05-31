@@ -13,8 +13,8 @@ include(GoogleTest)
 
 # ---- Tests ----
 add_executable(NUTC_tests
-  src/test_utils/macros.cpp 
-  src/test_utils/process.cpp
+  src/util/macros.cpp 
+  src/util/process.cpp
 
   src/unit/matching/invalid_orders.cpp
   src/unit/matching/many_orders.cpp
@@ -26,7 +26,7 @@ add_executable(NUTC_tests
 
   src/unit/expiration/basic_expiration.cpp
 
-  src/integration/basic_algo.cpp
+  src/integration/basic.cpp
   )
 
 target_include_directories(

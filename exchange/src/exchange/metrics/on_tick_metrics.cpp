@@ -1,8 +1,6 @@
 #include "on_tick_metrics.hpp"
 
-#include "exchange/config/dynamic/config.hpp"
 #include "exchange/metrics/prometheus.hpp"
-#include "exchange/tickers/manager/ticker_manager.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "prometheus.hpp"
 
@@ -12,46 +10,43 @@ namespace nutc {
 namespace metrics {
 
 void
-OnTickMetricsPush::on_tick(uint64_t tick_num)
+TickerMetricsPusher::push(
+    std::unordered_map<std::string, matching::ticker_info> tickers, uint64_t tick_num
+)
 {
     record_current_tick(tick_num);
-    record_trader_metrics();
+    record_trader_metrics(tickers);
 }
 
-OnTickMetricsPush::OnTickMetricsPush(
-    std::shared_ptr<ps::Registry> reg,
-    std::shared_ptr<engine_manager::EngineManager> manager
-) :
-    manager_(manager),
+TickerMetricsPusher::TickerMetricsPusher(std::shared_ptr<ps::Registry> reg) :
     pnl_gauge(ps::BuildGauge().Name("pnl").Register(*reg)),
     capital_gauge(ps::BuildGauge().Name("capital").Register(*reg)),
     portfolio_gauge(ps::BuildGauge().Name("portfolio_value").Register(*reg)),
     current_tick(ps::BuildGauge().Name("current_tick").Register(*reg))
 {}
 
-OnTickMetricsPush::OnTickMetricsPush(
-    std::shared_ptr<engine_manager::EngineManager> manager
-) :
-    OnTickMetricsPush(metrics::Prometheus::get_registry(), manager)
+TickerMetricsPusher::TickerMetricsPusher() :
+    TickerMetricsPusher(metrics::Prometheus::get_registry())
 {}
 
 void
-OnTickMetricsPush::record_current_tick(uint64_t tick_num)
+TickerMetricsPusher::record_current_tick(uint64_t tick_num)
 {
     current_tick.Add({}).Set(static_cast<double>(tick_num));
 }
 
 void
-OnTickMetricsPush::record_trader_metrics()
+TickerMetricsPusher::record_trader_metrics(
+    std::unordered_map<std::string, matching::ticker_info> tickers
+)
 {
-    const auto& tickers = config::Config::get().get_tickers();
     auto& trader_container = traders::TraderContainer::get_instance();
 
     auto portfolio_value = [&](const auto& trader) {
         double pnl = 0.0;
-        for (const auto& ticker_conf : tickers) {
-            double amount_held = trader->get_holdings(ticker_conf.TICKER);
-            double midprice = manager_->get_midprice(ticker_conf.TICKER);
+        for (const auto& [ticker, info] : tickers) {
+            double amount_held = trader->get_holdings(ticker);
+            double midprice = info.orderbook.get_midprice();
             pnl += amount_held * midprice;
         }
         return pnl;

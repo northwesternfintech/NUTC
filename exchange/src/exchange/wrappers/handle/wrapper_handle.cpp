@@ -48,8 +48,7 @@ WrapperHandle::~WrapperHandle()
 
 WrapperHandle::WrapperHandle(
     const std::string& remote_uid, const std::string& algo_id
-) :
-    WrapperHandle({"--uid", quote_id(remote_uid), "--algo_id", quote_id(algo_id)})
+) : WrapperHandle({"--uid", quote_id(remote_uid), "--algo_id", quote_id(algo_id)})
 {}
 
 WrapperHandle::WrapperHandle(const std::string& algo_path) :

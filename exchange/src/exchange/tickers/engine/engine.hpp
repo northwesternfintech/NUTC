@@ -1,15 +1,15 @@
 #pragma once
 
-#include "order_container.hpp"
+#include "orderbook.hpp"
 
 namespace nutc {
 namespace matching {
 
 class Engine {
-    const double ORDER_FEE;
+    double order_fee;
 
 public:
-    explicit Engine(double order_fee = 0.0) : ORDER_FEE(order_fee) {}
+    explicit Engine(double order_fee = 0.0) : order_fee(order_fee) {}
 
     std::vector<stored_match>
     match_order(OrderBook& orderbook, const stored_order& order);

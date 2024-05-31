@@ -8,8 +8,6 @@
 #include <cassert>
 
 #include <memory>
-#include <string>
-#include <unordered_map>
 
 namespace nutc {
 namespace traders {

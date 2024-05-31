@@ -1,4 +1,5 @@
 #include "level_update_generator.hpp"
+
 #include <cassert>
 
 namespace nutc {

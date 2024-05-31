@@ -36,7 +36,6 @@ add_library(
     
     src/exchange/wrappers/handle/wrapper_handle.cpp
     src/exchange/wrappers/creation/rmq_wrapper_init.cpp
-    src/exchange/wrappers/messaging/consumer.cpp
     src/exchange/wrappers/messaging/async_pipe_runner.cpp
     src/exchange/wrappers/messaging/pipe_reader.cpp
     src/exchange/wrappers/messaging/pipe_writer.cpp
@@ -48,10 +47,10 @@ add_library(
     src/exchange/bots/bot_types/market_maker.cpp
 
     src/exchange/tickers/engine/engine.cpp
-    src/exchange/tickers/engine/order_container.cpp
+    src/exchange/tickers/engine/orderbook.cpp
     src/exchange/tickers/engine/level_update_generator.cpp
 
-    src/exchange/tickers/manager/ticker_manager.cpp
+	src/exchange/tickers/matching_cycle/base/base_strategy.cpp
     
     src/exchange/traders/trader_types/generic_trader.cpp
     src/exchange/traders/trader_types/bot_trader.cpp

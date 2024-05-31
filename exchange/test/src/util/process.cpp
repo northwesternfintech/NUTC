@@ -5,10 +5,22 @@
 #include "exchange/wrappers/creation/rmq_wrapper_init.hpp"
 
 namespace nutc {
-namespace test_utils {
+namespace test {
+std::shared_ptr<traders::GenericTrader>
+start_wrappers(
+    nutc::traders::TraderContainer& users, const std::string& filename,
+    double starting_capital, size_t start_delay
+)
+{
+    auto ret =
+        start_wrappers(users, std::vector{filename}, starting_capital, start_delay);
+    if (ret.size() != 1)
+        throw std::runtime_error("Unexpected num wrappers");
+    return ret[0];
+}
 
 std::vector<std::shared_ptr<traders::GenericTrader>>
-initialize_testing_clients(
+start_wrappers(
     nutc::traders::TraderContainer& users,
     const std::vector<std::string>& algo_filenames, double starting_capital,
     size_t start_delay
@@ -26,5 +38,5 @@ initialize_testing_clients(
 
     return users.get_traders();
 }
-} // namespace test_utils
+} // namespace test
 } // namespace nutc
