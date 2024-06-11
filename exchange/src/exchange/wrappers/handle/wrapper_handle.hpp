@@ -20,8 +20,7 @@ class WrapperHandle {
     PipeWriter writer_{};
 
     WrapperHandle(
-        const std::vector<std::string>& args,
-        const std::optional<std::string> optional_algo
+        const std::vector<std::string>& args, std::optional<std::string> optional_algo
     );
     void block_on_init();
 

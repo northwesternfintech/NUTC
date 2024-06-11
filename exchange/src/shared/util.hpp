@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glaze/glaze.hpp>
+
 #include <cmath>
 
 #include <string>
@@ -33,3 +35,14 @@ is_close_to_zero(double value, double epsilon = 1e-6)
 
 } // namespace util
 } // namespace nutc
+
+using Algorithm = nutc::util::algorithm_content;
+
+namespace glz {
+
+template <>
+struct meta<Algorithm> {
+    static constexpr auto value = object("algorithm", &Algorithm::algorithm);
+};
+
+} // namespace glz

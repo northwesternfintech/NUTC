@@ -22,15 +22,6 @@ struct wrapper_args {
     bool dev_mode;
 };
 
-using Algorithm = nutc::util::algorithm_content;
-
-namespace glz {
-template <>
-struct meta<Algorithm> {
-    static constexpr auto value = object("algorithm", &Algorithm::algorithm);
-};
-} // namespace glz
-
 namespace {
 wrapper_args
 process_arguments(int argc, const char** argv)
@@ -120,14 +111,10 @@ get_algorithm()
     if (error) {
         std::string descriptive_error = glz::format_error(error, error_buffer);
         log_e(wrapper_init, "glz::read_json() failed: {}", descriptive_error);
-        return {};
+        throw std::runtime_error("Wrapper unable to read algorithm json");
     }
 
-    try {
-        return algorithm_message["algorithm"].get<std::string>();
-    } catch (...) {
-        return {};
-    }
+    return algorithm_message["algorithm"].get<std::string>();
 }
 
 int

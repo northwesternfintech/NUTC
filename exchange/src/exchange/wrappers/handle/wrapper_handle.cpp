@@ -48,15 +48,14 @@ WrapperHandle::~WrapperHandle()
     }
 }
 
-WrapperHandle::WrapperHandle(const std::string& remote_uid, const std::string& algo_id)
-{
-    std::optional<std::string> remote_algo =
-        nutc::firebase::get_algo(remote_uid, algo_id);
-
+WrapperHandle::WrapperHandle(
+    const std::string& remote_uid, const std::string& algo_id
+) :
     WrapperHandle(
-        {"--uid", quote_id(remote_uid), "--algo_id", quote_id(algo_id)}, remote_algo
-    );
-}
+        {"--uid", quote_id(remote_uid), "--algo_id", quote_id(algo_id)},
+        nutc::firebase::get_algo(remote_uid, algo_id)
+    )
+{}
 
 WrapperHandle::WrapperHandle(const std::string& algo_path)
 {
@@ -79,13 +78,11 @@ WrapperHandle::block_on_init()
 }
 
 WrapperHandle::WrapperHandle(
-    const std::vector<std::string>& args, const std::optional<std::string> optional_algo
+    const std::vector<std::string>& args, std::optional<std::string> optional_algo
 )
 {
     if (!optional_algo.has_value()) {
-        throw std::runtime_error(
-            "Received empty algorithm; cannot initiate empty wrapper"
-        );
+        throw std::runtime_error("Passed invalid algorithm to wrapper constructor");
     }
 
     static const std::string path{wrapper_binary_path()};
@@ -98,7 +95,7 @@ WrapperHandle::WrapperHandle(
         bp::std_out > pipe_in_ptr
     );
 
-    struct nutc::util::algorithm_content algorithm_message = {optional_algo.value()};
+    nutc::util::algorithm_content algorithm_message = {optional_algo.value()};
     auto encoded_message = glz::write_json(algorithm_message);
     writer_.send_message(encoded_message);
 

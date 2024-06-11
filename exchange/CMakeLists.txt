@@ -220,6 +220,7 @@ target_include_directories(
 )
 
 target_link_libraries(SHARED_lib PUBLIC fmt::fmt)
+target_link_libraries(SHARED_lib PUBLIC glaze::glaze)
 target_link_libraries(SHARED_lib PUBLIC yaml-cpp::yaml-cpp)
 
 target_link_libraries(EXCHANGE_lib PUBLIC SHARED_lib)
