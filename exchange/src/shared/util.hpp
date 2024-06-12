@@ -19,7 +19,7 @@ std::string to_string(Side side);
 enum class Mode { dev, normal, bots_only };
 
 struct algorithm_content {
-    const std::string algorithm;
+    const std::string ALGORITHM;
 };
 
 struct algorithm {
@@ -42,7 +42,7 @@ namespace glz {
 
 template <>
 struct meta<Algorithm> {
-    static constexpr auto value = object("algorithm", &Algorithm::algorithm);
+    static constexpr auto value = object("algorithm", &Algorithm::ALGORITHM);
 };
 
 } // namespace glz
