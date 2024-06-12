@@ -4,6 +4,8 @@
 #include "exchange/config/dynamic/config.hpp"
 #include "exchange/config/dynamic/ticker_config.hpp"
 #include "exchange/tick_scheduler/tick_scheduler.hpp"
+#include "exchange/tickers/matching_cycle/base/base_strategy.hpp"
+#include "exchange/tickers/matching_cycle/cycle_strategy.hpp"
 #include "exchange/tickers/matching_cycle/dev/dev_strategy.hpp"
 #include "exchange/tickers/ticker.hpp"
 #include "logging.hpp"
@@ -18,7 +20,7 @@ namespace {
 using namespace nutc; // NOLINT
 
 std::unordered_map<std::string, matching::ticker_info>
-initialize_bots()
+load_tickers()
 {
     std::unordered_map<std::string, matching::ticker_info> ret;
     const auto& tickers = config::Config::get().get_tickers();
@@ -47,6 +49,21 @@ initialize_algos(const auto& mode)
     );
 }
 
+std::shared_ptr<matching::MatchingCycle>
+create_cycle(const auto& mode)
+{
+    auto tickers = load_tickers();
+    auto traders = traders::TraderContainer::get_instance().get_traders();
+    auto exp = config::Config::get().constants().ORDER_EXPIRATION_TICKS;
+
+    if (mode == util::Mode::normal) {
+        return std::make_shared<matching::BaseMatchingCycle>(tickers, traders, exp);
+    }
+    else {
+        return std::make_shared<matching::DevMatchingCycle>(tickers, traders, exp);
+    }
+}
+
 } // namespace
 
 int
@@ -67,15 +84,12 @@ main(int argc, const char** argv)
     if (mode != util::Mode::bots_only)
         initialize_wrappers();
 
-    auto tickers = initialize_bots();
-    auto cycle = std::make_shared<matching::DevMatchingCycle>(
-        tickers, traders::TraderContainer::get_instance().get_traders(),
-        config::Config::get().constants().ORDER_EXPIRATION_TICKS
-    );
 
     sandbox::CrowServer::get_instance();
 
+    auto cycle = create_cycle(mode);
     auto tick_hz = config::Config::get().constants().TICK_HZ;
     nutc::ticks::run([&cycle](uint64_t tick) { cycle->on_tick(tick); }, tick_hz);
+
     return 0;
 }
