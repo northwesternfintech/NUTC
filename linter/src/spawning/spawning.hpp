@@ -6,6 +6,8 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/process.hpp>
 
+#include <filesystem>
+
 namespace nutc {
 namespace spawning {
 

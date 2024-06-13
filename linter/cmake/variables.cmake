@@ -8,10 +8,6 @@ if(PROJECT_IS_TOP_LEVEL)
   option(NUTC-linter_DEVELOPER_MODE "Enable developer mode" OFF)
 endif()
 
-if(PROJECT_IS_TOP_LEVEL)
-  option(NUTC_LINTER_LOCAL_DEV_MODE "Enable local development endpoints" OFF)
-endif()
-
 
 # ---- Warning guard ----
 

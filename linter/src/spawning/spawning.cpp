@@ -10,6 +10,23 @@ namespace bp = boost::process;
 namespace nutc {
 namespace spawning {
 
+const std::filesystem::path&
+LintProcessManager::spawner_binary_path()
+{
+    static const char* spawner_binary_location =
+        std::getenv("NUTC_SPAWNER_BINARY_PATH"); // NOLINT
+    if (spawner_binary_location == nullptr) [[unlikely]] {
+        throw std::runtime_error("NUTC_SPAWNER_BINARY_PATH environment variable not set"
+        );
+    }
+
+    static const std::filesystem::path spawner_binary_path{spawner_binary_location};
+    if (!std::filesystem::exists(spawner_binary_path))
+        throw std::runtime_error("File at NUTC_SPAWNER_BINARY_PATH does not exist");
+
+    return spawner_binary_path;
+}
+
 nutc::lint::lint_result
 LintProcessManager::spawn_client(const std::string& algo_code)
 {
