@@ -13,6 +13,7 @@ include(GoogleTest)
 
 # ---- Tests ----
 add_executable(NUTC_tests
+  src/util/helpers/test_cycle.cpp
   src/util/macros.cpp 
   src/util/process.cpp
 

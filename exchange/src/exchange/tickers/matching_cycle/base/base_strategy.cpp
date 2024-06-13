@@ -31,9 +31,10 @@ BaseMatchingCycle::match_orders_(std::vector<stored_order> orders)
 {
     std::vector<stored_match> matches{};
     for (auto& order : orders) {
-        auto it = tickers_.find(order.ticker);
         if (order.price < 0 || order.quantity <= 0)
             continue;
+
+        auto it = tickers_.find(order.ticker);
         if (it == tickers_.end())
             continue;
 

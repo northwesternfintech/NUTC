@@ -1,6 +1,5 @@
 #include "config.h"
 #include "exchange/traders/trader_container.hpp"
-#include "shared/messages_wrapper_to_exchange.hpp"
 #include "util/helpers/test_cycle.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
@@ -12,7 +11,6 @@ namespace nutc {
 namespace test {
 
 using nutc::test::start_wrappers;
-using nutc::traders::GenericTrader;
 using nutc::util::Side::buy;
 using nutc::util::Side::sell;
 
@@ -63,8 +61,7 @@ TEST_F(IntegrationBasicAlgo, ManyUpdates)
 
     cycle.on_tick(0);
 
-    auto mess = nutc::test_utils::consume_message(trader1);
-    ASSERT_EQ_MARKET_ORDER(mess, "TSLA", buy, 100, 10);
+	cycle.wait_for_order({buy, "TSLA", 10, 100});
 }
 
 TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
@@ -82,10 +79,8 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
     trader2->add_order({sell, "TSLA", 100, 100});
 
     cycle.wait_for_order({buy, "TSLA", 10, 102});
-    ASSERT_EQ_MARKET_ORDER(cycle.last_order, "TSLA", buy, 102, 10);
 
-    auto mess = nutc::test_utils::consume_message(trader1);
-    ASSERT_EQ_MARKET_ORDER(mess, "APPL", buy, 100, 1);
+	cycle.wait_for_order({buy, "APPL", 1, 100});
 }
 
 // Sanity check that it goes through the orderbook

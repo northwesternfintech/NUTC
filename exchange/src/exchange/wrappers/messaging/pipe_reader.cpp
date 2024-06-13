@@ -61,7 +61,7 @@ PipeReader::store_message_(const std::string& message)
     // TODO: handle better
     if (err) {
         log_e(
-            main, "Error processing message from wrapper: {}",
+            pipe_reader, "Error processing message from wrapper: {}",
             glz::format_error(err, message)
         );
         return;
