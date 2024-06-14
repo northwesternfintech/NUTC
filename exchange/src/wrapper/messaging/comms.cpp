@@ -1,11 +1,10 @@
 #include "comms.hpp"
 
-#include "shared/messages_exchange_to_wrapper.hpp"
-#include "wrapper/logging.hpp"
-#include "wrapper/pywrapper/pywrapper.hpp"
+#include "wrapper/algo_wrapper/wrapper.hpp"
 
 #include <boost/asio.hpp>
 #include <boost/process.hpp>
+#include <pybind11/pytypes.h>
 #include <unistd.h>
 
 #include <chrono>
@@ -15,64 +14,68 @@
 namespace nutc {
 namespace comms {
 
-// todo: split into helpers
-
 void
-ExchangeProxy::main_event_loop(const std::string& uid)
+ExchangeProxy::main_event_loop(const wrapper::Wrapper& algo_wrapper)
 {
     while (true) {
         std::variant<start_time, tick_update> data = consume_message();
         std::visit(
-            [&](auto&& arg) { process_message(std::forward<decltype(arg)>(arg), uid); },
+            [&](auto&& arg) {
+                process_message(std::forward<decltype(arg)>(arg), algo_wrapper);
+            },
             std::move(data)
         );
     }
 }
 
 void
-ExchangeProxy::process_message(auto&& message, const std::string& uid)
+ExchangeProxy::process_message(auto&& message, const wrapper::Wrapper& algo_wrapper)
 {
     using MessageType = std::decay_t<decltype(message)>;
     if constexpr (std::is_same_v<MessageType, tick_update>) {
         for (const auto& update : message.ob_updates)
-            handle_orderbook_update(update);
+            handle_orderbook_update(update, algo_wrapper);
         for (const auto& update : message.matches)
-            handle_match(update, uid);
+            handle_match(update, algo_wrapper);
     }
 }
 
 void
-ExchangeProxy::handle_orderbook_update(const orderbook_update& update)
+ExchangeProxy::handle_orderbook_update(
+    const orderbook_update& update, const wrapper::Wrapper& algo_wrapper
+)
 {
     try {
         std::string side = update.side == util::Side::buy ? "BUY" : "SELL";
-        nutc::pywrapper::get_ob_update_function()(
+        algo_wrapper.fire_on_orderbook_update(
             update.ticker, side, update.price, update.quantity
         );
-    } catch (const py::error_already_set& e) {}
+    } catch (const pybind11::error_already_set& e) {}
 }
 
 void
-ExchangeProxy::handle_match(const match& match, const std::string& uid)
+ExchangeProxy::handle_match(const match& match, const wrapper::Wrapper& algo_wrapper)
 {
     try {
         std::string side = match.side == util::Side::buy ? "BUY" : "SELL";
 
-        nutc::pywrapper::get_trade_update_function()(
+        algo_wrapper.fire_on_trade_update(
             match.ticker, side, match.price, match.quantity
         );
 
-        if (match.buyer_id == uid) {
-            nutc::pywrapper::get_account_update_function()(
+        const auto& trader_id = algo_wrapper.get_trader_id();
+
+        if (match.buyer_id == trader_id) {
+            algo_wrapper.fire_on_account_update(
                 match.ticker, "BUY", match.price, match.quantity, match.buyer_capital
             );
         }
-        if (match.seller_id == uid) {
-            nutc::pywrapper::get_account_update_function()(
-                match.ticker, "SELL", match.price, match.quantity, match.seller_capital
+        if (match.seller_id == trader_id) {
+            algo_wrapper.fire_on_account_update(
+                match.ticker, "SELL", match.price, match.quantity, match.buyer_capital
             );
         }
-    } catch (const py::error_already_set& e) {}
+    } catch (const pybind11::error_already_set& e) {}
 }
 
 bool
