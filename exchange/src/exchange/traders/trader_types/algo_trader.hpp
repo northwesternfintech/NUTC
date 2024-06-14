@@ -26,9 +26,9 @@ public:
     {}
 
     // Local (algo .py on disk)
-    explicit LocalTrader(std::string algo_path, double capital) :
+    explicit LocalTrader(std::string algo_path, double capital, bool binary_algo) :
         GenericTrader(algo_path, capital), DISPLAY_NAME(algo_path), ALGO_ID(algo_path),
-        wrapper_handle_(algo_path)
+        wrapper_handle_(algo_path, binary_algo)
     {
         if (!file_ops::file_exists(ALGO_ID)) [[unlikely]] {
             std::string err_str =

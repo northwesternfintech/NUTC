@@ -160,10 +160,12 @@ add_library(
     
     src/wrapper/messaging/comms.cpp
     src/wrapper/firebase/firebase.cpp
-    src/wrapper/pywrapper/pywrapper.cpp
-    src/wrapper/pywrapper/rate_limiter.cpp
+    src/wrapper/rate_limiter.cpp
     # Utils
     src/wrapper/logging.cpp
+    src/wrapper/algo_wrapper/python/python_wrapper.cpp
+    src/wrapper/algo_wrapper/binary/binary_wrapper.cpp
+
 )
 
 target_include_directories(

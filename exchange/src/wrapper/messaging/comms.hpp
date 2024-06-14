@@ -2,7 +2,8 @@
 
 #include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
-#include "wrapper/pywrapper/rate_limiter.hpp"
+#include "wrapper/algo_wrapper/wrapper.hpp"
+#include "wrapper/rate_limiter.hpp"
 
 #include <unistd.h>
 
@@ -26,16 +27,17 @@ public:
     market_order_func();
 
     static void wait_for_start_time();
-
-    void main_event_loop(const std::string& uid);
+    void main_event_loop(const wrapper::Wrapper& algo_wrapper);
 
 private:
     rate_limiter::RateLimiter limiter;
 
-    static void handle_orderbook_update(const orderbook_update& update);
-    static void handle_match(const match& match, const std::string& uid);
+    static void handle_orderbook_update(
+        const orderbook_update& update, const wrapper::Wrapper& algo_wrapper
+    );
+    static void handle_match(const match& match, const wrapper::Wrapper& algo_wrapper);
     template <typename T>
-    static void process_message(T&& message, const std::string& uid);
+    static void process_message(T&& message, const wrapper::Wrapper& algo_wrapper);
 
     static void publish_message(const std::string& message);
     [[nodiscard]] bool publish_market_order(

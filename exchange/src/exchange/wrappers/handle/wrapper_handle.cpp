@@ -16,6 +16,20 @@ quote_id(std::string user_id)
     return user_id;
 }
 
+std::vector<std::string>
+create_local_args(const std::string& algo_path, bool is_binary)
+{
+    std::vector<std::string> args = {
+        "--uid", quote_id(algo_path), "--algo_id", quote_id(algo_path), "--dev"
+    };
+
+    if (is_binary) {
+        args.push_back("--binary");
+    }
+
+    return args;
+}
+
 } // namespace
 
 namespace nutc {
@@ -48,14 +62,11 @@ WrapperHandle::~WrapperHandle()
 
 WrapperHandle::WrapperHandle(
     const std::string& remote_uid, const std::string& algo_id
-) :
-    WrapperHandle({"--uid", quote_id(remote_uid), "--algo_id", quote_id(algo_id)})
+) : WrapperHandle({"--uid", quote_id(remote_uid), "--algo_id", quote_id(algo_id)})
 {}
 
-WrapperHandle::WrapperHandle(const std::string& algo_path) :
-    WrapperHandle(
-        {"--uid", quote_id(algo_path), "--algo_id", quote_id(algo_path), "--dev"}
-    )
+WrapperHandle::WrapperHandle(const std::string& algo_path, bool is_binary) :
+    WrapperHandle(create_local_args(algo_path, is_binary))
 {}
 
 void
