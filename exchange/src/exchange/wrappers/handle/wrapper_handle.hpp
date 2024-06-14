@@ -6,7 +6,6 @@
 #include <boost/process.hpp>
 #include <boost/process/pipe.hpp>
 
-#include <atomic>
 #include <filesystem>
 
 namespace nutc {
@@ -34,7 +33,7 @@ public:
     WrapperHandle(const std::string& remote_uid, const std::string& algo_id);
 
     // Local (.py on disk)
-    WrapperHandle(const std::string& algo_path);
+    WrapperHandle(const std::string& algo_path, bool is_binary_algo);
 
     std::vector<market_order>
     read_messages()

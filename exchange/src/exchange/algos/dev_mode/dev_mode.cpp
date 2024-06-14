@@ -15,8 +15,11 @@ DevModeAlgoInitializer::initialize_trader_container(
     traders::TraderContainer& traders, double start_capital
 ) const
 {
-    for (const fs::path& filepath : algo_filepaths_)
-        traders.add_trader<traders::LocalTrader>(filepath, start_capital);
+    for (const fs::path& filepath : algo_filepaths_) {
+        auto ext = filepath.extension();
+
+        traders.add_trader<traders::LocalTrader>(filepath, start_capital, ext != ".py");
+    }
 }
 
 void

@@ -1,13 +1,16 @@
 #include "shared/config/config.h"
 #include "shared/file_operations/file_operations.hpp"
+#include "wrapper/algo_wrapper/binary/binary_wrapper.hpp"
+#include "wrapper/algo_wrapper/python/python_wrapper.hpp"
 #include "wrapper/firebase/firebase.hpp"
-#include "wrapper/logging.hpp"
 #include "wrapper/messaging/comms.hpp"
-#include "wrapper/pywrapper/pywrapper.hpp"
 #include "wrapper/resource_limits.hpp"
 
 #include <argparse/argparse.hpp>
+#include <pybind11/embed.h>
 #include <pybind11/pybind11.h>
+
+#include <csignal>
 
 #include <algorithm>
 #include <iostream>
@@ -19,6 +22,7 @@ struct wrapper_args {
     std::string uid;
     std::string algo_id;
     bool dev_mode;
+    bool binary_algo;
 };
 
 namespace {
@@ -31,6 +35,12 @@ process_arguments(int argc, const char** argv)
 
     program.add_argument("-D", "--dev")
         .help("Enable development features")
+        .default_value(false)
+        .implicit_value(true)
+        .nargs(0);
+
+    program.add_argument("-B", "--binary")
+        .help("Treat this algorithm as a binary shared library")
         .default_value(false)
         .implicit_value(true)
         .nargs(0);
@@ -85,6 +95,7 @@ process_arguments(int argc, const char** argv)
         program.get<std::string>("--uid"),
         program.get<std::string>("--algo_id"),
         program.get<bool>("--dev"),
+        program.get<bool>("--binary"),
     };
 }
 } // namespace
@@ -102,8 +113,8 @@ main(int argc, const char** argv)
 {
     std::signal(SIGINT, catch_sigint);
     using comms = nutc::comms::ExchangeProxy;
-    auto [verbosity, uid, algo_id, development_mode] = process_arguments(argc, argv);
-    pybind11::scoped_interpreter guard{};
+    auto [verbosity, uid, algo_id, development_mode, binary_algo] =
+        process_arguments(argc, argv);
 
     nutc::limits::set_memory_limit(1024);
 
@@ -126,9 +137,19 @@ main(int argc, const char** argv)
     comms::wait_for_start_time();
 
     comms exchange_conn{};
-    nutc::pywrapper::create_api_module(exchange_conn.market_order_func());
-    nutc::pywrapper::run_code_init(algo.value());
+    if (binary_algo) {
+        nutc::wrapper::BinaryWrapper wrapper(
+            algo.value(), trader_id, exchange_conn.market_order_func()
+        );
+        exchange_conn.main_event_loop(wrapper);
+    }
+    else {
+        pybind11::scoped_interpreter guard{};
+        nutc::wrapper::PyWrapper wrapper(
+            algo.value(), trader_id, exchange_conn.market_order_func()
+        );
+        exchange_conn.main_event_loop(wrapper);
+    }
 
-    exchange_conn.main_event_loop(trader_id);
     return 0;
 }

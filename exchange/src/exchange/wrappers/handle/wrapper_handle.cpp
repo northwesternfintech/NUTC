@@ -1,12 +1,7 @@
 #include "wrapper_handle.hpp"
 
-#include "exchange/wrappers/messaging/async_pipe_runner.hpp"
-#include "shared/util.hpp"
-
 #include <boost/asio.hpp>
 #include <fmt/format.h>
-
-#include <iostream>
 
 namespace {
 std::string
@@ -14,6 +9,16 @@ quote_id(std::string user_id)
 {
     std::replace(user_id.begin(), user_id.end(), '-', ' ');
     return user_id;
+}
+
+std::vector<std::string>
+add_binary_flag(std::vector<std::string> args, bool is_binary)
+{
+    if (is_binary) {
+        args.push_back("--binary");
+    }
+
+    return args;
 }
 
 } // namespace
@@ -49,13 +54,16 @@ WrapperHandle::~WrapperHandle()
 WrapperHandle::WrapperHandle(
     const std::string& remote_uid, const std::string& algo_id
 ) :
-    WrapperHandle({"--uid", quote_id(remote_uid), "--algo_id", quote_id(algo_id)})
+    WrapperHandle(add_binary_flag(
+        {"--uid", quote_id(remote_uid), "--algo_id", quote_id(algo_id)}, false
+    ))
 {}
 
-WrapperHandle::WrapperHandle(const std::string& algo_path) :
-    WrapperHandle(
-        {"--uid", quote_id(algo_path), "--algo_id", quote_id(algo_path), "--dev"}
-    )
+WrapperHandle::WrapperHandle(const std::string& algo_path, bool is_binary_algo) :
+    WrapperHandle(add_binary_flag(
+        {"--uid", quote_id(algo_path), "--algo_id", quote_id(algo_path), "--dev"},
+        is_binary_algo
+    ))
 {}
 
 void
