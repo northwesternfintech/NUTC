@@ -40,9 +40,9 @@ struct match {
         std::string ticker, util::Side side, double price, double quantity,
         std::string bid, std::string sid, double bcap, double scap
     ) :
-        ticker(std::move(ticker)),
-        side(side), price(price), quantity(quantity), buyer_id(std::move(bid)),
-        seller_id(std::move(sid)), buyer_capital(bcap), seller_capital(scap)
+        ticker(std::move(ticker)), side(side), price(price), quantity(quantity),
+        buyer_id(std::move(bid)), seller_id(std::move(sid)), buyer_capital(bcap),
+        seller_capital(scap)
     {}
 };
 
@@ -59,9 +59,7 @@ struct orderbook_update {
 
     orderbook_update(
         std::string ticker, util::Side side, double price, double quantity
-    ) :
-        ticker(std::move(ticker)),
-        side(side), price(price), quantity(quantity)
+    ) : ticker(std::move(ticker)), side(side), price(price), quantity(quantity)
     {}
 
     bool operator==(const orderbook_update& other) const = default;
@@ -75,9 +73,7 @@ struct tick_update {
 
     explicit tick_update(
         std::vector<orderbook_update> ob_updates, std::vector<match> matches
-    ) :
-        ob_updates(std::move(ob_updates)),
-        matches(std::move(matches))
+    ) : ob_updates(std::move(ob_updates)), matches(std::move(matches))
     {}
 };
 

@@ -75,16 +75,9 @@ get_main_logger()
     class ____dummy_##category // makes you add a semicolon
 
 // Create loggers here for every category
-CREATE_LOG_CATEGORY(matching);
-CREATE_LOG_CATEGORY(kafka);
-CREATE_LOG_CATEGORY(firebase_fetching);
-CREATE_LOG_CATEGORY(client_spawning);
-CREATE_LOG_CATEGORY(rabbitmq);
-CREATE_LOG_CATEGORY(dev_mode);
-CREATE_LOG_CATEGORY(events);
-CREATE_LOG_CATEGORY(sandbox);
-CREATE_LOG_CATEGORY(tick_scheduler);
-CREATE_LOG_CATEGORY(retail_bot);
+CREATE_LOG_CATEGORY(sandbox_server);
+CREATE_LOG_CATEGORY(pipe_reader);
+CREATE_LOG_CATEGORY(testing);
 
 #undef CREATE_LOG_CATEGORY
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)

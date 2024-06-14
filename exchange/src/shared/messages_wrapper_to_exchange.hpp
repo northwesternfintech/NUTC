@@ -10,6 +10,7 @@ namespace messages {
 
 /**
  * @brief Sent by clients to the exchange to indicate they're initialized
+ * TODO: remove/replace
  */
 struct init_message {
     bool placeholder = false;
@@ -22,11 +23,7 @@ struct market_order {
     double quantity;
     double price;
 
-    market_order(util::Side side, std::string ticker, double quantity, double price) :
-        side(side), ticker(ticker), quantity(quantity), price(price)
-    {}
-
-    market_order() = default;
+    bool operator==(const market_order& other) const = default;
 };
 
 } // namespace messages

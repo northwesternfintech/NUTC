@@ -2,28 +2,32 @@
 #include "exchange/algos/algo_manager.hpp"
 #include "exchange/config/dynamic/argparse.hpp"
 #include "exchange/config/dynamic/config.hpp"
-#include "exchange/metrics/on_tick_metrics.hpp"
+#include "exchange/config/dynamic/ticker_config.hpp"
 #include "exchange/tick_scheduler/tick_scheduler.hpp"
+#include "exchange/tickers/matching_cycle/base/base_strategy.hpp"
+#include "exchange/tickers/matching_cycle/cycle_strategy.hpp"
+#include "exchange/tickers/matching_cycle/dev/dev_strategy.hpp"
+#include "exchange/tickers/ticker.hpp"
 #include "logging.hpp"
 #include "sandbox/server/crow.hpp"
 #include "shared/util.hpp"
-#include "tickers/manager/ticker_manager.hpp"
 #include "traders/trader_container.hpp"
 #include "wrappers/creation/rmq_wrapper_init.hpp"
-#include "wrappers/messaging/consumer.hpp"
 
 #include <csignal>
 
 namespace {
 using namespace nutc; // NOLINT
 
-void
-initialize_bots(std::shared_ptr<engine_manager::EngineManager> manager)
+std::unordered_map<std::string, matching::ticker_info>
+load_tickers()
 {
+    std::unordered_map<std::string, matching::ticker_info> ret;
     const auto& tickers = config::Config::get().get_tickers();
-    for (const auto& ticker : tickers) {
-        manager->add_engine(ticker);
+    for (const config::ticker_config& ticker : tickers) {
+        ret.emplace(ticker.TICKER, ticker);
     }
+    return ret;
 }
 
 void
@@ -45,18 +49,21 @@ initialize_algos(const auto& mode)
     );
 }
 
-auto
-create_runner(auto manager)
+std::shared_ptr<matching::MatchingCycle>
+create_cycle(const auto& mode)
 {
-    auto consumer = std::make_shared<rabbitmq::WrapperConsumer>(manager);
-    auto metrics = std::make_shared<metrics::OnTickMetricsPush>(manager);
+    auto tickers = load_tickers();
+    auto traders = traders::TraderContainer::get_instance().get_traders();
+    auto exp = config::Config::get().constants().ORDER_EXPIRATION_TICKS;
 
-    ticks::TickJobScheduler scheduler;
-    scheduler.on_tick(consumer, /*priority=*/1, "consumer");
-    scheduler.on_tick(manager, /*priority=*/2, "Matching Engine");
-    scheduler.on_tick(metrics, /*priority=*/3, "Metrics Pushing");
-    return scheduler;
+    if (mode == util::Mode::normal) {
+        return std::make_shared<matching::BaseMatchingCycle>(tickers, traders, exp);
+    }
+    else {
+        return std::make_shared<matching::DevMatchingCycle>(tickers, traders, exp);
+    }
 }
+
 } // namespace
 
 int
@@ -65,11 +72,11 @@ main(int argc, const char** argv)
     logging::init(quill::LogLevel::Info);
 
     std::signal(SIGINT, [](auto) { std::exit(0); });
+
+    // Wrappers may unexpectedly exit for many reasons. Should not affect the exchange
     std::signal(SIGPIPE, SIG_IGN);
 
     auto mode = config::process_arguments(argc, argv);
-
-    auto engine_manager = std::make_shared<engine_manager::EngineManager>();
 
     // Algos must init before wrappers
     initialize_algos(mode);
@@ -77,11 +84,12 @@ main(int argc, const char** argv)
     if (mode != util::Mode::bots_only)
         initialize_wrappers();
 
-    initialize_bots(engine_manager);
 
     sandbox::CrowServer::get_instance();
 
+    auto cycle = create_cycle(mode);
     auto tick_hz = config::Config::get().constants().TICK_HZ;
-    create_runner(engine_manager).run(tick_hz);
+    nutc::ticks::run([&cycle](uint64_t tick) { cycle->on_tick(tick); }, tick_hz);
+
     return 0;
 }

@@ -1,40 +1,42 @@
 #pragma once
 
-#include "exchange/tick_scheduler/tick_observer.hpp"
-#include "exchange/tickers/manager/ticker_manager.hpp"
+#include "exchange/tickers/ticker.hpp"
 
 #include <prometheus/family.h>
 #include <prometheus/gauge.h>
 #include <prometheus/registry.h>
 
+#include <unordered_map>
+
 namespace nutc {
 namespace metrics {
 namespace ps = prometheus;
 
-class OnTickMetricsPush : public ticks::TickObserver {
-    std::shared_ptr<engine_manager::EngineManager> manager_;
+class TickerMetricsPusher {
     ps::Family<ps::Gauge>& pnl_gauge;
     ps::Family<ps::Gauge>& capital_gauge;
     ps::Family<ps::Gauge>& portfolio_gauge;
     ps::Family<ps::Gauge>& current_tick;
 
-    OnTickMetricsPush(
-        std::shared_ptr<ps::Registry> reg,
-        std::shared_ptr<engine_manager::EngineManager> manager
-    );
+    TickerMetricsPusher(std::shared_ptr<ps::Registry> reg);
 
 public:
-    OnTickMetricsPush(std::shared_ptr<engine_manager::EngineManager> manager);
+    TickerMetricsPusher();
 
     void record_current_tick(uint64_t tick_num);
-    void record_trader_metrics();
+    void
+    record_trader_metrics(std::unordered_map<std::string, matching::ticker_info> tickers
+    );
 
-    OnTickMetricsPush& operator=(const OnTickMetricsPush&) = delete;
-    OnTickMetricsPush(const OnTickMetricsPush&) = delete;
-    OnTickMetricsPush& operator=(OnTickMetricsPush&&) = delete;
-    OnTickMetricsPush(OnTickMetricsPush&&) = delete;
+    TickerMetricsPusher& operator=(const TickerMetricsPusher&) = delete;
+    TickerMetricsPusher(const TickerMetricsPusher&) = delete;
+    TickerMetricsPusher& operator=(TickerMetricsPusher&&) = delete;
+    TickerMetricsPusher(TickerMetricsPusher&&) = delete;
 
-    void on_tick(uint64_t tick_num) override;
+    void push(
+        std::unordered_map<std::string, matching::ticker_info> tickers,
+        uint64_t tick_num
+    );
 };
 } // namespace metrics
 } // namespace nutc

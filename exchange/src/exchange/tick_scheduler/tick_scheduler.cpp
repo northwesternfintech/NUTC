@@ -1,28 +1,28 @@
 #include "tick_scheduler.hpp"
 
+#include <chrono>
+
+#include <thread>
+
 namespace nutc {
 namespace ticks {
+using std::chrono::milliseconds;
+using steady_clock = std::chrono::steady_clock;
 
 void
-TickJobScheduler::notify_tick_()
+run(std::function<void(uint64_t)> function, uint16_t tick_hz)
 {
-    for (const auto& job : on_tick_jobs_) {
-        job.job_ptr->on_tick(current_tick_);
-    }
-}
+    static constexpr uint16_t MS_PER_SECOND = 1000;
 
-void
-TickJobScheduler::run(uint16_t tick_hz)
-{
-    delay_time_ = milliseconds(MS_PER_SECOND / tick_hz);
-    using steady_clock = std::chrono::steady_clock;
-    auto next_tick = steady_clock::now() + delay_time_;
+    const auto delay_time = milliseconds(MS_PER_SECOND / tick_hz);
+    auto next_tick = steady_clock::now() + delay_time;
+
+    uint64_t current_tick = 0;
 
     while (true) {
         std::this_thread::sleep_until(next_tick);
-        current_tick_++;
-        notify_tick_();
-        next_tick = steady_clock::now() + delay_time_;
+        function(current_tick++);
+        next_tick = steady_clock::now() + delay_time;
     }
 }
 

@@ -62,10 +62,10 @@ Engine::create_match(const stored_order& buyer, const stored_order& seller)
     };
 
     match.buyer->process_order_match(
-        {util::Side::buy, match.ticker, match.quantity, match.price * (1 + ORDER_FEE)}
+        {util::Side::buy, match.ticker, match.quantity, match.price * (1 + order_fee)}
     );
     match.seller->process_order_match(
-        {util::Side::sell, match.ticker, match.quantity, match.price * (1 - ORDER_FEE)}
+        {util::Side::sell, match.ticker, match.quantity, match.price * (1 - order_fee)}
     );
     return match;
 }
@@ -78,7 +78,7 @@ Engine::order_can_execute_(
     double quantity = order_quantity(buyer, seller);
     double price = order_price(buyer, seller);
     if (!buyer.trader->can_leverage()
-        && buyer.trader->get_capital() < (1 + ORDER_FEE) * price * quantity) {
+        && buyer.trader->get_capital() < (1 + order_fee) * price * quantity) {
         orderbook.remove_order(buyer.order_index);
         return false;
     }
