@@ -24,6 +24,12 @@ struct market_order {
     double price;
 
     bool operator==(const market_order& other) const = default;
+
+    market_order(util::Side side, std::string ticker, double quantity, double price) :
+        side(side), ticker(std::move(ticker)), quantity(quantity), price(price)
+    {}
+
+    market_order() = default;
 };
 
 } // namespace messages
