@@ -29,6 +29,8 @@ RUN if [ "$firebase_emulator" = "false" ]; then \
 
 RUN cmake --build build --config Release -j6
 
+ENV NUTC_SPAWNER_BINARY_PATH="/bin/NUTC-linter-spawner"
+
 RUN mv /app/linter/build/NUTC-linter-spawner /bin/NUTC-linter-spawner
 RUN mv /app/linter/build/NUTC-linter /bin/NUTC-linter
 

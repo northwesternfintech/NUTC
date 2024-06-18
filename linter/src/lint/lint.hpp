@@ -1,19 +1,13 @@
 #pragma once
 
-#include "firebase/fetching.hpp"
-#include "mock_api/mock_api.hpp"
-#include "pywrapper/runtime.hpp"
-
-#include <pybind11/pybind11.h>
+#include "lint/lint_result.hpp"
 
 #include <string>
 
 namespace nutc {
 namespace lint {
 
-[[nodiscard]] bool lint(
-    const std::string& uid, const std::string& algo_id, std::stringstream& output_stream
-);
+[[nodiscard]] lint_result lint(const std::string& algo_code);
 
 } // namespace lint
 } // namespace nutc

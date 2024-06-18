@@ -15,9 +15,13 @@ class Recipe(ConanFile):
         self.requires("libcurl/8.6.0")
         self.requires("glaze/2.4.0")
         self.requires("pybind11/2.12.0")
+        self.requires("boost/1.83.0")
 
         self.requires("argparse/3.0")
         self.requires("crowcpp-crow/1.1.0")
+
+    def configure(self):
+        self.options["boost"].without_test = True
 
     def build_requirements(self):
         self.test_requires("gtest/1.13.0")

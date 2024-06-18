@@ -1,45 +1,61 @@
 version: '3'
 
-env:
+vars:
   NAME: NUTC-linter
 
+  RELEASE_BUILD: "false"
+  RELEASE_PRESET: "ci-ubuntu"
+
 tasks:
+  start-nix:
+    cmds:
+      - |
+        if [ -z "${IN_NIX_SHELL}" ]; then
+          nix-shell {{.TASKFILE_DIR}}/../config/shell.nix
+        else
+          echo "Already in a nix-shell."
+        fi
+
   deps:
     dir: '{{.USER_WORKING_DIR}}'
+    vars:
+      BUILD_TYPE: '{{if eq .RELEASE_BUILD "true"}}Release{{else}}Debug{{end}}'
     cmds:
-      - conan install . -s build_type=Debug -b missing -pr cpp20 -pr:b cpp20
+      - conan install . -s build_type={{.BUILD_TYPE}} -b missing -pr cpp20 -pr:b cpp20
 
-  format:
+  fmt:
     dir: '{{.USER_WORKING_DIR}}'
     cmds:
       - cmake -D FIX=YES -P cmake/lint.cmake
+      - cmake -D FIX=YES -P cmake/spell.cmake
     
   init:
     dir: '{{.USER_WORKING_DIR}}'
+    vars:
+      PRESET: '{{if eq .RELEASE_BUILD "true"}}{{.RELEASE_PRESET}}{{else}}dev{{end}}'
     preconditions:
       - test -f CMakeUserPresets.json
     cmds:
-      - cmake --preset=dev
+      - cmake --preset={{.PRESET}}
 
   build:
     dir: '{{.USER_WORKING_DIR}}'
+    vars:
+      CMAKE_SUFFIX: '{{if eq .RELEASE_BUILD "true"}}build --config Release{{else}}--preset=dev{{end}}'
     preconditions:
       - test -f CMakeUserPresets.json
     cmds:
-      - cmake --build --preset=dev -j
+      - cmake --build {{.CMAKE_SUFFIX}} -j 
 
-  build-local-dev:
-    preconditions:
-      - test -f CMakeUserPresets.json
+  run:
+    env:
+      NUTC_SPAWNER_BINARY_PATH: '{{if eq .RELEASE_BUILD "true"}}./build/NUTC-linter-spawner{{else}}./build/dev/NUTC-linter-spawner{{end}}'
+    vars:
+      LINTER_PATH: '{{if eq .RELEASE_BUILD "true"}}build/{{.NAME}}{{else}}build/dev/{{.NAME}}{{end}}'
     cmds:
-      - cmake --preset=dev -DNUTC_LINTER_LOCAL_DEV_MODE=ON
-      - cmake --build --preset=dev -j
+      - task: built
+      - ./{{ .LINTER_PATH }}
 
-  run-dev:
-    cmds:
-      - task: build-local-dev
-      - sudo mv ./build/dev/{{.NAME}}-spawner /usr/local/bin/{{.NAME}}-spawner
-      - ./build/dev/{{.NAME}} 
   run-v:
     env:
       SPDLOG_LEVEL: trace
@@ -47,10 +63,17 @@ tasks:
       - task: run
 
   test:
-    dir: '{{.USER_WORKING_DIR}}'
+    env:
+      NUTC_SPAWNER_BINARY_PATH: '../NUTC-linter-spawner'
+
+    dir: '{{if eq .RELEASE_BUILD "true"}}./build{{else}}.{{end}}'
+    vars:
+      DEV_TEST_FLAGS: '--preset=dev'
+      RELEASE_TEST_FLAGS: '--output-on-failure --no-tests=error -C Release'
+      TEST_FLAGS: '{{if eq .RELEASE_BUILD "true"}}{{.RELEASE_TEST_FLAGS}}{{else}}{{.DEV_TEST_FLAGS}}{{end}}'
     cmds:
       - task: build
-      - ctest --preset=dev
+      - ctest {{.TEST_FLAGS}}
 
   docs:
     dir: '{{.USER_WORKING_DIR}}'
@@ -62,11 +85,6 @@ tasks:
     dir: '{{.USER_WORKING_DIR}}'
     cmds:
       - cmake --build --preset=dev -t clean
-
-  format:
-    dir: '{{.USER_WORKING_DIR}}'
-    cmds:
-      - cmake -D FIX=YES -P cmake/lint.cmake
 
   default:
     cmds:

@@ -1,5 +1,8 @@
 #include "runtime.hpp"
 
+#include <fmt/format.h>
+#include <pybind11/embed.h>
+
 namespace py = pybind11;
 
 namespace nutc {
@@ -22,7 +25,28 @@ create_api_module(
         sys_modules["nutc_api"] = m;
 
         py::exec(R"(import nutc_api)");
-    } catch (const std::exception& e) {
+    } catch (...) {
+        return false;
+    }
+    return true;
+}
+
+bool
+supress_stdout()
+{
+    try {
+        py::exec(R"(
+    import sys
+    import os
+    class SuppressOutput(object):
+        def write(self, txt):
+            pass  # Do nothing on write
+        def flush(self):
+            pass  # Do nothing on flush
+
+    sys.stdout = SuppressOutput()
+    )");
+    } catch (...) {
         return false;
     }
     return true;
@@ -31,7 +55,6 @@ create_api_module(
 std::optional<std::string>
 import_py_code(const std::string& code)
 {
-    log_i(mock_runtime, "Importing algorithm code into python interpreter");
     try {
         py::exec(code);
     } catch (const std::exception& e) {
@@ -47,7 +70,6 @@ import_py_code(const std::string& code)
 std::optional<std::string>
 run_initialization()
 {
-    log_i(mock_runtime, "Running initialization code");
     try {
         py::exec("strategy = Strategy()");
     }
@@ -73,7 +95,6 @@ run_initialization()
 std::optional<std::string>
 trigger_callbacks()
 {
-    log_i(mock_runtime, "Triggering callbacks");
     try {
         py::exec(R"(place_market_order("BUY", "ETH", 1.0, 1.0))");
     } catch (const std::exception& e) {

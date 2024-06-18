@@ -1,5 +1,13 @@
 #include "fetching.hpp"
 
+#include "config.h"
+
+#include <curl/curl.h>
+#include <fmt/core.h>
+
+#include <optional>
+#include <regex>
+
 namespace nutc {
 namespace client {
 
@@ -14,16 +22,6 @@ get_firebase_endpoint(const std::string& params)
 }
 
 void
-print_algo_info(const glz::json_t& algo, const std::string& algo_id)
-{
-    log_i(firebase, "Running {}", algo["name"].get<std::string>());
-    log_i(firebase, "Description: {}", algo["description"].get<std::string>());
-    log_i(firebase, "Upload date: {}", algo["uploadDate"].get<std::string>());
-    log_d(firebase, "Downloading at url {}", algo["downloadURL"].get<std::string>());
-    log_i(firebase, "Algo id: {}", algo_id);
-}
-
-void
 set_lint_result(const std::string& uid, const std::string& algo_id, bool succeeded)
 {
     std::string success = "\"success\"";
@@ -31,7 +29,7 @@ set_lint_result(const std::string& uid, const std::string& algo_id, bool succeed
     std::string params =
         fmt::format("users/{}/algos/{}/lintResults.json", uid, algo_id);
 
-    glz::json_t res = firebase_request(
+    firebase_request(
         "PUT", get_firebase_endpoint(params), succeeded ? success : failure
     );
 }
@@ -52,15 +50,13 @@ set_lint_success(
 )
 {
     std::string json_success = "\"" + replaceDisallowedValues(success) + "\"";
-    log_i(main, "Setting lint success: {}", json_success);
     std::string params1 =
         fmt::format("users/{}/algos/{}/lintSuccessMessage.json", uid, algo_id);
     std::string params2 = fmt::format("users/{}/latestAlgoId.json", uid);
 
-    glz::json_t res =
-        firebase_request("PUT", get_firebase_endpoint(params1), json_success);
-    glz::json_t res2 =
-        firebase_request("PUT", get_firebase_endpoint(params2), "\"" + algo_id + "\"");
+    firebase_request("PUT", get_firebase_endpoint(params1), json_success);
+
+    firebase_request("PUT", get_firebase_endpoint(params2), "\"" + algo_id + "\"");
     set_lint_result(uid, algo_id, true);
 }
 
@@ -70,15 +66,13 @@ set_lint_failure(
 )
 {
     std::string json_failure = "\"" + replaceDisallowedValues(failure) + "\"";
-    log_e(main, "Setting lint failure: {}", json_failure);
     std::string params =
         fmt::format("users/{}/algos/{}/lintFailureMessage.json", uid, algo_id);
-    glz::json_t res =
-        firebase_request("PUT", get_firebase_endpoint(params), json_failure);
+    firebase_request("PUT", get_firebase_endpoint(params), json_failure);
     set_lint_result(uid, algo_id, false);
 }
 
-glz::json_t
+std::optional<glz::json_t>
 get_user_info(const std::string& uid)
 {
     std::string url = fmt::format("users/{}.json", uid);
@@ -95,26 +89,30 @@ write_callback(void* contents, size_t size, size_t nmemb, void* userp)
     return size * nmemb;
 }
 
-std::string
+std::optional<std::string>
 storage_request(const std::string& firebase_url)
 {
-    CURL* curl;
-    CURLcode res;
     std::string readBuffer;
 
-    curl = curl_easy_init();
+    CURL* curl = curl_easy_init();
     if (curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, firebase_url.c_str());
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
-
-        res = curl_easy_perform(curl);
-
+        CURLcode res = curl_easy_setopt(curl, CURLOPT_URL, firebase_url.c_str());
         if (res != CURLE_OK) {
-            std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res)
-                      << std::endl;
+            return std::nullopt;
+        }
+        res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+        if (res != CURLE_OK) {
+            return std::nullopt;
+        }
+        res = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+        if (res != CURLE_OK) {
+            return std::nullopt;
         }
 
+        res = curl_easy_perform(curl);
+        if (res != CURLE_OK) {
+            return std::nullopt;
+        }
         curl_easy_cleanup(curl);
     }
 
@@ -124,52 +122,42 @@ storage_request(const std::string& firebase_url)
 std::optional<std::string>
 get_algo(const std::string& uid, const std::string& algo_id)
 {
-    glz::json_t user_info = get_user_info(uid);
-    // if not has "algos"
-    if (!user_info.contains("algos")) {
-        log_w(
-            firebase, "User {} has no algos. Will not participate in simulation.", uid
-        );
+    auto maybe_user_info = get_user_info(uid);
+    if (!maybe_user_info.has_value()) {
         return std::nullopt;
     }
-    if (!user_info["algos"].contains(algo_id)) {
-        log_w(firebase, "User {} does not have algo id {}.", uid, algo_id);
+    auto user_info = maybe_user_info.value();
+    // if not has "algos"
+    if (!user_info.contains("algos") || !user_info["algos"].contains(algo_id)) {
         return std::nullopt;
     }
     glz::json_t algo_info = user_info["algos"][algo_id];
     std::string downloadURL = algo_info["downloadURL"].get<std::string>();
-    print_algo_info(algo_info, algo_id);
-    std::string algo_file = storage_request(downloadURL);
+    auto algo_file = storage_request(downloadURL);
     return algo_file;
 }
 
 nutc::client::LintingResultOption
 get_algo_status(const std::string& uid, const std::string& algo_id)
 {
-    glz::json_t user_info = get_user_info(uid);
+    auto maybe_user_info = get_user_info(uid);
+    if (!maybe_user_info.has_value()) {
+        return nutc::client::LintingResultOption::UNKNOWN;
+    }
+    auto user_info = maybe_user_info.value();
     // if not has "algos"
     if (!user_info.contains("algos")) {
-        log_w(
-            firebase, "User {} has no algos. Will not participate in simulation.", uid
-        );
         return nutc::client::LintingResultOption::UNKNOWN;
     }
 
     // check if algo id exists
     if (!user_info["algos"].contains(algo_id)) {
-        log_w(firebase, "User {} does not have algo id {}.", uid, algo_id);
         return nutc::client::LintingResultOption::UNKNOWN;
     }
     glz::json_t algo_info = user_info["algos"][algo_id];
 
     // check if this algo id has lint results
     if (!algo_info.contains("lintResults")) {
-        log_w(
-            firebase,
-            "User {} algoid {} has no lint result, assuming unknown.",
-            uid,
-            algo_id
-        );
         return nutc::client::LintingResultOption::UNKNOWN;
     }
 
@@ -185,35 +173,54 @@ get_algo_status(const std::string& uid, const std::string& algo_id)
     }
 }
 
-glz::json_t
+std::optional<glz::json_t>
 firebase_request(
     const std::string& method, const std::string& url, const std::string& data
 )
 {
-    CURL* curl;
-    CURLcode res;
     std::string readBuffer;
 
-    curl = curl_easy_init();
+    CURL* curl = curl_easy_init();
     if (curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+        CURLcode res = curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        if (res != CURLE_OK) {
+            return std::nullopt;
+        }
+        res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+        if (res != CURLE_OK) {
+            return std::nullopt;
+        }
+        res = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+        if (res != CURLE_OK) {
+            return std::nullopt;
+        }
 
         if (method == "POST") {
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
+            res = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
+            if (res != CURLE_OK) {
+                return std::nullopt;
+            }
         }
         else if (method == "PUT") {
-            curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
+            res = curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
+            if (res != CURLE_OK) {
+                return std::nullopt;
+            }
+            res = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
+            if (res != CURLE_OK) {
+                return std::nullopt;
+            }
         }
         else if (method == "DELETE") {
-            curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+            res = curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+            if (res != CURLE_OK) {
+                return std::nullopt;
+            }
         }
 
         res = curl_easy_perform(curl);
         if (res != CURLE_OK) {
-            log_e(firebase, "curl_easy_perform() failed: {}", curl_easy_strerror(res));
+            return std::nullopt;
         }
 
         curl_easy_cleanup(curl);
@@ -221,8 +228,7 @@ firebase_request(
     glz::json_t json{};
     auto error = glz::read_json(json, readBuffer);
     if (error) {
-        std::string descriptive_error = glz::format_error(error, readBuffer);
-        log_e(firebase, "glz::read_json() failed: {}", descriptive_error);
+        return std::nullopt;
     }
     return json;
 }
