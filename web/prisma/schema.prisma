@@ -1,0 +1,42 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "rhel-openssl-1.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  uid       String   @id
+  email     String   @unique
+  profile	Profile?
+  Resume    Resume[]
+
+  @@map("users")
+}
+
+model Profile {
+  firstName String
+  lastName  String
+  school	String
+  about     String
+
+  uid		String   @id
+  user      User     @relation(fields: [uid], references: [uid])
+
+  @@map("profiles")
+}
+
+model Resume {
+  key		String    @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  uid		String
+  user		User   @relation(fields: [uid], references: [uid])
+
+  @@index([uid])
+  @@map("resumes")
+}
