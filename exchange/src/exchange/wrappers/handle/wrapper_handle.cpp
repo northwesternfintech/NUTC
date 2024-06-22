@@ -1,10 +1,10 @@
 #include "wrapper_handle.hpp"
 
 #include "exchange/wrappers/messaging/async_pipe_runner.hpp"
-#include "shared/util.hpp"
-#include "shared/firebase/firebase.hpp"
 #include "shared/file_operations/file_operations.hpp"
+#include "shared/firebase/firebase.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
+#include "shared/util.hpp"
 
 #include <boost/asio.hpp>
 #include <fmt/format.h>
@@ -51,7 +51,8 @@ WrapperHandle::~WrapperHandle()
 
 WrapperHandle::WrapperHandle(
     const std::string& remote_uid, const std::string& algo_id
-) : WrapperHandle(
+) :
+    WrapperHandle(
         {"--uid", quote_id(remote_uid), "--algo_id", quote_id(algo_id)},
         nutc::firebase::get_algo(remote_uid, algo_id)
     )
@@ -74,10 +75,14 @@ WrapperHandle::block_on_init()
     throw std::runtime_error("Received non-init message on initialization");
 }
 
-WrapperHandle::WrapperHandle(const std::vector<std::string>& args, const std::optional<std::string>& algorithm)
+WrapperHandle::WrapperHandle(
+    const std::vector<std::string>& args, const std::optional<std::string>& algorithm
+)
 {
     if (!algorithm.has_value()) {
-        throw std::runtime_error("Received empty algorithm; cannot initiate empty wrapper");
+        throw std::runtime_error(
+            "Received empty algorithm; cannot initiate empty wrapper"
+        );
     }
 
     static const std::string path{wrapper_binary_path()};
@@ -94,7 +99,7 @@ WrapperHandle::WrapperHandle(const std::vector<std::string>& args, const std::op
     algorithm_t algorithm_message = algorithm_t(algorithm.value());
     auto encoded_message = glz::write_json(algorithm_message);
 
-    // writer_.send_message(encoded_message);
+    writer_.send_message(encoded_message);
     block_on_init();
 }
 

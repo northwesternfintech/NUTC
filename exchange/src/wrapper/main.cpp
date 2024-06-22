@@ -107,27 +107,24 @@ main(int argc, const char** argv)
 
     nutc::limits::set_memory_limit(1024);
 
-    std::optional<std::string> algo{};
-    std::string trader_id{};
+    comms exchange_conn{};
+    algorithm_t algorithm = exchange_conn.consume_algorithm();
+    std::string algorithm_str = algorithm.algorithm_content_str;
+
+    std::string trader_id = nutc::util::trader_id(uid, algo_id);
     if (development_mode) {
-        algo = nutc::file_ops::read_file_content(algo_id);
         trader_id = algo_id;
-    }
-    else {
-        algo = nutc::firebase::get_algo(uid, algo_id);
-        trader_id = nutc::util::trader_id(uid, algo_id);
     }
 
     // Send message to exchange to let it know we successfully initialized
     comms::publish_init_message();
-    if (!algo.has_value()) {
+    if (algorithm_str == "") {
         return 1;
     }
     comms::wait_for_start_time();
 
-    comms exchange_conn{};
     nutc::pywrapper::create_api_module(exchange_conn.market_order_func());
-    nutc::pywrapper::run_code_init(algo.value());
+    nutc::pywrapper::run_code_init(algorithm_str);
 
     exchange_conn.main_event_loop(trader_id);
     return 0;

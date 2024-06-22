@@ -4,8 +4,6 @@
 
 #include <string>
 
-#include <glaze/glaze.hpp>
-
 namespace nutc {
 namespace util {
 
@@ -18,7 +16,7 @@ std::string to_string(Side side);
 
 enum class Mode { dev, normal, bots_only };
 
-struct algorithm { // TODO: deprecate this into `algorithm_content`
+struct algorithm {
     const std::string UID;
     const std::string ALGO_ID;
 };

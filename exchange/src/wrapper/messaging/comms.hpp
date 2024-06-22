@@ -30,6 +30,9 @@ public:
 
     void main_event_loop(const std::string& uid);
 
+    static algorithm_t consume_algorithm();
+
+
 private:
     rate_limiter::RateLimiter limiter;
 
@@ -44,8 +47,9 @@ private:
         double price
     );
 
-    static algorithm_t consume_algorithm();
-    static std::variant<start_time, tick_update> consume_message();
+    template <typename T>
+    static T consume_message();
+
 };
 
 } // namespace comms

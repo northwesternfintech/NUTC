@@ -17,11 +17,13 @@ namespace comms {
 
 // todo: split into helpers
 
+using start_tick_variant_t = std::variant<start_time, tick_update>;
+
 void
 ExchangeProxy::main_event_loop(const std::string& uid)
 {
     while (true) {
-        std::variant<start_time, tick_update> data = consume_message();
+        auto data = consume_message<start_tick_variant_t>();
         std::visit(
             [&](auto&& arg) { process_message(std::forward<decltype(arg)>(arg), uid); },
             std::move(data)
@@ -102,33 +104,19 @@ ExchangeProxy::publish_message(const std::string& message)
 }
 
 algorithm_t
-ExchangeProxy::consume_algorithm() // TODO: merge with function right below this
-{
-    std::string buf{};
-    std::getline(std::cin, buf);
-    if (buf.empty())
-        throw std::runtime_error("Wrapper received empty buffer from stdin");
-
-    algorithm_t data{};
-    auto err = glz::read_json(data, buf);
-    if (err) {
-        std::string error = glz::format_error(err, buf);
-        throw std::runtime_error(
-            fmt::format("Failed to parse message with error: {}", error)
-        );
-    }
-    return data;
+ExchangeProxy::consume_algorithm() {
+    return consume_message<algorithm_t>();
 }
 
-std::variant<start_time, tick_update>
-ExchangeProxy::consume_message()
+template <typename T>
+T ExchangeProxy::consume_message()
 {
     std::string buf{};
     std::getline(std::cin, buf);
     if (buf.empty())
         throw std::runtime_error("Wrapper received empty buffer from stdin");
 
-    std::variant<start_time, tick_update> data{};
+    T data{};
     auto err = glz::read_json(data, buf);
     if (err) {
         std::string error = glz::format_error(err, buf);
@@ -162,11 +150,11 @@ ExchangeProxy::wait_for_start_time()
 {
     using nanoseconds = std::chrono::nanoseconds;
     using time_point = std::chrono::high_resolution_clock::time_point;
-    auto message = consume_message();
+    auto message = consume_message<start_tick_variant_t>();
 
     // Sandbox may get ob updates before it's initialized
     while (!std::holds_alternative<start_time>(message)) {
-        message = consume_message();
+        message = consume_message<start_tick_variant_t>();
     }
 
     start_time start = std::get<start_time>(message);

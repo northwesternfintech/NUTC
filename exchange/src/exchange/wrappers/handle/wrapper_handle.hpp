@@ -19,7 +19,10 @@ class WrapperHandle {
     PipeReader reader_{};
     PipeWriter writer_{};
 
-    WrapperHandle(const std::vector<std::string>& args, const std::optional<std::string>& algorithm);
+    WrapperHandle(
+        const std::vector<std::string>& args,
+        const std::optional<std::string>& algorithm
+    );
     void block_on_init();
 
     const fs::path& wrapper_binary_path();

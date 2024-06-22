@@ -78,11 +78,12 @@ struct tick_update {
 };
 
 struct algorithm_content {
-    const std::string algorithm_content_str;
+    std::string algorithm_content_str;
 
     algorithm_content() = default;
 
-    explicit algorithm_content(std::string algorithm) : algorithm_content_str(algorithm) {}
+    explicit algorithm_content(std::string algorithm) : algorithm_content_str(algorithm)
+    {}
 };
 
 } // namespace messages
