@@ -4,6 +4,8 @@
 
 #include <string>
 
+#include <glaze/glaze.hpp>
+
 namespace nutc {
 namespace util {
 
@@ -16,9 +18,13 @@ std::string to_string(Side side);
 
 enum class Mode { dev, normal, bots_only };
 
-struct algorithm {
+struct algorithm { // TODO: deprecate this into `algorithm_content`
     const std::string UID;
     const std::string ALGO_ID;
+};
+
+struct algorithm_content {
+    const std::string ALGORITHM;
 };
 
 constexpr bool
@@ -29,3 +35,12 @@ is_close_to_zero(double value, double epsilon = 1e-6)
 
 } // namespace util
 } // namespace nutc
+
+namespace glz {
+    template <>
+    struct meta<nutc::util::algorithm_content> {
+        static constexpr auto value = object(
+            "algorithm", &nutc::util::algorithm_content::ALGORITHM
+        );
+    };
+}
