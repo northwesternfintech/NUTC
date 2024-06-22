@@ -1,6 +1,6 @@
 #include "shared/config/config.h"
 #include "shared/file_operations/file_operations.hpp"
-#include "wrapper/firebase/firebase.hpp"
+#include "shared/firebase/firebase.hpp"
 #include "wrapper/logging.hpp"
 #include "wrapper/messaging/comms.hpp"
 #include "wrapper/pywrapper/pywrapper.hpp"

@@ -158,7 +158,6 @@ add_library(
     WRAPPER_lib OBJECT
     
     src/wrapper/messaging/comms.cpp
-    src/wrapper/firebase/firebase.cpp
     src/wrapper/pywrapper/pywrapper.cpp
     src/wrapper/pywrapper/rate_limiter.cpp
     # Utils
@@ -208,6 +207,7 @@ target_link_libraries(WRAPPER_exe PRIVATE ${Python3_LIBRARIES})
 
 add_library(SHARED_lib OBJECT     
     src/shared/file_operations/file_operations.cpp
+    src/shared/firebase/firebase.cpp
     src/shared/util.cpp
 )
 
@@ -219,6 +219,7 @@ target_include_directories(
 
 target_link_libraries(SHARED_lib PUBLIC fmt::fmt)
 target_link_libraries(SHARED_lib PUBLIC yaml-cpp::yaml-cpp)
+target_link_libraries(SHARED_lib PUBLIC glaze::glaze)
 
 target_link_libraries(EXCHANGE_lib PUBLIC SHARED_lib)
 target_link_libraries(EXCHANGE_exe PRIVATE SHARED_lib)
