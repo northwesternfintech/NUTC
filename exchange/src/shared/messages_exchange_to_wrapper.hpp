@@ -77,6 +77,14 @@ struct tick_update {
     {}
 };
 
+struct algorithm_content {
+    const std::string algorithm_content_str;
+
+    algorithm_content() = default;
+
+    explicit algorithm_content(std::string algorithm) : algorithm_content_str(algorithm) {}
+};
+
 } // namespace messages
 } // namespace nutc
 
@@ -114,4 +122,12 @@ struct glz::meta<nutc::messages::start_time> {
     using t = nutc::messages::start_time;
     static constexpr auto value = // NOLINT
         object(&t::start_time_ns);
+};
+
+/// \cond
+template <>
+struct glz::meta<nutc::messages::algorithm_content> {
+    using t = nutc::messages::algorithm_content;
+    static constexpr auto value = // NOLINT
+        object(&t::algorithm_content_str);
 };

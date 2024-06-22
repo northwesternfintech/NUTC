@@ -4,6 +4,7 @@
 #include "shared/util.hpp"
 #include "shared/firebase/firebase.hpp"
 #include "shared/file_operations/file_operations.hpp"
+#include "shared/messages_exchange_to_wrapper.hpp"
 
 #include <boost/asio.hpp>
 #include <fmt/format.h>
@@ -89,7 +90,8 @@ WrapperHandle::WrapperHandle(const std::vector<std::string>& args, const std::op
         bp::std_out > pipe_in_ptr
     );
 
-    struct nutc::util::algorithm_content algorithm_message = {algorithm.value()};
+    using algorithm_t = nutc::messages::algorithm_content;
+    algorithm_t algorithm_message = algorithm_t(algorithm.value());
     auto encoded_message = glz::write_json(algorithm_message);
 
     // writer_.send_message(encoded_message);

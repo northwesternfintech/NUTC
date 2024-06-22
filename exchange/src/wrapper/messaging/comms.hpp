@@ -14,6 +14,7 @@ using tick_update = nutc::messages::tick_update;
 using orderbook_update = nutc::messages::orderbook_update;
 using match = nutc::messages::match;
 using start_time = nutc::messages::start_time;
+using algorithm_t = nutc::messages::algorithm_content;
 
 namespace nutc {
 
@@ -43,6 +44,7 @@ private:
         double price
     );
 
+    static algorithm_t consume_algorithm();
     static std::variant<start_time, tick_update> consume_message();
 };
 

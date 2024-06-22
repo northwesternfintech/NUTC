@@ -101,6 +101,25 @@ ExchangeProxy::publish_message(const std::string& message)
     lock.unlock();
 }
 
+algorithm_t
+ExchangeProxy::consume_algorithm() // TODO: merge with function right below this
+{
+    std::string buf{};
+    std::getline(std::cin, buf);
+    if (buf.empty())
+        throw std::runtime_error("Wrapper received empty buffer from stdin");
+
+    algorithm_t data{};
+    auto err = glz::read_json(data, buf);
+    if (err) {
+        std::string error = glz::format_error(err, buf);
+        throw std::runtime_error(
+            fmt::format("Failed to parse message with error: {}", error)
+        );
+    }
+    return data;
+}
+
 std::variant<start_time, tick_update>
 ExchangeProxy::consume_message()
 {
