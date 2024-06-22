@@ -9,7 +9,6 @@
 
 namespace nutc {
 namespace test {
-
 using nutc::test::start_wrappers;
 using nutc::util::Side::buy;
 using nutc::util::Side::sell;
@@ -17,12 +16,6 @@ using nutc::util::Side::sell;
 class IntegrationBasicAlgo : public ::testing::Test {
 protected:
     using TestTrader = nutc::test_utils::TestTrader;
-
-    void
-    TearDown() override
-    {
-        users_.reset();
-    }
 
     TraderContainer& users_ =
         nutc::traders::TraderContainer::get_instance(); // NOLINT(*)
@@ -171,6 +164,26 @@ TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
 
     EXPECT_GE(duration_ms, wait_time_ms);
     EXPECT_LE(duration_ms, wait_time_ms + 1000);
+}
+
+// Disable trader and confirm it doesn't send any orders
+TEST_F(IntegrationBasicAlgo, DisableTrader)
+{
+    auto trader1 = start_wrappers(users_, "test_algos/buy_tsla_at_100.py");
+    auto trader2 = users_.add_trader<TestTrader>(0);
+    trader2->modify_holdings("TSLA", 1000); // NOLINT
+    trader2->add_order({sell, "TSLA", 100, 100});
+
+    traders::TraderContainer::get_instance().remove_trader(trader1);
+
+    TestMatchingCycle cycle{
+        {"TSLA"},
+        {trader1, trader2},
+    };
+
+    cycle.on_tick(0);
+    sleep(1);
+    ASSERT_TRUE(trader1->read_orders().empty());
 }
 } // namespace test
 } // namespace nutc

@@ -14,21 +14,19 @@ class UnitInvalidOrders : public ::testing::Test {
 protected:
     using TestTrader = nutc::test_utils::TestTrader;
     static constexpr const int DEFAULT_QUANTITY = 1000;
-    std::shared_ptr<nutc::traders::GenericTrader> trader1, trader2;
+    TraderContainer& manager_ = nutc::traders::TraderContainer::get_instance();
+    nutc::traders::GenericTrader& trader1 =
+        *manager_.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
+    nutc::traders::GenericTrader& trader2 =
+        *manager_.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
 
     void
     SetUp() override
     {
-        trader1 =
-            manager_.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
-        trader2 =
-            manager_.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
-
-        trader1->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
-        trader2->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+        trader1.modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+        trader2.modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     }
 
-    TraderContainer& manager_ = nutc::traders::TraderContainer::get_instance();
     nutc::matching::OrderBook orderbook_;
     Engine engine_;
 
@@ -41,7 +39,7 @@ protected:
 
 TEST_F(UnitInvalidOrders, RemoveThenAddFunds)
 {
-    trader1->modify_capital(-TEST_STARTING_CAPITAL);
+    trader1.modify_capital(-TEST_STARTING_CAPITAL);
 
     stored_order order2{trader2, sell, "ETHUSD", 1, 1, 0};
     stored_order order1{trader1, buy, "ETHUSD", 1, 1, 0};
@@ -54,7 +52,7 @@ TEST_F(UnitInvalidOrders, RemoveThenAddFunds)
     matches = add_to_engine_(order2);
     ASSERT_EQ(matches.size(), 0);
 
-    trader1->modify_capital(TEST_STARTING_CAPITAL);
+    trader1.modify_capital(TEST_STARTING_CAPITAL);
 
     // Kept, but not matched
     matches = add_to_engine_(order2);
@@ -68,7 +66,7 @@ TEST_F(UnitInvalidOrders, RemoveThenAddFunds)
 
 TEST_F(UnitInvalidOrders, MatchingInvalidFunds)
 {
-    trader1->modify_capital(-TEST_STARTING_CAPITAL);
+    trader1.modify_capital(-TEST_STARTING_CAPITAL);
 
     stored_order order1{trader1, buy, "ETHUSD", 1, 1, 0};
     stored_order order2{trader2, sell, "ETHUSD", 1, 1, 0};
@@ -84,15 +82,19 @@ TEST_F(UnitInvalidOrders, MatchingInvalidFunds)
 
 TEST_F(UnitInvalidOrders, SimpleManyInvalidOrder)
 {
-    auto t1 = manager_.add_trader<TestTrader>(std::string("A"), TEST_STARTING_CAPITAL);
-    auto t2 = manager_.add_trader<TestTrader>(std::string("B"), 0);
-    auto t3 = manager_.add_trader<TestTrader>(std::string("C"), TEST_STARTING_CAPITAL);
-    auto t4 = manager_.add_trader<TestTrader>(std::string("D"), TEST_STARTING_CAPITAL);
+    nutc::traders::GenericTrader& t1 =
+        *(manager_.add_trader<TestTrader>(std::string("A"), TEST_STARTING_CAPITAL));
+    nutc::traders::GenericTrader& t2 =
+        *(manager_.add_trader<TestTrader>(std::string("B"), 0));
+    nutc::traders::GenericTrader& t3 =
+        *(manager_.add_trader<TestTrader>(std::string("C"), TEST_STARTING_CAPITAL));
+    nutc::traders::GenericTrader& t4 =
+        *(manager_.add_trader<TestTrader>(std::string("D"), TEST_STARTING_CAPITAL));
 
-    t1->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
-    t2->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
-    t3->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
-    t4->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+    t1.modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+    t2.modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+    t3.modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+    t4.modify_holdings("ETHUSD", DEFAULT_QUANTITY);
 
     stored_order order1{t1, buy, "ETHUSD", 1, 1, 0};
     stored_order order2{t2, buy, "ETHUSD", 1, 1, 0};

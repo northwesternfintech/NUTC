@@ -56,8 +56,8 @@ bool validate_market_order(
             << ", side = " << static_cast<int>(side_) << ", price = " << (price_)      \
             << ", quantity = " << (quantity_)                                          \
             << ". Actual match: ticker = " << (match).ticker                           \
-            << ", buyer_id = " << (match).buyer->get_id()                              \
-            << ", seller_id = " << (match).seller->get_id()                            \
+            << ", buyer_id = " << (match).buyer.get_id()                               \
+            << ", seller_id = " << (match).seller.get_id()                             \
             << ", side = " << static_cast<int>((match).side)                           \
             << ", price = " << (match).price << ", quantity = " << (match).quantity;   \
     } while (0)

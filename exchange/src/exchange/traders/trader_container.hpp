@@ -7,7 +7,9 @@
 
 #include <cassert>
 
+#include <algorithm>
 #include <memory>
+#include <ranges>
 
 namespace nutc {
 namespace traders {
@@ -36,14 +38,18 @@ public:
     }
 
     void
-    remove_trader(std::shared_ptr<traders::GenericTrader> trader)
+    remove_trader(std::shared_ptr<traders::GenericTrader> to_remove)
     {
         lock_guard lock{trader_lock_};
-        std::erase_if(traders_, [&trader](auto& other) { return trader == other; });
+        for (auto& trader : traders_) {
+            if (trader == to_remove)
+                trader->disable();
+        }
     }
 
     size_t
     num_traders() const
+
     {
         lock_guard lock{trader_lock_};
         return traders_.size();

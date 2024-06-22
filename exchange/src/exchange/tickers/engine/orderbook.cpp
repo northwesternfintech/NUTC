@@ -33,7 +33,7 @@ stored_order
 OrderBook::remove_order(uint64_t order_id)
 {
     stored_order order = std::move(get_order_(order_id));
-    order.trader->process_order_remove(order);
+    order.trader.process_order_remove(order);
 
     order_index index{order.price, order_id};
     if (order.side == util::Side::buy) {
@@ -109,7 +109,7 @@ OrderBook::expire_orders(uint64_t tick)
 void
 OrderBook::add_order(stored_order order)
 {
-    order.trader->process_order_add(order);
+    order.trader.process_order_add(order);
 
     orders_by_tick_[order.tick].push_back(order.order_index);
     if (order.side == util::Side::buy) {
