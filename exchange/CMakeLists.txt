@@ -111,6 +111,10 @@ target_link_libraries(EXCHANGE_lib PUBLIC glaze::glaze)
 find_package(Boost REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC boost::boost)
 
+# abseil
+find_package(absl REQUIRED)
+target_link_libraries(EXCHANGE_lib PUBLIC abseil::abseil)
+
 
 add_executable(EXCHANGE_exe src/exchange/main.cpp)
 add_executable(EXCHANGE::exe ALIAS EXCHANGE_exe)
@@ -132,6 +136,8 @@ target_link_libraries(EXCHANGE_exe PRIVATE fmt::fmt)
 find_package(yaml-cpp REQUIRED)
 target_link_libraries(EXCHANGE_exe PRIVATE yaml-cpp::yaml-cpp)
 
+# abseil
+target_link_libraries(EXCHANGE_exe PRIVATE abseil::abseil)
 
 # curl
 find_package(CURL REQUIRED)
