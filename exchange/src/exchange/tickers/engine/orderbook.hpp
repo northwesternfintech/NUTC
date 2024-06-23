@@ -26,8 +26,8 @@ class OrderBook {
     // tick -> queue of order ids
     std::unordered_map<uint64_t, std::vector<uint64_t>> orders_by_tick_;
 
-    std::unordered_map<double, double> bid_levels_;
-    std::unordered_map<double, double> ask_levels_;
+    std::unordered_map<decimal_price, double> bid_levels_;
+    std::unordered_map<decimal_price, double> ask_levels_;
 
 public:
     // Default constructor for testing the orderbook function without the need of a

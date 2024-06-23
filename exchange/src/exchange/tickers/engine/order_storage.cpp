@@ -6,9 +6,8 @@ stored_order::stored_order(
     std::shared_ptr<traders::GenericTrader> trader, util::Side side, std::string ticker,
     double quantity, double price, uint64_t tick
 ) :
-    trader(std::move(trader)), ticker(std::move(ticker)), side(side),
-    price(std::round(price * 100) / 100), quantity(quantity), tick(tick),
-    order_index(get_and_increment_global_index())
+    trader(std::move(trader)), ticker(std::move(ticker)), side(side), price(price),
+    quantity(quantity), tick(tick), order_index(get_and_increment_global_index())
 {}
 
 bool

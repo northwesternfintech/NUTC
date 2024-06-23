@@ -1,4 +1,5 @@
 #pragma once
+#include "decimal_price.hpp"
 #include "exchange/traders/trader_types/generic_trader.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
@@ -14,20 +15,20 @@ struct stored_match {
     std::shared_ptr<traders::GenericTrader> seller;
     std::string ticker;
     util::Side side;
-    double price;
+    decimal_price price;
     double quantity;
 };
 
 struct stored_order {
     std::shared_ptr<traders::GenericTrader> trader;
-    std::string ticker{};
-    util::Side side{};
-    double price{};
-    double quantity{};
-    uint64_t tick{};
+    std::string ticker;
+    util::Side side;
+    decimal_price price;
+    double quantity;
+    uint64_t tick;
 
     // Used to sort orders by time created
-    uint64_t order_index{};
+    uint64_t order_index;
 
     stored_order() = default;
 
@@ -58,7 +59,7 @@ struct stored_order {
 };
 
 struct order_index {
-    double price;
+    decimal_price price;
     uint64_t index;
 };
 

@@ -61,7 +61,7 @@ TEST_F(IntegrationBasicAlgo, ManyUpdates)
 
     cycle.on_tick(0);
 
-	cycle.wait_for_order({buy, "TSLA", 10, 100});
+    cycle.wait_for_order({buy, "TSLA", 10, 100});
 }
 
 TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
@@ -80,7 +80,7 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
 
     cycle.wait_for_order({buy, "TSLA", 10, 102});
 
-	cycle.wait_for_order({buy, "APPL", 1, 100});
+    cycle.wait_for_order({buy, "APPL", 1, 100});
 }
 
 // Sanity check that it goes through the orderbook

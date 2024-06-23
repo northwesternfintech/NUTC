@@ -1,6 +1,6 @@
 #pragma once
-#include "exchange/tickers/ticker.hpp"
 #include "exchange/tickers/matching_cycle/cycle_strategy.hpp"
+#include "exchange/tickers/ticker.hpp"
 
 #include <unordered_map>
 
