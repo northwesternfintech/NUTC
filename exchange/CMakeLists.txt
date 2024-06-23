@@ -47,6 +47,7 @@ add_library(
     src/exchange/bots/bot_types/market_maker.cpp
 
     src/exchange/tickers/engine/engine.cpp
+    src/exchange/tickers/engine/order_storage.cpp
     src/exchange/tickers/engine/orderbook.cpp
     src/exchange/tickers/engine/level_update_generator.cpp
 

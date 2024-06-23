@@ -33,7 +33,8 @@ CrowServer::CrowServer() :
         static auto trial_secs = config::Config::get().constants().SANDBOX_TRIAL_SECS;
         try {
             log_i(
-                sandbox_server, "Received sandbox request with user id {} and algoid {}", user_id,
+                sandbox_server,
+                "Received sandbox request with user id {} and algoid {}", user_id,
                 algo_id
             );
             static const auto STARTING_CAPITAL =
@@ -77,7 +78,9 @@ CrowServer::start_remove_timer_(
     timer.async_wait([trader_ptr](const boost::system::error_code& err_code) {
         auto trader = trader_ptr.lock();
         if (trader == nullptr) {
-            log_i(sandbox_server, "Trader already removed: {}", trader->get_display_name());
+            log_i(
+                sandbox_server, "Trader already removed: {}", trader->get_display_name()
+            );
             return;
         }
         if (!err_code) {
@@ -85,7 +88,9 @@ CrowServer::start_remove_timer_(
             traders::TraderContainer::get_instance().remove_trader(trader);
         }
         else {
-            log_e(sandbox_server, "Unable to remove trader {}", trader->get_display_name());
+            log_e(
+                sandbox_server, "Unable to remove trader {}", trader->get_display_name()
+            );
         }
     });
     timers_.push_back(std::move(timer));

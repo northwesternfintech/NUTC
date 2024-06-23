@@ -84,7 +84,6 @@ main(int argc, const char** argv)
     if (mode != util::Mode::bots_only)
         initialize_wrappers();
 
-
     sandbox::CrowServer::get_instance();
 
     auto cycle = create_cycle(mode);

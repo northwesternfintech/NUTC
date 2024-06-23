@@ -1,6 +1,7 @@
 #include "test_cycle.hpp"
 
 #include "exchange/logging.hpp"
+
 #include <glaze/glaze.hpp>
 
 #include <tuple>
