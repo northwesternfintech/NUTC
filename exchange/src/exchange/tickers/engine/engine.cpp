@@ -11,7 +11,7 @@ using ob_update = nutc::messages::orderbook_update;
 using match = nutc::messages::match;
 
 namespace {
-constexpr double
+constexpr decimal_price
 order_price(const stored_order& order1, const stored_order& order2)
 {
     return order1.order_index < order2.order_index ? order1.price : order2.price;
@@ -53,7 +53,7 @@ Engine::create_match(const stored_order& buyer, const stored_order& seller)
 {
     assert(buyer.ticker == seller.ticker);
     double quantity = order_quantity(buyer, seller);
-    double price = order_price(buyer, seller);
+    decimal_price price = order_price(buyer, seller);
     util::Side aggressive_side =
         buyer.order_index < seller.order_index ? util::Side::sell : util::Side::buy;
 
@@ -61,11 +61,14 @@ Engine::create_match(const stored_order& buyer, const stored_order& seller)
         buyer.trader, seller.trader, buyer.ticker, aggressive_side, price, quantity,
     };
 
+    static constexpr decimal_price decimal_one(1.0);
     match.buyer->process_order_match(
-        {util::Side::buy, match.ticker, match.quantity, match.price * (1 + order_fee)}
+        {util::Side::buy, match.ticker, match.quantity,
+         match.price * (decimal_one + order_fee)}
     );
     match.seller->process_order_match(
-        {util::Side::sell, match.ticker, match.quantity, match.price * (1 - order_fee)}
+        {util::Side::sell, match.ticker, match.quantity,
+         match.price * (decimal_one - order_fee)}
     );
     return match;
 }
@@ -76,7 +79,7 @@ Engine::order_can_execute_(
 )
 {
     double quantity = order_quantity(buyer, seller);
-    double price = order_price(buyer, seller);
+    decimal_price price = order_price(buyer, seller);
     if (!buyer.trader->can_leverage()
         && buyer.trader->get_capital() < (1 + order_fee) * price * quantity) {
         orderbook.remove_order(buyer.order_index);

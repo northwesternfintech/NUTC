@@ -17,7 +17,7 @@ OrderBook::get_top_order(util::Side side) const
 }
 
 void
-OrderBook::modify_level_(util::Side side, double price, double qualtity)
+OrderBook::modify_level_(util::Side side, decimal_price price, double qualtity)
 {
     auto& levels = side == util::Side::buy ? bid_levels_ : ask_levels_;
     levels[price] += qualtity;
@@ -58,17 +58,17 @@ OrderBook::can_match_orders() const
     return get_top_order(util::Side::buy).can_match(get_top_order(util::Side::sell));
 }
 
-double
+decimal_price
 OrderBook::get_midprice() const
 {
     if (bids_.empty() || asks_.empty()) {
-        return 0;
+        return 0.0;
     }
     return (bids_.begin()->price + asks_.begin()->price) / 2;
 }
 
 double
-OrderBook::get_level(util::Side side, double price) const
+OrderBook::get_level(util::Side side, decimal_price price) const
 {
     const auto& levels = (side == util::Side::buy) ? bid_levels_ : ask_levels_;
     if (!levels.contains(price)) {
