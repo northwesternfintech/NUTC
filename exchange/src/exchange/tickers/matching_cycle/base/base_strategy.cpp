@@ -15,11 +15,11 @@ std::vector<stored_order>
 BaseMatchingCycle::collect_orders(uint64_t new_tick)
 {
     std::vector<stored_order> orders;
-    for (const auto& trader : traders_) {
+    for (const std::shared_ptr<traders::GenericTrader>& trader : traders_) {
         auto incoming_orders = trader->read_orders();
         for (auto& order : incoming_orders) {
             orders.emplace_back(
-                trader, order.side, order.ticker, order.quantity, order.price, new_tick
+                *trader, order.side, order.ticker, order.quantity, order.price, new_tick
             );
         }
     }
@@ -58,9 +58,8 @@ BaseMatchingCycle::handle_matches_(std::vector<stored_match> matches)
     glz_matches.reserve(matches.size());
     for (auto& match : matches) {
         glz_matches.emplace_back(
-            match.ticker, match.side, match.price, match.quantity,
-            match.buyer->get_id(), match.seller->get_id(), match.buyer->get_capital(),
-            match.seller->get_capital()
+            match.ticker, match.side, match.price, match.quantity, match.buyer.get_id(),
+            match.seller.get_id(), match.buyer.get_capital(), match.seller.get_capital()
         );
     }
 

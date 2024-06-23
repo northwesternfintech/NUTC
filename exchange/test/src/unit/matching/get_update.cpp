@@ -18,24 +18,18 @@ using nutc::util::Side::sell;
 class UnitGetUpdate : public ::testing::Test {
 protected:
     using TestTrader = nutc::test_utils::TestTrader;
-    std::shared_ptr<nutc::traders::GenericTrader> trader1, trader2, trader3;
+    TraderContainer& manager_ =
+        nutc::traders::TraderContainer::get_instance(); // NOLINT(*)
+
+    nutc::traders::GenericTrader& trader1 =
+        *manager_.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
+    nutc::traders::GenericTrader& trader2 =
+        *manager_.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
+    nutc::traders::GenericTrader& trader3 =
+        *manager_.add_trader<TestTrader>(std::string("GHI"), TEST_STARTING_CAPITAL);
 
     std::shared_ptr<LevelUpdateGenerator> generator_ =
         std::make_shared<LevelUpdateGenerator>();
-
-    void
-    SetUp() override
-    {
-        trader1 =
-            manager_.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
-        trader2 =
-            manager_.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
-        trader3 =
-            manager_.add_trader<TestTrader>(std::string("GHI"), TEST_STARTING_CAPITAL);
-    }
-
-    TraderContainer& manager_ =
-        nutc::traders::TraderContainer::get_instance(); // NOLINT(*)
 
     OrderBook ob{generator_};
     // OrderBook after{};  // NOLINT (*)

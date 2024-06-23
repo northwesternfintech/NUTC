@@ -36,8 +36,8 @@ validate_match(
     double price, double quantity
 )
 {
-    return match.ticker == ticker && match.buyer->get_id() == buyer_id
-           && match.seller->get_id() == seller_id && match.side == side
+    return match.ticker == ticker && match.buyer.get_id() == buyer_id
+           && match.seller.get_id() == seller_id && match.side == side
            && is_nearly_equal(match.price, price)
            && is_nearly_equal(match.quantity, quantity);
 }

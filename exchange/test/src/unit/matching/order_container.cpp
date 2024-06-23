@@ -15,21 +15,21 @@ class UnitOrderBookTest : public ::testing::Test {
 protected:
     using TestTrader = nutc::test_utils::TestTrader;
     static constexpr const int DEFAULT_QUANTITY = 1000;
-    std::shared_ptr<TestTrader> trader_1, trader_2;
+
+    TraderContainer& manager_ = nutc::traders::TraderContainer::get_instance();
+
+    nutc::traders::GenericTrader& trader_1 =
+        *manager_.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
+    nutc::traders::GenericTrader& trader_2 =
+        *manager_.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
 
     void
     SetUp() override
     {
-        trader_1 =
-            manager_.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
-        trader_2 =
-            manager_.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
-
-        trader_1->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
-        trader_2->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+        trader_1.modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+        trader_2.modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     }
 
-    TraderContainer& manager_ = nutc::traders::TraderContainer::get_instance();
     nutc::matching::OrderBook container_;
 };
 

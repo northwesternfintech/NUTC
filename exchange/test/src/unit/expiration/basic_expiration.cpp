@@ -14,20 +14,22 @@ class UnitOrderExpiration : public ::testing::Test {
 
 protected:
     static constexpr const int DEFAULT_QUANTITY = 1000;
-    std::shared_ptr<nutc::traders::GenericTrader> trader1, trader2;
+
+    TraderContainer& manager_ =
+        nutc::traders::TraderContainer::get_instance(); // NOLINT(*)
+
+    nutc::traders::GenericTrader& trader1 =
+        *manager_.add_trader<TestTrader>(TEST_STARTING_CAPITAL);
+    nutc::traders::GenericTrader& trader2 =
+        *manager_.add_trader<TestTrader>(TEST_STARTING_CAPITAL);
 
     void
     SetUp() override
     {
-        trader1 = manager_.add_trader<TestTrader>(TEST_STARTING_CAPITAL);
-        trader2 = manager_.add_trader<TestTrader>(TEST_STARTING_CAPITAL);
-
-        trader1->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
-        trader2->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+        trader1.modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+        trader2.modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     }
 
-    TraderContainer& manager_ =
-        nutc::traders::TraderContainer::get_instance(); // NOLINT(*)
     nutc::matching::OrderBook orderbook_;
     Engine engine_;
 

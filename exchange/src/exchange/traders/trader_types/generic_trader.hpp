@@ -23,11 +23,11 @@ public:
         USER_ID(std::move(user_id)), INITIAL_CAPITAL(capital)
     {}
 
+    virtual void
+    disable()
+    {}
+
     virtual ~GenericTrader() = default;
-    GenericTrader& operator=(GenericTrader&& other) = delete;
-    GenericTrader& operator=(const GenericTrader& other) = delete;
-    GenericTrader(GenericTrader&& other) = default;
-    GenericTrader(const GenericTrader& other) = delete;
 
     virtual bool
     can_leverage() const

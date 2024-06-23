@@ -11,6 +11,8 @@ using ob_update = nutc::messages::orderbook_update;
 using match = nutc::messages::match;
 
 namespace {
+static constexpr decimal_price decimal_one(1.0);
+
 constexpr decimal_price
 order_price(const stored_order& order1, const stored_order& order2)
 {
@@ -61,12 +63,11 @@ Engine::create_match(const stored_order& buyer, const stored_order& seller)
         buyer.trader, seller.trader, buyer.ticker, aggressive_side, price, quantity,
     };
 
-    static constexpr decimal_price decimal_one(1.0);
-    match.buyer->process_order_match(
+    match.buyer.process_order_match(
         {util::Side::buy, match.ticker, match.quantity,
          match.price * (decimal_one + order_fee)}
     );
-    match.seller->process_order_match(
+    match.seller.process_order_match(
         {util::Side::sell, match.ticker, match.quantity,
          match.price * (decimal_one - order_fee)}
     );
@@ -79,18 +80,20 @@ Engine::order_can_execute_(
 )
 {
     double quantity = order_quantity(buyer, seller);
+
     decimal_price price = order_price(buyer, seller);
-    if (!buyer.trader->can_leverage()
-        && buyer.trader->get_capital() < (1 + order_fee) * price * quantity) {
+    double total_price = double((decimal_one + order_fee) * price) * quantity;
+
+    if (!buyer.trader.can_leverage() && buyer.trader.get_capital() < total_price) {
         orderbook.remove_order(buyer.order_index);
         return false;
     }
-    if (!seller.trader->can_leverage()
-        && seller.trader->get_holdings(seller.ticker) < quantity) {
+    if (!seller.trader.can_leverage()
+        && seller.trader.get_holdings(seller.ticker) < quantity) {
         orderbook.remove_order(seller.order_index);
         return false;
     }
-    if (seller.trader == buyer.trader) [[unlikely]] {
+    if (&seller.trader == &buyer.trader) [[unlikely]] {
         orderbook.remove_order(std::min(seller.order_index, buyer.order_index));
         return false;
     }

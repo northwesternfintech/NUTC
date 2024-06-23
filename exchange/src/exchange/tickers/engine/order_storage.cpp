@@ -3,18 +3,18 @@
 namespace nutc {
 namespace matching {
 stored_order::stored_order(
-    std::shared_ptr<traders::GenericTrader> trader, util::Side side, std::string ticker,
+    traders::GenericTrader& trader, util::Side side, std::string ticker,
     double quantity, double price, uint64_t tick
 ) :
-    trader(std::move(trader)), ticker(std::move(ticker)), side(side), price(price),
+    trader(trader), ticker(std::move(ticker)), side(side), price(price),
     quantity(quantity), tick(tick), order_index(get_and_increment_global_index())
 {}
 
 bool
 stored_order::operator==(const stored_order& other) const
 {
-    return trader->get_id() == other.trader->get_id() && ticker == other.ticker
-           && side == other.side && util::is_close_to_zero(price - other.price)
+    return &trader == &other.trader && ticker == other.ticker && side == other.side
+           && util::is_close_to_zero(price - other.price)
            && util::is_close_to_zero(quantity - other.quantity);
 }
 

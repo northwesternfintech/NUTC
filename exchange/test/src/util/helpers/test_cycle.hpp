@@ -13,7 +13,7 @@ namespace test {
 
 class TestMatchingCycle : public matching::BaseMatchingCycle {
 public:
-    matching::stored_order last_order;
+    std::unique_ptr<matching::stored_order> last_order;
 
     TestMatchingCycle(
         std::vector<std::string> ticker_names,

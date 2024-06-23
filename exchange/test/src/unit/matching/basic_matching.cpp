@@ -12,31 +12,29 @@ class UnitBasicMatching : public ::testing::Test {
 protected:
     using TestTrader = nutc::test_utils::TestTrader;
     static constexpr const int DEFAULT_QUANTITY = 1000;
-    std::shared_ptr<nutc::traders::GenericTrader> trader1, trader2, trader3;
+    TraderContainer& manager_ = nutc::traders::TraderContainer::get_instance();
+
+    nutc::traders::GenericTrader& trader1 =
+        *manager_.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
+    nutc::traders::GenericTrader& trader2 =
+        *manager_.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
+    nutc::traders::GenericTrader& trader3 =
+        *manager_.add_trader<TestTrader>(std::string("GHI"), TEST_STARTING_CAPITAL);
 
     void
     SetUp() override
     {
-        trader1 =
-            manager_.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
-        trader2 =
-            manager_.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
-        trader3 =
-            manager_.add_trader<TestTrader>(std::string("GHI"), TEST_STARTING_CAPITAL);
-
-        trader1->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
-        trader2->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
-        trader3->modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+        trader1.modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+        trader2.modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+        trader3.modify_holdings("ETHUSD", DEFAULT_QUANTITY);
     }
 
     void
     TearDown() override
     {
-        manager_.reset();
         SetUp();
     }
 
-    TraderContainer& manager_ = nutc::traders::TraderContainer::get_instance();
     nutc::matching::OrderBook orderbook_{};
     Engine engine_;
 

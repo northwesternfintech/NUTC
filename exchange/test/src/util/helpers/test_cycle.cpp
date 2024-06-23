@@ -14,10 +14,12 @@ void
 TestMatchingCycle::wait_for_order(const messages::market_order& order)
 {
     log_i(testing, "Waiting for order {}", glz::write_json(order));
-    messages::market_order last = last_order;
-    while (last != order) {
+    auto last = last_order == nullptr
+                    ? nullptr
+                    : std::make_unique<matching::stored_order>(*last_order);
+    while (last == nullptr || *last != order) {
         on_tick(0);
-        last = last_order;
+        last = std::make_unique<matching::stored_order>(*last_order);
     }
     log_i(testing, "Order received. Continuing...");
 }
@@ -26,7 +28,8 @@ std::vector<matching::stored_match>
 TestMatchingCycle::match_orders_(std::vector<matching::stored_order> orders)
 {
     if (!orders.empty())
-        last_order = orders.at(orders.size() - 1);
+        last_order =
+            std::make_unique<matching::stored_order>(orders.at(orders.size() - 1));
 
     return BaseMatchingCycle::match_orders_(std::move(orders));
 }
