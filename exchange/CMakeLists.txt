@@ -73,7 +73,7 @@ target_include_directories(
 )
 
 
-target_compile_features(EXCHANGE_lib PUBLIC cxx_std_20)
+target_compile_features(EXCHANGE_lib PUBLIC cxx_std_23)
 
 # argparse
 find_package(argparse REQUIRED)
@@ -117,7 +117,7 @@ add_executable(EXCHANGE::exe ALIAS EXCHANGE_exe)
 
 set_property(TARGET EXCHANGE_exe PROPERTY OUTPUT_NAME NUTC)
 
-target_compile_features(EXCHANGE_exe PRIVATE cxx_std_20)
+target_compile_features(EXCHANGE_exe PRIVATE cxx_std_23)
 
 target_link_libraries(EXCHANGE_exe PRIVATE EXCHANGE_lib)
 
@@ -191,7 +191,7 @@ add_executable(WRAPPER::exe ALIAS WRAPPER_exe)
 
 set_property(TARGET WRAPPER_exe PROPERTY OUTPUT_NAME WRAPPER)
 
-target_compile_features(WRAPPER_exe PRIVATE cxx_std_20)
+target_compile_features(WRAPPER_exe PRIVATE cxx_std_23)
 
 target_link_libraries(WRAPPER_exe PRIVATE WRAPPER_lib)
 target_link_libraries(WRAPPER_exe PRIVATE fmt::fmt)
@@ -227,7 +227,7 @@ target_link_libraries(EXCHANGE_exe PRIVATE SHARED_lib)
 target_link_libraries(WRAPPER_lib PUBLIC SHARED_lib)
 target_link_libraries(WRAPPER_exe PRIVATE SHARED_lib)
 
-target_compile_features(SHARED_lib PUBLIC cxx_std_20)
+target_compile_features(SHARED_lib PUBLIC cxx_std_23)
 
 # Enable lto for release builds
 include(CheckIPOSupported)

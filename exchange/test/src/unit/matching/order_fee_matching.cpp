@@ -227,7 +227,7 @@ TEST_F(UnitOrderFeeMatching, PassivePriceMatchReversed)
 
     matches = add_to_engine_(order2);
     ASSERT_EQ(matches.size(), 1);
-    ASSERT_EQ(matches.at(0).price, 1);
+    ASSERT_EQ(matches.at(0).price, 1.0);
     ASSERT_EQ_MATCH(matches.at(0), "ETHUSD", "DEF", "ABC", buy, 1, 1);
     ASSERT_EQ(trader2->get_capital_delta(), -1 * 1 * 1.5);
     ASSERT_EQ(trader1->get_capital_delta(), 1 * .5);
@@ -371,7 +371,7 @@ TEST_F(UnitOrderFeeMatching, SimpleManyInvalidOrder)
     ASSERT_EQ_MATCH(matches[0], "ETHUSD", "A", "D", sell, 1, 1);
     ASSERT_EQ_MATCH(matches[1], "ETHUSD", "C", "D", sell, 1, 1);
 
-    ASSERT_EQ(trader4->get_capital_delta(), -1 * 1 * 1.5);
+    ASSERT_EQ(trader4->get_capital_delta(), -1.5);
     ASSERT_EQ(trader5->get_capital_delta(), 0);
     ASSERT_EQ(trader6->get_capital_delta(), -1 * 1 * 1.5);
     ASSERT_EQ(trader7->get_capital_delta(), 2 * .5);

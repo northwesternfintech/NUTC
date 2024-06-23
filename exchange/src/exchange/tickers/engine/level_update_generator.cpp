@@ -22,10 +22,9 @@ LevelUpdateGenerator::get_updates(const std::string& ticker) const
 
 void
 LevelUpdateGenerator::record_level_change(
-    util::Side side, double price, double new_quantity
+    util::Side side, decimal_price price, double new_quantity
 )
 {
-    assert(std::round(price * 100) / 100 == price);
     if (side == util::Side::buy) {
         updated_buy_levels_[price] = new_quantity;
     }

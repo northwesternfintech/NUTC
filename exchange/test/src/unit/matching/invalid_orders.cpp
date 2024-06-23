@@ -30,7 +30,7 @@ protected:
 
     TraderContainer& manager_ = nutc::traders::TraderContainer::get_instance();
     nutc::matching::OrderBook orderbook_;
-    Engine engine_{TEST_ORDER_EXPIRATION_TICKS};
+    Engine engine_;
 
     std::vector<nutc::matching::stored_match>
     add_to_engine_(const stored_order& order)

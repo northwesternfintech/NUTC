@@ -41,9 +41,9 @@ public:
     /**
      * @brief Get the quantity at a specific price for a side
      */
-    double get_level(util::Side side, double price) const;
+    double get_level(util::Side side, decimal_price price) const;
 
-    double get_midprice() const;
+    decimal_price get_midprice() const;
 
     bool can_match_orders() const;
 
@@ -92,7 +92,7 @@ private:
         return orders_by_id_.contains(order_id);
     }
 
-    void modify_level_(util::Side side, double price, double qualtity);
+    void modify_level_(util::Side side, decimal_price price, double qualtity);
 };
 } // namespace matching
 } // namespace nutc

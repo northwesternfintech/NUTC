@@ -38,7 +38,7 @@ protected:
 
     TraderContainer& manager_ = nutc::traders::TraderContainer::get_instance();
     nutc::matching::OrderBook orderbook_{};
-    Engine engine_{TEST_ORDER_EXPIRATION_TICKS}; // NOLINT (*)
+    Engine engine_;
 
     std::vector<nutc::matching::stored_match>
     add_to_engine_(const stored_order& order)
@@ -193,7 +193,7 @@ TEST_F(UnitBasicMatching, PassivePriceMatchReversed)
 
     matches = add_to_engine_(order2);
     ASSERT_EQ(matches.size(), 1);
-    ASSERT_EQ(matches.at(0).price, 1);
+    ASSERT_EQ(matches.at(0).price, 1.0);
     ASSERT_EQ_MATCH(matches.at(0), "ETHUSD", "DEF", "ABC", buy, 1, 1);
 }
 

@@ -6,10 +6,10 @@ namespace nutc {
 namespace matching {
 
 class Engine {
-    double order_fee;
+    decimal_price order_fee;
 
 public:
-    explicit Engine(double order_fee = 0.0) : order_fee(order_fee) {}
+    explicit Engine(decimal_price order_fee = 0.0) : order_fee(order_fee) {}
 
     std::vector<stored_match>
     match_order(OrderBook& orderbook, const stored_order& order);
