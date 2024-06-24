@@ -29,7 +29,7 @@ stored_order&
 OrderBook::get_top_order(util::Side side)
 {
     auto& tree = side == util::Side::buy ? bids_ : asks_;
-	assert(!tree.empty());
+    assert(!tree.empty());
 
     auto key = side == util::Side::buy ? std::prev(tree.end()) : tree.begin();
     auto& q = key->second;
@@ -42,16 +42,14 @@ void
 OrderBook::modify_level_(util::Side side, decimal_price price, double quantity)
 {
     auto& levels = side == util::Side::buy ? bid_levels_ : ask_levels_;
-	if(levels.size()<=price.price) {
-		bid_levels_.resize(static_cast<size_t>(price.price*1.5));
-		ask_levels_.resize(static_cast<size_t>(price.price*1.5));
-		return modify_level_(side, price, quantity);
-	}
-    levels[price.price] += quantity;
 
-    // if (util::is_close_to_zero(levels[price.price])) {
-    //     levels.erase(price);
-    // }
+    if (levels.size() <= price.price) [[unlikely]] {
+        bid_levels_.resize(static_cast<size_t>(price.price * 1.5));
+        ask_levels_.resize(static_cast<size_t>(price.price * 1.5));
+        return modify_level_(side, price, quantity);
+    }
+
+    levels[price.price] += quantity;
 
     if (level_update_generator_)
         level_update_generator_->record_level_change(side, price, levels[price.price]);
@@ -60,8 +58,8 @@ OrderBook::modify_level_(util::Side side, decimal_price price, double quantity)
 bool
 OrderBook::can_match_orders()
 {
-	clean_tree(util::Side::sell);
-	clean_tree(util::Side::buy);
+    clean_tree(util::Side::sell);
+    clean_tree(util::Side::buy);
 
     if (bids_.empty() || asks_.empty()) {
         return false;
@@ -72,7 +70,7 @@ OrderBook::can_match_orders()
 decimal_price
 OrderBook::get_midprice() const
 {
-    if (bids_.empty() || asks_.empty()) {
+    if (bids_.empty() || asks_.empty()) [[unlikely]] {
         return 0.0;
     }
     return (bids_.begin()->first + std::prev(asks_.end())->first) / 2;
@@ -82,9 +80,10 @@ double
 OrderBook::get_level(util::Side side, decimal_price price) const
 {
     const auto& levels = (side == util::Side::buy) ? bid_levels_ : ask_levels_;
-	if(levels.size()<=price.price) {
-		return 0.0;
-	}
+
+    if (levels.size() <= price.price) [[unlikely]] {
+        return 0.0;
+    }
     // if (!levels.contains(price)) {
     //     return 0;
     // }

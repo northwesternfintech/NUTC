@@ -2,7 +2,7 @@
 #include "decimal_price.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
 
-#include <unordered_map>
+#include <unordered_set>
 
 namespace nutc {
 namespace matching {
@@ -17,13 +17,16 @@ public:
     void
     reset()
     {
-        updated_buy_levels_.clear();
-        updated_sell_levels_.clear();
+        modified_buy_levels_.clear();
+        modified_sell_levels_.clear();
     }
 
 private:
-    std::unordered_map<decimal_price, double> updated_buy_levels_{};
-    std::unordered_map<decimal_price, double> updated_sell_levels_{};
+    std::vector<double> updated_buy_levels_{1000};
+    std::vector<double> updated_sell_levels_{1000};
+
+    std::unordered_set<uint32_t> modified_buy_levels_;
+    std::unordered_set<uint32_t> modified_sell_levels_;
 };
 } // namespace matching
 } // namespace nutc

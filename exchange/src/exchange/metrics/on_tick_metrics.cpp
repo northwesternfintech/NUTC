@@ -15,7 +15,7 @@ TickerMetricsPusher::push(
 )
 {
     record_current_tick(tick_num);
-    // record_trader_metrics(tickers);
+    record_trader_metrics(tickers);
 }
 
 TickerMetricsPusher::TickerMetricsPusher(std::shared_ptr<ps::Registry> reg) :

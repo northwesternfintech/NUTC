@@ -19,7 +19,6 @@ class Recipe(ConanFile):
         self.requires("boost/1.83.0")
         self.requires("prometheus-cpp/1.1.0")
         self.requires("crowcpp-crow/1.1.0")
-        self.requires("abseil/20240116.2")
 
         # Wrapper
         self.requires("pybind11/2.12.0")
