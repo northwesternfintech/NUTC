@@ -21,8 +21,8 @@ class OrderBook {
     std::map<decimal_price, std::queue<stored_order>> bids_;
     std::map<decimal_price, std::queue<stored_order>> asks_;
 
-    std::unordered_map<decimal_price, double> bid_levels_;
-    std::unordered_map<decimal_price, double> ask_levels_;
+    std::vector<double> bid_levels_{1000};
+    std::vector<double> ask_levels_{1000};
 
 public:
     // Default constructor for testing the orderbook function without the need of a

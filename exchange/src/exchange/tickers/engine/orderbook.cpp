@@ -42,14 +42,19 @@ void
 OrderBook::modify_level_(util::Side side, decimal_price price, double quantity)
 {
     auto& levels = side == util::Side::buy ? bid_levels_ : ask_levels_;
-    levels[price] += quantity;
+	if(levels.size()<=price.price) {
+		bid_levels_.resize(static_cast<size_t>(price.price*1.5));
+		ask_levels_.resize(static_cast<size_t>(price.price*1.5));
+		return modify_level_(side, price, quantity);
+	}
+    levels[price.price] += quantity;
 
-    if (util::is_close_to_zero(levels[price])) {
-        levels.erase(price);
-    }
+    // if (util::is_close_to_zero(levels[price.price])) {
+    //     levels.erase(price);
+    // }
 
     if (level_update_generator_)
-        level_update_generator_->record_level_change(side, price, levels[price]);
+        level_update_generator_->record_level_change(side, price, levels[price.price]);
 }
 
 bool
@@ -77,10 +82,13 @@ double
 OrderBook::get_level(util::Side side, decimal_price price) const
 {
     const auto& levels = (side == util::Side::buy) ? bid_levels_ : ask_levels_;
-    if (!levels.contains(price)) {
-        return 0;
-    }
-    return levels.at(price);
+	if(levels.size()<=price.price) {
+		return 0.0;
+	}
+    // if (!levels.contains(price)) {
+    //     return 0;
+    // }
+    return levels.at(price.price);
 }
 
 std::vector<stored_order>
