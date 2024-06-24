@@ -41,6 +41,7 @@ protected:
     void
     expire_old_orders_(OrderBook& orderbook, uint64_t new_tick)
     {
+		if(ORDER_EXPIRE_TICKS > new_tick) return;
         orderbook.expire_orders(new_tick - ORDER_EXPIRE_TICKS);
     }
 

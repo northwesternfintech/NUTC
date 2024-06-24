@@ -1,12 +1,13 @@
 #pragma once
 
+#include "absl/container/btree_map.h"
 #include "level_update_generator.hpp"
 #include "order_storage.hpp"
 #include "shared/util.hpp"
 
 #include <cassert>
 
-#include <set>
+#include <queue>
 #include <unordered_map>
 #include <vector>
 
@@ -17,14 +18,8 @@ class OrderBook {
     std::shared_ptr<LevelUpdateGenerator> level_update_generator_;
 
     // both map/sort price, order_index
-    std::set<order_index, bid_comparator> bids_;
-    std::set<order_index, ask_comparator> asks_;
-
-    // order index -> order
-    std::unordered_map<uint64_t, stored_order> orders_by_id_;
-
-    // tick -> queue of order ids
-    std::unordered_map<uint64_t, std::vector<uint64_t>> orders_by_tick_;
+    std::map<decimal_price, std::queue<stored_order>> bids_;
+    std::map<decimal_price, std::queue<stored_order>> asks_;
 
     std::unordered_map<decimal_price, double> bid_levels_;
     std::unordered_map<decimal_price, double> ask_levels_;
@@ -45,7 +40,7 @@ public:
 
     decimal_price get_midprice() const;
 
-    bool can_match_orders() const;
+    bool can_match_orders();
 
     void add_order(stored_order order);
 
@@ -56,43 +51,15 @@ public:
     std::vector<stored_order> expire_orders(uint64_t tick);
 
     /**
-     * @brief Modify the quantity of an order
-     * Remove it if the quantity is now 0
-     */
-    void modify_order_quantity(uint64_t order_index, double delta);
-
-    /**
-     * @brief Remove an order from all data structures
-     */
-    stored_order remove_order(uint64_t order_id);
-
-    /**
      * @brief Get the top order on a side
      */
-    const stored_order& get_top_order(util::Side side) const;
+    stored_order& get_top_order(util::Side side);
+
+	void modify_quantity(const stored_order& order, double quantity);
+    void modify_level_(util::Side side, decimal_price price, double quantity);
 
 private:
-    const stored_order&
-    get_order_(uint64_t order_id) const
-    {
-        assert(order_exists_(order_id));
-        return orders_by_id_.at(order_id);
-    }
-
-    stored_order&
-    get_order_(uint64_t order_id)
-    {
-        assert(order_exists_(order_id));
-        return orders_by_id_.at(order_id);
-    }
-
-    bool
-    order_exists_(uint64_t order_id) const
-    {
-        return orders_by_id_.contains(order_id);
-    }
-
-    void modify_level_(util::Side side, decimal_price price, double qualtity);
+	void clean_tree(util::Side side);
 };
 } // namespace matching
 } // namespace nutc

@@ -26,6 +26,7 @@ struct stored_order {
     decimal_price price{};
     double quantity{};
     uint64_t tick{};
+	bool active{true};
 
     // Used to sort orders by time created
     uint64_t order_index;
