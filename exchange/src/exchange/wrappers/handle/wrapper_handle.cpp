@@ -54,14 +54,20 @@ WrapperHandle::WrapperHandle(
 ) :
     WrapperHandle(
         {"--uid", quote_id(remote_uid), "--algo_id", quote_id(algo_id)},
-        nutc::firebase::get_algo(remote_uid, algo_id)
+        force_upwrap_optional(
+            nutc::firebase::get_algo(remote_uid, algo_id),
+            fmt::format("Could not read algoid {} of uid {} from Firebase", algo_id, remote_uid)
+        )
     )
 {}
 
 WrapperHandle::WrapperHandle(const std::string& algo_path) :
     WrapperHandle(
         {"--uid", quote_id(algo_path), "--algo_id", quote_id(algo_path), "--dev"},
-        nutc::file_ops::read_file_content(algo_path)
+        force_upwrap_optional(
+            nutc::file_ops::read_file_content(algo_path), 
+            fmt::format("Could not read algorithm file at {}", algo_path)
+        )
     )
 {}
 
@@ -76,15 +82,9 @@ WrapperHandle::block_on_init()
 }
 
 WrapperHandle::WrapperHandle(
-    const std::vector<std::string>& args, const std::optional<std::string>& algorithm
+    const std::vector<std::string>& args, const std::string& algorithm
 )
 {
-    if (!algorithm.has_value()) {
-        throw std::runtime_error(
-            "Received empty algorithm; cannot initiate empty wrapper"
-        );
-    }
-
     static const std::string path{wrapper_binary_path()};
 
     auto& pipe_in_ptr = reader_.get_pipe();
@@ -96,7 +96,7 @@ WrapperHandle::WrapperHandle(
     );
 
     using algorithm_t = nutc::messages::algorithm_content;
-    algorithm_t algorithm_message = algorithm_t(algorithm.value());
+    algorithm_t algorithm_message = algorithm_t(algorithm);
     auto encoded_message = glz::write_json(algorithm_message);
 
     writer_.send_message(encoded_message);

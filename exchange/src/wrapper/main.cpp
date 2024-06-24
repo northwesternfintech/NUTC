@@ -118,7 +118,7 @@ main(int argc, const char** argv)
 
     // Send message to exchange to let it know we successfully initialized
     comms::publish_init_message();
-    if (algorithm_str == "") {
+    if (algorithm_str.empty()) {
         return 1;
     }
     comms::wait_for_start_time();
