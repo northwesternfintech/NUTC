@@ -1,7 +1,5 @@
 #include "orderbook.hpp"
 
-#include <memory>
-
 namespace nutc {
 namespace matching {
 
@@ -31,6 +29,7 @@ stored_order&
 OrderBook::get_top_order(util::Side side)
 {
     auto& tree = side == util::Side::buy ? bids_ : asks_;
+	assert(!tree.empty());
 
     auto key = side == util::Side::buy ? std::prev(tree.end()) : tree.begin();
     auto& q = key->second;
@@ -71,7 +70,7 @@ OrderBook::get_midprice() const
     if (bids_.empty() || asks_.empty()) {
         return 0.0;
     }
-    return (bids_.begin()->first + asks_.end()->first) / 2;
+    return (bids_.begin()->first + std::prev(asks_.end())->first) / 2;
 }
 
 double

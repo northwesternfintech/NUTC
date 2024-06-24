@@ -11,11 +11,11 @@ namespace metrics {
 
 void
 TickerMetricsPusher::push(
-    std::unordered_map<std::string, matching::ticker_info> tickers, uint64_t tick_num
+    const std::unordered_map<std::string, matching::ticker_info>& tickers, uint64_t tick_num
 )
 {
     record_current_tick(tick_num);
-    record_trader_metrics(tickers);
+    // record_trader_metrics(tickers);
 }
 
 TickerMetricsPusher::TickerMetricsPusher(std::shared_ptr<ps::Registry> reg) :
@@ -37,7 +37,7 @@ TickerMetricsPusher::record_current_tick(uint64_t tick_num)
 
 void
 TickerMetricsPusher::record_trader_metrics(
-    std::unordered_map<std::string, matching::ticker_info> tickers
+    const std::unordered_map<std::string, matching::ticker_info>& tickers
 )
 {
     auto& trader_container = traders::TraderContainer::get_instance();
