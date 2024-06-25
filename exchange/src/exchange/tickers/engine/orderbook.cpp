@@ -1,57 +1,66 @@
 #include "orderbook.hpp"
 
-#include <memory>
-
 namespace nutc {
 namespace matching {
 
-const stored_order&
-OrderBook::get_top_order(util::Side side) const
+void
+OrderBook::clean_tree(util::Side side)
 {
-    if (side == util::Side::buy) {
-        assert(!bids_.empty());
-        return get_order_(bids_.begin()->index);
+    auto& tree = side == util::Side::buy ? bids_ : asks_;
+    while (!tree.empty()) {
+        auto key = side == util::Side::buy ? std::prev(tree.end()) : tree.begin();
+        auto& q = key->second;
+
+        if (q.empty()) {
+            tree.erase(key);
+            continue;
+        }
+
+        if (!q.front().active || q.front().quantity <= 0) {
+            q.pop();
+            continue;
+        }
+
+        return;
     }
-    assert(!asks_.empty());
-    return get_order_(asks_.begin()->index);
+}
+
+stored_order&
+OrderBook::get_top_order(util::Side side)
+{
+    auto& tree = side == util::Side::buy ? bids_ : asks_;
+    assert(!tree.empty());
+
+    auto key = side == util::Side::buy ? std::prev(tree.end()) : tree.begin();
+    auto& q = key->second;
+
+    assert(!q.empty());
+    return q.front();
 }
 
 void
-OrderBook::modify_level_(util::Side side, decimal_price price, double qualtity)
+OrderBook::modify_level_(util::Side side, decimal_price price, double quantity)
 {
     auto& levels = side == util::Side::buy ? bid_levels_ : ask_levels_;
-    levels[price] += qualtity;
-    if (util::is_close_to_zero(levels[price])) {
-        levels.erase(price);
+
+    if (levels.size() <= price.price) [[unlikely]] {
+        bid_levels_.resize(static_cast<size_t>(price.price * 1.5));
+        ask_levels_.resize(static_cast<size_t>(price.price * 1.5));
+        return modify_level_(side, price, quantity);
     }
+
+    levels[price.price] += quantity;
 
     if (level_update_generator_)
-        level_update_generator_->record_level_change(side, price, levels[price]);
-}
-
-stored_order
-OrderBook::remove_order(uint64_t order_id)
-{
-    stored_order order = std::move(get_order_(order_id));
-    order.trader.process_order_remove(order);
-
-    order_index index{order.price, order_id};
-    if (order.side == util::Side::buy) {
-        assert(bids_.find(index) != bids_.end());
-        bids_.erase(index);
-    }
-    else {
-        assert(asks_.find(index) != asks_.end());
-        asks_.erase(index);
-    }
-    modify_level_(order.side, order.price, -order.quantity);
-    orders_by_id_.erase(order_id);
-    return order;
+        level_update_generator_->record_level_change(side, price, levels[price.price]);
 }
 
 bool
-OrderBook::can_match_orders() const
+OrderBook::can_match_orders()
 {
+    clean_tree(util::Side::sell);
+    clean_tree(util::Side::buy);
+
     if (bids_.empty() || asks_.empty()) {
         return false;
     }
@@ -61,48 +70,46 @@ OrderBook::can_match_orders() const
 decimal_price
 OrderBook::get_midprice() const
 {
-    if (bids_.empty() || asks_.empty()) {
+    if (bids_.empty() || asks_.empty()) [[unlikely]] {
         return 0.0;
     }
-    return (bids_.begin()->price + asks_.begin()->price) / 2;
+    return (bids_.begin()->first + std::prev(asks_.end())->first) / 2;
 }
 
 double
 OrderBook::get_level(util::Side side, decimal_price price) const
 {
     const auto& levels = (side == util::Side::buy) ? bid_levels_ : ask_levels_;
-    if (!levels.contains(price)) {
-        return 0;
+
+    if (levels.size() <= price.price) [[unlikely]] {
+        return 0.0;
     }
-    return levels.at(price);
-}
-
-void
-OrderBook::modify_order_quantity(uint64_t order_index, double delta)
-{
-    stored_order order = remove_order(order_index);
-    order.quantity += delta;
-    if (util::is_close_to_zero(order.quantity))
-        return;
-
-    add_order(order);
+    // if (!levels.contains(price)) {
+    //     return 0;
+    // }
+    return levels.at(price.price);
 }
 
 std::vector<stored_order>
 OrderBook::expire_orders(uint64_t tick)
 {
-    if (orders_by_tick_.find(tick) == orders_by_tick_.end()) {
-        return {};
-    }
-
     std::vector<stored_order> result;
-    for (uint64_t index : orders_by_tick_[tick]) {
-        if (!order_exists_(index))
-            continue;
-        stored_order removed_order = remove_order(index);
-        result.push_back(std::move(removed_order));
+    for (auto& [price, q] : bids_) {
+        while (!q.empty() && q.front().tick <= tick) {
+            result.push_back(std::move(q.front()));
+            q.pop();
+
+            modify_level_(util::Side::buy, price, -result.back().quantity);
+        }
     }
-    orders_by_tick_.erase(tick);
+    for (auto& [price, q] : asks_) {
+        while (!q.empty() && q.front().tick <= tick) {
+            result.push_back(std::move(q.front()));
+            q.pop();
+
+            modify_level_(util::Side::sell, price, -result.back().quantity);
+        }
+    }
     return result;
 }
 
@@ -111,15 +118,13 @@ OrderBook::add_order(stored_order order)
 {
     order.trader.process_order_add(order);
 
-    orders_by_tick_[order.tick].push_back(order.order_index);
     if (order.side == util::Side::buy) {
-        bids_.insert(order_index{order.price, order.order_index});
+        bids_[order.price].push(order);
     }
     else {
-        asks_.insert(order_index{order.price, order.order_index});
+        asks_[order.price].push(order);
     }
     modify_level_(order.side, order.price, order.quantity);
-    orders_by_id_.emplace(order.order_index, std::move(order));
 }
 
 } // namespace matching

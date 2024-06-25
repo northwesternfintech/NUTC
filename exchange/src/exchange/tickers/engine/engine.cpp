@@ -31,19 +31,21 @@ Engine::attempt_matches_(OrderBook& orderbook)
 {
     std::vector<stored_match> matches;
     while (orderbook.can_match_orders()) {
-        const stored_order& highest_bid = orderbook.get_top_order(side::buy);
-        const stored_order& cheapest_ask = orderbook.get_top_order(side::sell);
+        stored_order& highest_bid = orderbook.get_top_order(side::buy);
+        stored_order& cheapest_ask = orderbook.get_top_order(side::sell);
         assert(highest_bid.price >= cheapest_ask.price);
         assert(highest_bid.ticker == cheapest_ask.ticker);
         assert(cheapest_ask.quantity > 0);
 
-        if (!order_can_execute_(orderbook, highest_bid, cheapest_ask))
+        if (!order_can_execute_(highest_bid, cheapest_ask))
             continue;
 
         auto match = create_match(highest_bid, cheapest_ask);
+		highest_bid.quantity-=match.quantity;
+		cheapest_ask.quantity-=match.quantity;
 
-        orderbook.modify_order_quantity(highest_bid.order_index, -match.quantity);
-        orderbook.modify_order_quantity(cheapest_ask.order_index, -match.quantity);
+		orderbook.modify_level_(util::Side::buy, highest_bid.price, -match.quantity);
+		orderbook.modify_level_(util::Side::sell, cheapest_ask.price, -match.quantity);
 
         matches.push_back(std::move(match));
     }
@@ -76,7 +78,7 @@ Engine::create_match(const stored_order& buyer, const stored_order& seller)
 
 bool
 Engine::order_can_execute_(
-    OrderBook& orderbook, const stored_order& buyer, const stored_order& seller
+    stored_order& buyer, stored_order& seller
 )
 {
     double quantity = order_quantity(buyer, seller);
@@ -85,16 +87,21 @@ Engine::order_can_execute_(
     double total_price = double((decimal_one + order_fee) * price) * quantity;
 
     if (!buyer.trader.can_leverage() && buyer.trader.get_capital() < total_price) {
-        orderbook.remove_order(buyer.order_index);
+        buyer.active = false;
         return false;
     }
     if (!seller.trader.can_leverage()
         && seller.trader.get_holdings(seller.ticker) < quantity) {
-        orderbook.remove_order(seller.order_index);
+        seller.active = false;
         return false;
     }
     if (&seller.trader == &buyer.trader) [[unlikely]] {
-        orderbook.remove_order(std::min(seller.order_index, buyer.order_index));
+        if (seller.order_index <= buyer.order_index) {
+            seller.active = false;
+        }
+        else {
+            buyer.active = false;
+        }
         return false;
     }
     return true;
