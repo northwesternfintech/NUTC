@@ -19,7 +19,10 @@ class WrapperHandle {
     PipeReader reader_{};
     PipeWriter writer_{};
 
-    WrapperHandle(const std::vector<std::string>& args);
+    WrapperHandle(
+        const std::vector<std::string>& args,
+        const std::string& algorithm
+    );
     void block_on_init();
 
     const fs::path& wrapper_binary_path();
@@ -35,6 +38,16 @@ public:
 
     // Local (.py on disk)
     WrapperHandle(const std::string& algo_path);
+
+    inline
+    std::string
+    force_upwrap_optional(std::optional<std::string> opt, std::string error_msg) {
+        if (!opt.has_value()) {
+            throw std::runtime_error(error_msg);
+        }
+
+        return opt.value();
+    }
 
     std::vector<market_order>
     read_messages()

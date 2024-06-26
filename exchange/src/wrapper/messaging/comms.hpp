@@ -14,6 +14,7 @@ using tick_update = nutc::messages::tick_update;
 using orderbook_update = nutc::messages::orderbook_update;
 using match = nutc::messages::match;
 using start_time = nutc::messages::start_time;
+using algorithm_t = nutc::messages::algorithm_content;
 
 namespace nutc {
 
@@ -29,6 +30,9 @@ public:
 
     void main_event_loop(const std::string& uid);
 
+    static algorithm_t consume_algorithm();
+
+
 private:
     rate_limiter::RateLimiter limiter;
 
@@ -43,7 +47,9 @@ private:
         double price
     );
 
-    static std::variant<start_time, tick_update> consume_message();
+    template <typename T>
+    static T consume_message();
+
 };
 
 } // namespace comms
