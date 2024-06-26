@@ -40,8 +40,10 @@ class Strategy:
             Volume placed into orderbook
         """
         print(f"Python Orderbook update: {ticker} {side} {price} {quantity}")
-        if(ticker=="TSLA" and price<101.0 and price>99.0):
-            place_market_order("BUY", "TSLA", 10, 100)
+        import sys
+        print(ticker, file=sys.stderr)
+        if(ticker=="ABC" and price<101.0 and price>99.0):
+            place_market_order("BUY", "ABC", 10, 100)
 
     def on_account_update(
         self,

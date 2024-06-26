@@ -18,8 +18,8 @@ struct ticker_info {
     Engine engine;
     bots::BotContainer bot_container;
 
-    ticker_info(std::string ticker, decimal_price order_fee) :
-        ticker_info(std::move(ticker), 0.0, order_fee, {})
+    ticker_info(util::Ticker ticker, decimal_price order_fee) :
+        ticker_info(ticker, 0.0, order_fee, {})
     {}
 
     // TODO: order fee should not be 0
@@ -28,12 +28,12 @@ struct ticker_info {
     {}
 
     ticker_info(
-        std::string ticker, double starting_price, decimal_price order_fee,
+        util::Ticker ticker, double starting_price, decimal_price order_fee,
         std::vector<config::bot_config> config
     ) :
         level_update_generator_(std::make_shared<matching::LevelUpdateGenerator>()),
         orderbook(level_update_generator_), engine(order_fee),
-        bot_container(std::move(ticker), starting_price, std::move(config))
+        bot_container(ticker, starting_price, std::move(config))
     {}
 };
 

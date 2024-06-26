@@ -2,12 +2,11 @@
 
 #include "level_update_generator.hpp"
 #include "order_storage.hpp"
-#include "shared/util.hpp"
+#include "shared/ticker.hpp"
 
 #include <cassert>
 
 #include <queue>
-#include <unordered_map>
 #include <vector>
 
 namespace nutc {
@@ -54,11 +53,11 @@ public:
      */
     stored_order& get_top_order(util::Side side);
 
-	void modify_quantity(const stored_order& order, double quantity);
+    void modify_quantity(const stored_order& order, double quantity);
     void modify_level_(util::Side side, decimal_price price, double quantity);
 
 private:
-	void clean_tree(util::Side side);
+    void clean_tree(util::Side side);
 };
 } // namespace matching
 } // namespace nutc

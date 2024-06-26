@@ -31,7 +31,7 @@ is_nearly_equal(double f_a, double f_b, double epsilon)
 
 bool
 validate_match(
-    const nutc::matching::stored_match& match, const std::string& ticker,
+    const nutc::matching::stored_match& match, util::Ticker ticker,
     const std::string& buyer_id, const std::string& seller_id, util::Side side,
     double price, double quantity
 )
@@ -44,8 +44,8 @@ validate_match(
 
 bool
 validate_ob_update(
-    const orderbook_update& update, const std::string& ticker, util::Side side,
-    double price, double quantity
+    const orderbook_update& update, util::Ticker ticker, util::Side side, double price,
+    double quantity
 )
 {
     return update.ticker == ticker && update.side == side
@@ -55,8 +55,8 @@ validate_ob_update(
 
 bool
 validate_market_order(
-    const market_order& update, const std::string& ticker, util::Side side,
-    double price, double quantity
+    const market_order& update, util::Ticker ticker, util::Side side, double price,
+    double quantity
 )
 {
     return update.ticker == ticker && update.side == side

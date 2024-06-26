@@ -56,7 +56,9 @@ WrapperHandle::WrapperHandle(
         {"--uid", quote_id(remote_uid), "--algo_id", quote_id(algo_id)},
         force_upwrap_optional(
             nutc::firebase::get_algo(remote_uid, algo_id),
-            fmt::format("Could not read algoid {} of uid {} from Firebase", algo_id, remote_uid)
+            fmt::format(
+                "Could not read algoid {} of uid {} from Firebase", algo_id, remote_uid
+            )
         )
     )
 {}
@@ -65,7 +67,7 @@ WrapperHandle::WrapperHandle(const std::string& algo_path) :
     WrapperHandle(
         {"--uid", quote_id(algo_path), "--algo_id", quote_id(algo_path), "--dev"},
         force_upwrap_optional(
-            nutc::file_ops::read_file_content(algo_path), 
+            nutc::file_ops::read_file_content(algo_path),
             fmt::format("Could not read algorithm file at {}", algo_path)
         )
     )

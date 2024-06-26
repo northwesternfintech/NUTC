@@ -1,5 +1,10 @@
 #include "config.hpp"
 
+#include "shared/config/config.h"
+#include "shared/util.hpp"
+
+#include <fmt/core.h>
+
 #include <yaml-cpp/yaml.h>
 
 namespace nutc {
@@ -67,7 +72,16 @@ Config::get_ticker_config_(const YAML::Node& full_config)
         if (!ticker_symb.IsDefined())
             throw_undef_err("tickers/{ticker}/ticker");
 
-        const std::string& ticker_symb_s = ticker_symb.as<std::string>();
+        std::string ticker_symb_s = ticker_symb.as<std::string>();
+        if (ticker_symb_s.size() != TICKER_LENGTH) {
+            throw std::runtime_error(fmt::format(
+                "Ticker string length is {} but should be {}", ticker_symb_s.size(),
+                TICKER_LENGTH
+            ));
+        }
+        util::Ticker ticker;
+        std::copy(ticker_symb_s.begin(), ticker_symb_s.end(), ticker.arr.begin());
+
         if (!ticker_start_price.IsDefined())
             throw_undef_err(fmt::format("tickers/{}/ticker", ticker_symb_s));
 
@@ -76,7 +90,7 @@ Config::get_ticker_config_(const YAML::Node& full_config)
             bot_config = get_bot_config_(bots);
 
         tickers.emplace_back(
-            ticker_config{ticker_symb_s, ticker_start_price.as<double>(), bot_config}
+            ticker_config{ticker, ticker_start_price.as<double>(), bot_config}
         );
     }
     return tickers;

@@ -11,7 +11,7 @@ namespace nutc {
 namespace traders {
 
 class BotTrader : public traders::GenericTrader {
-    const std::string TICKER;
+    const util::Ticker TICKER;
     const double INTEREST_LIMIT;
     double short_interest_ = 0;
     double long_interest_ = 0;
@@ -21,8 +21,8 @@ class BotTrader : public traders::GenericTrader {
     std::vector<market_order> orders_{};
 
 public:
-    BotTrader(std::string ticker, double interest_limit) :
-        GenericTrader(generate_user_id(), interest_limit), TICKER(std::move(ticker)),
+    BotTrader(util::Ticker ticker, double interest_limit) :
+        GenericTrader(generate_user_id(), interest_limit), TICKER(ticker),
         INTEREST_LIMIT(interest_limit)
     {}
 

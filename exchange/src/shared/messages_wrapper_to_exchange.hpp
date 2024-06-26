@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ticker.hpp"
 #include "util.hpp"
 
 #include <fmt/format.h>
@@ -19,14 +20,14 @@ struct init_message {
 
 struct market_order {
     util::Side side;
-    std::string ticker;
+    util::Ticker ticker;
     double quantity;
     double price;
 
     bool operator==(const market_order& other) const = default;
 
-    market_order(util::Side side, std::string ticker, double quantity, double price) :
-        side(side), ticker(std::move(ticker)), quantity(quantity), price(price)
+    market_order(util::Side side, util::Ticker ticker, double quantity, double price) :
+        side(side), ticker(ticker), quantity(quantity), price(price)
     {}
 
     market_order() = default;

@@ -49,7 +49,7 @@ ExchangeProxy::handle_orderbook_update(const orderbook_update& update)
     try {
         std::string side = update.side == util::Side::buy ? "BUY" : "SELL";
         nutc::pywrapper::get_ob_update_function()(
-            update.ticker, side, update.price, update.quantity
+            std::string{update.ticker}, side, update.price, update.quantity
         );
     } catch (const py::error_already_set& e) {}
 }
@@ -61,17 +61,19 @@ ExchangeProxy::handle_match(const match& match, const std::string& uid)
         std::string side = match.side == util::Side::buy ? "BUY" : "SELL";
 
         nutc::pywrapper::get_trade_update_function()(
-            match.ticker, side, match.price, match.quantity
+            std::string{match.ticker}, side, match.price, match.quantity
         );
 
         if (match.buyer_id == uid) {
             nutc::pywrapper::get_account_update_function()(
-                match.ticker, "BUY", match.price, match.quantity, match.buyer_capital
+                std::string{match.ticker}, "BUY", match.price, match.quantity,
+                match.buyer_capital
             );
         }
         if (match.seller_id == uid) {
             nutc::pywrapper::get_account_update_function()(
-                match.ticker, "SELL", match.price, match.quantity, match.seller_capital
+                std::string{match.ticker}, "SELL", match.price, match.quantity,
+                match.seller_capital
             );
         }
     } catch (const py::error_already_set& e) {}
@@ -79,7 +81,7 @@ ExchangeProxy::handle_match(const match& match, const std::string& uid)
 
 bool
 ExchangeProxy::publish_market_order(
-    const std::string& side, const std::string& ticker, double quantity, double price
+    const std::string& side, util::Ticker ticker, double quantity, double price
 )
 {
     if (limiter.should_rate_limit()) {
@@ -132,7 +134,12 @@ ExchangeProxy::market_order_func()
 {
     return [&](const std::string& side, const auto& ticker, const auto& quantity,
                const auto& price) {
-        return ExchangeProxy::publish_market_order(side, ticker, quantity, price);
+        if (ticker.size() != 3) [[unlikely]] {
+            return false;
+        }
+        util::Ticker ticker_arr;
+        std::copy(ticker.begin(), ticker.end(), ticker_arr.arr.begin());
+        return ExchangeProxy::publish_market_order(side, ticker_arr, quantity, price);
     };
 }
 

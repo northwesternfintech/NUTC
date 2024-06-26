@@ -209,6 +209,7 @@ target_link_libraries(WRAPPER_exe PRIVATE ${Python3_LIBRARIES})
 add_library(SHARED_lib OBJECT     
     src/shared/file_operations/file_operations.cpp
     src/shared/firebase/firebase.cpp
+    src/shared/ticker.cpp
     src/shared/util.cpp
 )
 
@@ -219,6 +220,7 @@ target_include_directories(
 )
 
 target_link_libraries(SHARED_lib PUBLIC fmt::fmt)
+target_link_libraries(SHARED_lib PUBLIC glaze::glaze)
 target_link_libraries(SHARED_lib PUBLIC yaml-cpp::yaml-cpp)
 target_link_libraries(SHARED_lib PUBLIC glaze::glaze)
 target_link_libraries(SHARED_lib PUBLIC CURL::libcurl)

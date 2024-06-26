@@ -2,6 +2,7 @@
 
 #include "exchange/tickers/matching_cycle/base/base_strategy.hpp"
 #include "exchange/tickers/ticker.hpp"
+#include "shared/ticker.hpp"
 
 #include <memory>
 #include <string>
@@ -33,7 +34,7 @@ private:
     virtual std::vector<matching::stored_match>
     match_orders_(std::vector<matching::stored_order> orders) override;
 
-    std::unordered_map<std::string, matching::ticker_info>
+    std::unordered_map<util::Ticker, matching::ticker_info>
     create_tickers(const std::vector<std::string>& ticker_names, double order_fee);
 };
 

@@ -5,15 +5,13 @@
 
 #include <fmt/format.h>
 
-#include <string>
-
 namespace nutc {
 namespace matching {
 
 struct stored_match {
     traders::GenericTrader& buyer;
     traders::GenericTrader& seller;
-    std::string ticker;
+    util::Ticker ticker;
     util::Side side;
     decimal_price price;
     double quantity;
@@ -21,12 +19,12 @@ struct stored_match {
 
 struct stored_order {
     traders::GenericTrader& trader;
-    std::string ticker{};
-    util::Side side{};
-    decimal_price price{};
-    double quantity{};
-    uint64_t tick{};
-	bool active{true};
+    util::Ticker ticker;
+    util::Side side;
+    decimal_price price;
+    double quantity;
+    uint64_t tick;
+    bool active{true};
 
     // Used to sort orders by time created
     uint64_t order_index;
@@ -41,7 +39,7 @@ struct stored_order {
     }
 
     stored_order(
-        traders::GenericTrader& trader, util::Side side, std::string ticker,
+        traders::GenericTrader& trader, util::Side side, util::Ticker ticker,
         double quantity, double price, uint64_t tick = 0
     );
 

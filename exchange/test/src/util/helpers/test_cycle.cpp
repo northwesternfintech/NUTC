@@ -1,6 +1,7 @@
 #include "test_cycle.hpp"
 
 #include "exchange/logging.hpp"
+#include "shared/ticker.hpp"
 
 #include <glaze/glaze.hpp>
 
@@ -34,16 +35,16 @@ TestMatchingCycle::match_orders_(std::vector<matching::stored_order> orders)
     return BaseMatchingCycle::match_orders_(std::move(orders));
 }
 
-std::unordered_map<std::string, matching::ticker_info>
+std::unordered_map<util::Ticker, matching::ticker_info>
 TestMatchingCycle::create_tickers(
     const std::vector<std::string>& ticker_names, double order_fee
 )
 {
-    std::unordered_map<std::string, matching::ticker_info> mappings;
+    std::unordered_map<util::Ticker, matching::ticker_info> mappings;
     for (const auto& ticker : ticker_names) {
         mappings.emplace(
-            std::piecewise_construct, std::forward_as_tuple(ticker),
-            std::forward_as_tuple(ticker, order_fee)
+            std::piecewise_construct, std::forward_as_tuple(ticker.c_str()),
+            std::forward_as_tuple(ticker.c_str(), order_fee)
         );
     }
     return mappings;

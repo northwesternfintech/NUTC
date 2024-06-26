@@ -43,8 +43,7 @@ private:
 
     static void publish_message(const std::string& message);
     [[nodiscard]] bool publish_market_order(
-        const std::string& side, const std::string& ticker, double quantity,
-        double price
+        const std::string& side, util::Ticker ticker, double quantity, double price
     );
 
     template <typename T>

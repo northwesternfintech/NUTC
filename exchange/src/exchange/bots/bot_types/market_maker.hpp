@@ -13,8 +13,8 @@ namespace bots {
  */
 class MarketMakerBot : public traders::BotTrader {
 public:
-    MarketMakerBot(std::string ticker, double interest_limit) :
-        BotTrader(std::move(ticker), interest_limit)
+    MarketMakerBot(util::Ticker ticker, double interest_limit) :
+        BotTrader(ticker, interest_limit)
     {}
 
     bool constexpr can_leverage() const override { return true; }

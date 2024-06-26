@@ -3,11 +3,12 @@
 namespace nutc {
 namespace matching {
 stored_order::stored_order(
-    traders::GenericTrader& trader, util::Side side, std::string ticker,
+    traders::GenericTrader& trader, util::Side side, util::Ticker ticker,
     double quantity, double price, uint64_t tick
 ) :
-    trader(trader), ticker(std::move(ticker)), side(side), price(price),
-    quantity(quantity), tick(tick), order_index(get_and_increment_global_index())
+    trader(trader),
+    ticker(ticker), side(side), price(price), quantity(quantity), tick(tick),
+    order_index(get_and_increment_global_index())
 {}
 
 bool

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "exchange/tickers/ticker.hpp"
+#include "shared/ticker.hpp"
 
 #include <prometheus/family.h>
 #include <prometheus/gauge.h>
@@ -24,8 +25,8 @@ public:
     TickerMetricsPusher();
 
     void record_current_tick(uint64_t tick_num);
-    void
-    record_trader_metrics(const std::unordered_map<std::string, matching::ticker_info>& tickers
+    void record_trader_metrics(
+        const std::unordered_map<util::Ticker, matching::ticker_info>& tickers
     );
 
     TickerMetricsPusher& operator=(const TickerMetricsPusher&) = delete;
@@ -34,7 +35,7 @@ public:
     TickerMetricsPusher(TickerMetricsPusher&&) = delete;
 
     void push(
-        const std::unordered_map<std::string, matching::ticker_info>& tickers,
+        const std::unordered_map<util::Ticker, matching::ticker_info>& tickers,
         uint64_t tick_num
     );
 };
