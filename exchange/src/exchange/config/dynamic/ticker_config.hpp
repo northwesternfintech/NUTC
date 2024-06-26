@@ -1,6 +1,7 @@
 #pragma once
 
-#include <string>
+#include "shared/ticker.hpp"
+
 #include <vector>
 
 namespace nutc {
@@ -16,7 +17,7 @@ struct bot_config {
 };
 
 struct ticker_config {
-    const std::string TICKER;
+    const util::Ticker TICKER;
     const double STARTING_PRICE;
 
     const std::vector<bot_config> BOTS;

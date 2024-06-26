@@ -3,6 +3,7 @@
 #include "exchange/metrics/prometheus.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "prometheus.hpp"
+#include "shared/util.hpp"
 
 #include <prometheus/gauge.h>
 
@@ -11,7 +12,8 @@ namespace metrics {
 
 void
 TickerMetricsPusher::push(
-    const std::unordered_map<std::string, matching::ticker_info>& tickers, uint64_t tick_num
+    const std::unordered_map<util::Ticker, matching::ticker_info>& tickers,
+    uint64_t tick_num
 )
 {
     record_current_tick(tick_num);
@@ -37,7 +39,7 @@ TickerMetricsPusher::record_current_tick(uint64_t tick_num)
 
 void
 TickerMetricsPusher::record_trader_metrics(
-    const std::unordered_map<std::string, matching::ticker_info>& tickers
+    const std::unordered_map<util::Ticker, matching::ticker_info>& tickers
 )
 {
     auto& trader_container = traders::TraderContainer::get_instance();

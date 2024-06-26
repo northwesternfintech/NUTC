@@ -41,11 +41,11 @@ Engine::attempt_matches_(OrderBook& orderbook)
             continue;
 
         auto match = create_match(highest_bid, cheapest_ask);
-		highest_bid.quantity-=match.quantity;
-		cheapest_ask.quantity-=match.quantity;
+        highest_bid.quantity -= match.quantity;
+        cheapest_ask.quantity -= match.quantity;
 
-		orderbook.modify_level_(util::Side::buy, highest_bid.price, -match.quantity);
-		orderbook.modify_level_(util::Side::sell, cheapest_ask.price, -match.quantity);
+        orderbook.modify_level_(util::Side::buy, highest_bid.price, -match.quantity);
+        orderbook.modify_level_(util::Side::sell, cheapest_ask.price, -match.quantity);
 
         matches.push_back(std::move(match));
     }
@@ -77,9 +77,7 @@ Engine::create_match(const stored_order& buyer, const stored_order& seller)
 }
 
 bool
-Engine::order_can_execute_(
-    stored_order& buyer, stored_order& seller
-)
+Engine::order_can_execute_(stored_order& buyer, stored_order& seller)
 {
     double quantity = order_quantity(buyer, seller);
 

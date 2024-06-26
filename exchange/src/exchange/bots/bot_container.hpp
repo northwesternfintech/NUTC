@@ -13,7 +13,7 @@ using BotVector = std::vector<std::shared_ptr<traders::BotTrader>>;
  * @brief Container for bots for a given ticker
  */
 class BotContainer {
-    std::string ticker;
+    util::Ticker ticker;
     stochastic::BrownianMotion theo_generator_;
 
     BotVector bots_{};
@@ -28,10 +28,10 @@ public:
     }
 
     BotContainer(
-        std::string ticker, double starting_price, std::vector<config::bot_config> bots
+        util::Ticker ticker, double starting_price, std::vector<config::bot_config> bots
     ) :
-        ticker(std::move(ticker)), theo_generator_(starting_price),
-        bots_(add_bots(std::move(bots)))
+        ticker(ticker),
+        theo_generator_(starting_price), bots_(add_bots(std::move(bots)))
     {}
 
     double

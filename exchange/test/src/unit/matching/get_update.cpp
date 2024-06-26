@@ -37,27 +37,27 @@ protected:
 
 TEST_F(UnitGetUpdate, NoOrders)
 {
-    // auto updates = get_updates("A", before, after);
-    auto updates = generator_->get_updates("A");
+    // auto updates = get_updates("ABC", before, after);
+    auto updates = generator_->get_updates("ABC");
 
     ASSERT_EQ(updates.size(), 0);
 }
 
 TEST_F(UnitGetUpdate, OrderAdded)
 {
-    stored_order order1{trader1, buy, "A", 1, 1, 0};
+    stored_order order1{trader1, buy, "ABC", 1, 1, 0};
 
     ob.add_order(order1);
 
-    auto updates = generator_->get_updates("A");
+    auto updates = generator_->get_updates("ABC");
 
     ASSERT_EQ(updates.size(), 1);
-    ASSERT_EQ_OB_UPDATE(updates[0], "A", buy, 1, 1);
+    ASSERT_EQ_OB_UPDATE(updates[0], "ABC", buy, 1, 1);
 }
 
 TEST_F(UnitGetUpdate, OrderDeleted)
 {
-    stored_order order1{trader1, buy, "A", 1, 1, 0};
+    stored_order order1{trader1, buy, "ABC", 1, 1, 0};
 
     // before, we have a single order
     ob.add_order(order1);
@@ -68,52 +68,53 @@ TEST_F(UnitGetUpdate, OrderDeleted)
 
     // ob.remove_order(order1.order_index);
     //
-    // auto updates = generator_->get_updates("A");
+    // auto updates = generator_->get_updates("ABC");
     //
     // ASSERT_EQ(updates.size(), 1);
-    // ASSERT_EQ_OB_UPDATE(updates[0], "A", buy, 1, 0);
+    // ASSERT_EQ_OB_UPDATE(updates[0], "ABC", buy, 1, 0);
 }
 
 TEST_F(UnitGetUpdate, OrderQuantityChange)
 {
     double initial_quantity = 1;
-    stored_order order1{trader1, buy, "A", initial_quantity, 1, 0};
+    stored_order order1{trader1, buy, "ABC", initial_quantity, 1, 0};
     ob.add_order(order1);
 
     double quantity_delta = 5;
     // ob.modify_order_quantity(order1.order_index, quantity_delta);
-    // auto updates = generator_->get_updates("A");
+    // auto updates = generator_->get_updates("ABC");
     //
     // ASSERT_EQ(updates.size(), 1);
-    // ASSERT_EQ_OB_UPDATE(updates[0], "A", buy, 1, quantity_delta + initial_quantity);
+    // ASSERT_EQ_OB_UPDATE(updates[0], "ABC", buy, 1, quantity_delta +
+    // initial_quantity);
 }
 
 // This is an edge case that we currently level change updator doesn't handle
 /* TEST_F(UnitGetUpdate, NoQuanitityChange)
 {
-    stored_order order1{trader1, buy, "A", 1, 1, 0};
-    stored_order order2{trader1, buy, "A", 1, 2, 0};
-    stored_order order3{trader1, buy, "A", 1, 3, 0};
+    stored_order order1{trader1, buy, "ABC", 1, 1, 0};
+    stored_order order2{trader1, buy, "ABC", 1, 2, 0};
+    stored_order order3{trader1, buy, "ABC", 1, 3, 0};
     before.add_order(order1);
     before.add_order(order2);
     before.add_order(order3);
 
-    stored_order order4{trader1, buy, "A", 1, 3, 0};
-    stored_order order5{trader1, buy, "A", 1, 2, 0};
-    stored_order order6{trader1, buy, "A", 1, 1, 0};
+    stored_order order4{trader1, buy, "ABC", 1, 3, 0};
+    stored_order order5{trader1, buy, "ABC", 1, 2, 0};
+    stored_order order6{trader1, buy, "ABC", 1, 1, 0};
     after.add_order(order4);
     after.add_order(order5);
     after.add_order(order6);
 
-    auto updates = get_updates("A", before, after);
+    auto updates = get_updates("ABC", before, after);
 
     ASSERT_EQ(updates.size(), 0);
 } */
 
 TEST_F(UnitGetUpdate, BuySellChange)
 {
-    stored_order order1{trader1, buy, "A", 1, 1, 0};
-    stored_order order2{trader3, sell, "A", 1, 5, 0};
+    stored_order order1{trader1, buy, "ABC", 1, 1, 0};
+    stored_order order2{trader3, sell, "ABC", 1, 5, 0};
 
     ob.add_order(order1);
     ob.add_order(order2);
@@ -121,23 +122,23 @@ TEST_F(UnitGetUpdate, BuySellChange)
     // ob.modify_order_quantity(order1.order_index, 4);
     // ob.modify_order_quantity(order2.order_index, 4);
     //
-    // auto updates = generator_->get_updates("A");
+    // auto updates = generator_->get_updates("ABC");
     //
     // std::sort(updates.begin(), updates.end(), [](auto a, auto b) {
     //     return a.price < b.price;
     // });
     //
     // ASSERT_EQ(updates.size(), 2);
-    // ASSERT_EQ_OB_UPDATE(updates[0], "A", buy, 1, 5);
-    // ASSERT_EQ_OB_UPDATE(updates[1], "A", sell, 5, 5);
+    // ASSERT_EQ_OB_UPDATE(updates[0], "ABC", buy, 1, 5);
+    // ASSERT_EQ_OB_UPDATE(updates[1], "ABC", sell, 5, 5);
 }
 
 TEST_F(UnitGetUpdate, ManyLevelChanges)
 {
-    stored_order order1{trader1, buy, "A", 1, 1, 0};
-    stored_order order2{trader1, buy, "A", 1, 2, 0};
-    stored_order order3{trader1, buy, "A", 1, 3, 0};
-    stored_order order4{trader3, buy, "A", 1, 4, 0};
+    stored_order order1{trader1, buy, "ABC", 1, 1, 0};
+    stored_order order2{trader1, buy, "ABC", 1, 2, 0};
+    stored_order order3{trader1, buy, "ABC", 1, 3, 0};
+    stored_order order4{trader3, buy, "ABC", 1, 4, 0};
 
     ob.add_order(order1);
     ob.add_order(order2);
@@ -146,33 +147,33 @@ TEST_F(UnitGetUpdate, ManyLevelChanges)
 
     generator_->reset();
 
-    stored_order order5{trader1, buy, "A", 8, 2, 0};
-    stored_order order6{trader1, buy, "A", 9, 3, 0};
-    stored_order order7{trader1, buy, "A", 7, 4, 0};
+    stored_order order5{trader1, buy, "ABC", 8, 2, 0};
+    stored_order order6{trader1, buy, "ABC", 9, 3, 0};
+    stored_order order7{trader1, buy, "ABC", 7, 4, 0};
 
     ob.add_order(order5);
     ob.add_order(order6);
     ob.add_order(order7);
-    auto updates = generator_->get_updates("A");
+    auto updates = generator_->get_updates("ABC");
 
     std::sort(updates.begin(), updates.end(), [](auto a, auto b) {
         return a.price < b.price;
     });
 
     ASSERT_EQ(updates.size(), 3);
-    ASSERT_EQ_OB_UPDATE(updates[0], "A", buy, 2, 9);
-    ASSERT_EQ_OB_UPDATE(updates[1], "A", buy, 3, 10);
-    ASSERT_EQ_OB_UPDATE(updates[2], "A", buy, 4, 8);
+    ASSERT_EQ_OB_UPDATE(updates[0], "ABC", buy, 2, 9);
+    ASSERT_EQ_OB_UPDATE(updates[1], "ABC", buy, 3, 10);
+    ASSERT_EQ_OB_UPDATE(updates[2], "ABC", buy, 4, 8);
 }
 
 TEST_F(UnitGetUpdate, ChangesAddsAndDeletes)
 {
-    stored_order order1{trader1, buy, "A", 1, 1, 0};
-    stored_order order2{trader1, buy, "A", 1, 2, 0};
-    stored_order order3{trader1, buy, "A", 1, 3, 0};
-    stored_order order4{trader3, buy, "A", 10, 4, 0};
-    stored_order order5{trader3, buy, "A", 5, 5, 0};
-    stored_order order6{trader3, buy, "A", 5, 5, 0};
+    stored_order order1{trader1, buy, "ABC", 1, 1, 0};
+    stored_order order2{trader1, buy, "ABC", 1, 2, 0};
+    stored_order order3{trader1, buy, "ABC", 1, 3, 0};
+    stored_order order4{trader3, buy, "ABC", 10, 4, 0};
+    stored_order order5{trader3, buy, "ABC", 5, 5, 0};
+    stored_order order6{trader3, buy, "ABC", 5, 5, 0};
 
     ob.add_order(order1);
     ob.add_order(order2);
@@ -183,21 +184,21 @@ TEST_F(UnitGetUpdate, ChangesAddsAndDeletes)
 
     generator_->reset();
 
-    stored_order order7{trader1, buy, "A", 8, 2, 0};
-    stored_order order8{trader1, buy, "A", 9, 3, 0};
+    stored_order order7{trader1, buy, "ABC", 8, 2, 0};
+    stored_order order8{trader1, buy, "ABC", 9, 3, 0};
 
     ob.add_order(order7);
     ob.add_order(order8);
     // ob.remove_order(order6.order_index);
     //
-    // auto updates = generator_->get_updates("A");
+    // auto updates = generator_->get_updates("ABC");
     //
     // std::sort(updates.begin(), updates.end(), [](auto a, auto b) {
     //     return a.price < b.price;
     // });
     //
     // ASSERT_EQ(updates.size(), 3);
-    // ASSERT_EQ_OB_UPDATE(updates[0], "A", buy, 2, 9);
-    // ASSERT_EQ_OB_UPDATE(updates[1], "A", buy, 3, 10);
-    // ASSERT_EQ_OB_UPDATE(updates[2], "A", buy, 5, 5);
+    // ASSERT_EQ_OB_UPDATE(updates[0], "ABC", buy, 2, 9);
+    // ASSERT_EQ_OB_UPDATE(updates[1], "ABC", buy, 3, 10);
+    // ASSERT_EQ_OB_UPDATE(updates[2], "ABC", buy, 5, 5);
 }

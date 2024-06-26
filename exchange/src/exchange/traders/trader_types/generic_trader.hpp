@@ -16,7 +16,7 @@ class GenericTrader {
     const std::string USER_ID;
     const double INITIAL_CAPITAL;
     double capital_delta_{};
-    std::unordered_map<std::string, double> holdings_{};
+    std::unordered_map<util::Ticker, double> holdings_{};
 
 public:
     explicit GenericTrader(std::string user_id, double capital) :
@@ -57,7 +57,7 @@ public:
     }
 
     double
-    get_holdings(const std::string& ticker) const
+    get_holdings(util::Ticker ticker) const
     {
         if (!holdings_.contains(ticker))
             return 0.0;
@@ -66,7 +66,7 @@ public:
     }
 
     double
-    modify_holdings(const std::string& ticker, double change_in_holdings)
+    modify_holdings(util::Ticker ticker, double change_in_holdings)
     {
         holdings_[ticker] += change_in_holdings;
         return holdings_[ticker];

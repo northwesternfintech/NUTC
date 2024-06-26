@@ -20,9 +20,8 @@ class RetailBot : public traders::BotTrader {
     }
 
 public:
-    RetailBot(std::string ticker, double interest_limit) :
-        BotTrader(std::move(ticker), interest_limit),
-        AGGRESSIVENESS(generate_aggresiveness_())
+    RetailBot(util::Ticker ticker, double interest_limit) :
+        BotTrader(ticker, interest_limit), AGGRESSIVENESS(generate_aggresiveness_())
     {}
 
     void take_action(double midprice, double theo) override;

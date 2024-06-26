@@ -3,6 +3,7 @@
 #include "exchange/metrics/on_tick_metrics.hpp"
 #include "exchange/metrics/prometheus.hpp"
 #include "exchange/tickers/matching_cycle/base/base_strategy.hpp"
+#include "shared/util.hpp"
 
 #include <prometheus/counter.h>
 #include <prometheus/gauge.h>
@@ -14,7 +15,7 @@ class DevMatchingCycle : public BaseMatchingCycle {
 
 public:
     DevMatchingCycle(
-        std::unordered_map<std::string, ticker_info> tickers,
+        std::unordered_map<util::Ticker, ticker_info> tickers,
         std::vector<std::shared_ptr<traders::GenericTrader>> traders,
         uint64_t expire_ticks
     ) : BaseMatchingCycle(tickers, traders, expire_ticks)
@@ -39,7 +40,7 @@ protected:
 
 private:
     void
-    log_midprice_(const std::string& symbol, const OrderBook& orderbook)
+    log_midprice_(util::Ticker symbol, const OrderBook& orderbook)
     {
         static auto& midprice_gauge =
             prometheus::BuildGauge()

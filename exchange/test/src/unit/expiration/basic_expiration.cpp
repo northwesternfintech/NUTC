@@ -26,8 +26,8 @@ protected:
     void
     SetUp() override
     {
-        trader1.modify_holdings("ETHUSD", DEFAULT_QUANTITY);
-        trader2.modify_holdings("ETHUSD", DEFAULT_QUANTITY);
+        trader1.modify_holdings("ETH", DEFAULT_QUANTITY);
+        trader2.modify_holdings("ETH", DEFAULT_QUANTITY);
     }
 
     nutc::matching::OrderBook orderbook_;
@@ -42,8 +42,8 @@ protected:
 
 TEST_F(UnitOrderExpiration, SimpleNoMatch)
 {
-    stored_order order1{trader1, buy, "ETHUSD", 1, 1, 0};
-    stored_order order2{trader2, sell, "ETHUSD", 1, 1, 0};
+    stored_order order1{trader1, buy, "ETH", 1, 1, 0};
+    stored_order order2{trader2, sell, "ETH", 1, 1, 0};
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
 
@@ -63,8 +63,8 @@ TEST_F(UnitOrderExpiration, SimpleNoMatch)
 TEST_F(UnitOrderExpiration, IncrementTick)
 {
     orderbook_.expire_orders(TEST_ORDER_EXPIRATION_TICKS);
-    stored_order order1{trader1, buy, "ETHUSD", 1, 1, TEST_ORDER_EXPIRATION_TICKS};
-    stored_order order2{trader2, sell, "ETHUSD", 1, 1, TEST_ORDER_EXPIRATION_TICKS};
+    stored_order order1{trader1, buy, "ETH", 1, 1, TEST_ORDER_EXPIRATION_TICKS};
+    stored_order order2{trader2, sell, "ETH", 1, 1, TEST_ORDER_EXPIRATION_TICKS};
 
     add_to_engine_(order1);
     auto expired = orderbook_.expire_orders(TEST_ORDER_EXPIRATION_TICKS);
@@ -76,7 +76,7 @@ TEST_F(UnitOrderExpiration, ExpireOne)
 {
     orderbook_.expire_orders(TEST_ORDER_EXPIRATION_TICKS);
     stored_order order1{trader1, buy, "IDK", 1, 1, TEST_ORDER_EXPIRATION_TICKS};
-    stored_order order2{trader2, sell, "ETHUSD", 1, 1, TEST_ORDER_EXPIRATION_TICKS + 1};
+    stored_order order2{trader2, sell, "ETH", 1, 1, TEST_ORDER_EXPIRATION_TICKS + 1};
 
     add_to_engine_(order1);
     add_to_engine_(order2);
@@ -89,8 +89,8 @@ TEST_F(UnitOrderExpiration, ExpireOne)
 TEST_F(UnitOrderExpiration, PartialExpiration)
 {
     orderbook_.expire_orders(TEST_ORDER_EXPIRATION_TICKS);
-    stored_order order1{trader1, buy, "ETHUSD", 1, 1, TEST_ORDER_EXPIRATION_TICKS};
-    stored_order order2{trader2, sell, "ETHUSD", 2, 1, TEST_ORDER_EXPIRATION_TICKS};
+    stored_order order1{trader1, buy, "ETH", 1, 1, TEST_ORDER_EXPIRATION_TICKS};
+    stored_order order2{trader2, sell, "ETH", 2, 1, TEST_ORDER_EXPIRATION_TICKS};
 
     add_to_engine_(order1);
     add_to_engine_(order2);
@@ -98,6 +98,6 @@ TEST_F(UnitOrderExpiration, PartialExpiration)
     // Confirms the expired order is the modified order 2 with reduced quantity
     auto expired = orderbook_.expire_orders(TEST_ORDER_EXPIRATION_TICKS);
     ASSERT_EQ(1, expired.size());
-    stored_order test_eq{trader2, sell, "ETHUSD", 1, 1, TEST_ORDER_EXPIRATION_TICKS};
+    stored_order test_eq{trader2, sell, "ETH", 1, 1, TEST_ORDER_EXPIRATION_TICKS};
     ASSERT_EQ(expired.at(0), test_eq);
 }

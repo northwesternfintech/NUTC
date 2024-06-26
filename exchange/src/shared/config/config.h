@@ -9,3 +9,5 @@
 #else
 #define FIREBASE_URL "https://nutc-web-default-rtdb.firebaseio.com/"
 #endif
+
+#define TICKER_LENGTH 3

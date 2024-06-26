@@ -4,6 +4,7 @@
 #include "exchange/traders/trader_types/generic_trader.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
+#include "shared/ticker.hpp"
 
 #include <limits>
 
@@ -23,19 +24,19 @@ bool is_nearly_equal(
 );
 
 bool validate_match(
-    const nutc::matching::stored_match& match, const std::string& ticker,
+    const nutc::matching::stored_match& match, util::Ticker ticker,
     const std::string& buyer_id, const std::string& seller_id, util::Side side,
     double price, double quantity
 );
 
 bool validate_ob_update(
-    const orderbook_update& update, const std::string& ticker, util::Side side,
-    double price, double quantity
+    const orderbook_update& update, util::Ticker ticker, util::Side side, double price,
+    double quantity
 );
 
 bool validate_market_order(
-    const market_order& update, const std::string& ticker, util::Side side,
-    double price, double quantity
+    const market_order& update, util::Ticker ticker, util::Side side, double price,
+    double quantity
 );
 
 } // namespace test_utils
@@ -55,7 +56,7 @@ bool validate_market_order(
             << ", buyer_id = " << (buyer_id_) << ", seller_id = " << (seller_id_)      \
             << ", side = " << static_cast<int>(side_) << ", price = " << (price_)      \
             << ", quantity = " << (quantity_)                                          \
-            << ". Actual match: ticker = " << (match).ticker                           \
+            << ". Actual match: ticker = " << std::string{(match).ticker}              \
             << ", buyer_id = " << (match).buyer.get_id()                               \
             << ", seller_id = " << (match).seller.get_id()                             \
             << ", side = " << static_cast<int>((match).side)                           \
@@ -73,7 +74,7 @@ bool validate_market_order(
             << "Expected update with ticker = " << (ticker_)                           \
             << ", side = " << static_cast<int>(side_) << ", price = " << (price_)      \
             << ", quantity = " << (quantity_)                                          \
-            << ". Actual update: ticker = " << (update).ticker                         \
+            << ". Actual update: ticker = " << std::string{(update).ticker}            \
             << ", side = " << static_cast<int>((update).side)                          \
             << ", price = " << (update).price << ", quantity = " << (update).quantity; \
     } while (0)
@@ -91,7 +92,7 @@ bool validate_market_order(
             << ", price = " << (price_) << ", quantity = " << (quantity_)              \
             << ". Actual update: client_id = "                                         \
             << ""                                                                      \
-            << ", ticker = " << (update).ticker                                        \
+            << ", ticker = " << std::string{(update).ticker}                           \
             << ", side = " << static_cast<int>((update).side)                          \
             << ", price = " << (update).price << ", quantity = " << (update).quantity; \
     } while (0)
