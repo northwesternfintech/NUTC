@@ -3,6 +3,7 @@
 #include "exchange/tickers/ticker.hpp"
 
 #include <unordered_map>
+#include <memory_resource>
 
 namespace nutc {
 namespace matching {
