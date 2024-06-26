@@ -16,9 +16,9 @@ class DevMatchingCycle : public BaseMatchingCycle {
 public:
     DevMatchingCycle(
         std::unordered_map<util::Ticker, ticker_info> tickers,
-        std::vector<std::shared_ptr<traders::GenericTrader>> traders,
+        std::pmr::vector<std::shared_ptr<traders::GenericTrader>> traders,
         uint64_t expire_ticks
-    ) : BaseMatchingCycle(tickers, traders, expire_ticks)
+    ) : BaseMatchingCycle(tickers, std::move(traders), expire_ticks)
     {}
 
 protected:

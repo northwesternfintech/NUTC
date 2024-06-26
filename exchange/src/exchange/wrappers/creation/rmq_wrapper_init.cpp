@@ -7,7 +7,7 @@ namespace rabbitmq {
 
 void
 WrapperInitializer::send_start_time(
-    const std::vector<TraderPtr>& traders, size_t wait_seconds
+    const std::pmr::vector<TraderPtr>& traders, size_t wait_seconds
 )
 {
     using time_point = std::chrono::high_resolution_clock::time_point;
