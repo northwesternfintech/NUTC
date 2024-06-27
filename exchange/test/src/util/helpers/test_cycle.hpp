@@ -18,12 +18,13 @@ public:
 
     TestMatchingCycle(
         std::vector<std::string> ticker_names,
-        std::vector<std::shared_ptr<traders::GenericTrader>> traders,
+        std::pmr::vector<std::shared_ptr<traders::GenericTrader>> traders,
         double order_fee = 0.0,
         uint64_t order_expire_ticks = std::numeric_limits<uint64_t>::max()
     ) :
         matching::BaseMatchingCycle{
-            create_tickers(ticker_names, order_fee), traders, order_expire_ticks
+            create_tickers(ticker_names, order_fee), std::move(traders),
+            order_expire_ticks
         }
     {}
 

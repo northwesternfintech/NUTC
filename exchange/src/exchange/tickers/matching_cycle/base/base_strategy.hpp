@@ -3,6 +3,7 @@
 #include "exchange/tickers/ticker.hpp"
 
 #include <unordered_map>
+#include <memory_resource>
 
 namespace nutc {
 namespace matching {
@@ -12,14 +13,14 @@ namespace matching {
 class BaseMatchingCycle : public MatchingCycle {
 protected:
     std::unordered_map<util::Ticker, ticker_info> tickers_;
-    std::vector<std::shared_ptr<traders::GenericTrader>> traders_; // move elsewhere
+    std::pmr::vector<std::shared_ptr<traders::GenericTrader>> traders_; // move elsewhere
     const uint64_t ORDER_EXPIRE_TICKS;
 
 public:
     // Require transfer of ownership
     BaseMatchingCycle(
         std::unordered_map<util::Ticker, ticker_info> tickers,
-        std::vector<std::shared_ptr<traders::GenericTrader>> traders,
+        std::pmr::vector<std::shared_ptr<traders::GenericTrader>> traders,
         uint64_t expire_ticks
     ) :
         tickers_(std::move(tickers)),

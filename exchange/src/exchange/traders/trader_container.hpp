@@ -7,19 +7,24 @@
 
 #include <cassert>
 
-#include <algorithm>
 #include <memory>
-#include <ranges>
+#include <memory_resource>
 
 namespace nutc {
 namespace traders {
 using lock_guard = std::lock_guard<std::mutex>;
 
+static constexpr auto CACHED_TRADERS = 256;
+static constexpr auto CACHED_TRADER_SIZE = CACHED_TRADERS * sizeof(GenericTrader);
+
 // The traders themselves shouldn't need thread safety - maybe we should still consider
 // adding, though
 class TraderContainer {
+    std::array<std::byte, CACHED_TRADER_SIZE> buf;
+    std::pmr::monotonic_buffer_resource res{&buf, sizeof(buf)};
+
     mutable std::mutex trader_lock_{};
-    std::vector<std::shared_ptr<GenericTrader>> traders_{};
+    std::pmr::vector<std::shared_ptr<GenericTrader>> traders_{&res};
 
 public:
     /**
@@ -55,7 +60,7 @@ public:
         return traders_.size();
     }
 
-    const std::vector<std::shared_ptr<GenericTrader>>&
+    const std::pmr::vector<std::shared_ptr<GenericTrader>>&
     get_traders() const
     {
         return traders_;
