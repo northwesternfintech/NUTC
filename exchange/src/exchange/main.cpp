@@ -3,7 +3,6 @@
 #include "exchange/config/dynamic/argparse.hpp"
 #include "exchange/config/dynamic/config.hpp"
 #include "exchange/config/dynamic/ticker_config.hpp"
-#include "exchange/tick_scheduler/tick_scheduler.hpp"
 #include "exchange/tickers/matching_cycle/base/base_strategy.hpp"
 #include "exchange/tickers/matching_cycle/cycle_strategy.hpp"
 #include "exchange/tickers/matching_cycle/dev/dev_strategy.hpp"
@@ -64,6 +63,13 @@ create_cycle(const auto& mode)
     }
 }
 
+void main_event_loop(auto cycle) {
+	uint64_t tick = 0;
+	while(true) {
+		cycle->on_tick(tick++);
+	}
+}
+
 } // namespace
 
 int
@@ -87,8 +93,8 @@ main(int argc, const char** argv)
     sandbox::CrowServer::get_instance();
 
     auto cycle = create_cycle(mode);
-    auto tick_hz = config::Config::get().constants().TICK_HZ;
-    nutc::ticks::run([&cycle](uint64_t tick) { cycle->on_tick(tick); }, tick_hz);
+
+	main_event_loop(cycle);
 
     return 0;
 }

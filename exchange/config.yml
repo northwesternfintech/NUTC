@@ -5,7 +5,6 @@ global:
 
     # How many ticks for an order to expire
     order_expiration_ticks: 10
-    exchange_tick_hz: 100
     order_fee: .0000
     sandbox_trial_seconds: 300
 

@@ -58,8 +58,6 @@ add_library(
 
     src/exchange/theo/brownian.cpp
     
-    src/exchange/tick_scheduler/tick_scheduler.cpp
-    
     src/exchange/metrics/on_tick_metrics.cpp
 
     src/exchange/config/dynamic/argparse.cpp
