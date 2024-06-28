@@ -1,7 +1,7 @@
 #pragma once
 
-#include "level_update_generator.hpp"
-#include "order_storage.hpp"
+#include "exchange/orders/storage/level_update_generator.hpp"
+#include "exchange/orders/storage/order_storage.hpp"
 #include "shared/ticker.hpp"
 
 #include <cassert>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "exchange/tickers/ticker.hpp"
+#include "exchange/orders/storage/ticker_info.hpp"
 #include "shared/ticker.hpp"
 
 #include <prometheus/family.h>

@@ -1,5 +1,5 @@
 #pragma once
-#include "decimal_price.hpp"
+#include "exchange/orders/storage/decimal_price.hpp"
 #include "exchange/traders/trader_types/generic_trader.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
