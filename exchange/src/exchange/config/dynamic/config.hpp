@@ -16,7 +16,6 @@ struct global_config {
     const int STARTING_CAPITAL;
     const size_t WAIT_SECS;
     const size_t ORDER_EXPIRATION_TICKS;
-    const uint16_t TICK_HZ;
     const unsigned int SANDBOX_TRIAL_SECS;
     const double ORDER_FEE;
 };
