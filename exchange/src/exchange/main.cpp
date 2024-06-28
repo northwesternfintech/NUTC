@@ -3,15 +3,15 @@
 #include "exchange/config/dynamic/argparse.hpp"
 #include "exchange/config/dynamic/config.hpp"
 #include "exchange/config/dynamic/ticker_config.hpp"
-#include "exchange/tickers/matching_cycle/base/base_strategy.hpp"
-#include "exchange/tickers/matching_cycle/cycle_strategy.hpp"
-#include "exchange/tickers/matching_cycle/dev/dev_strategy.hpp"
-#include "exchange/tickers/ticker.hpp"
-#include "logging.hpp"
-#include "sandbox/server/crow.hpp"
+#include "exchange/matching_cycle/base/base_strategy.hpp"
+#include "exchange/matching_cycle/cycle_strategy.hpp"
+#include "exchange/matching_cycle/dev/dev_strategy.hpp"
+#include "exchange/orders/storage/ticker_info.hpp"
+#include "exchange/sandbox_server/crow.hpp"
+#include "exchange/traders/trader_container.hpp"
+#include "exchange/wrappers/creation/rmq_wrapper_init.hpp"
+#include "exchange/logging.hpp"
 #include "shared/util.hpp"
-#include "traders/trader_container.hpp"
-#include "wrappers/creation/rmq_wrapper_init.hpp"
 
 #include <csignal>
 
@@ -63,11 +63,13 @@ create_cycle(const auto& mode)
     }
 }
 
-void main_event_loop(auto cycle) {
-	uint64_t tick = 0;
-	while(true) {
-		cycle->on_tick(tick++);
-	}
+void
+main_event_loop(auto cycle)
+{
+    uint64_t tick = 0;
+    while (true) {
+        cycle->on_tick(tick++);
+    }
 }
 
 } // namespace
@@ -94,7 +96,7 @@ main(int argc, const char** argv)
 
     auto cycle = create_cycle(mode);
 
-	main_event_loop(cycle);
+    main_event_loop(cycle);
 
     return 0;
 }

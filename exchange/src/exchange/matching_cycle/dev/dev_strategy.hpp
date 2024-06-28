@@ -2,7 +2,7 @@
 
 #include "exchange/metrics/on_tick_metrics.hpp"
 #include "exchange/metrics/prometheus.hpp"
-#include "exchange/tickers/matching_cycle/base/base_strategy.hpp"
+#include "exchange/matching_cycle/base/base_strategy.hpp"
 #include "shared/util.hpp"
 
 #include <prometheus/counter.h>

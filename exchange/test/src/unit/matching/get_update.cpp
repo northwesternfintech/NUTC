@@ -1,5 +1,5 @@
 #include "config.h"
-#include "exchange/tickers/engine/level_update_generator.hpp"
+#include "exchange/orders/storage/level_update_generator.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "shared/util.hpp"
 #include "util/helpers/test_trader.hpp"
@@ -80,7 +80,7 @@ TEST_F(UnitGetUpdate, OrderQuantityChange)
     stored_order order1{trader1, buy, "ABC", initial_quantity, 1, 0};
     ob.add_order(order1);
 
-    double quantity_delta = 5;
+    // double quantity_delta = 5;
     // ob.modify_order_quantity(order1.order_index, quantity_delta);
     // auto updates = generator_->get_updates("ABC");
     //

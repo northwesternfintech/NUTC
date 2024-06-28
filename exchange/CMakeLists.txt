@@ -40,18 +40,18 @@ add_library(
     src/exchange/wrappers/messaging/pipe_reader.cpp
     src/exchange/wrappers/messaging/pipe_writer.cpp
     
-    src/exchange/sandbox/server/crow.cpp
+    src/exchange/sandbox_server/crow.cpp
 
     src/exchange/bots/bot_container.cpp
     src/exchange/bots/bot_types/retail.cpp
     src/exchange/bots/bot_types/market_maker.cpp
 
-    src/exchange/tickers/engine/engine.cpp
-    src/exchange/tickers/engine/order_storage.cpp
-    src/exchange/tickers/engine/orderbook.cpp
-    src/exchange/tickers/engine/level_update_generator.cpp
+    src/exchange/orders/matching/engine.cpp
+    src/exchange/orders/storage/order_storage.cpp
+    src/exchange/orders/storage/orderbook.cpp
+    src/exchange/orders/storage/level_update_generator.cpp
 
-	src/exchange/tickers/matching_cycle/base/base_strategy.cpp
+	src/exchange/matching_cycle/base/base_strategy.cpp
     
     src/exchange/traders/trader_types/generic_trader.cpp
     src/exchange/traders/trader_types/bot_trader.cpp
