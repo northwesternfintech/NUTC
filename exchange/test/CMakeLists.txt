@@ -11,6 +11,26 @@ endif()
 find_package(GTest REQUIRED)
 include(GoogleTest)
 
+find_package(benchmark REQUIRED)
+
+# ---- Benchmarks ----
+add_executable(NUTC_benchmarks
+  src/benchmark/level_quantity_tracker.cpp
+)
+
+target_include_directories(
+  NUTC_benchmarks ${warning_guard}
+  PUBLIC
+  "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
+)
+
+target_link_libraries(
+  NUTC_benchmarks PRIVATE
+  EXCHANGE_lib 
+  SHARED_lib
+  benchmark::benchmark
+)
+
 # ---- Tests ----
 add_executable(NUTC_tests
   src/util/helpers/test_cycle.cpp
@@ -47,11 +67,13 @@ include(CheckIPOSupported)
 check_ipo_supported(RESULT lto_supported OUTPUT error)
 if(lto_supported)
   set_target_properties(NUTC_tests PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+  set_target_properties(NUTC_benchmarks PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
 else()
     message(WARNING "LTO is not supported: ${error}")
 endif()
 
 target_compile_features(NUTC_tests PRIVATE cxx_std_20)
+target_compile_features(NUTC_benchmarks PRIVATE cxx_std_20)
 
 gtest_discover_tests(NUTC_tests)
 

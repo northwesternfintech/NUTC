@@ -47,6 +47,7 @@ add_library(
     src/exchange/bots/bot_types/market_maker.cpp
 
     src/exchange/orders/matching/engine.cpp
+    src/exchange/orders/storage/level_quantity_tracker.cpp
     src/exchange/orders/storage/order_storage.cpp
     src/exchange/orders/storage/orderbook.cpp
     src/exchange/orders/storage/level_update_generator.cpp
@@ -109,6 +110,10 @@ target_link_libraries(EXCHANGE_lib PUBLIC glaze::glaze)
 find_package(Boost REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC boost::boost)
 
+# emhash
+find_package(emhash REQUIRED)
+target_link_libraries(EXCHANGE_lib PUBLIC emhash::emhash)
+
 
 add_executable(EXCHANGE_exe src/exchange/main.cpp)
 add_executable(EXCHANGE::exe ALIAS EXCHANGE_exe)
@@ -125,6 +130,8 @@ target_link_libraries(EXCHANGE_exe PRIVATE quill::quill)
 
 # fmt
 target_link_libraries(EXCHANGE_exe PRIVATE fmt::fmt)
+
+target_link_libraries(EXCHANGE_exe PRIVATE emhash::emhash)
 
 # yaml-cpp
 find_package(yaml-cpp REQUIRED)
@@ -239,6 +246,7 @@ if(lto_supported)
   set_target_properties(WRAPPER_exe PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
   set_target_properties(EXCHANGE_lib PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
   set_target_properties(EXCHANGE_exe PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+  set_target_properties(SHARED_lib PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
 else()
     message(WARNING "LTO is not supported: ${error}")
 endif()
