@@ -48,6 +48,7 @@ public:
 
 private:
     void clean_tree(util::Side side);
+	stored_order pop_from_queue(util::Side side, double price);
 };
 } // namespace matching
 } // namespace nutc

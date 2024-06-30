@@ -85,20 +85,20 @@ Engine::order_can_execute_(stored_order& buyer, stored_order& seller)
     double total_price = double((decimal_one + order_fee) * price) * quantity;
 
     if (!buyer.trader.can_leverage() && buyer.trader.get_capital() < total_price) {
-        buyer.active = false;
+        buyer.isActive = false;
         return false;
     }
     if (!seller.trader.can_leverage()
         && seller.trader.get_holdings(seller.ticker) < quantity) {
-        seller.active = false;
+        seller.isActive = false;
         return false;
     }
     if (&seller.trader == &buyer.trader) [[unlikely]] {
         if (seller.order_index <= buyer.order_index) {
-            seller.active = false;
+            seller.isActive = false;
         }
         else {
-            buyer.active = false;
+            buyer.isActive = false;
         }
         return false;
     }
