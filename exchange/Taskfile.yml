@@ -96,6 +96,12 @@ tasks:
       - task: build
       - ctest {{.TEST_FLAGS}} -R "Unit*"
 
+  bench:
+    dir: './build{{if eq .RELEASE_BUILD "false"}}/dev/{{end}}'
+    cmds:
+      - task: build
+      - ./benchmark/NUTC_benchmarks
+
   itest:
     dir: '.'
     vars:
