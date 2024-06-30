@@ -47,7 +47,7 @@ Engine::attempt_matches_(OrderBook& orderbook)
         orderbook.modify_level_(util::Side::buy, highest_bid.price, -match.quantity);
         orderbook.modify_level_(util::Side::sell, cheapest_ask.price, -match.quantity);
 
-        matches.push_back(std::move(match));
+        matches.emplace_back(match);
     }
     return matches;
 }
@@ -66,12 +66,12 @@ Engine::create_match(const stored_order& buyer, const stored_order& seller)
     };
 
     match.buyer.process_order_match(
-        {util::Side::buy, match.ticker, match.quantity,
-         match.price * (decimal_one + order_fee)}
+        {util::Side::buy, match.ticker, match.price * (decimal_one + order_fee),
+         match.quantity}
     );
     match.seller.process_order_match(
-        {util::Side::sell, match.ticker, match.quantity,
-         match.price * (decimal_one - order_fee)}
+        {util::Side::sell, match.ticker, match.price * (decimal_one - order_fee),
+         match.quantity}
     );
     return match;
 }

@@ -30,6 +30,29 @@ const std::string basic_algo = R"(class Strategy:
         pass
 )";
 
+const std::string incorrect_arguments_algo = R"(class Strategy:
+    def __init__(self) -> None:
+        pass
+
+    def on_trade_update(self, ticker: str, side: str, price: float, quantity: float) -> None:
+        place_limit_order("ETHUSD", "BUY", 5, 5)
+
+    def on_orderbook_update(
+        self, ticker: str, side: str, price: float, quantity: float
+    ) -> None:
+        pass
+
+    def on_account_update(
+        self,
+        ticker: str,
+        side: str,
+        price: float,
+        quantity: float,
+        capital_remaining: float,
+    ) -> None:
+        pass
+)";
+
 const std::string timeout_algo = R"(import time
 class Strategy:
     def __init__(self) -> None:
@@ -106,6 +129,16 @@ TEST_F(IntegrationLinterTest, basic)
 {
     auto lint_result = manager.spawn_client(basic_algo);
     ASSERT_TRUE(lint_result.success);
+}
+
+TEST_F(IntegrationLinterTest, invalidSideArg)
+{
+    auto lint_result = manager.spawn_client(incorrect_arguments_algo);
+    ASSERT_FALSE(lint_result.success);
+    ASSERT_TRUE(
+        lint_result.message.find("Side should be BUY or SELL")
+        != std::string::npos
+    );
 }
 
 TEST_F(IntegrationLinterTest, timeout)

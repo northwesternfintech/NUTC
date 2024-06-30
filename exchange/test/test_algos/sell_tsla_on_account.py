@@ -1,5 +1,8 @@
-def place_market_order(side: str, ticker: str, quantity: float, price: float) -> None:
-    """Place a market order - DO NOT MODIFY"""
+def place_market_order(side: str, ticker: str, quantity: float) -> None:
+    """Place a market order - DO NOT MODIFY""" 
+
+def place_limit_order(side: str, ticker: str, price: float, quantity: float) -> None:
+    """Place a limit order - DO NOT MODIFY""" 
 
 
 class Strategy:
@@ -7,7 +10,7 @@ class Strategy:
 
     def __init__(self) -> None:
         """Your initialization code goes here."""
-        place_market_order("SELL", "ABC", 10, 100)
+        place_limit_order("SELL", "ABC", 100, 10)
 
     def on_trade_update(
         self, ticker: str, side: str, price: float, quantity: float
@@ -68,4 +71,4 @@ class Strategy:
             f"Python Account update: {ticker} {side} {price} {quantity} {capital_remaining}"
         )
         if ticker == "ABC" and quantity >= 10:
-            place_market_order("BUY", "DEF", 1, 100)
+            place_limit_order("BUY", "DEF", 100, 1)

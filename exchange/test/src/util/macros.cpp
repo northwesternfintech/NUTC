@@ -3,7 +3,7 @@
 namespace nutc {
 namespace test_utils {
 
-market_order
+limit_order
 consume_message(const std::shared_ptr<traders::GenericTrader>& trader)
 {
     while (true) {
@@ -54,9 +54,9 @@ validate_ob_update(
 }
 
 bool
-validate_market_order(
-    const market_order& update, util::Ticker ticker, util::Side side, double price,
-    double quantity
+validate_limit_order(
+    const limit_order& update, util::Ticker ticker, util::Side side,
+    double price, double quantity
 )
 {
     return update.ticker == ticker && update.side == side

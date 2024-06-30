@@ -69,7 +69,7 @@ public:
             wrapper_handle_->send_message(message);
     }
 
-    std::vector<market_order>
+    std::vector<limit_order>
     read_orders() override
     {
         if (wrapper_handle_) [[likely]]
@@ -78,11 +78,11 @@ public:
     }
 
     void
-    process_order_remove(market_order) final
+    process_order_remove(limit_order) final
     {}
 
     void
-    process_order_add(market_order) final
+    process_order_add(limit_order) final
     {}
 };
 

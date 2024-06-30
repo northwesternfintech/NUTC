@@ -58,12 +58,12 @@ MarketMakerBot::take_action(double, double real_theo)
     auto new_buy_order = [&](const price_level& level) {
         double price = theo + level.PRICE_DELTA;
         double quantity = total_quantity * level.QUANTITY_FACTOR;
-        add_order(util::Side::buy, quantity, price);
+        add_order(util::Side::buy, price, quantity);
     };
     auto new_sell_order = [&](const price_level& level) {
         double price = theo + level.PRICE_DELTA;
         double quantity = total_quantity * level.QUANTITY_FACTOR;
-        add_order(util::Side::sell, quantity, price);
+        add_order(util::Side::sell, price, quantity);
     };
 
     std::ranges::for_each(BID_LEVELS, new_buy_order);

@@ -11,6 +11,8 @@ namespace pywrapper {
 bool
 create_api_module(
     std::function<bool(const std::string&, const std::string&, float, float)>
+        publish_limit_order,
+    std::function<bool(const std::string&, const std::string&, float)>
         publish_market_order
 )
 {
@@ -18,6 +20,8 @@ create_api_module(
         py::module m = py::module::create_extension_module(
             "nutc_api", "Official NUTC Exchange API", new py::module::module_def
         );
+
+        m.def("publish_limit_order", publish_limit_order);
         m.def("publish_market_order", publish_market_order);
 
         py::module_ sys = py::module_::import("sys");
@@ -61,8 +65,11 @@ import_py_code(const std::string& code)
         return fmt::format("Failed to import code: {}", e.what());
     }
     py::exec(R"(
-        def place_market_order(side, ticker, quantity, price):
-            return nutc_api.publish_market_order(side, ticker, quantity, price))");
+        def place_market_order(side, ticker, quantity):
+            return nutc_api.publish_market_order(side, ticker, quantity))");
+    py::exec(R"(
+        def place_limit_order(side, ticker, quantity, price):
+            return nutc_api.publish_limit_order(side, ticker, price, quantity))");
 
     return std::nullopt;
 }
@@ -96,9 +103,9 @@ std::optional<std::string>
 trigger_callbacks()
 {
     try {
-        py::exec(R"(place_market_order("BUY", "ETH", 1.0, 1.0))");
+        py::exec(R"(place_limit_order("BUY", "ETH", 1.0, 1.0))");
     } catch (const std::exception& e) {
-        return fmt::format("Failed to run place_market_order: {}", e.what());
+        return fmt::format("Failed to run place_limit_order: {}", e.what());
     }
 
     try {

@@ -123,7 +123,7 @@ main(int argc, const char** argv)
     }
     comms::wait_for_start_time();
 
-    nutc::pywrapper::create_api_module(exchange_conn.market_order_func());
+    nutc::pywrapper::create_api_module(exchange_conn.limit_order_func(), exchange_conn.market_order_func());
     nutc::pywrapper::run_code_init(algorithm_str);
 
     exchange_conn.main_event_loop(trader_id);

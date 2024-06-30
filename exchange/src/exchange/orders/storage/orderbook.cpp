@@ -1,4 +1,5 @@
 #include "orderbook.hpp"
+#include <iostream>
 
 namespace nutc {
 namespace matching {

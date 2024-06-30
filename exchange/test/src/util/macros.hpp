@@ -9,7 +9,7 @@
 #include <limits>
 
 using Engine = nutc::matching::Engine;
-using market_order = nutc::messages::market_order;
+using limit_order = nutc::messages::limit_order;
 using stored_order = nutc::matching::stored_order;
 using orderbook_update = nutc::messages::orderbook_update;
 using TraderContainer = nutc::traders::TraderContainer;
@@ -17,7 +17,7 @@ using TraderContainer = nutc::traders::TraderContainer;
 namespace nutc {
 namespace test_utils {
 
-market_order consume_message(const std::shared_ptr<traders::GenericTrader>& trader);
+limit_order consume_message(const std::shared_ptr<traders::GenericTrader>& trader);
 
 bool is_nearly_equal(
     double f_a, double f_b, double epsilon = std::numeric_limits<double>::epsilon()
@@ -34,8 +34,8 @@ bool validate_ob_update(
     double quantity
 );
 
-bool validate_market_order(
-    const market_order& update, util::Ticker ticker, util::Side side, double price,
+bool validate_limit_order(
+    const limit_order& update, util::Ticker ticker, util::Side side, double price,
     double quantity
 );
 
@@ -79,19 +79,17 @@ bool validate_market_order(
             << ", price = " << (update).price << ", quantity = " << (update).quantity; \
     } while (0)
 
-#define ASSERT_EQ_MARKET_ORDER(/* NOLINT (cppcoreguidelines-macro-usage) */            \
-                               update, ticker_, side_, price_, quantity_               \
+#define ASSERT_EQ_LIMIT_ORDER(/* NOLINT (cppcoreguidelines-macro-usage) */             \
+                              update, ticker_, side_, price_, quantity_                \
 )                                                                                      \
     do {                                                                               \
-        bool isUpdateValid = nutc::test_utils::validate_market_order(                  \
+        bool isUpdateValid = nutc::test_utils::validate_limit_order(                   \
             (update), (ticker_), (side_), (price_), (quantity_)                        \
         );                                                                             \
         EXPECT_TRUE(isUpdateValid)                                                     \
-            << "Expected market order with"                                            \
-            << " ticker =" << (ticker_) << ", side = " << static_cast<int>(side_)      \
-            << ", price = " << (price_) << ", quantity = " << (quantity_)              \
-            << ". Actual update: client_id = "                                         \
-            << ""                                                                      \
+            << "Expected market order with" << " ticker =" << (ticker_)                \
+            << ", side = " << static_cast<int>(side_) << ", price = " << (price_)      \
+            << ", quantity = " << (quantity_) << ". Actual update: client_id = " << "" \
             << ", ticker = " << std::string{(update).ticker}                           \
             << ", side = " << static_cast<int>((update).side)                          \
             << ", price = " << (update).price << ", quantity = " << (update).quantity; \

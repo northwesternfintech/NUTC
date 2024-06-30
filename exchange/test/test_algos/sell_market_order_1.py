@@ -10,7 +10,7 @@ class Strategy:
 
     def __init__(self) -> None:
         """Your initialization code goes here."""
-        place_limit_order("BUY", "ABC", 102, 10)
+        place_market_order("SELL", "ABC", 5)
 
     def on_trade_update(
         self, ticker: str, side: str, price: float, quantity: float
@@ -27,8 +27,6 @@ class Strategy:
             Volume traded
         """
         print(f"Python Trade update: {ticker} {side} {price} {quantity}")
-        if ticker == "ABC" and quantity >= 10:
-            place_limit_order("BUY", "DEF", 100, 1)
 
     def on_orderbook_update(
         self, ticker: str, side: str, price: float, quantity: float
@@ -46,6 +44,8 @@ class Strategy:
             Volume placed into orderbook
         """
         print(f"Python Orderbook update: {ticker} {side} {price} {quantity}")
+        if(ticker=="ABC" and price <= 2.0 and price>=0.0):
+            place_limit_order("BUY", "APPL", 1000, 1)
 
     def on_account_update(
         self,
@@ -72,3 +72,5 @@ class Strategy:
         print(
             f"Python Account update: {ticker} {side} {price} {quantity} {capital_remaining}"
         )
+        if ticker == "ABC" and quantity >= 10:
+            place_market_order("SELL", "APPL", 5)

@@ -12,7 +12,7 @@ namespace nutc {
 namespace test {
 
 void
-TestMatchingCycle::wait_for_order(const messages::market_order& order)
+TestMatchingCycle::wait_for_order(const messages::limit_order& order)
 {
     log_i(testing, "Waiting for order {}", glz::write_json(order));
     auto last = last_order == nullptr

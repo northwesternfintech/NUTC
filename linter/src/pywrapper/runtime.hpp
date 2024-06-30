@@ -8,6 +8,8 @@ namespace nutc {
 namespace pywrapper {
 [[nodiscard]] bool create_api_module(
     std::function<bool(const std::string&, const std::string&, float, float)>
+        publish_limit_order,
+    std::function<bool(const std::string&, const std::string&, float)>
         publish_market_order
 );
 [[nodiscard]] bool supress_stdout();

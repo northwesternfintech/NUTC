@@ -49,11 +49,11 @@ public:
         return opt.value();
     }
 
-    std::vector<market_order>
+    std::vector<limit_order>
     read_messages()
     {
         auto messages = reader_.get_messages();
-        std::vector<market_order> orders{};
+        std::vector<limit_order> orders{};
         orders.reserve(messages.size());
 
         if (std::ranges::any_of(messages, [](auto&& mess) {
@@ -62,7 +62,7 @@ public:
             throw std::runtime_error("Unexpected init message");
 
         for (const auto& message : messages) {
-            orders.push_back(std::move(std::get<market_order>(message)));
+            orders.push_back(std::move(std::get<limit_order>(message)));
         }
         return orders;
     }

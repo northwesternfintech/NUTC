@@ -18,19 +18,19 @@ struct init_message {
     consteval init_message() = default;
 };
 
-struct market_order {
+struct limit_order {
     util::Side side;
     util::Ticker ticker;
-    double quantity;
     double price;
+    double quantity;
 
-    bool operator==(const market_order& other) const = default;
+    bool operator==(const limit_order& other) const = default;
 
-    market_order(util::Side side, util::Ticker ticker, double quantity, double price) :
-        side(side), ticker(ticker), quantity(quantity), price(price)
+    limit_order(util::Side side, util::Ticker ticker, double price, double quantity) :
+        side(side), ticker(ticker), price(price), quantity(quantity)
     {}
 
-    market_order() = default;
+    limit_order() = default;
 };
 
 } // namespace messages
@@ -38,9 +38,9 @@ struct market_order {
 
 /// \cond
 template <>
-struct glz::meta<nutc::messages::market_order> {
-    using t = nutc::messages::market_order;
-    static constexpr auto value = object(&t::ticker, &t::side, &t::quantity, &t::price);
+struct glz::meta<nutc::messages::limit_order> {
+    using t = nutc::messages::limit_order;
+    static constexpr auto value = object(&t::ticker, &t::side, &t::price, &t::quantity);
 };
 
 /// \cond

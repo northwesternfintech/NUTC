@@ -9,14 +9,14 @@ namespace nutc {
 namespace wrappers {
 
 using init_message = messages::init_message;
-using market_order = messages::market_order;
+using limit_order = messages::limit_order;
 
 namespace bp = boost::process;
 namespace ba = boost::asio;
 
 class PipeReader {
     std::mutex message_lock_{};
-    std::vector<std::variant<init_message, market_order>> message_queue_{};
+    std::vector<std::variant<init_message, limit_order>> message_queue_{};
     std::shared_ptr<ba::io_context> pipe_context_;
     bp::async_pipe pipe_in_;
 
@@ -38,11 +38,11 @@ public:
     ~PipeReader();
 
     // Nonblocking, all available messages
-    std::vector<std::variant<init_message, market_order>> get_messages();
+    std::vector<std::variant<init_message, limit_order>> get_messages();
 
     // Blocking, O(messages) due to erase
     // Use sparingly
-    std::variant<init_message, market_order> get_message();
+    std::variant<init_message, limit_order> get_message();
 };
 
 } // namespace wrappers

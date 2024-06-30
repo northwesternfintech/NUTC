@@ -33,8 +33,39 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
         {trader1, trader2},
     };
 
-    cycle.wait_for_order({buy, "ABC", 10, 100});
+    cycle.wait_for_order({buy, "ABC", 100, 10});
 }
+
+// TEST_F(IntegrationBasicAlgo, MarketOrderBuy)
+// {
+//     auto trader1 = start_wrappers(users_, "test_algos/buy_market_order_1000.py");
+//     auto trader2 = users_.add_trader<TestTrader>(0);
+//     trader2->modify_holdings("ABC", 1000); // NOLINT
+//     trader2->add_order({sell, "ABC", 1000, 100});
+//
+//     TestMatchingCycle cycle{
+//         {"ABC",   "DEF"  },
+//         {trader1, trader2},
+//     };
+//
+//     cycle.wait_for_order({buy, "ABC", 1000, 1});
+// }
+//
+// TEST_F(IntegrationBasicAlgo, MarketOrderSell)
+// {
+//     auto trader1 = start_wrappers(users_, "test_algos/sell_market_order_1.py");
+//     trader1->modify_holdings("ABC", 1000); // NOLINT
+//
+//     auto trader2 = users_.add_trader<TestTrader>(0);
+//     trader2->add_order({buy, "ABC", 100, 1});
+//
+//     TestMatchingCycle cycle{
+//         {"ABC"},
+//         {trader1, trader2},
+//     };
+//
+//     cycle.wait_for_order({buy, "ABC", 1000, 1});
+// }
 
 TEST_F(IntegrationBasicAlgo, ManyUpdates)
 {
@@ -49,12 +80,12 @@ TEST_F(IntegrationBasicAlgo, ManyUpdates)
     };
 
     for (double i = 0; i < 100000; i++) {
-        trader2->add_order({sell, "ABC", 1, i});
+        trader2->add_order({sell, "ABC", i, 1});
     }
 
     cycle.on_tick(0);
 
-    cycle.wait_for_order({buy, "ABC", 10, 100});
+    cycle.wait_for_order({buy, "ABC", 100, 10});
 }
 
 TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
@@ -71,9 +102,9 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
 
     trader2->add_order({sell, "ABC", 100, 100});
 
-    cycle.wait_for_order({buy, "ABC", 10, 102});
+    cycle.wait_for_order({buy, "ABC", 102, 10});
 
-    cycle.wait_for_order({buy, "DEF", 1, 100});
+    cycle.wait_for_order({buy, "DEF", 100, 1});
 }
 
 // Sanity check that it goes through the orderbook
@@ -89,10 +120,10 @@ TEST_F(IntegrationBasicAlgo, MultipleLevelOrder)
         {trader1, trader2},
     };
 
-    trader2->add_order({sell, "ABC", 5, 100});
-    trader2->add_order({sell, "ABC", 5, 95});
+    trader2->add_order({sell, "ABC", 100, 5});
+    trader2->add_order({sell, "ABC", 95, 5});
 
-    cycle.wait_for_order({buy, "ABC", 10, 100});
+    cycle.wait_for_order({buy, "ABC", 100, 10});
     ASSERT_EQ(trader1->get_capital() - trader1->get_initial_capital(), -975.0);
 }
 
@@ -110,11 +141,11 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateSell)
     };
 
     // obupdate triggers one user to place autil::Side::buy order of 10 ABC at 102
-    cycle.wait_for_order({sell, "ABC", 10, 100});
+    cycle.wait_for_order({sell, "ABC", 100, 10});
 
     // on_trade_match triggers one user to place autil::Side::buy order of 1 ABC at
     // 100
-    cycle.wait_for_order({buy, "DEF", 1, 100});
+    cycle.wait_for_order({buy, "DEF", 100, 1});
 }
 
 TEST_F(IntegrationBasicAlgo, OnAccountUpdateBuy)
@@ -131,10 +162,10 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateBuy)
     };
 
     // obupdate triggers one user to place autil::Side::buy order of 10 ABC at 102
-    cycle.wait_for_order({buy, "ABC", 10, 102});
+    cycle.wait_for_order({buy, "ABC", 102, 10});
     // on_trade_match triggers one user to place autil::Side::buy order of 1 ABC at
     // 100
-    cycle.wait_for_order({buy, "DEF", 1, 100});
+    cycle.wait_for_order({buy, "DEF", 100, 1});
 }
 
 TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
@@ -155,7 +186,7 @@ TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
         {trader1, trader2},
     };
 
-    cycle.wait_for_order({buy, "ABC", 10, 100});
+    cycle.wait_for_order({buy, "ABC", 100, 10});
 
     auto end = std::chrono::high_resolution_clock::now();
     const int64_t duration_ms =

@@ -32,7 +32,7 @@ RetailBot::take_action(double midprice, double theo)
         double quantity =
             (1 - get_capital_utilization()) * get_interest_limit() / price;
         quantity *= RETAIL_ORDER_SIZE;
-        add_order(util::Side::buy, quantity, price);
+        add_order(util::Side::buy, price, quantity);
     }
     else if (midprice > noised_theo) {
         double price = noised_theo - RETAIL_ORDER_OFFSET;
@@ -40,7 +40,7 @@ RetailBot::take_action(double midprice, double theo)
         double quantity =
             (1 - get_capital_utilization()) * get_interest_limit() / price;
         quantity *= RETAIL_ORDER_SIZE;
-        add_order(util::Side::sell, quantity, price);
+        add_order(util::Side::sell, price, quantity);
     }
     return;
 }

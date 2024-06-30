@@ -18,7 +18,7 @@ class BotTrader : public traders::GenericTrader {
 
     double open_bids_ = 0;
     double open_asks_ = 0;
-    std::vector<market_order> orders_{};
+    std::vector<limit_order> orders_{};
 
 public:
     BotTrader(util::Ticker ticker, double interest_limit) :
@@ -80,18 +80,18 @@ public:
 
     ~BotTrader() override = default;
 
-    void process_order_remove(market_order order) final;
-    void process_order_add(market_order order) final;
+    void process_order_remove(limit_order order) final;
+    void process_order_add(limit_order order) final;
 
     /**
      * midprice, theo
      */
     virtual void take_action(double, double) = 0;
 
-    std::vector<market_order>
+    std::vector<limit_order>
     read_orders() override
     {
-        auto ret = orders_;
+        auto ret = std::move(orders_);
         orders_.clear();
         return ret;
     }
@@ -114,9 +114,9 @@ protected:
     }
 
     void
-    add_order(util::Side side, double quantity, double price)
+    add_order(util::Side side, double price, double quantity)
     {
-        orders_.emplace_back(side, TICKER, quantity, price);
+        orders_.emplace_back(side, TICKER, price, quantity);
     }
 
     double

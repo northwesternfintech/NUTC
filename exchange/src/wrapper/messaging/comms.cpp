@@ -1,7 +1,6 @@
 #include "comms.hpp"
 
-#include "shared/messages_exchange_to_wrapper.hpp"
-#include "wrapper/logging.hpp"
+#include "shared/config/config.h"
 #include "wrapper/pywrapper/pywrapper.hpp"
 
 #include <boost/asio.hpp>
@@ -80,20 +79,35 @@ ExchangeProxy::handle_match(const match& match, const std::string& uid)
 }
 
 bool
-ExchangeProxy::publish_market_order(
-    const std::string& side, util::Ticker ticker, double quantity, double price
+ExchangeProxy::publish_limit_order(
+    const std::string& side, util::Ticker ticker, double price, double quantity
 )
 {
     if (limiter.should_rate_limit()) {
         return false;
     }
-    market_order order{
-        side == "BUY" ? util::Side::buy : util::Side::sell, ticker, quantity, price
+    limit_order order{
+        side == "BUY" ? util::Side::buy : util::Side::sell, ticker, price, quantity
     };
     std::string message = glz::write_json(order);
 
     publish_message(message);
     return true;
+}
+
+bool
+ExchangeProxy::publish_market_order(
+    const std::string& side, util::Ticker ticker, double quantity
+)
+{
+    if (side == "BUY") {
+        return publish_limit_order(
+            side, ticker, std::numeric_limits<double>::max(), quantity
+        );
+    }
+    else {
+        return publish_limit_order(side, ticker, 0, quantity);
+    }
 }
 
 void
@@ -106,12 +120,14 @@ ExchangeProxy::publish_message(const std::string& message)
 }
 
 algorithm_t
-ExchangeProxy::consume_algorithm() {
+ExchangeProxy::consume_algorithm()
+{
     return consume_message<algorithm_t>();
 }
 
 template <typename T>
-T ExchangeProxy::consume_message()
+T
+ExchangeProxy::consume_message()
 {
     std::string buf{};
     std::getline(std::cin, buf);
@@ -130,16 +146,29 @@ T ExchangeProxy::consume_message()
 }
 
 std::function<bool(const std::string&, const std::string&, double, double)>
-ExchangeProxy::market_order_func()
+ExchangeProxy::limit_order_func()
 {
-    return [&](const std::string& side, const auto& ticker, const auto& quantity,
-               const auto& price) {
-        if (ticker.size() != 3) [[unlikely]] {
+    return [&](const std::string& side, const auto& ticker, const auto& price,
+               const auto& quantity) {
+        if (ticker.size() != TICKER_LENGTH) [[unlikely]] {
             return false;
         }
         util::Ticker ticker_arr;
         std::copy(ticker.begin(), ticker.end(), ticker_arr.arr.begin());
-        return ExchangeProxy::publish_market_order(side, ticker_arr, quantity, price);
+        return ExchangeProxy::publish_limit_order(side, ticker_arr, price, quantity);
+    };
+}
+
+std::function<bool(const std::string&, const std::string&, double)>
+ExchangeProxy::market_order_func()
+{
+    return [&](const std::string& side, const auto& ticker, const auto& quantity) {
+        if (ticker.size() != TICKER_LENGTH) [[unlikely]] {
+            return false;
+        }
+        util::Ticker ticker_arr;
+        std::copy(ticker.begin(), ticker.end(), ticker_arr.arr.begin());
+        return ExchangeProxy::publish_market_order(side, ticker_arr, quantity);
     };
 }
 

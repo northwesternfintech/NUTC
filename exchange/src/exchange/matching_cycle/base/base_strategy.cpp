@@ -19,7 +19,7 @@ BaseMatchingCycle::collect_orders(uint64_t new_tick)
         auto incoming_orders = trader->read_orders();
         for (auto& order : incoming_orders) {
             orders.emplace_back(
-                *trader, order.side, order.ticker, order.quantity, order.price, new_tick
+                *trader, order.ticker, order.side, order.price, order.quantity, new_tick
             );
         }
     }
