@@ -35,9 +35,7 @@ struct decimal_price {
     decimal_price
     operator*(const decimal_price& other) const
     {
-        decimal_price ret;
-        ret.price = (price * other.price) / (100 * 100);
-        return ret;
+        return (price * other.price) / 100;
     }
 
     decimal_price
@@ -65,6 +63,9 @@ struct decimal_price {
     }
 
     operator double() const { return static_cast<double>(price) / 100; }
+
+private:
+    decimal_price(uint32_t decimal) : price(decimal) {}
 };
 } // namespace matching
 } // namespace nutc

@@ -35,7 +35,7 @@ public:
 
     /**
      * @brief Expire all orders that were created tick-EXPIRATION_TIME ago
-    * This should be called every tick
+     * This should be called every tick
      */
     std::vector<stored_order> expire_orders(uint64_t tick);
 
@@ -44,10 +44,13 @@ public:
      */
     stored_order& get_top_order(util::Side side);
 
-    void modify_level_(util::Side side, decimal_price price, double quantity);
+    void mark_order_removed(stored_order& order);
+    void change_quantity(stored_order& order, double quantity_delta);
 
 private:
     void clean_tree(util::Side side);
+    stored_order pop_from_queue(util::Side side, double price);
+    void modify_level_(util::Side side, decimal_price price, double quantity);
 };
 } // namespace matching
 } // namespace nutc

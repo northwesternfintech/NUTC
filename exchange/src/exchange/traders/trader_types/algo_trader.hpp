@@ -78,11 +78,7 @@ public:
     }
 
     void
-    process_order_remove(limit_order) final
-    {}
-
-    void
-    process_order_add(limit_order) final
+    process_position_change(limit_order) final
     {}
 };
 

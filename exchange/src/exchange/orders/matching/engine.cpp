@@ -37,15 +37,13 @@ Engine::attempt_matches_(OrderBook& orderbook)
         assert(highest_bid.ticker == cheapest_ask.ticker);
         assert(cheapest_ask.quantity > 0);
 
-        if (!order_can_execute_(highest_bid, cheapest_ask))
+        if (!order_can_execute_(orderbook, highest_bid, cheapest_ask))
             continue;
 
         auto match = create_match(highest_bid, cheapest_ask);
-        highest_bid.quantity -= match.quantity;
-        cheapest_ask.quantity -= match.quantity;
 
-        orderbook.modify_level_(util::Side::buy, highest_bid.price, -match.quantity);
-        orderbook.modify_level_(util::Side::sell, cheapest_ask.price, -match.quantity);
+        orderbook.change_quantity(highest_bid, -match.quantity);
+        orderbook.change_quantity(cheapest_ask, -match.quantity);
 
         matches.emplace_back(match);
     }
@@ -77,7 +75,9 @@ Engine::create_match(const stored_order& buyer, const stored_order& seller)
 }
 
 bool
-Engine::order_can_execute_(stored_order& buyer, stored_order& seller)
+Engine::order_can_execute_(
+    OrderBook& orderbook, stored_order& buyer, stored_order& seller
+)
 {
     double quantity = order_quantity(buyer, seller);
 
@@ -85,20 +85,20 @@ Engine::order_can_execute_(stored_order& buyer, stored_order& seller)
     double total_price = double((decimal_one + order_fee) * price) * quantity;
 
     if (!buyer.trader.can_leverage() && buyer.trader.get_capital() < total_price) {
-        buyer.active = false;
+        orderbook.mark_order_removed(buyer);
         return false;
     }
     if (!seller.trader.can_leverage()
         && seller.trader.get_holdings(seller.ticker) < quantity) {
-        seller.active = false;
+        orderbook.mark_order_removed(seller);
         return false;
     }
     if (&seller.trader == &buyer.trader) [[unlikely]] {
         if (seller.order_index <= buyer.order_index) {
-            seller.active = false;
+            orderbook.mark_order_removed(seller);
         }
         else {
-            buyer.active = false;
+            orderbook.mark_order_removed(buyer);
         }
         return false;
     }

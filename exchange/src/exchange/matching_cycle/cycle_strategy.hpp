@@ -14,7 +14,7 @@ public:
     {
         before_cycle_(new_tick);
         auto orders = collect_orders(new_tick);
-        auto matches = match_orders_(orders);
+        auto matches = match_orders_(std::move(orders));
         handle_matches_(std::move(matches));
         post_cycle_(new_tick);
     }

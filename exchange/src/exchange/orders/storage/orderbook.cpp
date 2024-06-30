@@ -1,4 +1,7 @@
 #include "orderbook.hpp"
+
+#include "shared/util.hpp"
+
 #include <iostream>
 
 namespace nutc {
@@ -17,7 +20,7 @@ OrderBook::clean_tree(util::Side side)
             continue;
         }
 
-        if (!q.front().active || q.front().quantity <= 0) {
+        if (!q.front().isActive) {
             q.pop();
             continue;
         }
@@ -52,7 +55,7 @@ OrderBook::can_match_orders()
     clean_tree(util::Side::sell);
     clean_tree(util::Side::buy);
 
-    if (bids_.empty() || asks_.empty()) {
+    if (bids_.empty() || asks_.empty()) [[unlikely]] {
         return false;
     }
     return get_top_order(util::Side::buy).can_match(get_top_order(util::Side::sell));
@@ -64,43 +67,73 @@ OrderBook::get_midprice() const
     if (bids_.empty() || asks_.empty()) [[unlikely]] {
         return 0.0;
     }
-    return (bids_.begin()->first + std::prev(asks_.end())->first) / 2;
+    return (std::prev(bids_.end())->first + asks_.begin()->first) / 2;
 }
 
 std::vector<stored_order>
 OrderBook::expire_orders(uint64_t tick)
 {
+    auto remove_order = [this](auto& queue) {
+        auto order = queue.front();
+        queue.pop();
+
+        this->mark_order_removed(order);
+        return order;
+    };
+
+    auto front_to_be_removed = [tick](auto& q) {
+        return !q.empty() && (q.front().tick <= tick || !q.front().isActive);
+    };
+
     std::vector<stored_order> result;
     for (auto& [price, q] : bids_) {
-        while (!q.empty() && q.front().tick <= tick) {
-            result.push_back(std::move(q.front()));
-            q.pop();
-
-            modify_level_(util::Side::buy, price, -result.back().quantity);
+        while (front_to_be_removed(q)) {
+            result.emplace_back(remove_order(q));
         }
     }
     for (auto& [price, q] : asks_) {
-        while (!q.empty() && q.front().tick <= tick) {
-            result.push_back(std::move(q.front()));
-            q.pop();
-
-            modify_level_(util::Side::sell, price, -result.back().quantity);
+        while (front_to_be_removed(q)) {
+            result.emplace_back(remove_order(q));
         }
     }
     return result;
 }
 
 void
+OrderBook::change_quantity(stored_order& order, double quantity_delta)
+{
+    if (util::is_close_to_zero(order.quantity + quantity_delta)) {
+        mark_order_removed(order);
+        return;
+    }
+
+    order.trader.process_position_change(
+        {order.side, order.ticker, order.price, quantity_delta}
+    );
+
+    order.quantity += quantity_delta;
+    modify_level_(order.side, order.price, quantity_delta);
+}
+
+void
+OrderBook::mark_order_removed(stored_order& order)
+{
+    order.trader.process_position_change(
+        {order.side, order.ticker, order.price, -order.quantity}
+    );
+
+    modify_level_(order.side, order.price, -order.quantity);
+    order.isActive = false;
+}
+
+void
 OrderBook::add_order(stored_order order)
 {
-    order.trader.process_order_add(order);
+    order.trader.process_position_change(order);
 
-    if (order.side == util::Side::buy) {
-        bids_[order.price].push(order);
-    }
-    else {
-        asks_[order.price].push(order);
-    }
+    auto& map = order.side == util::Side::buy ? bids_ : asks_;
+    map[order.price].push(order);
+
     modify_level_(order.side, order.price, order.quantity);
 }
 

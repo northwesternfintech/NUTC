@@ -19,15 +19,11 @@ public:
     {}
 
     void
-    send_message(const std::string&) final
+    send_message(const std::string&) override
     {}
 
     virtual void
-    process_order_remove(messages::limit_order) final
-    {}
-
-    virtual void
-    process_order_add(messages::limit_order) final
+    process_position_change(messages::limit_order) override
     {}
 
     std::vector<messages::limit_order>
