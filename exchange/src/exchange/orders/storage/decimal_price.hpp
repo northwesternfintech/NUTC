@@ -35,7 +35,7 @@ struct decimal_price {
     decimal_price
     operator*(const decimal_price& other) const
     {
-        return (price * other.price) / (100 * 100);
+        return (price * other.price) / 100;
     }
 
     decimal_price
