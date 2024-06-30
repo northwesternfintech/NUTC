@@ -19,6 +19,7 @@ class Recipe(ConanFile):
         self.requires("boost/1.83.0")
         self.requires("prometheus-cpp/1.1.0")
         self.requires("crowcpp-crow/1.1.0")
+        self.requires("emhash/cci.20240601")
 
         # Wrapper
         self.requires("pybind11/2.12.0")
@@ -28,3 +29,4 @@ class Recipe(ConanFile):
 
     def build_requirements(self):
         self.test_requires("gtest/1.13.0")
+        self.requires("benchmark/1.8.4")
