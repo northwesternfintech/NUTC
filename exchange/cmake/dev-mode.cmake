@@ -2,6 +2,7 @@ include(cmake/folders.cmake)
 
 include(CTest)
 add_subdirectory(test)
+add_subdirectory(benchmark)
 
 add_custom_target(
     run-exe
