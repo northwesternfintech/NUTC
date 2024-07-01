@@ -7,34 +7,32 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NextResponse } from "next/server";
-import createDefaultUser from "../defaultUser";
 
-export async function GET() {
+export async function POST() {
   const session = await getSession();
   if (!session?.user.sub) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  await createDefaultUser(session);
 
   const uid: string = session.user.sub;
   if (!uid) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const resume = await prisma.resume.create({
-    data: { uid: uid },
+  const algoFile = await prisma.algoFile.create({
+    data: { uid },
   });
+
   const params = {
     Bucket: "nutc",
-    Key: resume.key,
-    ContentType: "application/pdf",
+    Key: algoFile.key,
+    ContentType: "text/x-python",
   } satisfies PutObjectCommandInput;
 
   try {
     const command = new PutObjectCommand(params);
     const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
-    console.log(url);
-    return NextResponse.json({ url });
+    return NextResponse.json({ url: url, key: algoFile.key });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
