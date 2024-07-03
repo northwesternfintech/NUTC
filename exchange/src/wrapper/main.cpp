@@ -108,7 +108,7 @@ main(int argc, const char** argv)
     nutc::limits::set_memory_limit(1024);
 
     comms exchange_conn{};
-    algorithm_t algorithm = exchange_conn.consume_algorithm();
+    nutc::comms::algorithm_t algorithm = exchange_conn.consume_algorithm();
     std::string algorithm_str = algorithm.algorithm_content_str;
 
     std::string trader_id = nutc::util::trader_id(uid, algo_id);
@@ -123,7 +123,9 @@ main(int argc, const char** argv)
     }
     comms::wait_for_start_time();
 
-    nutc::pywrapper::create_api_module(exchange_conn.limit_order_func(), exchange_conn.market_order_func());
+    nutc::pywrapper::create_api_module(
+        exchange_conn.limit_order_func(), exchange_conn.market_order_func()
+    );
     nutc::pywrapper::run_code_init(algorithm_str);
 
     exchange_conn.main_event_loop(trader_id);

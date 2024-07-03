@@ -65,18 +65,38 @@ struct decimal_price {
     operator double() const { return static_cast<double>(price) / 100; }
 
 private:
-    decimal_price(uint32_t decimal) : price(decimal) {}
+    constexpr decimal_price(uint32_t decimal) : price(decimal) {}
+
+    friend class std::numeric_limits<decimal_price>;
 };
 } // namespace matching
 } // namespace nutc
 
 namespace std {
+using decimal_price = nutc::matching::decimal_price;
+
 template <>
-struct hash<nutc::matching::decimal_price> {
+struct hash<decimal_price> {
     std::size_t
-    operator()(const nutc::matching::decimal_price& dp) const noexcept
+    operator()(const decimal_price& dp) const noexcept
     {
         return std::hash<uint32_t>()(dp.price);
+    }
+};
+
+template <>
+class numeric_limits<decimal_price> {
+public:
+    static consteval decimal_price
+    min() noexcept
+    {
+        return std::numeric_limits<uint32_t>::min();
+    }
+
+    static consteval decimal_price
+    max() noexcept
+    {
+        return std::numeric_limits<uint32_t>::max();
     }
 };
 } // namespace std
