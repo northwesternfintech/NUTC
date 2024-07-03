@@ -15,7 +15,8 @@ public:
     match_order(OrderBook& orderbook, const stored_order& order);
 
 private:
-    bool order_can_execute_(stored_order& buyer, stored_order& seller);
+    bool
+    order_can_execute_(OrderBook& orderbook, stored_order& buyer, stored_order& seller);
 
     stored_match create_match(const stored_order& buyer, const stored_order& seller);
 

@@ -1,5 +1,6 @@
 #include "comms.hpp"
 
+#include "exchange/orders/storage/decimal_price.hpp"
 #include "shared/config/config.h"
 #include "wrapper/pywrapper/pywrapper.hpp"
 
@@ -10,6 +11,7 @@
 #include <chrono>
 
 #include <iostream>
+#include <limits>
 
 namespace nutc {
 namespace comms {
@@ -80,15 +82,13 @@ ExchangeProxy::handle_match(const match& match, const std::string& uid)
 
 bool
 ExchangeProxy::publish_limit_order(
-    const std::string& side, util::Ticker ticker, double price, double quantity
+    util::Side side, util::Ticker ticker, matching::decimal_price price, double quantity
 )
 {
     if (limiter.should_rate_limit()) {
         return false;
     }
-    limit_order order{
-        side == "BUY" ? util::Side::buy : util::Side::sell, ticker, price, quantity
-    };
+    limit_order order{side, ticker, price, quantity};
     std::string message = glz::write_json(order);
 
     publish_message(message);
@@ -97,17 +97,13 @@ ExchangeProxy::publish_limit_order(
 
 bool
 ExchangeProxy::publish_market_order(
-    const std::string& side, util::Ticker ticker, double quantity
+    util::Side side, util::Ticker ticker, double quantity
 )
 {
-    if (side == "BUY") {
-        return publish_limit_order(
-            side, ticker, std::numeric_limits<double>::max(), quantity
-        );
-    }
-    else {
-        return publish_limit_order(side, ticker, 0, quantity);
-    }
+    using limit = std::numeric_limits<matching::decimal_price>;
+    auto price = (side == util::Side::buy) ? limit::max() : limit::min();
+
+    return publish_limit_order(side, ticker, price, quantity);
 }
 
 void
@@ -155,7 +151,12 @@ ExchangeProxy::limit_order_func()
         }
         util::Ticker ticker_arr;
         std::copy(ticker.begin(), ticker.end(), ticker_arr.arr.begin());
-        return ExchangeProxy::publish_limit_order(side, ticker_arr, price, quantity);
+
+        util::Side side_enum = (side == "BUY") ? util::Side::buy : util::Side::sell;
+
+        return ExchangeProxy::publish_limit_order(
+            side_enum, ticker_arr, price, quantity
+        );
     };
 }
 
@@ -168,7 +169,9 @@ ExchangeProxy::market_order_func()
         }
         util::Ticker ticker_arr;
         std::copy(ticker.begin(), ticker.end(), ticker_arr.arr.begin());
-        return ExchangeProxy::publish_market_order(side, ticker_arr, quantity);
+
+        util::Side side_enum = (side == "BUY") ? util::Side::buy : util::Side::sell;
+        return ExchangeProxy::publish_market_order(side_enum, ticker_arr, quantity);
     };
 }
 

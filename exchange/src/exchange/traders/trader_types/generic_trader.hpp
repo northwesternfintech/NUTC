@@ -90,8 +90,7 @@ public:
         return INITIAL_CAPITAL;
     }
 
-    virtual void process_order_remove(limit_order) = 0;
-    virtual void process_order_add(limit_order) = 0;
+    virtual void process_position_change(limit_order) = 0;
     virtual void process_order_match(limit_order);
 
     virtual void send_message(const std::string&) = 0;

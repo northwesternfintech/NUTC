@@ -22,15 +22,21 @@ TestMatchingCycle::wait_for_order(const messages::limit_order& order)
         on_tick(0);
         last = std::make_unique<matching::stored_order>(*last_order);
     }
-    log_i(testing, "Order received. Continuing...");
+    log_i(testing, "Expected order received. Continuing...");
 }
 
 std::vector<matching::stored_match>
 TestMatchingCycle::match_orders_(std::vector<matching::stored_order> orders)
 {
-    if (!orders.empty())
+    if (!orders.empty()) {
+        auto order = orders.back();
+        log_i(
+            testing, "Order received: {} {} {}", std::string{order.ticker}, double{order.price},
+            order.quantity
+        );
         last_order =
             std::make_unique<matching::stored_order>(orders.at(orders.size() - 1));
+    }
 
     return BaseMatchingCycle::match_orders_(std::move(orders));
 }
