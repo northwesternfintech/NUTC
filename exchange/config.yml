@@ -13,7 +13,7 @@ tickers:
     start_price: 100
     bots:
       - type: "market_maker"
-        number_of_bots: 10
+        number_of_bots: 100
         average_capital: 25000
         std_dev_capital: 5000
       - type: "retail"
@@ -25,7 +25,7 @@ tickers:
     start_price: 200
     bots:
       - type: "market_maker"
-        number_of_bots: 10
+        number_of_bots: 100
         average_capital: 100000
         std_dev_capital: 25000
 
@@ -38,7 +38,7 @@ tickers:
     start_price: 50
     bots:
       - type: "market_maker"
-        number_of_bots: 10
+        number_of_bots: 100
         average_capital: 100000
         std_dev_capital: 10000
       - type: "retail"

@@ -3,7 +3,6 @@
 #include "exchange/metrics/prometheus.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "prometheus.hpp"
-#include "shared/util.hpp"
 
 #include <prometheus/gauge.h>
 
@@ -24,7 +23,8 @@ TickerMetricsPusher::TickerMetricsPusher(std::shared_ptr<ps::Registry> reg) :
     pnl_gauge(ps::BuildGauge().Name("pnl").Register(*reg)),
     capital_gauge(ps::BuildGauge().Name("capital").Register(*reg)),
     portfolio_gauge(ps::BuildGauge().Name("portfolio_value").Register(*reg)),
-    current_tick(ps::BuildGauge().Name("current_tick").Register(*reg))
+    current_tick(ps::BuildGauge().Name("current_tick").Register(*reg)),
+    holdings_gauge(ps::BuildGauge().Name("holdings").Register(*reg))
 {}
 
 TickerMetricsPusher::TickerMetricsPusher() :
@@ -54,7 +54,22 @@ TickerMetricsPusher::record_trader_metrics(
         return pnl;
     };
 
+    auto report_holdings = [&](const auto& trader) {
+        for (const auto& [ticker, info] : tickers) {
+            double amount_held = trader->get_holdings(ticker);
+            holdings_gauge
+                .Add({
+                    {"ticker",      ticker            },
+                    {"name",        trader->get_id()  },
+                    {"trader_type", trader->get_type()},
+            })
+                .Set(amount_held);
+        }
+    };
+
     for (const auto& trader : trader_container.get_traders()) {
+        report_holdings(trader);
+
         double capital = trader->get_capital();
         double portfolio = portfolio_value(trader);
         double pnl = capital + portfolio - trader->get_initial_capital();

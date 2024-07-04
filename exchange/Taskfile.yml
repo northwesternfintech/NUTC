@@ -66,6 +66,17 @@ tasks:
       - task: new-log-dir
       - gdb ./{{ .NUTC_PATH }}
 
+  run-perf:
+    env:
+      NUTC_WRAPPER_BINARY_PATH: '{{if eq .RELEASE_BUILD "true"}}./build/WRAPPER{{else}}./build/dev/WRAPPER{{end}}'
+    vars:
+      NUTC_PATH: '{{if eq .RELEASE_BUILD "true"}}build/{{.NAME}}{{else}}build/dev/{{.NAME}}{{end}}'
+      MODE_FLAG: '{{if eq .MODE "BOTS"}}--bots-only{{else if eq .MODE "DEV"}}--dev{{end}}'
+    cmds:
+      - task: build
+      - task: new-log-dir
+      - perf record -g ./{{ .NUTC_PATH }} {{ .MODE_FLAG }}
+
   run:
     env:
       NUTC_WRAPPER_BINARY_PATH: '{{if eq .RELEASE_BUILD "true"}}./build/WRAPPER{{else}}./build/dev/WRAPPER{{end}}'
