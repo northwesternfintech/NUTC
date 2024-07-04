@@ -36,6 +36,23 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
     cycle.wait_for_order({buy, "ABC", 100, 10});
 }
 
+TEST_F(IntegrationBasicAlgo, RemoveIOCOrder)
+{
+    auto trader1 = start_wrappers(users_, "test_algos/buy_tsla_at_100.py");
+    auto trader2 = users_.add_trader<TestTrader>(0);
+    trader2->modify_holdings("ABC", 1000); // NOLINT
+    trader2->add_order({sell, "ABC", 100, 100, true});
+
+    TestMatchingCycle cycle{
+        {"ABC"},
+        {trader1, trader2},
+    };
+
+    cycle.on_tick(0);
+
+    cycle.wait_for_order({buy, "ABC", 100, 10});
+}
+
 TEST_F(IntegrationBasicAlgo, MarketOrderBuy)
 {
     auto trader1 = start_wrappers(users_, "test_algos/buy_market_order_1000.py");

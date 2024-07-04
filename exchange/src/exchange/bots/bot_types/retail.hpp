@@ -24,7 +24,7 @@ public:
         BotTrader(ticker, interest_limit), AGGRESSIVENESS(generate_aggresiveness_())
     {}
 
-    void take_action(double midprice, double theo) override;
+    void take_action(double midprice, double theo, double) override;
 
     const std::string&
     get_type() const final

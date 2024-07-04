@@ -18,7 +18,7 @@ OrderBook::clean_tree(util::Side side)
             continue;
         }
 
-        if (!q.front().isActive) {
+        if (q.front().was_removed) {
             q.pop();
             continue;
         }
@@ -69,32 +69,15 @@ OrderBook::get_midprice() const
 }
 
 std::vector<stored_order>
-OrderBook::expire_orders(uint64_t tick)
+OrderBook::remove_ioc_orders()
 {
-    auto remove_order = [this](auto& queue) {
-        auto order = queue.front();
-        queue.pop();
-
-        this->mark_order_removed(order);
-        return order;
-    };
-
-    auto front_to_be_removed = [tick](auto& q) {
-        return !q.empty() && (q.front().tick <= tick || !q.front().isActive);
-    };
-
-    std::vector<stored_order> result;
-    for (auto& [price, q] : bids_) {
-        while (front_to_be_removed(q)) {
-            result.emplace_back(remove_order(q));
-        }
+    std::vector<stored_order> orders;
+    for (uint64_t order_id : ioc_order_ids_) {
+        orders.push_back(mark_order_removed(order_id));
     }
-    for (auto& [price, q] : asks_) {
-        while (front_to_be_removed(q)) {
-            result.emplace_back(remove_order(q));
-        }
-    }
-    return result;
+
+    ioc_order_ids_.clear();
+    return orders;
 }
 
 void
@@ -113,7 +96,7 @@ OrderBook::change_quantity(stored_order& order, double quantity_delta)
     modify_level_(order.side, order.price, quantity_delta);
 }
 
-void
+stored_order&
 OrderBook::mark_order_removed(stored_order& order)
 {
     order.trader.process_position_change(
@@ -121,7 +104,18 @@ OrderBook::mark_order_removed(stored_order& order)
     );
 
     modify_level_(order.side, order.price, -order.quantity);
-    order.isActive = false;
+    order.was_removed = true;
+
+    order_map_.erase(order.order_index);
+    return order;
+}
+
+stored_order&
+OrderBook::mark_order_removed(uint64_t order_id)
+{
+    // TODO: remove once testing real algos
+    assert(order_map_.contains(order_id));
+    return mark_order_removed(order_map_.at(order_id));
 }
 
 void
@@ -132,7 +126,14 @@ OrderBook::add_order(stored_order order)
     auto& map = order.side == util::Side::buy ? bids_ : asks_;
     map[order.price].push(order);
 
-    modify_level_(order.side, order.price, order.quantity);
+    order_map_.emplace(order.order_index, order);
+
+    if (order.ioc) {
+        ioc_order_ids_.push_back(order.order_index);
+    }
+    else {
+        modify_level_(order.side, order.price, order.quantity);
+    }
 }
 
 } // namespace matching

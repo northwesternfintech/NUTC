@@ -4,10 +4,10 @@ namespace nutc {
 namespace matching {
 stored_order::stored_order(
     traders::GenericTrader& trader, util::Ticker ticker, util::Side side, double price,
-    double quantity, uint64_t tick, bool ioc
+    double quantity, bool ioc
 ) :
     trader(trader), ticker(ticker), side(side), price(price), quantity(quantity),
-    tick(tick), ioc(ioc), order_index(get_and_increment_global_index())
+    ioc(ioc), order_index(get_and_increment_global_index())
 {}
 
 bool

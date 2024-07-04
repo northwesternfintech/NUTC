@@ -41,7 +41,7 @@ TEST_F(UnitOrderBookTest, TestStorageRounding)
     stored_order order2{trader_2, "ETH", buy, .9999, 0.00001, 1};
     ASSERT_EQ(order2.price, 1.0);
 
-    stored_order order3{trader_2, "ETH", buy, .994, 1, 2};
+    stored_order order3{trader_2, "ETH", buy, .994, 1};
     ASSERT_EQ(order3.price, 0.99);
 }
 

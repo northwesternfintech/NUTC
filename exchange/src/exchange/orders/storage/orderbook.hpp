@@ -18,6 +18,9 @@ class OrderBook {
     std::map<decimal_price, std::queue<stored_order>> bids_;
     std::map<decimal_price, std::queue<stored_order>> asks_;
 
+    std::unordered_map<uint64_t, std::reference_wrapper<stored_order>> order_map_;
+	std::vector<uint64_t> ioc_order_ids_;
+
 public:
     // Default constructor for testing the orderbook function without the need of a
     // LevelUpdateGenerator
@@ -33,18 +36,16 @@ public:
 
     void add_order(stored_order order);
 
-    /**
-     * @brief Expire all orders that were created tick-EXPIRATION_TIME ago
-     * This should be called every tick
-     */
-    std::vector<stored_order> expire_orders(uint64_t tick);
+    std::vector<stored_order> remove_ioc_orders();
 
     /**
      * @brief Get the top order on a side
      */
     stored_order& get_top_order(util::Side side);
 
-    void mark_order_removed(stored_order& order);
+    stored_order& mark_order_removed(stored_order& order);
+    stored_order& mark_order_removed(uint64_t order_id);
+
     void change_quantity(stored_order& order, double quantity_delta);
 
 private:

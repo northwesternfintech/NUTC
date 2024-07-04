@@ -85,7 +85,7 @@ public:
     /**
      * midprice, theo
      */
-    virtual void take_action(double, double) = 0;
+    virtual void take_action(double, double, double) = 0;
 
     std::vector<limit_order>
     read_orders() override

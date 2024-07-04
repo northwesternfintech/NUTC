@@ -4,7 +4,7 @@ global:
     wait_secs: 3
 
     # How many ticks for an order to expire
-    order_expiration_ticks: 10
+    order_expiration_ticks: 0
     order_fee: .0000
     sandbox_trial_seconds: 300
 
@@ -14,10 +14,10 @@ tickers:
     bots:
       - type: "market_maker"
         number_of_bots: 100
-        average_capital: 25000
+        average_capital: 250000
         std_dev_capital: 5000
       - type: "retail"
-        number_of_bots: 10
+        number_of_bots: 0
         average_capital: 1000
         std_dev_capital: 200
 
@@ -30,7 +30,7 @@ tickers:
         std_dev_capital: 25000
 
       - type: "retail"
-        number_of_bots: 10
+        number_of_bots: 0
         average_capital: 750
         std_dev_capital: 100
 
@@ -42,6 +42,6 @@ tickers:
         average_capital: 100000
         std_dev_capital: 10000
       - type: "retail"
-        number_of_bots: 10
+        number_of_bots: 0
         average_capital: 2000
         std_dev_capital: 1000

@@ -6,7 +6,7 @@ vars:
   # BOTS, DEV, or NORMAL
   MODE: "BOTS"
   
-  RELEASE_BUILD: "false"
+  RELEASE_BUILD: "true"
   RELEASE_PRESET: "ci-ubuntu"
 
 tasks:

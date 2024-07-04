@@ -20,7 +20,8 @@ void
 BotContainer::generate_orders(double midprice)
 {
     auto theo = fabs(theo_generator_.generate_next_magnitude());
-    generate_orders(midprice, theo);
+	variance_calculator_.record_price(midprice);
+    generate_orders(midprice, theo, variance_calculator_.calculate_volatility());
 }
 
 template <class BotType>
@@ -68,10 +69,10 @@ BotContainer::add_bots(const std::vector<config::bot_config>& bot_config)
 }
 
 void
-BotContainer::generate_orders(double midprice, double new_theo)
+BotContainer::generate_orders(double midprice, double new_theo, double variance)
 {
     for (const auto& bot : bots_) {
-        bot->take_action(midprice, new_theo);
+        bot->take_action(midprice, new_theo, variance);
     }
 }
 } // namespace bots

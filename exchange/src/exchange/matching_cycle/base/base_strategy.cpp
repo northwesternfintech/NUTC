@@ -3,23 +3,22 @@
 namespace nutc {
 namespace matching {
 void
-BaseMatchingCycle::before_cycle_(uint64_t new_tick)
+BaseMatchingCycle::before_cycle_(uint64_t)
 {
     for (auto& [symbol, ticker_info] : tickers_) {
         generate_bot_orders_(ticker_info.bot_container, ticker_info.orderbook);
-        expire_old_orders_(ticker_info.orderbook, new_tick);
     }
 }
 
 std::vector<stored_order>
-BaseMatchingCycle::collect_orders(uint64_t new_tick)
+BaseMatchingCycle::collect_orders(uint64_t)
 {
     std::vector<stored_order> orders;
     for (const std::shared_ptr<traders::GenericTrader>& trader : traders_) {
         auto incoming_orders = trader->read_orders();
         for (auto& order : incoming_orders) {
             orders.emplace_back(
-                *trader, order.ticker, order.side, order.price, order.quantity, new_tick
+                *trader, order.ticker, order.side, order.price, order.quantity
             );
         }
     }
@@ -51,7 +50,7 @@ BaseMatchingCycle::handle_matches_(std::vector<stored_match> matches)
 
     for (auto& [ticker, info] : tickers_) {
         auto tmp = info.level_update_generator_->get_updates(ticker);
-        std::ranges::move(tmp, std::back_inserter(ob_updates));
+        std::ranges::copy(tmp, std::back_inserter(ob_updates));
     }
 
     std::vector<messages::match> glz_matches{};
@@ -77,6 +76,7 @@ void
 BaseMatchingCycle::post_cycle_(uint64_t)
 {
     for (auto& [ticker, info] : tickers_) {
+        info.orderbook.remove_ioc_orders();
         info.level_update_generator_->reset();
     }
 }

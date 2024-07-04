@@ -3,7 +3,6 @@
 #include "exchange/orders/storage/ticker_info.hpp"
 
 #include <unordered_map>
-#include <memory_resource>
 
 namespace nutc {
 namespace matching {
@@ -28,9 +27,9 @@ public:
     {}
 
 protected:
-    virtual void before_cycle_(uint64_t new_tick) override;
+    virtual void before_cycle_(uint64_t) override;
 
-    virtual std::vector<stored_order> collect_orders(uint64_t new_tick) override;
+    virtual std::vector<stored_order> collect_orders(uint64_t) override;
 
     virtual std::vector<stored_match> match_orders_(std::vector<stored_order> orders
     ) override;
@@ -38,14 +37,6 @@ protected:
     virtual void handle_matches_(std::vector<stored_match> matches) override;
 
     virtual void post_cycle_(uint64_t) override;
-
-    void
-    expire_old_orders_(OrderBook& orderbook, uint64_t new_tick)
-    {
-        if (ORDER_EXPIRE_TICKS > new_tick)
-            return;
-        orderbook.expire_orders(new_tick - ORDER_EXPIRE_TICKS);
-    }
 
     void
     generate_bot_orders_(bots::BotContainer& bot_container, const OrderBook& orderbook);

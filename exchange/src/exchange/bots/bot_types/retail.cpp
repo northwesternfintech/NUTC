@@ -6,7 +6,7 @@ namespace nutc {
 namespace bots {
 
 void
-RetailBot::take_action(double midprice, double theo)
+RetailBot::take_action(double midprice, double theo, double)
 {
     static std::uniform_real_distribution<> dis{0.0, 1.0};
 

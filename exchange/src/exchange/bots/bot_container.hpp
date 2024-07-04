@@ -2,6 +2,7 @@
 #include "exchange/config/dynamic/ticker_config.hpp"
 #include "exchange/theo/brownian.hpp"
 #include "exchange/traders/trader_types/bot_trader.hpp"
+#include "variance.hpp"
 
 namespace nutc {
 
@@ -15,6 +16,7 @@ using BotVector = std::vector<std::shared_ptr<traders::BotTrader>>;
 class BotContainer {
     util::Ticker ticker;
     stochastic::BrownianMotion theo_generator_;
+    VarianceCalculator variance_calculator_;
 
     BotVector bots_{};
 
@@ -30,8 +32,8 @@ public:
     BotContainer(
         util::Ticker ticker, double starting_price, std::vector<config::bot_config> bots
     ) :
-        ticker(ticker),
-        theo_generator_(starting_price), bots_(add_bots(std::move(bots)))
+        ticker(ticker), theo_generator_(starting_price),
+        bots_(add_bots(std::move(bots)))
     {}
 
     double
@@ -40,8 +42,12 @@ public:
         return theo_generator_.get_magnitude();
     }
 
+	double get_variance() const {
+		return variance_calculator_.calculate_volatility();
+	}
+
 private:
-    void generate_orders(double midprice, double new_theo);
+    void generate_orders(double midprice, double new_theo, double variance);
     BotVector add_bots(const std::vector<config::bot_config>& bot_config);
 
     template <class BotType>

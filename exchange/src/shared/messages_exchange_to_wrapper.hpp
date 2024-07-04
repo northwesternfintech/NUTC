@@ -22,7 +22,7 @@ struct start_time {
     explicit start_time(int64_t stns) : start_time_ns(stns) {}
 };
 
-/**
+/*f
  * @brief Sent by exchange to a client to indicate a match has occurred
  */
 struct match {
@@ -41,9 +41,9 @@ struct match {
         util::Ticker ticker, util::Side side, double price, double quantity,
         std::string bid, std::string sid, double bcap, double scap
     ) :
-        ticker(ticker),
-        side(side), price(price), quantity(quantity), buyer_id(std::move(bid)),
-        seller_id(std::move(sid)), buyer_capital(bcap), seller_capital(scap)
+        ticker(ticker), side(side), price(price), quantity(quantity),
+        buyer_id(std::move(bid)), seller_id(std::move(sid)), buyer_capital(bcap),
+        seller_capital(scap)
     {}
 };
 
@@ -60,9 +60,7 @@ struct orderbook_update {
 
     orderbook_update(
         util::Ticker ticker, util::Side side, double price, double quantity
-    ) :
-        ticker(ticker),
-        side(side), price(price), quantity(quantity)
+    ) : ticker(ticker), side(side), price(price), quantity(quantity)
     {}
 
     bool operator==(const orderbook_update& other) const = default;
@@ -76,9 +74,7 @@ struct tick_update {
 
     explicit tick_update(
         std::vector<orderbook_update> ob_updates, std::vector<match> matches
-    ) :
-        ob_updates(std::move(ob_updates)),
-        matches(std::move(matches))
+    ) : ob_updates(std::move(ob_updates)), matches(std::move(matches))
     {}
 };
 
