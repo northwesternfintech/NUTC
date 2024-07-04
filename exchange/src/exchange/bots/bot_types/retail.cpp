@@ -8,9 +8,6 @@ namespace bots {
 void
 RetailBot::take_action(double midprice, double theo)
 {
-    if (get_capital() < get_interest_limit() * .9)
-        return;
-
     static std::uniform_real_distribution<> dis{0.0, 1.0};
 
     double p_trade = (1 - get_capital_utilization());

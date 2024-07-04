@@ -18,6 +18,7 @@ class TickerMetricsPusher {
     ps::Family<ps::Gauge>& capital_gauge;
     ps::Family<ps::Gauge>& portfolio_gauge;
     ps::Family<ps::Gauge>& current_tick;
+    ps::Family<ps::Gauge>& holdings_gauge;
 
     TickerMetricsPusher(std::shared_ptr<ps::Registry> reg);
 

@@ -71,7 +71,7 @@ private:
                 {"seller_trader_type", match.seller.get_type()},
                 {"buyer_trader_type",  match.buyer.get_type() }
         })
-            .Increment(match.quantity);
+            .Increment(1);
     }
 
     void
@@ -87,7 +87,7 @@ private:
                 {"ticker",      order.ticker           },
                 {"trader_type", order.trader.get_type()}
         })
-            .Increment(order.quantity);
+            .Increment(1);
     }
 
     void
