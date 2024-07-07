@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <limits>
+#include <stdexcept>
 
 namespace nutc {
 namespace comms {
@@ -52,7 +53,9 @@ ExchangeProxy::handle_orderbook_update(const orderbook_update& update)
         nutc::pywrapper::get_ob_update_function()(
             std::string{update.ticker}, side, update.price, update.quantity
         );
-    } catch (const py::error_already_set& e) {}
+    } catch (const py::error_already_set& e) {
+		std::cerr << e.what() << std::endl;
+    }
 }
 
 void
@@ -77,18 +80,21 @@ ExchangeProxy::handle_match(const match& match, const std::string& uid)
                 match.seller_capital
             );
         }
-    } catch (const py::error_already_set& e) {}
+    } catch (const py::error_already_set& e) {
+		std::cerr << e.what() << std::endl;
+    }
 }
 
 bool
 ExchangeProxy::publish_limit_order(
-    util::Side side, util::Ticker ticker, matching::decimal_price price, double quantity
+    util::Side side, util::Ticker ticker, matching::decimal_price price,
+    double quantity, bool ioc
 )
 {
     if (limiter.should_rate_limit()) {
         return false;
     }
-    limit_order order{side, ticker, price, quantity};
+    limit_order order{side, ticker, price, quantity, ioc};
     std::string message = glz::write_json(order);
 
     publish_message(message);
@@ -103,7 +109,7 @@ ExchangeProxy::publish_market_order(
     using limit = std::numeric_limits<matching::decimal_price>;
     auto price = (side == util::Side::buy) ? limit::max() : limit::min();
 
-    return publish_limit_order(side, ticker, price, quantity);
+    return publish_limit_order(side, ticker, price, quantity, true);
 }
 
 void
@@ -141,11 +147,11 @@ ExchangeProxy::consume_message()
     return data;
 }
 
-std::function<bool(const std::string&, const std::string&, double, double)>
+std::function<bool(const std::string&, const std::string&, double, double, bool)>
 ExchangeProxy::limit_order_func()
 {
     return [&](const std::string& side, const auto& ticker, const auto& price,
-               const auto& quantity) {
+               const auto& quantity, bool ioc) {
         if (ticker.size() != TICKER_LENGTH) [[unlikely]] {
             return false;
         }
@@ -155,7 +161,7 @@ ExchangeProxy::limit_order_func()
         util::Side side_enum = (side == "BUY") ? util::Side::buy : util::Side::sell;
 
         return ExchangeProxy::publish_limit_order(
-            side_enum, ticker_arr, price, quantity
+            side_enum, ticker_arr, price, quantity, ioc
         );
     };
 }

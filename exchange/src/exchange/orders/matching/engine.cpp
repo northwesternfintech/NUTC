@@ -65,11 +65,11 @@ Engine::create_match(const stored_order& buyer, const stored_order& seller)
 
     match.buyer.process_order_match(
         {util::Side::buy, match.ticker, match.price * (decimal_one + order_fee),
-         match.quantity}
+         match.quantity, true}
     );
     match.seller.process_order_match(
         {util::Side::sell, match.ticker, match.price * (decimal_one - order_fee),
-         match.quantity}
+         match.quantity, true}
     );
     return match;
 }

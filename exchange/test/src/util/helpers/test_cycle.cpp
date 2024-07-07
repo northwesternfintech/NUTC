@@ -31,8 +31,7 @@ TestMatchingCycle::match_orders_(std::vector<matching::stored_order> orders)
     if (!orders.empty()) {
         auto order = orders.back();
         log_i(
-            testing, "Order received: {} {} {}", std::string{order.ticker}, double{order.price},
-            order.quantity
+            testing, "Order received: {}", glz::write_json(messages::limit_order{order})
         );
         last_order =
             std::make_unique<matching::stored_order>(orders.at(orders.size() - 1));

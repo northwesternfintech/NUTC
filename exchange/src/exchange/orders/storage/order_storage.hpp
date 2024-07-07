@@ -24,12 +24,13 @@ struct stored_order {
     decimal_price price;
     double quantity;
     uint64_t tick;
+    bool ioc;
     bool isActive{true};
 
     // Used to sort orders by time created
     uint64_t order_index;
 
-    operator messages::limit_order() const { return {side, ticker, price, quantity}; }
+    operator messages::limit_order() const { return {side, ticker, price, quantity, ioc}; }
 
     static uint64_t
     get_and_increment_global_index()
@@ -40,7 +41,7 @@ struct stored_order {
 
     stored_order(
         traders::GenericTrader& trader, util::Ticker ticker, util::Side side,
-        double price, double quantity, uint64_t tick = 0
+        double price, double quantity, uint64_t tick = 0, bool ioc = false
     );
 
     stored_order(const stored_order& other) = default;

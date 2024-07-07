@@ -106,7 +106,7 @@ OrderBook::change_quantity(stored_order& order, double quantity_delta)
     }
 
     order.trader.process_position_change(
-        {order.side, order.ticker, order.price, quantity_delta}
+        {order.side, order.ticker, order.price, quantity_delta, order.ioc}
     );
 
     order.quantity += quantity_delta;
@@ -117,7 +117,7 @@ void
 OrderBook::mark_order_removed(stored_order& order)
 {
     order.trader.process_position_change(
-        {order.side, order.ticker, order.price, -order.quantity}
+        {order.side, order.ticker, order.price, -order.quantity, order.ioc}
     );
 
     modify_level_(order.side, order.price, -order.quantity);

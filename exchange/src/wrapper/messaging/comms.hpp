@@ -25,7 +25,7 @@ class ExchangeProxy {
 public:
     static void publish_init_message();
 
-    std::function<bool(const std::string&, const std::string&, double, double)>
+    std::function<bool(const std::string&, const std::string&, double, double, bool)>
     limit_order_func();
 
     std::function<bool(const std::string&, const std::string&, double)>
@@ -48,7 +48,7 @@ private:
     static void publish_message(const std::string& message);
     [[nodiscard]] bool publish_limit_order(
         util::Side side, util::Ticker ticker, matching::decimal_price price,
-        double quantity
+        double quantity, bool ioc
     );
     [[nodiscard]] bool
     publish_market_order(util::Side side, util::Ticker ticker, double quantity);

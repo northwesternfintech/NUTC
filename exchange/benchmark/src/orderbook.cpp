@@ -15,7 +15,7 @@ BM_AddOrders(benchmark::State& state)
 
     for (auto _ : state) {
         for (uint32_t i = 0; i < adds; i++) {
-            orderbook.add_order({trader, "ABC", util::Side::sell, 0.0, 0.0});
+            orderbook.add_order({trader, "ABC", util::Side::sell, 0.0, 0.0,false});
         }
     }
 }

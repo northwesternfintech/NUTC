@@ -113,9 +113,9 @@ protected:
     }
 
     void
-    add_order(util::Side side, double price, double quantity)
+    add_order(util::Side side, double price, double quantity, bool ioc)
     {
-        orders_.emplace_back(side, TICKER, price, quantity);
+        orders_.emplace_back(side, TICKER, price, quantity, ioc);
     }
 
     double
