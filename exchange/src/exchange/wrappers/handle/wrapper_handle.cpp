@@ -1,15 +1,11 @@
 #include "wrapper_handle.hpp"
 
-#include "exchange/wrappers/messaging/async_pipe_runner.hpp"
 #include "shared/file_operations/file_operations.hpp"
 #include "shared/firebase/firebase.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
-#include "shared/util.hpp"
 
 #include <boost/asio.hpp>
 #include <fmt/format.h>
-
-#include <iostream>
 
 namespace {
 std::string
@@ -19,16 +15,44 @@ quote_id(std::string user_id)
     return user_id;
 }
 
+std::string
+force_unwrap_optional(std::optional<std::string> opt, std::string error_msg)
+{
+    if (!opt.has_value()) [[unlikely]] {
+        throw std::runtime_error(error_msg);
+    }
+
+    return opt.value();
+}
+
 } // namespace
 
 namespace nutc {
 namespace wrappers {
+std::vector<limit_order>
+WrapperHandle::read_messages()
+{
+    auto messages = reader_.get_messages();
+    std::vector<limit_order> orders;
+    orders.reserve(messages.size());
+
+    assert(!std::ranges::any_of(messages, [](auto&& mess) {
+        return std::holds_alternative<init_message>(mess);
+    }));
+
+    std::transform(
+        messages.begin(), messages.end(), std::back_inserter(orders),
+        [](const auto& order) { return std::get<limit_order>(order); }
+    );
+    return orders;
+}
 
 const fs::path&
 WrapperHandle::wrapper_binary_path()
 {
-    static const char* wrapper_binary_location =
-        std::getenv("NUTC_WRAPPER_BINARY_PATH"); // NOLINT
+    static const char* const wrapper_binary_location =
+        std::getenv("NUTC_WRAPPER_BINARY_PATH");
+
     if (wrapper_binary_location == nullptr) [[unlikely]] {
         throw std::runtime_error("NUTC_WRAPPER_BINARY_PATH environment variable not set"
         );
@@ -54,7 +78,7 @@ WrapperHandle::WrapperHandle(
 ) :
     WrapperHandle(
         {"--uid", quote_id(remote_uid), "--algo_id", quote_id(algo_id)},
-        force_upwrap_optional(
+        force_unwrap_optional(
             nutc::firebase::get_algo(remote_uid, algo_id),
             fmt::format(
                 "Could not read algoid {} of uid {} from Firebase", algo_id, remote_uid
@@ -66,7 +90,7 @@ WrapperHandle::WrapperHandle(
 WrapperHandle::WrapperHandle(const std::string& algo_path) :
     WrapperHandle(
         {"--uid", quote_id(algo_path), "--algo_id", quote_id(algo_path), "--dev"},
-        force_upwrap_optional(
+        force_unwrap_optional(
             nutc::file_ops::read_file_content(algo_path),
             fmt::format("Could not read algorithm file at {}", algo_path)
         )

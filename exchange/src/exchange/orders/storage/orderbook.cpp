@@ -2,8 +2,6 @@
 
 #include "shared/util.hpp"
 
-#include <iostream>
-
 namespace nutc {
 namespace matching {
 

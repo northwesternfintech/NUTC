@@ -18,35 +18,6 @@ stored_order::operator==(const stored_order& other) const
            && util::is_close_to_zero(quantity - other.quantity);
 }
 
-int
-stored_order::operator<=>(const stored_order& other) const
-{
-    // assuming both sides are same
-    // otherwise, this shouldn't even be called
-    if (util::is_close_to_zero(this->price - other.price)) {
-        if (this->order_index > other.order_index)
-            return -1;
-        if (this->order_index < other.order_index)
-            return 1;
-        return 0;
-    }
-    if (this->side == util::Side::buy) {
-        if (this->price < other.price)
-            return -1;
-        if (this->price > other.price)
-            return 1;
-        return 0;
-    }
-    if (this->side == util::Side::sell) {
-        if (this->price > other.price)
-            return -1;
-        if (this->price < other.price)
-            return 1;
-        return 0;
-    }
-    return 0;
-}
-
 [[nodiscard]] bool
 stored_order::can_match(const stored_order& other) const
 {

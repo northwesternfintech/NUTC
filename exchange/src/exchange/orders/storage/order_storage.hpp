@@ -47,40 +47,9 @@ struct stored_order {
 
     bool operator==(const stored_order& other) const;
 
-    int operator<=>(const stored_order& other) const;
-
     [[nodiscard]] bool can_match(const stored_order& other) const;
 
     ~stored_order() = default;
-};
-
-struct order_index {
-    decimal_price price;
-    uint64_t index;
-};
-
-// Want highest first
-struct bid_comparator {
-    bool
-    operator()(const order_index& lhs, const order_index& rhs) const
-    {
-        if (lhs.price != rhs.price) {
-            return lhs.price > rhs.price;
-        }
-        return lhs.index < rhs.index;
-    }
-};
-
-// Want lowest first
-struct ask_comparator {
-    bool
-    operator()(const order_index& lhs, const order_index& rhs) const
-    {
-        if (lhs.price != rhs.price) {
-            return lhs.price < rhs.price;
-        }
-        return lhs.index < rhs.index;
-    }
 };
 } // namespace matching
 } // namespace nutc
