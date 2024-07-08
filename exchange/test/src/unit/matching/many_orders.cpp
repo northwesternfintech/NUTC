@@ -32,7 +32,7 @@ protected:
         trader4.modify_holdings("ETH", DEFAULT_QUANTITY);
     }
 
-    nutc::matching::OrderBook orderbook_;
+    nutc::matching::LimitOrderBook orderbook_;
     Engine engine_;
 
     std::vector<nutc::matching::stored_match>

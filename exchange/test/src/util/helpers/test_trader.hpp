@@ -23,7 +23,7 @@ public:
     {}
 
     virtual void
-    process_position_change(messages::limit_order) override
+    process_position_change(util::position) override
     {}
 
     std::vector<messages::limit_order>

@@ -5,6 +5,7 @@
 
 #include <prometheus/counter.h>
 #include <prometheus/gauge.h>
+#include <iostream>
 
 namespace nutc {
 namespace matching {

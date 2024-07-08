@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glaze/glaze.hpp>
+
 #include <cassert>
 #include <cmath>
 #include <cstdint>
@@ -62,6 +64,12 @@ struct decimal_price {
         return price == static_cast<uint32_t>(other * 100);
     }
 
+    // std::strong_ordering
+    // operator<=>(const decimal_price& other) const
+    // {
+    //     return price <=> other.price;
+    // }
+
     operator double() const { return static_cast<double>(price) / 100; }
 
 private:
@@ -100,3 +108,10 @@ public:
     }
 };
 } // namespace std
+
+/// \cond
+template <>
+struct glz::meta<nutc::matching::decimal_price> {
+    using t = nutc::matching::decimal_price;
+    static constexpr auto value = object(&t::price);
+};

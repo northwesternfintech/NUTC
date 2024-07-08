@@ -1,6 +1,6 @@
 #include "config.h"
-#include "exchange/orders/storage/tracked_orderbook.hpp"
-#include "exchange/orders/storage/level_update_generator.hpp"
+#include "exchange/orders/orderbook/tracked_orderbook.hpp"
+#include "exchange/orders/level_tracking/level_update_generator.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "shared/util.hpp"
 #include "util/helpers/test_trader.hpp"

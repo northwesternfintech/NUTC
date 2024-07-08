@@ -6,11 +6,11 @@ namespace nutc {
 namespace traders {
 
 void
-BotTrader::process_position_change(limit_order order)
+BotTrader::process_position_change(util::position order)
 {
     assert(order.ticker == TICKER);
 
-    double total_cap = order.price * order.quantity;
+    double total_cap = double{order.price} * order.quantity;
     if (order.side == util::Side::buy) {
         modify_long_capital(total_cap);
         modify_open_bids(order.quantity);

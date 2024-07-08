@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shared/ticker.hpp"
+#include "shared/types/ticker.hpp"
 
 #include <vector>
 

@@ -1,14 +1,14 @@
 #pragma once
 
-#include "exchange/orders/storage/level_update_generator.hpp"
-#include "orderbook.hpp"
+#include "exchange/orders/level_tracking/level_update_generator.hpp"
+#include "exchange/orders/orderbook/limit_orderbook.hpp"
 
 #include <vector>
 
 namespace nutc {
 namespace matching {
 
-class TrackedOrderBook : public OrderBook {
+class TrackedOrderBook : public LimitOrderBook {
     std::shared_ptr<LevelUpdateGenerator> level_update_generator_;
     std::vector<uint64_t> ioc_order_ids_;
 
@@ -30,7 +30,7 @@ public:
     std::vector<stored_order> remove_ioc_orders();
 
     stored_order& mark_order_removed(uint64_t order_id);
-    bool contains_order(uint64_t order_id);
+    bool contains_order(uint64_t order_id) const;
 
 private:
     void modify_level_(util::Side side, decimal_price price, double delta);

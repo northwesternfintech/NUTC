@@ -1,7 +1,6 @@
 #include "test_cycle.hpp"
 
 #include "exchange/logging.hpp"
-#include "shared/ticker.hpp"
 
 #include <glaze/glaze.hpp>
 

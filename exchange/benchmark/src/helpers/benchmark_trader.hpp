@@ -21,7 +21,7 @@ public:
     {}
 
     virtual void
-    process_position_change(messages::limit_order change) override
+    process_position_change(util::position change) override
     {
         benchmark::DoNotOptimize(change);
     }

@@ -22,7 +22,7 @@ PipeReader::get_message()
 {
     while (true) {
         std::lock_guard<std::mutex> lock{message_lock_};
-        if (message_queue_.empty()) [[likely]]
+        if (message_queue_.empty())
             continue;
 
         auto val = message_queue_.back();
@@ -59,7 +59,7 @@ PipeReader::store_message_(const std::string& message)
     auto err = glz::read_json(data, message);
 
     // TODO: handle better
-    if (err) {
+    if (err) [[unlikely]] {
         log_e(
             pipe_reader, "Error processing message from wrapper: {}",
             glz::format_error(err, message)

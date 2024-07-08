@@ -47,12 +47,12 @@ add_library(
     src/exchange/bots/variance.cpp
     src/exchange/bots/bot_types/market_maker.cpp
 
-    src/exchange/orders/matching/engine.cpp
-    src/exchange/orders/storage/level_quantity_tracker.cpp
-    src/exchange/orders/storage/tracked_orderbook.cpp
+    src/exchange/matching/engine.cpp
+    src/exchange/orders/level_tracking/level_quantity_tracker.cpp
+    src/exchange/orders/orderbook/tracked_orderbook.cpp
     src/exchange/orders/storage/order_storage.cpp
-    src/exchange/orders/storage/orderbook.cpp
-    src/exchange/orders/storage/level_update_generator.cpp
+    src/exchange/orders/orderbook/limit_orderbook.cpp
+    src/exchange/orders/level_tracking/level_update_generator.cpp
 
 	src/exchange/matching_cycle/base/base_strategy.cpp
     
@@ -216,7 +216,7 @@ target_link_libraries(WRAPPER_exe PRIVATE ${Python3_LIBRARIES})
 add_library(SHARED_lib OBJECT     
     src/shared/file_operations/file_operations.cpp
     src/shared/firebase/firebase.cpp
-    src/shared/ticker.cpp
+    src/shared/types/ticker.cpp
     src/shared/util.cpp
 )
 

@@ -35,7 +35,7 @@ protected:
         SetUp();
     }
 
-    nutc::matching::OrderBook orderbook_{};
+    nutc::matching::LimitOrderBook orderbook_{};
     Engine engine_;
 
     std::vector<nutc::matching::stored_match>
@@ -197,7 +197,7 @@ TEST_F(UnitBasicMatching, PassivePriceMatchReversed)
 
     matches = add_to_engine_(order2);
     ASSERT_EQ(matches.size(), 1);
-    ASSERT_EQ(matches.at(0).price, 1.0);
+    ASSERT_EQ(matches.at(0).position.price, 1.0);
     ASSERT_EQ_MATCH(matches.at(0), "ETH", "DEF", "ABC", buy, 1, 1);
 }
 

@@ -10,7 +10,7 @@ TrackedOrderBook::modify_level_(util::Side side, decimal_price price, double del
 }
 
 bool
-TrackedOrderBook::contains_order(uint64_t order_id)
+TrackedOrderBook::contains_order(uint64_t order_id) const
 {
     return order_map_.contains(order_id);
 }
@@ -31,10 +31,12 @@ TrackedOrderBook::add_order(stored_order order)
         ioc_order_ids_.push_back(order.order_index);
     }
     else {
-        modify_level_(order.side, order.price, order.quantity);
+        modify_level_(
+            order.position.side, order.position.price, order.position.quantity
+        );
     }
 
-    auto& added_order = OrderBook::add_order(order);
+    auto& added_order = LimitOrderBook::add_order(order);
     order_map_.emplace(order.order_index, added_order);
 
     return added_order;
@@ -43,17 +45,17 @@ TrackedOrderBook::add_order(stored_order order)
 void
 TrackedOrderBook::mark_order_removed(stored_order& order)
 {
-    modify_level_(order.side, order.price, -order.quantity);
+    modify_level_(order.position.side, order.position.price, -order.position.quantity);
     order_map_.erase(order.order_index);
 
-    OrderBook::mark_order_removed(order);
+    LimitOrderBook::mark_order_removed(order);
 }
 
 void
 TrackedOrderBook::change_quantity(stored_order& order, double quantity_delta)
 {
-    modify_level_(order.side, order.price, quantity_delta);
-    OrderBook::change_quantity(order, quantity_delta);
+    modify_level_(order.position.side, order.position.price, quantity_delta);
+    LimitOrderBook::change_quantity(order, quantity_delta);
 }
 
 std::vector<stored_order>

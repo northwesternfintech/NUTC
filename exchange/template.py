@@ -18,7 +18,7 @@ def place_market_order(side: str, ticker: str, quantity: float) -> bool:
     You should handle the case where the order fails due to rate limiting (maybe wait and try again?)
     """
 
-def place_limit_order(side: str, ticker: str, quantity: float, price: float) -> bool:
+def place_limit_order(side: str, ticker: str, quantity: float, price: float, ioc: bool = False) -> bool:
     """Place a limit order - DO NOT MODIFY
 
     Parameters

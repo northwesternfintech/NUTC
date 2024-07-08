@@ -1,6 +1,6 @@
 #include "comms.hpp"
 
-#include "exchange/orders/storage/decimal_price.hpp"
+#include "shared/types/decimal_price.hpp"
 #include "shared/config/config.h"
 #include "wrapper/pywrapper/pywrapper.hpp"
 
@@ -46,15 +46,15 @@ ExchangeProxy::process_message(auto&& message, const std::string& uid)
 }
 
 void
-ExchangeProxy::handle_orderbook_update(const orderbook_update& update)
+ExchangeProxy::handle_orderbook_update(const util::position& update)
 {
     try {
         std::string side = update.side == util::Side::buy ? "BUY" : "SELL";
         nutc::pywrapper::get_ob_update_function()(
-            std::string{update.ticker}, side, update.price, update.quantity
+            std::string{update.ticker}, side, double{update.price}, update.quantity
         );
     } catch (const py::error_already_set& e) {
-		std::cerr << e.what() << std::endl;
+        std::cerr << e.what() << std::endl;
     }
 }
 
@@ -62,26 +62,25 @@ void
 ExchangeProxy::handle_match(const match& match, const std::string& uid)
 {
     try {
-        std::string side = match.side == util::Side::buy ? "BUY" : "SELL";
+        std::string ticker = match.position.ticker;
+        std::string side = match.position.side == util::Side::buy ? "BUY" : "SELL";
+        double price = match.position.price;
+        double quantity = match.position.quantity;
 
-        nutc::pywrapper::get_trade_update_function()(
-            std::string{match.ticker}, side, match.price, match.quantity
-        );
+        nutc::pywrapper::get_trade_update_function()(ticker, side, price, quantity);
 
         if (match.buyer_id == uid) {
             nutc::pywrapper::get_account_update_function()(
-                std::string{match.ticker}, "BUY", match.price, match.quantity,
-                match.buyer_capital
+                ticker, "BUY", price, quantity, match.buyer_capital
             );
         }
         if (match.seller_id == uid) {
             nutc::pywrapper::get_account_update_function()(
-                std::string{match.ticker}, "SELL", match.price, match.quantity,
-                match.seller_capital
+                ticker, "SELL", price, quantity, match.seller_capital
             );
         }
     } catch (const py::error_already_set& e) {
-		std::cerr << e.what() << std::endl;
+        std::cerr << e.what() << std::endl;
     }
 }
 

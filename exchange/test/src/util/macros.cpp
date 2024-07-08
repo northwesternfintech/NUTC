@@ -3,30 +3,11 @@
 namespace nutc {
 namespace test_utils {
 
-limit_order
-consume_message(const std::shared_ptr<traders::GenericTrader>& trader)
-{
-    while (true) {
-        auto messages = trader->read_orders();
-
-        switch (messages.size()) {
-            case 0:
-                continue;
-            case 1:
-                return messages.at(0);
-            default:
-                throw std::runtime_error("Huh");
-        }
-    }
-}
-
 bool
-is_nearly_equal(double f_a, double f_b, double epsilon)
+is_nearly_equal(double f_a, double f_b)
 {
-    double abs_a = std::fabs(f_a);
-    double abs_b = std::fabs(f_b);
     double diff = std::fabs(f_a - f_b);
-    return diff <= ((abs_a < abs_b ? abs_b : abs_a) * epsilon);
+    return util::is_close_to_zero(diff);
 }
 
 bool
@@ -36,15 +17,15 @@ validate_match(
     double price, double quantity
 )
 {
-    return match.ticker == ticker && match.buyer.get_id() == buyer_id
-           && match.seller.get_id() == seller_id && match.side == side
-           && is_nearly_equal(match.price, price)
-           && is_nearly_equal(match.quantity, quantity);
+    return match.position.ticker == ticker && match.buyer.get_id() == buyer_id
+           && match.seller.get_id() == seller_id && match.position.side == side
+           && is_nearly_equal(match.position.price, price)
+           && is_nearly_equal(match.position.quantity, quantity);
 }
 
 bool
 validate_ob_update(
-    const orderbook_update& update, util::Ticker ticker, util::Side side, double price,
+    const util::position& update, util::Ticker ticker, util::Side side, double price,
     double quantity
 )
 {
@@ -55,13 +36,13 @@ validate_ob_update(
 
 bool
 validate_limit_order(
-    const limit_order& update, util::Ticker ticker, util::Side side,
-    double price, double quantity
+    const limit_order& update, util::Ticker ticker, util::Side side, double price,
+    double quantity
 )
 {
-    return update.ticker == ticker && update.side == side
-           && is_nearly_equal(update.price, price)
-           && is_nearly_equal(update.quantity, quantity);
+    return update.position.ticker == ticker && update.position.side == side
+           && is_nearly_equal(update.position.price, price)
+           && is_nearly_equal(update.position.quantity, quantity);
 }
 
 } // namespace test_utils

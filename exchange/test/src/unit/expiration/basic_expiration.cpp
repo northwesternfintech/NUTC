@@ -1,6 +1,6 @@
 #include "config.h"
 #include "exchange/orders/storage/order_storage.hpp"
-#include "exchange/orders/storage/orderbook.hpp"
+#include "exchange/orders/orderbook/limit_orderbook.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
 
@@ -30,7 +30,7 @@ protected:
         trader2.modify_holdings("ETH", DEFAULT_QUANTITY);
     }
 
-    nutc::matching::OrderBook orderbook_;
+    nutc::matching::LimitOrderBook orderbook_;
     Engine engine_;
 
     std::vector<nutc::matching::stored_match>

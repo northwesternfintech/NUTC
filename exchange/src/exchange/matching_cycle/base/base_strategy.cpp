@@ -21,8 +21,8 @@ BaseMatchingCycle::collect_orders(uint64_t)
         auto incoming_orders = trader->read_orders();
         for (auto& order : incoming_orders) {
             orders.emplace_back(
-                *trader, order.ticker, order.side, order.price, order.quantity,
-                order.ioc
+                *trader, order.position.ticker, order.position.side,
+                order.position.price, order.position.quantity, order.ioc
             );
         }
     }
@@ -34,10 +34,10 @@ BaseMatchingCycle::match_orders_(std::vector<stored_order> orders)
 {
     std::vector<stored_match> matches{};
     for (auto& order : orders) {
-        if (order.price < 0 || order.quantity <= 0)
+        if (order.position.price < decimal_price{0.0} || order.position.quantity <= 0)
             continue;
 
-        auto it = tickers_.find(order.ticker);
+        auto it = tickers_.find(order.position.ticker);
         if (it == tickers_.end())
             continue;
 
@@ -50,7 +50,7 @@ BaseMatchingCycle::match_orders_(std::vector<stored_order> orders)
 void
 BaseMatchingCycle::handle_matches_(std::vector<stored_match> matches)
 {
-    std::vector<ob_update> ob_updates{};
+    std::vector<util::position> ob_updates{};
 
     for (auto& [ticker, info] : tickers_) {
         auto tmp = info.level_update_generator_->get_updates(ticker);
@@ -61,8 +61,8 @@ BaseMatchingCycle::handle_matches_(std::vector<stored_match> matches)
     glz_matches.reserve(matches.size());
     for (auto& match : matches) {
         glz_matches.emplace_back(
-            match.ticker, match.side, match.price, match.quantity, match.buyer.get_id(),
-            match.seller.get_id(), match.buyer.get_capital(), match.seller.get_capital()
+            match.position, match.buyer.get_id(), match.seller.get_id(),
+            match.buyer.get_capital(), match.seller.get_capital()
         );
     }
 

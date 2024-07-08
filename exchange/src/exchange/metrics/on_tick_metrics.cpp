@@ -31,10 +31,10 @@ TickerMetricsPusher::report_orders(const std::vector<matching::stored_order>& or
     auto log_order = [&](const matching::stored_order& order) {
         orders_quantity_counter
             .Add({
-                {"ticker",      order.ticker           },
+                {"ticker",      order.position.ticker  },
                 {"trader_type", order.trader.get_type()}
         })
-            .Increment(order.quantity);
+            .Increment(order.position.quantity);
     };
 
     std::for_each(orders.begin(), orders.end(), log_order);
@@ -54,24 +54,24 @@ TickerMetricsPusher::report_ticker_stats(
     };
     auto log_best_ba = [&](util::Ticker ticker, matching::ticker_info& info) {
         auto best_bid = info.orderbook.get_top_order(util::Side::buy);
-        auto best_ask = info.orderbook.get_top_order(util::Side::buy);
+        auto best_ask = info.orderbook.get_top_order(util::Side::sell);
 
-        if (best_bid.has_value()) {
+        if (best_bid.has_value()) [[likely]] {
             best_ba_gauge
                 .Add({
                     {"ticker", std::string{ticker}},
                     {"type",   "BID"              }
             })
-                .Set(best_bid->get().price);
+                .Set(best_bid->get().position.price);
         }
 
-        if (best_ask.has_value()) {
+        if (best_ask.has_value()) [[likely]] {
             best_ba_gauge
                 .Add({
                     {"ticker", std::string{ticker}},
                     {"type",   "ASK"              }
             })
-                .Set(best_ask->get().price);
+                .Set(best_ask->get().position.price);
         }
     };
 
@@ -93,14 +93,14 @@ TickerMetricsPusher::report_ticker_stats(
 void
 TickerMetricsPusher::report_matches(const std::vector<matching::stored_match>& orders)
 {
-    auto log_match = [&](const matching::stored_match& match) {
+    auto log_match = [this](const matching::stored_match& match) {
         matches_quantity_counter
             .Add({
-                {"ticker",             match.ticker           },
+                {"ticker",             match.position.ticker  },
                 {"seller_trader_type", match.seller.get_type()},
                 {"buyer_trader_type",  match.buyer.get_type() }
         })
-            .Increment(match.quantity);
+            .Increment(match.position.quantity);
     };
 
     std::for_each(orders.begin(), orders.end(), log_match);

@@ -1,6 +1,6 @@
-#include "exchange/orders/storage/level_quantity_tracker.hpp"
+#include "exchange/orders/level_tracking/level_quantity_tracker.hpp"
 
-#include "exchange/orders/storage/decimal_price.hpp"
+#include "shared/types/decimal_price.hpp"
 
 #include <benchmark/benchmark.h>
 

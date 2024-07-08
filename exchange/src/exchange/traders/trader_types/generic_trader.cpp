@@ -4,9 +4,9 @@ namespace nutc {
 namespace traders {
 
 void
-GenericTrader::process_order_match(limit_order match)
+GenericTrader::process_order_match(util::position match)
 {
-    double total_cap = match.price * match.quantity;
+    double total_cap = double{match.price} * match.quantity;
     if (match.side == util::Side::buy) {
         modify_holdings(match.ticker, match.quantity);
         modify_capital(-total_cap);

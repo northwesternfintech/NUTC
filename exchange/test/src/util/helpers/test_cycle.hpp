@@ -1,8 +1,8 @@
 #pragma once
 
 #include "exchange/matching_cycle/base/base_strategy.hpp"
-#include "exchange/orders/storage/ticker_info.hpp"
-#include "shared/ticker.hpp"
+#include "exchange/orders/ticker_info.hpp"
+#include "shared/types/ticker.hpp"
 
 #include <memory>
 #include <string>

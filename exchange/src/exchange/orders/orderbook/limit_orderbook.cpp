@@ -1,4 +1,4 @@
-#include "orderbook.hpp"
+#include "limit_orderbook.hpp"
 
 #include "shared/util.hpp"
 
@@ -6,7 +6,7 @@ namespace nutc {
 namespace matching {
 
 void
-OrderBook::clean_tree(util::Side side)
+LimitOrderBook::clean_tree(util::Side side)
 {
     auto& tree = side == util::Side::buy ? bids_ : asks_;
     while (!tree.empty()) {
@@ -28,7 +28,7 @@ OrderBook::clean_tree(util::Side side)
 }
 
 std::optional<std::reference_wrapper<stored_order>>
-OrderBook::get_top_order(util::Side side)
+LimitOrderBook::get_top_order(util::Side side)
 {
     clean_tree(side);
 
@@ -47,7 +47,7 @@ OrderBook::get_top_order(util::Side side)
 }
 
 decimal_price
-OrderBook::get_midprice() const
+LimitOrderBook::get_midprice() const
 {
     if (bids_.empty() || asks_.empty()) [[unlikely]] {
         return 0.0;
@@ -56,38 +56,38 @@ OrderBook::get_midprice() const
 }
 
 void
-OrderBook::change_quantity(stored_order& order, double quantity_delta)
+LimitOrderBook::change_quantity(stored_order& order, double quantity_delta)
 {
-    if (util::is_close_to_zero(order.quantity + quantity_delta)) {
+    if (util::is_close_to_zero(order.position.quantity + quantity_delta)) {
         mark_order_removed(order);
         return;
     }
 
     order.trader.process_position_change(
-        {order.side, order.ticker, order.price, quantity_delta, order.ioc}
+        {order.position.side, order.position.ticker, order.position.price, quantity_delta}
     );
 
-    order.quantity += quantity_delta;
+    order.position.quantity += quantity_delta;
 }
 
 void
-OrderBook::mark_order_removed(stored_order& order)
+LimitOrderBook::mark_order_removed(stored_order& order)
 {
     order.trader.process_position_change(
-        {order.side, order.ticker, order.price, -order.quantity, order.ioc}
+        {order.position.side, order.position.ticker, order.position.price, -order.position.quantity}
     );
 
     order.was_removed = true;
 }
 
 stored_order&
-OrderBook::add_order(stored_order order)
+LimitOrderBook::add_order(stored_order order)
 {
     order.trader.process_position_change(order);
 
-    auto& map = order.side == util::Side::buy ? bids_ : asks_;
+    auto& map = order.position.side == util::Side::buy ? bids_ : asks_;
 
-    auto& queue = map[order.price];
+    auto& queue = map[order.position.price];
     queue.push(order);
     return queue.back();
 }

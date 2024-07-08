@@ -1,5 +1,6 @@
 #pragma once
 
+#include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
 #include <boost/process.hpp>
@@ -9,8 +10,6 @@
 
 namespace nutc {
 namespace traders {
-
-using limit_order = messages::limit_order;
 
 class GenericTrader {
     const std::string USER_ID;
@@ -90,12 +89,12 @@ public:
         return INITIAL_CAPITAL;
     }
 
-    virtual void process_position_change(limit_order) = 0;
-    virtual void process_order_match(limit_order);
+    virtual void process_position_change(util::position) = 0;
+    virtual void process_order_match(util::position);
 
     virtual void send_message(const std::string&) = 0;
 
-    virtual std::vector<limit_order> read_orders() = 0;
+    virtual std::vector<messages::limit_order> read_orders() = 0;
 };
 } // namespace traders
 } // namespace nutc

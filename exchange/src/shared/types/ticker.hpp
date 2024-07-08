@@ -1,6 +1,6 @@
 #pragma once
 
-#include "config/config.h"
+#include "shared/config/config.h"
 
 #include <glaze/glaze.hpp>
 
@@ -14,7 +14,7 @@ namespace util {
 struct Ticker {
     std::array<char, TICKER_LENGTH> arr{};
 
-    consteval Ticker() = default;
+    constexpr Ticker() = default;
 
     constexpr Ticker(std::array<char, TICKER_LENGTH> arr) : arr(arr) {}
 

@@ -10,7 +10,7 @@
 namespace nutc {
 namespace matching {
 
-class OrderBook {
+class LimitOrderBook {
     std::map<decimal_price, std::queue<stored_order>> bids_;
     std::map<decimal_price, std::queue<stored_order>> asks_;
 
@@ -23,7 +23,7 @@ public:
 
     std::optional<std::reference_wrapper<stored_order>> get_top_order(util::Side side);
 
-    virtual ~OrderBook() = default;
+    virtual ~LimitOrderBook() = default;
 
 private:
     void clean_tree(util::Side side);

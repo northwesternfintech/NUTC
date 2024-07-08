@@ -1,4 +1,4 @@
-#include "exchange/orders/storage/orderbook.hpp"
+#include "exchange/orders/orderbook/limit_orderbook.hpp"
 
 #include "helpers/benchmark_trader.hpp"
 
@@ -9,7 +9,7 @@ using namespace nutc;
 static void
 BM_AddOrders(benchmark::State& state)
 {
-    matching::OrderBook orderbook;
+    matching::LimitOrderBook orderbook;
     bench_utils::BenchmarkTrader trader;
     uint32_t adds = static_cast<uint32_t>(state.range(0));
 

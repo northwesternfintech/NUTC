@@ -1,5 +1,4 @@
 #pragma once
-#include "exchange/orders/storage/decimal_price.hpp"
 #include "exchange/traders/trader_types/generic_trader.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
@@ -11,35 +10,30 @@ namespace matching {
 struct stored_match {
     traders::GenericTrader& buyer;
     traders::GenericTrader& seller;
-    util::Ticker ticker;
-    util::Side side;
-    decimal_price price;
-    double quantity;
+    util::position position;
+
+    operator messages::match() const
+    {
+        return {
+            position, buyer.get_id(), seller.get_id(), buyer.get_capital(),
+            seller.get_capital()
+        };
+    }
 };
 
-struct stored_order {
+struct stored_order : public messages::limit_order {
     traders::GenericTrader& trader;
-    util::Ticker ticker;
-    util::Side side;
-    decimal_price price;
-    double quantity;
-    bool ioc;
     bool was_removed{false};
+    const uint64_t order_index = get_and_increment_global_index();
 
-    // Used to sort orders by time created
-    uint64_t order_index;
-
-    operator messages::limit_order() const
-    {
-        return {side, ticker, price, quantity, ioc};
-    }
-
-    static uint64_t
+    inline static uint64_t
     get_and_increment_global_index()
     {
         static uint64_t global_index = 0;
         return global_index++;
     }
+
+    operator util::position() const { return position; }
 
     stored_order(
         traders::GenericTrader& trader, util::Ticker ticker, util::Side side,

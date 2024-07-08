@@ -1,6 +1,7 @@
 #pragma once
 
-#include "shared/ticker.hpp"
+#include "shared/types/ticker.hpp"
+#include "shared/types/position.hpp"
 #include "util.hpp"
 
 #include <fmt/format.h>
@@ -15,7 +16,7 @@ namespace nutc {
 namespace messages {
 
 struct start_time {
-    int64_t start_time_ns{};
+    int64_t start_time_ns;
 
     start_time() = default;
 
@@ -26,54 +27,39 @@ struct start_time {
  * @brief Sent by exchange to a client to indicate a match has occurred
  */
 struct match {
-    util::Ticker ticker{};
-    util::Side side;
-    double price{};
-    double quantity{};
-    std::string buyer_id{};
-    std::string seller_id{};
-    double buyer_capital{};
-    double seller_capital{};
+    util::position position;
+    std::string buyer_id;
+    std::string seller_id;
+    double buyer_capital;
+    double seller_capital;
 
     match() = default;
 
     match(
-        util::Ticker ticker, util::Side side, double price, double quantity,
-        std::string bid, std::string sid, double bcap, double scap
+        util::Ticker ticker, util::Side side, matching::decimal_price price,
+        double quantity, std::string bid, std::string sid, double bcap, double scap
     ) :
-        ticker(ticker), side(side), price(price), quantity(quantity),
-        buyer_id(std::move(bid)), seller_id(std::move(sid)), buyer_capital(bcap),
-        seller_capital(scap)
-    {}
-};
-
-/**
- * @brief Sent by exchange to clients to indicate an orderbook update
- */
-struct orderbook_update {
-    util::Ticker ticker{};
-    util::Side side{};
-    double price{};
-    double quantity{};
-
-    orderbook_update() = default;
-
-    orderbook_update(
-        util::Ticker ticker, util::Side side, double price, double quantity
-    ) : ticker(ticker), side(side), price(price), quantity(quantity)
+        position(side, ticker, price, quantity), buyer_id(std::move(bid)),
+        seller_id(std::move(sid)), buyer_capital(bcap), seller_capital(scap)
     {}
 
-    bool operator==(const orderbook_update& other) const = default;
+    match(
+        const util::position& position, std::string bid, std::string sid, double bcap,
+        double scap
+    ) :
+        position(position), buyer_id(std::move(bid)), seller_id(std::move(sid)),
+        buyer_capital(bcap), seller_capital(scap)
+    {}
 };
 
 struct tick_update {
-    std::vector<orderbook_update> ob_updates{};
-    std::vector<match> matches{};
+    std::vector<util::position> ob_updates;
+    std::vector<match> matches;
 
     tick_update() = default;
 
     explicit tick_update(
-        std::vector<orderbook_update> ob_updates, std::vector<match> matches
+        std::vector<util::position> ob_updates, std::vector<match> matches
     ) : ob_updates(std::move(ob_updates)), matches(std::move(matches))
     {}
 };
@@ -92,15 +78,6 @@ struct algorithm_content {
 
 /// \cond
 template <>
-struct glz::meta<nutc::messages::orderbook_update> {
-    using t = nutc::messages::orderbook_update;
-    static constexpr auto value = object( // NOLINT
-        &t::ticker, &t::side, &t::price, &t::quantity
-    );
-};
-
-/// \cond
-template <>
 struct glz::meta<nutc::messages::tick_update> {
     using t = nutc::messages::tick_update;
     static constexpr auto value = object( // NOLINT
@@ -113,8 +90,7 @@ template <>
 struct glz::meta<nutc::messages::match> {
     using t = nutc::messages::match;
     static constexpr auto value = object( // NOLINT
-        &t::ticker, &t::buyer_id, &t::seller_id, &t::side, &t::price, &t::quantity,
-        &t::buyer_capital, &t::seller_capital
+        &t::position, &t::buyer_id, &t::seller_id, &t::buyer_capital, &t::seller_capital
     );
 };
 

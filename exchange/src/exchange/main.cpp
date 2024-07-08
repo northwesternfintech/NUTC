@@ -6,7 +6,7 @@
 #include "exchange/matching_cycle/base/base_strategy.hpp"
 #include "exchange/matching_cycle/cycle_strategy.hpp"
 #include "exchange/matching_cycle/dev/dev_strategy.hpp"
-#include "exchange/orders/storage/ticker_info.hpp"
+#include "exchange/orders/ticker_info.hpp"
 #include "exchange/sandbox_server/crow.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "exchange/wrappers/creation/rmq_wrapper_init.hpp"

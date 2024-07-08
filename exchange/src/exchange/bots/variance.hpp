@@ -1,6 +1,6 @@
 #pragma once
 
-#include "exchange/orders/storage/decimal_price.hpp"
+#include "shared/types/decimal_price.hpp"
 
 #include <deque>
 

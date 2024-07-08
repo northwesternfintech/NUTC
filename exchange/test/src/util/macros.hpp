@@ -1,27 +1,18 @@
-#include "exchange/orders/matching/engine.hpp"
+#include "exchange/matching/engine.hpp"
 #include "exchange/orders/storage/order_storage.hpp"
 #include "exchange/traders/trader_container.hpp"
-#include "exchange/traders/trader_types/generic_trader.hpp"
-#include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
-#include "shared/ticker.hpp"
-
-#include <limits>
+#include "shared/types/ticker.hpp"
 
 using Engine = nutc::matching::Engine;
 using limit_order = nutc::messages::limit_order;
 using stored_order = nutc::matching::stored_order;
-using orderbook_update = nutc::messages::orderbook_update;
 using TraderContainer = nutc::traders::TraderContainer;
 
 namespace nutc {
 namespace test_utils {
 
-limit_order consume_message(const std::shared_ptr<traders::GenericTrader>& trader);
-
-bool is_nearly_equal(
-    double f_a, double f_b, double epsilon = std::numeric_limits<double>::epsilon()
-);
+bool is_nearly_equal(double f_a, double f_b);
 
 bool validate_match(
     const nutc::matching::stored_match& match, util::Ticker ticker,
@@ -30,7 +21,7 @@ bool validate_match(
 );
 
 bool validate_ob_update(
-    const orderbook_update& update, util::Ticker ticker, util::Side side, double price,
+    const util::position& update, util::Ticker ticker, util::Side side, double price,
     double quantity
 );
 
@@ -56,11 +47,12 @@ bool validate_limit_order(
             << ", buyer_id = " << (buyer_id_) << ", seller_id = " << (seller_id_)      \
             << ", side = " << static_cast<int>(side_) << ", price = " << (price_)      \
             << ", quantity = " << (quantity_)                                          \
-            << ". Actual match: ticker = " << std::string{(match).ticker}              \
+            << ". Actual match: ticker = " << std::string{(match).position.ticker}     \
             << ", buyer_id = " << (match).buyer.get_id()                               \
             << ", seller_id = " << (match).seller.get_id()                             \
-            << ", side = " << static_cast<int>((match).side)                           \
-            << ", price = " << (match).price << ", quantity = " << (match).quantity;   \
+            << ", side = " << static_cast<int>((match).position.side)                  \
+            << ", price = " << (match).position.price                                  \
+            << ", quantity = " << (match).position.quantity;                           \
     } while (0)
 
 #define ASSERT_EQ_OB_UPDATE(/* NOLINT(cppcoreguidelines-macro-usage) */                \

@@ -1,5 +1,5 @@
 #include "config.h"
-#include "exchange/orders/storage/tracked_orderbook.hpp"
+#include "exchange/orders/orderbook/tracked_orderbook.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
@@ -48,6 +48,34 @@ TEST_F(UnitMatchIOC, BasicMatchIOC)
 
 	matches = add_to_engine_(order2);
 	ASSERT_EQ(matches.size(), 1);
+}
+
+TEST_F(UnitMatchIOC, DoubleIOCMatch)
+{
+    stored_order order1{trader1, "ETH", buy, 1, 5, true};
+    stored_order order2{trader2, "ETH", sell, 1, 0, true};
+
+	auto matches = add_to_engine_(order1);
+	ASSERT_TRUE(matches.empty());
+
+	matches = add_to_engine_(order2);
+	ASSERT_EQ(matches.size(), 1);
+}
+
+TEST_F(UnitMatchIOC, DoubleIOCMatchMultipleLevels)
+{
+    stored_order order1{trader1, "ETH", buy, 2, 5, true};
+    stored_order order2{trader2, "ETH", sell, 1, 0, true};
+    stored_order order3{trader2, "ETH", sell, 1, 4, true};
+
+	auto matches = add_to_engine_(order2);
+	ASSERT_TRUE(matches.empty());
+
+	matches = add_to_engine_(order3);
+	ASSERT_TRUE(matches.empty());
+
+	matches = add_to_engine_(order1);
+	ASSERT_EQ(matches.size(), 2);
 }
 
 TEST_F(UnitMatchIOC, NoMatchAfterCycle)

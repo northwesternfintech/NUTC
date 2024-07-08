@@ -1,7 +1,7 @@
 #pragma once
 
-#include "exchange/orders/storage/ticker_info.hpp"
-#include "shared/ticker.hpp"
+#include "exchange/orders/ticker_info.hpp"
+#include "shared/types/ticker.hpp"
 
 #include <prometheus/counter.h>
 #include <prometheus/family.h>

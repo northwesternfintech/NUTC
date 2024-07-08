@@ -51,12 +51,15 @@ void
 MarketMakerBot::take_action(double midprice, double real_theo, double variance)
 {
     double theo = real_theo + generate_gaussian_noise(0, .05);
-    // double theo = real_theo + generate_gaussian_noise(0, .1);
 
     double offset = midprice * (1.0 / 600 + variance);
     offset *= aggressiveness;
-	offset = std::min(offset, 1.0);
-	offset = std::max(offset, -1.0);
+    offset = std::min(offset, 1.0);
+    offset = std::max(offset, -1.0);
+
+    // TODO: adding market impact to the spread is very challenging and will be
+    // continued later
+    offset = 0;
 
     double average_price = avg_level_price(theo, offset);
     double total_quantity = compute_capital_tolerance_() / average_price;
