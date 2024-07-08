@@ -37,9 +37,6 @@ protected:
     virtual void handle_matches_(std::vector<stored_match> matches) override;
 
     virtual void post_cycle_(uint64_t) override;
-
-    void
-    generate_bot_orders_(bots::BotContainer& bot_container, const OrderBook& orderbook);
 };
 
 } // namespace matching

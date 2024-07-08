@@ -50,8 +50,6 @@ struct stored_order {
 
     bool operator==(const stored_order& other) const;
 
-    [[nodiscard]] bool can_match(const stored_order& other) const;
-
     ~stored_order() = default;
 };
 } // namespace matching

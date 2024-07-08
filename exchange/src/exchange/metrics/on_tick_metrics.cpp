@@ -53,18 +53,26 @@ TickerMetricsPusher::report_ticker_stats(
             .Set(info.orderbook.get_midprice());
     };
     auto log_best_ba = [&](util::Ticker ticker, matching::ticker_info& info) {
-        best_ba_gauge
-            .Add({
-                {"ticker", std::string{ticker}},
-                {"type",   "BID"              }
-        })
-            .Set(info.orderbook.get_top_order(util::Side::buy).price);
-        best_ba_gauge
-            .Add({
-                {"ticker", std::string{ticker}},
-                {"type",   "ASK"              }
-        })
-            .Set(info.orderbook.get_top_order(util::Side::sell).price);
+        auto best_bid = info.orderbook.get_top_order(util::Side::buy);
+        auto best_ask = info.orderbook.get_top_order(util::Side::buy);
+
+        if (best_bid.has_value()) {
+            best_ba_gauge
+                .Add({
+                    {"ticker", std::string{ticker}},
+                    {"type",   "BID"              }
+            })
+                .Set(best_bid->get().price);
+        }
+
+        if (best_ask.has_value()) {
+            best_ba_gauge
+                .Add({
+                    {"ticker", std::string{ticker}},
+                    {"type",   "ASK"              }
+            })
+                .Set(best_ask->get().price);
+        }
     };
 
     auto log_variance = [&](util::Ticker ticker, const matching::ticker_info& info) {

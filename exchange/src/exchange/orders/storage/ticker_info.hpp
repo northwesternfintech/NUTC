@@ -1,8 +1,8 @@
 #pragma once
+#include "exchange/orders/storage/tracked_orderbook.hpp"
 #include "exchange/bots/bot_container.hpp"
 #include "exchange/orders/matching/engine.hpp"
 #include "exchange/orders/storage/level_update_generator.hpp"
-#include "exchange/orders/storage/orderbook.hpp"
 
 namespace nutc {
 namespace matching {
@@ -13,7 +13,7 @@ namespace matching {
  */
 struct ticker_info {
     std::shared_ptr<matching::LevelUpdateGenerator> level_update_generator_;
-    matching::OrderBook orderbook;
+    matching::TrackedOrderBook orderbook;
 
     Engine engine;
     bots::BotContainer bot_container;

@@ -18,23 +18,5 @@ stored_order::operator==(const stored_order& other) const
            && util::is_close_to_zero(quantity - other.quantity) && ioc == other.ioc;
 }
 
-[[nodiscard]] bool
-stored_order::can_match(const stored_order& other) const
-{
-    if (this->side == other.side) [[unlikely]] {
-        return false;
-    }
-    if (this->ticker != other.ticker) [[unlikely]] {
-        return false;
-    }
-    if (this->side == util::Side::buy && this->price < other.price) {
-        return false;
-    }
-    if (this->side == util::Side::sell && this->price > other.price) {
-        return false;
-    }
-    return true;
-}
-
 } // namespace matching
 } // namespace nutc

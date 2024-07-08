@@ -1,7 +1,7 @@
 def place_market_order(side: str, ticker: str, quantity: float) -> None:
     """Place a market order - DO NOT MODIFY""" 
 
-def place_limit_order(side: str, ticker: str, price: float, quantity: float) -> None:
+def place_limit_order(side: str, ticker: str, price: float, quantity: float, ioc: bool = True) -> None:
     """Place a limit order - DO NOT MODIFY""" 
 
 

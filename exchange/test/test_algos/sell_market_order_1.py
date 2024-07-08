@@ -27,6 +27,8 @@ class Strategy:
             Volume traded
         """
         print(f"Python Trade update: {ticker} {side} {price} {quantity}")
+        if(ticker=="ABC" and price <= 101.0 and price>=99.0 and quantity == 1):
+            place_limit_order("BUY", "DEF", 1000, 1)
 
     def on_orderbook_update(
         self, ticker: str, side: str, price: float, quantity: float
@@ -44,8 +46,6 @@ class Strategy:
             Volume placed into orderbook
         """
         print(f"Python Orderbook update: {ticker} {side} {price} {quantity}")
-        if(ticker=="ABC" and price <= 2.0 and price>=0.0):
-            place_limit_order("BUY", "DEF", 1000, 1)
 
     def on_account_update(
         self,
@@ -72,5 +72,3 @@ class Strategy:
         print(
             f"Python Account update: {ticker} {side} {price} {quantity} {capital_remaining}"
         )
-        if ticker == "ABC" and quantity >= 10:
-            place_market_order("SELL", "DEF", 5)

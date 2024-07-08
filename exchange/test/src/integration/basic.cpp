@@ -41,7 +41,7 @@ TEST_F(IntegrationBasicAlgo, RemoveIOCOrder)
     auto trader1 = start_wrappers(users_, "test_algos/buy_tsla_at_100.py");
     auto trader2 = users_.add_trader<TestTrader>(0);
     trader2->modify_holdings("ABC", 1000); // NOLINT
-    trader2->add_order({sell, "ABC", 100, 100, true});
+    trader2->add_order({sell, "ABC", 100, 100});
 
     TestMatchingCycle cycle{
         {"ABC"},
@@ -49,15 +49,19 @@ TEST_F(IntegrationBasicAlgo, RemoveIOCOrder)
     };
 
     cycle.on_tick(0);
+    usleep(500);
+    cycle.on_tick(0);
+    usleep(500);
+    cycle.on_tick(0);
 
-    cycle.wait_for_order({buy, "ABC", 100, 10});
+    ASSERT_TRUE(trader1->read_orders().empty());
 }
 
 TEST_F(IntegrationBasicAlgo, MarketOrderBuy)
 {
     auto trader1 = start_wrappers(users_, "test_algos/buy_market_order_1000.py");
     auto trader2 = users_.add_trader<TestTrader>(0);
-    trader2->modify_holdings("ABC", 1000); // NOLINT
+    trader2->modify_holdings("ABC", 1000);
     trader2->add_order({sell, "ABC", 1000, 100});
 
     TestMatchingCycle cycle{
@@ -71,10 +75,10 @@ TEST_F(IntegrationBasicAlgo, MarketOrderBuy)
 TEST_F(IntegrationBasicAlgo, MarketOrderSell)
 {
     auto trader1 = start_wrappers(users_, "test_algos/sell_market_order_1.py");
-    trader1->modify_holdings("ABC", 1000); // NOLINT
-
     auto trader2 = users_.add_trader<TestTrader>(0);
+    trader1->modify_holdings("ABC", 1000);
     trader2->add_order({buy, "ABC", 100, 1});
+	trader2->modify_capital(1000);
 
     TestMatchingCycle cycle{
         {"ABC",   "DEF"  },

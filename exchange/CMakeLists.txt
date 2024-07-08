@@ -49,6 +49,7 @@ add_library(
 
     src/exchange/orders/matching/engine.cpp
     src/exchange/orders/storage/level_quantity_tracker.cpp
+    src/exchange/orders/storage/tracked_orderbook.cpp
     src/exchange/orders/storage/order_storage.cpp
     src/exchange/orders/storage/orderbook.cpp
     src/exchange/orders/storage/level_update_generator.cpp

@@ -1,4 +1,5 @@
 #include "config.h"
+#include "exchange/orders/storage/tracked_orderbook.hpp"
 #include "exchange/orders/storage/level_update_generator.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "shared/util.hpp"
@@ -11,7 +12,7 @@
 #include <memory>
 
 using nutc::matching::LevelUpdateGenerator;
-using nutc::matching::OrderBook;
+using nutc::matching::TrackedOrderBook;
 using nutc::util::Side::buy;
 using nutc::util::Side::sell;
 
@@ -31,8 +32,7 @@ protected:
     std::shared_ptr<LevelUpdateGenerator> generator_ =
         std::make_shared<LevelUpdateGenerator>();
 
-    OrderBook ob{generator_};
-    // OrderBook after{};  // NOLINT (*)
+    TrackedOrderBook ob{generator_};
 };
 
 TEST_F(UnitGetUpdate, NoOrders)
@@ -66,12 +66,12 @@ TEST_F(UnitGetUpdate, OrderDeleted)
 
     // we delete the order
 
-    // ob.remove_order(order1.order_index);
+    ob.mark_order_removed(order1);
     //
-    // auto updates = generator_->get_updates("ABC");
-    //
-    // ASSERT_EQ(updates.size(), 1);
-    // ASSERT_EQ_OB_UPDATE(updates[0], "ABC", buy, 1, 0);
+    auto updates = generator_->get_updates("ABC");
+
+    ASSERT_EQ(updates.size(), 1);
+    ASSERT_EQ_OB_UPDATE(updates[0], "ABC", buy, 1, 0);
 }
 
 TEST_F(UnitGetUpdate, OrderQuantityChange)
@@ -80,13 +80,12 @@ TEST_F(UnitGetUpdate, OrderQuantityChange)
     stored_order order1{trader1, "ABC", buy, initial_quantity, 1, 0};
     ob.add_order(order1);
 
-    // double quantity_delta = 5;
-    // ob.modify_order_quantity(order1.order_index, quantity_delta);
-    // auto updates = generator_->get_updates("ABC");
-    //
-    // ASSERT_EQ(updates.size(), 1);
-    // ASSERT_EQ_OB_UPDATE(updates[0], "ABC", buy, 1, quantity_delta +
-    // initial_quantity);
+    double quantity_delta = 5;
+    ob.change_quantity(order1, quantity_delta);
+    auto updates = generator_->get_updates("ABC");
+
+    ASSERT_EQ(updates.size(), 1);
+    ASSERT_EQ_OB_UPDATE(updates[0], "ABC", buy, 1, quantity_delta + initial_quantity);
 }
 
 // This is an edge case that we currently level change updator doesn't handle
@@ -119,18 +118,18 @@ TEST_F(UnitGetUpdate, BuySellChange)
     ob.add_order(order1);
     ob.add_order(order2);
 
-    // ob.modify_order_quantity(order1.order_index, 4);
-    // ob.modify_order_quantity(order2.order_index, 4);
-    //
-    // auto updates = generator_->get_updates("ABC");
-    //
-    // std::sort(updates.begin(), updates.end(), [](auto a, auto b) {
-    //     return a.price < b.price;
-    // });
-    //
-    // ASSERT_EQ(updates.size(), 2);
-    // ASSERT_EQ_OB_UPDATE(updates[0], "ABC", buy, 1, 5);
-    // ASSERT_EQ_OB_UPDATE(updates[1], "ABC", sell, 5, 5);
+    ob.change_quantity(order1, 4);
+    ob.change_quantity(order2, 4);
+
+    auto updates = generator_->get_updates("ABC");
+
+    std::sort(updates.begin(), updates.end(), [](auto a, auto b) {
+        return a.price < b.price;
+    });
+
+    ASSERT_EQ(updates.size(), 2);
+    ASSERT_EQ_OB_UPDATE(updates[0], "ABC", buy, 1, 5);
+    ASSERT_EQ_OB_UPDATE(updates[1], "ABC", sell, 5, 5);
 }
 
 TEST_F(UnitGetUpdate, ManyLevelChanges)
@@ -189,16 +188,17 @@ TEST_F(UnitGetUpdate, ChangesAddsAndDeletes)
 
     ob.add_order(order7);
     ob.add_order(order8);
-    // ob.remove_order(order6.order_index);
-    //
-    // auto updates = generator_->get_updates("ABC");
-    //
-    // std::sort(updates.begin(), updates.end(), [](auto a, auto b) {
-    //     return a.price < b.price;
-    // });
-    //
-    // ASSERT_EQ(updates.size(), 3);
-    // ASSERT_EQ_OB_UPDATE(updates[0], "ABC", buy, 2, 9);
-    // ASSERT_EQ_OB_UPDATE(updates[1], "ABC", buy, 3, 10);
-    // ASSERT_EQ_OB_UPDATE(updates[2], "ABC", buy, 5, 5);
+
+    ob.mark_order_removed(order6);
+
+    auto updates = generator_->get_updates("ABC");
+
+    std::sort(updates.begin(), updates.end(), [](auto a, auto b) {
+        return a.price < b.price;
+    });
+
+    ASSERT_EQ(updates.size(), 3);
+    ASSERT_EQ_OB_UPDATE(updates[0], "ABC", buy, 2, 9);
+    ASSERT_EQ_OB_UPDATE(updates[1], "ABC", buy, 3, 10);
+    ASSERT_EQ_OB_UPDATE(updates[2], "ABC", buy, 5, 5);
 }

@@ -30,12 +30,18 @@ std::vector<stored_match>
 Engine::attempt_matches_(OrderBook& orderbook)
 {
     std::vector<stored_match> matches;
-    while (orderbook.can_match_orders()) {
-        stored_order& highest_bid = orderbook.get_top_order(side::buy);
-        stored_order& cheapest_ask = orderbook.get_top_order(side::sell);
-        assert(highest_bid.price >= cheapest_ask.price);
-        assert(highest_bid.ticker == cheapest_ask.ticker);
-        assert(cheapest_ask.quantity > 0);
+    while (true) {
+        auto highest_bid_opt = orderbook.get_top_order(side::buy);
+        auto cheapest_ask_opt = orderbook.get_top_order(side::sell);
+
+        if (!highest_bid_opt.has_value() || !cheapest_ask_opt.has_value()) [[unlikely]]
+            break;
+
+        stored_order& highest_bid = highest_bid_opt->get();
+        stored_order& cheapest_ask = cheapest_ask_opt->get();
+
+        if (highest_bid.price < cheapest_ask.price)
+            break;
 
         if (!order_can_execute_(orderbook, highest_bid, cheapest_ask))
             continue;
@@ -56,6 +62,7 @@ Engine::create_match(const stored_order& buyer, const stored_order& seller)
     assert(buyer.ticker == seller.ticker);
     double quantity = order_quantity(buyer, seller);
     decimal_price price = order_price(buyer, seller);
+
     util::Side aggressive_side =
         buyer.order_index < seller.order_index ? util::Side::sell : util::Side::buy;
 
@@ -102,6 +109,7 @@ Engine::order_can_execute_(
         }
         return false;
     }
+
     return true;
 }
 

@@ -6,7 +6,10 @@ void
 BaseMatchingCycle::before_cycle_(uint64_t)
 {
     for (auto& [symbol, ticker_info] : tickers_) {
-        generate_bot_orders_(ticker_info.bot_container, ticker_info.orderbook);
+        auto& bot_container = ticker_info.bot_container;
+        auto& orderbook = ticker_info.orderbook;
+
+        bot_container.generate_orders(orderbook.get_midprice());
     }
 }
 
@@ -18,7 +21,8 @@ BaseMatchingCycle::collect_orders(uint64_t)
         auto incoming_orders = trader->read_orders();
         for (auto& order : incoming_orders) {
             orders.emplace_back(
-                *trader, order.ticker, order.side, order.price, order.quantity
+                *trader, order.ticker, order.side, order.price, order.quantity,
+                order.ioc
             );
         }
     }
@@ -81,12 +85,5 @@ BaseMatchingCycle::post_cycle_(uint64_t)
     }
 }
 
-void
-BaseMatchingCycle::generate_bot_orders_(
-    bots::BotContainer& bot_container, const OrderBook& orderbook
-)
-{
-    bot_container.generate_orders(orderbook.get_midprice());
-}
 } // namespace matching
 } // namespace nutc
