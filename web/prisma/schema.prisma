@@ -1,6 +1,6 @@
 generator client {
   provider      = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-3.0.x", "rhel-openssl-1.0.x"]
+  binaryTargets = ["native", "debian-openssl-3.0.x", "rhel-openssl-1.0.x", "linux-arm64-openssl-3.0.x"]
 }
 
 datasource db {
@@ -9,33 +9,63 @@ datasource db {
 }
 
 model User {
-  uid       String   @id
-  email     String   @unique
-  profile	Profile?
-  Resume    Resume[]
+  uid      String     @id
+  email    String     @unique
+  Resume   Resume[]
+  Algo     Algo[]
+  profile  Profile?
+  AlgoFile AlgoFile[]
 
   @@map("users")
+}
+
+model Algo {
+  algoFileKey        String  @id
+  name               String  @unique
+  description        String
+  case               String
+  lintResults        String
+  sandboxLogFileURL  String?
+  lintFailureMessage String?
+  lintSuccessMessage String?
+
+  algoFile AlgoFile @relation(fields: [algoFileKey], references: [key])
+  uid      String
+  user     User     @relation(fields: [uid], references: [uid])
+
+  @@index([uid])
+  @@map("algos")
+}
+
+model AlgoFile {
+  key       String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Algo      Algo?
+
+  uid  String
+  user User   @relation(fields: [uid], references: [uid])
 }
 
 model Profile {
   firstName String
   lastName  String
-  school	String
+  school    String
   about     String
 
-  uid		String   @id
-  user      User     @relation(fields: [uid], references: [uid])
+  uid  String @id
+  user User   @relation(fields: [uid], references: [uid])
 
   @@map("profiles")
 }
 
 model Resume {
-  key		String    @id @default(uuid())
+  key       String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  uid		String
-  user		User   @relation(fields: [uid], references: [uid])
+  uid  String
+  user User   @relation(fields: [uid], references: [uid])
 
   @@index([uid])
   @@map("resumes")
