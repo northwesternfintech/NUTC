@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("PRISMA_DATABASE_URL")
 }
 
 model User {
@@ -45,6 +45,8 @@ model AlgoFile {
 
   uid  String
   user User   @relation(fields: [uid], references: [uid])
+
+  @@map("algo_file")
 }
 
 model Profile {
