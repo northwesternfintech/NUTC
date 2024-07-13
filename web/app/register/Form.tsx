@@ -90,6 +90,7 @@ export default function RegistrationForm(props: { user: any }) {
   };
 
   const confirmEntriesAdded = () => {
+    if(!resumeUploaded) return false;
     for (const [key, value] of Object.entries(profile)) {
       if (!value) {
         Swal.fire({
