@@ -49,7 +49,6 @@ add_library(
 
     src/exchange/matching/engine.cpp
     src/exchange/orders/level_tracking/level_quantity_tracker.cpp
-    src/exchange/orders/orderbook/tracked_orderbook.cpp
     src/exchange/orders/storage/order_storage.cpp
     src/exchange/orders/orderbook/limit_orderbook.cpp
     src/exchange/orders/level_tracking/level_update_generator.cpp
@@ -112,9 +111,9 @@ target_link_libraries(EXCHANGE_lib PUBLIC glaze::glaze)
 find_package(Boost REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC boost::boost)
 
-# emhash
-find_package(emhash REQUIRED)
-target_link_libraries(EXCHANGE_lib PUBLIC emhash::emhash)
+# # emhash
+# find_package(emhash REQUIRED)
+# target_link_libraries(EXCHANGE_lib PUBLIC emhash::emhash)
 
 
 add_executable(EXCHANGE_exe src/exchange/main.cpp)
@@ -133,7 +132,7 @@ target_link_libraries(EXCHANGE_exe PRIVATE quill::quill)
 # fmt
 target_link_libraries(EXCHANGE_exe PRIVATE fmt::fmt)
 
-target_link_libraries(EXCHANGE_exe PRIVATE emhash::emhash)
+# target_link_libraries(EXCHANGE_exe PRIVATE emhash::emhash)
 
 # yaml-cpp
 find_package(yaml-cpp REQUIRED)

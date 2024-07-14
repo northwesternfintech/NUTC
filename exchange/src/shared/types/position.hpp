@@ -10,7 +10,7 @@ namespace util {
 struct position {
     Side side;
     Ticker ticker;
-    matching::decimal_price price;
+    util::decimal_price price;
     double quantity;
 
     bool
@@ -22,7 +22,7 @@ struct position {
 
     position() = default;
 
-    position(Side side, Ticker ticker, matching::decimal_price price, double quantity) :
+    position(Side side, Ticker ticker, util::decimal_price price, double quantity) :
         side(side), ticker(ticker), price(price), quantity(quantity)
     {}
 };

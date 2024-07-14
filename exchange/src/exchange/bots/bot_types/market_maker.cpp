@@ -59,7 +59,7 @@ MarketMakerBot::take_action(double midprice, double real_theo, double variance)
 
     // TODO: adding market impact to the spread is very challenging and will be
     // continued later
-    offset = 0;
+    offset = .25;
 
     double average_price = avg_level_price(theo, offset);
     double total_quantity = compute_capital_tolerance_() / average_price;

@@ -46,7 +46,7 @@ class Strategy:
         print(f"Python Orderbook update: {ticker} {side} {price} {quantity}")
         if(ticker=="ABC" and price>=0.0):
             self.num+=1
-        if(self.num==100000):
+        if(self.num==10000):
             place_limit_order("BUY", "ABC", 100, 10)
 
     def on_account_update(

@@ -12,18 +12,18 @@ namespace matching {
 class BaseMatchingCycle : public MatchingCycle {
 protected:
     std::unordered_map<util::Ticker, ticker_info> tickers_;
-    std::pmr::vector<std::shared_ptr<traders::GenericTrader>> traders_; // move elsewhere
+    std::vector<std::shared_ptr<traders::GenericTrader>>& traders_; // move elsewhere
     const uint64_t ORDER_EXPIRE_TICKS;
 
 public:
     // Require transfer of ownership
     BaseMatchingCycle(
         std::unordered_map<util::Ticker, ticker_info> tickers,
-        std::pmr::vector<std::shared_ptr<traders::GenericTrader>> traders,
+        std::vector<std::shared_ptr<traders::GenericTrader>>& traders,
         uint64_t expire_ticks
     ) :
         tickers_(std::move(tickers)),
-        traders_(std::move(traders)), ORDER_EXPIRE_TICKS(expire_ticks)
+        traders_(traders), ORDER_EXPIRE_TICKS(expire_ticks)
     {}
 
 protected:

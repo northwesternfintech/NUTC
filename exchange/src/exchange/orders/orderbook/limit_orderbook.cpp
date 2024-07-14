@@ -46,7 +46,7 @@ LimitOrderBook::get_top_order(util::Side side)
     return q.front();
 }
 
-decimal_price
+util::decimal_price
 LimitOrderBook::get_midprice() const
 {
     if (bids_.empty() || asks_.empty()) [[unlikely]] {
@@ -63,7 +63,7 @@ LimitOrderBook::change_quantity(stored_order& order, double quantity_delta)
         return;
     }
 
-    order.trader.process_position_change(
+    order.trader->process_position_change(
         {order.position.side, order.position.ticker, order.position.price, quantity_delta}
     );
 
@@ -73,7 +73,7 @@ LimitOrderBook::change_quantity(stored_order& order, double quantity_delta)
 void
 LimitOrderBook::mark_order_removed(stored_order& order)
 {
-    order.trader.process_position_change(
+    order.trader->process_position_change(
         {order.position.side, order.position.ticker, order.position.price, -order.position.quantity}
     );
 
@@ -81,9 +81,9 @@ LimitOrderBook::mark_order_removed(stored_order& order)
 }
 
 stored_order&
-LimitOrderBook::add_order(stored_order order)
+LimitOrderBook::add_order(const stored_order& order)
 {
-    order.trader.process_position_change(order);
+    order.trader->process_position_change(order);
 
     auto& map = order.position.side == util::Side::buy ? bids_ : asks_;
 

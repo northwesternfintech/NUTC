@@ -19,7 +19,7 @@ start_wrappers(
     return ret[0];
 }
 
-std::pmr::vector<std::shared_ptr<traders::GenericTrader>>
+std::vector<std::shared_ptr<traders::GenericTrader>>
 start_wrappers(
     nutc::traders::TraderContainer& users,
     const std::vector<std::string>& algo_filenames, double starting_capital,

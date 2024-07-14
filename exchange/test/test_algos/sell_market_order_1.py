@@ -28,7 +28,7 @@ class Strategy:
         """
         print(f"Python Trade update: {ticker} {side} {price} {quantity}")
         if(ticker=="ABC" and price <= 101.0 and price>=99.0 and quantity == 1):
-            place_limit_order("BUY", "DEF", 1000, 1)
+            place_limit_order("BUY", "DEF", 100, 1)
 
     def on_orderbook_update(
         self, ticker: str, side: str, price: float, quantity: float

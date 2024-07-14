@@ -1,6 +1,5 @@
 #pragma once
 
-#include "shared/types/decimal_price.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 #include "shared/util.hpp"
@@ -45,10 +44,10 @@ private:
     static void process_message(T&& message, const std::string& uid);
 
     static void publish_message(const std::string& message);
-    [[nodiscard]] bool publish_limit_order(
-        util::Side side, util::Ticker ticker, matching::decimal_price price,
-        double quantity, bool ioc
-    );
+
+    template <typename T>
+    [[nodiscard]] bool publish_order(const T& order);
+
     [[nodiscard]] bool
     publish_market_order(util::Side side, util::Ticker ticker, double quantity);
 

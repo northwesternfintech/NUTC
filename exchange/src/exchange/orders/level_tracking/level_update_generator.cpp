@@ -9,11 +9,11 @@ LevelUpdateGenerator::get_updates(util::Ticker ticker) const
 {
     std::vector<util::position> updates;
 
-    for (decimal_price modified_decimal : modified_buy_levels_) {
+    for (util::decimal_price modified_decimal : modified_buy_levels_) {
         auto quantity = quantity_tracker_.get_level(util::Side::buy, modified_decimal);
         updates.emplace_back(util::Side::buy, ticker, modified_decimal, quantity);
     }
-    for (decimal_price modified_decimal : modified_sell_levels_) {
+    for (util::decimal_price modified_decimal : modified_sell_levels_) {
         auto quantity = quantity_tracker_.get_level(util::Side::sell, modified_decimal);
         updates.emplace_back(util::Side::sell, ticker, modified_decimal, quantity);
     }
@@ -23,7 +23,7 @@ LevelUpdateGenerator::get_updates(util::Ticker ticker) const
 
 void
 LevelUpdateGenerator::record_level_change(
-    util::Side side, decimal_price price, double delta
+    util::Side side, util::decimal_price price, double delta
 )
 {
     quantity_tracker_.report_quantity(side, price, delta);

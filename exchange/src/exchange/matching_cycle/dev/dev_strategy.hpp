@@ -5,7 +5,6 @@
 
 #include <prometheus/counter.h>
 #include <prometheus/gauge.h>
-#include <iostream>
 
 namespace nutc {
 namespace matching {
@@ -15,9 +14,9 @@ class DevMatchingCycle : public BaseMatchingCycle {
 public:
     DevMatchingCycle(
         std::unordered_map<util::Ticker, ticker_info> tickers,
-        std::pmr::vector<std::shared_ptr<traders::GenericTrader>> traders,
+        std::vector<std::shared_ptr<traders::GenericTrader>>& traders,
         uint64_t expire_ticks
-    ) : BaseMatchingCycle(tickers, std::move(traders), expire_ticks)
+    ) : BaseMatchingCycle(std::move(tickers), traders, expire_ticks)
     {}
 
 protected:

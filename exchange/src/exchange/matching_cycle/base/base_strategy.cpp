@@ -1,5 +1,7 @@
 #include "base_strategy.hpp"
 
+#include "exchange/traders/trader_container.hpp"
+
 namespace nutc {
 namespace matching {
 void
@@ -20,6 +22,10 @@ BaseMatchingCycle::collect_orders(uint64_t)
     for (const std::shared_ptr<traders::GenericTrader>& trader : traders_) {
         auto incoming_orders = trader->read_orders();
         for (auto& order : incoming_orders) {
+            // TODO: penalize?
+            if (!order.position.price.valid_start_price())
+                continue;
+
             orders.emplace_back(
                 *trader, order.position.ticker, order.position.side,
                 order.position.price, order.position.quantity, order.ioc
@@ -34,14 +40,16 @@ BaseMatchingCycle::match_orders_(std::vector<stored_order> orders)
 {
     std::vector<stored_match> matches{};
     for (auto& order : orders) {
-        if (order.position.price < decimal_price{0.0} || order.position.quantity <= 0)
+        if (order.position.price < util::decimal_price{0.0}
+            || order.position.quantity <= 0)
             continue;
 
         auto it = tickers_.find(order.position.ticker);
         if (it == tickers_.end())
             continue;
 
-        auto tmp = it->second.engine.match_order(it->second.orderbook, order);
+        it->second.orderbook.add_order(order);
+        auto tmp = it->second.engine.match_orders(it->second.orderbook);
         std::ranges::move(tmp, std::back_inserter(matches));
     }
     return matches;
@@ -53,7 +61,7 @@ BaseMatchingCycle::handle_matches_(std::vector<stored_match> matches)
     std::vector<util::position> ob_updates{};
 
     for (auto& [ticker, info] : tickers_) {
-        auto tmp = info.level_update_generator_->get_updates(ticker);
+        auto tmp = info.orderbook.get_update_generator().get_updates(ticker);
         std::ranges::copy(tmp, std::back_inserter(ob_updates));
     }
 
@@ -81,7 +89,7 @@ BaseMatchingCycle::post_cycle_(uint64_t)
 {
     for (auto& [ticker, info] : tickers_) {
         info.orderbook.remove_ioc_orders();
-        info.level_update_generator_->reset();
+        info.orderbook.get_update_generator().reset();
     }
 }
 

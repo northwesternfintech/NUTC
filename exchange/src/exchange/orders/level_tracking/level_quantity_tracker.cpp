@@ -3,14 +3,14 @@
 namespace nutc {
 namespace matching {
 void
-LevelQuantityTracker::report_small_quantity(
-    util::Side side, decimal_price price, double delta
+LevelQuantityTracker::report_quantity(
+    util::Side side, util::decimal_price price, double delta
 )
 {
     auto& levels = side == util::Side::buy ? bid_levels_ : ask_levels_;
 
     if (levels.size() <= price.price) [[unlikely]] {
-        auto new_size = static_cast<size_t>(std::min(price.price * 1.5, 50'000.0));
+        auto new_size = static_cast<size_t>(price.price * 1.5);
         bid_levels_.resize(new_size);
         ask_levels_.resize(new_size);
     }
@@ -18,19 +18,8 @@ LevelQuantityTracker::report_small_quantity(
     levels[price.price] += delta;
 }
 
-void
-LevelQuantityTracker::report_large_quantity(
-    util::Side side, decimal_price price, double delta
-)
-{
-    auto& levels =
-        side == util::Side::buy ? overflow_bid_levels_ : overflow_ask_levels_;
-
-    levels[price.price] += delta;
-}
-
 double
-LevelQuantityTracker::get_small_level(util::Side side, decimal_price price) const
+LevelQuantityTracker::get_level(util::Side side, util::decimal_price price) const
 {
     const auto& levels = (side == util::Side::buy) ? bid_levels_ : ask_levels_;
 
@@ -40,16 +29,5 @@ LevelQuantityTracker::get_small_level(util::Side side, decimal_price price) cons
 
     return levels[price.price];
 }
-
-double
-LevelQuantityTracker::get_large_level(util::Side side, decimal_price price) const
-{
-    const auto& levels =
-        (side == util::Side::buy) ? overflow_bid_levels_ : overflow_ask_levels_;
-
-    assert(levels.find(price.price) != levels.end());
-    return levels.find(price.price)->second;
-}
-
 } // namespace matching
 } // namespace nutc

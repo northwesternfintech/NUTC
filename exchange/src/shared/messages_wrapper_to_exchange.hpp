@@ -26,7 +26,7 @@ struct limit_order {
     bool operator==(const limit_order& other) const = default;
 
     limit_order(
-        util::Side side, util::Ticker ticker, matching::decimal_price price,
+        util::Side side, util::Ticker ticker, util::decimal_price price,
         double quantity, bool ioc = false
     ) : position{side, ticker, price, quantity}, ioc(ioc)
     {}

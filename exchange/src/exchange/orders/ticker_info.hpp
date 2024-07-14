@@ -1,24 +1,27 @@
 #pragma once
-#include "exchange/orders/orderbook/tracked_orderbook.hpp"
 #include "exchange/bots/bot_container.hpp"
 #include "exchange/matching/engine.hpp"
-#include "exchange/orders/level_tracking/level_update_generator.hpp"
+#include "exchange/orders/orderbook/cancellable_orderbook.hpp"
+#include "exchange/orders/orderbook/level_tracked_orderbook.hpp"
+#include "exchange/orders/orderbook/limit_orderbook.hpp"
 
 namespace nutc {
 namespace matching {
+
+template <typename BaseOrderBookT>
+using DecoratedOrderBook = LevelTrackedOrderbook<CancellableOrderBook<BaseOrderBookT>>;
 
 /**
  * @brief Contains the canonical reference to all data coupled to a ticker. Very useful
  * because we typically have to access all at once
  */
 struct ticker_info {
-    std::shared_ptr<matching::LevelUpdateGenerator> level_update_generator_;
-    matching::TrackedOrderBook orderbook;
+    DecoratedOrderBook<LimitOrderBook> orderbook;
 
     Engine engine;
     bots::BotContainer bot_container;
 
-    ticker_info(util::Ticker ticker, decimal_price order_fee) :
+    ticker_info(util::Ticker ticker, util::decimal_price order_fee) :
         ticker_info(ticker, 0.0, order_fee, {})
     {}
 
@@ -28,11 +31,10 @@ struct ticker_info {
     {}
 
     ticker_info(
-        util::Ticker ticker, double starting_price, decimal_price order_fee,
+        util::Ticker ticker, double starting_price, util::decimal_price order_fee,
         std::vector<config::bot_config> config
     ) :
-        level_update_generator_(std::make_shared<matching::LevelUpdateGenerator>()),
-        orderbook(level_update_generator_), engine(order_fee),
+        orderbook(), engine(order_fee),
         bot_container(ticker, starting_price, std::move(config))
     {}
 };

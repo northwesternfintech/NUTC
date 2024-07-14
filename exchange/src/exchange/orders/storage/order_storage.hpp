@@ -22,9 +22,9 @@ struct stored_match {
 };
 
 struct stored_order : public messages::limit_order {
-    traders::GenericTrader& trader;
+    traders::GenericTrader* trader;
     bool was_removed{false};
-    const uint64_t order_index = get_and_increment_global_index();
+    uint64_t order_index = get_and_increment_global_index();
 
     inline static uint64_t
     get_and_increment_global_index()
@@ -42,9 +42,8 @@ struct stored_order : public messages::limit_order {
 
     stored_order(const stored_order& other) = default;
 
-    bool operator==(const stored_order& other) const;
-
     ~stored_order() = default;
+    bool operator==(const stored_order& other) const;
 };
 } // namespace matching
 } // namespace nutc

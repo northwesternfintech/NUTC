@@ -32,7 +32,7 @@ TickerMetricsPusher::report_orders(const std::vector<matching::stored_order>& or
         orders_quantity_counter
             .Add({
                 {"ticker",      order.position.ticker  },
-                {"trader_type", order.trader.get_type()}
+                {"trader_type", order.trader->get_type()}
         })
             .Increment(order.position.quantity);
     };

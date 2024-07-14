@@ -22,9 +22,10 @@ static constexpr auto CACHED_TRADER_SIZE = CACHED_TRADERS * sizeof(GenericTrader
 class TraderContainer {
     std::array<std::byte, CACHED_TRADER_SIZE> buf;
     std::pmr::monotonic_buffer_resource res{&buf, sizeof(buf)};
+    std::pmr::polymorphic_allocator<GenericTrader> pmr_allocator{&res};
 
-    mutable std::mutex trader_lock_{};
-    std::pmr::vector<std::shared_ptr<GenericTrader>> traders_{&res};
+    mutable std::mutex trader_lock_;
+    std::vector<std::shared_ptr<GenericTrader>> traders_;
 
 public:
     /**
@@ -60,8 +61,9 @@ public:
         return traders_.size();
     }
 
-    const std::pmr::vector<std::shared_ptr<GenericTrader>>&
-    get_traders() const
+	// TODO: may not work correctly for sandbox (concurrency)
+    std::vector<std::shared_ptr<GenericTrader>>&
+    get_traders() 
     {
         return traders_;
     }
@@ -80,11 +82,10 @@ private:
     std::shared_ptr<GenericTrader>
     make_shared_trader_(Args&&... args)
     {
-        return std::make_shared<T>(std::forward<Args>(args)...);
+        return std::allocate_shared<T>(pmr_allocator, std::forward<Args>(args)...);
     }
 
     TraderContainer() = default;
-    ~TraderContainer() = default;
 
 public:
     static TraderContainer&

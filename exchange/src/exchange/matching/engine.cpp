@@ -10,9 +10,9 @@ using side = nutc::util::Side;
 using match = nutc::messages::match;
 
 namespace {
-static constexpr decimal_price decimal_one(1.0);
+static constexpr util::decimal_price decimal_one(1.0);
 
-constexpr decimal_price
+constexpr util::decimal_price
 order_price(const stored_order& order1, const stored_order& order2)
 {
     return order1.order_index < order2.order_index ? order1.position.price
@@ -27,7 +27,7 @@ order_quantity(const stored_order& order1, const stored_order& order2)
 } // namespace
 
 std::vector<stored_match>
-Engine::attempt_matches_(LimitOrderBook& orderbook)
+Engine::match_orders(LimitOrderBook& orderbook)
 {
     std::vector<stored_match> matches;
     while (true) {
@@ -64,21 +64,21 @@ Engine::create_match(const stored_order& buyer, const stored_order& seller)
 {
     assert(buyer.position.ticker == seller.position.ticker);
     double quantity = order_quantity(buyer, seller);
-    decimal_price price = order_price(buyer, seller);
+    util::decimal_price price = order_price(buyer, seller);
 
     util::Side aggressive_side =
         buyer.order_index < seller.order_index ? util::Side::sell : util::Side::buy;
 
     auto& ticker = buyer.position.ticker;
-    buyer.trader.process_order_match(
+    buyer.trader->process_order_match(
         {util::Side::buy, ticker, price * (decimal_one + order_fee), quantity}
     );
-    seller.trader.process_order_match(
+    seller.trader->process_order_match(
         {util::Side::sell, ticker, price * (decimal_one - order_fee), quantity}
     );
 
     util::position position{aggressive_side, buyer.position.ticker, price, quantity};
-    stored_match match{buyer.trader, seller.trader, position};
+    stored_match match{*buyer.trader, *seller.trader, position};
     return match;
 }
 
@@ -89,19 +89,19 @@ Engine::order_can_execute_(
 {
     double quantity = order_quantity(buyer, seller);
 
-    decimal_price price = order_price(buyer, seller);
+    util::decimal_price price = order_price(buyer, seller);
     double total_price = double((decimal_one + order_fee) * price) * quantity;
 
-    if (!buyer.trader.can_leverage() && buyer.trader.get_capital() < total_price) {
+    if (!buyer.trader->can_leverage() && buyer.trader->get_capital() < total_price) {
         orderbook.mark_order_removed(buyer);
         return false;
     }
-    if (!seller.trader.can_leverage()
-        && seller.trader.get_holdings(seller.position.ticker) < quantity) {
+    if (!seller.trader->can_leverage()
+        && seller.trader->get_holdings(seller.position.ticker) < quantity) {
         orderbook.mark_order_removed(seller);
         return false;
     }
-    if (&seller.trader == &buyer.trader) [[unlikely]] {
+    if (seller.trader== buyer.trader) [[unlikely]] {
         if (seller.order_index <= buyer.order_index) {
             orderbook.mark_order_removed(seller);
         }
@@ -112,13 +112,6 @@ Engine::order_can_execute_(
     }
 
     return true;
-}
-
-std::vector<stored_match>
-Engine::match_order(LimitOrderBook& orderbook, const stored_order& order)
-{
-    orderbook.add_order(order);
-    return attempt_matches_(orderbook);
 }
 
 } // namespace matching

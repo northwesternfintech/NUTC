@@ -3,6 +3,7 @@
 #include "exchange/config/dynamic/argparse.hpp"
 #include "exchange/config/dynamic/config.hpp"
 #include "exchange/config/dynamic/ticker_config.hpp"
+#include "exchange/logging.hpp"
 #include "exchange/matching_cycle/base/base_strategy.hpp"
 #include "exchange/matching_cycle/cycle_strategy.hpp"
 #include "exchange/matching_cycle/dev/dev_strategy.hpp"
@@ -10,7 +11,6 @@
 #include "exchange/sandbox_server/crow.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "exchange/wrappers/creation/rmq_wrapper_init.hpp"
-#include "exchange/logging.hpp"
 #include "shared/util.hpp"
 
 #include <csignal>
@@ -48,18 +48,19 @@ initialize_algos(const auto& mode)
     );
 }
 
-std::shared_ptr<matching::MatchingCycle>
+std::unique_ptr<matching::MatchingCycle>
 create_cycle(const auto& mode)
 {
     auto tickers = load_tickers();
-    auto traders = traders::TraderContainer::get_instance().get_traders();
+	// TODO: not singleton
+    auto& traders = traders::TraderContainer::get_instance().get_traders();
     auto exp = config::Config::get().constants().ORDER_EXPIRATION_TICKS;
 
     if (mode == util::Mode::normal) {
-        return std::make_shared<matching::BaseMatchingCycle>(tickers, traders, exp);
+        return std::make_unique<matching::BaseMatchingCycle>(tickers, traders, exp);
     }
     else {
-        return std::make_shared<matching::DevMatchingCycle>(tickers, traders, exp);
+        return std::make_unique<matching::DevMatchingCycle>(tickers, traders, exp);
     }
 }
 
@@ -78,7 +79,6 @@ int
 main(int argc, const char** argv)
 {
     logging::init(quill::LogLevel::Info);
-
     std::signal(SIGINT, [](auto) { std::exit(0); });
 
     // Wrappers may unexpectedly exit for many reasons. Should not affect the exchange
@@ -96,7 +96,7 @@ main(int argc, const char** argv)
 
     auto cycle = create_cycle(mode);
 
-    main_event_loop(cycle);
+    main_event_loop(std::move(cycle));
 
     return 0;
 }

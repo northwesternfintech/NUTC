@@ -1,7 +1,7 @@
 #include "comms.hpp"
 
-#include "shared/types/decimal_price.hpp"
 #include "shared/config/config.h"
+#include "shared/types/decimal_price.hpp"
 #include "wrapper/pywrapper/pywrapper.hpp"
 
 #include <boost/asio.hpp>
@@ -84,31 +84,17 @@ ExchangeProxy::handle_match(const match& match, const std::string& uid)
     }
 }
 
+template <typename T>
 bool
-ExchangeProxy::publish_limit_order(
-    util::Side side, util::Ticker ticker, matching::decimal_price price,
-    double quantity, bool ioc
-)
+ExchangeProxy::publish_order(const T& order)
 {
     if (limiter.should_rate_limit()) {
         return false;
     }
-    limit_order order{side, ticker, price, quantity, ioc};
     std::string message = glz::write_json(order);
 
     publish_message(message);
     return true;
-}
-
-bool
-ExchangeProxy::publish_market_order(
-    util::Side side, util::Ticker ticker, double quantity
-)
-{
-    using limit = std::numeric_limits<matching::decimal_price>;
-    auto price = (side == util::Side::buy) ? limit::max() : limit::min();
-
-    return publish_limit_order(side, ticker, price, quantity, true);
 }
 
 void
@@ -159,9 +145,8 @@ ExchangeProxy::limit_order_func()
 
         util::Side side_enum = (side == "BUY") ? util::Side::buy : util::Side::sell;
 
-        return ExchangeProxy::publish_limit_order(
-            side_enum, ticker_arr, price, quantity, ioc
-        );
+        limit_order order{side_enum, ticker_arr, price, quantity, ioc};
+        return publish_order(order);
     };
 }
 
@@ -176,7 +161,13 @@ ExchangeProxy::market_order_func()
         std::copy(ticker.begin(), ticker.end(), ticker_arr.arr.begin());
 
         util::Side side_enum = (side == "BUY") ? util::Side::buy : util::Side::sell;
-        return ExchangeProxy::publish_market_order(side_enum, ticker_arr, quantity);
+        util::decimal_price price =
+            side_enum == util::Side::buy
+                ? std::numeric_limits<util::decimal_price>::max()
+                : std::numeric_limits<util::decimal_price>::min();
+
+        limit_order order{side_enum, ticker_arr, price, quantity};
+        return publish_order(order);
     };
 }
 

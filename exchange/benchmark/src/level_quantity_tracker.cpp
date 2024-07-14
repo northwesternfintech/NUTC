@@ -12,15 +12,15 @@ static void
 BM_AddRangeOfTimes(benchmark::State& state)
 {
     matching::LevelQuantityTracker tracker;
-    uint32_t max_level = static_cast<uint32_t>(state.range(0));
-    matching::decimal_price decimal_price;
+    uint16_t max_level = static_cast<uint16_t>(state.range(0));
+    util::decimal_price decimal_price;
 
     for (auto _ : state) {
-        for (uint32_t level = 0; level < max_level; level++) {
+        for (uint16_t level = 0; level < max_level; level++) {
             decimal_price.price = level;
             tracker.report_quantity(util::Side::sell, decimal_price, level);
         }
-        for (uint32_t level = 0; level < max_level; level++) {
+        for (uint16_t level = 0; level < max_level; level++) {
             decimal_price.price = level;
             benchmark::DoNotOptimize(tracker.get_level(util::Side::sell, decimal_price)
             );
@@ -36,22 +36,22 @@ BM_RandomIterate(benchmark::State& state)
     matching::LevelQuantityTracker tracker;
     uint32_t max_level = static_cast<uint32_t>(state.range(0));
 
-    std::vector<uint32_t> random_levels(max_level);
+    std::vector<uint16_t> random_levels(max_level);
     std::iota(random_levels.begin(), random_levels.end(), 0);
-	std::vector<uint32_t> random_levels_2(random_levels);
+	std::vector<uint16_t> random_levels_2(random_levels);
 
     std::random_device rd;
     std::mt19937 g(rd());
     std::shuffle(random_levels.begin(), random_levels.end(), g);
     std::shuffle(random_levels_2.begin(), random_levels_2.end(), g);
 
-    matching::decimal_price decimal_price;
+    util::decimal_price decimal_price;
     for (auto _ : state) {
-        for (uint32_t level : random_levels) {
+        for (uint16_t level : random_levels) {
             decimal_price.price = level;
             tracker.report_quantity(util::Side::sell, decimal_price, level);
         }
-        for (uint32_t level : random_levels_2) {
+        for (uint16_t level : random_levels_2) {
             decimal_price.price = level;
             benchmark::DoNotOptimize(tracker.get_level(util::Side::sell, decimal_price)
             );

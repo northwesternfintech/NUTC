@@ -7,6 +7,8 @@
 #include <boost/asio.hpp>
 #include <fmt/format.h>
 
+#include <iostream>
+
 namespace {
 std::string
 quote_id(std::string user_id)

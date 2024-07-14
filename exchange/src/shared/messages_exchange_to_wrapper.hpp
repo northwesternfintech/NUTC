@@ -36,7 +36,7 @@ struct match {
     match() = default;
 
     match(
-        util::Ticker ticker, util::Side side, matching::decimal_price price,
+        util::Ticker ticker, util::Side side, util::decimal_price price,
         double quantity, std::string bid, std::string sid, double bcap, double scap
     ) :
         position(side, ticker, price, quantity), buyer_id(std::move(bid)),
