@@ -3,6 +3,7 @@
 #include "exchange/logging.hpp"
 
 #include <glaze/glaze.hpp>
+#include <hash_table7.hpp>
 
 #include <tuple>
 #include <utility>
@@ -39,17 +40,17 @@ TestMatchingCycle::match_orders_(std::vector<matching::stored_order> orders)
     return BaseMatchingCycle::match_orders_(std::move(orders));
 }
 
-std::unordered_map<util::Ticker, matching::ticker_info>
+emhash7::HashMap<util::Ticker, matching::ticker_info>
 TestMatchingCycle::create_tickers(
     const std::vector<std::string>& ticker_names, double order_fee
 )
 {
-    std::unordered_map<util::Ticker, matching::ticker_info> mappings;
+    emhash7::HashMap<util::Ticker, matching::ticker_info> mappings;
     for (const auto& ticker : ticker_names) {
-        mappings.emplace(
-            std::piecewise_construct, std::forward_as_tuple(ticker.c_str()),
-            std::forward_as_tuple(ticker.c_str(), order_fee)
-        );
+        util::Ticker t = ticker.c_str();
+        mappings.insert({
+            t, {t, order_fee}
+        });
     }
     return mappings;
 }

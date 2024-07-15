@@ -3,6 +3,7 @@
 #include "exchange/orders/ticker_info.hpp"
 #include "shared/types/ticker.hpp"
 
+#include <hash_table7.hpp>
 #include <prometheus/counter.h>
 #include <prometheus/family.h>
 #include <prometheus/gauge.h>
@@ -30,10 +31,10 @@ class TickerMetricsPusher {
 public:
     void report_current_tick(uint64_t tick_num);
     void report_trader_stats(
-        const std::unordered_map<util::Ticker, matching::ticker_info>& tickers
+        const emhash7::HashMap<util::Ticker, matching::ticker_info>& tickers
     );
     void report_ticker_stats(
-        std::unordered_map<util::Ticker, matching::ticker_info>& tickers
+        emhash7::HashMap<util::Ticker, matching::ticker_info>& tickers
     );
     void report_orders(const std::vector<matching::stored_order>& orders);
     void report_matches(const std::vector<matching::stored_match>& orders);

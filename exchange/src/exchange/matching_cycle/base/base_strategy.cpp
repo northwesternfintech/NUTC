@@ -1,13 +1,11 @@
 #include "base_strategy.hpp"
 
-#include "exchange/traders/trader_container.hpp"
-
 namespace nutc {
 namespace matching {
 void
 BaseMatchingCycle::before_cycle_(uint64_t)
 {
-    for (auto& [symbol, ticker_info] : tickers_) {
+    for (auto& [ticker_info, _, symbol] : tickers_) {
         auto& bot_container = ticker_info.bot_container;
         auto& orderbook = ticker_info.orderbook;
 
@@ -60,7 +58,7 @@ BaseMatchingCycle::handle_matches_(std::vector<stored_match> matches)
 {
     std::vector<util::position> ob_updates{};
 
-    for (auto& [ticker, info] : tickers_) {
+    for (auto& [info, _, ticker] : tickers_) {
         auto tmp = info.orderbook.get_update_generator().get_updates(ticker);
         std::ranges::copy(tmp, std::back_inserter(ob_updates));
     }
@@ -87,7 +85,7 @@ BaseMatchingCycle::handle_matches_(std::vector<stored_match> matches)
 void
 BaseMatchingCycle::post_cycle_(uint64_t)
 {
-    for (auto& [ticker, info] : tickers_) {
+    for (auto& [info, _, ticker] : tickers_) {
         info.orderbook.remove_ioc_orders();
         info.orderbook.get_update_generator().reset();
     }

@@ -34,7 +34,7 @@ private:
     virtual std::vector<matching::stored_match>
     match_orders_(std::vector<matching::stored_order> orders) override;
 
-    std::unordered_map<util::Ticker, matching::ticker_info>
+	emhash7::HashMap<util::Ticker, matching::ticker_info>
     create_tickers(const std::vector<std::string>& ticker_names, double order_fee);
 };
 

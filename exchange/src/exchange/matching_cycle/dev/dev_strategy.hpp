@@ -13,7 +13,7 @@ class DevMatchingCycle : public BaseMatchingCycle {
 
 public:
     DevMatchingCycle(
-        std::unordered_map<util::Ticker, ticker_info> tickers,
+        emhash7::HashMap<util::Ticker, ticker_info> tickers,
         std::vector<std::shared_ptr<traders::GenericTrader>>& traders,
         uint64_t expire_ticks
     ) : BaseMatchingCycle(std::move(tickers), traders, expire_ticks)

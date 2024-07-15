@@ -1,6 +1,7 @@
 #pragma once
 #include "exchange/matching_cycle/cycle_strategy.hpp"
 #include "exchange/orders/ticker_info.hpp"
+#include <hash_table7.hpp>
 
 #include <unordered_map>
 
@@ -11,14 +12,14 @@ namespace matching {
  */
 class BaseMatchingCycle : public MatchingCycle {
 protected:
-    std::unordered_map<util::Ticker, ticker_info> tickers_;
+	emhash7::HashMap<util::Ticker, ticker_info> tickers_;
     std::vector<std::shared_ptr<traders::GenericTrader>>& traders_; // move elsewhere
     const uint64_t ORDER_EXPIRE_TICKS;
 
 public:
     // Require transfer of ownership
     BaseMatchingCycle(
-        std::unordered_map<util::Ticker, ticker_info> tickers,
+        emhash7::HashMap<util::Ticker, ticker_info> tickers,
         std::vector<std::shared_ptr<traders::GenericTrader>>& traders,
         uint64_t expire_ticks
     ) :

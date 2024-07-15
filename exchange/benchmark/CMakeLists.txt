@@ -10,6 +10,7 @@ find_package(benchmark REQUIRED)
 add_executable(NUTC_benchmarks
   src/level_quantity_tracker.cpp
   src/orderbook.cpp
+  src/generic_trader.cpp
 )
 
 target_include_directories(
