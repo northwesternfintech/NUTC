@@ -1,7 +1,7 @@
 #include "comms.hpp"
 
-#include "exchange/orders/storage/decimal_price.hpp"
 #include "shared/config/config.h"
+#include "shared/types/decimal_price.hpp"
 #include "wrapper/pywrapper/pywrapper.hpp"
 
 #include <boost/asio.hpp>
@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <limits>
+#include <stdexcept>
 
 namespace nutc {
 namespace comms {
@@ -45,65 +46,55 @@ ExchangeProxy::process_message(auto&& message, const std::string& uid)
 }
 
 void
-ExchangeProxy::handle_orderbook_update(const orderbook_update& update)
+ExchangeProxy::handle_orderbook_update(const util::position& update)
 {
     try {
         std::string side = update.side == util::Side::buy ? "BUY" : "SELL";
         nutc::pywrapper::get_ob_update_function()(
-            std::string{update.ticker}, side, update.price, update.quantity
+            std::string{update.ticker}, side, double{update.price}, update.quantity
         );
-    } catch (const py::error_already_set& e) {}
+    } catch (const py::error_already_set& e) {
+        std::cerr << e.what() << std::endl;
+    }
 }
 
 void
 ExchangeProxy::handle_match(const match& match, const std::string& uid)
 {
     try {
-        std::string side = match.side == util::Side::buy ? "BUY" : "SELL";
+        std::string ticker = match.position.ticker;
+        std::string side = match.position.side == util::Side::buy ? "BUY" : "SELL";
+        double price = match.position.price;
+        double quantity = match.position.quantity;
 
-        nutc::pywrapper::get_trade_update_function()(
-            std::string{match.ticker}, side, match.price, match.quantity
-        );
+        nutc::pywrapper::get_trade_update_function()(ticker, side, price, quantity);
 
         if (match.buyer_id == uid) {
             nutc::pywrapper::get_account_update_function()(
-                std::string{match.ticker}, "BUY", match.price, match.quantity,
-                match.buyer_capital
+                ticker, "BUY", price, quantity, match.buyer_capital
             );
         }
         if (match.seller_id == uid) {
             nutc::pywrapper::get_account_update_function()(
-                std::string{match.ticker}, "SELL", match.price, match.quantity,
-                match.seller_capital
+                ticker, "SELL", price, quantity, match.seller_capital
             );
         }
-    } catch (const py::error_already_set& e) {}
+    } catch (const py::error_already_set& e) {
+        std::cerr << e.what() << std::endl;
+    }
 }
 
+template <typename T>
 bool
-ExchangeProxy::publish_limit_order(
-    util::Side side, util::Ticker ticker, matching::decimal_price price, double quantity
-)
+ExchangeProxy::publish_order(const T& order)
 {
     if (limiter.should_rate_limit()) {
         return false;
     }
-    limit_order order{side, ticker, price, quantity};
     std::string message = glz::write_json(order);
 
     publish_message(message);
     return true;
-}
-
-bool
-ExchangeProxy::publish_market_order(
-    util::Side side, util::Ticker ticker, double quantity
-)
-{
-    using limit = std::numeric_limits<matching::decimal_price>;
-    auto price = (side == util::Side::buy) ? limit::max() : limit::min();
-
-    return publish_limit_order(side, ticker, price, quantity);
 }
 
 void
@@ -141,11 +132,11 @@ ExchangeProxy::consume_message()
     return data;
 }
 
-std::function<bool(const std::string&, const std::string&, double, double)>
+std::function<bool(const std::string&, const std::string&, double, double, bool)>
 ExchangeProxy::limit_order_func()
 {
     return [&](const std::string& side, const auto& ticker, const auto& price,
-               const auto& quantity) {
+               const auto& quantity, bool ioc) {
         if (ticker.size() != TICKER_LENGTH) [[unlikely]] {
             return false;
         }
@@ -154,9 +145,8 @@ ExchangeProxy::limit_order_func()
 
         util::Side side_enum = (side == "BUY") ? util::Side::buy : util::Side::sell;
 
-        return ExchangeProxy::publish_limit_order(
-            side_enum, ticker_arr, price, quantity
-        );
+        limit_order order{side_enum, ticker_arr, price, quantity, ioc};
+        return publish_order(order);
     };
 }
 
@@ -171,7 +161,13 @@ ExchangeProxy::market_order_func()
         std::copy(ticker.begin(), ticker.end(), ticker_arr.arr.begin());
 
         util::Side side_enum = (side == "BUY") ? util::Side::buy : util::Side::sell;
-        return ExchangeProxy::publish_market_order(side_enum, ticker_arr, quantity);
+        util::decimal_price price =
+            side_enum == util::Side::buy
+                ? std::numeric_limits<util::decimal_price>::max()
+                : std::numeric_limits<util::decimal_price>::min();
+
+        limit_order order{side_enum, ticker_arr, price, quantity};
+        return publish_order(order);
     };
 }
 

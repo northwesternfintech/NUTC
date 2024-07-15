@@ -1,6 +1,7 @@
 #pragma once
 
-#include "ticker.hpp"
+#include "types/position.hpp"
+#include "types/ticker.hpp"
 #include "util.hpp"
 
 #include <fmt/format.h>
@@ -19,15 +20,19 @@ struct init_message {
 };
 
 struct limit_order {
-    util::Side side;
-    util::Ticker ticker;
-    double price;
-    double quantity;
+    util::position position;
+    bool ioc;
 
     bool operator==(const limit_order& other) const = default;
 
-    limit_order(util::Side side, util::Ticker ticker, double price, double quantity) :
-        side(side), ticker(ticker), price(price), quantity(quantity)
+    limit_order(
+        util::Side side, util::Ticker ticker, util::decimal_price price,
+        double quantity, bool ioc = false
+    ) : position{side, ticker, price, quantity}, ioc(ioc)
+    {}
+
+    limit_order(const util::position& position, bool ioc = false) :
+        position(position), ioc(ioc)
     {}
 
     limit_order() = default;
@@ -40,7 +45,7 @@ struct limit_order {
 template <>
 struct glz::meta<nutc::messages::limit_order> {
     using t = nutc::messages::limit_order;
-    static constexpr auto value = object(&t::ticker, &t::side, &t::price, &t::quantity);
+    static constexpr auto value = object(&t::position, &t::ioc);
 };
 
 /// \cond

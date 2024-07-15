@@ -14,7 +14,7 @@ struct price_level {
 };
 
 // TODO: parameterize
-constexpr double BASE_SPREAD = 0.16;
+constexpr double BASE_SPREAD = 0.06;
 constexpr uint8_t LEVELS = 3;
 constexpr std::array<price_level, LEVELS> BID_LEVELS{
     price_level{-BASE_SPREAD - .10, 1.0 / 12},
@@ -33,37 +33,54 @@ namespace nutc {
 namespace bots {
 
 constexpr double
-MarketMakerBot::avg_level_price(double new_theo)
+MarketMakerBot::avg_level_price(double new_theo, double offset)
 {
     double total_price = 0;
     for (const price_level& level : BID_LEVELS) {
-        total_price += (new_theo + level.PRICE_DELTA) * level.QUANTITY_FACTOR;
+        total_price += (new_theo + level.PRICE_DELTA - offset) * level.QUANTITY_FACTOR;
     }
     for (const price_level& level : ASK_LEVELS) {
-        total_price += (new_theo + level.PRICE_DELTA) * level.QUANTITY_FACTOR;
+        total_price += (new_theo + level.PRICE_DELTA + offset) * level.QUANTITY_FACTOR;
     }
 
     return total_price;
 }
 
+// TODO: clean up
 void
-MarketMakerBot::take_action(double, double real_theo)
+MarketMakerBot::take_action(double midprice, double real_theo, double variance)
 {
-    double theo = real_theo + generate_gaussian_noise(0, .1);
+    double theo = real_theo + generate_gaussian_noise(0, .05);
 
-    double capital_tolerance = compute_capital_tolerance_();
-    double average_price = avg_level_price(theo);
-    double total_quantity = capital_tolerance / average_price;
+    double offset = midprice * (1.0 / 600 + variance);
+    offset *= aggressiveness;
+    offset = std::min(offset, 1.0);
+    offset = std::max(offset, -1.0);
+
+    // TODO: adding market impact to the spread is very challenging and will be
+    // continued later
+    offset = .25;
+
+    double average_price = avg_level_price(theo, offset);
+    double total_quantity = compute_capital_tolerance_() / average_price;
 
     auto new_buy_order = [&](const price_level& level) {
-        double price = theo + level.PRICE_DELTA;
+        double price = theo + level.PRICE_DELTA - offset;
+
+        if (price <= 0) [[unlikely]]
+            return;
+
         double quantity = total_quantity * level.QUANTITY_FACTOR;
-        add_order(util::Side::buy, price, quantity);
+        add_order(util::Side::buy, price, quantity, true);
     };
     auto new_sell_order = [&](const price_level& level) {
-        double price = theo + level.PRICE_DELTA;
+        double price = theo + level.PRICE_DELTA + offset;
+
+        if (price <= 0) [[unlikely]]
+            return;
+
         double quantity = total_quantity * level.QUANTITY_FACTOR;
-        add_order(util::Side::sell, price, quantity);
+        add_order(util::Side::sell, price, quantity, true);
     };
 
     std::ranges::for_each(BID_LEVELS, new_buy_order);

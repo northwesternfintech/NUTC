@@ -5,7 +5,7 @@ namespace pywrapper {
 
 void
 create_api_module(
-    std::function<bool(const std::string&, const std::string&, double, double)>
+    std::function<bool(const std::string&, const std::string&, double, double, bool)>
         publish_limit_order,
     std::function<bool(const std::string&, const std::string&, double)>
         publish_market_order
@@ -60,12 +60,12 @@ run_code_init(const std::string& py_code)
 {
     py::exec(py_code);
     py::exec(R"(
-        def place_market_order(side, ticker, quantity):
+        def place_market_order(side: str, ticker: str, quantity: float):
             return nutc_api.publish_market_order(side, ticker, quantity)
     )");
     py::exec(R"(
-        def place_limit_order(side, ticker, price, quantity):
-            return nutc_api.publish_limit_order(side, ticker, price, quantity)
+        def place_limit_order(side: str, ticker: str, price: float, quantity: float, ioc: bool = False):
+            return nutc_api.publish_limit_order(side, ticker, price, quantity, ioc)
     )");
     py::exec("strategy = Strategy()");
 }

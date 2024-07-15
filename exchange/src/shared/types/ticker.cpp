@@ -2,6 +2,7 @@
 
 namespace nutc {
 namespace util {
+
 bool
 Ticker::operator==(const Ticker& other) const
 {

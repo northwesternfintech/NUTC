@@ -35,13 +35,14 @@ protected:
         SetUp();
     }
 
-    nutc::matching::OrderBook orderbook_{};
+    nutc::matching::LimitOrderBook orderbook_{};
     Engine engine_;
 
     std::vector<nutc::matching::stored_match>
     add_to_engine_(const stored_order& order)
     {
-        return engine_.match_order(orderbook_, order);
+		orderbook_.add_order(order);
+        return engine_.match_orders(orderbook_);
     }
 };
 
@@ -197,7 +198,7 @@ TEST_F(UnitBasicMatching, PassivePriceMatchReversed)
 
     matches = add_to_engine_(order2);
     ASSERT_EQ(matches.size(), 1);
-    ASSERT_EQ(matches.at(0).price, 1.0);
+    ASSERT_EQ(matches.at(0).position.price, 1.0);
     ASSERT_EQ_MATCH(matches.at(0), "ETH", "DEF", "ABC", buy, 1, 1);
 }
 

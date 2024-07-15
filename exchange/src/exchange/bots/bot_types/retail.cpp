@@ -6,7 +6,7 @@ namespace nutc {
 namespace bots {
 
 void
-RetailBot::take_action(double midprice, double theo)
+RetailBot::take_action(double midprice, double theo, double)
 {
     static std::uniform_real_distribution<> dis{0.0, 1.0};
 
@@ -29,7 +29,7 @@ RetailBot::take_action(double midprice, double theo)
         double quantity =
             (1 - get_capital_utilization()) * get_interest_limit() / price;
         quantity *= RETAIL_ORDER_SIZE;
-        add_order(util::Side::buy, price, quantity);
+        add_order(util::Side::buy, price, quantity, true);
     }
     else if (midprice > noised_theo) {
         double price = noised_theo - RETAIL_ORDER_OFFSET;
@@ -37,7 +37,7 @@ RetailBot::take_action(double midprice, double theo)
         double quantity =
             (1 - get_capital_utilization()) * get_interest_limit() / price;
         quantity *= RETAIL_ORDER_SIZE;
-        add_order(util::Side::sell, price, quantity);
+        add_order(util::Side::sell, price, quantity, true);
     }
     return;
 }

@@ -69,7 +69,7 @@ public:
             wrapper_handle_->send_message(message);
     }
 
-    std::vector<limit_order>
+    std::vector<messages::limit_order>
     read_orders() override
     {
         if (wrapper_handle_) [[likely]]
@@ -78,7 +78,7 @@ public:
     }
 
     void
-    process_position_change(limit_order) final
+    process_position_change(util::position) final
     {}
 };
 

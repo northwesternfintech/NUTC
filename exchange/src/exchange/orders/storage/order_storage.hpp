@@ -1,5 +1,4 @@
 #pragma once
-#include "exchange/orders/storage/decimal_price.hpp"
 #include "exchange/traders/trader_types/generic_trader.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
@@ -11,76 +10,40 @@ namespace matching {
 struct stored_match {
     traders::GenericTrader& buyer;
     traders::GenericTrader& seller;
-    util::Ticker ticker;
-    util::Side side;
-    decimal_price price;
-    double quantity;
+    util::position position;
+
+    operator messages::match() const
+    {
+        return {
+            position, buyer.get_id(), seller.get_id(), buyer.get_capital(),
+            seller.get_capital()
+        };
+    }
 };
 
-struct stored_order {
-    traders::GenericTrader& trader;
-    util::Ticker ticker;
-    util::Side side;
-    decimal_price price;
-    double quantity;
-    uint64_t tick;
-    bool isActive{true};
+struct stored_order : public messages::limit_order {
+    traders::GenericTrader* trader;
+    bool was_removed{false};
+    uint64_t order_index = get_and_increment_global_index();
 
-    // Used to sort orders by time created
-    uint64_t order_index;
-
-    operator messages::limit_order() const { return {side, ticker, price, quantity}; }
-
-    static uint64_t
+    inline static uint64_t
     get_and_increment_global_index()
     {
         static uint64_t global_index = 0;
         return global_index++;
     }
 
+    operator util::position() const { return position; }
+
     stored_order(
         traders::GenericTrader& trader, util::Ticker ticker, util::Side side,
-        double price, double quantity, uint64_t tick = 0
+        double price, double quantity, bool ioc = false
     );
 
     stored_order(const stored_order& other) = default;
 
-    bool operator==(const stored_order& other) const;
-
-    int operator<=>(const stored_order& other) const;
-
-    [[nodiscard]] bool can_match(const stored_order& other) const;
-
     ~stored_order() = default;
-};
-
-struct order_index {
-    decimal_price price;
-    uint64_t index;
-};
-
-// Want highest first
-struct bid_comparator {
-    bool
-    operator()(const order_index& lhs, const order_index& rhs) const
-    {
-        if (lhs.price != rhs.price) {
-            return lhs.price > rhs.price;
-        }
-        return lhs.index < rhs.index;
-    }
-};
-
-// Want lowest first
-struct ask_comparator {
-    bool
-    operator()(const order_index& lhs, const order_index& rhs) const
-    {
-        if (lhs.price != rhs.price) {
-            return lhs.price < rhs.price;
-        }
-        return lhs.index < rhs.index;
-    }
+    bool operator==(const stored_order& other) const;
 };
 } // namespace matching
 } // namespace nutc

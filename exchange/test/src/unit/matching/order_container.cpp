@@ -1,5 +1,5 @@
 #include "config.h"
-#include "exchange/orders/storage/orderbook.hpp"
+#include "exchange/orders/orderbook/limit_orderbook.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
@@ -30,19 +30,19 @@ protected:
         trader_2.modify_holdings("ETH", DEFAULT_QUANTITY);
     }
 
-    nutc::matching::OrderBook container_;
+    nutc::matching::LimitOrderBook container_;
 };
 
 TEST_F(UnitOrderBookTest, TestStorageRounding)
 {
-    stored_order order1{trader_1, "ETH", buy, 1.000001, 1, 1};
-    ASSERT_EQ(order1.price, 1.0);
+    stored_order order1{trader_1, "ETH", buy, 1.000001, 1};
+    ASSERT_EQ(order1.position.price, 1.0);
 
     stored_order order2{trader_2, "ETH", buy, .9999, 0.00001, 1};
-    ASSERT_EQ(order2.price, 1.0);
+    ASSERT_EQ(order2.position.price, 1.0);
 
-    stored_order order3{trader_2, "ETH", buy, .994, 1, 2};
-    ASSERT_EQ(order3.price, 0.99);
+    stored_order order3{trader_2, "ETH", buy, .994, 1};
+    ASSERT_EQ(order3.position.price, 0.99);
 }
 
 TEST_F(UnitOrderBookTest, SimpleAddRemove)

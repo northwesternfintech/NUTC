@@ -8,7 +8,7 @@ class WrapperInitializer {
 public:
     using TraderPtr = std::shared_ptr<traders::GenericTrader>;
     static void
-    send_start_time(const std::pmr::vector<TraderPtr>& traders, size_t wait_seconds);
+    send_start_time(const std::vector<TraderPtr>& traders, size_t wait_seconds);
 };
 } // namespace rabbitmq
 } // namespace nutc

@@ -6,7 +6,6 @@
 #include <boost/process.hpp>
 #include <boost/process/pipe.hpp>
 
-#include <atomic>
 #include <filesystem>
 
 namespace nutc {
@@ -19,10 +18,7 @@ class WrapperHandle {
     PipeReader reader_{};
     PipeWriter writer_{};
 
-    WrapperHandle(
-        const std::vector<std::string>& args,
-        const std::string& algorithm
-    );
+    WrapperHandle(const std::vector<std::string>& args, const std::string& algorithm);
     void block_on_init();
 
     const fs::path& wrapper_binary_path();
@@ -39,33 +35,8 @@ public:
     // Local (.py on disk)
     WrapperHandle(const std::string& algo_path);
 
-    inline
-    std::string
-    force_upwrap_optional(std::optional<std::string> opt, std::string error_msg) {
-        if (!opt.has_value()) {
-            throw std::runtime_error(error_msg);
-        }
 
-        return opt.value();
-    }
-
-    std::vector<limit_order>
-    read_messages()
-    {
-        auto messages = reader_.get_messages();
-        std::vector<limit_order> orders{};
-        orders.reserve(messages.size());
-
-        if (std::ranges::any_of(messages, [](auto&& mess) {
-                return std::holds_alternative<init_message>(mess);
-            }))
-            throw std::runtime_error("Unexpected init message");
-
-        for (const auto& message : messages) {
-            orders.push_back(std::move(std::get<limit_order>(message)));
-        }
-        return orders;
-    }
+    std::vector<limit_order> read_messages();
 
     void
     send_message(const std::string& message)

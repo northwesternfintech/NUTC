@@ -1,25 +1,34 @@
 #include "base_strategy.hpp"
 
+#include "exchange/traders/trader_container.hpp"
+
 namespace nutc {
 namespace matching {
 void
-BaseMatchingCycle::before_cycle_(uint64_t new_tick)
+BaseMatchingCycle::before_cycle_(uint64_t)
 {
     for (auto& [symbol, ticker_info] : tickers_) {
-        generate_bot_orders_(ticker_info.bot_container, ticker_info.orderbook);
-        expire_old_orders_(ticker_info.orderbook, new_tick);
+        auto& bot_container = ticker_info.bot_container;
+        auto& orderbook = ticker_info.orderbook;
+
+        bot_container.generate_orders(orderbook.get_midprice());
     }
 }
 
 std::vector<stored_order>
-BaseMatchingCycle::collect_orders(uint64_t new_tick)
+BaseMatchingCycle::collect_orders(uint64_t)
 {
     std::vector<stored_order> orders;
     for (const std::shared_ptr<traders::GenericTrader>& trader : traders_) {
         auto incoming_orders = trader->read_orders();
         for (auto& order : incoming_orders) {
+            // TODO: penalize?
+            if (!order.position.price.valid_start_price())
+                continue;
+
             orders.emplace_back(
-                *trader, order.ticker, order.side, order.price, order.quantity, new_tick
+                *trader, order.position.ticker, order.position.side,
+                order.position.price, order.position.quantity, order.ioc
             );
         }
     }
@@ -31,14 +40,16 @@ BaseMatchingCycle::match_orders_(std::vector<stored_order> orders)
 {
     std::vector<stored_match> matches{};
     for (auto& order : orders) {
-        if (order.price < 0 || order.quantity <= 0)
+        if (order.position.price < util::decimal_price{0.0}
+            || order.position.quantity <= 0)
             continue;
 
-        auto it = tickers_.find(order.ticker);
+        auto it = tickers_.find(order.position.ticker);
         if (it == tickers_.end())
             continue;
 
-        auto tmp = it->second.engine.match_order(it->second.orderbook, order);
+        it->second.orderbook.add_order(order);
+        auto tmp = it->second.engine.match_orders(it->second.orderbook);
         std::ranges::move(tmp, std::back_inserter(matches));
     }
     return matches;
@@ -47,19 +58,19 @@ BaseMatchingCycle::match_orders_(std::vector<stored_order> orders)
 void
 BaseMatchingCycle::handle_matches_(std::vector<stored_match> matches)
 {
-    std::vector<ob_update> ob_updates{};
+    std::vector<util::position> ob_updates{};
 
     for (auto& [ticker, info] : tickers_) {
-        auto tmp = info.level_update_generator_->get_updates(ticker);
-        std::ranges::move(tmp, std::back_inserter(ob_updates));
+        auto tmp = info.orderbook.get_update_generator().get_updates(ticker);
+        std::ranges::copy(tmp, std::back_inserter(ob_updates));
     }
 
     std::vector<messages::match> glz_matches{};
     glz_matches.reserve(matches.size());
     for (auto& match : matches) {
         glz_matches.emplace_back(
-            match.ticker, match.side, match.price, match.quantity, match.buyer.get_id(),
-            match.seller.get_id(), match.buyer.get_capital(), match.seller.get_capital()
+            match.position, match.buyer.get_id(), match.seller.get_id(),
+            match.buyer.get_capital(), match.seller.get_capital()
         );
     }
 
@@ -77,16 +88,10 @@ void
 BaseMatchingCycle::post_cycle_(uint64_t)
 {
     for (auto& [ticker, info] : tickers_) {
-        info.level_update_generator_->reset();
+        info.orderbook.remove_ioc_orders();
+        info.orderbook.get_update_generator().reset();
     }
 }
 
-void
-BaseMatchingCycle::generate_bot_orders_(
-    bots::BotContainer& bot_container, const OrderBook& orderbook
-)
-{
-    bot_container.generate_orders(orderbook.get_midprice());
-}
 } // namespace matching
 } // namespace nutc

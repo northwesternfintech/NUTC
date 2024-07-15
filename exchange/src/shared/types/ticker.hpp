@@ -1,6 +1,6 @@
 #pragma once
 
-#include "config/config.h"
+#include "shared/config/config.h"
 
 #include <glaze/glaze.hpp>
 
@@ -14,19 +14,17 @@ namespace util {
 struct Ticker {
     std::array<char, TICKER_LENGTH> arr{};
 
-    Ticker() = default;
+    constexpr Ticker() = default;
 
-    Ticker(std::array<char, TICKER_LENGTH> arr) : arr(arr) {}
+    constexpr Ticker(std::array<char, TICKER_LENGTH> arr) : arr(arr) {}
 
     Ticker(std::string_view str);
-
     Ticker(const char* str);
 
     operator std::array<char, TICKER_LENGTH>() const { return arr; }
 
-    operator std::string() const;
-
     bool operator==(const Ticker& other) const;
+    operator std::string() const;
 };
 } // namespace util
 } // namespace nutc
