@@ -1,6 +1,7 @@
 #include "test_cycle.hpp"
 
 #include "exchange/logging.hpp"
+#include "exchange/orders/ticker_info.hpp"
 
 #include <glaze/glaze.hpp>
 #include <hash_table7.hpp>
@@ -40,12 +41,12 @@ TestMatchingCycle::match_orders_(std::vector<matching::stored_order> orders)
     return BaseMatchingCycle::match_orders_(std::move(orders));
 }
 
-emhash7::HashMap<util::Ticker, matching::ticker_info>
+matching::TickerMapping
 TestMatchingCycle::create_tickers(
     const std::vector<std::string>& ticker_names, double order_fee
 )
 {
-    emhash7::HashMap<util::Ticker, matching::ticker_info> mappings;
+    matching::TickerMapping mappings;
     for (const auto& ticker : ticker_names) {
         util::Ticker t = ticker.c_str();
         mappings.insert({

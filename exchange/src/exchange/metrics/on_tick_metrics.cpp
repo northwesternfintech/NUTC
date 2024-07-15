@@ -1,6 +1,7 @@
 #include "on_tick_metrics.hpp"
 
 #include "exchange/metrics/prometheus.hpp"
+#include "exchange/orders/ticker_info.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "prometheus.hpp"
 
@@ -31,7 +32,7 @@ TickerMetricsPusher::report_orders(const std::vector<matching::stored_order>& or
     auto log_order = [&](const matching::stored_order& order) {
         orders_quantity_counter
             .Add({
-                {"ticker",      order.position.ticker  },
+                {"ticker",      order.position.ticker   },
                 {"trader_type", order.trader->get_type()}
         })
             .Increment(order.position.quantity);
@@ -41,9 +42,7 @@ TickerMetricsPusher::report_orders(const std::vector<matching::stored_order>& or
 }
 
 void
-TickerMetricsPusher::report_ticker_stats(
-    emhash7::HashMap<util::Ticker, matching::ticker_info>& tickers
-)
+TickerMetricsPusher::report_ticker_stats(matching::TickerMapping& tickers)
 {
     auto log_midprice = [&](util::Ticker ticker, const matching::ticker_info& info) {
         ticker_midprice_gauge
@@ -113,9 +112,7 @@ TickerMetricsPusher::report_current_tick(uint64_t tick_num)
 }
 
 void
-TickerMetricsPusher::report_trader_stats(
-    const emhash7::HashMap<util::Ticker, matching::ticker_info>& tickers
-)
+TickerMetricsPusher::report_trader_stats(const matching::TickerMapping& tickers)
 {
     auto& trader_container = traders::TraderContainer::get_instance();
 

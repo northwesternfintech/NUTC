@@ -20,6 +20,7 @@ class Recipe(ConanFile):
         self.requires("prometheus-cpp/1.1.0")
         self.requires("crowcpp-crow/1.1.0")
         self.requires("emhash/cci.20240601")
+        self.requires("abseil/20240116.2")
 
         # Wrapper
         self.requires("pybind11/2.12.0")
