@@ -18,10 +18,10 @@
 namespace {
 using namespace nutc; // NOLINT
 
-std::unordered_map<util::Ticker, matching::ticker_info>
+matching::TickerMapping
 load_tickers()
 {
-    std::unordered_map<util::Ticker, matching::ticker_info> ret;
+	matching::TickerMapping ret;
     const auto& tickers = config::Config::get().get_tickers();
     for (const config::ticker_config& ticker : tickers) {
         ret.emplace(ticker.TICKER, ticker);

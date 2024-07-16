@@ -2,13 +2,16 @@
 
 #include "exchange/orders/storage/order_storage.hpp"
 
+#include <absl/hash/hash.h>
+
 #include <cstdint>
 
-#include <unordered_map>
 #include <vector>
 
 namespace nutc {
 namespace matching {
+using OrderIdMap = emhash7::HashMap<
+    uint64_t, std::reference_wrapper<stored_order>, absl::Hash<uint64_t>>;
 
 template <typename BaseOrderBookT>
 class CancellableOrderBook : public BaseOrderBookT {
@@ -16,7 +19,7 @@ class CancellableOrderBook : public BaseOrderBookT {
 
     // Invariant: any order in order_map has a corresponding reference in the queues
     // In other words, when we remove from the queue, we remove from order map as well
-    std::unordered_map<uint64_t, std::reference_wrapper<stored_order>> order_map_;
+    OrderIdMap order_map_;
 
 public:
     bool
@@ -51,7 +54,7 @@ public:
     {
         order_map_.erase(order.order_index);
 
-		BaseOrderBookT::mark_order_removed(order);
+        BaseOrderBookT::mark_order_removed(order);
     }
 
     std::vector<stored_order>
@@ -60,9 +63,9 @@ public:
         std::vector<stored_order> orders;
 
         for (uint64_t order_id : ioc_order_ids_) {
-            if (!contains_order(order_id)){
+            if (!contains_order(order_id)) {
                 continue;
-				}
+            }
 
             auto& ioc_order = mark_order_removed(order_id);
             orders.push_back(ioc_order);

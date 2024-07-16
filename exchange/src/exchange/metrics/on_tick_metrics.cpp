@@ -1,6 +1,7 @@
 #include "on_tick_metrics.hpp"
 
 #include "exchange/metrics/prometheus.hpp"
+#include "exchange/orders/ticker_info.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "prometheus.hpp"
 
@@ -31,7 +32,7 @@ TickerMetricsPusher::report_orders(const std::vector<matching::stored_order>& or
     auto log_order = [&](const matching::stored_order& order) {
         orders_quantity_counter
             .Add({
-                {"ticker",      order.position.ticker  },
+                {"ticker",      order.position.ticker   },
                 {"trader_type", order.trader->get_type()}
         })
             .Increment(order.position.quantity);
@@ -41,9 +42,7 @@ TickerMetricsPusher::report_orders(const std::vector<matching::stored_order>& or
 }
 
 void
-TickerMetricsPusher::report_ticker_stats(
-    std::unordered_map<util::Ticker, matching::ticker_info>& tickers
-)
+TickerMetricsPusher::report_ticker_stats(matching::TickerMapping& tickers)
 {
     auto log_midprice = [&](util::Ticker ticker, const matching::ticker_info& info) {
         ticker_midprice_gauge
@@ -83,7 +82,7 @@ TickerMetricsPusher::report_ticker_stats(
             .Set(info.bot_container.get_variance());
     };
 
-    for (auto& [ticker, info] : tickers) {
+    for (auto& [info, _, ticker] : tickers) {
         log_midprice(ticker, info);
         log_best_ba(ticker, info);
         log_variance(ticker, info);
@@ -113,15 +112,13 @@ TickerMetricsPusher::report_current_tick(uint64_t tick_num)
 }
 
 void
-TickerMetricsPusher::report_trader_stats(
-    const std::unordered_map<util::Ticker, matching::ticker_info>& tickers
-)
+TickerMetricsPusher::report_trader_stats(const matching::TickerMapping& tickers)
 {
     auto& trader_container = traders::TraderContainer::get_instance();
 
     auto portfolio_value = [&](const auto& trader) {
         double pnl = 0.0;
-        for (const auto& [ticker, info] : tickers) {
+        for (const auto& [info, _, ticker] : tickers) {
             double amount_held = trader->get_holdings(ticker);
             double midprice = info.orderbook.get_midprice();
             pnl += amount_held * midprice;
@@ -130,7 +127,7 @@ TickerMetricsPusher::report_trader_stats(
     };
 
     auto report_holdings = [&](const auto& trader) {
-        for (const auto& [ticker, info] : tickers) {
+        for (const auto& [info, _, ticker] : tickers) {
             double amount_held = trader->get_holdings(ticker);
             per_trader_holdings_gauge
                 .Add({

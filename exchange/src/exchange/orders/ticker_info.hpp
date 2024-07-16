@@ -5,6 +5,8 @@
 #include "exchange/orders/orderbook/level_tracked_orderbook.hpp"
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
 
+#include <absl/hash/hash.h>
+
 namespace nutc {
 namespace matching {
 
@@ -38,6 +40,9 @@ struct ticker_info {
         bot_container(ticker, starting_price, std::move(config))
     {}
 };
+
+using TickerMapping =
+    emhash7::HashMap<util::Ticker, ticker_info, absl::Hash<util::Ticker>>;
 
 } // namespace matching
 } // namespace nutc

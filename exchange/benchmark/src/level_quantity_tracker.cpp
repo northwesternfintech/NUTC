@@ -28,7 +28,7 @@ BM_AddRangeOfTimes(benchmark::State& state)
     }
 }
 
-BENCHMARK(BM_AddRangeOfTimes)->Range(128, 128 << 10);
+BENCHMARK(BM_AddRangeOfTimes)->Range(128, 128 << 9);
 
 static void
 BM_RandomIterate(benchmark::State& state)
