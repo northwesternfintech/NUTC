@@ -1,13 +1,11 @@
 #include "on_tick_metrics.hpp"
 
-#include "exchange/bots/bot_types/market_maker.hpp"
 #include "exchange/metrics/prometheus.hpp"
 #include "exchange/orders/ticker_info.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "prometheus.hpp"
 
 #include <algorithm>
-#include <memory>
 
 namespace nutc {
 namespace metrics {
@@ -76,18 +74,18 @@ TickerMetricsPusher::report_ticker_stats(matching::TickerMapping& tickers)
         }
     };
 
-    auto log_variance = [&](util::Ticker ticker, const matching::ticker_info& info) {
-        ticker_midprice_variance_gauge
-            .Add({
-                {"ticker", std::string{ticker}}
-        })
-            .Set(info.bot_container.get_variance());
-    };
+    // auto log_variance = [&](util::Ticker ticker, const matching::ticker_info& info) {
+    //     ticker_midprice_variance_gauge
+    //         .Add({
+    //             {"ticker", std::string{ticker}}
+    //     })
+    //         .Set(info.bot_container.get_variance());
+    // };
 
     for (auto& [info, _, ticker] : tickers) {
         log_midprice(ticker, info);
         log_best_ba(ticker, info);
-        log_variance(ticker, info);
+        // log_variance(ticker, info);
     }
 }
 
@@ -138,19 +136,6 @@ TickerMetricsPusher::report_trader_stats(const matching::TickerMapping& tickers)
                     {"id",          trader->get_id()  },
             })
                 .Set(amount_held);
-
-            std::shared_ptr<bots::MarketMakerBot> market =
-                std::dynamic_pointer_cast<bots::MarketMakerBot>(trader);
-            if (market == nullptr)
-                continue;
-            double lean = market->calculate_lean(info.orderbook.get_midprice());
-            per_trader_lean_gauge
-                .Add({
-                    {"ticker",      ticker            },
-                    {"trader_type", trader->get_type()},
-                    {"id",          trader->get_id()  },
-            })
-                .Set(lean);
         }
     };
 

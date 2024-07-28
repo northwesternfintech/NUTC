@@ -1,12 +1,13 @@
 #include "retail.hpp"
 
+#include "exchange/bots/shared_bot_state.hpp"
 #include "exchange/config/static/config.h"
 
 namespace nutc {
 namespace bots {
 
 void
-RetailBot::take_action(double midprice, double theo, double)
+RetailBot::take_action(const shared_bot_state& state)
 {
     static std::uniform_real_distribution<> dis{0.0, 1.0};
 
@@ -14,19 +15,20 @@ RetailBot::take_action(double midprice, double theo, double)
 
     double noise_factor = dis(gen_);
 
-    double signal_strength = AGGRESSIVENESS * std::fabs(theo - midprice) / midprice;
+    double signal_strength =
+        AGGRESSIVENESS * std::fabs(state.THEO - state.MIDPRICE) / state.MIDPRICE;
 
     if (noise_factor >= p_trade * signal_strength)
         return;
     if (poisson_dist_(gen_) <= 0)
         return;
 
-    double noised_theo = theo + generate_gaussian_noise(0, .1);
+    double noised_theo = state.THEO + generate_gaussian_noise(0, .1);
     double quantity =
         (1 - get_capital_utilization()) * get_interest_limit() / noised_theo;
     quantity *= RETAIL_ORDER_SIZE;
 
-    auto side = (midprice < noised_theo) ? util::Side::buy : util::Side::sell;
+    auto side = (state.MIDPRICE < noised_theo) ? util::Side::buy : util::Side::sell;
 
     add_market_order(side, quantity);
 

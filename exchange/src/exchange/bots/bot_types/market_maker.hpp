@@ -1,4 +1,5 @@
 #pragma once
+#include "exchange/bots/shared_bot_state.hpp"
 #include "exchange/traders/trader_types/bot_trader.hpp"
 
 #include <sys/types.h>
@@ -12,9 +13,6 @@ namespace bots {
  * No thread safety - do not run functions on multiple threads
  */
 class MarketMakerBot : public traders::BotTrader {
-    double last_holdings = 0;
-    inline static constinit double cumulative_interest = 0;
-
     // TODO: parameterize
     static double
     gen_aggressiveness()
@@ -29,11 +27,9 @@ class MarketMakerBot : public traders::BotTrader {
 public:
     MarketMakerBot(util::Ticker ticker, double interest_limit) :
         BotTrader(ticker, interest_limit)
-    {
-        cumulative_interest += interest_limit;
-    }
+    {}
 
-    void take_action(double, double theo, double variance) override;
+    void take_action(const shared_bot_state& state) override;
 
     const std::string&
     get_type() const final
@@ -42,7 +38,7 @@ public:
         return TYPE;
     }
 
-    double calculate_lean(double midprice);
+    double calculate_lean(const shared_bot_state& state);
 
 private:
     void place_orders(util::Side side, double theo, double spread_offset);

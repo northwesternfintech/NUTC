@@ -1,5 +1,6 @@
 #pragma once
 #include "exchange/bots/bot_container.hpp"
+#include "exchange/config/dynamic/ticker_config.hpp"
 #include "exchange/matching/engine.hpp"
 #include "exchange/orders/orderbook/cancellable_orderbook.hpp"
 #include "exchange/orders/orderbook/level_tracked_orderbook.hpp"
@@ -18,10 +19,10 @@ using DecoratedOrderBook = LevelTrackedOrderbook<CancellableOrderBook<BaseOrderB
  * because we typically have to access all at once
  */
 struct ticker_info {
-    DecoratedOrderBook<LimitOrderBook> orderbook;
+    DecoratedOrderBook<LimitOrderBook> orderbook{};
 
     Engine engine;
-    bots::BotContainer bot_container;
+    std::unordered_map<config::BotType, bots::BotContainer> bot_containers;
 
     ticker_info(util::Ticker ticker, util::decimal_price order_fee) :
         ticker_info(ticker, 0.0, order_fee, {})
@@ -36,9 +37,23 @@ struct ticker_info {
         util::Ticker ticker, double starting_price, util::decimal_price order_fee,
         std::vector<config::bot_config> config
     ) :
-        orderbook(), engine(order_fee),
-        bot_container(ticker, starting_price, std::move(config))
+        engine(order_fee),
+        bot_containers(create_bot_containers(ticker, starting_price, config))
     {}
+
+private:
+    std::unordered_map<config::BotType, bots::BotContainer>
+    create_bot_containers(
+        util::Ticker ticker, double starting_price,
+        const std::vector<config::bot_config>& configs
+    )
+    {
+        std::unordered_map<config::BotType, bots::BotContainer> containers;
+        for (const config::bot_config& config : configs) {
+			containers.emplace(config.TYPE, bots::BotContainer{ticker, starting_price, config});
+        }
+        return containers;
+    }
 };
 
 using TickerMapping =

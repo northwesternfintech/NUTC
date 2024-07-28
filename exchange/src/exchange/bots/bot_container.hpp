@@ -2,13 +2,16 @@
 #include "exchange/config/dynamic/ticker_config.hpp"
 #include "exchange/theo/brownian.hpp"
 #include "exchange/traders/trader_types/bot_trader.hpp"
+#include "shared/types/decimal_price.hpp"
 #include "variance.hpp"
+#include "shared_bot_state.hpp"
 
 namespace nutc {
 
 namespace bots {
 
 using BotVector = std::vector<std::shared_ptr<traders::BotTrader>>;
+
 
 /**
  * @brief Container for bots for a given ticker
@@ -30,7 +33,7 @@ public:
     }
 
     BotContainer(
-        util::Ticker ticker, double starting_price, std::vector<config::bot_config> bots
+        util::Ticker ticker, double starting_price, config::bot_config bots
     ) :
         ticker(ticker), theo_generator_(starting_price),
         bots_(add_bots(std::move(bots)))
@@ -49,8 +52,8 @@ public:
     }
 
 private:
-    void generate_orders(double midprice, double new_theo, double variance);
-    BotVector add_bots(const std::vector<config::bot_config>& bot_config);
+    void generate_orders(const shared_bot_state& shared_state);
+    BotVector add_bots(const config::bot_config& bot_config);
 
     template <class BotType>
     BotVector add_bots(double mean_capital, double stddev_capital, size_t num_bots);

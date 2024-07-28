@@ -1,5 +1,6 @@
 #pragma once
 
+#include "exchange/bots/shared_bot_state.hpp"
 #include "exchange/traders/trader_types/generic_trader.hpp"
 
 #include <cassert>
@@ -20,6 +21,12 @@ class BotTrader : public traders::GenericTrader {
     std::vector<messages::limit_order> orders_{};
 
 public:
+    double
+    get_holdings() const
+    {
+        return GenericTrader::get_holdings(TICKER);
+    }
+
     BotTrader(util::Ticker ticker, double interest_limit) :
         GenericTrader(generate_user_id(), interest_limit), TICKER(ticker),
         INTEREST_LIMIT(interest_limit)
@@ -83,7 +90,7 @@ public:
     /**
      * midprice, theo
      */
-    virtual void take_action(double, double, double) = 0;
+    virtual void take_action(const bots::shared_bot_state& shared_state) = 0;
 
     std::vector<messages::limit_order>
     read_orders() override
@@ -95,12 +102,6 @@ public:
 
 protected:
     static double generate_gaussian_noise(double mean, double stddev);
-
-    double
-    get_holdings() const
-    {
-        return GenericTrader::get_holdings(TICKER);
-    }
 
     [[nodiscard]] double
     compute_net_exposure_() const

@@ -1,5 +1,6 @@
 #include "market_maker.hpp"
 
+#include "exchange/bots/shared_bot_state.hpp"
 #include "shared/types/decimal_price.hpp"
 #include "shared/util.hpp"
 
@@ -54,28 +55,19 @@ MarketMakerBot::place_orders(Side side, double theo, double spread_offset)
 }
 
 double
-MarketMakerBot::calculate_lean(double midprice)
+MarketMakerBot::calculate_lean(const shared_bot_state& state)
 {
-    static double cumulative_holdings = 0;
-    cumulative_holdings -= last_holdings;
-    double holdings = get_holdings();
-    cumulative_holdings += holdings;
-    last_holdings = holdings;
-
-    double lean_price = cumulative_holdings * midprice;
-
-    // Calculate as percentage of overall capital
-    double lean_pcnt = lean_price / cumulative_interest;
-    return lean_pcnt;
+    double lean_price = state.CUMULATIVE_QUANTITY_HELD * state.MIDPRICE;
+    return lean_price / state.CUMULATIVE_INTEREST_LIMIT;
 }
 
 // TODO: clean up
 void
-MarketMakerBot::take_action(double midprice, double real_theo, double variance)
+MarketMakerBot::take_action(const shared_bot_state& state)
 {
-    double theo = real_theo + generate_gaussian_noise(0, .05);
+    double theo = state.THEO + generate_gaussian_noise(0, .05);
 
-    double spread_offset = midprice * (1.0 / 600 + variance);
+    double spread_offset = state.MIDPRICE * (1.0 / 600 + state.REALIZED_VOLATILITY);
     spread_offset *= aggressiveness;
     spread_offset = std::min(spread_offset, 1.0);
     spread_offset = std::max(spread_offset, -1.0);
@@ -84,7 +76,7 @@ MarketMakerBot::take_action(double midprice, double real_theo, double variance)
     // continued later
     spread_offset = 0;
 
-    double lean_pcnt = calculate_lean(midprice);
+    double lean_pcnt = calculate_lean(state);
     theo -= (lean_pcnt * 15);
 
     place_orders(Side::buy, theo, spread_offset);
