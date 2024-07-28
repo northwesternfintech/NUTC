@@ -1,7 +1,6 @@
 #pragma once
-#include "shared/types/decimal_price.hpp"
 #include "exchange/orders/level_tracking/level_quantity_tracker.hpp"
-
+#include "shared/types/decimal_price.hpp"
 #include "shared/types/position.hpp"
 
 #include <unordered_set>
@@ -10,7 +9,7 @@ namespace nutc {
 namespace matching {
 
 class LevelUpdateGenerator {
-	LevelQuantityTracker quantity_tracker_;
+    LevelQuantityTracker quantity_tracker_;
 
     std::unordered_set<util::decimal_price> modified_buy_levels_;
     std::unordered_set<util::decimal_price> modified_sell_levels_;

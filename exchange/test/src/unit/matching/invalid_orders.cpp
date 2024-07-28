@@ -33,7 +33,7 @@ protected:
     std::vector<nutc::matching::stored_match>
     add_to_engine_(const stored_order& order)
     {
-		orderbook_.add_order(order);
+        orderbook_.add_order(order);
         return engine_.match_orders(orderbook_);
     }
 };

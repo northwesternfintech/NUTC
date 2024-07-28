@@ -42,9 +42,11 @@ public:
         return theo_generator_.get_magnitude();
     }
 
-	double get_variance() const {
-		return variance_calculator_.calculate_volatility();
-	}
+    double
+    get_variance() const
+    {
+        return variance_calculator_.calculate_volatility();
+    }
 
 private:
     void generate_orders(double midprice, double new_theo, double variance);

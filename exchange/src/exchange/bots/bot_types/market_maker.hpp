@@ -12,6 +12,9 @@ namespace bots {
  * No thread safety - do not run functions on multiple threads
  */
 class MarketMakerBot : public traders::BotTrader {
+    double last_holdings = 0;
+    inline static constinit double cumulative_interest = 0;
+
     // TODO: parameterize
     static double
     gen_aggressiveness()
@@ -26,9 +29,9 @@ class MarketMakerBot : public traders::BotTrader {
 public:
     MarketMakerBot(util::Ticker ticker, double interest_limit) :
         BotTrader(ticker, interest_limit)
-    {}
-
-    bool constexpr can_leverage() const override { return true; }
+    {
+        cumulative_interest += interest_limit;
+    }
 
     void take_action(double, double theo, double variance) override;
 
@@ -39,8 +42,10 @@ public:
         return TYPE;
     }
 
+    double calculate_lean(double midprice);
+
 private:
-    static constexpr double avg_level_price(double new_theo, double offset);
+    void place_orders(util::Side side, double theo, double spread_offset);
 };
 
 } // namespace bots

@@ -18,6 +18,7 @@ class TickerMetricsPusher {
     Gauge per_trader_pnl_gauge = create_gauge_("pnl");
     Gauge per_trader_capital_gauge = create_gauge_("capital");
     Gauge per_trader_holdings_gauge = create_gauge_("holdings");
+    Gauge per_trader_lean_gauge = create_gauge_("lean");
     Gauge ticker_midprice_gauge = create_gauge_("ticker_midprice");
     Gauge best_ba_gauge = create_gauge_("best_ba");
     Gauge ticker_midprice_variance_gauge = create_gauge_("ticker_midprice_variance");

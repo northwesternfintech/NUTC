@@ -21,7 +21,7 @@ using namespace nutc; // NOLINT
 matching::TickerMapping
 load_tickers()
 {
-	matching::TickerMapping ret;
+    matching::TickerMapping ret;
     const auto& tickers = config::Config::get().get_tickers();
     for (const config::ticker_config& ticker : tickers) {
         ret.emplace(ticker.TICKER, ticker);
@@ -52,7 +52,7 @@ std::unique_ptr<matching::MatchingCycle>
 create_cycle(const auto& mode)
 {
     auto tickers = load_tickers();
-	// TODO: not singleton
+    // TODO: not singleton
     auto& traders = traders::TraderContainer::get_instance().get_traders();
     auto exp = config::Config::get().constants().ORDER_EXPIRATION_TICKS;
 

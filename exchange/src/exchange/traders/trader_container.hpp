@@ -61,9 +61,9 @@ public:
         return traders_.size();
     }
 
-	// TODO: may not work correctly for sandbox (concurrency)
+    // TODO: may not work correctly for sandbox (concurrency)
     std::vector<std::shared_ptr<GenericTrader>>&
-    get_traders() 
+    get_traders()
     {
         return traders_;
     }

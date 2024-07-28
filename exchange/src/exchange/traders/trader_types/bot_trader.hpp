@@ -4,7 +4,6 @@
 
 #include <cassert>
 
-#include <random>
 #include <string>
 
 namespace nutc {
@@ -31,9 +30,8 @@ public:
     BotTrader& operator=(const BotTrader& other) = delete;
     BotTrader& operator=(BotTrader&& other) = delete;
 
-    // Bots should override if they shouldn't be able to leverage
     bool
-    can_leverage() const override
+    can_leverage() const final
     {
         return true;
     }
@@ -96,14 +94,12 @@ public:
     }
 
 protected:
-    static double
-    generate_gaussian_noise(double mean, double stddev)
-    {
-        static std::random_device rand{};
-        static std::mt19937 gen{rand()};
-        static std::normal_distribution<double> distr{mean, stddev};
+    static double generate_gaussian_noise(double mean, double stddev);
 
-        return distr(gen);
+    double
+    get_holdings() const
+    {
+        return GenericTrader::get_holdings(TICKER);
     }
 
     [[nodiscard]] double
@@ -113,15 +109,23 @@ protected:
     }
 
     void
-    add_order(util::Side side, double price, double quantity, bool ioc)
+    add_limit_order(
+        util::Side side, util::decimal_price price, double quantity, bool ioc
+    )
     {
         orders_.emplace_back(side, TICKER, price, quantity, ioc);
+    }
+
+    void
+    add_market_order(util::Side side, double quantity)
+    {
+        orders_.emplace_back(messages::make_market_order(side, TICKER, quantity));
     }
 
     double
     compute_capital_tolerance_()
     {
-        return (1 - get_capital_utilization()) * (get_interest_limit() / 3);
+        return (1 - get_capital_utilization()) * (get_interest_limit() / 2);
     }
 
     void
@@ -159,7 +163,7 @@ protected:
     {}
 
 private:
-    static uint64_t
+    static inline uint64_t
     get_and_increment_user_id()
     {
         static uint64_t user_id = 0;

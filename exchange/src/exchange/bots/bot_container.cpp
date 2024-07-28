@@ -20,7 +20,7 @@ void
 BotContainer::generate_orders(double midprice)
 {
     auto theo = fabs(theo_generator_.generate_next_magnitude());
-	variance_calculator_.record_price(midprice);
+    variance_calculator_.record_price(midprice);
     generate_orders(midprice, theo, variance_calculator_.calculate_volatility());
 }
 

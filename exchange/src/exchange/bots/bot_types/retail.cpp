@@ -22,23 +22,14 @@ RetailBot::take_action(double midprice, double theo, double)
         return;
 
     double noised_theo = theo + generate_gaussian_noise(0, .1);
+    double quantity =
+        (1 - get_capital_utilization()) * get_interest_limit() / noised_theo;
+    quantity *= RETAIL_ORDER_SIZE;
 
-    if (midprice < noised_theo) {
-        double price = noised_theo + RETAIL_ORDER_OFFSET;
-        assert(price > 0);
-        double quantity =
-            (1 - get_capital_utilization()) * get_interest_limit() / price;
-        quantity *= RETAIL_ORDER_SIZE;
-        add_order(util::Side::buy, price, quantity, true);
-    }
-    else if (midprice > noised_theo) {
-        double price = noised_theo - RETAIL_ORDER_OFFSET;
-        assert(price > 0);
-        double quantity =
-            (1 - get_capital_utilization()) * get_interest_limit() / price;
-        quantity *= RETAIL_ORDER_SIZE;
-        add_order(util::Side::sell, price, quantity, true);
-    }
+    auto side = (midprice < noised_theo) ? util::Side::buy : util::Side::sell;
+
+    add_market_order(side, quantity);
+
     return;
 }
 
