@@ -20,9 +20,8 @@ using DecoratedOrderBook = LevelTrackedOrderbook<CancellableOrderBook<BaseOrderB
  */
 struct ticker_info {
     DecoratedOrderBook<LimitOrderBook> orderbook{};
-
     Engine engine;
-    std::unordered_map<config::BotType, bots::BotContainer> bot_containers;
+    std::vector<bots::BotContainer> bot_containers;
 
     ticker_info(util::Ticker ticker, util::decimal_price order_fee) :
         ticker_info(ticker, 0.0, order_fee, {})
@@ -42,15 +41,15 @@ struct ticker_info {
     {}
 
 private:
-    std::unordered_map<config::BotType, bots::BotContainer>
+    std::vector<bots::BotContainer>
     create_bot_containers(
         util::Ticker ticker, double starting_price,
         const std::vector<config::bot_config>& configs
     )
     {
-        std::unordered_map<config::BotType, bots::BotContainer> containers;
-        for (const config::bot_config& config : configs) {
-			containers.emplace(config.TYPE, bots::BotContainer{ticker, starting_price, config});
+        std::vector<bots::BotContainer> containers;
+        for (const config::bot_config& bot_config : configs) {
+            containers.emplace_back(ticker, starting_price, bot_config);
         }
         return containers;
     }

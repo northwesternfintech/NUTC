@@ -7,7 +7,7 @@ BaseMatchingCycle::before_cycle_(uint64_t)
 {
     for (auto& [ticker_info, _, symbol] : tickers_) {
         auto& orderbook = ticker_info.orderbook;
-        for (auto& [type, bot_container] : ticker_info.bot_containers) {
+        for (auto& bot_container : ticker_info.bot_containers) {
             bot_container.generate_orders(orderbook.get_midprice());
         }
     }

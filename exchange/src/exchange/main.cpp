@@ -70,7 +70,6 @@ main_event_loop(auto cycle)
     uint64_t tick = 0;
     while (true) {
         cycle->on_tick(tick++);
-		usleep(100000);
     }
 }
 
