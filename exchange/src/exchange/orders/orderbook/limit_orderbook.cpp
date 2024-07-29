@@ -64,7 +64,8 @@ LimitOrderBook::change_quantity(stored_order& order, double quantity_delta)
     }
 
     order.trader->process_position_change(
-        {order.position.side, order.position.ticker, order.position.price, quantity_delta}
+        {order.position.side, order.position.ticker, order.position.price,
+         quantity_delta}
     );
 
     order.position.quantity += quantity_delta;
@@ -74,7 +75,8 @@ void
 LimitOrderBook::mark_order_removed(stored_order& order)
 {
     order.trader->process_position_change(
-        {order.position.side, order.position.ticker, order.position.price, -order.position.quantity}
+        {order.position.side, order.position.ticker, order.position.price,
+         -order.position.quantity}
     );
 
     order.was_removed = true;

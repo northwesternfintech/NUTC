@@ -17,7 +17,7 @@ std::string get_firebase_endpoint(const std::string& params);
 enum class Side { buy, sell };
 std::string to_string(Side side);
 
-enum class Mode { dev, normal, bots_only };
+enum class Mode { dev, sandbox, normal, bots_only };
 
 struct algorithm {
     const std::string UID;

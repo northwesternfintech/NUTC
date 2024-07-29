@@ -49,9 +49,7 @@ TestMatchingCycle::create_tickers(
     matching::TickerMapping mappings;
     for (const auto& ticker : ticker_names) {
         util::Ticker t = ticker.c_str();
-        mappings.insert({
-            t, {t, order_fee}
-        });
+        mappings.insert({t, {order_fee}});
     }
     return mappings;
 }

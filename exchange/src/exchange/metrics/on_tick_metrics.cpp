@@ -74,18 +74,18 @@ TickerMetricsPusher::report_ticker_stats(matching::TickerMapping& tickers)
         }
     };
 
-    auto log_variance = [&](util::Ticker ticker, const matching::ticker_info& info) {
-        ticker_midprice_variance_gauge
-            .Add({
-                {"ticker", std::string{ticker}}
-        })
-            .Set(info.bot_container.get_variance());
-    };
+    // auto log_variance = [&](util::Ticker ticker, const matching::ticker_info& info) {
+    //     ticker_midprice_variance_gauge
+    //         .Add({
+    //             {"ticker", std::string{ticker}}
+    //     })
+    //         .Set(info.bot_container.get_variance());
+    // };
 
     for (auto& [info, _, ticker] : tickers) {
         log_midprice(ticker, info);
         log_best_ba(ticker, info);
-        log_variance(ticker, info);
+        // log_variance(ticker, info);
     }
 }
 
@@ -114,8 +114,6 @@ TickerMetricsPusher::report_current_tick(uint64_t tick_num)
 void
 TickerMetricsPusher::report_trader_stats(const matching::TickerMapping& tickers)
 {
-    auto& trader_container = traders::TraderContainer::get_instance();
-
     auto portfolio_value = [&](const auto& trader) {
         double pnl = 0.0;
         for (const auto& [info, _, ticker] : tickers) {
@@ -139,7 +137,7 @@ TickerMetricsPusher::report_trader_stats(const matching::TickerMapping& tickers)
         }
     };
 
-    for (const auto& trader : trader_container.get_traders()) {
+    for (const auto& trader : trader_container_.get_traders()) {
         report_holdings(trader);
 
         double capital = trader->get_capital();

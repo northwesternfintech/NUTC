@@ -1,6 +1,7 @@
 #pragma once
 
 #include "exchange/orders/ticker_info.hpp"
+#include "exchange/traders/trader_container.hpp"
 
 #include <hash_table7.hpp>
 #include <prometheus/counter.h>
@@ -15,6 +16,7 @@ using Gauge = ps::Family<ps::Gauge>&;
 using Counter = ps::Family<ps::Counter>&;
 
 class TickerMetricsPusher {
+    traders::TraderContainer& trader_container_;
     Gauge per_trader_pnl_gauge = create_gauge_("pnl");
     Gauge per_trader_capital_gauge = create_gauge_("capital");
     Gauge per_trader_holdings_gauge = create_gauge_("holdings");
@@ -26,6 +28,10 @@ class TickerMetricsPusher {
     Gauge current_tick_gauge = create_gauge_("current_tick");
 
 public:
+    TickerMetricsPusher(traders::TraderContainer& trader_container) :
+        trader_container_(trader_container)
+    {}
+
     void report_current_tick(uint64_t tick_num);
     void report_trader_stats(const matching::TickerMapping& tickers);
     void report_ticker_stats(matching::TickerMapping& tickers);

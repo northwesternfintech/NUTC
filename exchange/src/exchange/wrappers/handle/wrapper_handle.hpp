@@ -35,7 +35,6 @@ public:
     // Local (.py on disk)
     WrapperHandle(const std::string& algo_path);
 
-
     std::vector<limit_order> read_messages();
 
     void

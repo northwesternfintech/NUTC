@@ -1,6 +1,7 @@
 #include "rmq_wrapper_init.hpp"
 
 #include "shared/messages_exchange_to_wrapper.hpp"
+
 #include <memory_resource>
 
 namespace nutc {

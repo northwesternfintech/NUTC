@@ -15,6 +15,8 @@ namespace fs = std::filesystem;
 
 class DevModeAlgoInitializer : public AlgoInitializer {
 protected:
+    const size_t WAIT_SECS;
+
     // Limit to 255
     const uint8_t NUM_ALGOS;
 
@@ -22,12 +24,15 @@ protected:
     std::vector<fs::path> algo_filepaths_;
 
 public:
-    explicit DevModeAlgoInitializer(uint8_t num_algos) :
-        NUM_ALGOS(num_algos), algo_filepaths_({})
+    explicit DevModeAlgoInitializer(size_t wait_secs, uint8_t num_algos) :
+        WAIT_SECS(wait_secs), NUM_ALGOS(num_algos), algo_filepaths_({})
     {}
 
-    explicit DevModeAlgoInitializer(const std::vector<fs::path>& algo_paths) :
-        NUM_ALGOS(static_cast<uint8_t>(algo_paths.size())), algo_filepaths_(algo_paths)
+    explicit DevModeAlgoInitializer(
+        size_t wait_secs, const std::vector<fs::path>& algo_paths
+    ) :
+        WAIT_SECS(wait_secs), NUM_ALGOS(static_cast<uint8_t>(algo_paths.size())),
+        algo_filepaths_(algo_paths)
     {
         size_t max_size = std::numeric_limits<uint8_t>::max();
         if (algo_paths.size() > max_size) {

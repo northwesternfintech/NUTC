@@ -7,7 +7,7 @@
 namespace nutc {
 namespace config {
 
-enum class BotType { market_maker, retail };
+enum class BotType { market_maker = 0, retail = 1 };
 
 struct bot_config {
     const BotType TYPE;

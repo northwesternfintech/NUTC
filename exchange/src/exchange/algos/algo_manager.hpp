@@ -27,14 +27,7 @@ class AlgoInitializer {
     ) const = 0;
 
 public:
-    void
-    initialize_algo_management(
-        traders::TraderContainer& trader_container, double start_cap
-    )
-    {
-        initialize_files();
-        initialize_trader_container(trader_container, start_cap);
-    }
+    void initialize_algo_management(traders::TraderContainer& trader_container);
 
     static std::unique_ptr<AlgoInitializer> get_algo_initializer(util::Mode mode);
 

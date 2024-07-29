@@ -30,27 +30,38 @@ CrowServer::CrowServer() :
             return res;
         }
 
-        static auto trial_secs = config::Config::get().constants().SANDBOX_TRIAL_SECS;
         try {
             log_i(
                 sandbox_server,
                 "Received sandbox request with user id {} and algoid {}", user_id,
                 algo_id
             );
-            static const auto STARTING_CAPITAL =
-                nutc::config::Config::get().constants().STARTING_CAPITAL;
-            auto trader = traders::TraderContainer::get_instance()
-                              .add_trader<traders::LocalTrader>(
-                                  user_id, algo_id, "SANDBOX_USER", STARTING_CAPITAL
-                              );
-            start_remove_timer_(trial_secs, trader);
-            trader->send_message(glz::write_json(messages::start_time{0}));
+            add_pending_trader(user_id, algo_id);
             return res;
         } catch (...) {
             return crow::response(500);
         }
     });
     server_thread = std::thread([this] { app.signal_clear().port(18080).run(); });
+}
+
+void
+CrowServer::add_pending_trader(const std::string user_id, const std::string algo_id)
+{
+    static const auto STARTING_CAPITAL =
+        nutc::config::Config::get().constants().STARTING_CAPITAL;
+
+    auto trader = std::make_shared<traders::LocalTrader>(
+        user_id, algo_id, "SANDBOX_USER", STARTING_CAPITAL
+    );
+
+    trader_lock.lock();
+    traders_to_add.push_back(trader);
+    trader_lock.unlock();
+
+    static auto trial_secs = config::Config::get().constants().SANDBOX_TRIAL_SECS;
+    start_remove_timer_(trial_secs, trader);
+    trader->send_message(glz::write_json(messages::start_time{0}));
 }
 
 CrowServer::~CrowServer()
@@ -85,7 +96,7 @@ CrowServer::start_remove_timer_(
         }
         if (!err_code) {
             log_i(sandbox_server, "Removing trader {}", trader->get_display_name());
-            traders::TraderContainer::get_instance().remove_trader(trader);
+            trader->disable();
         }
         else {
             log_e(

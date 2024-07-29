@@ -1,7 +1,7 @@
 #include "pipe_writer.hpp"
 
 #include "async_pipe_runner.hpp"
-#include "exchange/config/static/config.h"
+#include "exchange/config/static/config.hpp"
 
 namespace nutc {
 namespace wrappers {

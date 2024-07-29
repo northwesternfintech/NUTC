@@ -20,11 +20,9 @@ public:
     stored_order&
     add_order(const stored_order& order) override
     {
-        if (!order.ioc) {
-            modify_level_(
-                order.position.side, order.position.price, order.position.quantity
-            );
-        }
+        modify_level_(
+            order.position.side, order.position.price, order.position.quantity
+        );
 
         return BaseOrderBookT::add_order(order);
     }

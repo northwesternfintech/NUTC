@@ -1,7 +1,9 @@
 #include "dev_mode.hpp"
 
-#include "exchange/config/static/config.h"
+#include "exchange/config/dynamic/config.hpp"
+#include "exchange/config/static/config.hpp"
 #include "exchange/traders/trader_types/algo_trader.hpp"
+#include "exchange/wrappers/creation/rmq_wrapper_init.hpp"
 #include "shared/file_operations/file_operations.hpp"
 
 #include <iostream>
@@ -17,6 +19,8 @@ DevModeAlgoInitializer::initialize_trader_container(
 {
     for (const fs::path& filepath : algo_filepaths_)
         traders.add_trader<traders::LocalTrader>(filepath, start_capital);
+
+    rabbitmq::WrapperInitializer::send_start_time(traders.get_traders(), WAIT_SECS);
 }
 
 void

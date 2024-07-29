@@ -38,6 +38,15 @@ struct limit_order {
     limit_order() = default;
 };
 
+inline limit_order
+make_market_order(util::Side side, util::Ticker ticker, double quantity)
+{
+    util::decimal_price price = (side == util::Side::buy)
+                                    ? std::numeric_limits<util::decimal_price>::max()
+                                    : std::numeric_limits<util::decimal_price>::min();
+    return limit_order{side, ticker, price, quantity, true};
+}
+
 } // namespace messages
 } // namespace nutc
 

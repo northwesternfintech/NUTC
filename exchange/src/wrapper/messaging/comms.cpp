@@ -153,7 +153,8 @@ ExchangeProxy::limit_order_func()
 std::function<bool(const std::string&, const std::string&, double)>
 ExchangeProxy::market_order_func()
 {
-    return [&](const std::string& side, const auto& ticker, const auto& quantity) {
+    return [&](const std::string& side, const std::string& ticker,
+               const double& quantity) {
         if (ticker.size() != TICKER_LENGTH) [[unlikely]] {
             return false;
         }
@@ -161,12 +162,9 @@ ExchangeProxy::market_order_func()
         std::copy(ticker.begin(), ticker.end(), ticker_arr.arr.begin());
 
         util::Side side_enum = (side == "BUY") ? util::Side::buy : util::Side::sell;
-        util::decimal_price price =
-            side_enum == util::Side::buy
-                ? std::numeric_limits<util::decimal_price>::max()
-                : std::numeric_limits<util::decimal_price>::min();
 
-        limit_order order{side_enum, ticker_arr, price, quantity};
+        limit_order order =
+            messages::make_market_order(side_enum, ticker_arr, quantity);
         return publish_order(order);
     };
 }

@@ -21,12 +21,12 @@ struct decimal_price {
     constexpr uint32_t
     price_to_decimal(double price) const
     {
-        assert(price >= 0);
-        assert(price * 100 < std::numeric_limits<uint32_t>::max());
         if consteval {
             return static_cast<uint32_t>(price * 100);
         }
         else {
+            assert(price >= 0);
+            assert(price * 100 < std::numeric_limits<uint32_t>::max());
             return static_cast<uint32_t>(std::round(price * 100));
         }
     }
@@ -38,43 +38,55 @@ struct decimal_price {
 
     constexpr decimal_price() = default;
 
-    decimal_price
+    constexpr decimal_price(const decimal_price& other) = default;
+    constexpr decimal_price(decimal_price&& other) = default;
+    constexpr decimal_price& operator=(const decimal_price& other) = default;
+    constexpr decimal_price& operator=(decimal_price&& other) = default;
+
+    constexpr decimal_price
     operator*(const decimal_price& other) const
     {
         return (price * other.price) / 100;
     }
 
-    decimal_price
+    constexpr decimal_price
     operator-(const decimal_price& other) const
     {
         return price - other.price;
     }
 
-    decimal_price
+    constexpr decimal_price
     operator+(const decimal_price& other) const
     {
         return price + other.price;
     }
 
-    bool
+    constexpr bool
     operator==(const decimal_price& other) const
     {
         return price == other.price;
     }
 
-    bool
+    constexpr bool
     operator==(double other) const
     {
         return price == static_cast<uint32_t>(other * 100);
     }
 
-    operator double() const { return static_cast<double>(price) / 100; }
+    // TODO: make explicit
+    constexpr
+    operator double() const
+    {
+        return static_cast<double>(price) / 100;
+    }
 
-    bool
+    constexpr bool
     valid_start_price() const
     {
         return price <= std::numeric_limits<uint16_t>::max();
     }
+
+    constexpr ~decimal_price() = default;
 
 private:
     constexpr decimal_price(uint32_t decimal) : price(decimal) {}

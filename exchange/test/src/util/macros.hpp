@@ -79,9 +79,11 @@ bool validate_limit_order(
             (update), (ticker_), (side_), (price_), (quantity_)                        \
         );                                                                             \
         EXPECT_TRUE(isUpdateValid)                                                     \
-            << "Expected market order with" << " ticker =" << (ticker_)                \
-            << ", side = " << static_cast<int>(side_) << ", price = " << (price_)      \
-            << ", quantity = " << (quantity_) << ". Actual update: client_id = " << "" \
+            << "Expected market order with"                                            \
+            << " ticker =" << (ticker_) << ", side = " << static_cast<int>(side_)      \
+            << ", price = " << (price_) << ", quantity = " << (quantity_)              \
+            << ". Actual update: client_id = "                                         \
+            << ""                                                                      \
             << ", ticker = " << std::string{(update).ticker}                           \
             << ", side = " << static_cast<int>((update).side)                          \
             << ", price = " << (update).price << ", quantity = " << (update).quantity; \

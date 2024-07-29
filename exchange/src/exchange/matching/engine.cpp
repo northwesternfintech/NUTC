@@ -101,7 +101,7 @@ Engine::order_can_execute_(
         orderbook.mark_order_removed(seller);
         return false;
     }
-    if (seller.trader== buyer.trader) [[unlikely]] {
+    if (seller.trader == buyer.trader) [[unlikely]] {
         if (seller.order_index <= buyer.order_index) {
             orderbook.mark_order_removed(seller);
         }

@@ -2,7 +2,6 @@
 
 #include "exchange/algos/dev_mode/dev_mode.hpp"
 #include "exchange/logging.hpp"
-#include "exchange/wrappers/creation/rmq_wrapper_init.hpp"
 
 namespace nutc {
 namespace test {
@@ -31,10 +30,10 @@ start_wrappers(
     std::vector<std::filesystem::path> algo_filepaths{};
     std::ranges::copy(algo_filenames, std::back_inserter(algo_filepaths));
 
-    DevModeAlgoInitializer algo_manager{algo_filepaths};
-    algo_manager.initialize_trader_container(users, starting_capital);
     logging::init(quill::LogLevel::Info);
-    rabbitmq::WrapperInitializer::send_start_time(users.get_traders(), start_delay);
+
+    DevModeAlgoInitializer algo_manager{start_delay, algo_filepaths};
+    algo_manager.initialize_trader_container(users, starting_capital);
 
     return users.get_traders();
 }

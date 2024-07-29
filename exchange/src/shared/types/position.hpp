@@ -3,6 +3,7 @@
 #include "shared/types/decimal_price.hpp"
 #include "shared/types/ticker.hpp"
 #include "shared/util.hpp"
+
 #include <glaze/glaze.hpp>
 
 namespace nutc {
@@ -17,7 +18,7 @@ struct position {
     operator==(const position& other) const noexcept
     {
         return side == other.side && ticker == other.ticker && price == other.price
-               && ((quantity - other.quantity)==0);
+               && ((quantity - other.quantity) == 0);
     }
 
     position() = default;
@@ -26,7 +27,6 @@ struct position {
         side(side), ticker(ticker), price(price), quantity(quantity)
     {}
 };
-
 
 } // namespace util
 } // namespace nutc

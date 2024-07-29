@@ -1,7 +1,7 @@
 #pragma once
 
-#define DEFAULT_CONFIG_FILE "config.yml" 
-#define DEBUG_NUM_USERS  2
+#define DEFAULT_CONFIG_FILE "config.yml"
+#define DEBUG_NUM_USERS     2
 
 // How many outgoing messages for one wrapper before we start dropping
 #define MAX_OUTGOING_MQ_SIZE 1000
@@ -22,7 +22,7 @@
 //
 #define ALGO_DIR "algos"
 
-
-
-#define RETAIL_ORDER_OFFSET .02 // How much retail orders are offset from theo price. Ex. .02 means buy order is theo+.02 to ensure it gets filled
+#define RETAIL_ORDER_OFFSET                                                            \
+    .02 // How much retail orders are offset from theo price. Ex. .02 means buy order is
+        // theo+.02 to ensure it gets filled
 #define RETAIL_ORDER_SIZE .05 // How much of the interest limit to use for retail orders
