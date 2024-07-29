@@ -9,7 +9,6 @@
 #include "exchange/matching_cycle/dev/dev_strategy.hpp"
 #include "exchange/matching_cycle/sandbox/sandbox_cycle.hpp"
 #include "exchange/orders/ticker_info.hpp"
-#include "exchange/sandbox_server/crow.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "shared/util.hpp"
 
@@ -19,32 +18,23 @@ namespace {
 using namespace nutc; // NOLINT
 
 matching::TickerMapping
-load_tickers()
+load_tickers(traders::TraderContainer& traders)
 {
     matching::TickerMapping ret;
     const auto& tickers = config::Config::get().get_tickers();
     for (const config::ticker_config& ticker : tickers) {
-        ret.emplace(ticker.TICKER, ticker);
+        ret.insert({
+            ticker.TICKER, {traders, ticker}
+        });
     }
     return ret;
 }
 
-void
-initialize_algos(const auto& mode)
-{
-    traders::TraderContainer& users = traders::TraderContainer::get_instance();
-    auto algo_mgr = algos::AlgoInitializer::get_algo_initializer(mode);
-    algo_mgr->initialize_algo_management(
-        users, config::Config::get().constants().STARTING_CAPITAL
-    );
-}
-
 std::unique_ptr<matching::MatchingCycle>
-create_cycle(const auto& mode)
+create_cycle(traders::TraderContainer& traders, const auto& mode)
 {
-    auto tickers = load_tickers();
     // TODO: not singleton
-    auto& traders = traders::TraderContainer::get_instance().get_traders();
+    auto tickers = load_tickers(traders);
     auto exp = config::Config::get().constants().ORDER_EXPIRATION_TICKS;
 
     if (mode == util::Mode::normal) {
@@ -80,10 +70,13 @@ main(int argc, const char** argv)
 
     auto mode = config::process_arguments(argc, argv);
 
-    // Algos must init before wrappers
-    initialize_algos(mode);
+    traders::TraderContainer traders{};
 
-    main_event_loop(create_cycle(mode));
+    algos::AlgoInitializer::get_algo_initializer(mode)->initialize_algo_management(
+        traders
+    );
+
+    main_event_loop(create_cycle(traders, mode));
 
     return 0;
 }

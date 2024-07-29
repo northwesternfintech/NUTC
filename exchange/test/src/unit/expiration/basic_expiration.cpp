@@ -15,8 +15,7 @@ class UnitOrderExpiration : public ::testing::Test {
 protected:
     static constexpr const int DEFAULT_QUANTITY = 1000;
 
-    TraderContainer& manager_ =
-        nutc::traders::TraderContainer::get_instance(); // NOLINT(*)
+    TraderContainer manager_{};
 
     nutc::traders::GenericTrader& trader1 =
         *manager_.add_trader<TestTrader>(TEST_STARTING_CAPITAL);

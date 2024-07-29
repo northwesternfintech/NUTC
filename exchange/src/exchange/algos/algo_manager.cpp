@@ -14,6 +14,15 @@ namespace algos {
 
 using mode = util::Mode;
 
+void
+AlgoInitializer::initialize_algo_management(traders::TraderContainer& trader_container)
+{
+    double start_cap = config::Config::get().constants().STARTING_CAPITAL;
+
+    initialize_files();
+    initialize_trader_container(trader_container, start_cap);
+}
+
 std::unique_ptr<AlgoInitializer>
 AlgoInitializer::get_algo_initializer(mode mode)
 {
@@ -25,6 +34,7 @@ AlgoInitializer::get_algo_initializer(mode mode)
             );
         case mode::normal:
             return std::make_unique<algos::NormalModeAlgoInitializer>(wait_secs);
+        case mode::sandbox:
         case mode::bots_only:
             return std::make_unique<algos::BotModeAlgoInitializer>();
     }

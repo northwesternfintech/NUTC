@@ -2,7 +2,6 @@
 
 #include "exchange/traders/trader_types/generic_trader.hpp"
 
-#include <boost/unordered_map.hpp>
 #include <glaze/glaze.hpp>
 
 #include <cassert>
@@ -28,17 +27,18 @@ class TraderContainer {
     std::vector<std::shared_ptr<GenericTrader>> traders_;
 
 public:
-    static TraderContainer&
-    get_instance()
-    {
-        static TraderContainer instance{};
-        return instance;
-    }
+    TraderContainer() = default;
+
+    TraderContainer(std::initializer_list<std::shared_ptr<GenericTrader>> initializer) :
+        traders_(initializer)
+    {}
 
     TraderContainer(const TraderContainer&) = delete;
     TraderContainer(TraderContainer&&) = delete;
     TraderContainer& operator=(const TraderContainer&) = delete;
     TraderContainer& operator=(TraderContainer&&) = delete;
+
+    ~TraderContainer() = default;
 
     void
     add_trader(std::shared_ptr<GenericTrader> trader)
@@ -78,8 +78,6 @@ private:
     {
         return std::allocate_shared<T>(pmr_allocator, std::forward<Args>(args)...);
     }
-
-    TraderContainer() = default;
 };
 
 } // namespace traders

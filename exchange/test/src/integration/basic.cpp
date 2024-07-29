@@ -18,8 +18,7 @@ class IntegrationBasicAlgo : public ::testing::Test {
 protected:
     using TestTrader = nutc::test_utils::TestTrader;
 
-    TraderContainer& users_ =
-        nutc::traders::TraderContainer::get_instance(); // NOLINT(*)
+    TraderContainer users_;
 };
 
 TEST_F(IntegrationBasicAlgo, InitialLiquidity)
@@ -29,7 +28,7 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
     trader2->modify_holdings("ABC", 1000); // NOLINT
     trader2->add_order({sell, "ABC", 100.0, 100});
 
-    std::vector<std::shared_ptr<traders::GenericTrader>> traders{trader1, trader2};
+    TraderContainer traders{trader1, trader2};
     TestMatchingCycle cycle{{"ABC"}, traders};
 
     cycle.wait_for_order({buy, "ABC", 100.0, 10});
@@ -42,7 +41,7 @@ TEST_F(IntegrationBasicAlgo, RemoveIOCOrder)
     trader2->modify_holdings("ABC", 1000); // NOLINT
     trader2->add_order({sell, "ABC", 100.0, 100});
 
-    std::vector<std::shared_ptr<traders::GenericTrader>> traders{trader1, trader2};
+    TraderContainer traders{trader1, trader2};
     TestMatchingCycle cycle{{"ABC"}, traders};
 
     cycle.on_tick(0);
@@ -61,7 +60,7 @@ TEST_F(IntegrationBasicAlgo, MarketOrderBuy)
     trader2->modify_holdings("ABC", 1000);
     trader2->add_order({sell, "ABC", 100.0, 100});
 
-    std::vector<std::shared_ptr<traders::GenericTrader>> traders{trader1, trader2};
+    TraderContainer traders{trader1, trader2};
     TestMatchingCycle cycle{
         {"ABC", "DEF"},
         traders
@@ -78,7 +77,7 @@ TEST_F(IntegrationBasicAlgo, MarketOrderSell)
     trader2->add_order({buy, "ABC", 100.0, 1});
     trader2->modify_capital(1000);
 
-    std::vector<std::shared_ptr<traders::GenericTrader>> traders{trader1, trader2};
+    TraderContainer traders{trader1, trader2};
     TestMatchingCycle cycle{
         {"ABC", "DEF"},
         traders
@@ -94,7 +93,7 @@ TEST_F(IntegrationBasicAlgo, ManyUpdates)
     auto trader2 = users_.add_trader<TestTrader>(0);
     trader2->modify_holdings("ABC", 100000); // NOLINT
 
-    std::vector<std::shared_ptr<traders::GenericTrader>> traders{trader1, trader2};
+    TraderContainer traders{trader1, trader2};
     TestMatchingCycle cycle{{"ABC"}, traders};
 
     for (double i = 0; i < 10000; i++) {
@@ -113,7 +112,7 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
     auto trader2 = users_.add_trader<TestTrader>(0);
     trader2->modify_holdings("ABC", 10000); // NOLINT
 
-    std::vector<std::shared_ptr<traders::GenericTrader>> traders{trader1, trader2};
+    TraderContainer traders{trader1, trader2};
     TestMatchingCycle cycle{
         {"ABC", "DEF"},
         traders
@@ -134,7 +133,7 @@ TEST_F(IntegrationBasicAlgo, MultipleLevelOrder)
     auto trader2 = users_.add_trader<TestTrader>(0);
     trader2->modify_holdings("ABC", 1000); // NOLINT
 
-    std::vector<std::shared_ptr<traders::GenericTrader>> traders{trader1, trader2};
+    TraderContainer traders{trader1, trader2};
     TestMatchingCycle cycle{
         {"ABC", "DEF"},
         traders
@@ -155,7 +154,7 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateSell)
     auto trader2 = users_.add_trader<TestTrader>(100000);
     trader2->add_order({buy, "ABC", 102.0, 102});
 
-    std::vector<std::shared_ptr<traders::GenericTrader>> traders{trader1, trader2};
+    TraderContainer traders{trader1, trader2};
     TestMatchingCycle cycle{
         {"ABC", "DEF"},
         traders
@@ -177,7 +176,7 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateBuy)
     trader2->modify_holdings("ABC", 1000); // NOLINT
     trader2->add_order({sell, "ABC", 100.0, 100});
 
-    std::vector<std::shared_ptr<traders::GenericTrader>> traders{trader1, trader2};
+    TraderContainer traders{trader1, trader2};
     TestMatchingCycle cycle{
         {"ABC", "DEF"},
         traders
@@ -203,7 +202,7 @@ TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
     trader2->modify_holdings("ABC", 1000); // NOLINT
     trader2->add_order({sell, "ABC", 100.0, 100});
 
-    std::vector<std::shared_ptr<traders::GenericTrader>> traders{trader1, trader2};
+    TraderContainer traders{trader1, trader2};
     TestMatchingCycle cycle{{"ABC"}, traders};
 
     cycle.wait_for_order({buy, "ABC", 100.0, 10});
@@ -227,7 +226,7 @@ TEST_F(IntegrationBasicAlgo, DisableTrader)
 
     trader1->disable();
 
-    std::vector<std::shared_ptr<traders::GenericTrader>> traders{trader1, trader2};
+    TraderContainer traders{trader1, trader2};
     TestMatchingCycle cycle{{"ABC"}, traders};
 
     cycle.on_tick(0);

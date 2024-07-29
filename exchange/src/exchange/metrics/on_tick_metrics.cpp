@@ -114,8 +114,6 @@ TickerMetricsPusher::report_current_tick(uint64_t tick_num)
 void
 TickerMetricsPusher::report_trader_stats(const matching::TickerMapping& tickers)
 {
-    auto& trader_container = traders::TraderContainer::get_instance();
-
     auto portfolio_value = [&](const auto& trader) {
         double pnl = 0.0;
         for (const auto& [info, _, ticker] : tickers) {
@@ -139,7 +137,7 @@ TickerMetricsPusher::report_trader_stats(const matching::TickerMapping& tickers)
         }
     };
 
-    for (const auto& trader : trader_container.get_traders()) {
+    for (const auto& trader : trader_container_.get_traders()) {
         report_holdings(trader);
 
         double capital = trader->get_capital();

@@ -12,7 +12,7 @@ class UnitBasicMatching : public ::testing::Test {
 protected:
     using TestTrader = nutc::test_utils::TestTrader;
     static constexpr const int DEFAULT_QUANTITY = 1000;
-    TraderContainer& manager_ = nutc::traders::TraderContainer::get_instance();
+    TraderContainer manager_;
 
     nutc::traders::GenericTrader& trader1 =
         *manager_.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);

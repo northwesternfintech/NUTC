@@ -20,8 +20,7 @@ using nutc::util::Side::sell;
 class UnitGetUpdate : public ::testing::Test {
 protected:
     using TestTrader = nutc::test_utils::TestTrader;
-    TraderContainer& manager_ =
-        nutc::traders::TraderContainer::get_instance(); // NOLINT(*)
+    TraderContainer manager_;
 
     nutc::traders::GenericTrader& trader1 =
         *manager_.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);

@@ -49,7 +49,7 @@ public:
     ~CrowServer();
 
 private:
-	void add_pending_trader(const std::string user_id, const std::string algo_id);
+    void add_pending_trader(const std::string user_id, const std::string algo_id);
     void start_remove_timer_(
         unsigned int time_ms, std::weak_ptr<traders::GenericTrader> trader_ptr
     );

@@ -2,6 +2,7 @@
 
 #include "exchange/matching_cycle/base/base_strategy.hpp"
 #include "exchange/metrics/on_tick_metrics.hpp"
+#include "exchange/traders/trader_container.hpp"
 
 #include <prometheus/counter.h>
 #include <prometheus/gauge.h>
@@ -14,10 +15,8 @@ class DevMatchingCycle : public BaseMatchingCycle {
 
 public:
     DevMatchingCycle(
-        TickerMapping tickers,
-        std::vector<std::shared_ptr<traders::GenericTrader>>& traders,
-        uint64_t expire_ticks
-    ) : BaseMatchingCycle(std::move(tickers), traders, expire_ticks)
+        TickerMapping tickers, traders::TraderContainer& traders, uint64_t expire_ticks
+    ) : BaseMatchingCycle(std::move(tickers), traders, expire_ticks), pusher(traders)
     {}
 
 protected:

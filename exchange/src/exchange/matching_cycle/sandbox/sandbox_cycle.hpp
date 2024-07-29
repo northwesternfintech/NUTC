@@ -9,9 +9,7 @@ namespace nutc::matching {
 class SandboxMatchingCycle : public DevMatchingCycle {
 public:
     SandboxMatchingCycle(
-        TickerMapping tickers,
-        std::vector<std::shared_ptr<traders::GenericTrader>>& traders,
-        uint64_t expire_ticks
+        TickerMapping tickers, traders::TraderContainer& traders, uint64_t expire_ticks
     ) : DevMatchingCycle(std::move(tickers), traders, expire_ticks)
     {}
 
@@ -22,8 +20,8 @@ private:
         auto traders =
             sandbox::CrowServer::get_instance().get_and_clear_pending_traders();
 
-        std::for_each(traders.begin(), traders.end(), [](auto&& trader) {
-            traders::TraderContainer::get_instance().add_trader(trader);
+        std::for_each(traders.begin(), traders.end(), [this](auto&& trader) {
+            get_trader_container().add_trader(trader);
         });
     }
 };
