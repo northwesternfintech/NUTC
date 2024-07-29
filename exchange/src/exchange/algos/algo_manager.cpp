@@ -2,11 +2,11 @@
 
 #include "bot_mode/bot_mode.hpp"
 #include "dev_mode/dev_mode.hpp"
-#include "exchange/config/static/config.h"
+#include "exchange/config/dynamic/config.hpp"
+#include "exchange/config/static/config.hpp"
 #include "normal_mode/normal_mode.hpp"
 
 #include <memory>
-#include <optional>
 #include <stdexcept>
 
 namespace nutc {
@@ -17,11 +17,14 @@ using mode = util::Mode;
 std::unique_ptr<AlgoInitializer>
 AlgoInitializer::get_algo_initializer(mode mode)
 {
+    size_t wait_secs = config::Config::get().constants().WAIT_SECS;
     switch (mode) {
         case mode::dev:
-            return std::make_unique<algos::DevModeAlgoInitializer>(DEBUG_NUM_USERS);
+            return std::make_unique<algos::DevModeAlgoInitializer>(
+                wait_secs, DEBUG_NUM_USERS
+            );
         case mode::normal:
-            return std::make_unique<algos::NormalModeAlgoInitializer>();
+            return std::make_unique<algos::NormalModeAlgoInitializer>(wait_secs);
         case mode::bots_only:
             return std::make_unique<algos::BotModeAlgoInitializer>();
     }

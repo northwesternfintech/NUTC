@@ -2,6 +2,7 @@
 
 #include "exchange/curl/curl.hpp"
 #include "exchange/traders/trader_types/algo_trader.hpp"
+#include "exchange/wrappers/creation/rmq_wrapper_init.hpp"
 
 #include <fmt/format.h>
 
@@ -40,6 +41,8 @@ NormalModeAlgoInitializer::initialize_trader_container(
             user_id, algo_id, full_name, start_capital
         );
     }
+
+    rabbitmq::WrapperInitializer::send_start_time(traders.get_traders(), WAIT_SECS);
 }
 
 glz::json_t::object_t

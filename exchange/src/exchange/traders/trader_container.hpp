@@ -9,10 +9,10 @@
 
 #include <memory>
 #include <memory_resource>
+#include <mutex>
 
 namespace nutc {
 namespace traders {
-using lock_guard = std::lock_guard<std::mutex>;
 
 static constexpr auto CACHED_TRADERS = 256;
 static constexpr auto CACHED_TRADER_SIZE = CACHED_TRADERS * sizeof(GenericTrader);
@@ -28,37 +28,32 @@ class TraderContainer {
     std::vector<std::shared_ptr<GenericTrader>> traders_;
 
 public:
-    /**
-     * @brief Add a trader to the trader manager, return a shared pointer to the trader
-     */
+    static TraderContainer&
+    get_instance()
+    {
+        static TraderContainer instance{};
+        return instance;
+    }
+
+    TraderContainer(const TraderContainer&) = delete;
+    TraderContainer(TraderContainer&&) = delete;
+    TraderContainer& operator=(const TraderContainer&) = delete;
+    TraderContainer& operator=(TraderContainer&&) = delete;
+
+    void
+    add_trader(std::shared_ptr<GenericTrader> trader)
+    {
+        traders_.push_back(std::move(trader));
+    }
+
     template <typename T, typename... Args>
     std::shared_ptr<T>
     add_trader(Args&&... args)
     {
-        lock_guard lock{trader_lock_};
-
         std::shared_ptr<GenericTrader> trader =
             make_shared_trader_<T>(std::forward<Args>(args)...);
         traders_.emplace_back(trader);
         return std::static_pointer_cast<T>(trader);
-    }
-
-    void
-    remove_trader(std::shared_ptr<traders::GenericTrader> to_remove)
-    {
-        lock_guard lock{trader_lock_};
-        for (auto& trader : traders_) {
-            if (trader == to_remove)
-                trader->disable();
-        }
-    }
-
-    size_t
-    num_traders() const
-
-    {
-        lock_guard lock{trader_lock_};
-        return traders_.size();
     }
 
     // TODO: may not work correctly for sandbox (concurrency)
@@ -72,7 +67,6 @@ public:
     void
     reset()
     {
-        lock_guard lock{trader_lock_};
         traders_.clear();
     }
 
@@ -86,19 +80,6 @@ private:
     }
 
     TraderContainer() = default;
-
-public:
-    static TraderContainer&
-    get_instance()
-    {
-        static TraderContainer instance{};
-        return instance;
-    }
-
-    TraderContainer(const TraderContainer&) = delete;
-    TraderContainer(TraderContainer&&) = delete;
-    TraderContainer& operator=(const TraderContainer&) = delete;
-    TraderContainer& operator=(TraderContainer&&) = delete;
 };
 
 } // namespace traders

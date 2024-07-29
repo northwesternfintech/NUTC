@@ -1,7 +1,7 @@
 #include "retail.hpp"
 
 #include "exchange/bots/shared_bot_state.hpp"
-#include "exchange/config/static/config.h"
+#include "exchange/config/static/config.hpp"
 
 namespace nutc {
 namespace bots {

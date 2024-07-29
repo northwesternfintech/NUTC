@@ -9,7 +9,6 @@ namespace matching {
  * @brief Barebones matching cycle. Likely to be overridden for more logging
  */
 class BaseMatchingCycle : public MatchingCycle {
-protected:
     TickerMapping tickers_;
     std::vector<std::shared_ptr<traders::GenericTrader>>& traders_; // move elsewhere
     const uint64_t ORDER_EXPIRE_TICKS;
@@ -26,6 +25,12 @@ public:
     {}
 
 protected:
+    auto&
+    get_tickers()
+    {
+        return tickers_;
+    }
+
     virtual void before_cycle_(uint64_t) override;
 
     virtual std::vector<stored_order> collect_orders(uint64_t) override;

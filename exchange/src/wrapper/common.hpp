@@ -2,7 +2,7 @@
 
 // Common headers
 
-#include "wrapper/config.h"
+#include "wrapper/config.hpp"
 #include "wrapper/logging.hpp"
 
 #include <cassert>

@@ -48,6 +48,8 @@ process_arguments(int argc, const char** argv)
         return mode::dev;
     if (program.get<bool>("--bots-only"))
         return mode::bots_only;
+    if (program.get<bool>("--sandbox"))
+        return mode::sandbox;
     return mode::normal;
 }
 

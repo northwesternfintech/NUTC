@@ -8,6 +8,7 @@
 
 namespace nutc {
 namespace matching {
+
 class DevMatchingCycle : public BaseMatchingCycle {
     metrics::TickerMetricsPusher pusher;
 
@@ -38,8 +39,8 @@ protected:
     post_cycle_(uint64_t new_tick) override
     {
         pusher.report_current_tick(new_tick);
-        pusher.report_trader_stats(tickers_);
-        pusher.report_ticker_stats(tickers_);
+        pusher.report_trader_stats(get_tickers());
+        pusher.report_ticker_stats(get_tickers());
         BaseMatchingCycle::post_cycle_(new_tick);
     }
 };

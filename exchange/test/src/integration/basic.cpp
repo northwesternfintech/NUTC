@@ -225,7 +225,7 @@ TEST_F(IntegrationBasicAlgo, DisableTrader)
     trader2->modify_holdings("ABC", 1000); // NOLINT
     trader2->add_order({sell, "ABC", 100.0, 100});
 
-    traders::TraderContainer::get_instance().remove_trader(trader1);
+    trader1->disable();
 
     std::vector<std::shared_ptr<traders::GenericTrader>> traders{trader1, trader2};
     TestMatchingCycle cycle{{"ABC"}, traders};
