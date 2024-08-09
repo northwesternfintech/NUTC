@@ -1,6 +1,6 @@
 #pragma once
 
-#include "exchange/config/static/config.h"
+#include "exchange/config/static/config.hpp"
 #include "ticker_config.hpp"
 
 #include <fmt/format.h>

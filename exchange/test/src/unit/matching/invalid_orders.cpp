@@ -14,7 +14,7 @@ class UnitInvalidOrders : public ::testing::Test {
 protected:
     using TestTrader = nutc::test_utils::TestTrader;
     static constexpr const int DEFAULT_QUANTITY = 1000;
-    TraderContainer& manager_ = nutc::traders::TraderContainer::get_instance();
+    TraderContainer manager_;
     nutc::traders::GenericTrader& trader1 =
         *manager_.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
     nutc::traders::GenericTrader& trader2 =
@@ -33,7 +33,7 @@ protected:
     std::vector<nutc::matching::stored_match>
     add_to_engine_(const stored_order& order)
     {
-		orderbook_.add_order(order);
+        orderbook_.add_order(order);
         return engine_.match_orders(orderbook_);
     }
 };

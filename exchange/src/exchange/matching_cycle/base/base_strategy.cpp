@@ -6,10 +6,9 @@ void
 BaseMatchingCycle::before_cycle_(uint64_t)
 {
     for (auto& [ticker_info, _, symbol] : tickers_) {
-        auto& bot_container = ticker_info.bot_container;
-        auto& orderbook = ticker_info.orderbook;
-
-        bot_container.generate_orders(orderbook.get_midprice());
+        for (auto& bot_container : ticker_info.bot_containers) {
+            bot_container.generate_orders(ticker_info.orderbook.get_midprice());
+        }
     }
 }
 
@@ -17,7 +16,7 @@ std::vector<stored_order>
 BaseMatchingCycle::collect_orders(uint64_t)
 {
     std::vector<stored_order> orders;
-    for (const std::shared_ptr<traders::GenericTrader>& trader : traders_) {
+    for (const auto& trader : trader_container.get_traders()) {
         auto incoming_orders = trader->read_orders();
         for (auto& order : incoming_orders) {
             // TODO: penalize?
@@ -77,7 +76,7 @@ BaseMatchingCycle::handle_matches_(std::vector<stored_match> matches)
 
     messages::tick_update updates{ob_updates, glz_matches};
     std::string update_str = glz::write_json(updates);
-    for (const auto& trader : traders_) {
+    for (const auto& trader : trader_container.get_traders()) {
         trader->send_message(update_str);
     }
 }

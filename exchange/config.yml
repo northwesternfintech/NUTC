@@ -13,35 +13,37 @@ tickers:
     start_price: 100
     bots:
       - type: "market_maker"
-        number_of_bots: 100
-        average_capital: 250000
-        std_dev_capital: 5000
+        number_of_bots: 50
+        average_capital: 200000
+        std_dev_capital: 50000
       - type: "retail"
-        number_of_bots: 0
-        average_capital: 1000
-        std_dev_capital: 200
+        number_of_bots: 250
+        average_capital: 5000
+        std_dev_capital: 2000
 
-  - ticker: "LTC"
-    start_price: 200
-    bots:
-      - type: "market_maker"
-        number_of_bots: 100
-        average_capital: 100000
-        std_dev_capital: 25000
+        # perfect: 5/250000/5000, 25/1000/200
 
-      - type: "retail"
-        number_of_bots: 0
-        average_capital: 750
-        std_dev_capital: 100
-
-  - ticker: "BTC"
-    start_price: 50
-    bots:
-      - type: "market_maker"
-        number_of_bots: 100
-        average_capital: 100000
-        std_dev_capital: 10000
-      - type: "retail"
-        number_of_bots: 0
-        average_capital: 2000
-        std_dev_capital: 1000
+  # - ticker: "LTC"
+  #   start_price: 200
+  #   bots:
+  #     - type: "market_maker"
+  #       number_of_bots: 10
+  #       average_capital: 100000
+  #       std_dev_capital: 25000
+  #
+  #     - type: "retail"
+  #       number_of_bots: 100
+  #       average_capital: 7500
+  #       std_dev_capital: 100
+  #
+  # - ticker: "BTC"
+  #   start_price: 50
+  #   bots:
+  #     - type: "market_maker"
+  #       number_of_bots: 10
+  #       average_capital: 100000
+  #       std_dev_capital: 10000
+  #     - type: "retail"
+  #       number_of_bots: 100
+  #       average_capital: 2000
+  #       std_dev_capital: 1000

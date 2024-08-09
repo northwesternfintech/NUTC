@@ -2,6 +2,7 @@
 
 #include "exchange/matching_cycle/base/base_strategy.hpp"
 #include "exchange/orders/ticker_info.hpp"
+#include "exchange/traders/trader_container.hpp"
 
 #include <memory>
 #include <string>
@@ -16,8 +17,7 @@ public:
     std::unique_ptr<matching::stored_order> last_order;
 
     TestMatchingCycle(
-        std::vector<std::string> ticker_names,
-        std::vector<std::shared_ptr<traders::GenericTrader>>& traders,
+        std::vector<std::string> ticker_names, traders::TraderContainer& traders,
         double order_fee = 0.0,
         uint64_t order_expire_ticks = std::numeric_limits<uint64_t>::max()
     ) :

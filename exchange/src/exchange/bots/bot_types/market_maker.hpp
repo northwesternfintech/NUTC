@@ -1,4 +1,5 @@
 #pragma once
+#include "exchange/bots/shared_bot_state.hpp"
 #include "exchange/traders/trader_types/bot_trader.hpp"
 
 #include <sys/types.h>
@@ -28,9 +29,7 @@ public:
         BotTrader(ticker, interest_limit)
     {}
 
-    bool constexpr can_leverage() const override { return true; }
-
-    void take_action(double, double theo, double variance) override;
+    void take_action(const shared_bot_state& state) override;
 
     const std::string&
     get_type() const final
@@ -39,8 +38,10 @@ public:
         return TYPE;
     }
 
+    double calculate_lean(const shared_bot_state& state);
+
 private:
-    static constexpr double avg_level_price(double new_theo, double offset);
+    void place_orders(util::Side side, double theo, double spread_offset);
 };
 
 } // namespace bots

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "exchange/bots/shared_bot_state.hpp"
 #include "exchange/traders/trader_types/bot_trader.hpp"
 
 #include <random>
@@ -24,7 +25,7 @@ public:
         BotTrader(ticker, interest_limit), AGGRESSIVENESS(generate_aggresiveness_())
     {}
 
-    void take_action(double midprice, double theo, double) override;
+    void take_action(const shared_bot_state& state) override;
 
     const std::string&
     get_type() const final

@@ -1,10 +1,10 @@
 #pragma once
 
+#include "exchange/bots/shared_bot_state.hpp"
 #include "exchange/traders/trader_types/generic_trader.hpp"
 
 #include <cassert>
 
-#include <random>
 #include <string>
 
 namespace nutc {
@@ -21,6 +21,12 @@ class BotTrader : public traders::GenericTrader {
     std::vector<messages::limit_order> orders_{};
 
 public:
+    double
+    get_holdings() const
+    {
+        return GenericTrader::get_holdings(TICKER);
+    }
+
     BotTrader(util::Ticker ticker, double interest_limit) :
         GenericTrader(generate_user_id(), interest_limit), TICKER(ticker),
         INTEREST_LIMIT(interest_limit)
@@ -31,9 +37,8 @@ public:
     BotTrader& operator=(const BotTrader& other) = delete;
     BotTrader& operator=(BotTrader&& other) = delete;
 
-    // Bots should override if they shouldn't be able to leverage
     bool
-    can_leverage() const override
+    can_leverage() const final
     {
         return true;
     }
@@ -85,7 +90,7 @@ public:
     /**
      * midprice, theo
      */
-    virtual void take_action(double, double, double) = 0;
+    virtual void take_action(const bots::shared_bot_state& shared_state) = 0;
 
     std::vector<messages::limit_order>
     read_orders() override
@@ -96,15 +101,7 @@ public:
     }
 
 protected:
-    static double
-    generate_gaussian_noise(double mean, double stddev)
-    {
-        static std::random_device rand{};
-        static std::mt19937 gen{rand()};
-        static std::normal_distribution<double> distr{mean, stddev};
-
-        return distr(gen);
-    }
+    static double generate_gaussian_noise(double mean, double stddev);
 
     [[nodiscard]] double
     compute_net_exposure_() const
@@ -113,15 +110,23 @@ protected:
     }
 
     void
-    add_order(util::Side side, double price, double quantity, bool ioc)
+    add_limit_order(
+        util::Side side, util::decimal_price price, double quantity, bool ioc
+    )
     {
         orders_.emplace_back(side, TICKER, price, quantity, ioc);
+    }
+
+    void
+    add_market_order(util::Side side, double quantity)
+    {
+        orders_.emplace_back(messages::make_market_order(side, TICKER, quantity));
     }
 
     double
     compute_capital_tolerance_()
     {
-        return (1 - get_capital_utilization()) * (get_interest_limit() / 3);
+        return (1 - get_capital_utilization()) * (get_interest_limit() / 2);
     }
 
     void
@@ -159,7 +164,7 @@ protected:
     {}
 
 private:
-    static uint64_t
+    static inline uint64_t
     get_and_increment_user_id()
     {
         static uint64_t user_id = 0;

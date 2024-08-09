@@ -115,11 +115,11 @@ Config::get_global_config_(const YAML::Node& full_config)
         throw_undef_err("global/order_expiration_ticks");
     if (!sandbox_secs.IsDefined())
         throw_undef_err("global/sandbox_trial_seconds");
-    return {starting_capital.as<int>(),
-            wait_secs.as<size_t>(),
-            exp_ticks.as<size_t>(),
-            sandbox_secs.as<unsigned int>(),
-            order_fee.IsDefined() ? order_fee.as<double>() : 0};
+    return {
+        starting_capital.as<int>(), wait_secs.as<size_t>(), exp_ticks.as<size_t>(),
+        sandbox_secs.as<unsigned int>(),
+        order_fee.IsDefined() ? order_fee.as<double>() : 0
+    };
 }
 
 } // namespace config

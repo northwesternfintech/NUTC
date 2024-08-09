@@ -1,7 +1,7 @@
 #pragma once
 
-#include "shared/types/ticker.hpp"
 #include "shared/types/position.hpp"
+#include "shared/types/ticker.hpp"
 #include "util.hpp"
 
 #include <fmt/format.h>
