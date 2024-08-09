@@ -1,17 +1,16 @@
 #include "shared/config/config.h"
-#include "shared/file_operations/file_operations.hpp"
-#include "shared/firebase/firebase.hpp"
-#include "wrapper/logging.hpp"
 #include "wrapper/messaging/comms.hpp"
 #include "wrapper/pywrapper/pywrapper.hpp"
 #include "wrapper/resource_limits.hpp"
 
 #include <argparse/argparse.hpp>
 #include <pybind11/pybind11.h>
+#include <sys/prctl.h>
+
+#include <csignal>
 
 #include <algorithm>
 #include <iostream>
-#include <optional>
 #include <string>
 
 struct wrapper_args {
@@ -100,6 +99,7 @@ catch_sigint(int)
 int
 main(int argc, const char** argv)
 {
+    prctl(PR_SET_PDEATHSIG, SIGKILL);
     std::signal(SIGINT, catch_sigint);
     using comms = nutc::comms::ExchangeProxy;
     auto [verbosity, uid, algo_id, development_mode] = process_arguments(argc, argv);

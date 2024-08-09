@@ -26,6 +26,13 @@ process_arguments(int argc, const char** argv)
         .implicit_value(true)
         .nargs(0);
 
+    program.add_argument("--sandbox")
+        .help("Start crow server to support sandbox")
+        .action([](const auto& /* unused */) {})
+        .default_value(false)
+        .implicit_value(true)
+        .nargs(0);
+
     program.add_argument("-V", "--version")
         .help("prints version information and exits")
         .action([&](const auto& /* unused */) {

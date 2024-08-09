@@ -70,7 +70,7 @@ WrapperHandle::wrapper_binary_path()
 WrapperHandle::~WrapperHandle()
 {
     if (wrapper_.running()) {
-        wrapper_.terminate();
+        kill(wrapper_.id(), SIGTERM);
         wrapper_.wait();
     }
 }
@@ -83,7 +83,7 @@ WrapperHandle::WrapperHandle(
         force_unwrap_optional(
             nutc::firebase::get_algo(remote_uid, algo_id),
             fmt::format(
-                "Could not read algoid {} of uid {} from Firebase", algo_id, remote_uid
+                "Could not read algoid {} of uid {} from firebase", algo_id, remote_uid
             )
         )
     )

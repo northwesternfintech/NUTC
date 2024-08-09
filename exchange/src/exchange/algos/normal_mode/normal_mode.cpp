@@ -3,6 +3,7 @@
 #include "exchange/curl/curl.hpp"
 #include "exchange/traders/trader_types/algo_trader.hpp"
 #include "exchange/wrappers/creation/rmq_wrapper_init.hpp"
+#include "exchange/logging.hpp"
 
 #include <fmt/format.h>
 
@@ -16,8 +17,8 @@ NormalModeAlgoInitializer::initialize_trader_container(
     traders::TraderContainer& traders, double start_capital
 ) const
 {
-    constexpr const std::array<const char*, 3> REQUIRED_DB_FIELDS = {
-        "latestAlgoId", "firstName", "lastName"
+    constexpr const std::array<const char*, 4> REQUIRED_DB_FIELDS = {
+        "latestAlgoId", "firstName", "lastName", "algos"
     };
     glz::json_t::object_t firebase_users = get_remote_traders();
     for (const auto& user_it : firebase_users) {
@@ -37,9 +38,15 @@ NormalModeAlgoInitializer::initialize_trader_container(
             user["lastName"].get<std::string>()
         );
         std::string algo_id = user["latestAlgoId"].get<std::string>();
-        traders.add_trader<traders::LocalTrader>(
-            user_id, algo_id, full_name, start_capital
-        );
+
+        try {
+            traders.add_trader<traders::LocalTrader>(
+                user_id, algo_id, full_name, start_capital
+            );
+			log_i(main, "Created user");
+        } catch (const std::runtime_error& err) {
+			log_w(main, "Failed to create user {}", user_id);
+		}
     }
 
     rabbitmq::WrapperInitializer::send_start_time(traders.get_traders(), WAIT_SECS);

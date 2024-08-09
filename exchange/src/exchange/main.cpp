@@ -12,6 +12,8 @@
 #include "exchange/traders/trader_container.hpp"
 #include "shared/util.hpp"
 
+#include <sys/prctl.h>
+
 #include <csignal>
 
 namespace {
@@ -33,7 +35,6 @@ load_tickers(traders::TraderContainer& traders)
 std::unique_ptr<matching::MatchingCycle>
 create_cycle(traders::TraderContainer& traders, const auto& mode)
 {
-    // TODO: not singleton
     auto tickers = load_tickers(traders);
     auto exp = config::Config::get().constants().ORDER_EXPIRATION_TICKS;
 
@@ -68,10 +69,9 @@ main(int argc, const char** argv)
     // Wrappers may unexpectedly exit for many reasons. Should not affect the exchange
     std::signal(SIGPIPE, SIG_IGN);
 
-    auto mode = config::process_arguments(argc, argv);
-
     traders::TraderContainer traders{};
 
+    auto mode = config::process_arguments(argc, argv);
     algos::AlgoInitializer::get_algo_initializer(mode)->initialize_algo_management(
         traders
     );
