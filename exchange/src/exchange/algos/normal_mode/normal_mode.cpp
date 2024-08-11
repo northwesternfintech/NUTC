@@ -1,9 +1,9 @@
 #include "normal_mode.hpp"
 
 #include "exchange/curl/curl.hpp"
+#include "exchange/logging.hpp"
 #include "exchange/traders/trader_types/algo_trader.hpp"
 #include "exchange/wrappers/creation/rmq_wrapper_init.hpp"
-#include "exchange/logging.hpp"
 
 #include <fmt/format.h>
 
@@ -43,10 +43,10 @@ NormalModeAlgoInitializer::initialize_trader_container(
             traders.add_trader<traders::AlgoTrader>(
                 user_id, algo_id, full_name, start_capital
             );
-			log_i(main, "Created user");
+            log_i(main, "Created user");
         } catch (const std::runtime_error& err) {
-			log_w(main, "Failed to create user {}", user_id);
-		}
+            log_w(main, "Failed to create user {}", user_id);
+        }
     }
 
     rabbitmq::WrapperInitializer::send_start_time(traders.get_traders(), WAIT_SECS);

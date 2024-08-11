@@ -1,12 +1,12 @@
 #pragma once
+#include <cstdint>
 
 #ifdef __linux__
 #  include <sys/resource.h>
 
-namespace nutc {
-namespace limits {
-bool
-set_memory_limit(size_t limit_in_mb)
+namespace nutc::limits {
+inline bool
+set_memory_limit(std::size_t limit_in_mb)
 {
     struct rlimit limit;
     limit.rlim_cur = limit_in_mb * 1024 * 1024; // Set the soft limit.
@@ -17,17 +17,14 @@ set_memory_limit(size_t limit_in_mb)
     }
     return true;
 }
-} // namespace limits
-} // namespace nutc
+} // namespace nutc::limits
 #else
-namespace nutc {
-namespace limits {
+namespace nutc::limits {
 bool
-set_memory_limit(size_t)
+set_memory_limit(std::size_t)
 {
     return false;
 }
 
-} // namespace limits
-} // namespace nutc
+} // namespace nutc::limits
 #endif

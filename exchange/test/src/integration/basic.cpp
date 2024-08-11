@@ -29,7 +29,7 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
     trader2->add_order({sell, "ABC", 100.0, 100});
 
     TraderContainer traders{trader1, trader2};
-    TestMatchingCycleInterface cycle{{"ABC"}, traders};
+    TestMatchingCycle cycle{{"ABC"}, traders};
 
     cycle.wait_for_order({buy, "ABC", 100.0, 10});
 }
@@ -42,7 +42,7 @@ TEST_F(IntegrationBasicAlgo, RemoveIOCOrder)
     trader2->add_order({sell, "ABC", 100.0, 100});
 
     TraderContainer traders{trader1, trader2};
-    TestMatchingCycleInterface cycle{{"ABC"}, traders};
+    TestMatchingCycle cycle{{"ABC"}, traders};
 
     cycle.on_tick(0);
     usleep(500);
@@ -61,7 +61,7 @@ TEST_F(IntegrationBasicAlgo, MarketOrderBuy)
     trader2->add_order({sell, "ABC", 100.0, 100});
 
     TraderContainer traders{trader1, trader2};
-    TestMatchingCycleInterface cycle{
+    TestMatchingCycle cycle{
         {"ABC", "DEF"},
         traders
     };
@@ -78,7 +78,7 @@ TEST_F(IntegrationBasicAlgo, MarketOrderSell)
     trader2->modify_capital(1000);
 
     TraderContainer traders{trader1, trader2};
-    TestMatchingCycleInterface cycle{
+    TestMatchingCycle cycle{
         {"ABC", "DEF"},
         traders
     };
@@ -94,7 +94,7 @@ TEST_F(IntegrationBasicAlgo, ManyUpdates)
     trader2->modify_holdings("ABC", 100000); // NOLINT
 
     TraderContainer traders{trader1, trader2};
-    TestMatchingCycleInterface cycle{{"ABC"}, traders};
+    TestMatchingCycle cycle{{"ABC"}, traders};
 
     for (double i = 0; i < 10000; i++) {
         trader2->add_order({sell, "ABC", i / 100, 1});
@@ -113,7 +113,7 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
     trader2->modify_holdings("ABC", 10000); // NOLINT
 
     TraderContainer traders{trader1, trader2};
-    TestMatchingCycleInterface cycle{
+    TestMatchingCycle cycle{
         {"ABC", "DEF"},
         traders
     };
@@ -134,7 +134,7 @@ TEST_F(IntegrationBasicAlgo, MultipleLevelOrder)
     trader2->modify_holdings("ABC", 1000); // NOLINT
 
     TraderContainer traders{trader1, trader2};
-    TestMatchingCycleInterface cycle{
+    TestMatchingCycle cycle{
         {"ABC", "DEF"},
         traders
     };
@@ -155,7 +155,7 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateSell)
     trader2->add_order({buy, "ABC", 102.0, 102});
 
     TraderContainer traders{trader1, trader2};
-    TestMatchingCycleInterface cycle{
+    TestMatchingCycle cycle{
         {"ABC", "DEF"},
         traders
     };
@@ -177,7 +177,7 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateBuy)
     trader2->add_order({sell, "ABC", 100.0, 100});
 
     TraderContainer traders{trader1, trader2};
-    TestMatchingCycleInterface cycle{
+    TestMatchingCycle cycle{
         {"ABC", "DEF"},
         traders
     };
@@ -203,7 +203,7 @@ TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
     trader2->add_order({sell, "ABC", 100.0, 100});
 
     TraderContainer traders{trader1, trader2};
-    TestMatchingCycleInterface cycle{{"ABC"}, traders};
+    TestMatchingCycle cycle{{"ABC"}, traders};
 
     cycle.wait_for_order({buy, "ABC", 100.0, 10});
 
@@ -227,7 +227,7 @@ TEST_F(IntegrationBasicAlgo, DisableTrader)
     trader1->disable();
 
     TraderContainer traders{trader1, trader2};
-    TestMatchingCycleInterface cycle{{"ABC"}, traders};
+    TestMatchingCycle cycle{{"ABC"}, traders};
 
     cycle.on_tick(0);
     sleep(1);

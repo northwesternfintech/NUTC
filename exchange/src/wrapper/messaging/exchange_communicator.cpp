@@ -1,7 +1,7 @@
-#include "comms.hpp"
+#include "exchange_communicator.hpp"
 
 #include "shared/config/config.h"
-#include "shared/types/decimal_price.hpp"
+#include "shared/messages_exchange_to_wrapper.hpp"
 #include "wrapper/pywrapper/pywrapper.hpp"
 
 #include <boost/asio.hpp>
@@ -11,18 +11,17 @@
 #include <chrono>
 
 #include <iostream>
-#include <limits>
 #include <stdexcept>
 
 namespace nutc {
-namespace comms {
+namespace messaging {
 
 // todo: split into helpers
 
 using start_tick_variant_t = std::variant<start_time, tick_update>;
 
 void
-ExchangeProxy::main_event_loop(const std::string& uid)
+ExchangeCommunicator::main_event_loop(const std::string& uid)
 {
     while (true) {
         auto data = consume_message<start_tick_variant_t>();
@@ -34,7 +33,7 @@ ExchangeProxy::main_event_loop(const std::string& uid)
 }
 
 void
-ExchangeProxy::process_message(auto&& message, const std::string& uid)
+ExchangeCommunicator::process_message(auto&& message, const std::string& uid)
 {
     using MessageType = std::decay_t<decltype(message)>;
     if constexpr (std::is_same_v<MessageType, tick_update>) {
@@ -46,7 +45,7 @@ ExchangeProxy::process_message(auto&& message, const std::string& uid)
 }
 
 void
-ExchangeProxy::handle_orderbook_update(const util::position& update)
+ExchangeCommunicator::handle_orderbook_update(const util::position& update)
 {
     try {
         std::string side = update.side == util::Side::buy ? "BUY" : "SELL";
@@ -59,7 +58,7 @@ ExchangeProxy::handle_orderbook_update(const util::position& update)
 }
 
 void
-ExchangeProxy::handle_match(const match& match, const std::string& uid)
+ExchangeCommunicator::handle_match(const match& match, const std::string& uid)
 {
     try {
         std::string ticker = match.position.ticker;
@@ -86,7 +85,7 @@ ExchangeProxy::handle_match(const match& match, const std::string& uid)
 
 template <typename T>
 bool
-ExchangeProxy::publish_order(const T& order)
+ExchangeCommunicator::publish_order(const T& order)
 {
     if (limiter.should_rate_limit()) {
         return false;
@@ -98,7 +97,7 @@ ExchangeProxy::publish_order(const T& order)
 }
 
 void
-ExchangeProxy::publish_message(const std::string& message)
+ExchangeCommunicator::publish_message(const std::string& message)
 {
     static constinit std::mutex lock{};
     lock.lock();
@@ -106,15 +105,15 @@ ExchangeProxy::publish_message(const std::string& message)
     lock.unlock();
 }
 
-algorithm_t
-ExchangeProxy::consume_algorithm()
+messages::algorithm_content
+ExchangeCommunicator::consume_algorithm()
 {
-    return consume_message<algorithm_t>();
+    return consume_message<algorithm_content>();
 }
 
 template <typename T>
 T
-ExchangeProxy::consume_message()
+ExchangeCommunicator::consume_message()
 {
     std::string buf{};
     std::getline(std::cin, buf);
@@ -133,7 +132,7 @@ ExchangeProxy::consume_message()
 }
 
 std::function<bool(const std::string&, const std::string&, double, double, bool)>
-ExchangeProxy::limit_order_func()
+ExchangeCommunicator::limit_order_func()
 {
     return [&](const std::string& side, const auto& ticker, const auto& price,
                const auto& quantity, bool ioc) {
@@ -151,7 +150,7 @@ ExchangeProxy::limit_order_func()
 }
 
 std::function<bool(const std::string&, const std::string&, double)>
-ExchangeProxy::market_order_func()
+ExchangeCommunicator::market_order_func()
 {
     return [&](const std::string& side, const std::string& ticker,
                const double& quantity) {
@@ -170,7 +169,7 @@ ExchangeProxy::market_order_func()
 }
 
 void
-ExchangeProxy::publish_init_message()
+ExchangeCommunicator::publish_init_message()
 {
     static auto message = glz::write_json(messages::init_message{}); // NOLINT
     publish_message(message);
@@ -179,7 +178,7 @@ ExchangeProxy::publish_init_message()
 // If wait_blocking is disabled, we block until we *receive* the message, but not
 // after Otherwise, we block until the start time
 void
-ExchangeProxy::wait_for_start_time()
+ExchangeCommunicator::wait_for_start_time()
 {
     using nanoseconds = std::chrono::nanoseconds;
     using time_point = std::chrono::high_resolution_clock::time_point;

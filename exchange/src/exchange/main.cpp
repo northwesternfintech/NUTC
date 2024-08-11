@@ -16,6 +16,8 @@
 
 #include <csignal>
 
+#include <utility>
+
 namespace {
 using namespace nutc; // NOLINT
 
@@ -35,24 +37,26 @@ load_tickers(traders::TraderContainer& traders)
 std::unique_ptr<matching::MatchingCycleInterface>
 create_cycle(traders::TraderContainer& traders, const auto& mode)
 {
+    using util::Mode;
     auto tickers = load_tickers(traders);
-    auto exp = config::Config::get().constants().ORDER_EXPIRATION_TICKS;
 
-    if (mode == util::Mode::normal) {
-        return std::make_unique<matching::BaseMatchingCycle>(tickers, traders, exp);
+    switch (mode) {
+        case Mode::normal:
+            return std::make_unique<matching::BaseMatchingCycle>(tickers, traders);
+        case Mode::sandbox:
+            return std::make_unique<matching::SandboxMatchingCycle>(tickers, traders);
+        case Mode::bots_only:
+        case Mode::dev:
+            return std::make_unique<matching::DevMatchingCycle>(tickers, traders);
     }
-    else if (mode == util::Mode::sandbox) {
-        return std::make_unique<matching::SandboxMatchingCycle>(tickers, traders, exp);
-    }
-    else {
-        return std::make_unique<matching::DevMatchingCycle>(tickers, traders, exp);
-    }
+
+    std::unreachable();
 }
 
 void
-main_event_loop(auto cycle)
+main_event_loop(std::unique_ptr<matching::MatchingCycleInterface> cycle)
 {
-    uint64_t tick = 0;
+    uint64_t tick{};
     while (true) {
         cycle->on_tick(tick++);
     }
@@ -65,13 +69,10 @@ main(int argc, const char** argv)
 {
     logging::init(quill::LogLevel::Info);
     std::signal(SIGINT, [](auto) { std::exit(0); });
-
-    // Wrappers may unexpectedly exit for many reasons. Should not affect the exchange
     std::signal(SIGPIPE, SIG_IGN);
 
-    traders::TraderContainer traders{};
-
     auto mode = config::process_arguments(argc, argv);
+    traders::TraderContainer traders{};
     algos::AlgoInitializer::get_algo_initializer(mode)->initialize_algo_management(
         traders
     );

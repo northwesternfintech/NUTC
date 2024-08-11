@@ -169,11 +169,12 @@ target_link_libraries(EXCHANGE_exe PRIVATE prometheus-cpp::prometheus-cpp)
 add_library(
     WRAPPER_lib OBJECT
     
-    src/wrapper/messaging/comms.cpp
+    src/wrapper/messaging/exchange_communicator.cpp
     src/wrapper/pywrapper/pywrapper.cpp
     src/wrapper/pywrapper/rate_limiter.cpp
     # Utils
     src/wrapper/logging.cpp
+    src/wrapper/config/argparse.cpp
 )
 
 target_include_directories(

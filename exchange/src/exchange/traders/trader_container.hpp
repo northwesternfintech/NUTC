@@ -43,7 +43,7 @@ public:
     add_trader(std::shared_ptr<GenericTrader> trader)
     {
         traders_.push_back(std::move(trader));
-		volatile auto test = traders_[0];
+        volatile auto test = traders_[0];
     }
 
     template <typename T, typename... Args>

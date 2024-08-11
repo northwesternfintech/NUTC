@@ -1,6 +1,6 @@
 #pragma once
 
-#include "wrapper/config.h"
+#include "wrapper/config/config.h"
 
 #include <quill/Quill.h>
 

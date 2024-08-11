@@ -1,7 +1,5 @@
 #include "wrapper/logging.hpp"
 
-#include "config.h"
-
 #include <quill/Quill.h>
 
 #if defined(__CYGWIN__) || defined(__MINGW32__) || defined(__MINGW64__)                \

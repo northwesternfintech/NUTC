@@ -12,18 +12,14 @@ std::string mo_to_string(const nutc::messages::limit_order& order);
 namespace nutc {
 namespace test {
 
-class TestMatchingCycleInterface : public matching::BaseMatchingCycle {
+class TestMatchingCycle : public matching::BaseMatchingCycle {
 public:
     std::unique_ptr<matching::stored_order> last_order;
 
-    TestMatchingCycleInterface(
+    TestMatchingCycle(
         std::vector<std::string> ticker_names, traders::TraderContainer& traders,
-        double order_fee = 0.0,
-        uint64_t order_expire_ticks = std::numeric_limits<uint64_t>::max()
-    ) :
-        matching::BaseMatchingCycle{
-            create_tickers(ticker_names, order_fee), traders, order_expire_ticks
-        }
+        double order_fee = 0.0
+    ) : matching::BaseMatchingCycle{create_tickers(ticker_names, order_fee), traders}
     {}
 
     // Note: uses tick=0. If using something that relies on tick, it will not work

@@ -13,7 +13,7 @@ namespace nutc {
 namespace test {
 
 void
-TestMatchingCycleInterface::wait_for_order(const messages::limit_order& order)
+TestMatchingCycle::wait_for_order(const messages::limit_order& order)
 {
     log_i(testing, "Waiting for order {}", glz::write_json(order));
     auto last = last_order == nullptr
@@ -27,7 +27,7 @@ TestMatchingCycleInterface::wait_for_order(const messages::limit_order& order)
 }
 
 std::vector<matching::stored_match>
-TestMatchingCycleInterface::match_orders_(std::vector<matching::stored_order> orders)
+TestMatchingCycle::match_orders_(std::vector<matching::stored_order> orders)
 {
     if (!orders.empty()) {
         auto order = orders.back();
@@ -42,7 +42,7 @@ TestMatchingCycleInterface::match_orders_(std::vector<matching::stored_order> or
 }
 
 matching::TickerMapping
-TestMatchingCycleInterface::create_tickers(
+TestMatchingCycle::create_tickers(
     const std::vector<std::string>& ticker_names, double order_fee
 )
 {

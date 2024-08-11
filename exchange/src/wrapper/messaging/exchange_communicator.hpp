@@ -11,15 +11,10 @@
 
 namespace nutc {
 
-namespace comms {
-using init_message = nutc::messages::init_message;
-using limit_order = nutc::messages::limit_order;
-using tick_update = nutc::messages::tick_update;
-using match = nutc::messages::match;
-using start_time = nutc::messages::start_time;
-using algorithm_t = nutc::messages::algorithm_content;
+namespace messaging {
+using namespace nutc::messages;
 
-class ExchangeProxy {
+class ExchangeCommunicator {
 public:
     static void publish_init_message();
 
@@ -33,7 +28,7 @@ public:
 
     void main_event_loop(const std::string& uid);
 
-    static algorithm_t consume_algorithm();
+    static messages::algorithm_content consume_algorithm();
 
 private:
     rate_limiter::RateLimiter limiter;
@@ -55,5 +50,5 @@ private:
     static T consume_message();
 };
 
-} // namespace comms
+} // namespace messaging
 } // namespace nutc
