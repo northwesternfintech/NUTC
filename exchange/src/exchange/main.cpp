@@ -12,8 +12,6 @@
 #include "exchange/traders/trader_container.hpp"
 #include "shared/util.hpp"
 
-#include <sys/prctl.h>
-
 #include <csignal>
 
 #include <utility>

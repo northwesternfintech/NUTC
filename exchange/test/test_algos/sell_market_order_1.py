@@ -1,7 +1,7 @@
 def place_market_order(side: str, ticker: str, quantity: float) -> None:
     """Place a market order - DO NOT MODIFY""" 
 
-def place_limit_order(side: str, ticker: str, price: float, quantity: float, ioc: bool = False) -> None:
+def place_limit_order(side: str, ticker: str, quantity: float, price: float, ioc: bool = False) -> None:
     """Place a limit order - DO NOT MODIFY""" 
 
 
@@ -13,7 +13,7 @@ class Strategy:
         place_market_order("SELL", "ABC", 5)
 
     def on_trade_update(
-        self, ticker: str, side: str, price: float, quantity: float
+        self, ticker: str, side: str, quantity: float, price: float
     ) -> None:
         """Called whenever two orders match. Could be one of your orders, or two other people's orders.
         Parameters
@@ -28,10 +28,10 @@ class Strategy:
         """
         print(f"Python Trade update: {ticker} {side} {price} {quantity}")
         if(ticker=="ABC" and price <= 101.0 and price>=99.0 and quantity == 1):
-            place_limit_order("BUY", "DEF", 100, 1)
+            place_limit_order("BUY", "DEF", 1, 100)
 
     def on_orderbook_update(
-        self, ticker: str, side: str, price: float, quantity: float
+        self, ticker: str, side: str, quantity: float, price: float
     ) -> None:
         """Called whenever the orderbook changes. This could be because of a trade, or because of a new order, or both.
         Parameters

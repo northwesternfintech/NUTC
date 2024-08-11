@@ -2,10 +2,19 @@
 #include <cstdint>
 
 #ifdef __linux__
+#  include <sys/prctl.h>
 #  include <sys/resource.h>
 
-namespace nutc::limits {
-inline bool
+#  include <csignal>
+
+namespace nutc::system {
+[[nodiscard]] inline bool
+kill_on_exchange_death()
+{
+    return !prctl(PR_SET_PDEATHSIG, SIGKILL);
+}
+
+[[nodiscard]] inline bool
 set_memory_limit(std::size_t limit_in_mb)
 {
     struct rlimit limit;
@@ -17,14 +26,20 @@ set_memory_limit(std::size_t limit_in_mb)
     }
     return true;
 }
-} // namespace nutc::limits
+} // namespace nutc::system
 #else
-namespace nutc::limits {
-bool
-set_memory_limit(std::size_t)
+namespace nutc::system {
+[[nodiscard]] inline bool
+kill_on_exchange_death()
 {
-    return false;
+    return true;
 }
 
-} // namespace nutc::limits
+[[nodiscard]] inline bool
+set_memory_limit(std::size_t)
+{
+    return true;
+}
+
+} // namespace nutc::system
 #endif

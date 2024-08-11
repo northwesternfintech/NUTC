@@ -18,7 +18,7 @@ BM_AddRangeOfTimes(benchmark::State& state)
     for (auto _ : state) {
         for (uint16_t level = 0; level < max_level; level++) {
             decimal_price.price = level;
-            tracker.report_quantity(util::Side::sell, decimal_price, level);
+            tracker.report_quantity(util::Side::sell, level, decimal_price);
         }
         for (uint16_t level = 0; level < max_level; level++) {
             decimal_price.price = level;
@@ -38,7 +38,7 @@ BM_RandomIterate(benchmark::State& state)
 
     std::vector<uint16_t> random_levels(max_level);
     std::iota(random_levels.begin(), random_levels.end(), 0);
-	std::vector<uint16_t> random_levels_2(random_levels);
+    std::vector<uint16_t> random_levels_2(random_levels);
 
     std::random_device rd;
     std::mt19937 g(rd());
@@ -49,7 +49,7 @@ BM_RandomIterate(benchmark::State& state)
     for (auto _ : state) {
         for (uint16_t level : random_levels) {
             decimal_price.price = level;
-            tracker.report_quantity(util::Side::sell, decimal_price, level);
+            tracker.report_quantity(util::Side::sell, level, decimal_price);
         }
         for (uint16_t level : random_levels_2) {
             decimal_price.price = level;

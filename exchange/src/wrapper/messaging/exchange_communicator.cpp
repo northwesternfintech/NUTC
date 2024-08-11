@@ -2,6 +2,8 @@
 
 #include "shared/config/config.h"
 #include "shared/messages_exchange_to_wrapper.hpp"
+#include "shared/messages_wrapper_to_exchange.hpp"
+#include "shared/types/position.hpp"
 #include "wrapper/pywrapper/pywrapper.hpp"
 
 #include <boost/asio.hpp>
@@ -12,85 +14,68 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <type_traits>
 
 namespace nutc {
 namespace messaging {
 
-// todo: split into helpers
-
 using start_tick_variant_t = std::variant<start_time, tick_update>;
 
+template <>
 void
-ExchangeCommunicator::main_event_loop(const std::string& uid)
+ExchangeCommunicator::process_message(start_time&)
+{}
+
+template <>
+void
+ExchangeCommunicator::process_message(tick_update& tick_update)
+{
+    std::ranges::for_each(tick_update.ob_updates, [&](const util::position& ob_update) {
+        handle_orderbook_update(ob_update);
+    });
+    std::ranges::for_each(tick_update.matches, [&](const match& match) {
+        handle_match(match);
+    });
+}
+
+void
+ExchangeCommunicator::main_event_loop()
 {
     while (true) {
         auto data = consume_message<start_tick_variant_t>();
-        std::visit(
-            [&](auto&& arg) { process_message(std::forward<decltype(arg)>(arg), uid); },
-            std::move(data)
-        );
+        std::visit([this](auto message) { process_message(message); }, std::move(data));
     }
 }
 
 void
-ExchangeCommunicator::process_message(auto&& message, const std::string& uid)
+ExchangeCommunicator::handle_orderbook_update(const util::position& position)
 {
-    using MessageType = std::decay_t<decltype(message)>;
-    if constexpr (std::is_same_v<MessageType, tick_update>) {
-        for (const auto& update : message.ob_updates)
-            handle_orderbook_update(update);
-        for (const auto& update : message.matches)
-            handle_match(update, uid);
-    }
+    on_orderbook_update(position);
 }
 
 void
-ExchangeCommunicator::handle_orderbook_update(const util::position& update)
+ExchangeCommunicator::handle_match(const match& match)
 {
-    try {
-        std::string side = update.side == util::Side::buy ? "BUY" : "SELL";
-        nutc::pywrapper::get_ob_update_function()(
-            std::string{update.ticker}, side, double{update.price}, update.quantity
-        );
-    } catch (const py::error_already_set& e) {
-        std::cerr << e.what() << std::endl;
+    on_trade_update(match.position);
+
+    if (match.buyer_id == TRADER_ID) {
+        on_account_update(match.position, match.buyer_capital);
+    }
+    if (match.seller_id == TRADER_ID) {
+        on_account_update(match.position, match.seller_capital);
     }
 }
 
-void
-ExchangeCommunicator::handle_match(const match& match, const std::string& uid)
-{
-    try {
-        std::string ticker = match.position.ticker;
-        std::string side = match.position.side == util::Side::buy ? "BUY" : "SELL";
-        double price = match.position.price;
-        double quantity = match.position.quantity;
-
-        nutc::pywrapper::get_trade_update_function()(ticker, side, price, quantity);
-
-        if (match.buyer_id == uid) {
-            nutc::pywrapper::get_account_update_function()(
-                ticker, "BUY", price, quantity, match.buyer_capital
-            );
-        }
-        if (match.seller_id == uid) {
-            nutc::pywrapper::get_account_update_function()(
-                ticker, "SELL", price, quantity, match.seller_capital
-            );
-        }
-    } catch (const py::error_already_set& e) {
-        std::cerr << e.what() << std::endl;
-    }
-}
-
-template <typename T>
+template <typename T, typename... Args>
 bool
-ExchangeCommunicator::publish_order(const T& order)
+ExchangeCommunicator::publish_order(Args&&... args)
 {
+    static_assert(std::is_constructible_v<T, Args...>);
+
     if (limiter.should_rate_limit()) {
         return false;
     }
-    std::string message = glz::write_json(order);
+    std::string message = glz::write_json(T{std::forward<Args>(args)...});
 
     publish_message(message);
     return true;
@@ -131,47 +116,45 @@ ExchangeCommunicator::consume_message()
     return data;
 }
 
-std::function<bool(const std::string&, const std::string&, double, double, bool)>
-ExchangeCommunicator::limit_order_func()
+pywrapper::LimitOrderFunction
+ExchangeCommunicator::place_limit_order()
 {
-    return [&](const std::string& side, const auto& ticker, const auto& price,
-               const auto& quantity, bool ioc) {
+    return [this](
+               const std::string& side, const std::string& ticker, double quantity,
+               double price, bool ioc
+           ) {
         if (ticker.size() != TICKER_LENGTH) [[unlikely]] {
             return false;
         }
+
         util::Ticker ticker_arr;
         std::copy(ticker.begin(), ticker.end(), ticker_arr.arr.begin());
-
         util::Side side_enum = (side == "BUY") ? util::Side::buy : util::Side::sell;
 
-        limit_order order{side_enum, ticker_arr, price, quantity, ioc};
-        return publish_order(order);
+        return publish_order<limit_order>(side_enum, ticker_arr, quantity, price, ioc);
     };
 }
 
-std::function<bool(const std::string&, const std::string&, double)>
-ExchangeCommunicator::market_order_func()
+// TODO: check for valid side/ticker
+pywrapper::MarketOrderFunction
+ExchangeCommunicator::place_market_order()
 {
-    return [&](const std::string& side, const std::string& ticker,
-               const double& quantity) {
+    return [this](const std::string& side, const std::string& ticker, double quantity) {
         if (ticker.size() != TICKER_LENGTH) [[unlikely]] {
             return false;
         }
         util::Ticker ticker_arr;
         std::copy(ticker.begin(), ticker.end(), ticker_arr.arr.begin());
-
         util::Side side_enum = (side == "BUY") ? util::Side::buy : util::Side::sell;
 
-        limit_order order =
-            messages::make_market_order(side_enum, ticker_arr, quantity);
-        return publish_order(order);
+        return publish_order<limit_order>(side_enum, ticker_arr, quantity);
     };
 }
 
 void
-ExchangeCommunicator::publish_init_message()
+ExchangeCommunicator::report_startup_complete(bool success)
 {
-    static auto message = glz::write_json(messages::init_message{}); // NOLINT
+    auto message = glz::write_json(messages::init_message{success});
     publish_message(message);
 }
 
@@ -195,5 +178,5 @@ ExchangeCommunicator::wait_for_start_time()
     std::this_thread::sleep_until(wait_until);
 }
 
-} // namespace comms
+} // namespace messaging
 } // namespace nutc

@@ -1,6 +1,5 @@
 #include "dev_mode.hpp"
 
-#include "exchange/config/dynamic/config.hpp"
 #include "exchange/config/static/config.hpp"
 #include "exchange/traders/trader_types/algo_trader.hpp"
 #include "exchange/wrappers/creation/rmq_wrapper_init.hpp"

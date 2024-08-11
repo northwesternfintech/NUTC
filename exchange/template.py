@@ -46,7 +46,7 @@ class Strategy:
     def __init__(self) -> None:
         """Your initialization code goes here."""
 
-    def on_trade_update(self, ticker: str, side: str, price: float, quantity: float) -> None:
+    def on_trade_update(self, ticker: str, side: str, quantity: float, price: float) -> None:
         """Called whenever two orders match. Could be one of your orders, or two other people's orders.
 
         Parameters
@@ -63,7 +63,7 @@ class Strategy:
         print(f"Python Trade update: {ticker} {side} {price} {quantity}")
 
     def on_orderbook_update(
-        self, ticker: str, side: str, price: float, quantity: float
+        self, ticker: str, side: str, quantity: float, price: float
     ) -> None:
         """Called whenever the orderbook changes. This could be because of a trade, or because of a new order, or both.
 

@@ -14,7 +14,7 @@ bool
 validate_match(
     const nutc::matching::stored_match& match, util::Ticker ticker,
     const std::string& buyer_id, const std::string& seller_id, util::Side side,
-    double price, double quantity
+    double quantity, double price
 )
 {
     return match.position.ticker == ticker && match.buyer.get_id() == buyer_id
@@ -25,8 +25,8 @@ validate_match(
 
 bool
 validate_ob_update(
-    const util::position& update, util::Ticker ticker, util::Side side, double price,
-    double quantity
+    const util::position& update, util::Ticker ticker, util::Side side, double quantity,
+    double price
 )
 {
     return update.ticker == ticker && update.side == side
@@ -36,8 +36,8 @@ validate_ob_update(
 
 bool
 validate_limit_order(
-    const limit_order& update, util::Ticker ticker, util::Side side, double price,
-    double quantity
+    const limit_order& update, util::Ticker ticker, util::Side side, double quantity,
+    double price
 )
 {
     return update.position.ticker == ticker && update.position.side == side

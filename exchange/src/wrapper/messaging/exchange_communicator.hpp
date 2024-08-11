@@ -1,8 +1,8 @@
 #pragma once
 
 #include "shared/messages_exchange_to_wrapper.hpp"
-#include "shared/messages_wrapper_to_exchange.hpp"
 #include "shared/util.hpp"
+#include "wrapper/pywrapper/pywrapper.hpp"
 #include "wrapper/pywrapper/rate_limiter.hpp"
 
 #include <unistd.h>
@@ -15,39 +15,48 @@ namespace messaging {
 using namespace nutc::messages;
 
 class ExchangeCommunicator {
+    rate_limiter::RateLimiter limiter{};
+    const std::string TRADER_ID;
+    pywrapper::OrderBookUpdateFunction on_orderbook_update;
+    pywrapper::TradeUpdateFunction on_trade_update;
+    pywrapper::AccountUpdateFunction on_account_update;
+
 public:
-    static void publish_init_message();
+    ExchangeCommunicator(
+        std::string trader_id, pywrapper::OrderBookUpdateFunction ob_update,
+        pywrapper::TradeUpdateFunction trade_update,
+        pywrapper::AccountUpdateFunction account_update
+    ) :
+        TRADER_ID(std::move(trader_id)), on_orderbook_update{ob_update},
+        on_trade_update{trade_update}, on_account_update{account_update}
+    {}
 
-    std::function<bool(const std::string&, const std::string&, double, double, bool)>
-    limit_order_func();
+    void report_startup_complete(bool success);
 
-    std::function<bool(const std::string&, const std::string&, double)>
-    market_order_func();
+    pywrapper::LimitOrderFunction place_limit_order();
 
-    static void wait_for_start_time();
+    pywrapper::MarketOrderFunction place_market_order();
 
-    void main_event_loop(const std::string& uid);
+    void wait_for_start_time();
 
-    static messages::algorithm_content consume_algorithm();
+    void main_event_loop();
+
+    messages::algorithm_content consume_algorithm();
 
 private:
-    rate_limiter::RateLimiter limiter;
-
-    static void handle_orderbook_update(const util::position& update);
-    static void handle_match(const match& match, const std::string& uid);
-    template <typename T>
-    static void process_message(T&& message, const std::string& uid);
-
-    static void publish_message(const std::string& message);
+    void handle_orderbook_update(const util::position& update);
+    void handle_match(const match& match);
 
     template <typename T>
-    [[nodiscard]] bool publish_order(const T& order);
+    void process_message(T&& message);
 
-    [[nodiscard]] bool
-    publish_market_order(util::Side side, util::Ticker ticker, double quantity);
+    void publish_message(const std::string& message);
+
+    template <typename T, typename... Args>
+    [[nodiscard]] bool publish_order(Args&&...);
 
     template <typename T>
-    static T consume_message();
+    T consume_message();
 };
 
 } // namespace messaging

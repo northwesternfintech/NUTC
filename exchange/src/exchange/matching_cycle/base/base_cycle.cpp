@@ -25,7 +25,7 @@ BaseMatchingCycle::collect_orders(uint64_t)
 
             orders.emplace_back(
                 *trader, order.position.ticker, order.position.side,
-                order.position.price, order.position.quantity, order.ioc
+                order.position.quantity, order.position.price, order.ioc
             );
         }
     }

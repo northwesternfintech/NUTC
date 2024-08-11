@@ -77,7 +77,7 @@ Engine::create_match(const stored_order& buyer, const stored_order& seller)
         {util::Side::sell, ticker, price * (decimal_one - order_fee), quantity}
     );
 
-    util::position position{aggressive_side, buyer.position.ticker, price, quantity};
+    util::position position{aggressive_side, buyer.position.ticker, quantity, price};
     stored_match match{*buyer.trader, *seller.trader, position};
     return match;
 }

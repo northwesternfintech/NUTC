@@ -37,7 +37,7 @@ struct stored_order : public messages::limit_order {
 
     stored_order(
         traders::GenericTrader& trader, util::Ticker ticker, util::Side side,
-        double price, double quantity, bool ioc = false
+        double quantity, double price, bool ioc = false
     );
 
     stored_order(const stored_order& other) = default;

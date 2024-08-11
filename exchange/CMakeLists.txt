@@ -173,7 +173,7 @@ add_library(
     src/wrapper/pywrapper/pywrapper.cpp
     src/wrapper/pywrapper/rate_limiter.cpp
     # Utils
-    src/wrapper/logging.cpp
+    src/wrapper/util/logging.cpp
     src/wrapper/config/argparse.cpp
 )
 

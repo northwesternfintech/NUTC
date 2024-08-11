@@ -7,9 +7,7 @@
 namespace nutc::config {
 struct wrapper_args {
     const uint8_t VERBOSITY;
-    const std::string USER_ID;
-    const std::string ALGO_ID;
-    const bool DEV_MODE;
+    const std::string TRADER_ID;
 };
 
 wrapper_args process_arguments(int argc, const char** argv);

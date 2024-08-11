@@ -1,7 +1,7 @@
 def place_market_order(side: str, ticker: str, quantity: float) -> None:
     """Place a market order - DO NOT MODIFY""" 
 
-def place_limit_order(side: str, ticker: str, price: float, quantity: float, ioc: bool = False) -> None:
+def place_limit_order(side: str, ticker: str, quantity: float, price: float, ioc: bool = False) -> None:
     """Place a limit order - DO NOT MODIFY""" 
 
 class Strategy:
@@ -10,7 +10,7 @@ class Strategy:
     def __init__(self) -> None:
         """Your initialization code goes here."""
 
-    def on_trade_update(self, ticker: str, side: str, price: float, quantity: float) -> None:
+    def on_trade_update(self, ticker: str, side: str, quantity: float, price: float) -> None:
         """Called whenever two orders match. Could be one of your orders, or two other people's orders.
 
         Parameters
@@ -27,7 +27,7 @@ class Strategy:
         print(f"Python Trade update: {ticker} {side} {price} {quantity}")
 
     def on_orderbook_update(
-        self, ticker: str, side: str, price: float, quantity: float
+        self, ticker: str, side: str, quantity: float, price: float
     ) -> None:
         """Called whenever the orderbook changes. This could be because of a trade, or because of a new order, or both.
 
@@ -43,15 +43,15 @@ class Strategy:
             Volume placed into orderbook
         """
         print(f"Python Orderbook update: {ticker} {side} {price} {quantity}")
-        if(ticker=="ABC" and price<101.0 and price>99.0):
+        if(ticker=="ABC" and quantity<101.0 and quantity>99.0):
             place_limit_order("BUY", "ABC", 100, 10)
 
     def on_account_update(
         self,
         ticker: str,
         side: str,
-        price: float,
         quantity: float,
+        price: float,
         capital_remaining: float,
     ) -> None:
         """Called whenever one of your orders is filled.

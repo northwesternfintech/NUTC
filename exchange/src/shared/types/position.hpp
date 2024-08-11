@@ -11,8 +11,8 @@ namespace util {
 struct position {
     Side side;
     Ticker ticker;
-    util::decimal_price price;
     double quantity;
+    util::decimal_price price;
 
     bool
     operator==(const position& other) const noexcept
@@ -23,8 +23,8 @@ struct position {
 
     position() = default;
 
-    position(Side side, Ticker ticker, util::decimal_price price, double quantity) :
-        side(side), ticker(ticker), price(price), quantity(quantity)
+    position(Side side, Ticker ticker, double quantity, util::decimal_price price) :
+        side(side), ticker(ticker), quantity(quantity), price(price)
     {}
 };
 
@@ -35,5 +35,5 @@ struct position {
 template <>
 struct glz::meta<nutc::util::position> {
     using t = nutc::util::position;
-    static constexpr auto value = object(&t::side, &t::ticker, &t::price, &t::quantity);
+    static constexpr auto value = object(&t::side, &t::ticker, &t::quantity, &t::price);
 };

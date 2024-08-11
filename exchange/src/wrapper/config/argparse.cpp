@@ -1,6 +1,7 @@
 #include "argparse.hpp"
 
 #include "shared/config/config.h"
+#include "shared/util.hpp"
 
 #include <argparse/argparse.hpp>
 #include <fmt/format.h>
@@ -54,11 +55,13 @@ process_arguments(int argc, const char** argv)
         exit(1); // NOLINT(concurrency-*)
     }
 
-    return {
-        verbosity,
-        program.get<std::string>("--uid"),
-        program.get<std::string>("--algo_id"),
-        program.get<bool>("--dev"),
-    };
+    bool dev_mode = program.get<bool>("--dev");
+    auto trader_id = (dev_mode) ? program.get<std::string>("--algo_id")
+                                : util::trader_id(
+                                      program.get<std::string>("--uid"),
+                                      program.get<std::string>("--algo_id")
+                                  );
+
+    return {verbosity, trader_id};
 }
 } // namespace nutc::config
