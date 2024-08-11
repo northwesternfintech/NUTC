@@ -1,6 +1,6 @@
 #pragma once
 
-#include "exchange/matching_cycle/dev/dev_strategy.hpp"
+#include "exchange/matching_cycle/dev/dev_cycle.hpp"
 #include "exchange/sandbox_server/crow.hpp"
 #include "exchange/traders/trader_container.hpp"
 
@@ -8,9 +8,8 @@ namespace nutc::matching {
 
 class SandboxMatchingCycle : public DevMatchingCycle {
 public:
-    SandboxMatchingCycle(
-        TickerMapping tickers, traders::TraderContainer& traders, uint64_t expire_ticks
-    ) : DevMatchingCycle(std::move(tickers), traders, expire_ticks)
+    SandboxMatchingCycle(TickerMapping tickers, traders::TraderContainer& traders) :
+        DevMatchingCycle(std::move(tickers), traders)
     {}
 
 private:

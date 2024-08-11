@@ -15,19 +15,18 @@ namespace util {
 struct decimal_price {
     static constexpr uint16_t MAX_ORDER_PRICE = std::numeric_limits<uint16_t>::max();
 
-    uint32_t price{};
+    uint64_t price{};
 
     // A bit hacky but necessary to support constexpr constructors
-    constexpr uint32_t
-    price_to_decimal(double price) const
+    static constexpr uint64_t
+    price_to_decimal(double price)
     {
         if consteval {
-            return static_cast<uint32_t>(price * 100);
+            return static_cast<uint64_t>(price * 100);
         }
         else {
             assert(price >= 0);
-            assert(price * 100 < std::numeric_limits<uint32_t>::max());
-            return static_cast<uint32_t>(std::round(price * 100));
+            return static_cast<uint64_t>(std::round(price * 100));
         }
     }
 
@@ -70,7 +69,7 @@ struct decimal_price {
     constexpr bool
     operator==(double other) const
     {
-        return price == static_cast<uint32_t>(other * 100);
+        return price == static_cast<uint64_t>(other * 100);
     }
 
     // TODO: make explicit
@@ -89,7 +88,7 @@ struct decimal_price {
     constexpr ~decimal_price() = default;
 
 private:
-    constexpr decimal_price(uint32_t decimal) : price(decimal) {}
+    constexpr decimal_price(uint64_t decimal) : price(decimal) {}
 
     friend class std::numeric_limits<decimal_price>;
 };
@@ -104,7 +103,7 @@ struct hash<decimal_price> {
     std::size_t
     operator()(const decimal_price& dp) const noexcept
     {
-        return std::hash<uint32_t>()(dp.price);
+        return std::hash<uint64_t>()(dp.price);
     }
 };
 
@@ -114,13 +113,13 @@ public:
     static consteval decimal_price
     min() noexcept
     {
-        return static_cast<uint32_t>(0);
+        return static_cast<uint64_t>(0);
     }
 
     static consteval decimal_price
     max() noexcept
     {
-        return static_cast<uint32_t>(decimal_price::MAX_ORDER_PRICE);
+        return static_cast<uint64_t>(decimal_price::MAX_ORDER_PRICE);
     }
 };
 } // namespace std

@@ -17,30 +17,30 @@ bool is_nearly_equal(double f_a, double f_b);
 bool validate_match(
     const nutc::matching::stored_match& match, util::Ticker ticker,
     const std::string& buyer_id, const std::string& seller_id, util::Side side,
-    double price, double quantity
+    double quantity, double price
 );
 
 bool validate_ob_update(
-    const util::position& update, util::Ticker ticker, util::Side side, double price,
-    double quantity
+    const util::position& update, util::Ticker ticker, util::Side side, double quantity,
+    double price
 );
 
 bool validate_limit_order(
-    const limit_order& update, util::Ticker ticker, util::Side side, double price,
-    double quantity
+    const limit_order& update, util::Ticker ticker, util::Side side, double quantity,
+    double price
 );
 
 } // namespace test_utils
 } // namespace nutc
 
 #define ASSERT_EQ_MATCH(/* NOLINT(cppcoreguidelines-macro-usage) */                    \
-                        match, ticker_, buyer_id_, seller_id_, side_, price_,          \
-                        quantity_                                                      \
+                        match, ticker_, buyer_id_, seller_id_, side_, quantity_,       \
+                        price_                                                         \
 )                                                                                      \
     do {                                                                               \
         bool isMatchValid = nutc::test_utils::validate_match(                          \
-            (match), (ticker_), (buyer_id_), (seller_id_), (side_), (price_),          \
-            (quantity_)                                                                \
+            (match), (ticker_), (buyer_id_), (seller_id_), (side_), (quantity_),       \
+            (price_)                                                                   \
         );                                                                             \
         EXPECT_TRUE(isMatchValid)                                                      \
             << "Expected match with ticker = " << (ticker_)                            \
@@ -56,11 +56,11 @@ bool validate_limit_order(
     } while (0)
 
 #define ASSERT_EQ_OB_UPDATE(/* NOLINT(cppcoreguidelines-macro-usage) */                \
-                            update, ticker_, side_, price_, quantity_                  \
+                            update, ticker_, side_, quantity_, price_                  \
 )                                                                                      \
     do {                                                                               \
         bool isUpdateValid = nutc::test_utils::validate_ob_update(                     \
-            (update), (ticker_), (side_), (price_), (quantity_)                        \
+            (update), (ticker_), (side_), (quantity_), (price_)                        \
         );                                                                             \
         EXPECT_TRUE(isUpdateValid)                                                     \
             << "Expected update with ticker = " << (ticker_)                           \
@@ -72,11 +72,11 @@ bool validate_limit_order(
     } while (0)
 
 #define ASSERT_EQ_LIMIT_ORDER(/* NOLINT (cppcoreguidelines-macro-usage) */             \
-                              update, ticker_, side_, price_, quantity_                \
+                              update, ticker_, side_, quantity_, price_                \
 )                                                                                      \
     do {                                                                               \
         bool isUpdateValid = nutc::test_utils::validate_limit_order(                   \
-            (update), (ticker_), (side_), (price_), (quantity_)                        \
+            (update), (ticker_), (side_), (quantity_), (price_)                        \
         );                                                                             \
         EXPECT_TRUE(isUpdateValid)                                                     \
             << "Expected market order with"                                            \

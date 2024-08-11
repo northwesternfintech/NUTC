@@ -56,8 +56,8 @@ TEST_F(UnitMatchIOC, BasicMatchIOC)
 
 TEST_F(UnitMatchIOC, DoubleIOCMatch)
 {
-    stored_order order1{trader1, "ETH", buy, 1, 5, true};
-    stored_order order2{trader2, "ETH", sell, 1, 0, true};
+    stored_order order1{trader1, "ETH", buy, 5, 1, true};
+    stored_order order2{trader2, "ETH", sell, 0, 1, true};
 
     auto matches = add_to_engine_(order1);
     ASSERT_TRUE(matches.empty());
@@ -68,9 +68,9 @@ TEST_F(UnitMatchIOC, DoubleIOCMatch)
 
 TEST_F(UnitMatchIOC, DoubleIOCMatchMultipleLevels)
 {
-    stored_order order1{trader1, "ETH", buy, 2, 5, true};
-    stored_order order2{trader2, "ETH", sell, 1, 0, true};
-    stored_order order3{trader2, "ETH", sell, 1, 4, true};
+    stored_order order1{trader1, "ETH", buy, 5, 2, true};
+    stored_order order2{trader2, "ETH", sell, 0, 1, true};
+    stored_order order3{trader2, "ETH", sell, 4, 1, true};
 
     auto matches = add_to_engine_(order2);
     ASSERT_TRUE(matches.empty());

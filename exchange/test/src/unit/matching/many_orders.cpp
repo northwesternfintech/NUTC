@@ -49,7 +49,7 @@ TEST_F(UnitManyOrders, CorrectTimePriority)
     stored_order order2{trader2, "ETH", buy, 1, 1, 0};
     stored_order order3{trader3, "ETH", sell, 1, 1, 0};
     stored_order order4{trader4, "ETH", buy, 1, 1, 0};
-    stored_order order5{trader3, "ETH", sell, 1, 5, 0};
+    stored_order order5{trader3, "ETH", sell, 5, 1, 0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
@@ -86,7 +86,7 @@ TEST_F(UnitManyOrders, SimpleManyOrder)
     stored_order order1{trader1, "ETH", buy, 1, 1, 0};
     stored_order order2{trader2, "ETH", buy, 1, 1, 0};
     stored_order order3{trader3, "ETH", buy, 1, 1, 0};
-    stored_order order4{trader4, "ETH", sell, 1, 3, 0};
+    stored_order order4{trader4, "ETH", sell, 3, 1, 0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
@@ -106,9 +106,9 @@ TEST_F(UnitManyOrders, SimpleManyOrder)
 TEST_F(UnitManyOrders, PassiveAndAggressivePartial)
 {
     stored_order order1{trader1, "ETH", sell, 1, 1, 0};
-    stored_order order2{trader2, "ETH", sell, 1, 10, 0};
-    stored_order order3{trader3, "ETH", buy, 3, 2, 0};
-    stored_order order4{trader4, "ETH", buy, 4, 10, 0};
+    stored_order order2{trader2, "ETH", sell, 10, 1, 0};
+    stored_order order3{trader3, "ETH", buy, 2, 3, 0};
+    stored_order order4{trader4, "ETH", buy, 10, 4, 0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
@@ -120,5 +120,5 @@ TEST_F(UnitManyOrders, PassiveAndAggressivePartial)
     ASSERT_EQ_MATCH(matches[1], "ETH", "C", "B", buy, 1, 1);
     matches = add_to_engine_(order4);
     ASSERT_EQ(matches.size(), 1);
-    ASSERT_EQ_MATCH(matches[0], "ETH", "D", "B", buy, 1, 9);
+    ASSERT_EQ_MATCH(matches[0], "ETH", "D", "B", buy, 9, 1);
 }

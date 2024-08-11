@@ -1,6 +1,6 @@
 #pragma once
 
-#include "exchange/matching_cycle/base/base_strategy.hpp"
+#include "exchange/matching_cycle/base/base_cycle.hpp"
 #include "exchange/metrics/on_tick_metrics.hpp"
 #include "exchange/traders/trader_container.hpp"
 
@@ -14,9 +14,8 @@ class DevMatchingCycle : public BaseMatchingCycle {
     metrics::TickerMetricsPusher pusher;
 
 public:
-    DevMatchingCycle(
-        TickerMapping tickers, traders::TraderContainer& traders, uint64_t expire_ticks
-    ) : BaseMatchingCycle(std::move(tickers), traders, expire_ticks), pusher(traders)
+    DevMatchingCycle(TickerMapping tickers, traders::TraderContainer& traders) :
+        BaseMatchingCycle(std::move(tickers), traders), pusher(traders)
     {}
 
 protected:

@@ -21,7 +21,7 @@ public:
     add_order(const stored_order& order) override
     {
         modify_level_(
-            order.position.side, order.position.price, order.position.quantity
+            order.position.side, order.position.quantity, order.position.price
         );
 
         return BaseOrderBookT::add_order(order);
@@ -31,7 +31,7 @@ public:
     mark_order_removed(stored_order& order) override
     {
         modify_level_(
-            order.position.side, order.position.price, -order.position.quantity
+            order.position.side, -order.position.quantity, order.position.price
         );
 
         BaseOrderBookT::mark_order_removed(order);
@@ -40,16 +40,16 @@ public:
     void
     change_quantity(stored_order& order, double quantity_delta) override
     {
-        modify_level_(order.position.side, order.position.price, quantity_delta);
+        modify_level_(order.position.side, quantity_delta, order.position.price);
 
         BaseOrderBookT::change_quantity(order, quantity_delta);
     }
 
 private:
     void
-    modify_level_(util::Side side, util::decimal_price price, double delta)
+    modify_level_(util::Side side, double quantity_delta, util::decimal_price price)
     {
-        level_update_generator_.record_level_change(side, price, delta);
+        level_update_generator_.record_level_change(side, quantity_delta, price);
     }
 };
 } // namespace nutc::matching

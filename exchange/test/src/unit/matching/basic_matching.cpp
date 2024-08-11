@@ -60,9 +60,9 @@ TEST_F(UnitBasicMatching, SimpleMatch)
 TEST_F(UnitBasicMatching, CorrectBuyPricingOrder)
 {
     stored_order buy1{trader1, "ETH", buy, 1, 1, 0};
-    stored_order buy2{trader1, "ETH", buy, 2, 1, 0};
-    stored_order buy3{trader1, "ETH", buy, 3, 1, 0};
-    stored_order buy4{trader1, "ETH", buy, 4, 1, 0};
+    stored_order buy2{trader1, "ETH", buy, 1, 2, 0};
+    stored_order buy3{trader1, "ETH", buy, 1, 3, 0};
+    stored_order buy4{trader1, "ETH", buy, 1, 4, 0};
     stored_order sell1{trader2, "ETH", sell, 1, 1, 0};
 
     // Place cheapest buy orders first, then most expensive
@@ -76,17 +76,17 @@ TEST_F(UnitBasicMatching, CorrectBuyPricingOrder)
     ASSERT_EQ(matches.size(), 0);
     matches = add_to_engine_(sell1);
     ASSERT_EQ(matches.size(), 1);
-    ASSERT_EQ_MATCH(matches[0], "ETH", "ABC", "DEF", sell, 4, 1);
+    ASSERT_EQ_MATCH(matches[0], "ETH", "ABC", "DEF", sell, 1, 4);
     matches = add_to_engine_(sell1);
     ASSERT_EQ(matches.size(), 1);
-    ASSERT_EQ_MATCH(matches[0], "ETH", "ABC", "DEF", sell, 3, 1);
+    ASSERT_EQ_MATCH(matches[0], "ETH", "ABC", "DEF", sell, 1, 3);
 }
 
 TEST_F(UnitBasicMatching, NoMatchThenMatchBuy)
 {
     stored_order order1{trader1, "ETH", sell, 1, 1, 0};
     stored_order order2{trader2, "ETH", sell, 1, 1, 0};
-    stored_order order3{trader2, "ETH", buy, 2, 1, 0};
+    stored_order order3{trader2, "ETH", buy, 1, 2, 0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
@@ -101,7 +101,7 @@ TEST_F(UnitBasicMatching, NoMatchThenMatchSell)
 {
     stored_order order1{trader1, "ETH", buy, 1, 1, 0};
     stored_order order2{trader2, "ETH", buy, 1, 1, 0};
-    stored_order order3{trader3, "ETH", sell, 0, 2, 0};
+    stored_order order3{trader3, "ETH", sell, 2, 0, 0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
@@ -117,7 +117,7 @@ TEST_F(UnitBasicMatching, NoMatchThenMatchSell)
 
 TEST_F(UnitBasicMatching, PassivePriceMatch)
 {
-    stored_order order1{trader1, "ETH", buy, 2, 1, 0};
+    stored_order order1{trader1, "ETH", buy, 1, 2, 0};
     stored_order order2{trader2, "ETH", sell, 1, 1, 0};
 
     auto matches = add_to_engine_(order1);
@@ -125,12 +125,12 @@ TEST_F(UnitBasicMatching, PassivePriceMatch)
 
     matches = add_to_engine_(order2);
     ASSERT_EQ(matches.size(), 1);
-    ASSERT_EQ_MATCH(matches[0], "ETH", "ABC", "DEF", sell, 2, 1);
+    ASSERT_EQ_MATCH(matches[0], "ETH", "ABC", "DEF", sell, 1, 2);
 }
 
 TEST_F(UnitBasicMatching, PartialFill)
 {
-    stored_order order1{trader1, "ETH", buy, 1, 2, 0};
+    stored_order order1{trader1, "ETH", buy, 2, 1, 0};
     stored_order order2{trader2, "ETH", sell, 1, 1, 0};
 
     auto matches = add_to_engine_(order1);
@@ -145,7 +145,7 @@ TEST_F(UnitBasicMatching, MultipleFill)
 {
     stored_order order1{trader1, "ETH", buy, 1, 1, 0};
     stored_order order2{trader1, "ETH", buy, 1, 1, 0};
-    stored_order order3{trader2, "ETH", sell, 1, 2, 0};
+    stored_order order3{trader2, "ETH", sell, 2, 1, 0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
@@ -163,7 +163,7 @@ TEST_F(UnitBasicMatching, MultiplePartialFill)
 {
     stored_order order1{trader1, "ETH", buy, 1, 1, 0};
     stored_order order2{trader1, "ETH", buy, 1, 1, 0};
-    stored_order order3{trader2, "ETH", sell, 1, 3, 0};
+    stored_order order3{trader2, "ETH", sell, 3, 1, 0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
@@ -191,7 +191,7 @@ TEST_F(UnitBasicMatching, SimpleMatchReversed)
 TEST_F(UnitBasicMatching, PassivePriceMatchReversed)
 {
     stored_order order1{trader1, "ETH", sell, 1, 1, 0};
-    stored_order order2{trader2, "ETH", buy, 2, 1, 0};
+    stored_order order2{trader2, "ETH", buy, 1, 2, 0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
@@ -204,7 +204,7 @@ TEST_F(UnitBasicMatching, PassivePriceMatchReversed)
 
 TEST_F(UnitBasicMatching, PartialFillReversed)
 {
-    stored_order order1{trader1, "ETH", sell, 1, 2, 0};
+    stored_order order1{trader1, "ETH", sell, 2, 1, 0};
     stored_order order2{trader2, "ETH", buy, 1, 1, 0};
 
     auto matches = add_to_engine_(order1);
@@ -218,7 +218,7 @@ TEST_F(UnitBasicMatching, MultipleFillReversed)
 {
     stored_order order1{trader1, "ETH", sell, 1, 1, 0};
     stored_order order2{trader1, "ETH", sell, 1, 1, 0};
-    stored_order order3{trader2, "ETH", buy, 1, 2, 0};
+    stored_order order3{trader2, "ETH", buy, 2, 1, 0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
@@ -236,7 +236,7 @@ TEST_F(UnitBasicMatching, MultiplePartialFillReversed)
 {
     stored_order order1{trader1, "ETH", sell, 1, 1, 0};
     stored_order order2{trader1, "ETH", sell, 1, 1, 0};
-    stored_order order3{trader2, "ETH", buy, 1, 3, 0};
+    stored_order order3{trader2, "ETH", buy, 3, 1, 0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);

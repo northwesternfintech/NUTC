@@ -53,7 +53,7 @@ add_library(
     src/exchange/orders/orderbook/limit_orderbook.cpp
     src/exchange/orders/level_tracking/level_update_generator.cpp
 
-	src/exchange/matching_cycle/base/base_strategy.cpp
+	src/exchange/matching_cycle/base/base_cycle.cpp
     
     src/exchange/traders/trader_types/generic_trader.cpp
     src/exchange/traders/trader_types/bot_trader.cpp
@@ -169,11 +169,12 @@ target_link_libraries(EXCHANGE_exe PRIVATE prometheus-cpp::prometheus-cpp)
 add_library(
     WRAPPER_lib OBJECT
     
-    src/wrapper/messaging/comms.cpp
+    src/wrapper/messaging/exchange_communicator.cpp
     src/wrapper/pywrapper/pywrapper.cpp
     src/wrapper/pywrapper/rate_limiter.cpp
     # Utils
-    src/wrapper/logging.cpp
+    src/wrapper/util/logging.cpp
+    src/wrapper/config/argparse.cpp
 )
 
 target_include_directories(

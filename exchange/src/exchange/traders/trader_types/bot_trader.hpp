@@ -111,16 +111,16 @@ protected:
 
     void
     add_limit_order(
-        util::Side side, util::decimal_price price, double quantity, bool ioc
+        util::Side side, double quantity, util::decimal_price price, bool ioc
     )
     {
-        orders_.emplace_back(side, TICKER, price, quantity, ioc);
+        orders_.emplace_back(side, TICKER, quantity, price, ioc);
     }
 
     void
     add_market_order(util::Side side, double quantity)
     {
-        orders_.emplace_back(messages::make_market_order(side, TICKER, quantity));
+        orders_.emplace_back(side, TICKER, quantity);
     }
 
     double

@@ -9,26 +9,27 @@
 namespace nutc {
 namespace traders {
 
-class LocalTrader : public GenericTrader {
+class AlgoTrader : public GenericTrader {
     const std::string DISPLAY_NAME;
     const std::string ALGO_ID;
-    std::unique_ptr<wrappers::WrapperHandle> wrapper_handle_;
+    std::optional<wrappers::WrapperHandle> wrapper_handle_;
 
 public:
     // Remote (firebase)
-    explicit LocalTrader(
+    explicit AlgoTrader(
         std::string remote_uid, std::string algo_id, std::string full_name,
         double capital
     ) :
         GenericTrader(util::trader_id(remote_uid, algo_id), capital),
         DISPLAY_NAME(std::move(full_name)), ALGO_ID(algo_id),
-        wrapper_handle_(std::make_unique<wrappers::WrapperHandle>(remote_uid, algo_id))
+        wrapper_handle_(std::make_optional<wrappers::WrapperHandle>(remote_uid, algo_id)
+        )
     {}
 
     // Local (algo .py on disk)
-    explicit LocalTrader(std::string algo_path, double capital) :
+    explicit AlgoTrader(std::string algo_path, double capital) :
         GenericTrader(algo_path, capital), DISPLAY_NAME(algo_path), ALGO_ID(algo_path),
-        wrapper_handle_(std::make_unique<wrappers::WrapperHandle>(algo_path))
+        wrapper_handle_(std::make_optional<wrappers::WrapperHandle>(algo_path))
     {
         if (!file_ops::file_exists(ALGO_ID)) [[unlikely]] {
             std::string err_str =

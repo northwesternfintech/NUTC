@@ -50,7 +50,7 @@ MarketMakerBot::place_orders(Side side, double theo, double spread_offset)
             return;
 
         double quantity = total_quantity * quantity_factor;
-        add_limit_order(side, price, quantity, true);
+        add_limit_order(side, quantity, price, true);
     }
 }
 

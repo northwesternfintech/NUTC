@@ -4,17 +4,17 @@
 #include "exchange/config/dynamic/config.hpp"
 #include "exchange/config/dynamic/ticker_config.hpp"
 #include "exchange/logging.hpp"
-#include "exchange/matching_cycle/base/base_strategy.hpp"
-#include "exchange/matching_cycle/cycle_strategy.hpp"
-#include "exchange/matching_cycle/dev/dev_strategy.hpp"
+#include "exchange/matching_cycle/base/base_cycle.hpp"
+#include "exchange/matching_cycle/cycle_interface.hpp"
+#include "exchange/matching_cycle/dev/dev_cycle.hpp"
 #include "exchange/matching_cycle/sandbox/sandbox_cycle.hpp"
 #include "exchange/orders/ticker_info.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "shared/util.hpp"
 
-#include <sys/prctl.h>
-
 #include <csignal>
+
+#include <utility>
 
 namespace {
 using namespace nutc; // NOLINT
@@ -32,27 +32,29 @@ load_tickers(traders::TraderContainer& traders)
     return ret;
 }
 
-std::unique_ptr<matching::MatchingCycle>
+std::unique_ptr<matching::MatchingCycleInterface>
 create_cycle(traders::TraderContainer& traders, const auto& mode)
 {
+    using util::Mode;
     auto tickers = load_tickers(traders);
-    auto exp = config::Config::get().constants().ORDER_EXPIRATION_TICKS;
 
-    if (mode == util::Mode::normal) {
-        return std::make_unique<matching::BaseMatchingCycle>(tickers, traders, exp);
+    switch (mode) {
+        case Mode::normal:
+            return std::make_unique<matching::BaseMatchingCycle>(tickers, traders);
+        case Mode::sandbox:
+            return std::make_unique<matching::SandboxMatchingCycle>(tickers, traders);
+        case Mode::bots_only:
+        case Mode::dev:
+            return std::make_unique<matching::DevMatchingCycle>(tickers, traders);
     }
-    else if (mode == util::Mode::sandbox) {
-        return std::make_unique<matching::SandboxMatchingCycle>(tickers, traders, exp);
-    }
-    else {
-        return std::make_unique<matching::DevMatchingCycle>(tickers, traders, exp);
-    }
+
+    std::unreachable();
 }
 
 void
-main_event_loop(auto cycle)
+main_event_loop(std::unique_ptr<matching::MatchingCycleInterface> cycle)
 {
-    uint64_t tick = 0;
+    uint64_t tick{};
     while (true) {
         cycle->on_tick(tick++);
     }
@@ -65,13 +67,10 @@ main(int argc, const char** argv)
 {
     logging::init(quill::LogLevel::Info);
     std::signal(SIGINT, [](auto) { std::exit(0); });
-
-    // Wrappers may unexpectedly exit for many reasons. Should not affect the exchange
     std::signal(SIGPIPE, SIG_IGN);
 
-    traders::TraderContainer traders{};
-
     auto mode = config::process_arguments(argc, argv);
+    traders::TraderContainer traders{};
     algos::AlgoInitializer::get_algo_initializer(mode)->initialize_algo_management(
         traders
     );

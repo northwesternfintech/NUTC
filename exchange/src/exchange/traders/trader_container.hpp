@@ -30,20 +30,20 @@ public:
     TraderContainer() = default;
 
     TraderContainer(std::initializer_list<std::shared_ptr<GenericTrader>> initializer) :
-        traders_(initializer)
+        traders_(std::move(initializer))
     {}
 
     TraderContainer(const TraderContainer&) = delete;
     TraderContainer(TraderContainer&&) = delete;
     TraderContainer& operator=(const TraderContainer&) = delete;
     TraderContainer& operator=(TraderContainer&&) = delete;
-
     ~TraderContainer() = default;
 
     void
     add_trader(std::shared_ptr<GenericTrader> trader)
     {
         traders_.push_back(std::move(trader));
+        volatile auto test = traders_[0];
     }
 
     template <typename T, typename... Args>
@@ -51,7 +51,7 @@ public:
     add_trader(Args&&... args)
     {
         std::shared_ptr<GenericTrader> trader =
-            make_shared_trader_<T>(std::forward<Args>(args)...);
+            make_shared_trader<T>(std::forward<Args>(args)...);
         traders_.emplace_back(trader);
         return std::static_pointer_cast<T>(trader);
     }
@@ -63,18 +63,11 @@ public:
         return traders_;
     }
 
-    // Primarily for testing
-    void
-    reset()
-    {
-        traders_.clear();
-    }
-
 private:
     template <typename T, typename... Args>
     requires std::is_base_of_v<GenericTrader, T>
     std::shared_ptr<GenericTrader>
-    make_shared_trader_(Args&&... args)
+    make_shared_trader(Args&&... args)
     {
         return std::allocate_shared<T>(pmr_allocator, std::forward<Args>(args)...);
     }

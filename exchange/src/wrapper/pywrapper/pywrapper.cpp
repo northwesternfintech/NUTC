@@ -1,14 +1,17 @@
 #include "pywrapper.hpp"
 
-namespace nutc {
-namespace pywrapper {
+#include <pybind11/embed.h>
+#include <pybind11/pybind11.h>
+
+#include <iostream>
+
+namespace nutc::pywrapper {
+
+namespace py = pybind11;
 
 void
 create_api_module(
-    std::function<bool(const std::string&, const std::string&, double, double, bool)>
-        publish_limit_order,
-    std::function<bool(const std::string&, const std::string&, double)>
-        publish_market_order
+    LimitOrderFunction publish_limit_order, MarketOrderFunction publish_market_order
 )
 {
     py::module_ sys = py::module_::import("sys");
@@ -37,26 +40,62 @@ create_api_module(
     py::exec(R"(import nutc_api)");
 }
 
-py::object
-get_ob_update_function()
+OrderBookUpdateFunction
+ob_update_function()
 {
-    return py::globals()["strategy"].attr("on_orderbook_update");
+    return [](const util::position& position) {
+        std::string ticker_val{position.ticker};
+        std::string side_val = (position.side == util::Side::buy) ? "BUY" : "SELL";
+        double price_val{position.price};
+        double quantity{position.quantity};
+        try {
+            py::globals()["strategy"].attr("on_orderbook_update")(
+                ticker_val, side_val, quantity, price_val
+            );
+        } catch (const py::error_already_set& err) {
+            std::cerr << err.what() << "\n";
+        }
+    };
 }
 
-py::object
-get_trade_update_function()
+TradeUpdateFunction
+trade_update_function()
 {
-    return py::globals()["strategy"].attr("on_trade_update");
+    return [](const util::position& position) {
+        std::string ticker_val{position.ticker};
+        std::string side_val = (position.side == util::Side::buy) ? "BUY" : "SELL";
+        double price_val{position.price};
+        double quantity{position.quantity};
+        try {
+            py::globals()["strategy"].attr("on_trade_update")(
+                ticker_val, side_val, quantity, price_val
+            );
+        } catch (const py::error_already_set& err) {
+            std::cerr << err.what() << "\n";
+        }
+    };
 }
 
-py::object
-get_account_update_function()
+AccountUpdateFunction
+account_update_function()
 {
-    return py::globals()["strategy"].attr("on_account_update");
+    return [](const util::position& position, double held_capital) {
+        std::string ticker_val{position.ticker};
+        std::string side_val = (position.side == util::Side::buy) ? "BUY" : "SELL";
+        double price_val{position.price};
+        double quantity{position.quantity};
+        try {
+            py::globals()["strategy"].attr("on_account_update")(
+                ticker_val, side_val, quantity, price_val, held_capital
+            );
+        } catch (const py::error_already_set& err) {
+            std::cerr << err.what() << "\n";
+        }
+    };
 }
 
 void
-run_code_init(const std::string& py_code)
+run_initialization_code(const std::string& py_code)
 {
     py::exec(py_code);
     py::exec(R"(
@@ -64,11 +103,10 @@ run_code_init(const std::string& py_code)
             return nutc_api.publish_market_order(side, ticker, quantity)
     )");
     py::exec(R"(
-        def place_limit_order(side: str, ticker: str, price: float, quantity: float, ioc: bool = False):
-            return nutc_api.publish_limit_order(side, ticker, price, quantity, ioc)
+        def place_limit_order(side: str, ticker: str, quantity: float, price: float, ioc: bool = False):
+            return nutc_api.publish_limit_order(side, ticker, quantity, price, ioc)
     )");
     py::exec("strategy = Strategy()");
 }
 
-} // namespace pywrapper
-} // namespace nutc
+} // namespace nutc::pywrapper

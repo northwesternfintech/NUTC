@@ -24,10 +24,10 @@ class CrowServer {
     std::vector<ba::steady_timer> timers_{};
 
     mutable std::mutex trader_lock;
-    std::vector<std::shared_ptr<traders::LocalTrader>> traders_to_add;
+    std::vector<std::shared_ptr<traders::AlgoTrader>> traders_to_add;
 
 public:
-    std::vector<std::shared_ptr<traders::LocalTrader>>
+    std::vector<std::shared_ptr<traders::AlgoTrader>>
     get_and_clear_pending_traders()
     {
         lock_guard guard{trader_lock};

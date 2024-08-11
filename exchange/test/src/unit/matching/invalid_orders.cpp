@@ -1,6 +1,5 @@
 #include "config.h"
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
-#include "exchange/traders/trader_container.hpp"
 #include "shared/util.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
@@ -100,7 +99,7 @@ TEST_F(UnitInvalidOrders, SimpleManyInvalidOrder)
     stored_order order1{t1, "ETH", buy, 1, 1, 0};
     stored_order order2{t2, "ETH", buy, 1, 1, 0};
     stored_order order3{t3, "ETH", buy, 1, 1, 0};
-    stored_order order4{t4, "ETH", sell, 1, 3, 0};
+    stored_order order4{t4, "ETH", sell, 3, 1, 0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);

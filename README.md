@@ -1,6 +1,16 @@
 
 # Northwestern Trading Competition Monorepo
 
+Some of this is out of date - it will be updated soon
+
+## TODOS
+1. Add proper handling for market orders
+2. Confirm no implicit conversions of price to double in order handling (+ quantity change to float)
+3. Add full cpp support
+4. More integration tests (+ more coverage)
+5. Finish bots
+6. Clean up wrapper main
+
 ## Introduction
 
 The Northwestern Trading Competition (NUTC) is a contest where participants submit trading algorithms to compete in a simulated market environment. These algorithms are built from a provided template and interact with real-time simulated market data, executing arbitrary stock transactions. The objective is to maximize profit through strategic buying and selling of stocks.

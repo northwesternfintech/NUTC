@@ -3,8 +3,6 @@ global:
     # How long to wait after exchange-wrapper handshake before wrappers can place orders
     wait_secs: 3
 
-    # How many ticks for an order to expire
-    order_expiration_ticks: 0
     order_fee: .0000
     sandbox_trial_seconds: 300
 

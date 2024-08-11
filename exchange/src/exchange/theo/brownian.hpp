@@ -1,17 +1,4 @@
-/**
- * @file brownian.hpp
- * @author Andrew Li (andrewli@u.northwestern.edu)
- * @brief Brownian motion theo to simulate market chaos
- * @version 0.1
- * @date 2024-01-12
- *
- * @copyright Copyright (c) 2024
- *
- */
-
 #pragma once
-
-#include "exchange/config/static/config.hpp"
 
 #include <random>
 
