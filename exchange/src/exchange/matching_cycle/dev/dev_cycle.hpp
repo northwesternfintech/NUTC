@@ -1,6 +1,6 @@
 #pragma once
 
-#include "exchange/matching_cycle/base/base_strategy.hpp"
+#include "exchange/matching_cycle/base/base_cycle.hpp"
 #include "exchange/metrics/on_tick_metrics.hpp"
 #include "exchange/traders/trader_container.hpp"
 

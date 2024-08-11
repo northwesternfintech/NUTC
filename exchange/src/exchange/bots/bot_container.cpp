@@ -33,8 +33,8 @@ BotContainer::generate_orders(double midprice)
 template <class BotType>
 BotVector
 BotContainer::create_bots(
-    TraderContainer& trader_container, double mean_capital, double stddev_capital,
-    size_t num_bots
+    TraderContainer& trader_container, util::Ticker ticker, double mean_capital,
+    double stddev_capital, size_t num_bots
 )
 {
     BotVector bot_vec;
@@ -52,23 +52,24 @@ BotContainer::create_bots(
 
 BotVector
 BotContainer::create_bots(
-    TraderContainer& trader_container, const config::bot_config& bot_config
+    TraderContainer& trader_container, util::Ticker ticker,
+    const config::bot_config& bot_config
 )
 {
     switch (bot_config.TYPE) {
         case config::BotType::retail:
             return create_bots<RetailBot>(
-                trader_container, bot_config.AVERAGE_CAPITAL,
+                trader_container, ticker, bot_config.AVERAGE_CAPITAL,
                 bot_config.STD_DEV_CAPITAL, bot_config.NUM_BOTS
             );
         case config::BotType::market_maker:
             return create_bots<MarketMakerBot>(
-                trader_container, bot_config.AVERAGE_CAPITAL,
+                trader_container, ticker, bot_config.AVERAGE_CAPITAL,
                 bot_config.STD_DEV_CAPITAL, bot_config.NUM_BOTS
             );
     }
 
-    throw std::runtime_error("Unknown bot type");
+    throw std::invalid_argument("Unknown bot type");
 }
 
 void

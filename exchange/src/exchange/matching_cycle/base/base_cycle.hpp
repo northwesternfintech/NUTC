@@ -1,5 +1,5 @@
 #pragma once
-#include "exchange/matching_cycle/cycle_strategy.hpp"
+#include "exchange/matching_cycle/cycle_interface.hpp"
 #include "exchange/orders/ticker_info.hpp"
 #include "exchange/traders/trader_container.hpp"
 
@@ -9,7 +9,7 @@ namespace matching {
 /**
  * @brief Barebones matching cycle. Likely to be overridden for more logging
  */
-class BaseMatchingCycle : public MatchingCycle {
+class BaseMatchingCycle : public MatchingCycleInterface {
     TickerMapping tickers_;
     traders::TraderContainer& trader_container;
     const uint64_t ORDER_EXPIRE_TICKS;

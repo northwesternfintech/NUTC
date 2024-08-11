@@ -31,7 +31,7 @@ public:
         config::bot_config bots
     ) :
         ticker(ticker), theo_generator_(starting_price),
-        bots_(create_bots(trader_container, std::move(bots)))
+        bots_(create_bots(trader_container, ticker, std::move(bots)))
     {}
 
     double
@@ -49,14 +49,15 @@ public:
 private:
     void generate_orders(const shared_bot_state& shared_state);
 
-    BotVector create_bots(
-        TraderContainer& trader_container, const config::bot_config& bot_config
+    static BotVector create_bots(
+        TraderContainer& trader_container, util::Ticker ticker,
+        const config::bot_config& bot_config
     );
 
     template <class BotType>
-    BotVector create_bots(
-        TraderContainer& trader_container, double mean_capital, double stddev_capital,
-        size_t num_bots
+    static BotVector create_bots(
+        TraderContainer& trader_container, util::Ticker ticker, double mean_capital,
+        double stddev_capital, size_t num_bots
     );
 };
 } // namespace bots

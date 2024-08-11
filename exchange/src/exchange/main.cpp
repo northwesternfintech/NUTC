@@ -4,9 +4,9 @@
 #include "exchange/config/dynamic/config.hpp"
 #include "exchange/config/dynamic/ticker_config.hpp"
 #include "exchange/logging.hpp"
-#include "exchange/matching_cycle/base/base_strategy.hpp"
-#include "exchange/matching_cycle/cycle_strategy.hpp"
-#include "exchange/matching_cycle/dev/dev_strategy.hpp"
+#include "exchange/matching_cycle/base/base_cycle.hpp"
+#include "exchange/matching_cycle/cycle_interface.hpp"
+#include "exchange/matching_cycle/dev/dev_cycle.hpp"
 #include "exchange/matching_cycle/sandbox/sandbox_cycle.hpp"
 #include "exchange/orders/ticker_info.hpp"
 #include "exchange/traders/trader_container.hpp"
@@ -32,7 +32,7 @@ load_tickers(traders::TraderContainer& traders)
     return ret;
 }
 
-std::unique_ptr<matching::MatchingCycle>
+std::unique_ptr<matching::MatchingCycleInterface>
 create_cycle(traders::TraderContainer& traders, const auto& mode)
 {
     auto tickers = load_tickers(traders);

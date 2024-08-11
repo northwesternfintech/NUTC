@@ -1,6 +1,6 @@
 #pragma once
 
-#include "exchange/matching_cycle/base/base_strategy.hpp"
+#include "exchange/matching_cycle/base/base_cycle.hpp"
 #include "exchange/orders/ticker_info.hpp"
 #include "exchange/traders/trader_container.hpp"
 
@@ -12,11 +12,11 @@ std::string mo_to_string(const nutc::messages::limit_order& order);
 namespace nutc {
 namespace test {
 
-class TestMatchingCycle : public matching::BaseMatchingCycle {
+class TestMatchingCycleInterface : public matching::BaseMatchingCycle {
 public:
     std::unique_ptr<matching::stored_order> last_order;
 
-    TestMatchingCycle(
+    TestMatchingCycleInterface(
         std::vector<std::string> ticker_names, traders::TraderContainer& traders,
         double order_fee = 0.0,
         uint64_t order_expire_ticks = std::numeric_limits<uint64_t>::max()

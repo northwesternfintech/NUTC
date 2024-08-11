@@ -7,7 +7,7 @@
 namespace nutc {
 namespace matching {
 
-class MatchingCycle {
+class MatchingCycleInterface {
 public:
     void
     on_tick(uint64_t new_tick)
@@ -31,7 +31,7 @@ private:
     virtual void post_cycle_(uint64_t new_tick) = 0;
 
 public:
-    virtual ~MatchingCycle() {}
+    virtual ~MatchingCycleInterface() {}
 };
 } // namespace matching
 } // namespace nutc
