@@ -18,7 +18,7 @@ DevModeAlgoInitializer::initialize_trader_container(
 ) const
 {
     for (const fs::path& filepath : algo_filepaths_)
-        traders.add_trader<traders::LocalTrader>(filepath, start_capital);
+        traders.add_trader<traders::AlgoTrader>(filepath, start_capital);
 
     rabbitmq::WrapperInitializer::send_start_time(traders.get_traders(), WAIT_SECS);
 }

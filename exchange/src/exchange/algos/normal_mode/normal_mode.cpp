@@ -40,7 +40,7 @@ NormalModeAlgoInitializer::initialize_trader_container(
         std::string algo_id = user["latestAlgoId"].get<std::string>();
 
         try {
-            traders.add_trader<traders::LocalTrader>(
+            traders.add_trader<traders::AlgoTrader>(
                 user_id, algo_id, full_name, start_capital
             );
 			log_i(main, "Created user");

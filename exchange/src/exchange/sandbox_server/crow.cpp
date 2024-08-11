@@ -51,7 +51,7 @@ CrowServer::add_pending_trader(const std::string user_id, const std::string algo
     static const auto STARTING_CAPITAL =
         nutc::config::Config::get().constants().STARTING_CAPITAL;
 
-    auto trader = std::make_shared<traders::LocalTrader>(
+    auto trader = std::make_shared<traders::AlgoTrader>(
         user_id, algo_id, "SANDBOX_USER", STARTING_CAPITAL
     );
 
