@@ -6,7 +6,6 @@
 #include <crow/app.h>
 
 #include <mutex>
-#include <queue>
 #include <thread>
 
 namespace nutc {

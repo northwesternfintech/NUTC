@@ -8,31 +8,74 @@
 
 #include <memory>
 #include <memory_resource>
-#include <mutex>
 
 namespace nutc {
 namespace traders {
 
+class TraderIterator {
+public:
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = GenericTrader;
+    using difference_type = std::ptrdiff_t;
+    using pointer = std::shared_ptr<GenericTrader>*;
+    using reference = GenericTrader&;
+
+    TraderIterator(pointer ptr) : m_ptr(ptr) {}
+
+    reference
+    operator*() const
+    {
+        return *(*m_ptr);
+    }
+
+    pointer
+    operator->()
+    {
+        return m_ptr;
+    }
+
+    TraderIterator&
+    operator++()
+    {
+        m_ptr++;
+        return *this;
+    }
+
+    TraderIterator
+    operator++(int)
+    {
+        TraderIterator temp = *this;
+        ++(*this);
+        return temp;
+    }
+
+    bool
+    operator==(const TraderIterator& other) const
+    {
+        return m_ptr == other.m_ptr;
+    }
+
+    bool
+    operator!=(const TraderIterator& other) const
+    {
+        return m_ptr != other.m_ptr;
+    }
+
+private:
+    pointer m_ptr;
+};
+
 static constexpr auto CACHED_TRADERS = 256;
 static constexpr auto CACHED_TRADER_SIZE = CACHED_TRADERS * sizeof(GenericTrader);
 
-// The traders themselves shouldn't need thread safety - maybe we should still consider
-// adding, though
 class TraderContainer {
     std::array<std::byte, CACHED_TRADER_SIZE> buf;
     std::pmr::monotonic_buffer_resource res{&buf, sizeof(buf)};
     std::pmr::polymorphic_allocator<GenericTrader> pmr_allocator{&res};
-
-    mutable std::mutex trader_lock_;
     std::vector<std::shared_ptr<GenericTrader>> traders_;
 
 public:
     TraderContainer() = default;
-
-    TraderContainer(std::initializer_list<std::shared_ptr<GenericTrader>> initializer) :
-        traders_(std::move(initializer))
-    {}
-
     TraderContainer(const TraderContainer&) = delete;
     TraderContainer(TraderContainer&&) = delete;
     TraderContainer& operator=(const TraderContainer&) = delete;
@@ -43,7 +86,6 @@ public:
     add_trader(std::shared_ptr<GenericTrader> trader)
     {
         traders_.push_back(std::move(trader));
-        volatile auto test = traders_[0];
     }
 
     template <typename T, typename... Args>
@@ -56,11 +98,16 @@ public:
         return std::static_pointer_cast<T>(trader);
     }
 
-    // TODO: may not work correctly for sandbox (concurrency)
-    std::vector<std::shared_ptr<GenericTrader>>&
-    get_traders()
+    TraderIterator
+    begin()
     {
-        return traders_;
+        return TraderIterator(&traders_[0]);
+    }
+
+    TraderIterator
+    end()
+    {
+        return TraderIterator(&traders_[traders_.size()]);
     }
 
 private:

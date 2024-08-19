@@ -4,11 +4,8 @@
 
 namespace nutc {
 namespace rabbitmq {
-class WrapperInitializer {
-public:
-    using TraderPtr = std::shared_ptr<traders::GenericTrader>;
-    static void
-    send_start_time(const std::vector<TraderPtr>& traders, size_t wait_seconds);
-};
+int64_t get_start_time(size_t wait_seconds);
+
+void send_start_time(traders::GenericTrader& trader, int64_t start_time);
 } // namespace rabbitmq
 } // namespace nutc

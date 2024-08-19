@@ -49,7 +49,10 @@ NormalModeAlgoInitializer::initialize_trader_container(
         }
     }
 
-    rabbitmq::WrapperInitializer::send_start_time(traders.get_traders(), WAIT_SECS);
+    int64_t start_time = rabbitmq::get_start_time(WAIT_SECS);
+    std::for_each(traders.begin(), traders.end(), [start_time](auto& trader) {
+        rabbitmq::send_start_time(trader, start_time);
+    });
 }
 
 glz::json_t::object_t

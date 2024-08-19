@@ -114,49 +114,50 @@ TickerMetricsPusher::report_current_tick(uint64_t tick_num)
 void
 TickerMetricsPusher::report_trader_stats(const matching::TickerMapping& tickers)
 {
-    auto portfolio_value = [&](const auto& trader) {
-        double pnl = 0.0;
-        for (const auto& [info, _, ticker] : tickers) {
-            double amount_held = trader->get_holdings(ticker);
-            double midprice = info.orderbook.get_midprice();
-            pnl += amount_held * midprice;
-        }
-        return pnl;
-    };
-
     auto report_holdings = [&](const auto& trader) {
         for (const auto& [info, _, ticker] : tickers) {
-            double amount_held = trader->get_holdings(ticker);
+            double amount_held = trader.get_holdings(ticker);
             per_trader_holdings_gauge
                 .Add({
-                    {"ticker",      ticker            },
-                    {"trader_type", trader->get_type()},
-                    {"id",          trader->get_id()  },
+                    {"ticker",      ticker           },
+                    {"trader_type", trader.get_type()},
+                    {"id",          trader.get_id()  },
             })
                 .Set(amount_held);
         }
     };
 
-    for (const auto& trader : trader_container_.get_traders()) {
+    auto portfolio_value = [&](const auto& trader) {
+        double pnl = 0.0;
+        for (const auto& [info, _, ticker] : tickers) {
+            double amount_held = trader.get_holdings(ticker);
+            double midprice = info.orderbook.get_midprice();
+            pnl += amount_held * midprice;
+        }
+        return pnl;
+    };
+    auto track_trader = [&](traders::GenericTrader& trader) {
         report_holdings(trader);
 
-        double capital = trader->get_capital();
+        double capital = trader.get_capital();
         double portfolio = portfolio_value(trader);
-        double pnl = capital + portfolio - trader->get_initial_capital();
+        double pnl = capital + portfolio - trader.get_initial_capital();
 
         per_trader_pnl_gauge
             .Add({
-                {"trader_type", trader->get_type()},
-                {"id",          trader->get_id()  },
+                {"trader_type", trader.get_type()},
+                {"id",          trader.get_id()  },
         })
             .Set(pnl);
         per_trader_capital_gauge
             .Add({
-                {"trader_type", trader->get_type()},
-                {"id",          trader->get_id()  },
+                {"trader_type", trader.get_type()},
+                {"id",          trader.get_id()  },
         })
             .Set(capital);
-    }
+    };
+
+    std::for_each(trader_container_.begin(), trader_container_.end(), track_trader);
 }
 
 } // namespace metrics

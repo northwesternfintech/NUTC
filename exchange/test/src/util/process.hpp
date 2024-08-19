@@ -6,13 +6,13 @@
 namespace nutc {
 namespace test {
 
-[[nodiscard]] std::vector<std::shared_ptr<traders::GenericTrader>> start_wrappers(
+std::vector<std::reference_wrapper<traders::GenericTrader>> start_wrappers(
     nutc::traders::TraderContainer& users,
     const std::vector<std::string>& algo_filenames,
     double starting_capital = TEST_STARTING_CAPITAL, size_t start_delay = 0
 );
 
-[[nodiscard]] std::shared_ptr<traders::GenericTrader> start_wrappers(
+traders::GenericTrader& start_wrappers(
     nutc::traders::TraderContainer& users, const std::string& filename,
     double starting_capital = TEST_STARTING_CAPITAL, size_t start_delay = 0
 );

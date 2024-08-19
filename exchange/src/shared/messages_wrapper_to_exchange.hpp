@@ -23,7 +23,9 @@ struct limit_order {
     limit_order(
         util::Side side, util::Ticker ticker, double quantity,
         util::decimal_price price, bool ioc = false
-    ) : position{side, ticker, quantity, price}, ioc(ioc)
+    ) :
+        position{side, ticker, quantity, price},
+        ioc(ioc)
     {}
 
     limit_order(const util::position& position, bool ioc = false) :

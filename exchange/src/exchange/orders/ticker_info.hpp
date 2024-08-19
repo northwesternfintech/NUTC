@@ -28,22 +28,17 @@ struct ticker_info {
 
     // TODO: order fee should not be 0
     ticker_info(
-        traders::TraderContainer& trader_container, const config::ticker_config& config
+        traders::TraderContainer& traders, const config::ticker_config& config
     ) :
-        ticker_info(
-            trader_container, config.TICKER, config.STARTING_PRICE, 0.0, config.BOTS
-        )
+        ticker_info(traders, config.TICKER, config.STARTING_PRICE, 0.0, config.BOTS)
     {}
 
     ticker_info(
-        traders::TraderContainer& trader_container, util::Ticker ticker,
-        double starting_price, util::decimal_price order_fee,
-        std::vector<config::bot_config> config
+        traders::TraderContainer& traders, util::Ticker ticker, double starting_price,
+        util::decimal_price order_fee, std::vector<config::bot_config> config
     ) :
         engine(order_fee),
-        bot_containers(
-            create_bot_containers(trader_container, ticker, starting_price, config)
-        )
+        bot_containers(create_bot_containers(traders, ticker, starting_price, config))
     {}
 
 private:

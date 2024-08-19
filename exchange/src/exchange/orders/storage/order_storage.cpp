@@ -5,7 +5,9 @@ namespace matching {
 stored_order::stored_order(
     traders::GenericTrader& trader, util::Ticker ticker, util::Side side,
     double quantity, double price, bool ioc
-) : limit_order{side, ticker, quantity, price, ioc}, trader(&trader)
+) :
+    limit_order{side, ticker, quantity, price, ioc},
+    trader(&trader)
 {}
 
 bool

@@ -5,7 +5,7 @@
 
 namespace nutc {
 namespace test {
-std::shared_ptr<traders::GenericTrader>
+traders::GenericTrader&
 start_wrappers(
     nutc::traders::TraderContainer& users, const std::string& filename,
     double starting_capital, size_t start_delay
@@ -18,7 +18,7 @@ start_wrappers(
     return ret[0];
 }
 
-std::vector<std::shared_ptr<traders::GenericTrader>>
+std::vector<std::reference_wrapper<traders::GenericTrader>>
 start_wrappers(
     nutc::traders::TraderContainer& users,
     const std::vector<std::string>& algo_filenames, double starting_capital,
@@ -35,7 +35,7 @@ start_wrappers(
     DevModeAlgoInitializer algo_manager{start_delay, algo_filepaths};
     algo_manager.initialize_trader_container(users, starting_capital);
 
-    return users.get_traders();
+    return {users.begin(), users.end()};
 }
 } // namespace test
 } // namespace nutc

@@ -12,13 +12,13 @@ class UnitOrderFeeMatching : public ::testing::Test {
 protected:
     using TestTrader = nutc::test_utils::TestTrader;
     static constexpr const int DEFAULT_QUANTITY = 1000;
-    TraderContainer manager_;
+    TraderContainer traders;
     nutc::traders::GenericTrader& trader1 =
-        *manager_.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
+        *traders.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
     nutc::traders::GenericTrader& trader2 =
-        *manager_.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
+        *traders.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
     nutc::traders::GenericTrader& trader3 =
-        *manager_.add_trader<TestTrader>(std::string("GHI"), TEST_STARTING_CAPITAL);
+        *traders.add_trader<TestTrader>(std::string("GHI"), TEST_STARTING_CAPITAL);
 
     void
     SetUp() override
@@ -339,13 +339,13 @@ TEST_F(UnitOrderFeeMatching, MatchingInvalidFunds)
 TEST_F(UnitOrderFeeMatching, SimpleManyInvalidOrder)
 {
     nutc::traders::GenericTrader& trader4 =
-        *manager_.add_trader<TestTrader>(std::string("A"), TEST_STARTING_CAPITAL);
+        *traders.add_trader<TestTrader>(std::string("A"), TEST_STARTING_CAPITAL);
     nutc::traders::GenericTrader& trader5 =
-        *manager_.add_trader<TestTrader>(std::string("B"), 1);
+        *traders.add_trader<TestTrader>(std::string("B"), 1);
     nutc::traders::GenericTrader& trader6 =
-        *manager_.add_trader<TestTrader>(std::string("C"), TEST_STARTING_CAPITAL);
+        *traders.add_trader<TestTrader>(std::string("C"), TEST_STARTING_CAPITAL);
     nutc::traders::GenericTrader& trader7 =
-        *manager_.add_trader<TestTrader>(std::string("D"), TEST_STARTING_CAPITAL);
+        *traders.add_trader<TestTrader>(std::string("D"), TEST_STARTING_CAPITAL);
 
     trader4.modify_holdings("ETH", DEFAULT_QUANTITY);
     trader5.modify_holdings("ETH", DEFAULT_QUANTITY);

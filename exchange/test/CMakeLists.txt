@@ -24,6 +24,8 @@ add_executable(NUTC_tests
   src/unit/matching/order_container.cpp
   src/unit/matching/get_update.cpp
   src/unit/matching/match_ioc.cpp
+
+  src/unit/traders/trader_container.cpp
   
   src/integration/basic.cpp
   )

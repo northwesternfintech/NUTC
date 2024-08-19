@@ -1,5 +1,7 @@
 #include "base_cycle.hpp"
 
+#include "shared/messages_exchange_to_wrapper.hpp"
+
 namespace nutc {
 namespace matching {
 void
@@ -16,19 +18,23 @@ std::vector<stored_order>
 BaseMatchingCycle::collect_orders(uint64_t)
 {
     std::vector<stored_order> orders;
-    for (const auto& trader : trader_container.get_traders()) {
-        auto incoming_orders = trader->read_orders();
+
+    auto collect_orders = [&orders](traders::GenericTrader& trader) {
+        auto incoming_orders = trader.read_orders();
         for (auto& order : incoming_orders) {
             // TODO: penalize?
             if (!order.position.price.valid_start_price())
                 continue;
 
             orders.emplace_back(
-                *trader, order.position.ticker, order.position.side,
+                trader, order.position.ticker, order.position.side,
                 order.position.quantity, order.position.price, order.ioc
             );
         }
-    }
+    };
+
+    std::for_each(traders_.begin(), traders_.end(), collect_orders);
+
     return orders;
 }
 
@@ -37,8 +43,7 @@ BaseMatchingCycle::match_orders_(std::vector<stored_order> orders)
 {
     std::vector<stored_match> matches{};
     for (auto& order : orders) {
-        if (order.position.price < util::decimal_price{0.0}
-            || order.position.quantity <= 0)
+        if (order.position.price < 0.0 || order.position.quantity <= 0)
             continue;
 
         auto it = tickers_.find(order.position.ticker);
@@ -76,9 +81,13 @@ BaseMatchingCycle::handle_matches_(std::vector<stored_match> matches)
 
     messages::tick_update updates{ob_updates, glz_matches};
     std::string update_str = glz::write_json(updates);
-    for (const auto& trader : trader_container.get_traders()) {
-        trader->send_message(update_str);
-    }
+
+    std::for_each(
+        traders_.begin(), traders_.end(),
+        [&update_str](traders::GenericTrader& trader) {
+            trader.send_message(update_str);
+        }
+    );
 }
 
 void
