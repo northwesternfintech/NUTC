@@ -2,6 +2,7 @@
 #include "exchange/traders/trader_types/generic_trader.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
+#include "shared/types/decimal_price.hpp"
 
 #include <fmt/format.h>
 
@@ -38,7 +39,7 @@ struct stored_order : public messages::limit_order {
 
     stored_order(
         traders::GenericTrader& trader, util::Ticker ticker, util::Side side,
-        double quantity, double price, bool ioc = false
+        double quantity, util::decimal_price price, bool ioc = false
     );
 
     stored_order(const stored_order& other) = default;

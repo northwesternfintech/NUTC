@@ -49,7 +49,7 @@ TickerMetricsPusher::report_ticker_stats(matching::TickerMapping& tickers)
             .Add({
                 {"ticker", std::string{ticker}}
         })
-            .Set(info.orderbook.get_midprice());
+            .Set(double{info.orderbook.get_midprice()});
     };
     auto log_best_ba = [&](util::Ticker ticker, matching::ticker_info& info) {
         auto best_bid = info.orderbook.get_top_order(util::Side::buy);
@@ -61,7 +61,7 @@ TickerMetricsPusher::report_ticker_stats(matching::TickerMapping& tickers)
                     {"ticker", std::string{ticker}},
                     {"type",   "BID"              }
             })
-                .Set(best_bid->get().position.price);
+                .Set(double{best_bid->get().position.price});
         }
 
         if (best_ask.has_value()) [[likely]] {
@@ -70,7 +70,7 @@ TickerMetricsPusher::report_ticker_stats(matching::TickerMapping& tickers)
                     {"ticker", std::string{ticker}},
                     {"type",   "ASK"              }
             })
-                .Set(best_ask->get().position.price);
+                .Set(double{best_ask->get().position.price});
         }
     };
 
@@ -130,8 +130,8 @@ TickerMetricsPusher::report_trader_stats(const matching::TickerMapping& tickers)
     auto portfolio_value = [&](const auto& trader) {
         double pnl = 0.0;
         for (const auto& [info, _, ticker] : tickers) {
-            double amount_held = trader.get_holdings(ticker);
-            double midprice = info.orderbook.get_midprice();
+            double amount_held{trader.get_holdings(ticker)};
+            double midprice{info.orderbook.get_midprice()};
             pnl += amount_held * midprice;
         }
         return pnl;
@@ -139,9 +139,11 @@ TickerMetricsPusher::report_trader_stats(const matching::TickerMapping& tickers)
     auto track_trader = [&](traders::GenericTrader& trader) {
         report_holdings(trader);
 
-        double capital = trader.get_capital();
-        double portfolio = portfolio_value(trader);
-        double pnl = capital + portfolio - trader.get_initial_capital();
+        double capital{trader.get_capital()};
+        double pnl{
+            trader.get_capital() + portfolio_value(trader)
+            - trader.get_initial_capital()
+        };
 
         per_trader_pnl_gauge
             .Add({

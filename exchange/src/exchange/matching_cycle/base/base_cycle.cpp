@@ -22,10 +22,6 @@ BaseMatchingCycle::collect_orders(uint64_t)
     auto collect_orders = [&orders](traders::GenericTrader& trader) {
         auto incoming_orders = trader.read_orders();
         for (auto& order : incoming_orders) {
-            // TODO: penalize?
-            if (!order.position.price.valid_start_price())
-                continue;
-
             orders.emplace_back(
                 trader, order.position.ticker, order.position.side,
                 order.position.quantity, order.position.price, order.ioc

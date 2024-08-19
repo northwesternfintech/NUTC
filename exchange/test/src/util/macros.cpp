@@ -19,7 +19,7 @@ validate_match(
 {
     return match.position.ticker == ticker && match.buyer.get_id() == buyer_id
            && match.seller.get_id() == seller_id && match.position.side == side
-           && is_nearly_equal(match.position.price, price)
+           && match.position.price==price
            && is_nearly_equal(match.position.quantity, quantity);
 }
 
@@ -30,7 +30,7 @@ validate_ob_update(
 )
 {
     return update.ticker == ticker && update.side == side
-           && is_nearly_equal(update.price, price)
+           && update.price==price
            && is_nearly_equal(update.quantity, quantity);
 }
 
@@ -41,7 +41,7 @@ validate_limit_order(
 )
 {
     return update.position.ticker == ticker && update.position.side == side
-           && is_nearly_equal(update.position.price, price)
+           && update.position.price==price
            && is_nearly_equal(update.position.quantity, quantity);
 }
 

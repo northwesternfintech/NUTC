@@ -1,5 +1,6 @@
 #pragma once
 
+#include "shared/types/decimal_price.hpp"
 #include "shared/types/position.hpp"
 #include "shared/types/ticker.hpp"
 #include "util.hpp"
@@ -30,15 +31,15 @@ struct match {
     util::position position;
     std::string buyer_id;
     std::string seller_id;
-    double buyer_capital;
-    double seller_capital;
+    util::decimal_price buyer_capital;
+    util::decimal_price seller_capital;
 
     match() = default;
 
     match(
         util::Ticker ticker, util::Side side, double quantity,
-        util::decimal_price price, std::string bid, std::string sid, double bcap,
-        double scap
+        util::decimal_price price, std::string bid, std::string sid,
+        util::decimal_price bcap, util::decimal_price scap
     ) :
         position(side, ticker, quantity, price),
         buyer_id(std::move(bid)), seller_id(std::move(sid)), buyer_capital(bcap),
@@ -46,8 +47,8 @@ struct match {
     {}
 
     match(
-        const util::position& position, std::string bid, std::string sid, double bcap,
-        double scap
+        const util::position& position, std::string bid, std::string sid,
+        util::decimal_price bcap, util::decimal_price scap
     ) :
         position(position),
         buyer_id(std::move(bid)), seller_id(std::move(sid)), buyer_capital(bcap),

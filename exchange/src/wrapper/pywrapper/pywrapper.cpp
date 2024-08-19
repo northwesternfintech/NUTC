@@ -79,14 +79,15 @@ trade_update_function()
 AccountUpdateFunction
 account_update_function()
 {
-    return [](const util::position& position, double held_capital) {
+    return [](const util::position& position, util::decimal_price held_capital) {
         std::string ticker_val{position.ticker};
         std::string side_val = (position.side == util::Side::buy) ? "BUY" : "SELL";
         double price_val{position.price};
         double quantity{position.quantity};
+        double held_val{held_capital};
         try {
             py::globals()["strategy"].attr("on_account_update")(
-                ticker_val, side_val, quantity, price_val, held_capital
+                ticker_val, side_val, quantity, price_val, held_val
             );
         } catch (const py::error_already_set& err) {
             std::cerr << err.what() << "\n";

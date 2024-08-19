@@ -14,7 +14,7 @@ namespace algos {
 
 void
 NormalModeAlgoInitializer::initialize_trader_container(
-    traders::TraderContainer& traders, double start_capital
+    traders::TraderContainer& traders, util::decimal_price start_capital
 ) const
 {
     constexpr const std::array<const char*, 4> REQUIRED_DB_FIELDS = {

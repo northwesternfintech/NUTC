@@ -1,7 +1,7 @@
 #include "config.hpp"
 
 #include "shared/config/config.h"
-#include "shared/util.hpp"
+#include "shared/types/decimal_price.hpp"
 
 #include <fmt/core.h>
 
@@ -104,19 +104,16 @@ Config::get_global_config_(const YAML::Node& full_config)
         throw_undef_err("global");
     const auto& starting_capital = global["starting_capital"];
     const auto& wait_secs = global["wait_secs"];
-    const auto& exp_ticks = global["order_expiration_ticks"];
     const auto& sandbox_secs = global["sandbox_trial_seconds"];
     const auto& order_fee = global["order_fee"];
     if (!starting_capital.IsDefined())
         throw_undef_err("global/starting_capital");
     if (!wait_secs.IsDefined())
         throw_undef_err("global/wait_secs");
-    if (!exp_ticks.IsDefined())
-        throw_undef_err("global/order_expiration_ticks");
     if (!sandbox_secs.IsDefined())
         throw_undef_err("global/sandbox_trial_seconds");
     return {
-        starting_capital.as<int>(), wait_secs.as<size_t>(), exp_ticks.as<size_t>(),
+        util::decimal_price(starting_capital.as<double>()), wait_secs.as<size_t>(),
         sandbox_secs.as<unsigned int>(),
         order_fee.IsDefined() ? order_fee.as<double>() : 0
     };

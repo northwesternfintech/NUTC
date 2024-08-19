@@ -3,6 +3,7 @@
 #include "exchange/theo/brownian.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "exchange/traders/trader_types/bot_trader.hpp"
+#include "shared/types/decimal_price.hpp"
 #include "shared_bot_state.hpp"
 #include "variance.hpp"
 
@@ -24,10 +25,10 @@ class BotContainer {
     BotVector bots_{};
 
 public:
-    void generate_orders(double midprice);
+    void generate_orders(util::decimal_price midprice);
 
     BotContainer(
-        util::Ticker ticker, double starting_price, TraderContainer& trader_container,
+        util::Ticker ticker, util::decimal_price starting_price, TraderContainer& trader_container,
         config::bot_config bots
     ) :
         ticker(ticker),
@@ -35,7 +36,7 @@ public:
         bots_(create_bots(trader_container, ticker, std::move(bots)))
     {}
 
-    double
+    util::decimal_price
     get_theo() const
     {
         return theo_generator_.get_magnitude();
@@ -57,8 +58,8 @@ private:
 
     template <class BotType>
     static BotVector create_bots(
-        TraderContainer& trader_container, util::Ticker ticker, double mean_capital,
-        double stddev_capital, size_t num_bots
+        TraderContainer& trader_container, util::Ticker ticker, util::decimal_price mean_capital,
+        util::decimal_price stddev_capital, size_t num_bots
     );
 };
 } // namespace bots

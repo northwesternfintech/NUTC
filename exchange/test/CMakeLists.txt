@@ -26,6 +26,8 @@ add_executable(NUTC_tests
   src/unit/matching/match_ioc.cpp
 
   src/unit/traders/trader_container.cpp
+
+  src/unit/types/decimal_price.cpp
   
   src/integration/basic.cpp
   )

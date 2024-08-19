@@ -71,10 +71,10 @@ Engine::create_match(const stored_order& buyer, const stored_order& seller)
 
     auto& ticker = buyer.position.ticker;
     buyer.trader->process_order_match(
-        {util::Side::buy, ticker, price * (decimal_one + order_fee), quantity}
+        {util::Side::buy, ticker, quantity, price * (decimal_one + order_fee)}
     );
     seller.trader->process_order_match(
-        {util::Side::sell, ticker, price * (decimal_one - order_fee), quantity}
+        {util::Side::sell, ticker, quantity, price * (decimal_one - order_fee)}
     );
 
     util::position position{aggressive_side, buyer.position.ticker, quantity, price};
@@ -90,7 +90,7 @@ Engine::order_can_execute_(
     double quantity = order_quantity(buyer, seller);
 
     util::decimal_price price = order_price(buyer, seller);
-    double total_price = double((decimal_one + order_fee) * price) * quantity;
+    util::decimal_price total_price = ((decimal_one + order_fee) * price) * quantity;
 
     if (!buyer.trader->can_leverage() && buyer.trader->get_capital() < total_price) {
         orderbook.mark_order_removed(buyer);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "exchange/traders/trader_container.hpp"
+#include "shared/types/decimal_price.hpp"
 #include "shared/util.hpp"
 
 namespace nutc {
@@ -9,7 +10,7 @@ namespace algos {
 class AlgoInitializer {
     virtual void initialize_files() = 0;
     virtual void initialize_trader_container(
-        traders::TraderContainer& manager, double start_cap
+        traders::TraderContainer& manager, util::decimal_price start_cap
     ) const = 0;
 
 public:

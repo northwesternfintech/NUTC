@@ -13,7 +13,7 @@ namespace algos {
 
 void
 DevModeAlgoInitializer::initialize_trader_container(
-    traders::TraderContainer& traders, double start_capital
+    traders::TraderContainer& traders, util::decimal_price start_capital
 ) const
 {
     for (const fs::path& filepath : algo_filepaths_)
