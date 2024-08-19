@@ -20,7 +20,7 @@ private:
             sandbox::CrowServer::get_instance().get_and_clear_pending_traders();
 
         std::for_each(traders.begin(), traders.end(), [this](auto&& trader) {
-            get_trader_container().add_trader(trader);
+            get_traders().add_trader(trader);
         });
     }
 };

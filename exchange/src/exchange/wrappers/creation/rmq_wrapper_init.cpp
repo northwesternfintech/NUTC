@@ -2,29 +2,23 @@
 
 #include "shared/messages_exchange_to_wrapper.hpp"
 
-#include <memory_resource>
-
 namespace nutc {
 namespace rabbitmq {
 
-void
-WrapperInitializer::send_start_time(
-    const std::vector<TraderPtr>& traders, size_t wait_seconds
-)
+int64_t
+get_start_time(size_t wait_seconds)
 {
-    using time_point = std::chrono::high_resolution_clock::time_point;
-    time_point time =
-        std::chrono::high_resolution_clock::now() + std::chrono::seconds(wait_seconds);
-    int64_t time_ns = std::chrono::time_point_cast<std::chrono::nanoseconds>(time)
-                          .time_since_epoch()
-                          .count();
+    using hrq = std::chrono::high_resolution_clock;
+    hrq::time_point time = hrq::now() + std::chrono::seconds(wait_seconds);
+    return std::chrono::time_point_cast<std::chrono::nanoseconds>(time)
+        .time_since_epoch()
+        .count();
+}
 
-    messages::start_time message{time_ns};
-    auto buf = glz::write_json(message);
-
-    for (const auto& trader : traders) {
-        trader->send_message(buf);
-    }
+void
+send_start_time(traders::GenericTrader& trader, int64_t start_time)
+{
+    trader.send_message(glz::write_json(messages::start_time{start_time}));
 }
 
 } // namespace rabbitmq

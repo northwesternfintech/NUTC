@@ -8,7 +8,7 @@ namespace nutc {
 namespace test_utils {
 
 // Basically a generic trader but
-class TestTrader : public traders::GenericTrader {
+class TestTrader final : public traders::GenericTrader {
     std::vector<messages::limit_order> pending_orders_;
 
 public:

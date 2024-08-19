@@ -12,16 +12,16 @@ class UnitManyOrders : public ::testing::Test {
 protected:
     using TestTrader = nutc::test_utils::TestTrader;
     static constexpr const int DEFAULT_QUANTITY = 1000;
-    TraderContainer manager_;
+    TraderContainer traders;
 
     nutc::traders::GenericTrader& trader1 =
-        *manager_.add_trader<TestTrader>(std::string("A"), TEST_STARTING_CAPITAL);
+        *traders.add_trader<TestTrader>(std::string("A"), TEST_STARTING_CAPITAL);
     nutc::traders::GenericTrader& trader2 =
-        *manager_.add_trader<TestTrader>(std::string("B"), TEST_STARTING_CAPITAL);
+        *traders.add_trader<TestTrader>(std::string("B"), TEST_STARTING_CAPITAL);
     nutc::traders::GenericTrader& trader3 =
-        *manager_.add_trader<TestTrader>(std::string("C"), TEST_STARTING_CAPITAL);
+        *traders.add_trader<TestTrader>(std::string("C"), TEST_STARTING_CAPITAL);
     nutc::traders::GenericTrader& trader4 =
-        *manager_.add_trader<TestTrader>(std::string("D"), TEST_STARTING_CAPITAL);
+        *traders.add_trader<TestTrader>(std::string("D"), TEST_STARTING_CAPITAL);
 
     void
     SetUp() override

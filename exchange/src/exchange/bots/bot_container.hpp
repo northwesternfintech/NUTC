@@ -30,7 +30,8 @@ public:
         util::Ticker ticker, double starting_price, TraderContainer& trader_container,
         config::bot_config bots
     ) :
-        ticker(ticker), theo_generator_(starting_price),
+        ticker(ticker),
+        theo_generator_(starting_price),
         bots_(create_bots(trader_container, ticker, std::move(bots)))
     {}
 
@@ -50,7 +51,7 @@ private:
     void generate_orders(const shared_bot_state& shared_state);
 
     static BotVector create_bots(
-        TraderContainer& trader_container, util::Ticker ticker,
+        TraderContainer& traders, util::Ticker ticker,
         const config::bot_config& bot_config
     );
 

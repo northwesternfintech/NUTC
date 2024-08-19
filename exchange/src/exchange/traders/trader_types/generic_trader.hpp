@@ -1,7 +1,6 @@
 #pragma once
 
 #include "hash_table7.hpp"
-#include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
 #include <absl/hash/hash.h>
@@ -16,7 +15,7 @@ class GenericTrader {
     const std::string USER_ID;
     const double INITIAL_CAPITAL;
     double capital_delta_{};
-    emhash7::HashMap<util::Ticker, double, absl::Hash<util::Ticker>> holdings_{};
+    emhash7::HashMap<util::Ticker, double, absl::Hash<util::Ticker>> holdings_;
 
 public:
     explicit GenericTrader(std::string user_id, double capital) :

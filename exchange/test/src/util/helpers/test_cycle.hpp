@@ -19,7 +19,8 @@ public:
     TestMatchingCycle(
         std::vector<std::string> ticker_names, traders::TraderContainer& traders,
         double order_fee = 0.0
-    ) : matching::BaseMatchingCycle{create_tickers(ticker_names, order_fee), traders}
+    ) :
+        matching::BaseMatchingCycle{create_tickers(ticker_names, order_fee), traders}
     {}
 
     // Note: uses tick=0. If using something that relies on tick, it will not work

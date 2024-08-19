@@ -11,12 +11,12 @@ namespace matching {
  */
 class BaseMatchingCycle : public MatchingCycleInterface {
     TickerMapping tickers_;
-    traders::TraderContainer& trader_container;
+    traders::TraderContainer& traders_;
 
 public:
     // Require transfer of ownership
     BaseMatchingCycle(TickerMapping tickers, traders::TraderContainer& traders) :
-        tickers_(std::move(tickers)), trader_container(traders)
+        tickers_(std::move(tickers)), traders_(traders)
     {}
 
 protected:
@@ -26,10 +26,10 @@ protected:
         return tickers_;
     }
 
-    auto&
-    get_trader_container()
+    traders::TraderContainer&
+    get_traders()
     {
-        return trader_container;
+        return traders_;
     }
 
     virtual void before_cycle_(uint64_t) override;

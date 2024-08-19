@@ -16,12 +16,12 @@ protected:
     using TestTrader = nutc::test_utils::TestTrader;
     static constexpr const int DEFAULT_QUANTITY = 1000;
 
-    TraderContainer manager_;
+    TraderContainer traders;
 
     nutc::traders::GenericTrader& trader_1 =
-        *manager_.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
+        *traders.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
     nutc::traders::GenericTrader& trader_2 =
-        *manager_.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
+        *traders.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
 
     void
     SetUp() override

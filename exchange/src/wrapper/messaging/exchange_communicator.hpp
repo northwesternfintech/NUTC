@@ -27,8 +27,9 @@ public:
         pywrapper::TradeUpdateFunction trade_update,
         pywrapper::AccountUpdateFunction account_update
     ) :
-        TRADER_ID(std::move(trader_id)), on_orderbook_update{ob_update},
-        on_trade_update{trade_update}, on_account_update{account_update}
+        TRADER_ID(std::move(trader_id)),
+        on_orderbook_update{ob_update}, on_trade_update{trade_update},
+        on_account_update{account_update}
     {}
 
     void report_startup_complete(bool success);

@@ -1,7 +1,6 @@
 #include "config.h"
 #include "exchange/orders/level_tracking/level_update_generator.hpp"
 #include "exchange/orders/orderbook/level_tracked_orderbook.hpp"
-#include "exchange/traders/trader_container.hpp"
 #include "shared/util.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
@@ -20,14 +19,14 @@ using nutc::util::Side::sell;
 class UnitGetUpdate : public ::testing::Test {
 protected:
     using TestTrader = nutc::test_utils::TestTrader;
-    TraderContainer manager_;
+    TraderContainer traders;
 
     nutc::traders::GenericTrader& trader1 =
-        *manager_.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
+        *traders.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
     nutc::traders::GenericTrader& trader2 =
-        *manager_.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
+        *traders.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
     nutc::traders::GenericTrader& trader3 =
-        *manager_.add_trader<TestTrader>(std::string("GHI"), TEST_STARTING_CAPITAL);
+        *traders.add_trader<TestTrader>(std::string("GHI"), TEST_STARTING_CAPITAL);
 
     LevelTrackedOrderbook<LimitOrderBook> ob{};
     LevelUpdateGenerator& generator_ = ob.get_update_generator();
