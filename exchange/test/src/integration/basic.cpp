@@ -70,7 +70,7 @@ TEST_F(IntegrationBasicAlgo, MarketOrderSell)
     auto trader2 = traders.add_trader<TestTrader>(0);
     trader1.modify_holdings("ABC", 1000);
     trader2->add_order({buy, "ABC", 1, 100.0});
-    trader2->modify_capital(1000);
+    trader2->modify_capital(1000.0);
 
     TestMatchingCycle cycle{
         {"ABC", "DEF"},

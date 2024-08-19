@@ -1,5 +1,6 @@
 #include "limit_orderbook.hpp"
 
+#include "shared/types/decimal_price.hpp"
 #include "shared/util.hpp"
 
 namespace nutc {
@@ -52,7 +53,7 @@ LimitOrderBook::get_midprice() const
     if (bids_.empty() || asks_.empty()) [[unlikely]] {
         return 0.0;
     }
-    return (std::prev(bids_.end())->first + asks_.begin()->first) / 2;
+    return (std::prev(bids_.end())->first + asks_.begin()->first) / 2.0;
 }
 
 void

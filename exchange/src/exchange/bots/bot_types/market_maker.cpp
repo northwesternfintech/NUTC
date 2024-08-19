@@ -11,11 +11,12 @@ using nutc::util::Side;
 
 namespace {
 struct price_level {
-    const double PRICE_DELTA;
+    const nutc::util::decimal_price PRICE_DELTA;
     const double QUANTITY_FACTOR;
 
-    consteval price_level(double price_delta, double quantity_factor) :
-        PRICE_DELTA(price_delta), QUANTITY_FACTOR(quantity_factor)
+    consteval price_level(
+        nutc::util::decimal_price price_delta, double quantity_factor
+    ) : PRICE_DELTA(price_delta), QUANTITY_FACTOR(quantity_factor)
     {}
 };
 
@@ -34,30 +35,30 @@ namespace nutc {
 namespace bots {
 
 void
-MarketMakerBot::place_orders(Side side, double theo, double spread_offset)
+MarketMakerBot::place_orders(Side side, decimal_price theo, decimal_price spread_offset)
 {
     // Approximation
-    double total_quantity = compute_capital_tolerance_() / (theo + spread_offset);
+    double total_quantity =
+        double{compute_capital_tolerance_() / (theo + spread_offset)};
 
     // Placing orders on both sides
     total_quantity /= 2;
 
     for (const auto& [price_delta, quantity_factor] : PRICE_LEVELS) {
-        double price = (side == Side::buy) ? theo - price_delta - spread_offset
-                                           : theo + price_delta + spread_offset;
+        decimal_price price = (side == Side::buy) ? theo - price_delta - spread_offset
+                                                  : theo + price_delta + spread_offset;
 
-        if (price <= 0) [[unlikely]]
+        if (price <= 0.0) [[unlikely]]
             return;
 
-        double quantity = total_quantity * quantity_factor;
-        add_limit_order(side, quantity, price, true);
+        add_limit_order(side, total_quantity * quantity_factor, price, true);
     }
 }
 
-double
-MarketMakerBot::calculate_lean(const shared_bot_state& state)
+decimal_price
+MarketMakerBot::calculate_lean_percent(const shared_bot_state& state)
 {
-    double lean_price = state.CUMULATIVE_QUANTITY_HELD * state.MIDPRICE;
+    auto lean_price = state.MIDPRICE * state.CUMULATIVE_QUANTITY_HELD;
     return lean_price / state.CUMULATIVE_INTEREST_LIMIT;
 }
 
@@ -65,19 +66,16 @@ MarketMakerBot::calculate_lean(const shared_bot_state& state)
 void
 MarketMakerBot::take_action(const shared_bot_state& state)
 {
-    double theo = state.THEO + generate_gaussian_noise(0, .05);
-
-    double spread_offset = state.MIDPRICE * (1.0 / 600 + state.REALIZED_VOLATILITY);
-    spread_offset *= aggressiveness;
-    spread_offset = std::min(spread_offset, 1.0);
-    spread_offset = std::max(spread_offset, -1.0);
-
+    // decimal_price spread_offset = state.MIDPRICE * (1.0 / 600 +
+    // state.REALIZED_VOLATILITY); spread_offset *= aggressiveness; spread_offset =
+    // std::min(spread_offset, 1.0); spread_offset = std::max(spread_offset, -1.0);
+    //
     // TODO: adding market impact to the spread is very challenging and will be
     // continued later
-    spread_offset = 0;
+    decimal_price spread_offset = 0.0;
 
-    double lean_pcnt = calculate_lean(state);
-    theo -= (lean_pcnt * 15);
+    decimal_price lean = calculate_lean_percent(state);
+    decimal_price theo = state.THEO - (lean * 15.0) + generate_gaussian_noise(0, .05);
 
     place_orders(Side::buy, theo, spread_offset);
     place_orders(Side::sell, theo, spread_offset);

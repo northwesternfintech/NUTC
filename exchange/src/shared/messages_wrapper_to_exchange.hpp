@@ -42,8 +42,9 @@ private:
     static util::decimal_price
     market_order_price(util::Side side)
     {
+		// TODO: fix
         if (side == util::Side::buy) {
-            return std::numeric_limits<util::decimal_price>::max();
+            return static_cast<double>(std::numeric_limits<uint16_t>::max());
         }
         else {
             return std::numeric_limits<util::decimal_price>::min();

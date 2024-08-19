@@ -1,5 +1,6 @@
 #pragma once
 
+#include "shared/types/decimal_price.hpp"
 #include "shared/types/ticker.hpp"
 
 #include <vector>
@@ -12,13 +13,13 @@ enum class BotType { market_maker = 0, retail = 1 };
 struct bot_config {
     const BotType TYPE;
     const size_t NUM_BOTS;
-    const double AVERAGE_CAPITAL;
-    const double STD_DEV_CAPITAL;
+    const util::decimal_price AVERAGE_CAPITAL;
+    const util::decimal_price STD_DEV_CAPITAL;
 };
 
 struct ticker_config {
     const util::Ticker TICKER;
-    const double STARTING_PRICE;
+    const util::decimal_price STARTING_PRICE;
 
     const std::vector<bot_config> BOTS;
 };

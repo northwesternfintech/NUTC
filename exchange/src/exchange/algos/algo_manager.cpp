@@ -5,6 +5,7 @@
 #include "exchange/config/dynamic/config.hpp"
 #include "exchange/config/static/config.hpp"
 #include "normal_mode/normal_mode.hpp"
+#include "shared/types/decimal_price.hpp"
 
 #include <memory>
 #include <stdexcept>
@@ -17,7 +18,7 @@ using mode = util::Mode;
 void
 AlgoInitializer::initialize_algo_management(traders::TraderContainer& trader_container)
 {
-    double start_cap = config::Config::get().constants().STARTING_CAPITAL;
+    util::decimal_price start_cap = config::Config::get().constants().STARTING_CAPITAL;
 
     initialize_files();
     initialize_trader_container(trader_container, start_cap);

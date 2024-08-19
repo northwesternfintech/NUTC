@@ -1,6 +1,7 @@
 #pragma once
 
 #include "exchange/algos/algo_manager.hpp"
+#include "shared/types/decimal_price.hpp"
 
 namespace nutc {
 namespace algos {
@@ -12,7 +13,7 @@ public:
     NormalModeAlgoInitializer(size_t wait_secs) : WAIT_SECS(wait_secs) {}
 
     void initialize_trader_container(
-        traders::TraderContainer& traders, double start_capital
+        traders::TraderContainer& traders, util::decimal_price start_capital
     ) const override;
 
     // No files to initialize

@@ -13,8 +13,8 @@ using util::Ticker;
 using OrderBookUpdateFunction =
     std::function<void(const util::position& position_change)>;
 using TradeUpdateFunction = std::function<void(const util::position& position_change)>;
-using AccountUpdateFunction =
-    std::function<void(const util::position& position_change, double total_capital)>;
+using AccountUpdateFunction = std::function<
+    void(const util::position& position_change, util::decimal_price held_capital)>;
 
 OrderBookUpdateFunction ob_update_function();
 

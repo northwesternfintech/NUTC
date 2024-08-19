@@ -1,6 +1,5 @@
 #include "config.h"
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
-#include "exchange/traders/trader_container.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
 
@@ -47,8 +46,8 @@ TEST_F(UnitOrderBookTest, TestStorageRounding)
 
 TEST_F(UnitOrderBookTest, SimpleAddRemove)
 {
-    stored_order order1{trader_1, "ETH", buy, 1, 1, 1};
-    // stored_order order2{trader_2, "ETH", sell, 1, 1, 1};
+    stored_order order1{trader_1, "ETH", buy, 1, 1.0};
+    // stored_order order2{trader_2, "ETH", sell, 1, 1.0};
 
     container_.add_order(order1);
     // ASSERT_EQ(container_.get_level(buy, 1.0), 1);
@@ -67,8 +66,8 @@ TEST_F(UnitOrderBookTest, SimpleAddRemove)
 
 TEST_F(UnitOrderBookTest, ModifyQuantity)
 {
-    stored_order so1{trader_1, "ETH", buy, 1, 1, 1};
-    stored_order so2{trader_1, "ETH", sell, 1, 1, 1};
+    stored_order so1{trader_1, "ETH", buy, 1, 1.0};
+    stored_order so2{trader_1, "ETH", sell, 1, 1.0};
 
     container_.add_order(so1);
     container_.add_order(so2);

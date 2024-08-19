@@ -1,5 +1,7 @@
 #pragma once
 
+#include "shared/types/decimal_price.hpp"
+
 #include <random>
 
 namespace nutc {
@@ -30,14 +32,11 @@ public:
     }
 
     // Constructor for BrownianMotion, takes a seed
-    explicit BrownianMotion(const unsigned int seed) : cur_magnitude_(0)
-    {
-        set_seed(seed);
-    }
+    explicit BrownianMotion(unsigned int seed) : cur_magnitude_(0) { set_seed(seed); }
 
     // Constructor for BrownianMotion with initial price
-    explicit BrownianMotion(const double starting_magnitude) :
-        cur_magnitude_(starting_magnitude)
+    explicit BrownianMotion(util::decimal_price starting_magnitude) :
+        cur_magnitude_(double{starting_magnitude})
     {
         std::random_device rd;
         random_number_generator_ = std::minstd_rand0(rd());

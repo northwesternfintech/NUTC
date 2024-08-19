@@ -11,13 +11,13 @@
 namespace nutc::bots {
 
 void
-BotContainer::generate_orders(double midprice)
+BotContainer::generate_orders(util::decimal_price midprice)
 {
     auto theo = fabs(theo_generator_.generate_next_magnitude());
     variance_calculator_.record_price(midprice);
 
-    double cumulative_interest_limit = 0;
-    double cumulative_quantity_held = 0;
+    decimal_price cumulative_interest_limit{};
+    double cumulative_quantity_held{};
 
     for (const auto& bot : bots_) {
         cumulative_interest_limit += bot->get_interest_limit();
@@ -33,15 +33,15 @@ BotContainer::generate_orders(double midprice)
 template <class BotType>
 BotVector
 BotContainer::create_bots(
-    TraderContainer& trader_container, util::Ticker ticker, double mean_capital,
-    double stddev_capital, size_t num_bots
+    TraderContainer& trader_container, util::Ticker ticker, decimal_price mean_capital,
+    decimal_price stddev_capital, size_t num_bots
 )
 {
     BotVector bot_vec;
 
     std::random_device rand;
     std::mt19937 gen(rand());
-    std::normal_distribution<> distr(mean_capital, stddev_capital);
+    std::normal_distribution<> distr(double{mean_capital}, double{stddev_capital});
     for (size_t i = 0; i < num_bots; i++) {
         auto capital = distr(gen);
         auto bot = trader_container.add_trader<BotType>(ticker, std::fabs(capital));

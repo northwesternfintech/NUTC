@@ -1,6 +1,7 @@
 #pragma once
 
 #include "exchange/orders/storage/order_storage.hpp"
+#include "shared/types/decimal_price.hpp"
 
 #include <cassert>
 
@@ -27,7 +28,7 @@ public:
 
 private:
     void clean_tree(util::Side side);
-    stored_order pop_from_queue(util::Side side, double price);
+    stored_order pop_from_queue(util::Side side, util::decimal_price price);
 };
 } // namespace matching
 } // namespace nutc

@@ -3,6 +3,7 @@
 #include "exchange/wrappers/handle/wrapper_handle.hpp"
 #include "generic_trader.hpp"
 #include "shared/file_operations/file_operations.hpp"
+#include "shared/types/decimal_price.hpp"
 
 #include <fmt/format.h>
 
@@ -18,7 +19,7 @@ public:
     // Remote (firebase)
     explicit AlgoTrader(
         std::string remote_uid, std::string algo_id, std::string full_name,
-        double capital
+        util::decimal_price capital
     ) :
         GenericTrader(util::trader_id(remote_uid, algo_id), capital),
         DISPLAY_NAME(std::move(full_name)), ALGO_ID(algo_id),
@@ -27,7 +28,7 @@ public:
     {}
 
     // Local (algo .py on disk)
-    explicit AlgoTrader(std::string algo_path, double capital) :
+    explicit AlgoTrader(std::string algo_path, util::decimal_price capital) :
         GenericTrader(algo_path, capital), DISPLAY_NAME(algo_path), ALGO_ID(algo_path),
         wrapper_handle_(std::make_optional<wrappers::WrapperHandle>(algo_path))
     {

@@ -2,6 +2,7 @@
 
 #include "exchange/algos/algo_manager.hpp"
 #include "exchange/traders/trader_container.hpp"
+#include "shared/types/decimal_price.hpp"
 
 #include <filesystem>
 #include <limits>
@@ -43,7 +44,7 @@ public:
     }
 
     void initialize_trader_container(
-        traders::TraderContainer& traders, double start_capital
+        traders::TraderContainer& traders, util::decimal_price start_capital
     ) const override;
 
     void initialize_files() final;

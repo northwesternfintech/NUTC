@@ -1,6 +1,7 @@
 #pragma once
 
 #include "exchange/config/static/config.hpp"
+#include "shared/types/decimal_price.hpp"
 #include "ticker_config.hpp"
 
 #include <fmt/format.h>
@@ -13,9 +14,8 @@ namespace nutc {
 namespace config {
 
 struct global_config {
-    const int STARTING_CAPITAL;
+    const util::decimal_price STARTING_CAPITAL;
     const size_t WAIT_SECS;
-    const size_t ORDER_EXPIRATION_TICKS;
     const unsigned int SANDBOX_TRIAL_SECS;
     const double ORDER_FEE;
 };

@@ -2,6 +2,7 @@
 
 #include "exchange/bots/shared_bot_state.hpp"
 #include "exchange/traders/trader_types/generic_trader.hpp"
+#include "shared/types/decimal_price.hpp"
 
 #include <cassert>
 
@@ -12,13 +13,13 @@ namespace traders {
 
 class BotTrader : public traders::GenericTrader {
     const util::Ticker TICKER;
-    const double INTEREST_LIMIT;
-    double short_interest_ = 0;
-    double long_interest_ = 0;
+    const util::decimal_price INTEREST_LIMIT;
+    util::decimal_price short_interest_{};
+    util::decimal_price long_interest_{};
 
     double open_bids_ = 0;
     double open_asks_ = 0;
-    std::vector<messages::limit_order> orders_{};
+    std::vector<messages::limit_order> orders_;
 
 public:
     double
@@ -27,7 +28,7 @@ public:
         return GenericTrader::get_holdings(TICKER);
     }
 
-    BotTrader(util::Ticker ticker, double interest_limit) :
+    BotTrader(util::Ticker ticker, util::decimal_price interest_limit) :
         GenericTrader(generate_user_id(), interest_limit), TICKER(ticker),
         INTEREST_LIMIT(interest_limit)
     {}
@@ -43,29 +44,29 @@ public:
         return true;
     }
 
-    [[nodiscard]] double
+    [[nodiscard]] util::decimal_price
     get_capital_utilization() const
     {
-        double capital_util =
+        util::decimal_price capital_util =
             (get_long_interest() + get_short_interest()) / get_interest_limit();
-        assert(capital_util <= 1);
+        assert(capital_util <= 1.0);
         // assert(capital_util >= 0);
         return capital_util;
     }
 
-    [[nodiscard]] double
+    [[nodiscard]] util::decimal_price
     get_long_interest() const
     {
         return long_interest_;
     }
 
-    [[nodiscard]] double
+    [[nodiscard]] util::decimal_price
     get_interest_limit() const
     {
         return INTEREST_LIMIT;
     }
 
-    [[nodiscard]] double
+    [[nodiscard]] util::decimal_price
     get_short_interest() const
     {
         return short_interest_;
@@ -103,7 +104,7 @@ public:
 protected:
     static double generate_gaussian_noise(double mean, double stddev);
 
-    [[nodiscard]] double
+    [[nodiscard]] util::decimal_price
     compute_net_exposure_() const
     {
         return (get_long_interest() - get_short_interest());
@@ -123,20 +124,21 @@ protected:
         orders_.emplace_back(side, TICKER, quantity);
     }
 
-    double
+    util::decimal_price
     compute_capital_tolerance_()
     {
-        return (1 - get_capital_utilization()) * (get_interest_limit() / 2);
+        return (util::decimal_price{1.0} - get_capital_utilization())
+               * (get_interest_limit() / 2.0);
     }
 
     void
-    modify_short_capital(double delta)
+    modify_short_capital(util::decimal_price delta)
     {
         short_interest_ += delta;
     }
 
     void
-    modify_long_capital(double delta)
+    modify_long_capital(util::decimal_price delta)
     {
         long_interest_ += delta;
     }

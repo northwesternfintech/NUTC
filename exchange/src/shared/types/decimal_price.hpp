@@ -8,45 +8,50 @@
 
 #include <functional>
 
-namespace nutc {
-namespace util {
+namespace nutc::util {
 
 // We round prices to 2 decimal places, so just store them as integers
 struct decimal_price {
-    static constexpr uint16_t MAX_ORDER_PRICE = std::numeric_limits<uint16_t>::max();
+    using decimal_type = int64_t;
 
-    uint64_t price{};
+    decimal_type price;
 
-    // A bit hacky but necessary to support constexpr constructors
-    static constexpr uint64_t
+    static bool
+    price_within_bounds(double price)
+    {
+        bool lower_bound =
+            (price * 100)
+            > static_cast<double>(std::numeric_limits<decimal_type>::min());
+        bool upper_bound =
+            (price * 100)
+            < static_cast<double>(std::numeric_limits<decimal_type>::max());
+
+        return lower_bound && upper_bound;
+    }
+
+    static constexpr decimal_type
     price_to_decimal(double price)
     {
+        // Necessary to support constexpr constructors
         if consteval {
-            return static_cast<uint64_t>(price * 100);
+            return static_cast<decimal_type>(price * 100);
         }
-        else {
-            assert(price >= 0);
-            return static_cast<uint64_t>(std::round(price * 100));
+
+        if (!price_within_bounds(price)) [[unlikely]] {
+            throw std::invalid_argument("Price out of bounds");
         }
+
+        return static_cast<decimal_type>(std::round(price * 100));
     }
 
     constexpr decimal_price(double price_double) : price(price_to_decimal(price_double))
-    {
-        assert(price_double < std::numeric_limits<uint32_t>::max());
-    }
+    {}
 
     constexpr decimal_price() = default;
-
     constexpr decimal_price(const decimal_price& other) = default;
     constexpr decimal_price(decimal_price&& other) = default;
     constexpr decimal_price& operator=(const decimal_price& other) = default;
     constexpr decimal_price& operator=(decimal_price&& other) = default;
-
-    constexpr decimal_price
-    operator*(const decimal_price& other) const
-    {
-        return (price * other.price) / 100;
-    }
 
     constexpr decimal_price
     operator-(const decimal_price& other) const
@@ -60,40 +65,71 @@ struct decimal_price {
         return price + other.price;
     }
 
-    constexpr bool
-    operator==(const decimal_price& other) const
+    constexpr decimal_price
+    operator/(const decimal_price& other) const
     {
-        return price == other.price;
+        return price / other.price;
     }
+
+    constexpr decimal_price
+    operator*(const decimal_price& other) const
+    {
+        return (price * other.price) / 100;
+    }
+
+    constexpr decimal_price&
+    operator/=(const decimal_price& other)
+    {
+        price /= other.price;
+        return *this;
+    }
+
+    constexpr decimal_price&
+    operator+=(const decimal_price& other)
+    {
+        price += other.price;
+        return *this;
+    }
+
+    constexpr auto operator<=>(const decimal_price& other) const = default;
+    constexpr bool operator==(const decimal_price& other) const = default;
 
     constexpr bool
     operator==(double other) const
     {
-        return price == static_cast<uint64_t>(other * 100);
+        return price == static_cast<decimal_type>(other * 100);
     }
 
-    // TODO: make explicit
-    constexpr
+    explicit constexpr
     operator double() const
     {
         return static_cast<double>(price) / 100;
     }
 
-    constexpr bool
-    valid_start_price() const
+    explicit constexpr
+    operator float() const
     {
-        return price <= std::numeric_limits<uint16_t>::max();
+        return static_cast<float>(price) / 100;
     }
 
     constexpr ~decimal_price() = default;
 
-private:
-    constexpr decimal_price(uint64_t decimal) : price(decimal) {}
+    // TODO: bad practice
+    decimal_price
+    difference(const decimal_price& other) const noexcept
+    {
+        if (price >= other.price) {
+            return price - other.price;
+        }
+        else {
+            return other.price - price;
+        }
+    }
 
-    friend class std::numeric_limits<decimal_price>;
+private:
+    constexpr decimal_price(decimal_type decimal) : price(decimal) {}
 };
-} // namespace util
-} // namespace nutc
+} // namespace nutc::util
 
 namespace std {
 using decimal_price = nutc::util::decimal_price;
@@ -103,25 +139,10 @@ struct hash<decimal_price> {
     std::size_t
     operator()(const decimal_price& dp) const noexcept
     {
-        return std::hash<uint64_t>()(dp.price);
+        return std::hash<int64_t>()(dp.price);
     }
 };
 
-template <>
-class numeric_limits<decimal_price> {
-public:
-    static consteval decimal_price
-    min() noexcept
-    {
-        return static_cast<uint64_t>(0);
-    }
-
-    static consteval decimal_price
-    max() noexcept
-    {
-        return static_cast<uint64_t>(decimal_price::MAX_ORDER_PRICE);
-    }
-};
 } // namespace std
 
 /// \cond
