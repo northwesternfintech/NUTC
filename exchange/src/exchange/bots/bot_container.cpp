@@ -25,8 +25,8 @@ BotContainer::generate_orders(util::decimal_price midprice)
     }
 
     return generate_orders(
-        {midprice, theo, variance_calculator_.calculate_volatility(),
-         cumulative_interest_limit, cumulative_quantity_held}
+        {midprice, theo, cumulative_interest_limit,
+         variance_calculator_.calculate_volatility(), cumulative_quantity_held}
     );
 }
 
@@ -58,12 +58,12 @@ BotContainer::create_bots(
 {
     switch (bot_config.TYPE) {
         case config::BotType::retail:
-            return create_bots<RetailBot>(
+            return create_bots<RetailBot<>>(
                 trader_container, ticker, bot_config.AVERAGE_CAPITAL,
                 bot_config.STD_DEV_CAPITAL, bot_config.NUM_BOTS
             );
         case config::BotType::market_maker:
-            return create_bots<MarketMakerBot>(
+            return create_bots<MarketMakerBot<>>(
                 trader_container, ticker, bot_config.AVERAGE_CAPITAL,
                 bot_config.STD_DEV_CAPITAL, bot_config.NUM_BOTS
             );

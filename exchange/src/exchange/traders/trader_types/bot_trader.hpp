@@ -102,8 +102,6 @@ public:
     }
 
 protected:
-    static double generate_gaussian_noise(double mean, double stddev);
-
     [[nodiscard]] util::decimal_price
     compute_net_exposure_() const
     {

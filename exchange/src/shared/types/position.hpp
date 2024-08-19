@@ -14,12 +14,7 @@ struct position {
     double quantity;
     util::decimal_price price;
 
-    bool
-    operator==(const position& other) const noexcept
-    {
-        return side == other.side && ticker == other.ticker && price == other.price
-               && ((quantity - other.quantity) == 0);
-    }
+    bool operator==(const position& other) const noexcept = default;
 
     position() = default;
 

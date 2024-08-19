@@ -4,20 +4,8 @@
 
 #include <cassert>
 
-#include <random>
-
 namespace nutc {
 namespace traders {
-double
-BotTrader::generate_gaussian_noise(double mean, double stddev)
-{
-    static std::random_device rand{};
-    static std::mt19937 gen{rand()};
-    static std::normal_distribution<double> distr{mean, stddev};
-
-    return distr(gen);
-}
-
 void
 BotTrader::process_position_change(util::position order)
 {
