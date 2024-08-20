@@ -72,29 +72,16 @@ public:
             wrapper_handle_->send_message(message);
     }
 
-    std::vector<OrderVariant>
+    OrderVectors
     read_orders() override
     {
-        if (!wrapper_handle_) [[unlikely]]
+        if (!wrapper_handle_.has_value()) [[unlikely]]
             return {};
 
-        std::vector<OrderVariant> incoming_orders;
-
-        auto incoming_limit_orders =
-            wrapper_handle_->read_messages<messages::limit_order>();
-        auto incoming_market_orders =
-            wrapper_handle_->read_messages<messages::market_order>();
-
-        std::copy(
-            incoming_limit_orders.begin(), incoming_limit_orders.end(),
-            std::back_inserter(incoming_orders)
-        );
-        std::copy(
-            incoming_market_orders.begin(), incoming_market_orders.end(),
-            std::back_inserter(incoming_orders)
-        );
-
-        return incoming_orders;
+        return {
+            wrapper_handle_->read_messages<messages::limit_order>(),
+            wrapper_handle_->read_messages<messages::market_order>()
+        };
     }
 
     void

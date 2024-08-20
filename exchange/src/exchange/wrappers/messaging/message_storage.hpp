@@ -16,9 +16,8 @@ public:
     std::vector<T>
     extract()
     {
-        auto& original_vec = get<T>();
-        std::vector<T> result = std::move(original_vec);
-        original_vec.clear();
+        std::vector<T> result;
+        result.swap(get<T>());
         return result;
     }
 

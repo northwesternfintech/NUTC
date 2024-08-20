@@ -20,14 +20,14 @@ public:
     }
 
 protected:
-    using TaggedOrderVariant = std::variant<tagged_limit_order, tagged_market_order>;
+    using OrderVectorPair =
+        std::pair<std::vector<tagged_limit_order>, std::vector<tagged_market_order>>;
 
     virtual void before_cycle_(uint64_t new_tick) = 0;
 
-    virtual std::vector<TaggedOrderVariant> collect_orders(uint64_t new_tick) = 0;
+    virtual OrderVectorPair collect_orders(uint64_t new_tick) = 0;
 
-    virtual std::vector<stored_match>
-    match_orders_(std::vector<TaggedOrderVariant> orders) = 0;
+    virtual std::vector<stored_match> match_orders_(OrderVectorPair orders) = 0;
 
     virtual void handle_matches_(std::vector<stored_match> matches) = 0;
 

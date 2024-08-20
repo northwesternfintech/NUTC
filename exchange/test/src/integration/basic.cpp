@@ -46,7 +46,9 @@ TEST_F(IntegrationBasicAlgo, RemoveIOCOrder)
     usleep(500);
     cycle.on_tick(0);
 
-    ASSERT_TRUE(trader1.read_orders().empty());
+    auto [limit_orders, market_orders] = trader1.read_orders();
+    ASSERT_TRUE(limit_orders.empty());
+    ASSERT_TRUE(market_orders.empty());
 }
 
 TEST_F(IntegrationBasicAlgo, MarketOrderBuy)
@@ -218,7 +220,9 @@ TEST_F(IntegrationBasicAlgo, DisableTrader)
 
     cycle.on_tick(0);
     sleep(1);
-    ASSERT_TRUE(trader1.read_orders().empty());
+    auto [limit_orders, market_orders] = trader1.read_orders();
+    ASSERT_TRUE(limit_orders.empty());
+    ASSERT_TRUE(market_orders.empty());
 }
 } // namespace test
 } // namespace nutc

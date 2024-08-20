@@ -26,7 +26,7 @@ public:
         benchmark::DoNotOptimize(change);
     }
 
-    std::vector<OrderVariant>
+    OrderVectors
     read_orders() override
     {
         return {};

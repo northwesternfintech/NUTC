@@ -95,8 +95,9 @@ public:
 
     virtual void send_message(const std::string&) = 0;
 
-    using OrderVariant = std::variant<messages::limit_order, messages::market_order>;
-    virtual std::vector<OrderVariant> read_orders() = 0;
+    using OrderVectors = std::pair<
+        std::vector<messages::limit_order>, std::vector<messages::market_order>>;
+    virtual OrderVectors read_orders() = 0;
 };
 } // namespace traders
 } // namespace nutc

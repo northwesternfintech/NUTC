@@ -17,30 +17,24 @@ BaseMatchingCycle::before_cycle_(uint64_t)
 }
 
 auto
-BaseMatchingCycle::collect_orders(uint64_t) -> std::vector<TaggedOrderVariant>
+BaseMatchingCycle::collect_orders(uint64_t) -> OrderVectorPair
 {
-    std::vector<TaggedOrderVariant> orders;
+    OrderVectorPair orders;
 
     auto collect_orders = [&orders](traders::GenericTrader& trader) {
-        auto handle_order = [&orders, &trader]<typename ordered>(const ordered& order) {
-            if constexpr (std::is_same_v<ordered, messages::limit_order>) {
-                orders.emplace_back(tagged_limit_order{trader, order});
-            }
+        auto [limit_orders, market_orders] = trader.read_orders();
 
-            else if constexpr (std::is_same_v<ordered, messages::market_order>) {
-                orders.emplace_back(tagged_limit_order{
-                    trader, order.ticker, order.side, order.quantity,
-                    order.side == util::Side::buy ? 1000.0 : 0.0, true
-                });
-            }
+        auto get_tagged_order = [&trader]<typename OrderT>(const OrderT& order) {
+            return tagged_order<OrderT>{trader, order};
         };
 
-        auto incoming_orders = trader.read_orders();
-        std::for_each(
-            incoming_orders.begin(), incoming_orders.end(),
-            [&handle_order](const auto& order_variant) {
-                std::visit(handle_order, order_variant);
-            }
+        std::transform(
+            limit_orders.begin(), limit_orders.end(), std::back_inserter(orders.first),
+            get_tagged_order
+        );
+        std::transform(
+            market_orders.begin(), market_orders.end(),
+            std::back_inserter(orders.second), get_tagged_order
         );
     };
 
@@ -50,13 +44,10 @@ BaseMatchingCycle::collect_orders(uint64_t) -> std::vector<TaggedOrderVariant>
 }
 
 std::vector<stored_match>
-BaseMatchingCycle::match_orders_(std::vector<TaggedOrderVariant> orders)
+BaseMatchingCycle::match_orders_(OrderVectorPair orders)
 {
     std::vector<stored_match> matches{};
-    for (const TaggedOrderVariant& order_variant : orders) {
-        // TODO: make different
-        assert(std::holds_alternative<tagged_limit_order>(order_variant));
-        auto order = std::get<tagged_limit_order>(order_variant);
+    for (const tagged_limit_order& order : orders.first) {
         if (order.position.price < 0.0 || order.position.quantity <= 0)
             continue;
 
@@ -68,6 +59,29 @@ BaseMatchingCycle::match_orders_(std::vector<TaggedOrderVariant> orders)
         auto tmp = it->second.engine.match_orders(it->second.orderbook);
         std::ranges::move(tmp, std::back_inserter(matches));
     }
+    // TODO: change
+    for (const tagged_market_order& order : orders.second) {
+        if (order.quantity <= 0)
+            continue;
+
+        auto it = tickers_.find(order.ticker);
+        if (it == tickers_.end())
+            continue;
+
+        tagged_limit_order lim_order{
+            *order.trader,
+            order.ticker,
+            order.side,
+            order.quantity,
+            order.side == util::Side::buy ? 1000.0 : 0.0,
+            true
+        };
+
+        it->second.orderbook.add_order(lim_order);
+        auto tmp = it->second.engine.match_orders(it->second.orderbook);
+        std::ranges::move(tmp, std::back_inserter(matches));
+    }
+
     return matches;
 }
 
