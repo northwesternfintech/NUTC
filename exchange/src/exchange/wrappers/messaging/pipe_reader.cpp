@@ -17,8 +17,8 @@ PipeReader::async_read_pipe()
     async_read_pipe(std::make_shared<std::string>());
 }
 
-std::variant<init_message, limit_order>
-PipeReader::get_message()
+auto
+PipeReader::get_message() -> ReadMessageVariant
 {
     while (true) {
         std::lock_guard<std::mutex> lock{message_lock_};
@@ -31,8 +31,8 @@ PipeReader::get_message()
     }
 }
 
-std::vector<std::variant<messages::init_message, messages::limit_order>>
-PipeReader::get_messages()
+auto
+PipeReader::get_messages() -> std::vector<ReadMessageVariant>
 {
     std::lock_guard<std::mutex> lock{message_lock_};
     auto ret = message_queue_;
@@ -55,7 +55,7 @@ PipeReader::PipeReader() :
 void
 PipeReader::store_message_(const std::string& message)
 {
-    std::variant<init_message, limit_order> data;
+    ReadMessageVariant data;
     auto err = glz::read_json(data, message);
 
     // TODO: handle better

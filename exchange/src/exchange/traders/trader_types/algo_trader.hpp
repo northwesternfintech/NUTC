@@ -3,6 +3,7 @@
 #include "exchange/wrappers/handle/wrapper_handle.hpp"
 #include "generic_trader.hpp"
 #include "shared/file_operations/file_operations.hpp"
+#include "shared/messages_wrapper_to_exchange.hpp"
 #include "shared/types/decimal_price.hpp"
 
 #include <fmt/format.h>
@@ -71,12 +72,33 @@ public:
             wrapper_handle_->send_message(message);
     }
 
-    std::vector<messages::limit_order>
+    std::vector<OrderVariant>
     read_orders() override
     {
-        if (wrapper_handle_) [[likely]]
-            return wrapper_handle_->read_messages();
-        return {};
+        if (!wrapper_handle_) [[unlikely]]
+            return {};
+
+        std::vector<wrappers::WrapperHandle::ReadMessageVariant> incoming_messages =
+            wrapper_handle_->read_messages();
+
+        std::vector<OrderVariant> incoming_orders;
+        incoming_orders.reserve(incoming_messages.size());
+
+        std::transform(
+            incoming_messages.begin(), incoming_messages.end(),
+            std::back_inserter(incoming_orders),
+            [](const auto& v) -> OrderVariant {
+                if (std::holds_alternative<messages::market_order>(v))
+                    return std::get<messages::market_order>(v);
+
+                if (std::holds_alternative<messages::limit_order>(v))
+                    return std::get<messages::limit_order>(v);
+
+                throw std::runtime_error("Unexpected message from wrapper");
+            }
+        );
+
+        return incoming_orders;
     }
 
     void

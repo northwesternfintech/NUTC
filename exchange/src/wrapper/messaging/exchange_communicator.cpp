@@ -147,7 +147,7 @@ ExchangeCommunicator::place_market_order()
         std::copy(ticker.begin(), ticker.end(), ticker_arr.arr.begin());
         util::Side side_enum = (side == "BUY") ? util::Side::buy : util::Side::sell;
 
-        return publish_order<limit_order>(side_enum, ticker_arr, quantity);
+        return publish_order<market_order>(side_enum, ticker_arr, quantity);
     };
 }
 

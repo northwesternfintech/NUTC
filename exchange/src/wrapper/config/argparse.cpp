@@ -58,9 +58,9 @@ process_arguments(int argc, const char** argv)
     bool dev_mode = program.get<bool>("--dev");
     auto trader_id = (dev_mode) ? program.get<std::string>("--algo_id")
                                 : util::trader_id(
-                                    program.get<std::string>("--uid"),
-                                    program.get<std::string>("--algo_id")
-                                );
+                                      program.get<std::string>("--uid"),
+                                      program.get<std::string>("--algo_id")
+                                  );
 
     return {verbosity, trader_id};
 }

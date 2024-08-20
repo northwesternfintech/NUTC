@@ -26,7 +26,7 @@ public:
         benchmark::DoNotOptimize(change);
     }
 
-    std::vector<messages::limit_order>
+    std::vector<OrderVariant>
     read_orders() override
     {
         return {};

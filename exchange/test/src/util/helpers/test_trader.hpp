@@ -1,6 +1,7 @@
 #pragma once
 
 #include "exchange/traders/trader_types/generic_trader.hpp"
+#include "shared/messages_wrapper_to_exchange.hpp"
 
 #include <fmt/format.h>
 
@@ -9,7 +10,7 @@ namespace test_utils {
 
 // Basically a generic trader but
 class TestTrader final : public traders::GenericTrader {
-    std::vector<messages::limit_order> pending_orders_;
+    std::vector<OrderVariant> pending_orders_;
 
 public:
     TestTrader(double capital) : TestTrader("TEST", capital) {}
@@ -26,7 +27,7 @@ public:
     process_position_change(util::position) override
     {}
 
-    std::vector<messages::limit_order>
+    std::vector<OrderVariant>
     read_orders() override
     {
         auto ret = std::move(pending_orders_);
@@ -36,6 +37,12 @@ public:
 
     void
     add_order(messages::limit_order order)
+    {
+        pending_orders_.push_back(order);
+    }
+
+    void
+    add_order(messages::market_order order)
     {
         pending_orders_.push_back(order);
     }

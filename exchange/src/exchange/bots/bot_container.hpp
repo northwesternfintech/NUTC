@@ -28,11 +28,10 @@ public:
     void generate_orders(util::decimal_price midprice);
 
     BotContainer(
-        util::Ticker ticker, util::decimal_price starting_price, TraderContainer& trader_container,
-        config::bot_config bots
+        util::Ticker ticker, util::decimal_price starting_price,
+        TraderContainer& trader_container, config::bot_config bots
     ) :
-        ticker(ticker),
-        theo_generator_(starting_price),
+        ticker(ticker), theo_generator_(starting_price),
         bots_(create_bots(trader_container, ticker, std::move(bots)))
     {}
 
@@ -58,8 +57,9 @@ private:
 
     template <class BotType>
     static BotVector create_bots(
-        TraderContainer& trader_container, util::Ticker ticker, util::decimal_price mean_capital,
-        util::decimal_price stddev_capital, size_t num_bots
+        TraderContainer& trader_container, util::Ticker ticker,
+        util::decimal_price mean_capital, util::decimal_price stddev_capital,
+        size_t num_bots
     );
 };
 } // namespace bots

@@ -10,13 +10,16 @@ namespace wrappers {
 
 using init_message = messages::init_message;
 using limit_order = messages::limit_order;
+using market_order = messages::market_order;
 
 namespace bp = boost::process;
 namespace ba = boost::asio;
 
 class PipeReader {
+    using ReadMessageVariant = std::variant<init_message, limit_order, market_order>;
+
     std::mutex message_lock_{};
-    std::vector<std::variant<init_message, limit_order>> message_queue_{};
+    std::vector<ReadMessageVariant> message_queue_{};
     std::shared_ptr<ba::io_context> pipe_context_;
     bp::async_pipe pipe_in_;
 
@@ -38,11 +41,11 @@ public:
     ~PipeReader();
 
     // Nonblocking, all available messages
-    std::vector<std::variant<init_message, limit_order>> get_messages();
+    std::vector<ReadMessageVariant> get_messages();
 
     // Blocking, O(messages) due to erase
     // Use sparingly
-    std::variant<init_message, limit_order> get_message();
+    ReadMessageVariant get_message();
 };
 
 } // namespace wrappers

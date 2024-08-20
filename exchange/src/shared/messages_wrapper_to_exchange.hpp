@@ -14,6 +14,12 @@ struct init_message {
     bool successful_startup;
 };
 
+struct market_order {
+    util::Side side;
+    util::Ticker ticker;
+    double quantity;
+};
+
 struct limit_order {
     util::position position;
     bool ioc;
@@ -23,33 +29,14 @@ struct limit_order {
     limit_order(
         util::Side side, util::Ticker ticker, double quantity,
         util::decimal_price price, bool ioc = false
-    ) :
-        position{side, ticker, quantity, price},
-        ioc(ioc)
+    ) : position{side, ticker, quantity, price}, ioc(ioc)
     {}
 
     limit_order(const util::position& position, bool ioc = false) :
         position(position), ioc(ioc)
     {}
 
-    limit_order(util::Side side, util::Ticker ticker, double quantity) :
-        position{side, ticker, quantity, market_order_price(side)}, ioc{true}
-    {}
-
     limit_order() = default;
-
-private:
-    static util::decimal_price
-    market_order_price(util::Side side)
-    {
-		// TODO: fix
-        if (side == util::Side::buy) {
-            return static_cast<double>(std::numeric_limits<uint16_t>::max());
-        }
-        else {
-            return std::numeric_limits<util::decimal_price>::min();
-        }
-    }
 };
 
 } // namespace messages
@@ -60,6 +47,13 @@ template <>
 struct glz::meta<nutc::messages::limit_order> {
     using t = nutc::messages::limit_order;
     static constexpr auto value = object(&t::position, &t::ioc);
+};
+
+/// \cond
+template <>
+struct glz::meta<nutc::messages::market_order> {
+    using t = nutc::messages::market_order;
+    static constexpr auto value = object(&t::side, &t::ticker, &t::quantity);
 };
 
 /// \cond

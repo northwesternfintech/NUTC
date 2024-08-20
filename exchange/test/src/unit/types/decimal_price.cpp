@@ -13,8 +13,8 @@ TEST(UnitDecimalPrice, CorrectlyHandleSubtraction)
 
 TEST(UnitDecimalPrice, OutOfBoundsPriceThrowsException)
 {
-	double out_of_max_bound = std::numeric_limits<double>::max();
-	double out_of_min_bound = std::numeric_limits<double>::lowest();
-	EXPECT_THROW(decimal_price{out_of_max_bound}, std::invalid_argument);
-	EXPECT_THROW(decimal_price{out_of_min_bound}, std::invalid_argument);
+    double out_of_max_bound = std::numeric_limits<double>::max();
+    double out_of_min_bound = std::numeric_limits<double>::lowest();
+    EXPECT_THROW(decimal_price{out_of_max_bound}, std::invalid_argument);
+    EXPECT_THROW(decimal_price{out_of_min_bound}, std::invalid_argument);
 }

@@ -1,13 +1,12 @@
 #include "wrapper_handle.hpp"
 
+#include "exchange/wrappers/messaging/pipe_reader.hpp"
 #include "shared/file_operations/file_operations.hpp"
 #include "shared/firebase/firebase.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
 
 #include <boost/asio.hpp>
 #include <fmt/format.h>
-
-#include <iostream>
 
 namespace {
 std::string
@@ -31,22 +30,10 @@ force_unwrap_optional(std::optional<std::string> opt, std::string error_msg)
 
 namespace nutc {
 namespace wrappers {
-std::vector<limit_order>
-WrapperHandle::read_messages()
+auto
+WrapperHandle::read_messages() -> std::vector<ReadMessageVariant>
 {
-    auto messages = reader_.get_messages();
-    std::vector<limit_order> orders;
-    orders.reserve(messages.size());
-
-    assert(!std::ranges::any_of(messages, [](auto&& mess) {
-        return std::holds_alternative<init_message>(mess);
-    }));
-
-    std::transform(
-        messages.begin(), messages.end(), std::back_inserter(orders),
-        [](const auto& order) { return std::get<limit_order>(order); }
-    );
-    return orders;
+    return reader_.get_messages();
 }
 
 const fs::path&

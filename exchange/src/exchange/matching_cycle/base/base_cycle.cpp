@@ -20,13 +20,28 @@ BaseMatchingCycle::collect_orders(uint64_t)
     std::vector<stored_order> orders;
 
     auto collect_orders = [&orders](traders::GenericTrader& trader) {
+        auto handle_order = [&orders, &trader]<typename ordered>(const ordered& order) {
+            if constexpr (std::is_same_v<ordered, messages::limit_order>) {
+                orders.emplace_back(
+                    trader, order.position.ticker, order.position.side,
+                    order.position.quantity, order.position.price, order.ioc
+                );
+            }
+            else if constexpr (std::is_same_v<ordered, messages::market_order>) {
+                orders.emplace_back(
+                    trader, order.ticker, order.side, order.quantity,
+                    order.side == util::Side::buy ? 1000.0 : 0.0, true
+                );
+            }
+        };
+
         auto incoming_orders = trader.read_orders();
-        for (auto& order : incoming_orders) {
-            orders.emplace_back(
-                trader, order.position.ticker, order.position.side,
-                order.position.quantity, order.position.price, order.ioc
-            );
-        }
+        std::for_each(
+            incoming_orders.begin(), incoming_orders.end(),
+            [&handle_order](const auto& order_variant) {
+                std::visit(handle_order, order_variant);
+            }
+        );
     };
 
     std::for_each(traders_.begin(), traders_.end(), collect_orders);
