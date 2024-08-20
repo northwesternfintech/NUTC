@@ -53,6 +53,7 @@ add_library(
     src/exchange/orders/level_tracking/level_update_generator.cpp
 
 	src/exchange/matching_cycle/base/base_cycle.cpp
+	src/exchange/matching_cycle/cycle_interface.cpp
     
     src/exchange/traders/trader_types/generic_trader.cpp
     src/exchange/traders/trader_types/bot_trader.cpp

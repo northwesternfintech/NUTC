@@ -23,17 +23,13 @@ struct stored_match {
 };
 
 template <typename BaseOrderT>
-struct tagged_order : public BaseOrderT {
+class tagged_order : public BaseOrderT {
+    inline static constinit std::uint64_t global_index = 0;
+
+public:
     traders::GenericTrader* trader;
     bool was_removed{false};
-    uint64_t order_index = get_and_increment_global_index();
-
-    inline static uint64_t
-    get_and_increment_global_index()
-    {
-        static uint64_t global_index = 0;
-        return global_index++;
-    }
+    uint64_t order_index{++global_index};
 
     tagged_order(traders::GenericTrader& order_creator, const auto& order) :
         BaseOrderT(order), trader(&order_creator)

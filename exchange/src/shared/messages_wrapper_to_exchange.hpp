@@ -44,7 +44,7 @@ struct limit_order {
 
 template <typename OrderT>
 struct timed_message : public OrderT {
-    const std::chrono::steady_clock::time_point TIME_RECEIVED =
+    std::chrono::steady_clock::time_point time_received =
         std::chrono::steady_clock::now();
 
     template <typename... Args>

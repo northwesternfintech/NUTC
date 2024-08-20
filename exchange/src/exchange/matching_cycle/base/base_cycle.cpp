@@ -46,7 +46,8 @@ BaseMatchingCycle::collect_orders(uint64_t) -> OrderVectorPair
 std::vector<stored_match>
 BaseMatchingCycle::match_orders_(OrderVectorPair orders)
 {
-    std::vector<stored_match> matches{};
+    std::vector<stored_match> matches;
+
     for (const tagged_limit_order& order : orders.first) {
         if (order.position.price < 0.0 || order.position.quantity <= 0)
             continue;
@@ -57,8 +58,9 @@ BaseMatchingCycle::match_orders_(OrderVectorPair orders)
 
         it->second.orderbook.add_order(order);
         auto tmp = it->second.engine.match_orders(it->second.orderbook);
-        std::ranges::move(tmp, std::back_inserter(matches));
+        std::copy(tmp.begin(), tmp.end(), std::back_inserter(matches));
     }
+
     // TODO: change
     for (const tagged_market_order& order : orders.second) {
         if (order.quantity <= 0)
@@ -79,7 +81,7 @@ BaseMatchingCycle::match_orders_(OrderVectorPair orders)
 
         it->second.orderbook.add_order(lim_order);
         auto tmp = it->second.engine.match_orders(it->second.orderbook);
-        std::ranges::move(tmp, std::back_inserter(matches));
+        std::copy(tmp.begin(), tmp.end(), std::back_inserter(matches));
     }
 
     return matches;

@@ -13,11 +13,17 @@ public:
     on_tick(uint64_t new_tick)
     {
         before_cycle_(new_tick);
+
         auto orders = collect_orders(new_tick);
+        sort_by_timestamp(orders);
+
         auto matches = match_orders_(std::move(orders));
         handle_matches_(std::move(matches));
+
         post_cycle_(new_tick);
     }
+
+    virtual ~MatchingCycleInterface() = default;
 
 protected:
     using OrderVectorPair =
@@ -33,8 +39,8 @@ protected:
 
     virtual void post_cycle_(uint64_t new_tick) = 0;
 
-public:
-    virtual ~MatchingCycleInterface() = default;
+private:
+    static void sort_by_timestamp(OrderVectorPair& orders);
 };
 } // namespace matching
 } // namespace nutc

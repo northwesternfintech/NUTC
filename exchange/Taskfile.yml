@@ -4,7 +4,7 @@ vars:
   NAME: NUTC
   
   # BOTS, DEV, or NORMAL
-  MODE: "NORMAL"
+  MODE: "BOTS"
   
   RELEASE_BUILD: "false"
   RELEASE_PRESET: "ci-ubuntu"
