@@ -26,12 +26,11 @@ public:
         pywrapper::TradeUpdateFunction trade_update,
         pywrapper::AccountUpdateFunction account_update
     ) :
-        TRADER_ID(std::move(trader_id)),
-        on_orderbook_update{ob_update}, on_trade_update{trade_update},
-        on_account_update{account_update}
+        TRADER_ID(std::move(trader_id)), on_orderbook_update{ob_update},
+        on_trade_update{trade_update}, on_account_update{account_update}
     {}
 
-    void report_startup_complete(bool success);
+    bool report_startup_complete();
 
     pywrapper::LimitOrderFunction place_limit_order();
 
@@ -50,11 +49,11 @@ private:
     template <typename T>
     void process_message(T&& message);
 
-    void publish_message(const std::string& message);
+    static void publish_message(const std::string& message);
 
     template <typename T, typename... Args>
     requires std::is_constructible_v<T, Args...>
-    [[nodiscard]] bool publish_order(Args&&...);
+    [[nodiscard]] bool publish_message(Args&&...);
 
     template <typename T>
     T consume_message();

@@ -37,17 +37,17 @@ main(int argc, const char** argv)
 
     if (!set_memory_limit(1024) || !kill_on_exchange_death()) {
         log_e(main, "Failed to set memory limit");
-        communicator.report_startup_complete(false);
+        communicator.report_startup_complete();
         return 1;
     }
 
     algorithm_content algorithm = communicator.consume_algorithm();
 
     if (algorithm.algorithm_content_str.empty()) {
-        communicator.report_startup_complete(false);
+        communicator.report_startup_complete();
         return 1;
     }
-    communicator.report_startup_complete(true);
+    communicator.report_startup_complete();
     communicator.wait_for_start_time();
 
     nutc::pywrapper::create_api_module(

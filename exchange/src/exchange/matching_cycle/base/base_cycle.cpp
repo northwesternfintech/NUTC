@@ -108,12 +108,15 @@ BaseMatchingCycle::handle_matches_(std::vector<stored_match> matches)
         return;
 
     messages::tick_update updates{ob_updates, glz_matches};
-    std::string update_str = glz::write_json(updates);
+    auto update = glz::write_json(updates);
+    if (!update.has_value()) [[unlikely]] {
+        throw std::runtime_error(glz::format_error(update.error()));
+    }
 
     std::for_each(
         traders_.begin(), traders_.end(),
-        [&update_str](traders::GenericTrader& trader) {
-            trader.send_message(update_str);
+        [&message = *update](traders::GenericTrader& trader) {
+            trader.send_message(message);
         }
     );
 }

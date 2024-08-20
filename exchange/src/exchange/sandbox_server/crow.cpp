@@ -61,7 +61,16 @@ CrowServer::add_pending_trader(const std::string user_id, const std::string algo
 
     static auto trial_secs = config::Config::get().constants().SANDBOX_TRIAL_SECS;
     start_remove_timer_(trial_secs, trader);
-    trader->send_message(glz::write_json(messages::start_time{0}));
+
+    auto get_start_message = []() {
+        static auto start_message = glz::write_json(messages::start_time{0});
+        if (!start_message.has_value()) [[unlikely]]
+            throw std::runtime_error(glz::format_error(start_message.error()));
+        return start_message.value();
+    };
+
+    static auto start_message = get_start_message();
+    trader->send_message(start_message);
 }
 
 CrowServer::~CrowServer()

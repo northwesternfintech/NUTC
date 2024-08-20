@@ -69,14 +69,16 @@ ExchangeCommunicator::handle_match(const match& match)
 template <typename T, typename... Args>
 requires std::is_constructible_v<T, Args...>
 bool
-ExchangeCommunicator::publish_order(Args&&... args)
+ExchangeCommunicator::publish_message(Args&&... args)
 {
     if (limiter.should_rate_limit()) {
         return false;
     }
-    std::string message = glz::write_json(T{std::forward<Args>(args)...});
+    auto message = glz::write_json(T{std::forward<Args>(args)...});
+    if (!message.has_value()) [[unlikely]]
+        throw std::runtime_error(glz::format_error(message.error()));
 
-    publish_message(message);
+    publish_message(*message);
     return true;
 }
 
@@ -130,7 +132,9 @@ ExchangeCommunicator::place_limit_order()
         std::copy(ticker.begin(), ticker.end(), ticker_arr.arr.begin());
         util::Side side_enum = (side == "BUY") ? util::Side::buy : util::Side::sell;
 
-        return publish_order<limit_order>(ticker_arr, side_enum, quantity, price, ioc);
+        return publish_message<limit_order>(
+            ticker_arr, side_enum, quantity, price, ioc
+        );
     };
 }
 
@@ -146,15 +150,14 @@ ExchangeCommunicator::place_market_order()
         std::copy(ticker.begin(), ticker.end(), ticker_arr.arr.begin());
         util::Side side_enum = (side == "BUY") ? util::Side::buy : util::Side::sell;
 
-        return publish_order<market_order>(ticker_arr, side_enum, quantity);
+        return publish_message<market_order>(ticker_arr, side_enum, quantity);
     };
 }
 
-void
-ExchangeCommunicator::report_startup_complete(bool success)
+bool
+ExchangeCommunicator::report_startup_complete()
 {
-    auto message = glz::write_json(messages::init_message{success});
-    publish_message(message);
+    return publish_message<messages::init_message>();
 }
 
 // If wait_blocking is disabled, we block until we *receive* the message, but not

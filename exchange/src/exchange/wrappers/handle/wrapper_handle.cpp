@@ -102,9 +102,13 @@ WrapperHandle::WrapperHandle(
 
     using algorithm_t = nutc::messages::algorithm_content;
     algorithm_t algorithm_message = algorithm_t(algorithm);
-    auto encoded_message = glz::write_json(algorithm_message);
 
-    writer_.send_message(encoded_message);
+    auto encoded_message = glz::write_json(algorithm_message);
+    if (!encoded_message.has_value()) [[unlikely]] {
+        throw std::runtime_error(glz::format_error(encoded_message.error()));
+    }
+
+    writer_.send_message(*encoded_message);
     block_on_init();
 }
 

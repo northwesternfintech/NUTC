@@ -15,7 +15,7 @@ namespace test {
 void
 TestMatchingCycle::wait_for_order(const messages::limit_order& order)
 {
-    log_i(testing, "Waiting for order {}", glz::write_json(order));
+    log_i(testing, "Waiting for order {}", *glz::write_json(order));
     while (!last_order.has_value() || last_order.value() != order) {
         on_tick(0);
     }

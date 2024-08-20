@@ -6,12 +6,13 @@
 
 #include <fmt/format.h>
 #include <glaze/glaze.hpp>
+#include <glaze/util/type_traits.hpp>
 
 namespace nutc {
 namespace messages {
 
 struct init_message {
-    bool successful_startup;
+    std::string_view name = "init_message";
 };
 
 struct market_order {
@@ -35,13 +36,7 @@ struct limit_order {
     limit_order(
         util::Ticker ticker, util::Side side, double quantity,
         util::decimal_price price, bool ioc = false
-    ) :
-        position{ticker, side, quantity, price},
-        ioc(ioc)
-    {}
-
-    limit_order(const util::position& position, bool ioc = false) :
-        position(position), ioc(ioc)
+    ) : position{ticker, side, quantity, price}, ioc(ioc)
     {}
 
     limit_order() = default;
@@ -68,5 +63,5 @@ struct glz::meta<nutc::messages::market_order> {
 template <>
 struct glz::meta<nutc::messages::init_message> {
     using t = nutc::messages::init_message;
-    static constexpr auto value = object(&t::successful_startup);
+    static constexpr auto value = object(&t::name);
 };
