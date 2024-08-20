@@ -83,7 +83,7 @@ WrapperHandle::WrapperHandle(const std::string& algo_path) :
 void
 WrapperHandle::block_on_init()
 {
-    while (reader_.get_messages<timed_init_message>().empty()) {}
+    while (!std::holds_alternative<timed_init_message>(reader_.get_message())) {}
 }
 
 WrapperHandle::WrapperHandle(

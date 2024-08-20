@@ -35,13 +35,13 @@ protected:
 TEST_F(UnitOrderBookTest, TestStorageRounding)
 {
     tagged_limit_order order1{trader_1, "ETH", buy, 1, 1.000001};
-    ASSERT_EQ(order1.position.price, 1.0);
+    ASSERT_EQ(order1.price, 1.0);
 
     tagged_limit_order order2{trader_2, "ETH", buy, 0.00001, .9999, 1};
-    ASSERT_EQ(order2.position.price, 1.0);
+    ASSERT_EQ(order2.price, 1.0);
 
     tagged_limit_order order3{trader_2, "ETH", buy, 1, .994};
-    ASSERT_EQ(order3.position.price, 0.99);
+    ASSERT_EQ(order3.price, 0.99);
 }
 
 TEST_F(UnitOrderBookTest, SimpleAddRemove)

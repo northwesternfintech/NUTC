@@ -26,21 +26,21 @@ public:
     virtual ~MatchingCycleInterface() = default;
 
 protected:
-    using OrderVectorPair =
-        std::pair<std::vector<tagged_limit_order>, std::vector<tagged_market_order>>;
+    using OrderVariant = std::variant<tagged_limit_order, tagged_market_order>;
 
     virtual void before_cycle_(uint64_t new_tick) = 0;
 
-    virtual OrderVectorPair collect_orders(uint64_t new_tick) = 0;
+    virtual std::vector<OrderVariant> collect_orders(uint64_t new_tick) = 0;
 
-    virtual std::vector<stored_match> match_orders_(OrderVectorPair orders) = 0;
+    virtual std::vector<stored_match> match_orders_(std::vector<OrderVariant> orders
+    ) = 0;
 
     virtual void handle_matches_(std::vector<stored_match> matches) = 0;
 
     virtual void post_cycle_(uint64_t new_tick) = 0;
 
 private:
-    static void sort_by_timestamp(OrderVectorPair& orders);
+    static void sort_by_timestamp(std::vector<OrderVariant>& orders);
 };
 } // namespace matching
 } // namespace nutc

@@ -8,6 +8,7 @@
 
 namespace nutc {
 namespace test {
+using messages::limit_order;
 using nutc::test::start_wrappers;
 using nutc::util::Side::buy;
 using nutc::util::Side::sell;
@@ -28,7 +29,7 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
 
     TestMatchingCycle cycle{{"ABC"}, traders};
 
-    cycle.wait_for_order({"ABC", buy, 100, 10.0});
+    cycle.wait_for_order(limit_order{"ABC", buy, 100, 10.0});
 }
 
 TEST_F(IntegrationBasicAlgo, RemoveIOCOrder)
@@ -46,9 +47,8 @@ TEST_F(IntegrationBasicAlgo, RemoveIOCOrder)
     usleep(500);
     cycle.on_tick(0);
 
-    auto [limit_orders, market_orders] = trader1.read_orders();
-    ASSERT_TRUE(limit_orders.empty());
-    ASSERT_TRUE(market_orders.empty());
+    auto orders = trader1.read_orders();
+    ASSERT_TRUE(orders.empty());
 }
 
 TEST_F(IntegrationBasicAlgo, MarketOrderBuy)
@@ -63,7 +63,7 @@ TEST_F(IntegrationBasicAlgo, MarketOrderBuy)
         traders
     };
 
-    cycle.wait_for_order({"DEF", buy, 1, 100.0});
+    cycle.wait_for_order(limit_order{"DEF", buy, 1, 100.0});
 }
 
 TEST_F(IntegrationBasicAlgo, MarketOrderSell)
@@ -79,7 +79,7 @@ TEST_F(IntegrationBasicAlgo, MarketOrderSell)
         traders
     };
 
-    cycle.wait_for_order({"DEF", buy, 1, 100.0});
+    cycle.wait_for_order(limit_order{"DEF", buy, 1, 100.0});
 }
 
 TEST_F(IntegrationBasicAlgo, ManyUpdates)
@@ -97,7 +97,7 @@ TEST_F(IntegrationBasicAlgo, ManyUpdates)
 
     cycle.on_tick(0);
 
-    cycle.wait_for_order({"ABC", buy, 10, 100.0});
+    cycle.wait_for_order(limit_order{"ABC", buy, 10, 100.0});
 }
 
 TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
@@ -114,9 +114,9 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
 
     trader2->add_order({"ABC", sell, 100, 100.0});
 
-    cycle.wait_for_order({"ABC", buy, 10, 102.0});
+    cycle.wait_for_order(limit_order{"ABC", buy, 10, 102.0});
 
-    cycle.wait_for_order({"DEF", buy, 1, 100.0});
+    cycle.wait_for_order(limit_order{"DEF", buy, 1, 100.0});
 }
 
 // Sanity check that it goes through the orderbook
@@ -135,7 +135,7 @@ TEST_F(IntegrationBasicAlgo, MultipleLevelOrder)
     trader2->add_order({"ABC", sell, 55, 1.0});
     trader2->add_order({"ABC", sell, 45, 1.0});
 
-    cycle.wait_for_order({"ABC", buy, 100, 10.0});
+    cycle.wait_for_order(limit_order{"ABC", buy, 100, 10.0});
     ASSERT_EQ(trader1.get_capital() - trader1.get_initial_capital(), -100.0);
 }
 
@@ -153,11 +153,11 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateSell)
     };
 
     // obupdate triggers one user to place autil::Side::buy order of 10 ABC at 102
-    cycle.wait_for_order({"ABC", sell, 10, 100.0});
+    cycle.wait_for_order(limit_order{"ABC", sell, 10, 100.0});
 
     // on_trade_match triggers one user to place autil::Side::buy order of 1 ABC at
     // 100
-    cycle.wait_for_order({"DEF", buy, 1, 100.0});
+    cycle.wait_for_order(limit_order{"DEF", buy, 1, 100.0});
 }
 
 TEST_F(IntegrationBasicAlgo, OnAccountUpdateBuy)
@@ -174,10 +174,10 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateBuy)
     };
 
     // obupdate triggers one user to place autil::Side::buy order of 10 ABC at 102
-    cycle.wait_for_order({"ABC", buy, 10, 102.0});
+    cycle.wait_for_order(limit_order{"ABC", buy, 10, 102.0});
     // on_trade_match triggers one user to place autil::Side::buy order of 1 ABC at
     // 100
-    cycle.wait_for_order({"DEF", buy, 1, 100.0});
+    cycle.wait_for_order(limit_order{"DEF", buy, 1, 100.0});
 }
 
 TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
@@ -195,7 +195,7 @@ TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
 
     TestMatchingCycle cycle{{"ABC"}, traders};
 
-    cycle.wait_for_order({"ABC", buy, 100, 10.0});
+    cycle.wait_for_order(limit_order{"ABC", buy, 100, 10.0});
 
     auto end = std::chrono::high_resolution_clock::now();
     const int64_t duration_ms =
@@ -220,9 +220,8 @@ TEST_F(IntegrationBasicAlgo, DisableTrader)
 
     cycle.on_tick(0);
     sleep(1);
-    auto [limit_orders, market_orders] = trader1.read_orders();
-    ASSERT_TRUE(limit_orders.empty());
-    ASSERT_TRUE(market_orders.empty());
+    auto orders = trader1.read_orders();
+    ASSERT_TRUE(orders.empty());
 }
 } // namespace test
 } // namespace nutc

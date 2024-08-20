@@ -39,9 +39,9 @@ validate_limit_order(
     double price
 )
 {
-    return update.position.ticker == ticker && update.position.side == side
-           && update.position.price == price
-           && is_nearly_equal(update.position.quantity, quantity);
+    return update.ticker == ticker && update.side == side
+           && update.price == price
+           && is_nearly_equal(update.quantity, quantity);
 }
 
 } // namespace test_utils

@@ -26,7 +26,7 @@ public:
         benchmark::DoNotOptimize(change);
     }
 
-    OrderVectors
+    MessageQueue
     read_orders() override
     {
         return {};

@@ -41,18 +41,16 @@ struct match {
         util::decimal_price price, std::string bid, std::string sid,
         util::decimal_price bcap, util::decimal_price scap
     ) :
-        position(ticker, side, quantity, price),
-        buyer_id(std::move(bid)), seller_id(std::move(sid)), buyer_capital(bcap),
-        seller_capital(scap)
+        position{ticker, side, quantity, price}, buyer_id(std::move(bid)),
+        seller_id(std::move(sid)), buyer_capital(bcap), seller_capital(scap)
     {}
 
     match(
         const util::position& position, std::string bid, std::string sid,
         util::decimal_price bcap, util::decimal_price scap
     ) :
-        position(position),
-        buyer_id(std::move(bid)), seller_id(std::move(sid)), buyer_capital(bcap),
-        seller_capital(scap)
+        position(position), buyer_id(std::move(bid)), seller_id(std::move(sid)),
+        buyer_capital(bcap), seller_capital(scap)
     {}
 };
 
@@ -64,9 +62,7 @@ struct tick_update {
 
     explicit tick_update(
         std::vector<util::position> ob_updates, std::vector<match> matches
-    ) :
-        ob_updates(std::move(ob_updates)),
-        matches(std::move(matches))
+    ) : ob_updates(std::move(ob_updates)), matches(std::move(matches))
     {}
 };
 

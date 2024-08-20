@@ -19,7 +19,7 @@ class BotTrader : public traders::GenericTrader {
 
     double open_bids_ = 0;
     double open_asks_ = 0;
-    OrderVectors orders_;
+    MessageQueue orders_;
 
 public:
     double
@@ -93,10 +93,10 @@ public:
      */
     virtual void take_action(const bots::shared_bot_state& shared_state) = 0;
 
-    OrderVectors
+    MessageQueue
     read_orders() override
     {
-        OrderVectors ret{};
+        MessageQueue ret{};
         orders_.swap(ret);
         return ret;
     }
@@ -115,13 +115,13 @@ protected:
         util::Side side, double quantity, util::decimal_price price, bool ioc
     )
     {
-        orders_.first.emplace_back(TICKER, side, quantity, price, ioc);
+        orders_.push_back(messages::timed_limit_order{TICKER, side, quantity, price, ioc});
     }
 
     void
     add_market_order(util::Side side, double quantity)
     {
-        orders_.second.emplace_back(TICKER, side, quantity);
+        orders_.push_back(messages::timed_market_order{TICKER, side, quantity});
     }
 
     util::decimal_price

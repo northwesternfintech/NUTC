@@ -1,6 +1,5 @@
 #include "test_cycle.hpp"
 
-#include "exchange/logging.hpp"
 #include "exchange/orders/storage/order_storage.hpp"
 #include "exchange/orders/ticker_info.hpp"
 
@@ -12,22 +11,13 @@
 namespace nutc {
 namespace test {
 
-void
-TestMatchingCycle::wait_for_order(const messages::limit_order& order)
-{
-    log_i(testing, "Waiting for order {}", *glz::write_json(order));
-    while (!last_order.has_value() || last_order.value() != order) {
-        on_tick(0);
-    }
-    log_i(testing, "Expected order received. Continuing...");
-}
 
 std::vector<matching::stored_match>
-TestMatchingCycle::match_orders_(OrderVectorPair orders)
+TestMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
 {
     // TODO: FIX
-    if (!orders.first.empty()) {
-        auto& order = orders.first.back();
+    if (!orders.empty()) {
+        auto& order = orders.back();
         last_order.emplace(order);
     }
 

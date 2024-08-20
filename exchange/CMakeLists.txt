@@ -50,6 +50,7 @@ add_library(
     src/exchange/matching/engine.cpp
     src/exchange/orders/level_tracking/level_quantity_tracker.cpp
     src/exchange/orders/orderbook/limit_orderbook.cpp
+    src/exchange/orders/orderbook/market_orderbook.cpp
     src/exchange/orders/level_tracking/level_update_generator.cpp
 
 	src/exchange/matching_cycle/base/base_cycle.cpp

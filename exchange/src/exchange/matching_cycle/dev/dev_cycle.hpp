@@ -20,7 +20,7 @@ public:
 
 protected:
     std::vector<stored_match>
-    match_orders_(OrderVectorPair orders) override
+    match_orders_(std::vector<OrderVariant> orders) override
     {
         // TODO: add back
         // pusher.report_orders(orders);

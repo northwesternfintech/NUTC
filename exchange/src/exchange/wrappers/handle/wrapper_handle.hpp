@@ -35,11 +35,10 @@ public:
     // Local (.py on disk)
     WrapperHandle(const std::string& algo_path);
 
-    template <typename MessageT>
-    std::vector<MessageT>
+    std::vector<PipeReader::IncomingMessageVariant>
     read_messages()
     {
-        return reader_.get_messages<MessageT>();
+        return reader_.get_messages();
     }
 
     void

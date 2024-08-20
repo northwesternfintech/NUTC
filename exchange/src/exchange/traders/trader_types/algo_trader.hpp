@@ -72,16 +72,13 @@ public:
             wrapper_handle_->send_message(message);
     }
 
-    OrderVectors
+    MessageQueue
     read_orders() override
     {
         if (!wrapper_handle_.has_value()) [[unlikely]]
             return {};
 
-        return {
-            wrapper_handle_->read_messages<messages::timed_limit_order>(),
-            wrapper_handle_->read_messages<messages::timed_market_order>()
-        };
+        return wrapper_handle_->read_messages();
     }
 
     void

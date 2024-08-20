@@ -3,10 +3,12 @@
 #include "hash_table7.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 #include "shared/types/decimal_price.hpp"
+#include "shared/types/position.hpp"
 
 #include <absl/hash/hash.h>
 #include <boost/process.hpp>
 
+#include <queue>
 #include <string>
 
 namespace nutc {
@@ -95,11 +97,11 @@ public:
 
     virtual void send_message(const std::string&) = 0;
 
-    using OrderVectors = std::pair<
-        std::vector<messages::timed_limit_order>,
-        std::vector<messages::timed_market_order>>;
+    using MessageQueue = std::vector<std::variant<
+        messages::timed_init_message, messages::timed_limit_order,
+        messages::timed_market_order>>;
 
-    virtual OrderVectors read_orders() = 0;
+    virtual MessageQueue read_orders() = 0;
 };
 } // namespace traders
 } // namespace nutc

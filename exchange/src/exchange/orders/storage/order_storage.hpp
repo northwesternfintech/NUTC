@@ -41,8 +41,6 @@ public:
         : BaseOrderT(args...), trader(&order_creator)
     {}
 
-    operator util::position() const { return BaseOrderT::position; }
-
     bool operator==(const tagged_order& other) const = default;
 };
 

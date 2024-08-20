@@ -13,15 +13,15 @@
 namespace nutc {
 namespace matching {
 
-template <typename BaseOrderBookT>
-using DecoratedOrderBook = LevelTrackedOrderbook<CancellableOrderBook<BaseOrderBookT>>;
+using DecoratedLimitOrderBook =
+    LevelTrackedOrderbook<CancellableOrderBook<LimitOrderBook>>;
 
 /**
  * @brief Contains the canonical reference to all data coupled to a ticker. Very useful
  * because we typically have to access all at once
  */
 struct ticker_info {
-    DecoratedOrderBook<LimitOrderBook> orderbook{};
+    DecoratedLimitOrderBook limit_orderbook{};
     Engine engine;
     std::vector<bots::BotContainer> bot_containers;
 
@@ -30,8 +30,7 @@ struct ticker_info {
     // TODO: order fee should not be 0
     ticker_info(
         traders::TraderContainer& traders, const config::ticker_config& config
-    ) :
-        ticker_info(traders, config.TICKER, config.STARTING_PRICE, 0.0, config.BOTS)
+    ) : ticker_info(traders, config.TICKER, config.STARTING_PRICE, 0.0, config.BOTS)
     {}
 
     ticker_info(

@@ -1,5 +1,4 @@
 #pragma once
-#include "message_storage.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
 #include <boost/process.hpp>
@@ -15,9 +14,13 @@ namespace bp = boost::process;
 namespace ba = boost::asio;
 
 class PipeReader {
+public:
+    using IncomingMessageVariant =
+        std::variant<timed_init_message, timed_limit_order, timed_market_order>;
+
+private:
     std::mutex message_lock_;
-    MessageStorage<timed_init_message, timed_limit_order, timed_market_order>
-        message_storage_;
+    std::vector<IncomingMessageVariant> messages;
     std::shared_ptr<ba::io_context> pipe_context_;
     bp::async_pipe pipe_in_;
 
@@ -41,13 +44,27 @@ public:
     PipeReader& operator=(PipeReader&&) = delete;
     ~PipeReader();
 
-    // Nonblocking, all available messages
-    template <typename MessageT>
-    std::vector<MessageT>
+    // Blocking and O(1), use sparingly
+    IncomingMessageVariant
+    get_message()
+    {
+        while (true) {
+            std::lock_guard<std::mutex> lock{message_lock_};
+            if (messages.empty())
+                continue;
+            auto res = messages.front();
+			messages.erase(messages.begin());
+            return res;
+        }
+    }
+
+    std::vector<IncomingMessageVariant>
     get_messages()
     {
         std::lock_guard<std::mutex> lock{message_lock_};
-        return message_storage_.extract<MessageT>();
+        std::vector<IncomingMessageVariant> result;
+        result.swap(messages);
+        return result;
     }
 };
 

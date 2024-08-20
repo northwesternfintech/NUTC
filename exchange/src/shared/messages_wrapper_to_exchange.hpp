@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types/position.hpp"
+#include "types/decimal_price.hpp"
 #include "types/ticker.hpp"
 #include "util.hpp"
 
@@ -28,7 +28,10 @@ struct market_order {
 };
 
 struct limit_order {
-    util::position position;
+    util::Ticker ticker;
+    util::Side side;
+    double quantity;
+    util::decimal_price price;
     bool ioc;
 
     bool operator==(const limit_order& other) const = default;
@@ -36,7 +39,7 @@ struct limit_order {
     limit_order(
         util::Ticker ticker, util::Side side, double quantity,
         util::decimal_price price, bool ioc = false
-    ) : position{ticker, side, quantity, price}, ioc(ioc)
+    ) : ticker{ticker}, side{side}, quantity{quantity}, price{price}, ioc{ioc}
     {}
 
     limit_order() = default;
@@ -44,8 +47,7 @@ struct limit_order {
 
 template <typename OrderT>
 struct timed_message : public OrderT {
-    std::chrono::steady_clock::time_point time_received =
-        std::chrono::steady_clock::now();
+    std::chrono::steady_clock::time_point timestamp = std::chrono::steady_clock::now();
 
     template <typename... Args>
     timed_message(Args&&... args) : OrderT(std::forward<Args>(args)...)
@@ -63,14 +65,15 @@ using timed_market_order = timed_message<market_order>;
 template <>
 struct glz::meta<nutc::messages::limit_order> {
     using t = nutc::messages::limit_order;
-    static constexpr auto value = object(&t::position, &t::ioc);
+    static constexpr auto value =
+        object("limit", &t::ticker, &t::side, &t::quantity, &t::price, &t::ioc);
 };
 
 /// \cond
 template <>
 struct glz::meta<nutc::messages::market_order> {
     using t = nutc::messages::market_order;
-    static constexpr auto value = object(&t::side, &t::ticker, &t::quantity);
+    static constexpr auto value = object("market", &t::ticker, &t::side, &t::quantity);
 };
 
 /// \cond

@@ -10,7 +10,7 @@ namespace test_utils {
 
 // Basically a generic trader but
 class TestTrader final : public traders::GenericTrader {
-    OrderVectors pending_orders_;
+    MessageQueue pending_orders_;
 
 public:
     TestTrader(double capital) : TestTrader("TEST", capital) {}
@@ -27,10 +27,10 @@ public:
     process_position_change(util::position) override
     {}
 
-    OrderVectors
+    MessageQueue
     read_orders() override
     {
-        OrderVectors ret{};
+        MessageQueue ret{};
         pending_orders_.swap(ret);
         return ret;
     }
@@ -38,13 +38,13 @@ public:
     void
     add_order(messages::limit_order order)
     {
-        pending_orders_.first.push_back(order);
+        pending_orders_.push_back(messages::timed_limit_order{order});
     }
 
     void
     add_order(messages::market_order order)
     {
-        pending_orders_.second.push_back(order);
+        pending_orders_.push_back(messages::timed_market_order{order});
     }
 
     const std::string&

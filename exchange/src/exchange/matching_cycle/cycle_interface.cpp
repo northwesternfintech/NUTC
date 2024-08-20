@@ -2,12 +2,14 @@
 
 namespace nutc::matching {
 void
-MatchingCycleInterface::sort_by_timestamp(OrderVectorPair& orders)
+MatchingCycleInterface::sort_by_timestamp(std::vector<OrderVariant>& orders)
 {
-    auto cmp_order_timestamps = []<typename OrderT>(
-                                    const OrderT& lhs, const OrderT& rhs
-                                ) { return lhs.time_received < rhs.time_received; };
-    std::sort(orders.first.begin(), orders.first.end(), cmp_order_timestamps);
-    std::sort(orders.second.begin(), orders.second.end(), cmp_order_timestamps);
+    auto get_timestamp = [](const auto& order) { return order.timestamp; };
+
+    auto cmp_order_timestamps =
+        [&get_timestamp]<typename OrderT>(const OrderT& lhs, const OrderT& rhs) {
+            return std::visit(get_timestamp, lhs) < std::visit(get_timestamp, rhs);
+        };
+    std::sort(orders.begin(), orders.end(), cmp_order_timestamps);
 }
 } // namespace nutc::matching
