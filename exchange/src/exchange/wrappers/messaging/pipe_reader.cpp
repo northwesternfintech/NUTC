@@ -9,8 +9,6 @@
 namespace nutc {
 namespace wrappers {
 
-namespace ba = boost::asio;
-
 void
 PipeReader::async_read_pipe()
 {
@@ -32,7 +30,7 @@ PipeReader::PipeReader() :
 void
 PipeReader::store_message_(const std::string& message)
 {
-    ReadMessageVariant data;
+    std::variant<init_message, limit_order, market_order> data;
     auto err = glz::read_json(data, message);
 
     // TODO: handle better
@@ -44,8 +42,9 @@ PipeReader::store_message_(const std::string& message)
         return;
     }
 
-    auto store_message = [this](auto&& v) {
-        message_storage_.add<std::decay_t<decltype(v)>>(v);
+    auto store_message = [this]<typename MessageT>(const MessageT& v) {
+        using TimedMessageT = timed_message<MessageT>;
+        message_storage_.add<TimedMessageT>(TimedMessageT{v});
     };
 
     std::lock_guard<std::mutex> lock{message_lock_};

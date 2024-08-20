@@ -79,8 +79,8 @@ public:
             return {};
 
         return {
-            wrapper_handle_->read_messages<messages::limit_order>(),
-            wrapper_handle_->read_messages<messages::market_order>()
+            wrapper_handle_->read_messages<messages::timed_limit_order>(),
+            wrapper_handle_->read_messages<messages::timed_market_order>()
         };
     }
 

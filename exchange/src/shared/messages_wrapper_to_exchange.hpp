@@ -42,6 +42,20 @@ struct limit_order {
     limit_order() = default;
 };
 
+template <typename OrderT>
+struct timed_message : public OrderT {
+    const std::chrono::steady_clock::time_point TIME_RECEIVED =
+        std::chrono::steady_clock::now();
+
+    template <typename... Args>
+    timed_message(Args&&... args) : OrderT(std::forward<Args>(args)...)
+    {}
+};
+
+using timed_init_message = timed_message<init_message>;
+using timed_limit_order = timed_message<limit_order>;
+using timed_market_order = timed_message<market_order>;
+
 } // namespace messages
 } // namespace nutc
 

@@ -9,16 +9,15 @@
 namespace nutc {
 namespace wrappers {
 
-using init_message = messages::init_message;
-using limit_order = messages::limit_order;
-using market_order = messages::market_order;
+using namespace messages;
 
 namespace bp = boost::process;
 namespace ba = boost::asio;
 
 class PipeReader {
     std::mutex message_lock_;
-    MessageStorage<init_message, limit_order, market_order> message_storage_;
+    MessageStorage<timed_init_message, timed_limit_order, timed_market_order>
+        message_storage_;
     std::shared_ptr<ba::io_context> pipe_context_;
     bp::async_pipe pipe_in_;
 
@@ -28,8 +27,6 @@ class PipeReader {
     void async_read_pipe();
     void async_read_pipe(std::shared_ptr<std::string> buffer);
 
-    using ReadMessageVariant = std::variant<init_message, limit_order, market_order>;
-
 public:
     bp::async_pipe&
     get_pipe()
@@ -38,7 +35,10 @@ public:
     }
 
     PipeReader();
-
+    PipeReader(const PipeReader&) = delete;
+    PipeReader(PipeReader&&) = delete;
+    PipeReader& operator=(const PipeReader&) = delete;
+    PipeReader& operator=(PipeReader&&) = delete;
     ~PipeReader();
 
     // Nonblocking, all available messages

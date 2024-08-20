@@ -50,8 +50,8 @@ struct tagged_order : public BaseOrderT {
     bool operator==(const tagged_order& other) const = default;
 };
 
-using tagged_limit_order = tagged_order<messages::limit_order>;
-using tagged_market_order = tagged_order<messages::market_order>;
+using tagged_limit_order = tagged_order<messages::timed_limit_order>;
+using tagged_market_order = tagged_order<messages::timed_market_order>;
 
 } // namespace matching
 } // namespace nutc
