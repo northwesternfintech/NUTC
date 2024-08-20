@@ -67,11 +67,10 @@ ExchangeCommunicator::handle_match(const match& match)
 }
 
 template <typename T, typename... Args>
+requires std::is_constructible_v<T, Args...>
 bool
 ExchangeCommunicator::publish_order(Args&&... args)
 {
-    static_assert(std::is_constructible_v<T, Args...>);
-
     if (limiter.should_rate_limit()) {
         return false;
     }
@@ -131,7 +130,7 @@ ExchangeCommunicator::place_limit_order()
         std::copy(ticker.begin(), ticker.end(), ticker_arr.arr.begin());
         util::Side side_enum = (side == "BUY") ? util::Side::buy : util::Side::sell;
 
-        return publish_order<limit_order>(side_enum, ticker_arr, quantity, price, ioc);
+        return publish_order<limit_order>(ticker_arr, side_enum, quantity, price, ioc);
     };
 }
 
@@ -147,7 +146,7 @@ ExchangeCommunicator::place_market_order()
         std::copy(ticker.begin(), ticker.end(), ticker_arr.arr.begin());
         util::Side side_enum = (side == "BUY") ? util::Side::buy : util::Side::sell;
 
-        return publish_order<market_order>(side_enum, ticker_arr, quantity);
+        return publish_order<market_order>(ticker_arr, side_enum, quantity);
     };
 }
 

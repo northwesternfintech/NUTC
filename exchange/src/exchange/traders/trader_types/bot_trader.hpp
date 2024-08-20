@@ -115,13 +115,13 @@ protected:
         util::Side side, double quantity, util::decimal_price price, bool ioc
     )
     {
-        orders_.emplace_back(messages::limit_order{side, TICKER, quantity, price, ioc});
+        orders_.emplace_back(messages::limit_order{TICKER, side, quantity, price, ioc});
     }
 
     void
     add_market_order(util::Side side, double quantity)
     {
-        orders_.emplace_back(messages::market_order{side, TICKER, quantity});
+        orders_.emplace_back(messages::market_order{TICKER, side, quantity});
     }
 
     util::decimal_price

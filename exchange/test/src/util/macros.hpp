@@ -6,7 +6,7 @@
 
 using Engine = nutc::matching::Engine;
 using limit_order = nutc::messages::limit_order;
-using stored_order = nutc::matching::stored_order;
+using tagged_limit_order = nutc::matching::tagged_limit_order;
 using TraderContainer = nutc::traders::TraderContainer;
 
 namespace nutc {

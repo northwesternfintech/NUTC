@@ -13,14 +13,14 @@ namespace {
 static constexpr util::decimal_price decimal_one(1.0);
 
 constexpr util::decimal_price
-order_price(const stored_order& order1, const stored_order& order2)
+order_price(const tagged_limit_order& order1, const tagged_limit_order& order2)
 {
     return order1.order_index < order2.order_index ? order1.position.price
                                                    : order2.position.price;
 }
 
 constexpr double
-order_quantity(const stored_order& order1, const stored_order& order2)
+order_quantity(const tagged_limit_order& order1, const tagged_limit_order& order2)
 {
     return std::min(order1.position.quantity, order2.position.quantity);
 }
@@ -39,8 +39,8 @@ Engine::match_orders(LimitOrderBook& orderbook)
             break;
         }
 
-        stored_order& highest_bid = highest_bid_opt->get();
-        stored_order& cheapest_ask = cheapest_ask_opt->get();
+        tagged_limit_order& highest_bid = highest_bid_opt->get();
+        tagged_limit_order& cheapest_ask = cheapest_ask_opt->get();
 
         if (highest_bid.position.price < cheapest_ask.position.price) [[unlikely]] {
             break;
@@ -60,7 +60,7 @@ Engine::match_orders(LimitOrderBook& orderbook)
 }
 
 stored_match
-Engine::create_match(const stored_order& buyer, const stored_order& seller)
+Engine::create_match(const tagged_limit_order& buyer, const tagged_limit_order& seller)
 {
     assert(buyer.position.ticker == seller.position.ticker);
     double quantity = order_quantity(buyer, seller);
@@ -71,20 +71,20 @@ Engine::create_match(const stored_order& buyer, const stored_order& seller)
 
     auto& ticker = buyer.position.ticker;
     buyer.trader->process_order_match(
-        {util::Side::buy, ticker, quantity, price * (decimal_one + order_fee)}
+        {ticker, util::Side::buy, quantity, price * (decimal_one + order_fee)}
     );
     seller.trader->process_order_match(
-        {util::Side::sell, ticker, quantity, price * (decimal_one - order_fee)}
+        {ticker, util::Side::sell, quantity, price * (decimal_one - order_fee)}
     );
 
-    util::position position{aggressive_side, buyer.position.ticker, quantity, price};
+    util::position position{buyer.position.ticker, aggressive_side, quantity, price};
     stored_match match{*buyer.trader, *seller.trader, position};
     return match;
 }
 
 bool
 Engine::order_can_execute_(
-    LimitOrderBook& orderbook, stored_order& buyer, stored_order& seller
+    LimitOrderBook& orderbook, tagged_limit_order& buyer, tagged_limit_order& seller
 )
 {
     double quantity = order_quantity(buyer, seller);

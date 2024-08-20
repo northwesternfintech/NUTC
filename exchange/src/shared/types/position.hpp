@@ -9,8 +9,8 @@
 namespace nutc {
 namespace util {
 struct position {
-    Side side;
     Ticker ticker;
+    Side side;
     double quantity;
     util::decimal_price price;
 
@@ -23,8 +23,8 @@ struct position {
 
     position() = default;
 
-    position(Side side, Ticker ticker, double quantity, util::decimal_price price) :
-        side(side), ticker(ticker), quantity(quantity), price(price)
+    position(Ticker ticker, Side side, double quantity, util::decimal_price price) :
+        ticker(ticker), side(side), quantity(quantity), price(price)
     {}
 };
 

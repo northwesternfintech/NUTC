@@ -27,9 +27,11 @@ TickerMetricsPusher::create_counter_(const std::string& gauge_name)
 }
 
 void
-TickerMetricsPusher::report_orders(const std::vector<matching::stored_order>& orders)
+TickerMetricsPusher::report_orders(
+    const std::vector<matching::tagged_limit_order>& orders
+)
 {
-    auto log_order = [&](const matching::stored_order& order) {
+    auto log_order = [&](const matching::tagged_limit_order& order) {
         orders_quantity_counter
             .Add({
                 {"ticker",      order.position.ticker   },

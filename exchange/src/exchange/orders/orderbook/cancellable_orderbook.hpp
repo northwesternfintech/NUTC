@@ -11,7 +11,7 @@
 namespace nutc {
 namespace matching {
 using OrderIdMap = emhash7::HashMap<
-    uint64_t, std::reference_wrapper<stored_order>, absl::Hash<uint64_t>>;
+    uint64_t, std::reference_wrapper<tagged_limit_order>, absl::Hash<uint64_t>>;
 
 template <typename BaseOrderBookT>
 class CancellableOrderBook : public BaseOrderBookT {
@@ -28,16 +28,16 @@ public:
         return order_map_.contains(order_id);
     }
 
-    stored_order&
+    tagged_limit_order&
     mark_order_removed(uint64_t order_id)
     {
-        stored_order& order = order_map_.at(order_id);
+        tagged_limit_order& order = order_map_.at(order_id);
         mark_order_removed(order);
         return order;
     }
 
-    stored_order&
-    add_order(const stored_order& order) override
+    tagged_limit_order&
+    add_order(const tagged_limit_order& order) override
     {
         if (order.ioc) {
             ioc_order_ids_.push_back(order.order_index);
@@ -50,17 +50,17 @@ public:
     }
 
     void
-    mark_order_removed(stored_order& order) override
+    mark_order_removed(tagged_limit_order& order) override
     {
         order_map_.erase(order.order_index);
 
         BaseOrderBookT::mark_order_removed(order);
     }
 
-    std::vector<stored_order>
+    std::vector<tagged_limit_order>
     remove_ioc_orders()
     {
-        std::vector<stored_order> orders;
+        std::vector<tagged_limit_order> orders;
 
         for (uint64_t order_id : ioc_order_ids_) {
             if (!contains_order(order_id)) {

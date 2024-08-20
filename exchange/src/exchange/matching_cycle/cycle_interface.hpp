@@ -19,19 +19,22 @@ public:
         post_cycle_(new_tick);
     }
 
-private:
-    // Logging, generate orders, etc
+protected:
+    using TaggedOrderVariant = std::variant<tagged_limit_order, tagged_market_order>;
+
     virtual void before_cycle_(uint64_t new_tick) = 0;
-    virtual std::vector<stored_order> collect_orders(uint64_t new_tick) = 0;
-    virtual std::vector<stored_match> match_orders_(std::vector<stored_order> orders
-    ) = 0;
+
+    virtual std::vector<TaggedOrderVariant> collect_orders(uint64_t new_tick) = 0;
+
+    virtual std::vector<stored_match>
+    match_orders_(std::vector<TaggedOrderVariant> orders) = 0;
+
     virtual void handle_matches_(std::vector<stored_match> matches) = 0;
 
-    // Logging, send out updates, etc
     virtual void post_cycle_(uint64_t new_tick) = 0;
 
 public:
-    virtual ~MatchingCycleInterface() {}
+    virtual ~MatchingCycleInterface() = default;
 };
 } // namespace matching
 } // namespace nutc

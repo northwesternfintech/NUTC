@@ -17,8 +17,8 @@ public:
         return level_update_generator_;
     }
 
-    stored_order&
-    add_order(const stored_order& order) override
+    tagged_limit_order&
+    add_order(const tagged_limit_order& order) override
     {
         modify_level_(
             order.position.side, order.position.quantity, order.position.price
@@ -28,7 +28,7 @@ public:
     }
 
     void
-    mark_order_removed(stored_order& order) override
+    mark_order_removed(tagged_limit_order& order) override
     {
         modify_level_(
             order.position.side, -order.position.quantity, order.position.price
@@ -38,7 +38,7 @@ public:
     }
 
     void
-    change_quantity(stored_order& order, double quantity_delta) override
+    change_quantity(tagged_limit_order& order, double quantity_delta) override
     {
         modify_level_(order.position.side, quantity_delta, order.position.price);
 

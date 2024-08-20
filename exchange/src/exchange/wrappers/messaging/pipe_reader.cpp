@@ -17,29 +17,6 @@ PipeReader::async_read_pipe()
     async_read_pipe(std::make_shared<std::string>());
 }
 
-auto
-PipeReader::get_message() -> ReadMessageVariant
-{
-    while (true) {
-        std::lock_guard<std::mutex> lock{message_lock_};
-        if (message_queue_.empty())
-            continue;
-
-        auto val = message_queue_.back();
-        message_queue_.pop_back();
-        return val;
-    }
-}
-
-auto
-PipeReader::get_messages() -> std::vector<ReadMessageVariant>
-{
-    std::lock_guard<std::mutex> lock{message_lock_};
-    auto ret = message_queue_;
-    message_queue_.clear();
-    return ret;
-}
-
 PipeReader::~PipeReader()
 {
     pipe_in_.cancel();
@@ -67,8 +44,12 @@ PipeReader::store_message_(const std::string& message)
         return;
     }
 
+    auto store_message = [this](auto&& v) {
+        message_storage_.add<std::decay_t<decltype(v)>>(v);
+    };
+
     std::lock_guard<std::mutex> lock{message_lock_};
-    message_queue_.push_back(std::move(data));
+    std::visit(store_message, data);
 }
 
 void

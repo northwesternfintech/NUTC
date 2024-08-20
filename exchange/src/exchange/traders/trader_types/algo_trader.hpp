@@ -78,24 +78,20 @@ public:
         if (!wrapper_handle_) [[unlikely]]
             return {};
 
-        std::vector<wrappers::WrapperHandle::ReadMessageVariant> incoming_messages =
-            wrapper_handle_->read_messages();
-
         std::vector<OrderVariant> incoming_orders;
-        incoming_orders.reserve(incoming_messages.size());
 
-        std::transform(
-            incoming_messages.begin(), incoming_messages.end(),
-            std::back_inserter(incoming_orders),
-            [](const auto& v) -> OrderVariant {
-                if (std::holds_alternative<messages::market_order>(v))
-                    return std::get<messages::market_order>(v);
+        auto incoming_limit_orders =
+            wrapper_handle_->read_messages<messages::limit_order>();
+        auto incoming_market_orders =
+            wrapper_handle_->read_messages<messages::market_order>();
 
-                if (std::holds_alternative<messages::limit_order>(v))
-                    return std::get<messages::limit_order>(v);
-
-                throw std::runtime_error("Unexpected message from wrapper");
-            }
+        std::copy(
+            incoming_limit_orders.begin(), incoming_limit_orders.end(),
+            std::back_inserter(incoming_orders)
+        );
+        std::copy(
+            incoming_market_orders.begin(), incoming_market_orders.end(),
+            std::back_inserter(incoming_orders)
         );
 
         return incoming_orders;

@@ -41,7 +41,7 @@ TEST_F(UnitGetUpdate, NoOrders)
 
 TEST_F(UnitGetUpdate, OrderAdded)
 {
-    stored_order order1{trader1, "ABC", buy, 1, 1.0};
+    tagged_limit_order order1{trader1, "ABC", buy, 1, 1.0};
 
     ob.add_order(order1);
 
@@ -53,7 +53,7 @@ TEST_F(UnitGetUpdate, OrderAdded)
 
 TEST_F(UnitGetUpdate, OrderDeleted)
 {
-    stored_order order1{trader1, "ABC", buy, 1, 1.0};
+    tagged_limit_order order1{trader1, "ABC", buy, 1, 1.0};
 
     // before, we have a single order
     ob.add_order(order1);
@@ -73,7 +73,7 @@ TEST_F(UnitGetUpdate, OrderDeleted)
 TEST_F(UnitGetUpdate, OrderQuantityChange)
 {
     double initial_quantity = 1;
-    stored_order order1{trader1, "ABC", buy, initial_quantity, 1.0};
+    tagged_limit_order order1{trader1, "ABC", buy, initial_quantity, 1.0};
     ob.add_order(order1);
 
     double quantity_delta = 5;
@@ -87,16 +87,16 @@ TEST_F(UnitGetUpdate, OrderQuantityChange)
 // This is an edge case that we currently level change updator doesn't handle
 /* TEST_F(UnitGetUpdate, NoQuanitityChange)
 {
-    stored_order order1{trader1, "ABC", buy, 1, 1, 0};
-    stored_order order2{trader1, "ABC", buy, 1, 2, 0};
-    stored_order order3{trader1, "ABC", buy, 1, 3, 0};
+    tagged_limit_order order1{trader1, "ABC", buy, 1, 1, 0};
+    tagged_limit_order order2{trader1, "ABC", buy, 1, 2, 0};
+    tagged_limit_order order3{trader1, "ABC", buy, 1, 3, 0};
     before.add_order(order1);
     before.add_order(order2);
     before.add_order(order3);
 
-    stored_order order4{trader1, "ABC", buy, 1, 3, 0};
-    stored_order order5{trader1, "ABC", buy, 1, 2, 0};
-    stored_order order6{trader1, "ABC", buy, 1, 1, 0};
+    tagged_limit_order order4{trader1, "ABC", buy, 1, 3, 0};
+    tagged_limit_order order5{trader1, "ABC", buy, 1, 2, 0};
+    tagged_limit_order order6{trader1, "ABC", buy, 1, 1, 0};
     after.add_order(order4);
     after.add_order(order5);
     after.add_order(order6);
@@ -108,8 +108,8 @@ TEST_F(UnitGetUpdate, OrderQuantityChange)
 
 TEST_F(UnitGetUpdate, BuySellChange)
 {
-    stored_order order1{trader1, "ABC", buy, 1, 1.0};
-    stored_order order2{trader3, "ABC", sell, 1, 5.0};
+    tagged_limit_order order1{trader1, "ABC", buy, 1, 1.0};
+    tagged_limit_order order2{trader3, "ABC", sell, 1, 5.0};
 
     ob.add_order(order1);
     ob.add_order(order2);
@@ -130,10 +130,10 @@ TEST_F(UnitGetUpdate, BuySellChange)
 
 TEST_F(UnitGetUpdate, ManyLevelChanges)
 {
-    stored_order order1{trader1, "ABC", buy, 1, 1.0};
-    stored_order order2{trader1, "ABC", buy, 1, 2.0};
-    stored_order order3{trader1, "ABC", buy, 1, 3.0};
-    stored_order order4{trader3, "ABC", buy, 1, 4.0};
+    tagged_limit_order order1{trader1, "ABC", buy, 1, 1.0};
+    tagged_limit_order order2{trader1, "ABC", buy, 1, 2.0};
+    tagged_limit_order order3{trader1, "ABC", buy, 1, 3.0};
+    tagged_limit_order order4{trader3, "ABC", buy, 1, 4.0};
 
     ob.add_order(order1);
     ob.add_order(order2);
@@ -142,9 +142,9 @@ TEST_F(UnitGetUpdate, ManyLevelChanges)
 
     generator_.reset();
 
-    stored_order order5{trader1, "ABC", buy, 8, 2.0};
-    stored_order order6{trader1, "ABC", buy, 9, 3.0};
-    stored_order order7{trader1, "ABC", buy, 7, 4.0};
+    tagged_limit_order order5{trader1, "ABC", buy, 8, 2.0};
+    tagged_limit_order order6{trader1, "ABC", buy, 9, 3.0};
+    tagged_limit_order order7{trader1, "ABC", buy, 7, 4.0};
 
     ob.add_order(order5);
     ob.add_order(order6);
@@ -163,12 +163,12 @@ TEST_F(UnitGetUpdate, ManyLevelChanges)
 
 TEST_F(UnitGetUpdate, ChangesAddsAndDeletes)
 {
-    stored_order order1{trader1, "ABC", buy, 1, 1.0};
-    stored_order order2{trader1, "ABC", buy, 1, 2.0};
-    stored_order order3{trader1, "ABC", buy, 1, 3.0};
-    stored_order order4{trader3, "ABC", buy, 10, 4.0};
-    stored_order order5{trader3, "ABC", buy, 5, 5.0};
-    stored_order order6{trader3, "ABC", buy, 5, 5.0};
+    tagged_limit_order order1{trader1, "ABC", buy, 1, 1.0};
+    tagged_limit_order order2{trader1, "ABC", buy, 1, 2.0};
+    tagged_limit_order order3{trader1, "ABC", buy, 1, 3.0};
+    tagged_limit_order order4{trader3, "ABC", buy, 10, 4.0};
+    tagged_limit_order order5{trader3, "ABC", buy, 5, 5.0};
+    tagged_limit_order order6{trader3, "ABC", buy, 5, 5.0};
 
     ob.add_order(order1);
     ob.add_order(order2);
@@ -179,8 +179,8 @@ TEST_F(UnitGetUpdate, ChangesAddsAndDeletes)
 
     generator_.reset();
 
-    stored_order order7{trader1, "ABC", buy, 8, 2.0};
-    stored_order order8{trader1, "ABC", buy, 9, 3.0};
+    tagged_limit_order order7{trader1, "ABC", buy, 8, 2.0};
+    tagged_limit_order order8{trader1, "ABC", buy, 9, 3.0};
 
     ob.add_order(order7);
     ob.add_order(order8);

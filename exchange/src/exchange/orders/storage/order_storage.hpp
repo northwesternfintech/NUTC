@@ -2,7 +2,6 @@
 #include "exchange/traders/trader_types/generic_trader.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
-#include "shared/types/decimal_price.hpp"
 
 #include <fmt/format.h>
 
@@ -23,7 +22,8 @@ struct stored_match {
     }
 };
 
-struct stored_order : public messages::limit_order {
+template <typename BaseOrderT>
+struct tagged_order : public BaseOrderT {
     traders::GenericTrader* trader;
     bool was_removed{false};
     uint64_t order_index = get_and_increment_global_index();
@@ -35,17 +35,23 @@ struct stored_order : public messages::limit_order {
         return global_index++;
     }
 
-    operator util::position() const { return position; }
+    tagged_order(traders::GenericTrader& order_creator, const auto& order) :
+        BaseOrderT(order), trader(&order_creator)
+    {}
 
-    stored_order(
-        traders::GenericTrader& trader, util::Ticker ticker, util::Side side,
-        double quantity, util::decimal_price price, bool ioc = false
-    );
+    template <typename... Args>
+    tagged_order(traders::GenericTrader& order_creator, Args&&... args)
+    requires std::is_constructible_v<BaseOrderT, Args...>
+        : BaseOrderT(args...), trader(&order_creator)
+    {}
 
-    stored_order(const stored_order& other) = default;
+    operator util::position() const { return BaseOrderT::position; }
 
-    ~stored_order() = default;
-    bool operator==(const stored_order& other) const;
+    bool operator==(const tagged_order& other) const = default;
 };
+
+using tagged_limit_order = tagged_order<messages::limit_order>;
+using tagged_market_order = tagged_order<messages::market_order>;
+
 } // namespace matching
 } // namespace nutc

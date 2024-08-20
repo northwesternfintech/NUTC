@@ -15,10 +15,11 @@ public:
 
 private:
     bool order_can_execute_(
-        LimitOrderBook& orderbook, stored_order& buyer, stored_order& seller
+        LimitOrderBook& orderbook, tagged_limit_order& buyer, tagged_limit_order& seller
     );
 
-    stored_match create_match(const stored_order& buyer, const stored_order& seller);
+    stored_match
+    create_match(const tagged_limit_order& buyer, const tagged_limit_order& seller);
 
     static void drop_order(LimitOrderBook& orderbook, uint64_t order_index);
 };

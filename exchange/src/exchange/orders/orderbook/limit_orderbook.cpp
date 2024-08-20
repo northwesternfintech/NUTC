@@ -28,7 +28,7 @@ LimitOrderBook::clean_tree(util::Side side)
     }
 }
 
-std::optional<std::reference_wrapper<stored_order>>
+std::optional<std::reference_wrapper<tagged_limit_order>>
 LimitOrderBook::get_top_order(util::Side side)
 {
     clean_tree(side);
@@ -57,7 +57,7 @@ LimitOrderBook::get_midprice() const
 }
 
 void
-LimitOrderBook::change_quantity(stored_order& order, double quantity_delta)
+LimitOrderBook::change_quantity(tagged_limit_order& order, double quantity_delta)
 {
     if (util::is_close_to_zero(order.position.quantity + quantity_delta)) {
         mark_order_removed(order);
@@ -65,7 +65,7 @@ LimitOrderBook::change_quantity(stored_order& order, double quantity_delta)
     }
 
     order.trader->process_position_change(
-        {order.position.side, order.position.ticker, quantity_delta,
+        {order.position.ticker, order.position.side, quantity_delta,
          order.position.price}
     );
 
@@ -73,18 +73,18 @@ LimitOrderBook::change_quantity(stored_order& order, double quantity_delta)
 }
 
 void
-LimitOrderBook::mark_order_removed(stored_order& order)
+LimitOrderBook::mark_order_removed(tagged_limit_order& order)
 {
     order.trader->process_position_change(
-        {order.position.side, order.position.ticker, -order.position.quantity,
+        {order.position.ticker, order.position.side, -order.position.quantity,
          order.position.price}
     );
 
     order.was_removed = true;
 }
 
-stored_order&
-LimitOrderBook::add_order(const stored_order& order)
+tagged_limit_order&
+LimitOrderBook::add_order(const tagged_limit_order& order)
 {
     order.trader->process_position_change(order);
 

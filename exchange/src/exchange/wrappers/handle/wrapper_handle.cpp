@@ -1,6 +1,5 @@
 #include "wrapper_handle.hpp"
 
-#include "exchange/wrappers/messaging/pipe_reader.hpp"
 #include "shared/file_operations/file_operations.hpp"
 #include "shared/firebase/firebase.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
@@ -30,11 +29,6 @@ force_unwrap_optional(std::optional<std::string> opt, std::string error_msg)
 
 namespace nutc {
 namespace wrappers {
-auto
-WrapperHandle::read_messages() -> std::vector<ReadMessageVariant>
-{
-    return reader_.get_messages();
-}
 
 const fs::path&
 WrapperHandle::wrapper_binary_path()
@@ -89,11 +83,7 @@ WrapperHandle::WrapperHandle(const std::string& algo_path) :
 void
 WrapperHandle::block_on_init()
 {
-    auto message = reader_.get_message();
-    if (std::holds_alternative<init_message>(message)) {
-        return;
-    }
-    throw std::runtime_error("Received non-init message on initialization");
+    while (reader_.get_messages<init_message>().empty()) {}
 }
 
 WrapperHandle::WrapperHandle(

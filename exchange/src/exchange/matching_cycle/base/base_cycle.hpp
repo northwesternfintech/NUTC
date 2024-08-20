@@ -34,10 +34,10 @@ protected:
 
     virtual void before_cycle_(uint64_t) override;
 
-    virtual std::vector<stored_order> collect_orders(uint64_t) override;
+    virtual std::vector<TaggedOrderVariant> collect_orders(uint64_t) override;
 
-    virtual std::vector<stored_match> match_orders_(std::vector<stored_order> orders
-    ) override;
+    virtual std::vector<stored_match>
+    match_orders_(std::vector<TaggedOrderVariant> orders) override;
 
     virtual void handle_matches_(std::vector<stored_match> matches) override;
 

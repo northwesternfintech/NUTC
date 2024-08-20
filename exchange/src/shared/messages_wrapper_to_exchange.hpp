@@ -15,9 +15,15 @@ struct init_message {
 };
 
 struct market_order {
-    util::Side side;
     util::Ticker ticker;
+    util::Side side;
     double quantity;
+
+    market_order() = default;
+
+    market_order(util::Ticker ticker, util::Side side, double quantity) :
+        ticker(ticker), side(side), quantity(quantity)
+    {}
 };
 
 struct limit_order {
@@ -27,9 +33,11 @@ struct limit_order {
     bool operator==(const limit_order& other) const = default;
 
     limit_order(
-        util::Side side, util::Ticker ticker, double quantity,
+        util::Ticker ticker, util::Side side, double quantity,
         util::decimal_price price, bool ioc = false
-    ) : position{side, ticker, quantity, price}, ioc(ioc)
+    ) :
+        position{ticker, side, quantity, price},
+        ioc(ioc)
     {}
 
     limit_order(const util::position& position, bool ioc = false) :

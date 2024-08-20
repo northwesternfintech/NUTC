@@ -14,7 +14,7 @@ namespace test {
 
 class TestMatchingCycle : public matching::BaseMatchingCycle {
 public:
-    std::unique_ptr<matching::stored_order> last_order;
+    std::unique_ptr<matching::tagged_limit_order> last_order;
 
     TestMatchingCycle(
         std::vector<std::string> ticker_names, traders::TraderContainer& traders,
@@ -27,7 +27,7 @@ public:
 
 private:
     virtual std::vector<matching::stored_match>
-    match_orders_(std::vector<matching::stored_order> orders) override;
+    match_orders_(std::vector<TaggedOrderVariant> orders) override;
 
     matching::TickerMapping
     create_tickers(const std::vector<std::string>& ticker_names, double order_fee);

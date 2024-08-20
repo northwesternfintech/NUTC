@@ -35,8 +35,12 @@ public:
     // Local (.py on disk)
     WrapperHandle(const std::string& algo_path);
 
-    using ReadMessageVariant = std::variant<init_message, limit_order, market_order>;
-    std::vector<ReadMessageVariant> read_messages();
+    template <typename MessageT>
+    std::vector<MessageT>
+    read_messages()
+    {
+        return reader_.get_messages<MessageT>();
+    }
 
     void
     send_message(const std::string& message)

@@ -2,6 +2,8 @@
 
 #include "shared/messages_exchange_to_wrapper.hpp"
 
+#include <variant>
+
 namespace nutc {
 namespace matching {
 void
@@ -14,24 +16,22 @@ BaseMatchingCycle::before_cycle_(uint64_t)
     }
 }
 
-std::vector<stored_order>
-BaseMatchingCycle::collect_orders(uint64_t)
+auto
+BaseMatchingCycle::collect_orders(uint64_t) -> std::vector<TaggedOrderVariant>
 {
-    std::vector<stored_order> orders;
+    std::vector<TaggedOrderVariant> orders;
 
     auto collect_orders = [&orders](traders::GenericTrader& trader) {
         auto handle_order = [&orders, &trader]<typename ordered>(const ordered& order) {
             if constexpr (std::is_same_v<ordered, messages::limit_order>) {
-                orders.emplace_back(
-                    trader, order.position.ticker, order.position.side,
-                    order.position.quantity, order.position.price, order.ioc
-                );
+                orders.emplace_back(tagged_limit_order{trader, order});
             }
+
             else if constexpr (std::is_same_v<ordered, messages::market_order>) {
-                orders.emplace_back(
+                orders.emplace_back(tagged_limit_order{
                     trader, order.ticker, order.side, order.quantity,
                     order.side == util::Side::buy ? 1000.0 : 0.0, true
-                );
+                });
             }
         };
 
@@ -50,10 +50,13 @@ BaseMatchingCycle::collect_orders(uint64_t)
 }
 
 std::vector<stored_match>
-BaseMatchingCycle::match_orders_(std::vector<stored_order> orders)
+BaseMatchingCycle::match_orders_(std::vector<TaggedOrderVariant> orders)
 {
     std::vector<stored_match> matches{};
-    for (auto& order : orders) {
+    for (const TaggedOrderVariant& order_variant : orders) {
+        // TODO: make different
+        assert(std::holds_alternative<tagged_limit_order>(order_variant));
+        auto order = std::get<tagged_limit_order>(order_variant);
         if (order.position.price < 0.0 || order.position.quantity <= 0)
             continue;
 

@@ -24,11 +24,11 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
     start_wrappers(traders, "test_algos/buy_tsla_at_100.py");
     auto trader2 = traders.add_trader<TestTrader>(0);
     trader2->modify_holdings("ABC", 1000); // NOLINT
-    trader2->add_order({sell, "ABC", 100.0});
+    trader2->add_order({"ABC", sell, 100.0});
 
     TestMatchingCycle cycle{{"ABC"}, traders};
 
-    cycle.wait_for_order({buy, "ABC", 100, 10.0});
+    cycle.wait_for_order({"ABC", buy, 100, 10.0});
 }
 
 TEST_F(IntegrationBasicAlgo, RemoveIOCOrder)
@@ -36,7 +36,7 @@ TEST_F(IntegrationBasicAlgo, RemoveIOCOrder)
     auto& trader1 = start_wrappers(traders, "test_algos/buy_tsla_at_100.py");
     auto trader2 = traders.add_trader<TestTrader>(0);
     trader2->modify_holdings("ABC", 1000); // NOLINT
-    trader2->add_order({sell, "ABC", 100, 100.0});
+    trader2->add_order({"ABC", sell, 100, 100.0});
 
     TestMatchingCycle cycle{{"ABC"}, traders};
 
@@ -54,14 +54,14 @@ TEST_F(IntegrationBasicAlgo, MarketOrderBuy)
     start_wrappers(traders, "test_algos/buy_market_order_1000.py");
     auto trader2 = traders.add_trader<TestTrader>(0);
     trader2->modify_holdings("ABC", 1000);
-    trader2->add_order({sell, "ABC", 100, 100.0});
+    trader2->add_order({"ABC", sell, 100, 100.0});
 
     TestMatchingCycle cycle{
         {"ABC", "DEF"},
         traders
     };
 
-    cycle.wait_for_order({buy, "DEF", 1, 100.0});
+    cycle.wait_for_order({"DEF", buy, 1, 100.0});
 }
 
 TEST_F(IntegrationBasicAlgo, MarketOrderSell)
@@ -69,7 +69,7 @@ TEST_F(IntegrationBasicAlgo, MarketOrderSell)
     auto& trader1 = start_wrappers(traders, "test_algos/sell_market_order_1.py");
     auto trader2 = traders.add_trader<TestTrader>(0);
     trader1.modify_holdings("ABC", 1000);
-    trader2->add_order({buy, "ABC", 1, 100.0});
+    trader2->add_order({"ABC", buy, 1, 100.0});
     trader2->modify_capital(1000.0);
 
     TestMatchingCycle cycle{
@@ -77,7 +77,7 @@ TEST_F(IntegrationBasicAlgo, MarketOrderSell)
         traders
     };
 
-    cycle.wait_for_order({buy, "DEF", 1, 100.0});
+    cycle.wait_for_order({"DEF", buy, 1, 100.0});
 }
 
 TEST_F(IntegrationBasicAlgo, ManyUpdates)
@@ -90,12 +90,12 @@ TEST_F(IntegrationBasicAlgo, ManyUpdates)
     TestMatchingCycle cycle{{"ABC"}, traders};
 
     for (double i = 0; i < 10000; i++) {
-        trader2->add_order({sell, "ABC", 1, i / 100});
+        trader2->add_order({"ABC", sell, 1, i / 100});
     }
 
     cycle.on_tick(0);
 
-    cycle.wait_for_order({buy, "ABC", 10, 100.0});
+    cycle.wait_for_order({"ABC", buy, 10, 100.0});
 }
 
 TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
@@ -110,11 +110,11 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
         traders
     };
 
-    trader2->add_order({sell, "ABC", 100, 100.0});
+    trader2->add_order({"ABC", sell, 100, 100.0});
 
-    cycle.wait_for_order({buy, "ABC", 10, 102.0});
+    cycle.wait_for_order({"ABC", buy, 10, 102.0});
 
-    cycle.wait_for_order({buy, "DEF", 1, 100.0});
+    cycle.wait_for_order({"DEF", buy, 1, 100.0});
 }
 
 // Sanity check that it goes through the orderbook
@@ -130,10 +130,10 @@ TEST_F(IntegrationBasicAlgo, MultipleLevelOrder)
         traders
     };
 
-    trader2->add_order({sell, "ABC", 55, 1.0});
-    trader2->add_order({sell, "ABC", 45, 1.0});
+    trader2->add_order({"ABC", sell, 55, 1.0});
+    trader2->add_order({"ABC", sell, 45, 1.0});
 
-    cycle.wait_for_order({buy, "ABC", 100, 10.0});
+    cycle.wait_for_order({"ABC", buy, 100, 10.0});
     ASSERT_EQ(trader1.get_capital() - trader1.get_initial_capital(), -100.0);
 }
 
@@ -143,7 +143,7 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateSell)
     trader1.modify_holdings("ABC", 1000);
 
     auto trader2 = traders.add_trader<TestTrader>(100000);
-    trader2->add_order({buy, "ABC", 102, 102.0});
+    trader2->add_order({"ABC", buy, 102, 102.0});
 
     TestMatchingCycle cycle{
         {"ABC", "DEF"},
@@ -151,11 +151,11 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateSell)
     };
 
     // obupdate triggers one user to place autil::Side::buy order of 10 ABC at 102
-    cycle.wait_for_order({sell, "ABC", 10, 100.0});
+    cycle.wait_for_order({"ABC", sell, 10, 100.0});
 
     // on_trade_match triggers one user to place autil::Side::buy order of 1 ABC at
     // 100
-    cycle.wait_for_order({buy, "DEF", 1, 100.0});
+    cycle.wait_for_order({"DEF", buy, 1, 100.0});
 }
 
 TEST_F(IntegrationBasicAlgo, OnAccountUpdateBuy)
@@ -164,7 +164,7 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateBuy)
 
     auto trader2 = traders.add_trader<TestTrader>(0);
     trader2->modify_holdings("ABC", 1000); // NOLINT
-    trader2->add_order({sell, "ABC", 100, 100.0});
+    trader2->add_order({"ABC", sell, 100, 100.0});
 
     TestMatchingCycle cycle{
         {"ABC", "DEF"},
@@ -172,10 +172,10 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateBuy)
     };
 
     // obupdate triggers one user to place autil::Side::buy order of 10 ABC at 102
-    cycle.wait_for_order({buy, "ABC", 10, 102.0});
+    cycle.wait_for_order({"ABC", buy, 10, 102.0});
     // on_trade_match triggers one user to place autil::Side::buy order of 1 ABC at
     // 100
-    cycle.wait_for_order({buy, "DEF", 1, 100.0});
+    cycle.wait_for_order({"DEF", buy, 1, 100.0});
 }
 
 TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
@@ -189,11 +189,11 @@ TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
 
     auto trader2 = traders.add_trader<TestTrader>(0);
     trader2->modify_holdings("ABC", 1000); // NOLINT
-    trader2->add_order({sell, "ABC", 100, 100.0});
+    trader2->add_order({"ABC", sell, 100, 100.0});
 
     TestMatchingCycle cycle{{"ABC"}, traders};
 
-    cycle.wait_for_order({buy, "ABC", 100, 10.0});
+    cycle.wait_for_order({"ABC", buy, 100, 10.0});
 
     auto end = std::chrono::high_resolution_clock::now();
     const int64_t duration_ms =
@@ -210,7 +210,7 @@ TEST_F(IntegrationBasicAlgo, DisableTrader)
     auto& trader1 = start_wrappers(traders, "test_algos/buy_tsla_at_100.py");
     auto trader2 = traders.add_trader<TestTrader>(0);
     trader2->modify_holdings("ABC", 1000); // NOLINT
-    trader2->add_order({sell, "ABC", 100, 100.0});
+    trader2->add_order({"ABC", sell, 100, 100.0});
 
     trader1.disable();
 

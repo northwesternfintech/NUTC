@@ -34,7 +34,7 @@ protected:
     Engine engine_;
 
     std::vector<nutc::matching::stored_match>
-    add_to_engine_(const stored_order& order)
+    add_to_engine_(const tagged_limit_order& order)
     {
         orderbook_.add_order(order);
         return engine_.match_orders(orderbook_);
@@ -43,8 +43,8 @@ protected:
 
 TEST_F(UnitMatchIOC, BasicMatchIOC)
 {
-    stored_order order1{trader1, "ETH", buy, 1, 1.0, false};
-    stored_order order2{trader2, "ETH", sell, 1, 1.0, true};
+    tagged_limit_order order1{trader1, "ETH", buy, 1, 1.0, false};
+    tagged_limit_order order2{trader2, "ETH", sell, 1, 1.0, true};
 
     auto matches = add_to_engine_(order1);
     ASSERT_TRUE(matches.empty());
@@ -55,8 +55,8 @@ TEST_F(UnitMatchIOC, BasicMatchIOC)
 
 TEST_F(UnitMatchIOC, DoubleIOCMatch)
 {
-    stored_order order1{trader1, "ETH", buy, 5, 1.0, true};
-    stored_order order2{trader2, "ETH", sell, 0, 1.0, true};
+    tagged_limit_order order1{trader1, "ETH", buy, 5, 1.0, true};
+    tagged_limit_order order2{trader2, "ETH", sell, 0, 1.0, true};
 
     auto matches = add_to_engine_(order1);
     ASSERT_TRUE(matches.empty());
@@ -67,9 +67,9 @@ TEST_F(UnitMatchIOC, DoubleIOCMatch)
 
 TEST_F(UnitMatchIOC, DoubleIOCMatchMultipleLevels)
 {
-    stored_order order1{trader1, "ETH", buy, 5, 2.0, true};
-    stored_order order2{trader2, "ETH", sell, 0, 1.0, true};
-    stored_order order3{trader2, "ETH", sell, 4, 1.0, true};
+    tagged_limit_order order1{trader1, "ETH", buy, 5, 2.0, true};
+    tagged_limit_order order2{trader2, "ETH", sell, 0, 1.0, true};
+    tagged_limit_order order3{trader2, "ETH", sell, 4, 1.0, true};
 
     auto matches = add_to_engine_(order2);
     ASSERT_TRUE(matches.empty());
@@ -83,8 +83,8 @@ TEST_F(UnitMatchIOC, DoubleIOCMatchMultipleLevels)
 
 TEST_F(UnitMatchIOC, NoMatchAfterCycle)
 {
-    stored_order order1{trader1, "ETH", buy, 1, 1.0, false};
-    stored_order order2{trader2, "ETH", sell, 1, 1.0, true};
+    tagged_limit_order order1{trader1, "ETH", buy, 1, 1.0, false};
+    tagged_limit_order order2{trader2, "ETH", sell, 1, 1.0, true};
 
     add_to_engine_(order2);
 
