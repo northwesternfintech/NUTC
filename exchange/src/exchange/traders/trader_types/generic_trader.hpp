@@ -58,6 +58,7 @@ public:
         return INITIAL_CAPITAL + capital_delta_;
     }
 
+	// TODO: improve with find
     double
     get_holdings(util::Ticker ticker) const
     {

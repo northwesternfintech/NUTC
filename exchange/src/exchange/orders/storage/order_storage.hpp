@@ -28,7 +28,7 @@ class tagged_order : public BaseOrderT {
 
 public:
     traders::GenericTrader* trader;
-    bool was_removed{false};
+    bool active{true};
     uint64_t order_index{++global_index};
 
     tagged_order(traders::GenericTrader& order_creator, const auto& order) :

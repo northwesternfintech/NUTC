@@ -18,8 +18,8 @@ public:
         return level_update_generator_;
     }
 
-    OrderT&
-    add_order(const OrderT& order)
+    virtual OrderT&
+    add_order(const OrderT& order) override
     {
         modify_level_(
             order.side, order.quantity, order.price
@@ -28,8 +28,8 @@ public:
         return BaseOrderBookT::add_order(order);
     }
 
-    void
-    mark_order_removed(OrderT& order)
+    virtual void
+    mark_order_removed(OrderT& order) override
     {
         modify_level_(
             order.side, -order.quantity, order.price
@@ -38,8 +38,8 @@ public:
         BaseOrderBookT::mark_order_removed(order);
     }
 
-    void
-    change_quantity(OrderT& order, double quantity_delta)
+    virtual void
+    change_quantity(OrderT& order, double quantity_delta) override
     {
         modify_level_(order.side, quantity_delta, order.price);
 

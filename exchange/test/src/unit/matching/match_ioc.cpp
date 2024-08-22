@@ -36,8 +36,7 @@ protected:
     std::vector<nutc::matching::stored_match>
     add_to_engine_(const tagged_limit_order& order)
     {
-        orderbook_.add_order(order);
-        return engine_.match_orders(orderbook_);
+        return engine_.match_order(order, orderbook_);
     }
 };
 
@@ -53,23 +52,11 @@ TEST_F(UnitMatchIOC, BasicMatchIOC)
     ASSERT_EQ(matches.size(), 1);
 }
 
-TEST_F(UnitMatchIOC, DoubleIOCMatch)
-{
-    tagged_limit_order order1{trader1, "ETH", buy, 5, 1.0, true};
-    tagged_limit_order order2{trader2, "ETH", sell, 0, 1.0, true};
-
-    auto matches = add_to_engine_(order1);
-    ASSERT_TRUE(matches.empty());
-
-    matches = add_to_engine_(order2);
-    ASSERT_EQ(matches.size(), 1);
-}
-
 TEST_F(UnitMatchIOC, DoubleIOCMatchMultipleLevels)
 {
     tagged_limit_order order1{trader1, "ETH", buy, 5, 2.0, true};
-    tagged_limit_order order2{trader2, "ETH", sell, 0, 1.0, true};
-    tagged_limit_order order3{trader2, "ETH", sell, 4, 1.0, true};
+    tagged_limit_order order2{trader2, "ETH", sell, 1, 1.0, false};
+    tagged_limit_order order3{trader2, "ETH", sell, 4, 1.0, false};
 
     auto matches = add_to_engine_(order2);
     ASSERT_TRUE(matches.empty());
@@ -87,9 +74,6 @@ TEST_F(UnitMatchIOC, NoMatchAfterCycle)
     tagged_limit_order order2{trader2, "ETH", sell, 1, 1.0, true};
 
     add_to_engine_(order2);
-
-    auto removed_orders = orderbook_.remove_ioc_orders();
-    ASSERT_EQ(removed_orders.size(), 1);
 
     auto matches = add_to_engine_(order1);
     ASSERT_TRUE(matches.empty());

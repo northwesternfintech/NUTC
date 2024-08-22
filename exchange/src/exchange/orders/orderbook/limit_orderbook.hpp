@@ -23,9 +23,10 @@ private:
     OrderT pop_from_queue(util::Side side, util::decimal_price price);
 
 public:
-    OrderT& add_order(const OrderT& order);
-    void mark_order_removed(OrderT& order);
-    void change_quantity(OrderT& order, double quantity_delta);
+    virtual OrderT& add_order(const OrderT& order);
+    virtual void mark_order_removed(OrderT& order);
+    virtual void change_quantity(OrderT& order, double quantity_delta);
+    virtual ~LimitOrderBook() = default;
 
     util::decimal_price get_midprice() const;
 

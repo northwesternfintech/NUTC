@@ -40,8 +40,7 @@ protected:
     std::vector<nutc::matching::stored_match>
     add_to_engine_(const tagged_limit_order& order)
     {
-        orderbook_.add_order(order);
-        return engine_.match_orders(orderbook_);
+        return engine_.match_order(order, orderbook_);
     }
 };
 

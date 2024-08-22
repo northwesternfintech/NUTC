@@ -51,8 +51,8 @@ BaseMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
 {
     std::vector<stored_match> matches;
 
-    for (const auto& order_variant : orders) {
-        auto match_order = [&]<typename T>(const T& order) {
+    for (auto& order_variant : orders) {
+        auto match_order = [&]<typename T>(T& order) {
             if (order.quantity <= 0)
                 return;
 
@@ -61,11 +61,12 @@ BaseMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
                 return;
 
             if constexpr (std::is_same_v<T, tagged_limit_order>) {
-                it->second.limit_orderbook.add_order(order);
-                auto tmp = it->second.engine.match_orders(it->second.limit_orderbook);
+                auto tmp =
+                    it->second.engine.match_order(order, it->second.limit_orderbook);
                 std::copy(tmp.begin(), tmp.end(), std::back_inserter(matches));
             }
-            else if constexpr (std::is_same_v<T, tagged_market_order>) {
+            else {
+                static_assert(std::is_same_v<T, tagged_market_order>);
                 auto order2 = tagged_limit_order{
                     *order.trader,
                     messages::limit_order{
@@ -73,12 +74,9 @@ BaseMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
                                           order.side == util::Side::buy ? 1000.0 : 0.0, true
                     }
                 };
-                it->second.limit_orderbook.add_order(order2);
-                auto tmp = it->second.engine.match_orders(it->second.limit_orderbook);
+                auto tmp =
+                    it->second.engine.match_order(order2, it->second.limit_orderbook);
                 std::copy(tmp.begin(), tmp.end(), std::back_inserter(matches));
-            }
-            else {
-                static_assert(std::is_same_v<T, tagged_market_order>);
             }
         };
         std::visit(match_order, order_variant);
@@ -126,7 +124,6 @@ void
 BaseMatchingCycle::post_cycle_(uint64_t)
 {
     for (auto& [info, _, ticker] : tickers_) {
-        info.limit_orderbook.remove_ioc_orders();
         info.limit_orderbook.get_update_generator().reset();
     }
 }

@@ -19,7 +19,7 @@ LimitOrderBook::clean_tree(util::Side side)
             continue;
         }
 
-        if (q.front().was_removed) {
+        if (!q.front().active) {
             q.pop();
             continue;
         }
@@ -79,7 +79,7 @@ LimitOrderBook::mark_order_removed(OrderT& order)
         {order.ticker, order.side, -order.quantity, order.price}
     );
 
-    order.was_removed = true;
+    order.active = false;
 }
 
 auto
