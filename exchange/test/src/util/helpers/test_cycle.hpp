@@ -19,7 +19,8 @@ public:
     TestMatchingCycle(
         std::vector<std::string> ticker_names, traders::TraderContainer& traders,
         double order_fee = 0.0
-    ) : matching::BaseMatchingCycle{create_tickers(ticker_names, order_fee), traders}
+    ) :
+        matching::BaseMatchingCycle{create_tickers(ticker_names, order_fee), traders}
     {}
 
     // Note: uses tick=0. If using something that relies on tick, it will not work
@@ -42,8 +43,8 @@ public:
     }
 
 private:
-    virtual std::vector<matching::stored_match>
-    match_orders_(std::vector<OrderVariant> orders) override;
+    virtual std::vector<messages::match> match_orders_(std::vector<OrderVariant> orders
+    ) override;
 
     matching::TickerMapping
     create_tickers(const std::vector<std::string>& ticker_names, double order_fee);

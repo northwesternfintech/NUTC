@@ -1,6 +1,5 @@
 #include "test_cycle.hpp"
 
-#include "exchange/orders/storage/order_storage.hpp"
 #include "exchange/orders/ticker_info.hpp"
 
 #include <glaze/glaze.hpp>
@@ -11,8 +10,7 @@
 namespace nutc {
 namespace test {
 
-
-std::vector<matching::stored_match>
+std::vector<messages::match>
 TestMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
 {
     // TODO: FIX

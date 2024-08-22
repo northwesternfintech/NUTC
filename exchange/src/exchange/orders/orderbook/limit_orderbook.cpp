@@ -29,8 +29,8 @@ LimitOrderBook::clean_tree(util::Side side)
 }
 
 auto
-LimitOrderBook::get_top_order(util::Side side
-) -> std::optional<std::reference_wrapper<OrderT>>
+LimitOrderBook::get_top_order(util::Side side)
+    -> std::optional<std::reference_wrapper<OrderT>>
 {
     clean_tree(side);
 
@@ -65,7 +65,7 @@ LimitOrderBook::change_quantity(OrderT& order, double quantity_delta)
         return;
     }
 
-    order.trader->process_position_change(
+    order.trader->notify_position_change(
         {order.ticker, order.side, quantity_delta, order.price}
     );
 
@@ -75,7 +75,7 @@ LimitOrderBook::change_quantity(OrderT& order, double quantity_delta)
 void
 LimitOrderBook::mark_order_removed(OrderT& order)
 {
-    order.trader->process_position_change(
+    order.trader->notify_position_change(
         {order.ticker, order.side, -order.quantity, order.price}
     );
 
@@ -85,7 +85,7 @@ LimitOrderBook::mark_order_removed(OrderT& order)
 auto
 LimitOrderBook::add_order(const OrderT& order) -> OrderT&
 {
-    order.trader->process_position_change(
+    order.trader->notify_position_change(
         {order.ticker, order.side, order.quantity, order.price}
     );
 

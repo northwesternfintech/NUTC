@@ -34,7 +34,7 @@ TickerMetricsPusher::report_orders(
     auto log_order = [&](const matching::tagged_limit_order& order) {
         orders_quantity_counter
             .Add({
-                {"ticker",      order.ticker   },
+                {"ticker",      order.ticker            },
                 {"trader_type", order.trader->get_type()}
         })
             .Increment(order.quantity);
@@ -92,14 +92,12 @@ TickerMetricsPusher::report_ticker_stats(matching::TickerMapping& tickers)
 }
 
 void
-TickerMetricsPusher::report_matches(const std::vector<matching::stored_match>& orders)
+TickerMetricsPusher::report_matches(const std::vector<messages::match>& orders)
 {
-    auto log_match = [this](const matching::stored_match& match) {
+    auto log_match = [this](const messages::match& match) {
         matches_quantity_counter
             .Add({
-                {"ticker",             match.position.ticker  },
-                {"seller_trader_type", match.seller.get_type()},
-                {"buyer_trader_type",  match.buyer.get_type() }
+                {"ticker", match.position.ticker}
         })
             .Increment(match.position.quantity);
     };

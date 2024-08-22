@@ -1,26 +1,11 @@
 #pragma once
 #include "exchange/traders/trader_types/generic_trader.hpp"
-#include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 
 #include <fmt/format.h>
 
 namespace nutc {
 namespace matching {
-
-struct stored_match {
-    traders::GenericTrader& buyer;
-    traders::GenericTrader& seller;
-    util::position position;
-
-    operator messages::match() const
-    {
-        return {
-            position, buyer.get_id(), seller.get_id(), buyer.get_capital(),
-            seller.get_capital()
-        };
-    }
-};
 
 template <typename BaseOrderT>
 class tagged_order : public BaseOrderT {
@@ -46,6 +31,29 @@ public:
 
 using tagged_limit_order = tagged_order<messages::timed_limit_order>;
 using tagged_market_order = tagged_order<messages::timed_market_order>;
+
+template <typename T>
+struct is_limit_order : std::false_type {};
+
+template <>
+struct is_limit_order<tagged_limit_order> : std::true_type {};
+
+template <typename T>
+inline constexpr bool is_limit_order_v = is_limit_order<std::remove_cvref_t<T>>::value;
+
+template <typename T>
+struct is_market_order : std::false_type {};
+
+template <>
+struct is_market_order<tagged_market_order> : std::true_type {};
+
+template <typename T>
+inline constexpr bool is_market_order_v =
+    is_market_order<std::remove_cvref_t<T>>::value;
+
+template <typename T>
+concept TaggedOrder =
+    std::disjunction_v<is_limit_order<T>> || std::disjunction_v<is_market_order<T>>;
 
 } // namespace matching
 } // namespace nutc

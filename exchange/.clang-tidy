@@ -20,7 +20,9 @@ Checks: "\
   fuchsia-virtual-inheritance,\
   google-runtime-int,\
   -hicpp-braces-around-statements,\
+  -modernize-use-nodiscard,\
   -google-readability-braces-around-statements,\
+  -misc-include-cleaner,\
   -llvm-header-guard,\
   -hicpp-no-array-decay,\
   -modernize-concat-nested-namespaces,\
@@ -37,7 +39,6 @@ Checks: "\
   -*-magic-numbers, \
   -*-vararg"
 WarningsAsErrors: false
-AnalyzeTemporaryDtors: false
 FormatStyle: file
 HeaderFilterRegex: "(^config.h|.*\\.hpp)$"
 CheckOptions:

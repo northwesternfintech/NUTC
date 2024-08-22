@@ -1,6 +1,7 @@
 #pragma once
 
 #include "exchange/orders/storage/order_storage.hpp"
+#include "shared/messages_exchange_to_wrapper.hpp"
 
 #include <vector>
 
@@ -32,10 +33,10 @@ protected:
 
     virtual std::vector<OrderVariant> collect_orders(uint64_t new_tick) = 0;
 
-    virtual std::vector<stored_match> match_orders_(std::vector<OrderVariant> orders
+    virtual std::vector<messages::match> match_orders_(std::vector<OrderVariant> orders
     ) = 0;
 
-    virtual void handle_matches_(std::vector<stored_match> matches) = 0;
+    virtual void handle_matches_(std::vector<messages::match> matches) = 0;
 
     virtual void post_cycle_(uint64_t new_tick) = 0;
 

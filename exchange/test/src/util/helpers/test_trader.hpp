@@ -10,7 +10,7 @@ namespace test_utils {
 
 // Basically a generic trader but
 class TestTrader final : public traders::GenericTrader {
-    MessageQueue pending_orders_;
+    IncomingMessageQueue pending_orders_;
 
 public:
     TestTrader(double capital) : TestTrader("TEST", capital) {}
@@ -20,17 +20,21 @@ public:
     {}
 
     void
-    send_message(const std::string&) override
+    disable() final
+    {}
+
+    void
+    send_message(const std::string&) final
     {}
 
     virtual void
-    process_position_change(util::position) override
+    notify_position_change(util::position) final
     {}
 
-    MessageQueue
-    read_orders() override
+    IncomingMessageQueue
+    read_orders() final
     {
-        MessageQueue ret{};
+        IncomingMessageQueue ret{};
         pending_orders_.swap(ret);
         return ret;
     }

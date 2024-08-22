@@ -46,13 +46,13 @@ BaseMatchingCycle::collect_orders(uint64_t) -> std::vector<OrderVariant>
     return orders;
 }
 
-std::vector<stored_match>
+std::vector<messages::match>
 BaseMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
 {
-    std::vector<stored_match> matches;
+    std::vector<messages::match> matches;
 
-    for (auto& order_variant : orders) {
-        auto match_order = [&]<typename T>(T& order) {
+    for (OrderVariant& order_variant : orders) {
+        auto match_order = [&]<typename OrderT>(OrderT& order) {
             if (order.quantity <= 0)
                 return;
 
@@ -60,24 +60,10 @@ BaseMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
             if (it == tickers_.end())
                 return;
 
-            if constexpr (std::is_same_v<T, tagged_limit_order>) {
-                auto tmp =
-                    it->second.engine.match_order(order, it->second.limit_orderbook);
-                std::copy(tmp.begin(), tmp.end(), std::back_inserter(matches));
-            }
-            else {
-                static_assert(std::is_same_v<T, tagged_market_order>);
-                auto order2 = tagged_limit_order{
-                    *order.trader,
-                    messages::limit_order{
-                                          order.ticker, order.side, order.quantity,
-                                          order.side == util::Side::buy ? 1000.0 : 0.0, true
-                    }
-                };
-                auto tmp =
-                    it->second.engine.match_order(order2, it->second.limit_orderbook);
-                std::copy(tmp.begin(), tmp.end(), std::back_inserter(matches));
-            }
+            auto& orderbook = it->second.limit_orderbook;
+            auto& engine = it->second.engine;
+            auto tmp = engine.match_order(order, orderbook);
+            std::copy(tmp.begin(), tmp.end(), std::back_inserter(matches));
         };
         std::visit(match_order, order_variant);
     }
@@ -85,7 +71,7 @@ BaseMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
 }
 
 void
-BaseMatchingCycle::handle_matches_(std::vector<stored_match> matches)
+BaseMatchingCycle::handle_matches_(std::vector<messages::match> matches)
 {
     std::vector<util::position> ob_updates{};
 
@@ -94,19 +80,10 @@ BaseMatchingCycle::handle_matches_(std::vector<stored_match> matches)
         std::ranges::copy(tmp, std::back_inserter(ob_updates));
     }
 
-    std::vector<messages::match> glz_matches{};
-    glz_matches.reserve(matches.size());
-    for (auto& match : matches) {
-        glz_matches.emplace_back(
-            match.position, match.buyer.get_id(), match.seller.get_id(),
-            match.buyer.get_capital(), match.seller.get_capital()
-        );
-    }
-
-    if (ob_updates.empty() && glz_matches.empty())
+    if (ob_updates.empty() && matches.empty())
         return;
 
-    messages::tick_update updates{ob_updates, glz_matches};
+    messages::tick_update updates{ob_updates, matches};
     auto update = glz::write_json(updates);
     if (!update.has_value()) [[unlikely]] {
         throw std::runtime_error(glz::format_error(update.error()));

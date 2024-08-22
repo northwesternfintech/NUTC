@@ -8,7 +8,6 @@
 #include <absl/hash/hash.h>
 #include <boost/process.hpp>
 
-#include <queue>
 #include <string>
 
 namespace nutc {
@@ -25,11 +24,9 @@ public:
         USER_ID(std::move(user_id)), INITIAL_CAPITAL(capital)
     {}
 
-    virtual void
-    disable()
-    {}
-
     virtual ~GenericTrader() = default;
+
+    virtual void disable() = 0;
 
     virtual bool
     can_leverage() const
@@ -58,14 +55,15 @@ public:
         return INITIAL_CAPITAL + capital_delta_;
     }
 
-	// TODO: improve with find
+    // TODO: improve with find
     double
     get_holdings(util::Ticker ticker) const
     {
-        if (!holdings_.contains(ticker))
+        auto it = holdings_.find(ticker);
+        if (it == holdings_.end())
             return 0.0;
 
-        return holdings_.at(ticker);
+        return it->second;
     }
 
     double
@@ -93,16 +91,15 @@ public:
         return INITIAL_CAPITAL;
     }
 
-    virtual void process_position_change(util::position) = 0;
-    virtual void process_order_match(util::position);
-
+    virtual void notify_position_change(util::position) = 0;
+    virtual void notify_match(util::position);
     virtual void send_message(const std::string&) = 0;
 
-    using MessageQueue = std::vector<std::variant<
+    using IncomingMessageQueue = std::vector<std::variant<
         messages::timed_init_message, messages::timed_limit_order,
         messages::timed_market_order>>;
 
-    virtual MessageQueue read_orders() = 0;
+    virtual IncomingMessageQueue read_orders() = 0;
 };
 } // namespace traders
 } // namespace nutc

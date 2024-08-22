@@ -39,7 +39,10 @@ public:
     add_order(const OrderT& order) override
     {
         OrderT& added_order = BaseOrderBookT::add_order(order);
-        order_map_.emplace(order.order_index, added_order);
+
+        if (!order.ioc) {
+            order_map_.emplace(order.order_index, added_order);
+        }
 
         return added_order;
     }

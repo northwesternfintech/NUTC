@@ -30,7 +30,8 @@ struct ticker_info {
     // TODO: order fee should not be 0
     ticker_info(
         traders::TraderContainer& traders, const config::ticker_config& config
-    ) : ticker_info(traders, config.TICKER, config.STARTING_PRICE, 0.0, config.BOTS)
+    ) :
+        ticker_info(traders, config.TICKER, config.STARTING_PRICE, 0.0, config.BOTS)
     {}
 
     ticker_info(

@@ -21,9 +21,7 @@ public:
     virtual OrderT&
     add_order(const OrderT& order) override
     {
-        modify_level_(
-            order.side, order.quantity, order.price
-        );
+        modify_level_(order.side, order.quantity, order.price);
 
         return BaseOrderBookT::add_order(order);
     }
@@ -31,9 +29,7 @@ public:
     virtual void
     mark_order_removed(OrderT& order) override
     {
-        modify_level_(
-            order.side, -order.quantity, order.price
-        );
+        modify_level_(order.side, -order.quantity, order.price);
 
         BaseOrderBookT::mark_order_removed(order);
     }

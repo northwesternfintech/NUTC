@@ -72,7 +72,7 @@ public:
             wrapper_handle_->send_message(message);
     }
 
-    MessageQueue
+    IncomingMessageQueue
     read_orders() override
     {
         if (!wrapper_handle_.has_value()) [[unlikely]]
@@ -82,7 +82,7 @@ public:
     }
 
     void
-    process_position_change(util::position) final
+    notify_position_change(util::position) final
     {}
 };
 

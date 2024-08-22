@@ -35,7 +35,7 @@ protected:
     nutc::matching::LimitOrderBook orderbook_;
     Engine engine_;
 
-    std::vector<nutc::matching::stored_match>
+    std::vector<nutc::messages::match>
     add_to_engine_(const tagged_limit_order& order)
     {
         return engine_.match_order(order, orderbook_);
