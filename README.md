@@ -4,12 +4,13 @@
 Some of this is out of date - it will be updated soon
 
 ## TODOS
-1. Add proper handling for market orders
-2. Confirm no implicit conversions of price to double in order handling (+ quantity change to float)
-3. Add full cpp support
-4. More integration tests (+ more coverage)
-5. Finish bots
-6. Clean up wrapper main
+- [x] Add proper handling for market orders
+- [x] Confirm no implicit conversions of price to double in order handling (+ quantity change to float)
+- [ ] Add full cpp support
+- [ ]  More integration tests (+ more coverage)
+- [x]  Finish market maker bots
+- [ ]  Add more bots generally
+- [ ]  Clean up wrapper main
 
 ## Introduction
 
@@ -29,9 +30,7 @@ The wrapper manages a single user-submitted algorithm within a Python interprete
 
 Each algorithm operates within its own process, ensuring isolation from the exchange and other algorithms. This setup enhances control over the algorithm, allowing limitations on certain functions and rate limiting order calls.
 
-Location: `NUTC/exchange/src/wrapper`
-
-Note: The wrapper code is some of the oldest in the codebase and is of low quality. Contributions to its improvement are welcome.
+Note: The wrapper code is some of the oldest in the codebase. Contributions to its improvement are welcome.
 
 ### Exchange
 
