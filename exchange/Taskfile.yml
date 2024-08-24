@@ -24,7 +24,7 @@ tasks:
     vars:
       BUILD_TYPE: '{{if eq .RELEASE_BUILD "true"}}Release{{else}}Debug{{end}}'
     cmds:
-      - conan install . -s build_type={{.BUILD_TYPE}} -b missing -pr cpp20 -pr:b cpp20
+      - conan install . -s build_type={{.BUILD_TYPE}} -b missing -pr cpp23 -pr:b cpp23
     
   fmt:
     dir: .
