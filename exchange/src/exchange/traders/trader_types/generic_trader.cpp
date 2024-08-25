@@ -2,14 +2,13 @@
 
 #include "shared/types/decimal_price.hpp"
 
-namespace nutc {
-namespace traders {
+namespace nutc::exchange {
 
 void
-GenericTrader::notify_match(util::position match)
+GenericTrader::notify_match(shared::position match)
 {
-    util::decimal_price total_cap = match.price * match.quantity;
-    if (match.side == util::Side::buy) {
+    shared::decimal_price total_cap = match.price * match.quantity;
+    if (match.side == shared::Side::buy) {
         modify_holdings(match.ticker, match.quantity);
         modify_capital(total_cap * -1.0);
     }
@@ -19,5 +18,4 @@ GenericTrader::notify_match(util::position match)
     }
 }
 
-} // namespace traders
-} // namespace nutc
+} // namespace nutc::exchange

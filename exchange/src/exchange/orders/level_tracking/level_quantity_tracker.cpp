@@ -1,16 +1,16 @@
 #include "level_quantity_tracker.hpp"
 
-namespace nutc {
-namespace matching {
+namespace nutc::exchange {
+
 void
 LevelQuantityTracker::report_quantity(
-    util::Side side, double quantity_delta, util::decimal_price price
+    shared::Side side, double quantity_delta, shared::decimal_price price
 )
 {
     if (price.price < 0) [[unlikely]]
         throw std::runtime_error("Reporting quantity less than 0");
 
-    auto& levels = side == util::Side::buy ? bid_levels_ : ask_levels_;
+    auto& levels = side == shared::Side::buy ? bid_levels_ : ask_levels_;
 
     // TODO: guarantee size checks
     if (levels.size() <= static_cast<uint64_t>(price.price)) [[unlikely]] {
@@ -23,12 +23,12 @@ LevelQuantityTracker::report_quantity(
 }
 
 double
-LevelQuantityTracker::get_level(util::Side side, util::decimal_price price) const
+LevelQuantityTracker::get_level(shared::Side side, shared::decimal_price price) const
 {
     if (price.price < 0) [[unlikely]]
         throw std::runtime_error("Reporting quantity less than 0");
 
-    const auto& levels = (side == util::Side::buy) ? bid_levels_ : ask_levels_;
+    const auto& levels = (side == shared::Side::buy) ? bid_levels_ : ask_levels_;
 
     if (levels.size() <= static_cast<uint64_t>(price.price)) [[unlikely]] {
         return 0.0;
@@ -36,5 +36,4 @@ LevelQuantityTracker::get_level(util::Side side, util::decimal_price price) cons
 
     return levels[static_cast<uint64_t>(price.price)];
 }
-} // namespace matching
-} // namespace nutc
+} // namespace nutc::exchange

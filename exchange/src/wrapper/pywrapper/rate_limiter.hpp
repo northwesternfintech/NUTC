@@ -3,7 +3,7 @@
 #include <queue>
 
 namespace nutc {
-namespace rate_limiter {
+namespace wrapper {
 class RateLimiter {
     std::queue<std::chrono::steady_clock::time_point> timestamps_;
 
@@ -14,5 +14,5 @@ class RateLimiter {
 public:
     bool should_rate_limit();
 };
-} // namespace rate_limiter
+} // namespace wrapper
 } // namespace nutc

@@ -1,12 +1,11 @@
 #include "variance.hpp"
 
-namespace nutc {
-namespace bots {
+namespace nutc::exchange {
 
 void
-VarianceCalculator::record_price(util::decimal_price price)
+VarianceCalculator::record_price(shared::decimal_price price)
 {
-    if (price == util::decimal_price{0.0})
+    if (price == shared::decimal_price{0.0})
         return;
 
     prices.push_back(price);
@@ -61,5 +60,4 @@ VarianceCalculator::calculate_volatility() const
     double variance = calculate_variance(returns, mean);
     return std::sqrt(variance);
 }
-} // namespace bots
-} // namespace nutc
+} // namespace nutc::exchange

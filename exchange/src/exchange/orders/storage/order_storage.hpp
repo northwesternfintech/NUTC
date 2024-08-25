@@ -4,24 +4,23 @@
 
 #include <fmt/format.h>
 
-namespace nutc {
-namespace matching {
+namespace nutc::exchange {
 
 template <typename BaseOrderT>
 class tagged_order : public BaseOrderT {
     inline static constinit std::uint64_t global_index = 0;
 
 public:
-    traders::GenericTrader* trader;
+    GenericTrader* trader;
     bool active{true};
     uint64_t order_index{++global_index};
 
-    tagged_order(traders::GenericTrader& order_creator, const auto& order) :
+    tagged_order(GenericTrader& order_creator, const auto& order) :
         BaseOrderT(order), trader(&order_creator)
     {}
 
     template <typename... Args>
-    tagged_order(traders::GenericTrader& order_creator, Args&&... args)
+    tagged_order(GenericTrader& order_creator, Args&&... args)
     requires std::is_constructible_v<BaseOrderT, Args...>
         : BaseOrderT(args...), trader(&order_creator)
     {}
@@ -29,8 +28,8 @@ public:
     bool operator==(const tagged_order& other) const = default;
 };
 
-using tagged_limit_order = tagged_order<messages::timed_limit_order>;
-using tagged_market_order = tagged_order<messages::timed_market_order>;
+using tagged_limit_order = tagged_order<shared::timed_limit_order>;
+using tagged_market_order = tagged_order<shared::timed_market_order>;
 
 template <typename T>
 struct is_limit_order : std::false_type {};
@@ -54,5 +53,4 @@ inline constexpr bool is_market_order_v =
 template <typename T>
 concept TaggedOrder = is_limit_order_v<T> || is_market_order_v<T>;
 
-} // namespace matching
-} // namespace nutc
+} // namespace nutc::exchange

@@ -7,31 +7,24 @@
 
 #include <algorithm>
 
-namespace nutc {
-namespace metrics {
+namespace nutc::exchange {
 
 Gauge
 TickerMetricsPusher::create_gauge_(const std::string& gauge_name)
 {
-    return ps::BuildGauge()
-        .Name(gauge_name)
-        .Register(*metrics::Prometheus::get_registry());
+    return ps::BuildGauge().Name(gauge_name).Register(*Prometheus::get_registry());
 }
 
 Counter
 TickerMetricsPusher::create_counter_(const std::string& gauge_name)
 {
-    return ps::BuildCounter()
-        .Name(gauge_name)
-        .Register(*metrics::Prometheus::get_registry());
+    return ps::BuildCounter().Name(gauge_name).Register(*Prometheus::get_registry());
 }
 
 void
-TickerMetricsPusher::report_orders(
-    const std::vector<matching::tagged_limit_order>& orders
-)
+TickerMetricsPusher::report_orders(const std::vector<tagged_limit_order>& orders)
 {
-    auto log_order = [&](const matching::tagged_limit_order& order) {
+    auto log_order = [&](const tagged_limit_order& order) {
         orders_quantity_counter
             .Add({
                 {"ticker",      order.ticker            },
@@ -44,18 +37,18 @@ TickerMetricsPusher::report_orders(
 }
 
 void
-TickerMetricsPusher::report_ticker_stats(matching::TickerMapping& tickers)
+TickerMetricsPusher::report_ticker_stats(TickerMapping& tickers)
 {
-    auto log_midprice = [&](util::Ticker ticker, const matching::ticker_info& info) {
+    auto log_midprice = [&](shared::Ticker ticker, const ticker_info& info) {
         ticker_midprice_gauge
             .Add({
                 {"ticker", std::string{ticker}}
         })
             .Set(double{info.limit_orderbook.get_midprice()});
     };
-    auto log_best_ba = [&](util::Ticker ticker, matching::ticker_info& info) {
-        auto best_bid = info.limit_orderbook.get_top_order(util::Side::buy);
-        auto best_ask = info.limit_orderbook.get_top_order(util::Side::sell);
+    auto log_best_ba = [&](shared::Ticker ticker, ticker_info& info) {
+        auto best_bid = info.limit_orderbook.get_top_order(shared::Side::buy);
+        auto best_ask = info.limit_orderbook.get_top_order(shared::Side::sell);
 
         if (best_bid.has_value()) [[likely]] {
             best_ba_gauge
@@ -76,7 +69,7 @@ TickerMetricsPusher::report_ticker_stats(matching::TickerMapping& tickers)
         }
     };
 
-    // auto log_variance = [&](util::Ticker ticker, const matching::ticker_info& info) {
+    // auto log_variance = [&](shared::Ticker ticker, const ticker_info& info) {
     //     ticker_midprice_variance_gauge
     //         .Add({
     //             {"ticker", std::string{ticker}}
@@ -92,9 +85,9 @@ TickerMetricsPusher::report_ticker_stats(matching::TickerMapping& tickers)
 }
 
 void
-TickerMetricsPusher::report_matches(const std::vector<messages::match>& orders)
+TickerMetricsPusher::report_matches(const std::vector<shared::match>& orders)
 {
-    auto log_match = [this](const messages::match& match) {
+    auto log_match = [this](const shared::match& match) {
         matches_quantity_counter
             .Add({
                 {"ticker", match.position.ticker}
@@ -112,7 +105,7 @@ TickerMetricsPusher::report_current_tick(uint64_t tick_num)
 }
 
 void
-TickerMetricsPusher::report_trader_stats(const matching::TickerMapping& tickers)
+TickerMetricsPusher::report_trader_stats(const TickerMapping& tickers)
 {
     auto report_holdings = [&](const auto& trader) {
         for (const auto& [info, _, ticker] : tickers) {
@@ -136,7 +129,7 @@ TickerMetricsPusher::report_trader_stats(const matching::TickerMapping& tickers)
         }
         return pnl;
     };
-    auto track_trader = [&](traders::GenericTrader& trader) {
+    auto track_trader = [&](GenericTrader& trader) {
         report_holdings(trader);
 
         double capital{trader.get_capital()};
@@ -162,5 +155,4 @@ TickerMetricsPusher::report_trader_stats(const matching::TickerMapping& tickers)
     std::for_each(trader_container_.begin(), trader_container_.end(), track_trader);
 }
 
-} // namespace metrics
-} // namespace nutc
+} // namespace nutc::exchange

@@ -4,20 +4,20 @@
 
 #include <gtest/gtest.h>
 
-using nutc::util::Side::buy;
-using nutc::util::Side::sell;
+using nutc::shared::Side::buy;
+using nutc::shared::Side::sell;
 
 class UnitBasicMatching : public ::testing::Test {
 protected:
-    using TestTrader = nutc::test_utils::TestTrader;
+    using TestTrader = nutc::test::TestTrader;
     static constexpr const int DEFAULT_QUANTITY = 1000;
     TraderContainer traders;
 
-    nutc::traders::GenericTrader& trader1 =
+    nutc::exchange::GenericTrader& trader1 =
         *traders.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
-    nutc::traders::GenericTrader& trader2 =
+    nutc::exchange::GenericTrader& trader2 =
         *traders.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
-    nutc::traders::GenericTrader& trader3 =
+    nutc::exchange::GenericTrader& trader3 =
         *traders.add_trader<TestTrader>(std::string("GHI"), TEST_STARTING_CAPITAL);
 
     void
@@ -34,10 +34,10 @@ protected:
         SetUp();
     }
 
-    nutc::matching::LimitOrderBook orderbook_{};
+    nutc::exchange::LimitOrderBook orderbook_{};
     Engine engine_;
 
-    std::vector<nutc::messages::match>
+    std::vector<nutc::shared::match>
     add_to_engine_(const tagged_limit_order& order)
     {
         return engine_.match_order(order, orderbook_);

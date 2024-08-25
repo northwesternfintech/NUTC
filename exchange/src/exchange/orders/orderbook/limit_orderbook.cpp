@@ -3,15 +3,14 @@
 #include "shared/types/decimal_price.hpp"
 #include "shared/util.hpp"
 
-namespace nutc {
-namespace matching {
+namespace nutc::exchange {
 
 void
-LimitOrderBook::clean_tree(util::Side side)
+LimitOrderBook::clean_tree(shared::Side side)
 {
-    auto& tree = side == util::Side::buy ? bids_ : asks_;
+    auto& tree = side == shared::Side::buy ? bids_ : asks_;
     while (!tree.empty()) {
-        auto key = side == util::Side::buy ? std::prev(tree.end()) : tree.begin();
+        auto key = side == shared::Side::buy ? std::prev(tree.end()) : tree.begin();
         auto& queue = key->second;
 
         if (queue.empty()) {
@@ -29,16 +28,16 @@ LimitOrderBook::clean_tree(util::Side side)
 }
 
 std::optional<std::reference_wrapper<tagged_limit_order>>
-LimitOrderBook::get_top_order(util::Side side)
+LimitOrderBook::get_top_order(shared::Side side)
 {
     clean_tree(side);
 
-    auto& tree = side == util::Side::buy ? bids_ : asks_;
+    auto& tree = side == shared::Side::buy ? bids_ : asks_;
 
     if (tree.empty()) [[unlikely]]
         return std::nullopt;
 
-    auto key = side == util::Side::buy ? std::prev(tree.end()) : tree.begin();
+    auto key = side == shared::Side::buy ? std::prev(tree.end()) : tree.begin();
     auto& queue = key->second;
 
     if (queue.empty()) [[unlikely]]
@@ -47,7 +46,7 @@ LimitOrderBook::get_top_order(util::Side side)
     return queue.front();
 }
 
-util::decimal_price
+shared::decimal_price
 LimitOrderBook::get_midprice() const
 {
     if (bids_.empty() || asks_.empty()) [[unlikely]] {
@@ -59,7 +58,7 @@ LimitOrderBook::get_midprice() const
 void
 LimitOrderBook::change_quantity(tagged_limit_order& order, double quantity_delta)
 {
-    if (util::is_close_to_zero(order.quantity + quantity_delta)) {
+    if (shared::is_close_to_zero(order.quantity + quantity_delta)) {
         mark_order_removed(order);
         return;
     }
@@ -88,12 +87,11 @@ LimitOrderBook::add_order(const tagged_limit_order& order)
         {order.ticker, order.side, order.quantity, order.price}
     );
 
-    auto& map = order.side == util::Side::buy ? bids_ : asks_;
+    auto& map = order.side == shared::Side::buy ? bids_ : asks_;
 
     auto& queue = map[order.price];
     queue.push(order);
     return queue.back();
 }
 
-} // namespace matching
-} // namespace nutc
+} // namespace nutc::exchange

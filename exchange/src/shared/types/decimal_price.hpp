@@ -8,7 +8,7 @@
 
 #include <functional>
 
-namespace nutc::util {
+namespace nutc::shared {
 
 // We round prices to 2 decimal places, so just store them as integers
 struct decimal_price {
@@ -129,10 +129,10 @@ struct decimal_price {
 private:
     constexpr decimal_price(decimal_type decimal) : price(decimal) {}
 };
-} // namespace nutc::util
+} // namespace nutc::shared
 
 namespace std {
-using decimal_price = nutc::util::decimal_price;
+using decimal_price = nutc::shared::decimal_price;
 
 template <>
 struct hash<decimal_price> {
@@ -147,7 +147,7 @@ struct hash<decimal_price> {
 
 /// \cond
 template <>
-struct glz::meta<nutc::util::decimal_price> {
-    using t = nutc::util::decimal_price;
+struct glz::meta<nutc::shared::decimal_price> {
+    using t = nutc::shared::decimal_price;
     static constexpr auto value = object(&t::price);
 };

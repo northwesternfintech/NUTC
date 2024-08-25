@@ -8,14 +8,13 @@
 
 #include <string>
 
-namespace nutc {
-namespace traders {
+namespace nutc::exchange {
 
-class BotTrader : public traders::GenericTrader {
-    const util::Ticker TICKER;
-    const util::decimal_price INTEREST_LIMIT;
-    util::decimal_price short_interest_{};
-    util::decimal_price long_interest_{};
+class BotTrader : public GenericTrader {
+    const shared::Ticker TICKER;
+    const shared::decimal_price INTEREST_LIMIT;
+    shared::decimal_price short_interest_{};
+    shared::decimal_price long_interest_{};
 
     double open_bids_ = 0;
     double open_asks_ = 0;
@@ -28,7 +27,7 @@ public:
         return GenericTrader::get_holdings(TICKER);
     }
 
-    BotTrader(util::Ticker ticker, util::decimal_price interest_limit) :
+    BotTrader(shared::Ticker ticker, shared::decimal_price interest_limit) :
         GenericTrader(generate_user_id(), interest_limit), TICKER(ticker),
         INTEREST_LIMIT(interest_limit)
     {}
@@ -48,29 +47,29 @@ public:
     disable() final
     {}
 
-    [[nodiscard]] util::decimal_price
+    [[nodiscard]] shared::decimal_price
     get_capital_utilization() const
     {
-        util::decimal_price capital_util =
+        shared::decimal_price capital_util =
             (get_long_interest() + get_short_interest()) / get_interest_limit();
         assert(capital_util <= 1.0);
         // assert(capital_util >= 0);
         return capital_util;
     }
 
-    [[nodiscard]] util::decimal_price
+    [[nodiscard]] shared::decimal_price
     get_long_interest() const
     {
         return long_interest_;
     }
 
-    [[nodiscard]] util::decimal_price
+    [[nodiscard]] shared::decimal_price
     get_interest_limit() const
     {
         return INTEREST_LIMIT;
     }
 
-    [[nodiscard]] util::decimal_price
+    [[nodiscard]] shared::decimal_price
     get_short_interest() const
     {
         return short_interest_;
@@ -90,12 +89,12 @@ public:
 
     ~BotTrader() override = default;
 
-    void notify_position_change(util::position order) final;
+    void notify_position_change(shared::position order) final;
 
     /**
      * midprice, theo
      */
-    virtual void take_action(const bots::shared_bot_state& shared_state) = 0;
+    virtual void take_action(const shared_bot_state& shared_state) = 0;
 
     IncomingMessageQueue
     read_orders() override
@@ -108,7 +107,7 @@ public:
 protected:
     static double generate_gaussian_noise(double mean, double stddev);
 
-    [[nodiscard]] util::decimal_price
+    [[nodiscard]] shared::decimal_price
     compute_net_exposure_() const
     {
         return (get_long_interest() - get_short_interest());
@@ -116,35 +115,35 @@ protected:
 
     void
     add_limit_order(
-        util::Side side, double quantity, util::decimal_price price, bool ioc
+        shared::Side side, double quantity, shared::decimal_price price, bool ioc
     )
     {
-        orders_.push_back(
-            messages::timed_limit_order{TICKER, side, quantity, price, ioc}
+        orders_.emplace_back(
+            shared::timed_limit_order{TICKER, side, quantity, price, ioc}
         );
     }
 
     void
-    add_market_order(util::Side side, double quantity)
+    add_market_order(shared::Side side, double quantity)
     {
-        orders_.push_back(messages::timed_market_order{TICKER, side, quantity});
+        orders_.push_back(shared::timed_market_order{TICKER, side, quantity});
     }
 
-    util::decimal_price
+    shared::decimal_price
     compute_capital_tolerance_()
     {
-        return (util::decimal_price{1.0} - get_capital_utilization())
+        return (shared::decimal_price{1.0} - get_capital_utilization())
                * (get_interest_limit() / 2.0);
     }
 
     void
-    modify_short_capital(util::decimal_price delta)
+    modify_short_capital(shared::decimal_price delta)
     {
         short_interest_ += delta;
     }
 
     void
-    modify_long_capital(util::decimal_price delta)
+    modify_long_capital(shared::decimal_price delta)
     {
         long_interest_ += delta;
     }
@@ -186,5 +185,4 @@ private:
     }
 };
 
-} // namespace traders
-} // namespace nutc
+} // namespace nutc::exchange

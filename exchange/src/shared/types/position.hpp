@@ -6,13 +6,12 @@
 
 #include <glaze/glaze.hpp>
 
-namespace nutc {
-namespace util {
+namespace nutc::shared {
 struct position {
     Ticker ticker;
     Side side;
     double quantity;
-    util::decimal_price price;
+    shared::decimal_price price;
 
     bool
     operator==(const position& other) const noexcept
@@ -23,17 +22,16 @@ struct position {
 
     position() = default;
 
-    position(Ticker ticker, Side side, double quantity, util::decimal_price price) :
+    position(Ticker ticker, Side side, double quantity, shared::decimal_price price) :
         ticker(ticker), side(side), quantity(quantity), price(price)
     {}
 };
 
-} // namespace util
-} // namespace nutc
+} // namespace nutc::shared
 
 /// \cond
 template <>
-struct glz::meta<nutc::util::position> {
-    using t = nutc::util::position;
+struct glz::meta<nutc::shared::position> {
+    using t = nutc::shared::position;
     static constexpr auto value = object(&t::side, &t::ticker, &t::quantity, &t::price);
 };

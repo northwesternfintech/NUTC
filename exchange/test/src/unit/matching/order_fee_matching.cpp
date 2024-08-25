@@ -5,19 +5,19 @@
 
 #include <gtest/gtest.h>
 
-using nutc::util::Side::buy;
-using nutc::util::Side::sell;
+using nutc::shared::Side::buy;
+using nutc::shared::Side::sell;
 
 class UnitOrderFeeMatching : public ::testing::Test {
 protected:
-    using TestTrader = nutc::test_utils::TestTrader;
+    using TestTrader = nutc::test::TestTrader;
     static constexpr const int DEFAULT_QUANTITY = 1000;
     TraderContainer traders;
-    nutc::traders::GenericTrader& trader1 =
+    nutc::exchange::GenericTrader& trader1 =
         *traders.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
-    nutc::traders::GenericTrader& trader2 =
+    nutc::exchange::GenericTrader& trader2 =
         *traders.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
-    nutc::traders::GenericTrader& trader3 =
+    nutc::exchange::GenericTrader& trader3 =
         *traders.add_trader<TestTrader>(std::string("GHI"), TEST_STARTING_CAPITAL);
 
     void
@@ -34,10 +34,10 @@ protected:
         SetUp();
     }
 
-    nutc::matching::LimitOrderBook orderbook_;
+    nutc::exchange::LimitOrderBook orderbook_;
     Engine engine_{.5};
 
-    std::vector<nutc::messages::match>
+    std::vector<nutc::shared::match>
     add_to_engine_(const tagged_limit_order& order)
     {
         return engine_.match_order(order, orderbook_);
@@ -337,13 +337,13 @@ TEST_F(UnitOrderFeeMatching, MatchingInvalidFunds)
 
 TEST_F(UnitOrderFeeMatching, SimpleManyInvalidOrder)
 {
-    nutc::traders::GenericTrader& trader4 =
+    nutc::exchange::GenericTrader& trader4 =
         *traders.add_trader<TestTrader>(std::string("A"), TEST_STARTING_CAPITAL);
-    nutc::traders::GenericTrader& trader5 =
+    nutc::exchange::GenericTrader& trader5 =
         *traders.add_trader<TestTrader>(std::string("B"), 1);
-    nutc::traders::GenericTrader& trader6 =
+    nutc::exchange::GenericTrader& trader6 =
         *traders.add_trader<TestTrader>(std::string("C"), TEST_STARTING_CAPITAL);
-    nutc::traders::GenericTrader& trader7 =
+    nutc::exchange::GenericTrader& trader7 =
         *traders.add_trader<TestTrader>(std::string("D"), TEST_STARTING_CAPITAL);
 
     trader4.modify_holdings("ETH", DEFAULT_QUANTITY);

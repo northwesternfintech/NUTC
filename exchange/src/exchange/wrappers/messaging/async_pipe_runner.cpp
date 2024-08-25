@@ -4,8 +4,7 @@
 #include <boost/asio/read_until.hpp>
 #include <fmt/format.h>
 
-namespace nutc {
-namespace wrappers {
+namespace nutc::exchange {
 
 AsyncPipeRunner::~AsyncPipeRunner()
 {
@@ -29,5 +28,4 @@ AsyncPipeRunner::get_context()
     return instance.ios;
 }
 
-} // namespace wrappers
-} // namespace nutc
+} // namespace nutc::exchange

@@ -9,14 +9,14 @@
 #include <prometheus/gauge.h>
 #include <prometheus/registry.h>
 
-namespace nutc {
-namespace metrics {
+namespace nutc::exchange {
+
 namespace ps = prometheus;
 using Gauge = ps::Family<ps::Gauge>&;
 using Counter = ps::Family<ps::Counter>&;
 
 class TickerMetricsPusher {
-    traders::TraderContainer& trader_container_;
+    TraderContainer& trader_container_;
     Gauge per_trader_pnl_gauge = create_gauge_("pnl");
     Gauge per_trader_capital_gauge = create_gauge_("capital");
     Gauge per_trader_holdings_gauge = create_gauge_("holdings");
@@ -28,19 +28,18 @@ class TickerMetricsPusher {
     Gauge current_tick_gauge = create_gauge_("current_tick");
 
 public:
-    TickerMetricsPusher(traders::TraderContainer& trader_container) :
+    TickerMetricsPusher(TraderContainer& trader_container) :
         trader_container_(trader_container)
     {}
 
     void report_current_tick(uint64_t tick_num);
-    void report_trader_stats(const matching::TickerMapping& tickers);
-    void report_ticker_stats(matching::TickerMapping& tickers);
-    void report_orders(const std::vector<matching::tagged_limit_order>& orders);
-    void report_matches(const std::vector<messages::match>& orders);
+    void report_trader_stats(const TickerMapping& tickers);
+    void report_ticker_stats(TickerMapping& tickers);
+    void report_orders(const std::vector<tagged_limit_order>& orders);
+    void report_matches(const std::vector<shared::match>& orders);
 
 private:
     Gauge create_gauge_(const std::string& gauge_name);
     Counter create_counter_(const std::string& counter_name);
 };
-} // namespace metrics
-} // namespace nutc
+} // namespace nutc::exchange

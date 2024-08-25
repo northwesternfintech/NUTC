@@ -7,7 +7,7 @@
 
 #  include <csignal>
 
-namespace nutc::system {
+namespace nutc::wrapper {
 [[nodiscard]] inline bool
 kill_on_exchange_death()
 {
@@ -26,9 +26,9 @@ set_memory_limit(std::size_t limit_in_mb)
     }
     return true;
 }
-} // namespace nutc::system
+} // namespace nutc::wrapper
 #else
-namespace nutc::system {
+namespace nutc::wrapper {
 [[nodiscard]] inline bool
 kill_on_exchange_death()
 {
@@ -41,5 +41,5 @@ set_memory_limit(std::size_t)
     return true;
 }
 
-} // namespace nutc::system
+} // namespace nutc::wrapper
 #endif

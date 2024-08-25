@@ -9,13 +9,13 @@ using namespace nutc;
 static void
 BM_AddOrders(benchmark::State& state)
 {
-    matching::LimitOrderBook orderbook;
-    bench_utils::BenchmarkTrader trader;
+    exchange::LimitOrderBook orderbook;
+    benchmarks::BenchmarkTrader trader;
     uint32_t adds = static_cast<uint32_t>(state.range(0));
 
     for (auto _ : state) {
         for (uint32_t i = 0; i < adds; i++) {
-            orderbook.add_order({trader, "ABC", util::Side::sell, 0.0, 0.0,false});
+            orderbook.add_order({trader, "ABC", shared::Side::sell, 0.0, 0.0,false});
         }
     }
 }

@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-namespace nutc::pywrapper {
+namespace nutc::wrapper {
 
 namespace py = pybind11;
 
@@ -43,9 +43,9 @@ create_api_module(
 OrderBookUpdateFunction
 ob_update_function()
 {
-    return [](const util::position& position) {
+    return [](const shared::position& position) {
         std::string ticker_val{position.ticker};
-        std::string side_val = (position.side == util::Side::buy) ? "BUY" : "SELL";
+        std::string side_val = (position.side == shared::Side::buy) ? "BUY" : "SELL";
         double price_val{position.price};
         double quantity{position.quantity};
         try {
@@ -61,9 +61,9 @@ ob_update_function()
 TradeUpdateFunction
 trade_update_function()
 {
-    return [](const util::position& position) {
+    return [](const shared::position& position) {
         std::string ticker_val{position.ticker};
-        std::string side_val = (position.side == util::Side::buy) ? "BUY" : "SELL";
+        std::string side_val = (position.side == shared::Side::buy) ? "BUY" : "SELL";
         double price_val{position.price};
         double quantity{position.quantity};
         try {
@@ -79,9 +79,9 @@ trade_update_function()
 AccountUpdateFunction
 account_update_function()
 {
-    return [](const util::position& position, util::decimal_price held_capital) {
+    return [](const shared::position& position, shared::decimal_price held_capital) {
         std::string ticker_val{position.ticker};
-        std::string side_val = (position.side == util::Side::buy) ? "BUY" : "SELL";
+        std::string side_val = (position.side == shared::Side::buy) ? "BUY" : "SELL";
         double price_val{position.price};
         double quantity{position.quantity};
         double held_val{held_capital};
@@ -110,4 +110,4 @@ run_initialization_code(const std::string& py_code)
     py::exec("strategy = Strategy()");
 }
 
-} // namespace nutc::pywrapper
+} // namespace nutc::wrapper

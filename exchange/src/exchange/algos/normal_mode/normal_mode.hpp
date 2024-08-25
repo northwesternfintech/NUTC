@@ -3,8 +3,7 @@
 #include "exchange/algos/algo_manager.hpp"
 #include "shared/types/decimal_price.hpp"
 
-namespace nutc {
-namespace algos {
+namespace nutc::exchange {
 
 class NormalModeAlgoInitializer : public AlgoInitializer {
 public:
@@ -13,7 +12,7 @@ public:
     NormalModeAlgoInitializer(size_t wait_secs) : WAIT_SECS(wait_secs) {}
 
     void initialize_trader_container(
-        traders::TraderContainer& traders, util::decimal_price start_capital
+        TraderContainer& traders, shared::decimal_price start_capital
     ) const override;
 
     // No files to initialize
@@ -24,5 +23,4 @@ public:
 private:
     static glz::json_t::object_t get_remote_traders();
 };
-} // namespace algos
-} // namespace nutc
+} // namespace nutc::exchange

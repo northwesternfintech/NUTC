@@ -7,8 +7,7 @@
 
 #include <string>
 
-namespace nutc {
-namespace util {
+namespace nutc::shared {
 
 std::string trader_id(const std::string& user_id, const std::string& algo_id);
 
@@ -30,5 +29,4 @@ is_close_to_zero(double value, double epsilon = 1e-6)
     return std::fabs(value) < epsilon;
 }
 
-} // namespace util
-} // namespace nutc
+} // namespace nutc::shared

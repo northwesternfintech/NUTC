@@ -10,11 +10,10 @@
 
 #include <yaml-cpp/yaml.h>
 
-namespace nutc {
-namespace config {
+namespace nutc::exchange {
 
 struct global_config {
-    const util::decimal_price STARTING_CAPITAL;
+    const shared::decimal_price STARTING_CAPITAL;
     const size_t WAIT_SECS;
     const unsigned int SANDBOX_TRIAL_SECS;
     const double ORDER_FEE;
@@ -67,5 +66,4 @@ private:
     static std::vector<ticker_config> get_ticker_config_(const YAML::Node& full_config);
     static std::vector<bot_config> get_bot_config_(const YAML::Node& bots_config);
 };
-} // namespace config
-} // namespace nutc
+} // namespace nutc::exchange

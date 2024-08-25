@@ -10,8 +10,7 @@
 
 #include <absl/hash/hash.h>
 
-namespace nutc {
-namespace matching {
+namespace nutc::exchange {
 
 using DecoratedLimitOrderBook =
     LevelTrackedOrderbook<CancellableOrderBook<LimitOrderBook>>;
@@ -23,36 +22,33 @@ using DecoratedLimitOrderBook =
 struct ticker_info {
     DecoratedLimitOrderBook limit_orderbook{};
     Engine engine;
-    std::vector<bots::BotContainer> bot_containers;
+    std::vector<BotContainer> bot_containers;
 
-    ticker_info(util::decimal_price order_fee) : engine(order_fee) {}
+    ticker_info(shared::decimal_price order_fee) : engine(order_fee) {}
 
     // TODO: order fee should not be 0
-    ticker_info(
-        traders::TraderContainer& traders, const config::ticker_config& config
-    ) :
+    ticker_info(TraderContainer& traders, const ticker_config& config) :
         ticker_info(traders, config.TICKER, config.STARTING_PRICE, 0.0, config.BOTS)
     {}
 
     ticker_info(
-        traders::TraderContainer& traders, util::Ticker ticker,
-        util::decimal_price starting_price, util::decimal_price order_fee,
-        std::vector<config::bot_config> config
+        TraderContainer& traders, shared::Ticker ticker,
+        shared::decimal_price starting_price, shared::decimal_price order_fee,
+        std::vector<bot_config> config
     ) :
         engine(order_fee),
         bot_containers(create_bot_containers(traders, ticker, starting_price, config))
     {}
 
 private:
-    std::vector<bots::BotContainer>
+    std::vector<BotContainer>
     create_bot_containers(
-        traders::TraderContainer& trader_container, util::Ticker ticker,
-        util::decimal_price starting_price,
-        const std::vector<config::bot_config>& configs
+        TraderContainer& trader_container, shared::Ticker ticker,
+        shared::decimal_price starting_price, const std::vector<bot_config>& configs
     )
     {
-        std::vector<bots::BotContainer> containers;
-        for (const config::bot_config& bot_config : configs) {
+        std::vector<BotContainer> containers;
+        for (const bot_config& bot_config : configs) {
             containers.emplace_back(
                 ticker, starting_price, trader_container, bot_config
             );
@@ -62,7 +58,6 @@ private:
 };
 
 using TickerMapping =
-    emhash7::HashMap<util::Ticker, ticker_info, absl::Hash<util::Ticker>>;
+    emhash7::HashMap<shared::Ticker, ticker_info, absl::Hash<shared::Ticker>>;
 
-} // namespace matching
-} // namespace nutc
+} // namespace nutc::exchange

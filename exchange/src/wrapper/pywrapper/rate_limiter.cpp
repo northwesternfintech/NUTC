@@ -1,7 +1,7 @@
 #include "rate_limiter.hpp"
 
 namespace nutc {
-namespace rate_limiter {
+namespace wrapper {
 bool
 RateLimiter::should_rate_limit()
 {
@@ -16,5 +16,5 @@ RateLimiter::should_rate_limit()
     timestamps_.push(now);
     return false;
 }
-} // namespace rate_limiter
+} // namespace wrapper
 } // namespace nutc

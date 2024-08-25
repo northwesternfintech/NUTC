@@ -5,13 +5,11 @@
 #include <argparse/argparse.hpp>
 #include <fmt/format.h>
 
-namespace nutc {
-namespace config {
+namespace nutc::exchange {
 
-using mode = util::Mode;
-using algorithm = util::algorithm;
+using mode = shared::Mode;
+using algorithm = shared::algorithm;
 
 mode process_arguments(int argc, const char** argv);
 
-} // namespace config
-} // namespace nutc
+} // namespace nutc::exchange

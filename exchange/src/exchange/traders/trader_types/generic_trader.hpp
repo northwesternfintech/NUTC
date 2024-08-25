@@ -10,17 +10,16 @@
 
 #include <string>
 
-namespace nutc {
-namespace traders {
+namespace nutc::exchange {
 
 class GenericTrader {
     const std::string USER_ID;
-    const util::decimal_price INITIAL_CAPITAL;
-    util::decimal_price capital_delta_{};
-    emhash7::HashMap<util::Ticker, double, absl::Hash<util::Ticker>> holdings_{};
+    const shared::decimal_price INITIAL_CAPITAL;
+    shared::decimal_price capital_delta_{};
+    emhash7::HashMap<shared::Ticker, double, absl::Hash<shared::Ticker>> holdings_{};
 
 public:
-    explicit GenericTrader(std::string user_id, util::decimal_price capital) :
+    explicit GenericTrader(std::string user_id, shared::decimal_price capital) :
         USER_ID(std::move(user_id)), INITIAL_CAPITAL(capital)
     {}
 
@@ -49,7 +48,7 @@ public:
     // For metrics purposes
     virtual const std::string& get_type() const = 0;
 
-    virtual util::decimal_price
+    virtual shared::decimal_price
     get_capital() const
     {
         return INITIAL_CAPITAL + capital_delta_;
@@ -57,7 +56,7 @@ public:
 
     // TODO: improve with find
     double
-    get_holdings(util::Ticker ticker) const
+    get_holdings(shared::Ticker ticker) const
     {
         auto it = holdings_.find(ticker);
         if (it == holdings_.end())
@@ -67,39 +66,38 @@ public:
     }
 
     double
-    modify_holdings(util::Ticker ticker, double change_in_holdings)
+    modify_holdings(shared::Ticker ticker, double change_in_holdings)
     {
         holdings_[ticker] += change_in_holdings;
         return holdings_[ticker];
     }
 
     void
-    modify_capital(util::decimal_price change_in_capital)
+    modify_capital(shared::decimal_price change_in_capital)
     {
         capital_delta_ += change_in_capital;
     }
 
-    util::decimal_price
+    shared::decimal_price
     get_capital_delta() const
     {
         return capital_delta_;
     }
 
-    util::decimal_price
+    shared::decimal_price
     get_initial_capital() const
     {
         return INITIAL_CAPITAL;
     }
 
-    virtual void notify_position_change(util::position) = 0;
-    virtual void notify_match(util::position);
+    virtual void notify_position_change(shared::position) = 0;
+    virtual void notify_match(shared::position);
     virtual void send_message(const std::string&) = 0;
 
     using IncomingMessageQueue = std::vector<std::variant<
-        messages::timed_init_message, messages::timed_limit_order,
-        messages::timed_market_order>>;
+        shared::timed_init_message, shared::timed_limit_order,
+        shared::timed_market_order>>;
 
     virtual IncomingMessageQueue read_orders() = 0;
 };
-} // namespace traders
-} // namespace nutc
+} // namespace nutc::exchange

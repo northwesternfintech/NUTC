@@ -7,8 +7,7 @@
 
 #include <yaml-cpp/yaml.h>
 
-namespace nutc {
-namespace config {
+namespace nutc::exchange {
 namespace {
 void
 throw_undef_err(const std::string& undefined_err)
@@ -79,7 +78,7 @@ Config::get_ticker_config_(const YAML::Node& full_config)
                 TICKER_LENGTH
             ));
         }
-        util::Ticker ticker;
+        shared::Ticker ticker;
         std::copy(ticker_symb_s.begin(), ticker_symb_s.end(), ticker.arr.begin());
 
         if (!ticker_start_price.IsDefined())
@@ -113,11 +112,10 @@ Config::get_global_config_(const YAML::Node& full_config)
     if (!sandbox_secs.IsDefined())
         throw_undef_err("global/sandbox_trial_seconds");
     return {
-        util::decimal_price(starting_capital.as<double>()), wait_secs.as<size_t>(),
+        shared::decimal_price(starting_capital.as<double>()), wait_secs.as<size_t>(),
         sandbox_secs.as<unsigned int>(),
         order_fee.IsDefined() ? order_fee.as<double>() : 0
     };
 }
 
-} // namespace config
-} // namespace nutc
+} // namespace nutc::exchange

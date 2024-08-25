@@ -8,8 +8,8 @@
 
 #include <filesystem>
 
-namespace nutc {
-namespace wrappers {
+namespace nutc::exchange {
+
 namespace bp = boost::process;
 namespace fs = std::filesystem;
 
@@ -24,7 +24,7 @@ class WrapperHandle {
     const fs::path& wrapper_binary_path();
 
 public:
-    /* Both constructors will block on an init messages, ensuring proper construction
+    /* Both constructors will block on an init shared, ensuring proper construction
      * There should *not* be a case (including errors in submitted code) where the
      * wrapper does not send an init_message. this MUST happen
      */
@@ -36,9 +36,9 @@ public:
     WrapperHandle(const std::string& algo_path);
 
     std::vector<PipeReader::IncomingMessageVariant>
-    read_messages()
+    read_shared()
     {
-        return reader_.get_messages();
+        return reader_.get_shared();
     }
 
     void
@@ -49,5 +49,4 @@ public:
 
     ~WrapperHandle();
 };
-} // namespace wrappers
-} // namespace nutc
+} // namespace nutc::exchange

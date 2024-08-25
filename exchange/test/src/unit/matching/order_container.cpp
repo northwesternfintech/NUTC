@@ -7,19 +7,19 @@
 
 // TODO: expiration tests
 
-using nutc::util::Side::buy;
-using nutc::util::Side::sell;
+using nutc::shared::Side::buy;
+using nutc::shared::Side::sell;
 
 class UnitOrderBookTest : public ::testing::Test {
 protected:
-    using TestTrader = nutc::test_utils::TestTrader;
+    using TestTrader = nutc::test::TestTrader;
     static constexpr const int DEFAULT_QUANTITY = 1000;
 
     TraderContainer traders;
 
-    nutc::traders::GenericTrader& trader_1 =
+    nutc::exchange::GenericTrader& trader_1 =
         *traders.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
-    nutc::traders::GenericTrader& trader_2 =
+    nutc::exchange::GenericTrader& trader_2 =
         *traders.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
 
     void
@@ -29,7 +29,7 @@ protected:
         trader_2.modify_holdings("ETH", DEFAULT_QUANTITY);
     }
 
-    nutc::matching::LimitOrderBook container_;
+    nutc::exchange::LimitOrderBook container_;
 };
 
 TEST_F(UnitOrderBookTest, TestStorageRounding)

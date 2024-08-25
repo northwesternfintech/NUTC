@@ -4,12 +4,7 @@
 
 #include <string>
 
-namespace nutc {
-/**
- * @brief Handles all communication with firebase
- */
-namespace curl {
-
+namespace nutc::exchange {
 std::string request_to_string(
     const std::string& method, const std::string& url, const std::string& data = ""
 );
@@ -30,5 +25,4 @@ glz::json_t request_to_json(
     const std::string& method, const std::string& url, const std::string& data = ""
 );
 
-} // namespace curl
-} // namespace nutc
+} // namespace nutc::exchange

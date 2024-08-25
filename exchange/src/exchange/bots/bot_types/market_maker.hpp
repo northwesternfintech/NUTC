@@ -7,13 +7,13 @@
 
 #include <random>
 
-namespace nutc::bots {
-using util::decimal_price;
+namespace nutc::exchange {
+using shared::decimal_price;
 
 /**
  * No thread safety - do not run functions on multiple threads
  */
-class MarketMakerBot : public traders::BotTrader {
+class MarketMakerBot : public BotTrader {
     // TODO: parameterize
     static float
     gen_aggressiveness()
@@ -26,7 +26,7 @@ class MarketMakerBot : public traders::BotTrader {
     float aggressiveness = gen_aggressiveness();
 
 public:
-    MarketMakerBot(util::Ticker ticker, double interest_limit) :
+    MarketMakerBot(shared::Ticker ticker, double interest_limit) :
         BotTrader(ticker, interest_limit)
     {}
 
@@ -42,7 +42,8 @@ public:
     decimal_price calculate_lean_percent(const shared_bot_state& state);
 
 private:
-    void place_orders(util::Side side, decimal_price theo, decimal_price spread_offset);
+    void
+    place_orders(shared::Side side, decimal_price theo, decimal_price spread_offset);
 };
 
-} // namespace nutc::bots
+} // namespace nutc::exchange

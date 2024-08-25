@@ -17,14 +17,14 @@
 #include <utility>
 
 namespace {
-using namespace nutc; // NOLINT
+using namespace nutc::exchange; // NOLINT
 
-matching::TickerMapping
-load_tickers(traders::TraderContainer& traders)
+TickerMapping
+load_tickers(TraderContainer& traders)
 {
-    matching::TickerMapping ret;
-    const auto& tickers = config::Config::get().get_tickers();
-    for (const config::ticker_config& ticker : tickers) {
+    TickerMapping ret;
+    const auto& tickers = Config::get().get_tickers();
+    for (const ticker_config& ticker : tickers) {
         ret.insert({
             ticker.TICKER, {traders, ticker}
         });
@@ -32,27 +32,27 @@ load_tickers(traders::TraderContainer& traders)
     return ret;
 }
 
-std::unique_ptr<matching::MatchingCycleInterface>
-create_cycle(traders::TraderContainer& traders, const auto& mode)
+std::unique_ptr<MatchingCycleInterface>
+create_cycle(TraderContainer& traders, const auto& mode)
 {
-    using util::Mode;
+    using nutc::shared::Mode;
     auto tickers = load_tickers(traders);
 
     switch (mode) {
         case Mode::normal:
-            return std::make_unique<matching::BaseMatchingCycle>(tickers, traders);
+            return std::make_unique<BaseMatchingCycle>(tickers, traders);
         case Mode::sandbox:
-            return std::make_unique<matching::SandboxMatchingCycle>(tickers, traders);
+            return std::make_unique<SandboxMatchingCycle>(tickers, traders);
         case Mode::bots_only:
         case Mode::dev:
-            return std::make_unique<matching::DevMatchingCycle>(tickers, traders);
+            return std::make_unique<DevMatchingCycle>(tickers, traders);
     }
 
     std::unreachable();
 }
 
 void
-main_event_loop(std::unique_ptr<matching::MatchingCycleInterface> cycle)
+main_event_loop(std::unique_ptr<MatchingCycleInterface> cycle)
 {
     uint64_t tick{};
     while (true) {
@@ -65,15 +65,13 @@ main_event_loop(std::unique_ptr<matching::MatchingCycleInterface> cycle)
 int
 main(int argc, const char** argv)
 {
-    logging::init(quill::LogLevel::Info);
+    nutc::logging::init(quill::LogLevel::Info);
     std::signal(SIGINT, [](auto) { std::exit(0); });
     std::signal(SIGPIPE, SIG_IGN);
 
-    auto mode = config::process_arguments(argc, argv);
-    traders::TraderContainer traders{};
-    algos::AlgoInitializer::get_algo_initializer(mode)->initialize_algo_management(
-        traders
-    );
+    auto mode = process_arguments(argc, argv);
+    TraderContainer traders{};
+    AlgoInitializer::get_algo_initializer(mode)->initialize_algo_management(traders);
 
     main_event_loop(create_cycle(traders, mode));
 

@@ -7,36 +7,32 @@
 #include "shared_bot_state.hpp"
 #include "variance.hpp"
 
-namespace nutc {
-
-namespace bots {
-
-using BotVector = std::vector<std::shared_ptr<traders::BotTrader>>;
-using traders::TraderContainer;
+namespace nutc::exchange {
 
 /**
  * @brief Container for bots for a given ticker
  */
 class BotContainer {
-    util::Ticker ticker;
-    stochastic::BrownianMotion theo_generator_;
+    using BotVector = std::vector<std::shared_ptr<BotTrader>>;
+    shared::Ticker ticker;
+    BrownianMotion theo_generator_;
     VarianceCalculator variance_calculator_;
 
     BotVector bots_{};
 
 public:
-    void generate_orders(util::decimal_price midprice);
+    void generate_orders(shared::decimal_price midprice);
 
     BotContainer(
-        util::Ticker ticker, util::decimal_price starting_price,
-        TraderContainer& trader_container, config::bot_config bots
+        shared::Ticker ticker, shared::decimal_price starting_price,
+        TraderContainer& trader_container, bot_config bots
     ) :
         ticker(ticker),
         theo_generator_(starting_price),
-        bots_(create_bots(trader_container, ticker, std::move(bots)))
+        bots_(create_bots(trader_container, ticker, bots))
     {}
 
-    util::decimal_price
+    shared::decimal_price
     get_theo() const
     {
         return theo_generator_.get_magnitude();
@@ -52,16 +48,14 @@ private:
     void generate_orders(const shared_bot_state& shared_state);
 
     static BotVector create_bots(
-        TraderContainer& traders, util::Ticker ticker,
-        const config::bot_config& bot_config
+        TraderContainer& traders, shared::Ticker ticker, const bot_config& bot_config
     );
 
     template <class BotType>
     static BotVector create_bots(
-        TraderContainer& trader_container, util::Ticker ticker,
-        util::decimal_price mean_capital, util::decimal_price stddev_capital,
+        TraderContainer& trader_container, shared::Ticker ticker,
+        shared::decimal_price mean_capital, shared::decimal_price stddev_capital,
         size_t num_bots
     );
 };
-} // namespace bots
-} // namespace nutc
+} // namespace nutc::exchange

@@ -3,11 +3,10 @@
 #include "exchange/algos/dev_mode/dev_mode.hpp"
 #include "exchange/logging.hpp"
 
-namespace nutc {
-namespace test {
-traders::GenericTrader&
+namespace nutc::test {
+exchange::GenericTrader&
 start_wrappers(
-    nutc::traders::TraderContainer& users, const std::string& filename,
+    nutc::exchange::TraderContainer& users, const std::string& filename,
     double starting_capital, size_t start_delay
 )
 {
@@ -18,14 +17,14 @@ start_wrappers(
     return ret[0];
 }
 
-std::vector<std::reference_wrapper<traders::GenericTrader>>
+std::vector<std::reference_wrapper<exchange::GenericTrader>>
 start_wrappers(
-    nutc::traders::TraderContainer& users,
+    nutc::exchange::TraderContainer& users,
     const std::vector<std::string>& algo_filenames, double starting_capital,
     size_t start_delay
 )
 {
-    using algos::DevModeAlgoInitializer;
+    using exchange::DevModeAlgoInitializer;
 
     std::vector<std::filesystem::path> algo_filepaths{};
     std::ranges::copy(algo_filenames, std::back_inserter(algo_filepaths));
@@ -37,5 +36,4 @@ start_wrappers(
 
     return {users.begin(), users.end()};
 }
-} // namespace test
-} // namespace nutc
+} // namespace nutc::test

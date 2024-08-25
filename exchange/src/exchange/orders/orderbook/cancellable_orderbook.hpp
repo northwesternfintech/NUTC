@@ -7,8 +7,7 @@
 
 #include <cstdint>
 
-namespace nutc {
-namespace matching {
+namespace nutc::exchange {
 
 template <typename BaseOrderBookT>
 class CancellableOrderBook : public BaseOrderBookT {
@@ -54,5 +53,4 @@ public:
     }
 };
 
-} // namespace matching
-} // namespace nutc
+} // namespace nutc::exchange

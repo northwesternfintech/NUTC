@@ -4,8 +4,8 @@
 
 #include <variant>
 
-namespace nutc {
-namespace matching {
+namespace nutc::exchange {
+
 void
 BaseMatchingCycle::before_cycle_(uint64_t)
 {
@@ -21,13 +21,13 @@ BaseMatchingCycle::collect_orders(uint64_t) -> std::vector<OrderVariant>
 {
     std::vector<OrderVariant> orders;
 
-    auto collect_orders = [&orders](traders::GenericTrader& trader) {
+    auto collect_orders = [&orders](GenericTrader& trader) {
         auto message_queue = trader.read_orders();
 
         auto get_tagged_order =
             [&trader]<typename OrderT>(const OrderT& order
             ) -> std::variant<tagged_limit_order, tagged_market_order> {
-            if constexpr (std::is_same_v<OrderT, messages::timed_init_message>) {
+            if constexpr (std::is_same_v<OrderT, shared::timed_init_message>) {
                 throw std::runtime_error("Unexpected initialization message");
             }
             else {
@@ -46,10 +46,10 @@ BaseMatchingCycle::collect_orders(uint64_t) -> std::vector<OrderVariant>
     return orders;
 }
 
-std::vector<messages::match>
+std::vector<shared::match>
 BaseMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
 {
-    std::vector<messages::match> matches;
+    std::vector<shared::match> matches;
 
     for (OrderVariant& order_variant : orders) {
         auto match_order = [&]<typename OrderT>(OrderT& order) {
@@ -71,9 +71,9 @@ BaseMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
 }
 
 void
-BaseMatchingCycle::handle_matches_(std::vector<messages::match> matches)
+BaseMatchingCycle::handle_matches_(std::vector<shared::match> matches)
 {
-    std::vector<util::position> ob_updates{};
+    std::vector<shared::position> ob_updates{};
 
     for (auto& [info, _, ticker] : tickers_) {
         auto tmp = info.limit_orderbook.get_update_generator().get_updates(ticker);
@@ -83,7 +83,7 @@ BaseMatchingCycle::handle_matches_(std::vector<messages::match> matches)
     if (ob_updates.empty() && matches.empty())
         return;
 
-    messages::tick_update updates{ob_updates, matches};
+    shared::tick_update updates{ob_updates, matches};
     auto update = glz::write_json(updates);
     if (!update.has_value()) [[unlikely]] {
         throw std::runtime_error(glz::format_error(update.error()));
@@ -91,9 +91,7 @@ BaseMatchingCycle::handle_matches_(std::vector<messages::match> matches)
 
     std::for_each(
         traders_.begin(), traders_.end(),
-        [&message = *update](traders::GenericTrader& trader) {
-            trader.send_message(message);
-        }
+        [&message = *update](GenericTrader& trader) { trader.send_message(message); }
     );
 }
 
@@ -105,5 +103,4 @@ BaseMatchingCycle::post_cycle_(uint64_t)
     }
 }
 
-} // namespace matching
-} // namespace nutc
+} // namespace nutc::exchange

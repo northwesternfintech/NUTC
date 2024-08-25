@@ -6,8 +6,8 @@
 
 #include <random>
 
-namespace nutc {
-namespace traders {
+namespace nutc::exchange {
+
 double
 BotTrader::generate_gaussian_noise(double mean, double stddev)
 {
@@ -19,12 +19,12 @@ BotTrader::generate_gaussian_noise(double mean, double stddev)
 }
 
 void
-BotTrader::notify_position_change(util::position order)
+BotTrader::notify_position_change(shared::position order)
 {
     assert(order.ticker == TICKER);
 
-    util::decimal_price total_cap = order.price * order.quantity;
-    if (order.side == util::Side::buy) {
+    shared::decimal_price total_cap = order.price * order.quantity;
+    if (order.side == shared::Side::buy) {
         modify_long_capital(total_cap);
         modify_open_bids(order.quantity);
     }
@@ -34,5 +34,4 @@ BotTrader::notify_position_change(util::position order)
     }
 }
 
-} // namespace traders
-} // namespace nutc
+} // namespace nutc::exchange

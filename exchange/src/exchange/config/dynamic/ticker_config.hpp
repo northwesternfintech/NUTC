@@ -5,23 +5,21 @@
 
 #include <vector>
 
-namespace nutc {
-namespace config {
+namespace nutc::exchange {
 
 enum class BotType { market_maker = 0, retail = 1 };
 
 struct bot_config {
     const BotType TYPE;
     const size_t NUM_BOTS;
-    const util::decimal_price AVERAGE_CAPITAL;
-    const util::decimal_price STD_DEV_CAPITAL;
+    const shared::decimal_price AVERAGE_CAPITAL;
+    const shared::decimal_price STD_DEV_CAPITAL;
 };
 
 struct ticker_config {
-    const util::Ticker TICKER;
-    const util::decimal_price STARTING_PRICE;
+    const shared::Ticker TICKER;
+    const shared::decimal_price STARTING_PRICE;
 
     const std::vector<bot_config> BOTS;
 };
-} // namespace config
-} // namespace nutc
+} // namespace nutc::exchange

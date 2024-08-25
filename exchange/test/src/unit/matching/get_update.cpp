@@ -9,22 +9,22 @@
 
 #include <algorithm>
 
-using nutc::matching::LevelTrackedOrderbook;
-using nutc::matching::LevelUpdateGenerator;
-using nutc::matching::LimitOrderBook;
-using nutc::util::Side::buy;
-using nutc::util::Side::sell;
+using nutc::exchange::LevelTrackedOrderbook;
+using nutc::exchange::LevelUpdateGenerator;
+using nutc::exchange::LimitOrderBook;
+using nutc::shared::Side::buy;
+using nutc::shared::Side::sell;
 
 class UnitGetUpdate : public ::testing::Test {
 protected:
-    using TestTrader = nutc::test_utils::TestTrader;
+    using TestTrader = nutc::test::TestTrader;
     TraderContainer traders;
 
-    nutc::traders::GenericTrader& trader1 =
+    nutc::exchange::GenericTrader& trader1 =
         *traders.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
-    nutc::traders::GenericTrader& trader2 =
+    nutc::exchange::GenericTrader& trader2 =
         *traders.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
-    nutc::traders::GenericTrader& trader3 =
+    nutc::exchange::GenericTrader& trader3 =
         *traders.add_trader<TestTrader>(std::string("GHI"), TEST_STARTING_CAPITAL);
 
     LevelTrackedOrderbook<LimitOrderBook> ob{};

@@ -6,8 +6,7 @@
 #include <optional>
 #include <string>
 
-namespace nutc {
-namespace firebase {
+namespace nutc::shared {
 
 // database request - change name
 glz::json_t firebase_request(
@@ -18,5 +17,4 @@ glz::json_t get_user_info(const std::string& uid);
 
 std::optional<std::string> get_algo(const std::string& uid, const std::string& algo_id);
 
-} // namespace firebase
-} // namespace nutc
+} // namespace nutc::shared

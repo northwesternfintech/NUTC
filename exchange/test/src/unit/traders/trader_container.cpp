@@ -16,17 +16,14 @@ struct control_block {
 
 class UnitTraderContainerTest : public ::testing::Test {
 protected:
-    traders::TraderContainer traders;
+    exchange::TraderContainer traders;
 };
 
 TEST_F(UnitTraderContainerTest, PointersUseSharedMemory)
 {
-    auto trader1 =
-        traders.add_trader<test_utils::TestTrader>("ABC", TEST_STARTING_CAPITAL);
-    auto trader2 =
-        traders.add_trader<test_utils::TestTrader>("DEF", TEST_STARTING_CAPITAL);
-    auto trader3 =
-        traders.add_trader<test_utils::TestTrader>("GHI", TEST_STARTING_CAPITAL);
+    auto trader1 = traders.add_trader<test::TestTrader>("ABC", TEST_STARTING_CAPITAL);
+    auto trader2 = traders.add_trader<test::TestTrader>("DEF", TEST_STARTING_CAPITAL);
+    auto trader3 = traders.add_trader<test::TestTrader>("GHI", TEST_STARTING_CAPITAL);
 
 #ifdef __linux__
     std::ptrdiff_t distance1 =
@@ -41,7 +38,7 @@ TEST_F(UnitTraderContainerTest, PointersUseSharedMemory)
 #endif
 
     static constexpr auto EXPECTED_SIZE =
-        sizeof(test_utils::TestTrader) + sizeof(control_block);
+        sizeof(test::TestTrader) + sizeof(control_block);
     EXPECT_LE(distance1, EXPECTED_SIZE);
     EXPECT_LE(distance2, EXPECTED_SIZE);
 }

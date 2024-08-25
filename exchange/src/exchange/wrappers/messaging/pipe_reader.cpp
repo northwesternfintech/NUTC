@@ -6,8 +6,7 @@
 #include <boost/asio.hpp>
 #include <glaze/glaze.hpp>
 
-namespace nutc {
-namespace wrappers {
+namespace nutc::exchange {
 
 void
 PipeReader::async_read_pipe()
@@ -43,7 +42,7 @@ PipeReader::store_message_(const std::string& message)
     }
 
     auto store_message = [this]<typename MessageT>(const MessageT& v) {
-        messages.push_back(timestamped_message<MessageT>{v});
+        shared.push_back(timestamped_message<MessageT>{v});
     };
 
     std::lock_guard<std::mutex> lock{message_lock_};
@@ -70,5 +69,4 @@ PipeReader::async_read_pipe(std::shared_ptr<std::string> buffer)
     ba::async_read_until(pipe_in_, ba::dynamic_buffer(*buffer), "\n", prox_message);
 }
 
-} // namespace wrappers
-} // namespace nutc
+} // namespace nutc::exchange

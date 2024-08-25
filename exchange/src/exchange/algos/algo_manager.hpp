@@ -4,19 +4,18 @@
 #include "shared/types/decimal_price.hpp"
 #include "shared/util.hpp"
 
-namespace nutc {
-namespace algos {
+namespace nutc::exchange {
 
 class AlgoInitializer {
     virtual void initialize_files() = 0;
     virtual void initialize_trader_container(
-        traders::TraderContainer& manager, util::decimal_price start_cap
+        TraderContainer& manager, shared::decimal_price start_cap
     ) const = 0;
 
 public:
-    void initialize_algo_management(traders::TraderContainer& trader_container);
+    void initialize_algo_management(TraderContainer& trader_container);
 
-    static std::unique_ptr<AlgoInitializer> get_algo_initializer(util::Mode mode);
+    static std::unique_ptr<AlgoInitializer> get_algo_initializer(shared::Mode mode);
 
     virtual ~AlgoInitializer() = default;
     AlgoInitializer() = default;
@@ -26,5 +25,4 @@ public:
     AlgoInitializer& operator=(AlgoInitializer&&) = delete;
 };
 
-} // namespace algos
-} // namespace nutc
+} // namespace nutc::exchange

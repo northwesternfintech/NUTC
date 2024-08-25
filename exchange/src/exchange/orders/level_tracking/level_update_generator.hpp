@@ -5,21 +5,20 @@
 
 #include <unordered_set>
 
-namespace nutc {
-namespace matching {
+namespace nutc::exchange {
 
 class LevelUpdateGenerator {
     LevelQuantityTracker quantity_tracker_;
 
-    std::unordered_set<util::decimal_price> modified_buy_levels_;
-    std::unordered_set<util::decimal_price> modified_sell_levels_;
+    std::unordered_set<shared::decimal_price> modified_buy_levels_;
+    std::unordered_set<shared::decimal_price> modified_sell_levels_;
 
 public:
     void record_level_change(
-        util::Side side, double quantity_delta, util::decimal_price price
+        shared::Side side, double quantity_delta, shared::decimal_price price
     );
 
-    std::vector<util::position> get_updates(util::Ticker ticker) const;
+    std::vector<shared::position> get_updates(shared::Ticker ticker) const;
 
     void
     reset()
@@ -28,5 +27,4 @@ public:
         modified_sell_levels_.clear();
     }
 };
-} // namespace matching
-} // namespace nutc
+} // namespace nutc::exchange

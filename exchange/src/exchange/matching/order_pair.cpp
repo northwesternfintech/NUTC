@@ -2,10 +2,10 @@
 
 #include "exchange/orders/storage/order_storage.hpp"
 
-namespace nutc::matching {
+namespace nutc::exchange {
 template <TaggedOrder BuyerT, TaggedOrder SellerT>
 requires HasLimitOrder<BuyerT, SellerT>
-std::optional<util::decimal_price>
+std::optional<shared::decimal_price>
 OrderPair<BuyerT, SellerT>::potential_match_price() const
 {
     if constexpr (is_market_order_v<BuyerT>)
@@ -22,7 +22,7 @@ template <TaggedOrder BuyerT, TaggedOrder SellerT>
 requires HasLimitOrder<BuyerT, SellerT>
 void
 OrderPair<BuyerT, SellerT>::handle_match(
-    const messages::match& match, util::decimal_price order_fee,
+    const shared::match& match, shared::decimal_price order_fee,
     LimitOrderBook& orderbook
 )
 {
@@ -40,16 +40,16 @@ OrderPair<BuyerT, SellerT>::handle_match(
         buyer.active = false;
     }
     buyer.trader->notify_match(
-        {match.position.ticker, util::Side::buy, match.position.quantity,
-         match.position.price * (util::decimal_price{1.0} + order_fee)}
+        {match.position.ticker, shared::Side::buy, match.position.quantity,
+         match.position.price * (shared::decimal_price{1.0} + order_fee)}
     );
     seller.trader->notify_match(
-        {match.position.ticker, util::Side::sell, match.position.quantity,
-         match.position.price * (util::decimal_price{1.0} - order_fee)}
+        {match.position.ticker, shared::Side::sell, match.position.quantity,
+         match.position.price * (shared::decimal_price{1.0} - order_fee)}
     );
 }
 
 template class OrderPair<tagged_limit_order, tagged_limit_order>;
 template class OrderPair<tagged_limit_order, tagged_market_order>;
 template class OrderPair<tagged_market_order, tagged_limit_order>;
-} // namespace nutc::matching
+} // namespace nutc::exchange

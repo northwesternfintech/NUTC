@@ -3,37 +3,34 @@
 #include "exchange/wrappers/handle/wrapper_handle.hpp"
 #include "generic_trader.hpp"
 #include "shared/file_operations/file_operations.hpp"
-#include "shared/messages_wrapper_to_exchange.hpp"
 #include "shared/types/decimal_price.hpp"
 
 #include <fmt/format.h>
 
-namespace nutc {
-namespace traders {
+namespace nutc::exchange {
 
 class AlgoTrader : public GenericTrader {
     const std::string DISPLAY_NAME;
     const std::string ALGO_ID;
-    std::optional<wrappers::WrapperHandle> wrapper_handle_;
+    std::optional<WrapperHandle> wrapper_handle_;
 
 public:
     // Remote (firebase)
     explicit AlgoTrader(
         std::string remote_uid, std::string algo_id, std::string full_name,
-        util::decimal_price capital
+        shared::decimal_price capital
     ) :
-        GenericTrader(util::trader_id(remote_uid, algo_id), capital),
+        GenericTrader(shared::trader_id(remote_uid, algo_id), capital),
         DISPLAY_NAME(std::move(full_name)), ALGO_ID(algo_id),
-        wrapper_handle_(std::make_optional<wrappers::WrapperHandle>(remote_uid, algo_id)
-        )
+        wrapper_handle_(std::make_optional<WrapperHandle>(remote_uid, algo_id))
     {}
 
     // Local (algo .py on disk)
-    explicit AlgoTrader(std::string algo_path, util::decimal_price capital) :
+    explicit AlgoTrader(std::string algo_path, shared::decimal_price capital) :
         GenericTrader(algo_path, capital), DISPLAY_NAME(algo_path), ALGO_ID(algo_path),
-        wrapper_handle_(std::make_optional<wrappers::WrapperHandle>(algo_path))
+        wrapper_handle_(std::make_optional<WrapperHandle>(algo_path))
     {
-        if (!file_ops::file_exists(ALGO_ID)) [[unlikely]] {
+        if (!shared::file_exists(ALGO_ID)) [[unlikely]] {
             std::string err_str =
                 fmt::format("Unable to find local algorithm file: {}", algo_path);
             throw std::runtime_error(err_str);
@@ -78,13 +75,12 @@ public:
         if (!wrapper_handle_.has_value()) [[unlikely]]
             return {};
 
-        return wrapper_handle_->read_messages();
+        return wrapper_handle_->read_shared();
     }
 
     void
-    notify_position_change(util::position) final
+    notify_position_change(shared::position) final
     {}
 };
 
-} // namespace traders
-} // namespace nutc
+} // namespace nutc::exchange

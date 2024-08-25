@@ -8,43 +8,42 @@
 
 #include <string>
 
-namespace nutc {
+namespace nutc::wrapper {
 
-namespace messaging {
-using namespace nutc::messages;
+using namespace nutc::shared;
 
 class ExchangeCommunicator {
-    rate_limiter::RateLimiter limiter{};
+    RateLimiter limiter{};
     const std::string TRADER_ID;
-    pywrapper::OrderBookUpdateFunction on_orderbook_update;
-    pywrapper::TradeUpdateFunction on_trade_update;
-    pywrapper::AccountUpdateFunction on_account_update;
+    OrderBookUpdateFunction on_orderbook_update;
+    TradeUpdateFunction on_trade_update;
+    AccountUpdateFunction on_account_update;
 
 public:
     ExchangeCommunicator(
-        std::string trader_id, pywrapper::OrderBookUpdateFunction ob_update,
-        pywrapper::TradeUpdateFunction trade_update,
-        pywrapper::AccountUpdateFunction account_update
+        std::string trader_id, OrderBookUpdateFunction ob_update,
+        TradeUpdateFunction trade_update, AccountUpdateFunction account_update
     ) :
         TRADER_ID(std::move(trader_id)),
-        on_orderbook_update{ob_update}, on_trade_update{trade_update},
-        on_account_update{account_update}
+        on_orderbook_update{std::move(ob_update)},
+        on_trade_update{std::move(trade_update)},
+        on_account_update{std::move(account_update)}
     {}
 
     bool report_startup_complete();
 
-    pywrapper::LimitOrderFunction place_limit_order();
+    LimitOrderFunction place_limit_order();
 
-    pywrapper::MarketOrderFunction place_market_order();
+    MarketOrderFunction place_market_order();
 
     void wait_for_start_time();
 
     void main_event_loop();
 
-    messages::algorithm_content consume_algorithm();
+    shared::algorithm_content consume_algorithm();
 
 private:
-    void handle_orderbook_update(const util::position& update);
+    void handle_orderbook_update(const shared::position& update);
     void handle_match(const match& match);
 
     template <typename T>
@@ -60,5 +59,4 @@ private:
     T consume_message();
 };
 
-} // namespace messaging
-} // namespace nutc
+} // namespace nutc::wrapper

@@ -22,12 +22,10 @@ catch_sigint(int)
 int
 main(int argc, const char** argv)
 {
-    using namespace nutc::messaging;
-    using namespace nutc::pywrapper;
-    using namespace nutc::system;
+    using namespace nutc::wrapper;
 
     std::signal(SIGINT, catch_sigint);
-    auto [verbosity, trader_id] = nutc::config::process_arguments(argc, argv);
+    auto [verbosity, trader_id] = process_arguments(argc, argv);
     pybind11::scoped_interpreter guard{};
 
     ExchangeCommunicator communicator{
@@ -50,10 +48,10 @@ main(int argc, const char** argv)
     communicator.report_startup_complete();
     communicator.wait_for_start_time();
 
-    nutc::pywrapper::create_api_module(
+    create_api_module(
         communicator.place_limit_order(), communicator.place_market_order()
     );
-    nutc::pywrapper::run_initialization_code(algorithm.algorithm_content_str);
+    run_initialization_code(algorithm.algorithm_content_str);
 
     communicator.main_event_loop();
     return 0;
