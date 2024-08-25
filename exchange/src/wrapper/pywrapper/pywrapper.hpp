@@ -2,19 +2,15 @@
 
 #include "shared/types/decimal_price.hpp"
 #include "shared/types/position.hpp"
-#include "shared/types/ticker.hpp"
-#include "shared/util.hpp"
 
-namespace nutc::pywrapper {
-using util::decimal_price;
-using util::Side;
-using util::Ticker;
+namespace nutc::wrapper {
 
 using OrderBookUpdateFunction =
-    std::function<void(const util::position& position_change)>;
-using TradeUpdateFunction = std::function<void(const util::position& position_change)>;
+    std::function<void(const shared::position& position_change)>;
+using TradeUpdateFunction =
+    std::function<void(const shared::position& position_change)>;
 using AccountUpdateFunction = std::function<
-    void(const util::position& position_change, util::decimal_price held_capital)>;
+    void(const shared::position& position_change, shared::decimal_price held_capital)>;
 
 OrderBookUpdateFunction ob_update_function();
 
@@ -34,4 +30,4 @@ void create_api_module(
 );
 
 void run_initialization_code(const std::string& py_code);
-} // namespace nutc::pywrapper
+} // namespace nutc::wrapper

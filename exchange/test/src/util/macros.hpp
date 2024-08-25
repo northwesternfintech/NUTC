@@ -5,41 +5,39 @@
 #include "shared/messages_wrapper_to_exchange.hpp"
 #include "shared/types/ticker.hpp"
 
-using Engine = nutc::matching::Engine;
-using limit_order = nutc::messages::limit_order;
-using tagged_limit_order = nutc::matching::tagged_limit_order;
-using TraderContainer = nutc::traders::TraderContainer;
+using Engine = nutc::exchange::Engine;
+using limit_order = nutc::shared::limit_order;
+using tagged_limit_order = nutc::exchange::tagged_limit_order;
+using TraderContainer = nutc::exchange::TraderContainer;
 
-namespace nutc {
-namespace test_utils {
+namespace nutc::test {
 
 bool is_nearly_equal(double f_a, double f_b);
 
 bool validate_match(
-    const nutc::messages::match& match, util::Ticker ticker,
-    const std::string& buyer_id, const std::string& seller_id, util::Side side,
+    const nutc::shared::match& match, shared::Ticker ticker,
+    const std::string& buyer_id, const std::string& seller_id, shared::Side side,
     double quantity, double price
 );
 
 bool validate_ob_update(
-    const util::position& update, util::Ticker ticker, util::Side side, double quantity,
-    double price
+    const shared::position& update, shared::Ticker ticker, shared::Side side,
+    double quantity, double price
 );
 
 bool validate_limit_order(
-    const limit_order& update, util::Ticker ticker, util::Side side, double quantity,
-    double price
+    const limit_order& update, shared::Ticker ticker, shared::Side side,
+    double quantity, double price
 );
 
-} // namespace test_utils
-} // namespace nutc
+} // namespace nutc::test
 
 #define ASSERT_EQ_MATCH(/* NOLINT(cppcoreguidelines-macro-usage) */                    \
                         match, ticker_, buyer_id_, seller_id_, side_, quantity_,       \
                         price_                                                         \
 )                                                                                      \
     do {                                                                               \
-        bool isMatchValid = nutc::test_utils::validate_match(                          \
+        bool isMatchValid = nutc::test::validate_match(                                \
             (match), (ticker_), (buyer_id_), (seller_id_), (side_), (quantity_),       \
             (price_)                                                                   \
         );                                                                             \
@@ -60,7 +58,7 @@ bool validate_limit_order(
                             update, ticker_, side_, quantity_, price_                  \
 )                                                                                      \
     do {                                                                               \
-        bool isUpdateValid = nutc::test_utils::validate_ob_update(                     \
+        bool isUpdateValid = nutc::test::validate_ob_update(                           \
             (update), (ticker_), (side_), (quantity_), (price_)                        \
         );                                                                             \
         EXPECT_TRUE(isUpdateValid)                                                     \
@@ -77,7 +75,7 @@ bool validate_limit_order(
                               update, ticker_, side_, quantity_, price_                \
 )                                                                                      \
     do {                                                                               \
-        bool isUpdateValid = nutc::test_utils::validate_limit_order(                   \
+        bool isUpdateValid = nutc::test::validate_limit_order(                         \
             (update), (ticker_), (side_), (quantity_), (price_)                        \
         );                                                                             \
         EXPECT_TRUE(isUpdateValid)                                                     \

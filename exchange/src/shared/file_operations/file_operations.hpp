@@ -2,8 +2,7 @@
 
 #include <string>
 
-namespace nutc {
-namespace file_ops {
+namespace nutc::shared {
 
 bool file_exists(const std::string& filename) noexcept;
 
@@ -13,5 +12,4 @@ std::string read_file_content(const std::string& filename);
 
 void print_file_contents(const std::string& filepath);
 
-} // namespace file_ops
-} // namespace nutc
+} // namespace nutc::shared

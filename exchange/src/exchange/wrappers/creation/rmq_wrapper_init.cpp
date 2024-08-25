@@ -2,8 +2,7 @@
 
 #include "shared/messages_exchange_to_wrapper.hpp"
 
-namespace nutc {
-namespace rabbitmq {
+namespace nutc::exchange {
 
 int64_t
 get_start_time(size_t wait_seconds)
@@ -16,14 +15,13 @@ get_start_time(size_t wait_seconds)
 }
 
 void
-send_start_time(traders::GenericTrader& trader, int64_t start_time)
+send_start_time(GenericTrader& trader, int64_t start_time)
 {
-    static auto mess = glz::write_json(messages::start_time{start_time});
+    static auto mess = glz::write_json(shared::start_time{start_time});
     if (!mess.has_value()) [[unlikely]]
         throw std::runtime_error(glz::format_error(mess.error()));
 
     trader.send_message(*mess);
 }
 
-} // namespace rabbitmq
-} // namespace nutc
+} // namespace nutc::exchange

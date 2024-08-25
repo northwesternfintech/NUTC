@@ -5,11 +5,10 @@
 
 #include <fmt/format.h>
 
-namespace nutc {
-namespace test_utils {
+namespace nutc::test {
 
 // Basically a generic trader but
-class TestTrader final : public traders::GenericTrader {
+class TestTrader final : public exchange::GenericTrader {
     IncomingMessageQueue pending_orders_;
 
 public:
@@ -28,7 +27,7 @@ public:
     {}
 
     virtual void
-    notify_position_change(util::position) final
+    notify_position_change(shared::position) final
     {}
 
     IncomingMessageQueue
@@ -40,15 +39,15 @@ public:
     }
 
     void
-    add_order(messages::limit_order order)
+    add_order(shared::limit_order order)
     {
-        pending_orders_.push_back(messages::timed_limit_order{order});
+        pending_orders_.push_back(shared::timed_limit_order{order});
     }
 
     void
-    add_order(messages::market_order order)
+    add_order(shared::market_order order)
     {
-        pending_orders_.push_back(messages::timed_market_order{order});
+        pending_orders_.push_back(shared::timed_market_order{order});
     }
 
     const std::string&
@@ -59,5 +58,4 @@ public:
     }
 };
 
-} // namespace test_utils
-} // namespace nutc
+} // namespace nutc::test

@@ -4,8 +4,7 @@
 
 #include <fmt/format.h>
 
-namespace nutc {
-namespace util {
+namespace nutc::shared {
 std::string
 get_firebase_endpoint(const std::string& params)
 {
@@ -28,5 +27,4 @@ trader_id(const std::string& user_id, const std::string& algo_id)
     return fmt::format("{}-{}", user_id, algo_id);
 }
 
-} // namespace util
-} // namespace nutc
+} // namespace nutc::shared

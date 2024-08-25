@@ -3,8 +3,8 @@
 #include <prometheus/exposer.h>
 #include <prometheus/registry.h>
 
-namespace nutc {
-namespace metrics {
+namespace nutc::exchange {
+
 namespace ps = prometheus;
 
 class Prometheus {
@@ -35,5 +35,4 @@ public:
     }
 };
 
-} // namespace metrics
-} // namespace nutc
+} // namespace nutc::exchange

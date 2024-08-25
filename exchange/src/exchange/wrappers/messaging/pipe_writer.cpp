@@ -3,8 +3,7 @@
 #include "async_pipe_runner.hpp"
 #include "exchange/config/static/config.hpp"
 
-namespace nutc {
-namespace wrappers {
+namespace nutc::exchange {
 
 PipeWriter::PipeWriter() :
     pipe_context_(AsyncPipeRunner::get_context()), pipe_out_(*pipe_context_)
@@ -20,17 +19,17 @@ void
 PipeWriter::send_message(const std::string& message)
 {
     std::lock_guard<std::mutex> lock{message_lock_};
-    queued_messages_.push_back(message);
-    if (queued_messages_.size() > MAX_OUTGOING_MQ_SIZE) [[unlikely]] {
-        queued_messages_.pop_front();
+    queued_shared_.push_back(message);
+    if (queued_shared_.size() > MAX_OUTGOING_MQ_SIZE) [[unlikely]] {
+        queued_shared_.pop_front();
     }
 
-    // It will enqueue these messages anyway
+    // It will enqueue these shared anyway
     if (is_writing_.test_and_set(std::memory_order_acquire)) {
         return;
     }
-    auto to_send = queued_messages_.front();
-    queued_messages_.pop_front();
+    auto to_send = queued_shared_.front();
+    queued_shared_.pop_front();
     async_write_pipe(to_send + "\n");
 }
 
@@ -43,13 +42,13 @@ PipeWriter::async_write_pipe(std::string message)
         [this, buf](boost::system::error_code ec, std::size_t) {
             if (!ec) [[likely]] {
                 std::lock_guard<std::mutex> lock{message_lock_};
-                if (queued_messages_.empty()) {
+                if (queued_shared_.empty()) {
                     is_writing_.clear(std::memory_order_release);
                     return;
                 }
 
-                std::string to_write = queued_messages_.front();
-                queued_messages_.pop_front();
+                std::string to_write = queued_shared_.front();
+                queued_shared_.pop_front();
                 async_write_pipe(to_write + "\n");
             }
             else {
@@ -59,5 +58,4 @@ PipeWriter::async_write_pipe(std::string message)
         }
     );
 }
-} // namespace wrappers
-} // namespace nutc
+} // namespace nutc::exchange

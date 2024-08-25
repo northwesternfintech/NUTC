@@ -8,8 +8,8 @@
 #include <mutex>
 #include <thread>
 
-namespace nutc {
-namespace sandbox {
+namespace nutc::exchange {
+
 namespace ba = boost::asio;
 using lock_guard = std::lock_guard<std::mutex>;
 
@@ -23,10 +23,10 @@ class CrowServer {
     std::vector<ba::steady_timer> timers_{};
 
     mutable std::mutex trader_lock;
-    std::vector<std::shared_ptr<traders::AlgoTrader>> traders_to_add;
+    std::vector<std::shared_ptr<AlgoTrader>> traders_to_add;
 
 public:
-    std::vector<std::shared_ptr<traders::AlgoTrader>>
+    std::vector<std::shared_ptr<AlgoTrader>>
     get_and_clear_pending_traders()
     {
         lock_guard guard{trader_lock};
@@ -49,10 +49,8 @@ public:
 
 private:
     void add_pending_trader(const std::string user_id, const std::string algo_id);
-    void start_remove_timer_(
-        unsigned int time_ms, std::weak_ptr<traders::GenericTrader> trader_ptr
-    );
+    void
+    start_remove_timer_(unsigned int time_ms, std::weak_ptr<GenericTrader> trader_ptr);
 };
 
-} // namespace sandbox
-} // namespace nutc
+} // namespace nutc::exchange

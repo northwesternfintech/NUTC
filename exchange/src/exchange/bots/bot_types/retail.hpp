@@ -6,15 +6,13 @@
 
 #include <random>
 
-namespace nutc {
+namespace nutc::exchange {
 
-namespace bots {
-
-class RetailBot : public traders::BotTrader {
+class RetailBot : public BotTrader {
     std::mt19937 gen_{}; // NOLINT
     std::poisson_distribution<> poisson_dist_{};
 
-    util::decimal_price
+    shared::decimal_price
     generate_aggresiveness_()
     {
         static std::normal_distribution<> dist{1000, 2000};
@@ -22,7 +20,7 @@ class RetailBot : public traders::BotTrader {
     }
 
 public:
-    RetailBot(util::Ticker ticker, util::decimal_price interest_limit) :
+    RetailBot(shared::Ticker ticker, shared::decimal_price interest_limit) :
         BotTrader(ticker, interest_limit), AGGRESSIVENESS(generate_aggresiveness_())
     {}
 
@@ -36,9 +34,7 @@ public:
     }
 
 private:
-    const util::decimal_price AGGRESSIVENESS;
+    const shared::decimal_price AGGRESSIVENESS;
 };
 
-} // namespace bots
-
-} // namespace nutc
+} // namespace nutc::exchange

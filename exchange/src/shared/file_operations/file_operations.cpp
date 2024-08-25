@@ -11,8 +11,7 @@
 #include <sstream>
 
 // Low level file operations. Decoupled from functionality of exchange
-namespace nutc {
-namespace file_ops {
+namespace nutc::shared {
 
 void
 print_file_contents(const std::string& filepath)
@@ -64,5 +63,4 @@ read_file_content(const std::string& filename)
     return buffer.str();
 }
 
-} // namespace file_ops
-} // namespace nutc
+} // namespace nutc::shared

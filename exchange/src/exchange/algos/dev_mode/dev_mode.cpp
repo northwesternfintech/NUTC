@@ -8,20 +8,19 @@
 #include <iostream>
 #include <stdexcept>
 
-namespace nutc {
-namespace algos {
+namespace nutc::exchange {
 
 void
 DevModeAlgoInitializer::initialize_trader_container(
-    traders::TraderContainer& traders, util::decimal_price start_capital
+    TraderContainer& traders, shared::decimal_price start_capital
 ) const
 {
     for (const fs::path& filepath : algo_filepaths_)
-        traders.add_trader<traders::AlgoTrader>(filepath, start_capital);
+        traders.add_trader<AlgoTrader>(filepath, start_capital);
 
-    int64_t start_time = rabbitmq::get_start_time(WAIT_SECS);
+    int64_t start_time = get_start_time(WAIT_SECS);
     std::for_each(traders.begin(), traders.end(), [start_time](auto& trader) {
-        rabbitmq::send_start_time(trader, start_time);
+        send_start_time(trader, start_time);
     });
 }
 
@@ -36,9 +35,9 @@ DevModeAlgoInitializer::initialize_files()
         algo_filepaths_.emplace_back(relative_path);
     }
 
-    std::string content = file_ops::read_file_content("template.py");
+    std::string content = shared::read_file_content("template.py");
 
-    if (!file_ops::create_directory(ALGO_DIR))
+    if (!shared::create_directory(ALGO_DIR))
         throw std::runtime_error("Failed to create directory");
 
     for (const fs::path& path : algo_filepaths_) {
@@ -55,5 +54,4 @@ DevModeAlgoInitializer::initialize_files()
     }
 }
 
-} // namespace algos
-} // namespace nutc
+} // namespace nutc::exchange

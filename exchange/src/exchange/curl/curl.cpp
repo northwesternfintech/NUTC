@@ -3,8 +3,7 @@
 #include <curl/curl.h>
 #include <fmt/format.h>
 
-namespace nutc {
-namespace curl {
+namespace nutc::exchange {
 
 namespace {
 size_t
@@ -115,5 +114,4 @@ request_to_json(
     }
     return json;
 }
-} // namespace curl
-} // namespace nutc
+} // namespace nutc::exchange

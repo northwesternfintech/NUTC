@@ -2,8 +2,7 @@
 
 #include "shared/config/config.h"
 
-namespace nutc {
-namespace config {
+namespace nutc::exchange {
 
 mode
 process_arguments(int argc, const char** argv)
@@ -60,5 +59,4 @@ process_arguments(int argc, const char** argv)
     return mode::normal;
 }
 
-} // namespace config
-} // namespace nutc
+} // namespace nutc::exchange

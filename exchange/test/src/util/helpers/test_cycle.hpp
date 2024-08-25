@@ -7,20 +7,19 @@
 
 #include <string>
 
-std::string mo_to_string(const nutc::messages::limit_order& order);
+std::string mo_to_string(const nutc::shared::limit_order& order);
 
-namespace nutc {
-namespace test {
+namespace nutc::test {
 
-class TestMatchingCycle : public matching::BaseMatchingCycle {
+class TestMatchingCycle : public exchange::BaseMatchingCycle {
 public:
     std::optional<OrderVariant> last_order;
 
     TestMatchingCycle(
-        std::vector<std::string> ticker_names, traders::TraderContainer& traders,
+        std::vector<std::string> ticker_names, exchange::TraderContainer& traders,
         double order_fee = 0.0
     ) :
-        matching::BaseMatchingCycle{create_tickers(ticker_names, order_fee), traders}
+        exchange::BaseMatchingCycle{create_tickers(ticker_names, order_fee), traders}
     {}
 
     // Note: uses tick=0. If using something that relies on tick, it will not work
@@ -43,12 +42,11 @@ public:
     }
 
 private:
-    virtual std::vector<messages::match> match_orders_(std::vector<OrderVariant> orders
+    virtual std::vector<shared::match> match_orders_(std::vector<OrderVariant> orders
     ) override;
 
-    matching::TickerMapping
+    exchange::TickerMapping
     create_tickers(const std::vector<std::string>& ticker_names, double order_fee);
 };
 
-} // namespace test
-} // namespace nutc
+} // namespace nutc::test

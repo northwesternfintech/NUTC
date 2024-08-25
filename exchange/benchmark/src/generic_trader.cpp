@@ -7,7 +7,7 @@ using namespace nutc;
 static void
 BM_ModifyHoldings(benchmark::State& state)
 {
-    bench_utils::BenchmarkTrader trader;
+    benchmarks::BenchmarkTrader trader;
     uint32_t adds = static_cast<uint32_t>(state.range(0));
 
     for (auto _ : state) {

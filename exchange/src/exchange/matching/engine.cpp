@@ -3,10 +3,9 @@
 #include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/util.hpp"
 
-namespace nutc {
-namespace matching {
+namespace nutc::exchange {
 
-using match = nutc::messages::match;
+using match = nutc::shared::match;
 
 template <TaggedOrder OrderT>
 std::vector<match>
@@ -23,7 +22,7 @@ Engine::match_order(OrderT order, LimitOrderBook& orderbook)
     }
 
     if constexpr (is_limit_order_v<OrderT>) {
-        if (!order.ioc && !util::is_close_to_zero(order.quantity)) {
+        if (!order.ioc && !shared::is_close_to_zero(order.quantity)) {
             orderbook.add_order(order);
         }
     }
@@ -31,7 +30,7 @@ Engine::match_order(OrderT order, LimitOrderBook& orderbook)
     return matches;
 }
 
-template <util::Side AggressiveSide, typename OrderPairT>
+template <shared::Side AggressiveSide, typename OrderPairT>
 glz::expected<match, bool>
 Engine::match_orders_(OrderPairT& orders, LimitOrderBook& orderbook)
 {
@@ -55,7 +54,7 @@ Engine::match_orders_(OrderPairT& orders, LimitOrderBook& orderbook)
     return glz::unexpected(true);
 }
 
-template <util::Side AggressiveSide, TaggedOrder OrderT>
+template <shared::Side AggressiveSide, TaggedOrder OrderT>
 glz::expected<match, bool>
 Engine::match_incoming_order_(
     OrderT& aggressive_order, tagged_limit_order& passive_order,
@@ -72,7 +71,7 @@ Engine::match_incoming_order_(
     }
 }
 
-util::decimal_price
+shared::decimal_price
 Engine::total_order_cost_(decimal_price price, double quantity) const
 {
     decimal_price fee{order_fee_ * price};
@@ -80,7 +79,7 @@ Engine::total_order_cost_(decimal_price price, double quantity) const
     return price_per * quantity;
 }
 
-template <util::Side AggressiveSide, typename OrderPairT>
+template <shared::Side AggressiveSide, typename OrderPairT>
 glz::expected<match, Engine::MatchFailure>
 Engine::attempt_match_(OrderPairT& orders)
 {
@@ -127,5 +126,4 @@ template std::vector<match> Engine::match_order<>(tagged_limit_order, LimitOrder
 
 template std::vector<match> Engine::match_order<>(tagged_market_order, LimitOrderBook&);
 
-} // namespace matching
-} // namespace nutc
+} // namespace nutc::exchange

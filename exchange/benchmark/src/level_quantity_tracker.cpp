@@ -11,18 +11,18 @@ using namespace nutc;
 static void
 BM_AddRangeOfTimes(benchmark::State& state)
 {
-    matching::LevelQuantityTracker tracker;
+    exchange::LevelQuantityTracker tracker;
     uint16_t max_level = static_cast<uint16_t>(state.range(0));
-    util::decimal_price decimal_price;
+    shared::decimal_price decimal_price;
 
     for (auto _ : state) {
         for (uint16_t level = 0; level < max_level; level++) {
             decimal_price.price = level;
-            tracker.report_quantity(util::Side::sell, level, decimal_price);
+            tracker.report_quantity(shared::Side::sell, level, decimal_price);
         }
         for (uint16_t level = 0; level < max_level; level++) {
             decimal_price.price = level;
-            benchmark::DoNotOptimize(tracker.get_level(util::Side::sell, decimal_price)
+            benchmark::DoNotOptimize(tracker.get_level(shared::Side::sell, decimal_price)
             );
         }
     }
@@ -33,7 +33,7 @@ BENCHMARK(BM_AddRangeOfTimes)->Range(128, 128 << 9);
 static void
 BM_RandomIterate(benchmark::State& state)
 {
-    matching::LevelQuantityTracker tracker;
+    exchange::LevelQuantityTracker tracker;
     uint32_t max_level = static_cast<uint32_t>(state.range(0));
 
     std::vector<uint16_t> random_levels(max_level);
@@ -45,15 +45,15 @@ BM_RandomIterate(benchmark::State& state)
     std::shuffle(random_levels.begin(), random_levels.end(), g);
     std::shuffle(random_levels_2.begin(), random_levels_2.end(), g);
 
-    util::decimal_price decimal_price;
+    shared::decimal_price decimal_price;
     for (auto _ : state) {
         for (uint16_t level : random_levels) {
             decimal_price.price = level;
-            tracker.report_quantity(util::Side::sell, level, decimal_price);
+            tracker.report_quantity(shared::Side::sell, level, decimal_price);
         }
         for (uint16_t level : random_levels_2) {
             decimal_price.price = level;
-            benchmark::DoNotOptimize(tracker.get_level(util::Side::sell, decimal_price)
+            benchmark::DoNotOptimize(tracker.get_level(shared::Side::sell, decimal_price)
             );
         }
     }

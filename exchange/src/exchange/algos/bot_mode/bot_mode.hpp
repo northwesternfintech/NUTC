@@ -2,8 +2,7 @@
 
 #include "exchange/algos/algo_manager.hpp"
 
-namespace nutc {
-namespace algos {
+namespace nutc::exchange {
 
 /**
  * @brief Does nothing on initialization
@@ -13,8 +12,7 @@ public:
     constexpr BotModeAlgoInitializer() = default;
 
     constexpr void
-    initialize_trader_container(traders::TraderContainer&, util::decimal_price)
-        const final
+    initialize_trader_container(TraderContainer&, shared::decimal_price) const final
     {}
 
     constexpr void
@@ -22,5 +20,4 @@ public:
     {}
 };
 
-} // namespace algos
-} // namespace nutc
+} // namespace nutc::exchange

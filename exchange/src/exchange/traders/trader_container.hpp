@@ -9,8 +9,7 @@
 #include <memory>
 #include <memory_resource>
 
-namespace nutc {
-namespace traders {
+namespace nutc::exchange {
 
 class TraderIterator {
 public:
@@ -120,5 +119,4 @@ private:
     }
 };
 
-} // namespace traders
-} // namespace nutc
+} // namespace nutc::exchange

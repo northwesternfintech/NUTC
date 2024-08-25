@@ -5,8 +5,7 @@
 
 #include <vector>
 
-namespace nutc {
-namespace matching {
+namespace nutc::exchange {
 
 class MatchingCycleInterface {
 public:
@@ -33,15 +32,14 @@ protected:
 
     virtual std::vector<OrderVariant> collect_orders(uint64_t new_tick) = 0;
 
-    virtual std::vector<messages::match> match_orders_(std::vector<OrderVariant> orders
+    virtual std::vector<shared::match> match_orders_(std::vector<OrderVariant> orders
     ) = 0;
 
-    virtual void handle_matches_(std::vector<messages::match> matches) = 0;
+    virtual void handle_matches_(std::vector<shared::match> matches) = 0;
 
     virtual void post_cycle_(uint64_t new_tick) = 0;
 
 private:
     static void sort_by_timestamp(std::vector<OrderVariant>& orders);
 };
-} // namespace matching
-} // namespace nutc
+} // namespace nutc::exchange

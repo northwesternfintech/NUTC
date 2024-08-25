@@ -4,9 +4,7 @@
 
 #include <random>
 
-namespace nutc {
-
-namespace stochastic {
+namespace nutc::exchange {
 
 enum class Signedness { Negative = -1, Either = 0, Positive = 1 };
 
@@ -35,7 +33,7 @@ public:
     explicit BrownianMotion(unsigned int seed) : cur_magnitude_(0) { set_seed(seed); }
 
     // Constructor for BrownianMotion with initial price
-    explicit BrownianMotion(util::decimal_price starting_magnitude) :
+    explicit BrownianMotion(shared::decimal_price starting_magnitude) :
         cur_magnitude_(double{starting_magnitude})
     {
         std::random_device rd;
@@ -73,5 +71,4 @@ private:
     void config_new_market_event_();
 };
 
-} // namespace stochastic
-} // namespace nutc
+} // namespace nutc::exchange

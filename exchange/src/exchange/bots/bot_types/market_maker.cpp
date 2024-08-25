@@ -7,15 +7,15 @@
 #include <algorithm>
 #include <array>
 
-using nutc::util::Side;
+using nutc::shared::Side;
 
 namespace {
 struct price_level {
-    const nutc::util::decimal_price PRICE_DELTA;
+    const nutc::shared::decimal_price PRICE_DELTA;
     const double QUANTITY_FACTOR;
 
     consteval price_level(
-        nutc::util::decimal_price price_delta, double quantity_factor
+        nutc::shared::decimal_price price_delta, double quantity_factor
     ) :
         PRICE_DELTA(price_delta),
         QUANTITY_FACTOR(quantity_factor)
@@ -33,8 +33,7 @@ constexpr std::array<price_level, LEVELS> PRICE_LEVELS{
 
 } // namespace
 
-namespace nutc {
-namespace bots {
+namespace nutc::exchange {
 
 void
 MarketMakerBot::place_orders(Side side, decimal_price theo, decimal_price spread_offset)
@@ -82,5 +81,4 @@ MarketMakerBot::take_action(const shared_bot_state& state)
     place_orders(Side::buy, theo, spread_offset);
     place_orders(Side::sell, theo, spread_offset);
 }
-} // namespace bots
-} // namespace nutc
+} // namespace nutc::exchange

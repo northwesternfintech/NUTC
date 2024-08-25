@@ -9,8 +9,7 @@
 #include <stdexcept>
 #include <vector>
 
-namespace nutc {
-namespace algos {
+namespace nutc::exchange {
 
 namespace fs = std::filesystem;
 
@@ -44,7 +43,7 @@ public:
     }
 
     void initialize_trader_container(
-        traders::TraderContainer& traders, util::decimal_price start_capital
+        TraderContainer& traders, shared::decimal_price start_capital
     ) const override;
 
     void initialize_files() final;
@@ -56,5 +55,4 @@ public:
     }
 };
 
-} // namespace algos
-} // namespace nutc
+} // namespace nutc::exchange

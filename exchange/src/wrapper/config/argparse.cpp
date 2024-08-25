@@ -6,7 +6,7 @@
 #include <argparse/argparse.hpp>
 #include <fmt/format.h>
 
-namespace nutc::config {
+namespace nutc::wrapper {
 wrapper_args
 process_arguments(int argc, const char** argv)
 {
@@ -57,11 +57,11 @@ process_arguments(int argc, const char** argv)
 
     bool dev_mode = program.get<bool>("--dev");
     auto trader_id = (dev_mode) ? program.get<std::string>("--algo_id")
-                                : util::trader_id(
+                                : shared::trader_id(
                                     program.get<std::string>("--uid"),
                                     program.get<std::string>("--algo_id")
                                 );
 
     return {verbosity, trader_id};
 }
-} // namespace nutc::config
+} // namespace nutc::wrapper

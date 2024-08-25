@@ -14,37 +14,36 @@
 #  include <x86intrin.h>
 #endif
 
-namespace nutc {
-namespace messages {
+namespace nutc::shared {
 
 struct init_message {
     std::string_view name = "init_message";
 };
 
 struct market_order {
-    util::Ticker ticker;
-    util::Side side;
+    shared::Ticker ticker;
+    shared::Side side;
     double quantity;
 
     market_order() = default;
 
-    market_order(util::Ticker ticker, util::Side side, double quantity) :
+    market_order(shared::Ticker ticker, shared::Side side, double quantity) :
         ticker(ticker), side(side), quantity(quantity)
     {}
 };
 
 struct limit_order {
-    util::Ticker ticker;
-    util::Side side;
+    shared::Ticker ticker;
+    shared::Side side;
     double quantity;
-    util::decimal_price price;
+    shared::decimal_price price;
     bool ioc;
 
     bool operator==(const limit_order& other) const = default;
 
     limit_order(
-        util::Ticker ticker, util::Side side, double quantity,
-        util::decimal_price price, bool ioc = false
+        shared::Ticker ticker, shared::Side side, double quantity,
+        shared::decimal_price price, bool ioc = false
     ) :
         ticker{ticker},
         side{side}, quantity{quantity}, price{price}, ioc{ioc}
@@ -82,27 +81,26 @@ using timed_init_message = timestamped_message<init_message>;
 using timed_limit_order = timestamped_message<limit_order>;
 using timed_market_order = timestamped_message<market_order>;
 
-} // namespace messages
-} // namespace nutc
+} // namespace nutc::shared
 
 /// \cond
 template <>
-struct glz::meta<nutc::messages::limit_order> {
-    using t = nutc::messages::limit_order;
+struct glz::meta<nutc::shared::limit_order> {
+    using t = nutc::shared::limit_order;
     static constexpr auto value =
         object("limit", &t::ticker, &t::side, &t::quantity, &t::price, &t::ioc);
 };
 
 /// \cond
 template <>
-struct glz::meta<nutc::messages::market_order> {
-    using t = nutc::messages::market_order;
+struct glz::meta<nutc::shared::market_order> {
+    using t = nutc::shared::market_order;
     static constexpr auto value = object("market", &t::ticker, &t::side, &t::quantity);
 };
 
 /// \cond
 template <>
-struct glz::meta<nutc::messages::init_message> {
-    using t = nutc::messages::init_message;
+struct glz::meta<nutc::shared::init_message> {
+    using t = nutc::shared::init_message;
     static constexpr auto value = object(&t::name);
 };

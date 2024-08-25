@@ -6,8 +6,7 @@
 #include "exchange/traders/trader_types/algo_trader.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
 
-namespace nutc {
-namespace sandbox {
+namespace nutc::exchange {
 
 CrowServer::CrowServer() :
     work_guard_(ba::make_work_guard(io_context_)),
@@ -48,10 +47,9 @@ CrowServer::CrowServer() :
 void
 CrowServer::add_pending_trader(const std::string user_id, const std::string algo_id)
 {
-    static const auto STARTING_CAPITAL =
-        nutc::config::Config::get().constants().STARTING_CAPITAL;
+    static const auto STARTING_CAPITAL = Config::get().constants().STARTING_CAPITAL;
 
-    auto trader = std::make_shared<traders::AlgoTrader>(
+    auto trader = std::make_shared<AlgoTrader>(
         user_id, algo_id, "SANDBOX_USER", STARTING_CAPITAL
     );
 
@@ -59,11 +57,11 @@ CrowServer::add_pending_trader(const std::string user_id, const std::string algo
     traders_to_add.push_back(trader);
     trader_lock.unlock();
 
-    static auto trial_secs = config::Config::get().constants().SANDBOX_TRIAL_SECS;
+    static auto trial_secs = Config::get().constants().SANDBOX_TRIAL_SECS;
     start_remove_timer_(trial_secs, trader);
 
     auto get_start_message = []() {
-        static auto start_message = glz::write_json(messages::start_time{0});
+        static auto start_message = glz::write_json(shared::start_time{0});
         if (!start_message.has_value()) [[unlikely]]
             throw std::runtime_error(glz::format_error(start_message.error()));
         return start_message.value();
@@ -90,7 +88,7 @@ CrowServer::~CrowServer()
 
 void
 CrowServer::start_remove_timer_(
-    unsigned int time_s, std::weak_ptr<traders::GenericTrader> trader_ptr
+    unsigned int time_s, std::weak_ptr<GenericTrader> trader_ptr
 )
 {
     auto timer = ba::steady_timer{io_context_, std::chrono::seconds(time_s)};
@@ -116,5 +114,4 @@ CrowServer::start_remove_timer_(
     timers_.push_back(std::move(timer));
 }
 
-} // namespace sandbox
-} // namespace nutc
+} // namespace nutc::exchange

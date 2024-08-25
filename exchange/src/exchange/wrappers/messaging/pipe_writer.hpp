@@ -5,14 +5,14 @@
 #include <deque>
 #include <mutex>
 
-namespace nutc {
-namespace wrappers {
+namespace nutc::exchange {
+
 namespace bp = boost::process;
 namespace ba = boost::asio;
 
 class PipeWriter {
     std::mutex message_lock_{};
-    std::deque<std::string> queued_messages_{};
+    std::deque<std::string> queued_shared_{};
     std::atomic_flag is_writing_{false};
     std::shared_ptr<ba::io_context> pipe_context_;
     bp::async_pipe pipe_out_;
@@ -34,5 +34,4 @@ public:
     void send_message(const std::string& message);
 };
 
-} // namespace wrappers
-} // namespace nutc
+} // namespace nutc::exchange

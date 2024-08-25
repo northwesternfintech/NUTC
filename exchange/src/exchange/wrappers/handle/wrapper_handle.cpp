@@ -27,8 +27,7 @@ force_unwrap_optional(std::optional<std::string> opt, std::string error_msg)
 
 } // namespace
 
-namespace nutc {
-namespace wrappers {
+namespace nutc::exchange {
 
 const fs::path&
 WrapperHandle::wrapper_binary_path()
@@ -62,7 +61,7 @@ WrapperHandle::WrapperHandle(
     WrapperHandle(
         {"--uid", quote_id(remote_uid), "--algo_id", quote_id(algo_id)},
         force_unwrap_optional(
-            nutc::firebase::get_algo(remote_uid, algo_id),
+            nutc::shared::get_algo(remote_uid, algo_id),
             fmt::format(
                 "Could not read algoid {} of uid {} from firebase", algo_id, remote_uid
             )
@@ -74,7 +73,7 @@ WrapperHandle::WrapperHandle(const std::string& algo_path) :
     WrapperHandle(
         {"--uid", quote_id(algo_path), "--algo_id", quote_id(algo_path), "--dev"},
         force_unwrap_optional(
-            nutc::file_ops::read_file_content(algo_path),
+            nutc::shared::read_file_content(algo_path),
             fmt::format("Could not read algorithm file at {}", algo_path)
         )
     )
@@ -100,7 +99,7 @@ WrapperHandle::WrapperHandle(
         bp::std_out > pipe_in_ptr
     );
 
-    using algorithm_t = nutc::messages::algorithm_content;
+    using algorithm_t = nutc::shared::algorithm_content;
     algorithm_t algorithm_message = algorithm_t(algorithm);
 
     auto encoded_message = glz::write_json(algorithm_message);
@@ -112,5 +111,4 @@ WrapperHandle::WrapperHandle(
     block_on_init();
 }
 
-} // namespace wrappers
-} // namespace nutc
+} // namespace nutc::exchange

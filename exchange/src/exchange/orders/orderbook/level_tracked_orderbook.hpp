@@ -4,7 +4,7 @@
 #include "exchange/orders/storage/order_storage.hpp"
 #include "shared/types/decimal_price.hpp"
 
-namespace nutc::matching {
+namespace nutc::exchange {
 
 template <class BaseOrderBookT>
 class LevelTrackedOrderbook : public BaseOrderBookT {
@@ -43,9 +43,9 @@ public:
 
 private:
     void
-    modify_level_(util::Side side, double quantity_delta, util::decimal_price price)
+    modify_level_(shared::Side side, double quantity_delta, shared::decimal_price price)
     {
         level_update_generator_.record_level_change(side, quantity_delta, price);
     }
 };
-} // namespace nutc::matching
+} // namespace nutc::exchange

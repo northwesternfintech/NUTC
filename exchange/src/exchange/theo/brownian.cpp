@@ -6,8 +6,7 @@
 #define MARKET_DURATION_STDEV        5
 #include "brownian.hpp"
 
-namespace nutc {
-namespace stochastic {
+namespace nutc::exchange {
 
 double
 BrownianMotion::generate_norm_(double mean, double stdev, Signedness sign)
@@ -104,5 +103,4 @@ BrownianMotion::generate_next_magnitude()
     return fabs(cur_magnitude_);
 }
 
-} // namespace stochastic
-} // namespace nutc
+} // namespace nutc::exchange

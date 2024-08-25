@@ -1,7 +1,6 @@
 #include "ticker.hpp"
 
-namespace nutc {
-namespace util {
+namespace nutc::shared {
 
 bool
 Ticker::operator==(const Ticker& other) const
@@ -32,5 +31,4 @@ Ticker::operator std::string() const
     return str;
 }
 
-} // namespace util
-} // namespace nutc
+} // namespace nutc::shared

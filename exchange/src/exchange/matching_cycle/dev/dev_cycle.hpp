@@ -7,19 +7,18 @@
 #include <prometheus/counter.h>
 #include <prometheus/gauge.h>
 
-namespace nutc {
-namespace matching {
+namespace nutc::exchange {
 
 class DevMatchingCycle : public BaseMatchingCycle {
-    metrics::TickerMetricsPusher pusher;
+    TickerMetricsPusher pusher;
 
 public:
-    DevMatchingCycle(TickerMapping tickers, traders::TraderContainer& traders) :
+    DevMatchingCycle(TickerMapping tickers, TraderContainer& traders) :
         BaseMatchingCycle(std::move(tickers), traders), pusher(traders)
     {}
 
 protected:
-    std::vector<messages::match>
+    std::vector<shared::match>
     match_orders_(std::vector<OrderVariant> orders) override
     {
         // TODO: add back
@@ -28,7 +27,7 @@ protected:
     }
 
     void
-    handle_matches_(std::vector<messages::match> matches) override
+    handle_matches_(std::vector<shared::match> matches) override
     {
         pusher.report_matches(matches);
         BaseMatchingCycle::handle_matches_(std::move(matches));
@@ -44,5 +43,4 @@ protected:
     }
 };
 
-} // namespace matching
-} // namespace nutc
+} // namespace nutc::exchange

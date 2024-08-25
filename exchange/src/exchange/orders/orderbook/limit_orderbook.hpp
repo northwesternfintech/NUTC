@@ -10,15 +10,14 @@
 #include <functional>
 #include <queue>
 
-namespace nutc {
-namespace matching {
+namespace nutc::exchange {
 
 class LimitOrderBook {
-    std::map<util::decimal_price, std::queue<tagged_limit_order>> bids_;
-    std::map<util::decimal_price, std::queue<tagged_limit_order>> asks_;
+    std::map<shared::decimal_price, std::queue<tagged_limit_order>> bids_;
+    std::map<shared::decimal_price, std::queue<tagged_limit_order>> asks_;
 
-    void clean_tree(util::Side side);
-    tagged_limit_order pop_from_queue(util::Side side, util::decimal_price price);
+    void clean_tree(shared::Side side);
+    tagged_limit_order pop_from_queue(shared::Side side, shared::decimal_price price);
 
 public:
     virtual tagged_limit_order& add_order(const tagged_limit_order& order);
@@ -26,10 +25,9 @@ public:
     virtual void change_quantity(tagged_limit_order& order, double quantity_delta);
     virtual ~LimitOrderBook() = default;
 
-    util::decimal_price get_midprice() const;
+    shared::decimal_price get_midprice() const;
 
     std::optional<std::reference_wrapper<tagged_limit_order>>
-    get_top_order(util::Side side);
+    get_top_order(shared::Side side);
 };
-} // namespace matching
-} // namespace nutc
+} // namespace nutc::exchange

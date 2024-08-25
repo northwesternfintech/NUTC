@@ -6,17 +6,17 @@
 
 #include <gtest/gtest.h>
 
-using nutc::util::Side::buy;
-using nutc::util::Side::sell;
+using nutc::shared::Side::buy;
+using nutc::shared::Side::sell;
 
 class UnitInvalidOrders : public ::testing::Test {
 protected:
-    using TestTrader = nutc::test_utils::TestTrader;
+    using TestTrader = nutc::test::TestTrader;
     static constexpr const int DEFAULT_QUANTITY = 1000;
     TraderContainer manager_;
-    nutc::traders::GenericTrader& trader1 =
+    nutc::exchange::GenericTrader& trader1 =
         *manager_.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
-    nutc::traders::GenericTrader& trader2 =
+    nutc::exchange::GenericTrader& trader2 =
         *manager_.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
 
     void
@@ -26,10 +26,10 @@ protected:
         trader2.modify_holdings("ETH", DEFAULT_QUANTITY);
     }
 
-    nutc::matching::LimitOrderBook orderbook_;
+    nutc::exchange::LimitOrderBook orderbook_;
     Engine engine_;
 
-    std::vector<nutc::messages::match>
+    std::vector<nutc::shared::match>
     add_to_engine_(const tagged_limit_order& order)
     {
         return engine_.match_order(order, orderbook_);
@@ -81,13 +81,13 @@ TEST_F(UnitInvalidOrders, MatchingInvalidFunds)
 
 TEST_F(UnitInvalidOrders, SimpleManyInvalidOrder)
 {
-    nutc::traders::GenericTrader& t1 =
+    nutc::exchange::GenericTrader& t1 =
         *(manager_.add_trader<TestTrader>(std::string("A"), TEST_STARTING_CAPITAL));
-    nutc::traders::GenericTrader& t2 =
+    nutc::exchange::GenericTrader& t2 =
         *(manager_.add_trader<TestTrader>(std::string("B"), 0));
-    nutc::traders::GenericTrader& t3 =
+    nutc::exchange::GenericTrader& t3 =
         *(manager_.add_trader<TestTrader>(std::string("C"), TEST_STARTING_CAPITAL));
-    nutc::traders::GenericTrader& t4 =
+    nutc::exchange::GenericTrader& t4 =
         *(manager_.add_trader<TestTrader>(std::string("D"), TEST_STARTING_CAPITAL));
 
     t1.modify_holdings("ETH", DEFAULT_QUANTITY);

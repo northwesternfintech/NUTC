@@ -6,17 +6,14 @@
 
 #include <gtest/gtest.h>
 
-namespace nutc {
-namespace test {
-using messages::limit_order;
+namespace nutc::test {
+using nutc::shared::Side::buy;
+using nutc::shared::Side::sell;
 using nutc::test::start_wrappers;
-using nutc::util::Side::buy;
-using nutc::util::Side::sell;
+using shared::limit_order;
 
 class IntegrationBasicAlgo : public ::testing::Test {
 protected:
-    using TestTrader = nutc::test_utils::TestTrader;
-
     TraderContainer traders;
 };
 
@@ -153,10 +150,10 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateSell)
         traders
     };
 
-    // obupdate triggers one user to place autil::Side::buy order of 10 ABC at 102
+    // obupdate triggers one user to place ashared::Side::buy order of 10 ABC at 102
     cycle.wait_for_order(limit_order{"ABC", sell, 10, 100.0});
 
-    // on_trade_match triggers one user to place autil::Side::buy order of 1 ABC at
+    // on_trade_match triggers one user to place ashared::Side::buy order of 1 ABC at
     // 100
     cycle.wait_for_order(limit_order{"DEF", buy, 1, 100.0});
 }
@@ -174,9 +171,9 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateBuy)
         traders
     };
 
-    // obupdate triggers one user to place autil::Side::buy order of 10 ABC at 102
+    // obupdate triggers one user to place ashared::Side::buy order of 10 ABC at 102
     cycle.wait_for_order(limit_order{"ABC", buy, 10, 102.0});
-    // on_trade_match triggers one user to place autil::Side::buy order of 1 ABC at
+    // on_trade_match triggers one user to place ashared::Side::buy order of 1 ABC at
     // 100
     cycle.wait_for_order(limit_order{"DEF", buy, 1, 100.0});
 }
@@ -224,5 +221,4 @@ TEST_F(IntegrationBasicAlgo, DisableTrader)
     auto orders = trader1.read_orders();
     ASSERT_TRUE(orders.empty());
 }
-} // namespace test
-} // namespace nutc
+} // namespace nutc::test

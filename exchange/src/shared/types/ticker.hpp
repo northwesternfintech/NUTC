@@ -9,8 +9,7 @@
 #include <array>
 #include <string_view>
 
-namespace nutc {
-namespace util {
+namespace nutc::shared {
 struct Ticker {
     std::array<char, TICKER_LENGTH> arr{};
 
@@ -26,22 +25,21 @@ struct Ticker {
     bool operator==(const Ticker& other) const;
     operator std::string() const;
 };
-} // namespace util
-} // namespace nutc
+} // namespace nutc::shared
 
 /// \cond
 template <>
-struct glz::meta<nutc::util::Ticker> {
-    using t = nutc::util::Ticker;
+struct glz::meta<nutc::shared::Ticker> {
+    using t = nutc::shared::Ticker;
     static constexpr auto value = object(&t::arr);
 };
 
 // Simple because we do a lot of hashing but have very few tickers. Maybe revisit later?
 namespace std {
 template <>
-struct hash<nutc::util::Ticker> {
+struct hash<nutc::shared::Ticker> {
     std::size_t
-    operator()(const nutc::util::Ticker arr) const noexcept
+    operator()(const nutc::shared::Ticker arr) const noexcept
     {
         std::size_t hash_value = 0;
         for (size_t i = 0; i < TICKER_LENGTH; i++) {

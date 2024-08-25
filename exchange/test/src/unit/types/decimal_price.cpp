@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-using nutc::util::decimal_price;
+using nutc::shared::decimal_price;
 
 TEST(UnitDecimalPrice, CorrectlyHandleSubtraction)
 {

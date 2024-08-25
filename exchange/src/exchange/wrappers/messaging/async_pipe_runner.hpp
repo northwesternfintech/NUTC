@@ -4,13 +4,12 @@
 #include <boost/process.hpp>
 #include <boost/process/pipe.hpp>
 
-namespace nutc {
-namespace wrappers {
+namespace nutc::exchange {
 
 namespace ba = boost::asio;
 
 /**
- * @brief Singleton that handles async io messages from  pipes
+ * @brief Singleton that handles async io shared from  pipes
  * @note Mostly thread safe
  * @note This allows us to have one thread for all pipes
  */
@@ -32,5 +31,4 @@ public:
     AsyncPipeRunner(const AsyncPipeRunner&) = delete;
 };
 
-} // namespace wrappers
-} // namespace nutc
+} // namespace nutc::exchange

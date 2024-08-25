@@ -6,9 +6,9 @@
 #include <fmt/format.h>
 
 namespace nutc {
-namespace bench_utils {
+namespace benchmarks {
 
-class BenchmarkTrader : public traders::GenericTrader {
+class BenchmarkTrader : public exchange::GenericTrader {
 public:
     BenchmarkTrader() : BenchmarkTrader("Benchmark", 0.0) {}
 
@@ -22,8 +22,8 @@ public:
         benchmark::DoNotOptimize(str.size());
     }
 
-    virtual void
-    notify_position_change(util::position change) final
+    void
+    notify_position_change(shared::position change) final
     {
         benchmark::DoNotOptimize(change);
     }
@@ -41,10 +41,10 @@ public:
     const std::string&
     get_type() const final
     {
-        static const std::string TYPE = "TEST";
-        return TYPE;
+        static const std::string type = "TEST";
+        return type;
     }
 };
 
-} // namespace bench_utils
+} // namespace benchmarks
 } // namespace nutc

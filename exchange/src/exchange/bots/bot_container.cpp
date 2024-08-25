@@ -8,10 +8,10 @@
 
 #include <random>
 
-namespace nutc::bots {
+namespace nutc::exchange {
 
 void
-BotContainer::generate_orders(util::decimal_price midprice)
+BotContainer::generate_orders(shared::decimal_price midprice)
 {
     auto theo = fabs(theo_generator_.generate_next_magnitude());
     variance_calculator_.record_price(midprice);
@@ -31,10 +31,10 @@ BotContainer::generate_orders(util::decimal_price midprice)
 }
 
 template <class BotType>
-BotVector
+BotContainer::BotVector
 BotContainer::create_bots(
-    TraderContainer& trader_container, util::Ticker ticker, decimal_price mean_capital,
-    decimal_price stddev_capital, size_t num_bots
+    TraderContainer& trader_container, shared::Ticker ticker,
+    decimal_price mean_capital, decimal_price stddev_capital, size_t num_bots
 )
 {
     BotVector bot_vec;
@@ -50,19 +50,19 @@ BotContainer::create_bots(
     return bot_vec;
 }
 
-BotVector
+BotContainer::BotVector
 BotContainer::create_bots(
-    TraderContainer& trader_container, util::Ticker ticker,
-    const config::bot_config& bot_config
+    TraderContainer& trader_container, shared::Ticker ticker,
+    const bot_config& bot_config
 )
 {
     switch (bot_config.TYPE) {
-        case config::BotType::retail:
+        case BotType::retail:
             return create_bots<RetailBot>(
                 trader_container, ticker, bot_config.AVERAGE_CAPITAL,
                 bot_config.STD_DEV_CAPITAL, bot_config.NUM_BOTS
             );
-        case config::BotType::market_maker:
+        case BotType::market_maker:
             return create_bots<MarketMakerBot>(
                 trader_container, ticker, bot_config.AVERAGE_CAPITAL,
                 bot_config.STD_DEV_CAPITAL, bot_config.NUM_BOTS
@@ -79,4 +79,4 @@ BotContainer::generate_orders(const shared_bot_state& shared_state)
         bot->take_action(shared_state);
     }
 }
-} // namespace nutc::bots
+} // namespace nutc::exchange

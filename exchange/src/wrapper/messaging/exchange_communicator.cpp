@@ -16,8 +16,7 @@
 #include <stdexcept>
 #include <type_traits>
 
-namespace nutc {
-namespace messaging {
+namespace nutc::wrapper {
 
 using start_tick_variant_t = std::variant<start_time, tick_update>;
 
@@ -30,9 +29,10 @@ template <>
 void
 ExchangeCommunicator::process_message(tick_update& tick_update)
 {
-    std::ranges::for_each(tick_update.ob_updates, [&](const util::position& ob_update) {
-        handle_orderbook_update(ob_update);
-    });
+    std::ranges::for_each(
+        tick_update.ob_updates,
+        [&](const shared::position& ob_update) { handle_orderbook_update(ob_update); }
+    );
     std::ranges::for_each(tick_update.matches, [&](const match& match) {
         handle_match(match);
     });
@@ -48,7 +48,7 @@ ExchangeCommunicator::main_event_loop()
 }
 
 void
-ExchangeCommunicator::handle_orderbook_update(const util::position& position)
+ExchangeCommunicator::handle_orderbook_update(const shared::position& position)
 {
     on_orderbook_update(position);
 }
@@ -91,7 +91,7 @@ ExchangeCommunicator::publish_message(const std::string& message)
     lock.unlock();
 }
 
-messages::algorithm_content
+shared::algorithm_content
 ExchangeCommunicator::consume_algorithm()
 {
     return consume_message<algorithm_content>();
@@ -117,7 +117,7 @@ ExchangeCommunicator::consume_message()
     return data;
 }
 
-pywrapper::LimitOrderFunction
+LimitOrderFunction
 ExchangeCommunicator::place_limit_order()
 {
     return [this](
@@ -128,9 +128,10 @@ ExchangeCommunicator::place_limit_order()
             return false;
         }
 
-        util::Ticker ticker_arr;
+        shared::Ticker ticker_arr;
         std::copy(ticker.begin(), ticker.end(), ticker_arr.arr.begin());
-        util::Side side_enum = (side == "BUY") ? util::Side::buy : util::Side::sell;
+        shared::Side side_enum =
+            (side == "BUY") ? shared::Side::buy : shared::Side::sell;
 
         return publish_message<limit_order>(
             ticker_arr, side_enum, quantity, price, ioc
@@ -139,16 +140,17 @@ ExchangeCommunicator::place_limit_order()
 }
 
 // TODO: check for valid side/ticker
-pywrapper::MarketOrderFunction
+MarketOrderFunction
 ExchangeCommunicator::place_market_order()
 {
     return [this](const std::string& side, const std::string& ticker, double quantity) {
         if (ticker.size() != TICKER_LENGTH) [[unlikely]] {
             return false;
         }
-        util::Ticker ticker_arr;
+        shared::Ticker ticker_arr;
         std::copy(ticker.begin(), ticker.end(), ticker_arr.arr.begin());
-        util::Side side_enum = (side == "BUY") ? util::Side::buy : util::Side::sell;
+        shared::Side side_enum =
+            (side == "BUY") ? shared::Side::buy : shared::Side::sell;
 
         return publish_message<market_order>(ticker_arr, side_enum, quantity);
     };
@@ -157,7 +159,7 @@ ExchangeCommunicator::place_market_order()
 bool
 ExchangeCommunicator::report_startup_complete()
 {
-    return publish_message<messages::init_message>();
+    return publish_message<shared::init_message>();
 }
 
 // If wait_blocking is disabled, we block until we *receive* the message, but not
@@ -180,5 +182,4 @@ ExchangeCommunicator::wait_for_start_time()
     std::this_thread::sleep_until(wait_until);
 }
 
-} // namespace messaging
-} // namespace nutc
+} // namespace nutc::wrapper

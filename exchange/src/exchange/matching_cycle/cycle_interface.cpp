@@ -1,6 +1,6 @@
 #include "cycle_interface.hpp"
 
-namespace nutc::matching {
+namespace nutc::exchange {
 void
 MatchingCycleInterface::sort_by_timestamp(std::vector<OrderVariant>& orders)
 {
@@ -12,4 +12,4 @@ MatchingCycleInterface::sort_by_timestamp(std::vector<OrderVariant>& orders)
         };
     std::sort(orders.begin(), orders.end(), cmp_order_timestamps);
 }
-} // namespace nutc::matching
+} // namespace nutc::exchange

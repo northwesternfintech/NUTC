@@ -9,15 +9,14 @@
 
 #include <expected>
 
-namespace nutc {
-namespace matching {
+namespace nutc::exchange {
 
 class Engine {
-    using decimal_price = util::decimal_price;
+    using decimal_price = shared::decimal_price;
 
     decimal_price order_fee_;
-    using side = nutc::util::Side;
-    using match = messages::match;
+    using side = nutc::shared::Side;
+    using match = shared::match;
 
 public:
     explicit Engine(decimal_price order_fee = 0.0) : order_fee_(order_fee) {}
@@ -30,23 +29,22 @@ private:
     glz::expected<match, bool>
     match_incoming_order_(OrderT& aggressive_order, LimitOrderBook& orderbook);
 
-    template <util::Side AggressiveSide, TaggedOrder OrderT>
+    template <shared::Side AggressiveSide, TaggedOrder OrderT>
     glz::expected<match, bool> match_incoming_order_(
         OrderT& aggressive_order, tagged_limit_order& passive_order,
         LimitOrderBook& orderbook
     );
 
-    template <util::Side AggressiveSide, typename OrderPairT>
+    template <shared::Side AggressiveSide, typename OrderPairT>
     glz::expected<match, bool>
     match_orders_(OrderPairT& orders, LimitOrderBook& orderbook);
 
     enum class MatchFailure { buyer_failure, seller_failure, done_matching };
 
-    template <util::Side AggressiveSide, typename OrderPairT>
+    template <shared::Side AggressiveSide, typename OrderPairT>
     glz::expected<match, MatchFailure> attempt_match_(OrderPairT& orders);
 
     decimal_price total_order_cost_(decimal_price price, double quantity) const;
 };
 
-} // namespace matching
-} // namespace nutc
+} // namespace nutc::exchange

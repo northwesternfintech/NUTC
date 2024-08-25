@@ -4,14 +4,13 @@
 
 #include <fmt/format.h>
 
-namespace nutc {
-namespace firebase {
+namespace nutc::shared {
 
 glz::json_t
 get_user_info(const std::string& uid)
 {
     auto params = fmt::format("users/{}.json", uid);
-    auto url = util::get_firebase_endpoint(params);
+    auto url = shared::get_firebase_endpoint(params);
     return firebase_request("GET", url);
 }
 
@@ -121,5 +120,4 @@ firebase_request(
     }
     return json;
 }
-} // namespace firebase
-} // namespace nutc
+} // namespace nutc::shared

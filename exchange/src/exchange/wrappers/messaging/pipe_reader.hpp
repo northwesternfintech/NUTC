@@ -5,10 +5,9 @@
 
 #include <mutex>
 
-namespace nutc {
-namespace wrappers {
+namespace nutc::exchange {
 
-using namespace messages;
+using namespace shared;
 
 namespace bp = boost::process;
 namespace ba = boost::asio;
@@ -20,7 +19,7 @@ public:
 
 private:
     std::mutex message_lock_;
-    std::vector<IncomingMessageVariant> messages;
+    std::vector<IncomingMessageVariant> shared;
     std::shared_ptr<ba::io_context> pipe_context_;
     bp::async_pipe pipe_in_;
 
@@ -50,23 +49,22 @@ public:
     {
         while (true) {
             std::lock_guard<std::mutex> lock{message_lock_};
-            if (messages.empty())
+            if (shared.empty())
                 continue;
-            auto res = messages.front();
-            messages.erase(messages.begin());
+            auto res = shared.front();
+            shared.erase(shared.begin());
             return res;
         }
     }
 
     std::vector<IncomingMessageVariant>
-    get_messages()
+    get_shared()
     {
         std::lock_guard<std::mutex> lock{message_lock_};
         std::vector<IncomingMessageVariant> result;
-        result.swap(messages);
+        result.swap(shared);
         return result;
     }
 };
 
-} // namespace wrappers
-} // namespace nutc
+} // namespace nutc::exchange

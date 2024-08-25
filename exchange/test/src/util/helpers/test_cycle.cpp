@@ -7,10 +7,9 @@
 
 #include <utility>
 
-namespace nutc {
-namespace test {
+namespace nutc::test {
 
-std::vector<messages::match>
+std::vector<shared::match>
 TestMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
 {
     // TODO: FIX
@@ -22,18 +21,17 @@ TestMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
     return BaseMatchingCycle::match_orders_(std::move(orders));
 }
 
-matching::TickerMapping
+exchange::TickerMapping
 TestMatchingCycle::create_tickers(
     const std::vector<std::string>& ticker_names, double order_fee
 )
 {
-    matching::TickerMapping mappings;
+    exchange::TickerMapping mappings;
     for (const auto& ticker : ticker_names) {
-        util::Ticker t = ticker.c_str();
+        shared::Ticker t = ticker.c_str();
         mappings.insert({t, {order_fee}});
     }
     return mappings;
 }
 
-} // namespace test
-} // namespace nutc
+} // namespace nutc::test
