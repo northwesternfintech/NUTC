@@ -1,5 +1,6 @@
 #include "file_operations.hpp"
 
+#include <fmt/format.h>
 #include <sys/stat.h>
 
 #include <cassert>
@@ -50,6 +51,9 @@ file_exists(const std::string& filename) noexcept
 std::string
 read_file_content(const std::string& filename)
 {
+    if (!file_exists(filename)) {
+        throw std::invalid_argument(fmt::format("Cannot find file {}", filename));
+    }
     assert(file_exists(filename));
     std::ifstream file(filename);
     std::stringstream buffer;

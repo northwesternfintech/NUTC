@@ -27,15 +27,17 @@ TickerMetricsPusher::create_counter_(const std::string& gauge_name)
 }
 
 void
-TickerMetricsPusher::report_orders(const std::vector<matching::stored_order>& orders)
+TickerMetricsPusher::report_orders(
+    const std::vector<matching::tagged_limit_order>& orders
+)
 {
-    auto log_order = [&](const matching::stored_order& order) {
+    auto log_order = [&](const matching::tagged_limit_order& order) {
         orders_quantity_counter
             .Add({
-                {"ticker",      order.position.ticker   },
+                {"ticker",      order.ticker            },
                 {"trader_type", order.trader->get_type()}
         })
-            .Increment(order.position.quantity);
+            .Increment(order.quantity);
     };
 
     std::for_each(orders.begin(), orders.end(), log_order);
@@ -49,11 +51,11 @@ TickerMetricsPusher::report_ticker_stats(matching::TickerMapping& tickers)
             .Add({
                 {"ticker", std::string{ticker}}
         })
-            .Set(double{info.orderbook.get_midprice()});
+            .Set(double{info.limit_orderbook.get_midprice()});
     };
     auto log_best_ba = [&](util::Ticker ticker, matching::ticker_info& info) {
-        auto best_bid = info.orderbook.get_top_order(util::Side::buy);
-        auto best_ask = info.orderbook.get_top_order(util::Side::sell);
+        auto best_bid = info.limit_orderbook.get_top_order(util::Side::buy);
+        auto best_ask = info.limit_orderbook.get_top_order(util::Side::sell);
 
         if (best_bid.has_value()) [[likely]] {
             best_ba_gauge
@@ -61,7 +63,7 @@ TickerMetricsPusher::report_ticker_stats(matching::TickerMapping& tickers)
                     {"ticker", std::string{ticker}},
                     {"type",   "BID"              }
             })
-                .Set(double{best_bid->get().position.price});
+                .Set(double{best_bid->get().price});
         }
 
         if (best_ask.has_value()) [[likely]] {
@@ -70,7 +72,7 @@ TickerMetricsPusher::report_ticker_stats(matching::TickerMapping& tickers)
                     {"ticker", std::string{ticker}},
                     {"type",   "ASK"              }
             })
-                .Set(double{best_ask->get().position.price});
+                .Set(double{best_ask->get().price});
         }
     };
 
@@ -90,14 +92,12 @@ TickerMetricsPusher::report_ticker_stats(matching::TickerMapping& tickers)
 }
 
 void
-TickerMetricsPusher::report_matches(const std::vector<matching::stored_match>& orders)
+TickerMetricsPusher::report_matches(const std::vector<messages::match>& orders)
 {
-    auto log_match = [this](const matching::stored_match& match) {
+    auto log_match = [this](const messages::match& match) {
         matches_quantity_counter
             .Add({
-                {"ticker",             match.position.ticker  },
-                {"seller_trader_type", match.seller.get_type()},
-                {"buyer_trader_type",  match.buyer.get_type() }
+                {"ticker", match.position.ticker}
         })
             .Increment(match.position.quantity);
     };
@@ -131,7 +131,7 @@ TickerMetricsPusher::report_trader_stats(const matching::TickerMapping& tickers)
         double pnl = 0.0;
         for (const auto& [info, _, ticker] : tickers) {
             double amount_held{trader.get_holdings(ticker)};
-            double midprice{info.orderbook.get_midprice()};
+            double midprice{info.limit_orderbook.get_midprice()};
             pnl += amount_held * midprice;
         }
         return pnl;

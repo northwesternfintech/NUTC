@@ -9,35 +9,10 @@
 namespace nutc {
 namespace wrappers {
 
-namespace ba = boost::asio;
-
 void
 PipeReader::async_read_pipe()
 {
     async_read_pipe(std::make_shared<std::string>());
-}
-
-std::variant<init_message, limit_order>
-PipeReader::get_message()
-{
-    while (true) {
-        std::lock_guard<std::mutex> lock{message_lock_};
-        if (message_queue_.empty())
-            continue;
-
-        auto val = message_queue_.back();
-        message_queue_.pop_back();
-        return val;
-    }
-}
-
-std::vector<std::variant<messages::init_message, messages::limit_order>>
-PipeReader::get_messages()
-{
-    std::lock_guard<std::mutex> lock{message_lock_};
-    auto ret = message_queue_;
-    message_queue_.clear();
-    return ret;
 }
 
 PipeReader::~PipeReader()
@@ -55,7 +30,7 @@ PipeReader::PipeReader() :
 void
 PipeReader::store_message_(const std::string& message)
 {
-    std::variant<init_message, limit_order> data;
+    std::variant<init_message, limit_order, market_order> data;
     auto err = glz::read_json(data, message);
 
     // TODO: handle better
@@ -67,8 +42,12 @@ PipeReader::store_message_(const std::string& message)
         return;
     }
 
+    auto store_message = [this]<typename MessageT>(const MessageT& v) {
+        messages.push_back(timestamped_message<MessageT>{v});
+    };
+
     std::lock_guard<std::mutex> lock{message_lock_};
-    message_queue_.push_back(std::move(data));
+    std::visit(store_message, data);
 }
 
 void

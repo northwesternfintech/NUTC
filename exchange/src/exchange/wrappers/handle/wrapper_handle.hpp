@@ -25,8 +25,8 @@ class WrapperHandle {
 
 public:
     /* Both constructors will block on an init messages, ensuring proper construction
-     * There should *not* be a case (incl submitted code errors) where the wrapper does
-     * not send an init_message
+     * There should *not* be a case (including errors in submitted code) where the
+     * wrapper does not send an init_message. this MUST happen
      */
 
     // Remote (algo in firebase)
@@ -35,7 +35,11 @@ public:
     // Local (.py on disk)
     WrapperHandle(const std::string& algo_path);
 
-    std::vector<limit_order> read_messages();
+    std::vector<PipeReader::IncomingMessageVariant>
+    read_messages()
+    {
+        return reader_.get_messages();
+    }
 
     void
     send_message(const std::string& message)

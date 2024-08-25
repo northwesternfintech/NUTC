@@ -19,7 +19,7 @@ class BotTrader : public traders::GenericTrader {
 
     double open_bids_ = 0;
     double open_asks_ = 0;
-    std::vector<messages::limit_order> orders_;
+    IncomingMessageQueue orders_;
 
 public:
     double
@@ -43,6 +43,10 @@ public:
     {
         return true;
     }
+
+    void
+    disable() final
+    {}
 
     [[nodiscard]] util::decimal_price
     get_capital_utilization() const
@@ -86,18 +90,18 @@ public:
 
     ~BotTrader() override = default;
 
-    void process_position_change(util::position order) final;
+    void notify_position_change(util::position order) final;
 
     /**
      * midprice, theo
      */
     virtual void take_action(const bots::shared_bot_state& shared_state) = 0;
 
-    std::vector<messages::limit_order>
+    IncomingMessageQueue
     read_orders() override
     {
-        auto ret = std::move(orders_);
-        orders_.clear();
+        IncomingMessageQueue ret{};
+        orders_.swap(ret);
         return ret;
     }
 
@@ -115,13 +119,15 @@ protected:
         util::Side side, double quantity, util::decimal_price price, bool ioc
     )
     {
-        orders_.emplace_back(side, TICKER, quantity, price, ioc);
+        orders_.push_back(
+            messages::timed_limit_order{TICKER, side, quantity, price, ioc}
+        );
     }
 
     void
     add_market_order(util::Side side, double quantity)
     {
-        orders_.emplace_back(side, TICKER, quantity);
+        orders_.push_back(messages::timed_market_order{TICKER, side, quantity});
     }
 
     util::decimal_price

@@ -3,6 +3,7 @@
 #include "exchange/wrappers/handle/wrapper_handle.hpp"
 #include "generic_trader.hpp"
 #include "shared/file_operations/file_operations.hpp"
+#include "shared/messages_wrapper_to_exchange.hpp"
 #include "shared/types/decimal_price.hpp"
 
 #include <fmt/format.h>
@@ -71,16 +72,17 @@ public:
             wrapper_handle_->send_message(message);
     }
 
-    std::vector<messages::limit_order>
+    IncomingMessageQueue
     read_orders() override
     {
-        if (wrapper_handle_) [[likely]]
-            return wrapper_handle_->read_messages();
-        return {};
+        if (!wrapper_handle_.has_value()) [[unlikely]]
+            return {};
+
+        return wrapper_handle_->read_messages();
     }
 
     void
-    process_position_change(util::position) final
+    notify_position_change(util::position) final
     {}
 };
 

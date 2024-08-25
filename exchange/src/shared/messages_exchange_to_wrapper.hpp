@@ -41,7 +41,7 @@ struct match {
         util::decimal_price price, std::string bid, std::string sid,
         util::decimal_price bcap, util::decimal_price scap
     ) :
-        position(side, ticker, quantity, price),
+        position{ticker, side, quantity, price},
         buyer_id(std::move(bid)), seller_id(std::move(sid)), buyer_capital(bcap),
         seller_capital(scap)
     {}

@@ -1,26 +1,51 @@
 #pragma once
 
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
+#include "order_pair.hpp"
+#include "shared/messages_exchange_to_wrapper.hpp"
+#include "shared/types/decimal_price.hpp"
+
+#include <glaze/util/expected.hpp>
+
+#include <expected>
 
 namespace nutc {
 namespace matching {
 
 class Engine {
-    util::decimal_price order_fee;
+    using decimal_price = util::decimal_price;
+
+    decimal_price order_fee_;
+    using side = nutc::util::Side;
+    using match = messages::match;
 
 public:
-    explicit Engine(util::decimal_price order_fee = 0.0) : order_fee(order_fee) {}
+    explicit Engine(decimal_price order_fee = 0.0) : order_fee_(order_fee) {}
 
-    std::vector<stored_match> match_orders(LimitOrderBook& orderbook);
+    template <TaggedOrder OrderT>
+    std::vector<match> match_order(OrderT order, LimitOrderBook& orderbook);
 
 private:
-    bool order_can_execute_(
-        LimitOrderBook& orderbook, stored_order& buyer, stored_order& seller
+    template <TaggedOrder OrderT>
+    glz::expected<match, bool>
+    match_incoming_order_(OrderT& aggressive_order, LimitOrderBook& orderbook);
+
+    template <util::Side AggressiveSide, TaggedOrder OrderT>
+    glz::expected<match, bool> match_incoming_order_(
+        OrderT& aggressive_order, tagged_limit_order& passive_order,
+        LimitOrderBook& orderbook
     );
 
-    stored_match create_match(const stored_order& buyer, const stored_order& seller);
+    template <util::Side AggressiveSide, typename OrderPairT>
+    glz::expected<match, bool>
+    match_orders_(OrderPairT& orders, LimitOrderBook& orderbook);
 
-    static void drop_order(LimitOrderBook& orderbook, uint64_t order_index);
+    enum class MatchFailure { buyer_failure, seller_failure, done_matching };
+
+    template <util::Side AggressiveSide, typename OrderPairT>
+    glz::expected<match, MatchFailure> attempt_match_(OrderPairT& orders);
+
+    decimal_price total_order_cost_(decimal_price price, double quantity) const;
 };
 
 } // namespace matching

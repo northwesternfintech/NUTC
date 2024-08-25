@@ -8,7 +8,7 @@ if [ ! -f "$profile_path" ]; then
   arch=x86_64
   build_type=Release
   compiler=gcc
-  compiler.cppstd=gnu20
+  compiler.cppstd=gnu23
   compiler.libcxx=libstdc++11
   compiler.version=13
   os=Linux"

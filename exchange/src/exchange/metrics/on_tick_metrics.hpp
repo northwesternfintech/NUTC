@@ -35,8 +35,8 @@ public:
     void report_current_tick(uint64_t tick_num);
     void report_trader_stats(const matching::TickerMapping& tickers);
     void report_ticker_stats(matching::TickerMapping& tickers);
-    void report_orders(const std::vector<matching::stored_order>& orders);
-    void report_matches(const std::vector<matching::stored_match>& orders);
+    void report_orders(const std::vector<matching::tagged_limit_order>& orders);
+    void report_matches(const std::vector<messages::match>& orders);
 
 private:
     Gauge create_gauge_(const std::string& gauge_name);

@@ -32,16 +32,16 @@ protected:
         return traders_;
     }
 
-    virtual void before_cycle_(uint64_t) override;
+    void before_cycle_(uint64_t) override;
 
-    virtual std::vector<stored_order> collect_orders(uint64_t) override;
+    std::vector<OrderVariant> collect_orders(uint64_t) override;
 
-    virtual std::vector<stored_match> match_orders_(std::vector<stored_order> orders
+    std::vector<messages::match> match_orders_(std::vector<OrderVariant> orders
     ) override;
 
-    virtual void handle_matches_(std::vector<stored_match> matches) override;
+    void handle_matches_(std::vector<messages::match> matches) override;
 
-    virtual void post_cycle_(uint64_t) override;
+    void post_cycle_(uint64_t) override;
 };
 
 } // namespace matching

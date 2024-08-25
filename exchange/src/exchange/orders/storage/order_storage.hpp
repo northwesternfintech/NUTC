@@ -1,51 +1,58 @@
 #pragma once
 #include "exchange/traders/trader_types/generic_trader.hpp"
-#include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
-#include "shared/types/decimal_price.hpp"
 
 #include <fmt/format.h>
 
 namespace nutc {
 namespace matching {
 
-struct stored_match {
-    traders::GenericTrader& buyer;
-    traders::GenericTrader& seller;
-    util::position position;
+template <typename BaseOrderT>
+class tagged_order : public BaseOrderT {
+    inline static constinit std::uint64_t global_index = 0;
 
-    operator messages::match() const
-    {
-        return {
-            position, buyer.get_id(), seller.get_id(), buyer.get_capital(),
-            seller.get_capital()
-        };
-    }
-};
-
-struct stored_order : public messages::limit_order {
+public:
     traders::GenericTrader* trader;
-    bool was_removed{false};
-    uint64_t order_index = get_and_increment_global_index();
+    bool active{true};
+    uint64_t order_index{++global_index};
 
-    inline static uint64_t
-    get_and_increment_global_index()
-    {
-        static uint64_t global_index = 0;
-        return global_index++;
-    }
+    tagged_order(traders::GenericTrader& order_creator, const auto& order) :
+        BaseOrderT(order), trader(&order_creator)
+    {}
 
-    operator util::position() const { return position; }
+    template <typename... Args>
+    tagged_order(traders::GenericTrader& order_creator, Args&&... args)
+    requires std::is_constructible_v<BaseOrderT, Args...>
+        : BaseOrderT(args...), trader(&order_creator)
+    {}
 
-    stored_order(
-        traders::GenericTrader& trader, util::Ticker ticker, util::Side side,
-        double quantity, util::decimal_price price, bool ioc = false
-    );
-
-    stored_order(const stored_order& other) = default;
-
-    ~stored_order() = default;
-    bool operator==(const stored_order& other) const;
+    bool operator==(const tagged_order& other) const = default;
 };
+
+using tagged_limit_order = tagged_order<messages::timed_limit_order>;
+using tagged_market_order = tagged_order<messages::timed_market_order>;
+
+template <typename T>
+struct is_limit_order : std::false_type {};
+
+template <>
+struct is_limit_order<tagged_limit_order> : std::true_type {};
+
+template <typename T>
+inline constexpr bool is_limit_order_v = is_limit_order<std::remove_cvref_t<T>>::value;
+
+template <typename T>
+struct is_market_order : std::false_type {};
+
+template <>
+struct is_market_order<tagged_market_order> : std::true_type {};
+
+template <typename T>
+inline constexpr bool is_market_order_v =
+    is_market_order<std::remove_cvref_t<T>>::value;
+
+template <typename T>
+concept TaggedOrder = is_limit_order_v<T> || is_market_order_v<T>;
+
 } // namespace matching
 } // namespace nutc

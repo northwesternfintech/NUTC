@@ -7,7 +7,6 @@ conan/
 prefix/
 **/.DS_Store
 CMakeLists.txt.user
-CMakeUserPresets.json
 logs/
 compile_commands.json
 html

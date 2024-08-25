@@ -19,15 +19,16 @@ public:
     {}
 
 protected:
-    std::vector<stored_match>
-    match_orders_(std::vector<stored_order> orders) override
+    std::vector<messages::match>
+    match_orders_(std::vector<OrderVariant> orders) override
     {
-        pusher.report_orders(orders);
+        // TODO: add back
+        // pusher.report_orders(orders);
         return BaseMatchingCycle::match_orders_(std::move(orders));
     }
 
     void
-    handle_matches_(std::vector<stored_match> matches) override
+    handle_matches_(std::vector<messages::match> matches) override
     {
         pusher.report_matches(matches);
         BaseMatchingCycle::handle_matches_(std::move(matches));

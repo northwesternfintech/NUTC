@@ -3,6 +3,7 @@
 #include "hash_table7.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 #include "shared/types/decimal_price.hpp"
+#include "shared/types/position.hpp"
 
 #include <absl/hash/hash.h>
 #include <boost/process.hpp>
@@ -23,11 +24,9 @@ public:
         USER_ID(std::move(user_id)), INITIAL_CAPITAL(capital)
     {}
 
-    virtual void
-    disable()
-    {}
-
     virtual ~GenericTrader() = default;
+
+    virtual void disable() = 0;
 
     virtual bool
     can_leverage() const
@@ -56,13 +55,15 @@ public:
         return INITIAL_CAPITAL + capital_delta_;
     }
 
+    // TODO: improve with find
     double
     get_holdings(util::Ticker ticker) const
     {
-        if (!holdings_.contains(ticker))
+        auto it = holdings_.find(ticker);
+        if (it == holdings_.end())
             return 0.0;
 
-        return holdings_.at(ticker);
+        return it->second;
     }
 
     double
@@ -90,12 +91,15 @@ public:
         return INITIAL_CAPITAL;
     }
 
-    virtual void process_position_change(util::position) = 0;
-    virtual void process_order_match(util::position);
-
+    virtual void notify_position_change(util::position) = 0;
+    virtual void notify_match(util::position);
     virtual void send_message(const std::string&) = 0;
 
-    virtual std::vector<messages::limit_order> read_orders() = 0;
+    using IncomingMessageQueue = std::vector<std::variant<
+        messages::timed_init_message, messages::timed_limit_order,
+        messages::timed_market_order>>;
+
+    virtual IncomingMessageQueue read_orders() = 0;
 };
 } // namespace traders
 } // namespace nutc

@@ -6,7 +6,7 @@ namespace nutc {
 namespace traders {
 
 void
-GenericTrader::process_order_match(util::position match)
+GenericTrader::notify_match(util::position match)
 {
     util::decimal_price total_cap = match.price * match.quantity;
     if (match.side == util::Side::buy) {

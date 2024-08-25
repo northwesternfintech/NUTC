@@ -1,7 +1,6 @@
 #pragma once
 
 #include "shared/messages_exchange_to_wrapper.hpp"
-#include "shared/util.hpp"
 #include "wrapper/pywrapper/pywrapper.hpp"
 #include "wrapper/pywrapper/rate_limiter.hpp"
 
@@ -32,7 +31,7 @@ public:
         on_account_update{account_update}
     {}
 
-    void report_startup_complete(bool success);
+    bool report_startup_complete();
 
     pywrapper::LimitOrderFunction place_limit_order();
 
@@ -51,10 +50,11 @@ private:
     template <typename T>
     void process_message(T&& message);
 
-    void publish_message(const std::string& message);
+    static void publish_message(const std::string& message);
 
     template <typename T, typename... Args>
-    [[nodiscard]] bool publish_order(Args&&...);
+    requires std::is_constructible_v<T, Args...>
+    [[nodiscard]] bool publish_message(Args&&...);
 
     template <typename T>
     T consume_message();

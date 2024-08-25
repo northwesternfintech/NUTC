@@ -29,11 +29,10 @@ protected:
     nutc::matching::LimitOrderBook orderbook_;
     Engine engine_;
 
-    std::vector<nutc::matching::stored_match>
-    add_to_engine_(const stored_order& order)
+    std::vector<nutc::messages::match>
+    add_to_engine_(const tagged_limit_order& order)
     {
-        orderbook_.add_order(order);
-        return engine_.match_orders(orderbook_);
+        return engine_.match_order(order, orderbook_);
     }
 };
 
@@ -41,8 +40,8 @@ TEST_F(UnitInvalidOrders, RemoveThenAddFunds)
 {
     trader1.modify_capital(-TEST_STARTING_CAPITAL);
 
-    stored_order order2{trader2, "ETH", sell, 1, 1.0};
-    stored_order order1{trader1, "ETH", buy, 1, 1.0};
+    tagged_limit_order order2{trader2, "ETH", sell, 1, 1.0};
+    tagged_limit_order order1{trader1, "ETH", buy, 1, 1.0};
 
     // Thrown out
     auto matches = add_to_engine_(order1);
@@ -68,8 +67,8 @@ TEST_F(UnitInvalidOrders, MatchingInvalidFunds)
 {
     trader1.modify_capital(-TEST_STARTING_CAPITAL);
 
-    stored_order order1{trader1, "ETH", buy, 1, 1.0};
-    stored_order order2{trader2, "ETH", sell, 1, 1.0};
+    tagged_limit_order order1{trader1, "ETH", buy, 1, 1.0};
+    tagged_limit_order order2{trader2, "ETH", sell, 1, 1.0};
 
     // Thrown out
     auto matches = add_to_engine_(order1);
@@ -96,10 +95,10 @@ TEST_F(UnitInvalidOrders, SimpleManyInvalidOrder)
     t3.modify_holdings("ETH", DEFAULT_QUANTITY);
     t4.modify_holdings("ETH", DEFAULT_QUANTITY);
 
-    stored_order order1{t1, "ETH", buy, 1, 1.0};
-    stored_order order2{t2, "ETH", buy, 1, 1.0};
-    stored_order order3{t3, "ETH", buy, 1, 1.0};
-    stored_order order4{t4, "ETH", sell, 3, 1.0};
+    tagged_limit_order order1{t1, "ETH", buy, 1, 1.0};
+    tagged_limit_order order2{t2, "ETH", buy, 1, 1.0};
+    tagged_limit_order order3{t3, "ETH", buy, 1, 1.0};
+    tagged_limit_order order4{t4, "ETH", sell, 3, 1.0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);

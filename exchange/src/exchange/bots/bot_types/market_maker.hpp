@@ -9,6 +9,7 @@
 
 namespace nutc::bots {
 using util::decimal_price;
+
 /**
  * No thread safety - do not run functions on multiple threads
  */
@@ -38,10 +39,10 @@ public:
         return TYPE;
     }
 
-	decimal_price calculate_lean_percent(const shared_bot_state& state);
+    decimal_price calculate_lean_percent(const shared_bot_state& state);
 
 private:
     void place_orders(util::Side side, decimal_price theo, decimal_price spread_offset);
 };
 
-} // namespace bots
+} // namespace nutc::bots

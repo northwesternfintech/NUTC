@@ -1,56 +1,86 @@
 #pragma once
 
-#include "types/position.hpp"
+#include "types/decimal_price.hpp"
 #include "types/ticker.hpp"
 #include "util.hpp"
 
 #include <fmt/format.h>
 #include <glaze/glaze.hpp>
+#include <glaze/util/type_traits.hpp>
+
+#ifdef __APPLE__
+#  include <mach/mach_time.h>
+#else
+#  include <x86intrin.h>
+#endif
 
 namespace nutc {
 namespace messages {
 
 struct init_message {
-    bool successful_startup;
+    std::string_view name = "init_message";
+};
+
+struct market_order {
+    util::Ticker ticker;
+    util::Side side;
+    double quantity;
+
+    market_order() = default;
+
+    market_order(util::Ticker ticker, util::Side side, double quantity) :
+        ticker(ticker), side(side), quantity(quantity)
+    {}
 };
 
 struct limit_order {
-    util::position position;
+    util::Ticker ticker;
+    util::Side side;
+    double quantity;
+    util::decimal_price price;
     bool ioc;
 
     bool operator==(const limit_order& other) const = default;
 
     limit_order(
-        util::Side side, util::Ticker ticker, double quantity,
+        util::Ticker ticker, util::Side side, double quantity,
         util::decimal_price price, bool ioc = false
     ) :
-        position{side, ticker, quantity, price},
-        ioc(ioc)
-    {}
-
-    limit_order(const util::position& position, bool ioc = false) :
-        position(position), ioc(ioc)
-    {}
-
-    limit_order(util::Side side, util::Ticker ticker, double quantity) :
-        position{side, ticker, quantity, market_order_price(side)}, ioc{true}
+        ticker{ticker},
+        side{side}, quantity{quantity}, price{price}, ioc{ioc}
     {}
 
     limit_order() = default;
-
-private:
-    static util::decimal_price
-    market_order_price(util::Side side)
-    {
-		// TODO: fix
-        if (side == util::Side::buy) {
-            return static_cast<double>(std::numeric_limits<uint16_t>::max());
-        }
-        else {
-            return std::numeric_limits<util::decimal_price>::min();
-        }
-    }
 };
+
+namespace {
+inline uint64_t
+get_time()
+{
+#ifdef __APPLE__
+    static uint64_t min_time = 0;
+    return min_time = std::max(min_time + 1, mach_absolute_time());
+#else
+    return __rdtsc();
+#endif
+}
+} // namespace
+
+template <typename OrderT>
+struct timestamped_message : public OrderT {
+    uint64_t timestamp;
+
+    timestamped_message() = delete;
+
+    template <typename... Args>
+    explicit timestamped_message(Args&&... args) :
+        OrderT(std::forward<Args>(args)...), timestamp(get_time())
+    {}
+};
+
+using timed_init_message = timestamped_message<init_message>;
+using timed_limit_order = timestamped_message<limit_order>;
+using timed_market_order = timestamped_message<market_order>;
 
 } // namespace messages
 } // namespace nutc
@@ -59,12 +89,20 @@ private:
 template <>
 struct glz::meta<nutc::messages::limit_order> {
     using t = nutc::messages::limit_order;
-    static constexpr auto value = object(&t::position, &t::ioc);
+    static constexpr auto value =
+        object("limit", &t::ticker, &t::side, &t::quantity, &t::price, &t::ioc);
+};
+
+/// \cond
+template <>
+struct glz::meta<nutc::messages::market_order> {
+    using t = nutc::messages::market_order;
+    static constexpr auto value = object("market", &t::ticker, &t::side, &t::quantity);
 };
 
 /// \cond
 template <>
 struct glz::meta<nutc::messages::init_message> {
     using t = nutc::messages::init_message;
-    static constexpr auto value = object(&t::successful_startup);
+    static constexpr auto value = object(&t::name);
 };

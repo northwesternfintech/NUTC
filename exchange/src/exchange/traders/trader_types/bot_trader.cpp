@@ -19,7 +19,7 @@ BotTrader::generate_gaussian_noise(double mean, double stddev)
 }
 
 void
-BotTrader::process_position_change(util::position order)
+BotTrader::notify_position_change(util::position order)
 {
     assert(order.ticker == TICKER);
 

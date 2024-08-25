@@ -17,26 +17,26 @@ public:
     {}
 
     void
-    send_message(const std::string&) override
-    {}
+    send_message(const std::string& str) final
+    {
+        benchmark::DoNotOptimize(str.size());
+    }
 
     virtual void
-    process_position_change(util::position change) override
+    notify_position_change(util::position change) final
     {
         benchmark::DoNotOptimize(change);
     }
 
-    std::vector<messages::limit_order>
-    read_orders() override
+    IncomingMessageQueue
+    read_orders() final
     {
         return {};
     }
 
     void
-    add_order(messages::limit_order order)
-    {
-        benchmark::DoNotOptimize(order);
-    }
+    disable() final
+    {}
 
     const std::string&
     get_type() const final

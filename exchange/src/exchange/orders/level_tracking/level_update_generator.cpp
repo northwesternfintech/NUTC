@@ -11,11 +11,11 @@ LevelUpdateGenerator::get_updates(util::Ticker ticker) const
 
     for (util::decimal_price modified_decimal : modified_buy_levels_) {
         auto quantity = quantity_tracker_.get_level(util::Side::buy, modified_decimal);
-        updates.emplace_back(util::Side::buy, ticker, quantity, modified_decimal);
+        updates.emplace_back(ticker, util::Side::buy, quantity, modified_decimal);
     }
     for (util::decimal_price modified_decimal : modified_sell_levels_) {
         auto quantity = quantity_tracker_.get_level(util::Side::sell, modified_decimal);
-        updates.emplace_back(util::Side::sell, ticker, quantity, modified_decimal);
+        updates.emplace_back(ticker, util::Side::sell, quantity, modified_decimal);
     }
 
     return updates;

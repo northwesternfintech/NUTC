@@ -1,12 +1,13 @@
 #include "exchange/matching/engine.hpp"
 #include "exchange/orders/storage/order_storage.hpp"
 #include "exchange/traders/trader_container.hpp"
+#include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
 #include "shared/types/ticker.hpp"
 
 using Engine = nutc::matching::Engine;
 using limit_order = nutc::messages::limit_order;
-using stored_order = nutc::matching::stored_order;
+using tagged_limit_order = nutc::matching::tagged_limit_order;
 using TraderContainer = nutc::traders::TraderContainer;
 
 namespace nutc {
@@ -15,7 +16,7 @@ namespace test_utils {
 bool is_nearly_equal(double f_a, double f_b);
 
 bool validate_match(
-    const nutc::matching::stored_match& match, util::Ticker ticker,
+    const nutc::messages::match& match, util::Ticker ticker,
     const std::string& buyer_id, const std::string& seller_id, util::Side side,
     double quantity, double price
 );
@@ -48,10 +49,10 @@ bool validate_limit_order(
             << ", side = " << static_cast<int>(side_) << ", price = " << (price_)      \
             << ", quantity = " << (quantity_)                                          \
             << ". Actual match: ticker = " << std::string{(match).position.ticker}     \
-            << ", buyer_id = " << (match).buyer.get_id()                               \
-            << ", seller_id = " << (match).seller.get_id()                             \
+            << ", buyer_id = " << (match).buyer_id                                     \
+            << ", seller_id = " << (match).seller_id                                   \
             << ", side = " << static_cast<int>((match).position.side)                  \
-            << ", price = " << double{(match).position.price}                                  \
+            << ", price = " << double{(match).position.price}                          \
             << ", quantity = " << (match).position.quantity;                           \
     } while (0)
 
@@ -68,7 +69,8 @@ bool validate_limit_order(
             << ", quantity = " << (quantity_)                                          \
             << ". Actual update: ticker = " << std::string{(update).ticker}            \
             << ", side = " << static_cast<int>((update).side)                          \
-            << ", price = " << double((update).price) << ", quantity = " << (update).quantity; \
+            << ", price = " << double((update).price)                                  \
+            << ", quantity = " << (update).quantity;                                   \
     } while (0)
 
 #define ASSERT_EQ_LIMIT_ORDER(/* NOLINT (cppcoreguidelines-macro-usage) */             \
@@ -86,5 +88,6 @@ bool validate_limit_order(
             << ""                                                                      \
             << ", ticker = " << std::string{(update).ticker}                           \
             << ", side = " << static_cast<int>((update).side)                          \
-            << ", price = " << double((update).price) << ", quantity = " << (update).quantity; \
+            << ", price = " << double((update).price)                                  \
+            << ", quantity = " << (update).quantity;                                   \
     } while (0)

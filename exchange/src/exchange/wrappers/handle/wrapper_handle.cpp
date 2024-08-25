@@ -7,8 +7,6 @@
 #include <boost/asio.hpp>
 #include <fmt/format.h>
 
-#include <iostream>
-
 namespace {
 std::string
 quote_id(std::string user_id)
@@ -31,23 +29,6 @@ force_unwrap_optional(std::optional<std::string> opt, std::string error_msg)
 
 namespace nutc {
 namespace wrappers {
-std::vector<limit_order>
-WrapperHandle::read_messages()
-{
-    auto messages = reader_.get_messages();
-    std::vector<limit_order> orders;
-    orders.reserve(messages.size());
-
-    assert(!std::ranges::any_of(messages, [](auto&& mess) {
-        return std::holds_alternative<init_message>(mess);
-    }));
-
-    std::transform(
-        messages.begin(), messages.end(), std::back_inserter(orders),
-        [](const auto& order) { return std::get<limit_order>(order); }
-    );
-    return orders;
-}
 
 const fs::path&
 WrapperHandle::wrapper_binary_path()
@@ -102,11 +83,7 @@ WrapperHandle::WrapperHandle(const std::string& algo_path) :
 void
 WrapperHandle::block_on_init()
 {
-    auto message = reader_.get_message();
-    if (std::holds_alternative<init_message>(message)) {
-        return;
-    }
-    throw std::runtime_error("Received non-init message on initialization");
+    while (!std::holds_alternative<timed_init_message>(reader_.get_message())) {}
 }
 
 WrapperHandle::WrapperHandle(
@@ -125,9 +102,13 @@ WrapperHandle::WrapperHandle(
 
     using algorithm_t = nutc::messages::algorithm_content;
     algorithm_t algorithm_message = algorithm_t(algorithm);
-    auto encoded_message = glz::write_json(algorithm_message);
 
-    writer_.send_message(encoded_message);
+    auto encoded_message = glz::write_json(algorithm_message);
+    if (!encoded_message.has_value()) [[unlikely]] {
+        throw std::runtime_error(glz::format_error(encoded_message.error()));
+    }
+
+    writer_.send_message(*encoded_message);
     block_on_init();
 }
 

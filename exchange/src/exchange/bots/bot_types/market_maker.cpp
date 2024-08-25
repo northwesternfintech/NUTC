@@ -16,7 +16,9 @@ struct price_level {
 
     consteval price_level(
         nutc::util::decimal_price price_delta, double quantity_factor
-    ) : PRICE_DELTA(price_delta), QUANTITY_FACTOR(quantity_factor)
+    ) :
+        PRICE_DELTA(price_delta),
+        QUANTITY_FACTOR(quantity_factor)
     {}
 };
 

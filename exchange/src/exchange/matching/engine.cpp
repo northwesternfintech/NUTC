@@ -6,113 +6,126 @@
 namespace nutc {
 namespace matching {
 
-using side = nutc::util::Side;
 using match = nutc::messages::match;
 
-namespace {
-static constexpr util::decimal_price decimal_one(1.0);
-
-constexpr util::decimal_price
-order_price(const stored_order& order1, const stored_order& order2)
+template <TaggedOrder OrderT>
+std::vector<match>
+Engine::match_order(OrderT order, LimitOrderBook& orderbook)
 {
-    return order1.order_index < order2.order_index ? order1.position.price
-                                                   : order2.position.price;
-}
+    std::vector<match> matches;
 
-constexpr double
-order_quantity(const stored_order& order1, const stored_order& order2)
-{
-    return std::min(order1.position.quantity, order2.position.quantity);
-}
-} // namespace
-
-std::vector<stored_match>
-Engine::match_orders(LimitOrderBook& orderbook)
-{
-    std::vector<stored_match> matches;
-    while (true) {
-        auto highest_bid_opt = orderbook.get_top_order(side::buy);
-        auto cheapest_ask_opt = orderbook.get_top_order(side::sell);
-
-        if (!highest_bid_opt.has_value() || !cheapest_ask_opt.has_value())
-            [[unlikely]] {
+    while (order.active) {
+        auto match_opt = match_incoming_order_(order, orderbook);
+        if (match_opt.has_value())
+            matches.push_back(match_opt.value());
+        else if (match_opt.error())
             break;
-        }
-
-        stored_order& highest_bid = highest_bid_opt->get();
-        stored_order& cheapest_ask = cheapest_ask_opt->get();
-
-        if (highest_bid.position.price < cheapest_ask.position.price) [[unlikely]] {
-            break;
-        }
-
-        if (!order_can_execute_(orderbook, highest_bid, cheapest_ask))
-            continue;
-
-        auto match = create_match(highest_bid, cheapest_ask);
-
-        orderbook.change_quantity(highest_bid, -match.position.quantity);
-        orderbook.change_quantity(cheapest_ask, -match.position.quantity);
-
-        matches.emplace_back(match);
     }
+
+    if constexpr (is_limit_order_v<OrderT>) {
+        if (!order.ioc && !util::is_close_to_zero(order.quantity)) {
+            orderbook.add_order(order);
+        }
+    }
+
     return matches;
 }
 
-stored_match
-Engine::create_match(const stored_order& buyer, const stored_order& seller)
+template <util::Side AggressiveSide, typename OrderPairT>
+glz::expected<match, bool>
+Engine::match_orders_(OrderPairT& orders, LimitOrderBook& orderbook)
 {
-    assert(buyer.position.ticker == seller.position.ticker);
-    double quantity = order_quantity(buyer, seller);
-    util::decimal_price price = order_price(buyer, seller);
-
-    util::Side aggressive_side =
-        buyer.order_index < seller.order_index ? util::Side::sell : util::Side::buy;
-
-    auto& ticker = buyer.position.ticker;
-    buyer.trader->process_order_match(
-        {util::Side::buy, ticker, quantity, price * (decimal_one + order_fee)}
-    );
-    seller.trader->process_order_match(
-        {util::Side::sell, ticker, quantity, price * (decimal_one - order_fee)}
-    );
-
-    util::position position{aggressive_side, buyer.position.ticker, quantity, price};
-    stored_match match{*buyer.trader, *seller.trader, position};
-    return match;
+    auto match_result = attempt_match_<AggressiveSide>(orders);
+    if (match_result.has_value()) [[likely]] {
+        orders.handle_match(*match_result, order_fee_, orderbook);
+        return match_result.value();
+    }
+    if (match_result.error() == MatchFailure::seller_failure) {
+        if constexpr (AggressiveSide == side::buy) {
+            orderbook.mark_order_removed(orders.seller);
+            return glz::unexpected(false);
+        }
+    }
+    if (match_result.error() == MatchFailure::buyer_failure) {
+        if constexpr (AggressiveSide == side::sell) {
+            orderbook.mark_order_removed(orders.buyer);
+            return glz::unexpected(false);
+        }
+    }
+    return glz::unexpected(true);
 }
 
-bool
-Engine::order_can_execute_(
-    LimitOrderBook& orderbook, stored_order& buyer, stored_order& seller
+template <util::Side AggressiveSide, TaggedOrder OrderT>
+glz::expected<match, bool>
+Engine::match_incoming_order_(
+    OrderT& aggressive_order, tagged_limit_order& passive_order,
+    LimitOrderBook& orderbook
 )
 {
-    double quantity = order_quantity(buyer, seller);
-
-    util::decimal_price price = order_price(buyer, seller);
-    util::decimal_price total_price = ((decimal_one + order_fee) * price) * quantity;
-
-    if (!buyer.trader->can_leverage() && buyer.trader->get_capital() < total_price) {
-        orderbook.mark_order_removed(buyer);
-        return false;
+    if constexpr (AggressiveSide == side::buy) {
+        OrderPair pair{aggressive_order, passive_order};
+        return match_orders_<AggressiveSide>(pair, orderbook);
     }
-    if (!seller.trader->can_leverage()
-        && seller.trader->get_holdings(seller.position.ticker) < quantity) {
-        orderbook.mark_order_removed(seller);
-        return false;
+    else {
+        OrderPair pair{passive_order, aggressive_order};
+        return match_orders_<AggressiveSide>(pair, orderbook);
     }
-    if (seller.trader == buyer.trader) [[unlikely]] {
-        if (seller.order_index <= buyer.order_index) {
-            orderbook.mark_order_removed(seller);
-        }
-        else {
-            orderbook.mark_order_removed(buyer);
-        }
-        return false;
-    }
-
-    return true;
 }
+
+util::decimal_price
+Engine::total_order_cost_(decimal_price price, double quantity) const
+{
+    decimal_price fee{order_fee_ * price};
+    decimal_price price_per = price + fee;
+    return price_per * quantity;
+}
+
+template <util::Side AggressiveSide, typename OrderPairT>
+glz::expected<match, Engine::MatchFailure>
+Engine::attempt_match_(OrderPairT& orders)
+{
+    auto price_opt = orders.potential_match_price();
+    if (!price_opt) [[unlikely]]
+        return glz::unexpected(MatchFailure::done_matching);
+
+    auto match_price = *price_opt;
+    double match_quantity = orders.potential_match_quantity();
+    decimal_price total_price{total_order_cost_(match_price, match_quantity)};
+    if (orders.buyer.trader->get_capital() < total_price) [[unlikely]]
+        return glz::unexpected(MatchFailure::buyer_failure);
+    if (orders.seller.trader->get_holdings(orders.seller.ticker) < match_quantity)
+        [[unlikely]]
+        return glz::unexpected(MatchFailure::seller_failure);
+    if (orders.buyer.trader == orders.seller.trader) [[unlikely]] {
+        return glz::unexpected(MatchFailure::buyer_failure);
+    }
+    return orders.template create_match<AggressiveSide>(match_quantity, match_price);
+}
+
+template <TaggedOrder OrderT>
+glz::expected<match, bool>
+Engine::match_incoming_order_(OrderT& aggressive_order, LimitOrderBook& orderbook)
+{
+    if (aggressive_order.side == side::buy) {
+        auto passive_order = orderbook.get_top_order(side::sell);
+        if (!passive_order.has_value())
+            return glz::unexpected(true);
+        return match_incoming_order_<side::buy>(
+            aggressive_order, *passive_order, orderbook
+        );
+    }
+
+    auto passive_order = orderbook.get_top_order(side::buy);
+    if (!passive_order.has_value())
+        return glz::unexpected(true);
+    return match_incoming_order_<side::sell>(
+        aggressive_order, *passive_order, orderbook
+    );
+}
+
+template std::vector<match> Engine::match_order<>(tagged_limit_order, LimitOrderBook&);
+
+template std::vector<match> Engine::match_order<>(tagged_market_order, LimitOrderBook&);
 
 } // namespace matching
 } // namespace nutc

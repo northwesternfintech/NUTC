@@ -8,15 +8,19 @@
 namespace nutc {
 namespace wrappers {
 
-using init_message = messages::init_message;
-using limit_order = messages::limit_order;
+using namespace messages;
 
 namespace bp = boost::process;
 namespace ba = boost::asio;
 
 class PipeReader {
-    std::mutex message_lock_{};
-    std::vector<std::variant<init_message, limit_order>> message_queue_{};
+public:
+    using IncomingMessageVariant =
+        std::variant<timed_init_message, timed_limit_order, timed_market_order>;
+
+private:
+    std::mutex message_lock_;
+    std::vector<IncomingMessageVariant> messages;
     std::shared_ptr<ba::io_context> pipe_context_;
     bp::async_pipe pipe_in_;
 
@@ -34,15 +38,34 @@ public:
     }
 
     PipeReader();
-
+    PipeReader(const PipeReader&) = delete;
+    PipeReader(PipeReader&&) = delete;
+    PipeReader& operator=(const PipeReader&) = delete;
+    PipeReader& operator=(PipeReader&&) = delete;
     ~PipeReader();
 
-    // Nonblocking, all available messages
-    std::vector<std::variant<init_message, limit_order>> get_messages();
+    // Blocking and O(1), use sparingly
+    IncomingMessageVariant
+    get_message()
+    {
+        while (true) {
+            std::lock_guard<std::mutex> lock{message_lock_};
+            if (messages.empty())
+                continue;
+            auto res = messages.front();
+            messages.erase(messages.begin());
+            return res;
+        }
+    }
 
-    // Blocking, O(messages) due to erase
-    // Use sparingly
-    std::variant<init_message, limit_order> get_message();
+    std::vector<IncomingMessageVariant>
+    get_messages()
+    {
+        std::lock_guard<std::mutex> lock{message_lock_};
+        std::vector<IncomingMessageVariant> result;
+        result.swap(messages);
+        return result;
+    }
 };
 
 } // namespace wrappers
