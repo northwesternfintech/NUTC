@@ -43,7 +43,7 @@ PipeReader::store_message_(const std::string& message)
     }
 
     auto store_message = [this]<typename MessageT>(const MessageT& v) {
-        messages.push_back(timed_message<MessageT>{v});
+        messages.push_back(timestamped_message<MessageT>{v});
     };
 
     std::lock_guard<std::mutex> lock{message_lock_};

@@ -52,8 +52,7 @@ inline constexpr bool is_market_order_v =
     is_market_order<std::remove_cvref_t<T>>::value;
 
 template <typename T>
-concept TaggedOrder =
-    std::disjunction_v<is_limit_order<T>> || std::disjunction_v<is_market_order<T>>;
+concept TaggedOrder = is_limit_order_v<T> || is_market_order_v<T>;
 
 } // namespace matching
 } // namespace nutc

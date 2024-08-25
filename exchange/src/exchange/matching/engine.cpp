@@ -31,55 +31,26 @@ Engine::match_order(OrderT order, LimitOrderBook& orderbook)
     return matches;
 }
 
-template <TaggedOrder BuyerT, TaggedOrder SellerT>
-requires HasLimitOrder<BuyerT, SellerT>
-std::optional<util::decimal_price>
-Engine::potential_match_price(const BuyerT& buyer, const SellerT& seller)
-{
-    if constexpr (is_market_order_v<decltype(buyer)>)
-        return seller.price;
-    else if constexpr (is_market_order_v<decltype(seller)>)
-        return buyer.price;
-    else if (buyer.price < seller.price)
-        return std::nullopt;
-    else
-        return buyer.timestamp < seller.timestamp ? buyer.price : seller.price;
-}
-
-template <util::Side AggressiveSide, TaggedOrder BuyerT, TaggedOrder SellerT>
-requires HasLimitOrder<BuyerT, SellerT>
+template <util::Side AggressiveSide, typename OrderPairT>
 glz::expected<match, bool>
-Engine::match_orders_(BuyerT& buyer, SellerT& seller, LimitOrderBook& orderbook)
+Engine::match_orders_(OrderPairT& orders, LimitOrderBook& orderbook)
 {
-    auto match_result = attempt_match_<AggressiveSide>(buyer, seller);
+    auto match_result = attempt_match_<AggressiveSide>(orders);
     if (match_result.has_value()) [[likely]] {
-        if constexpr (is_limit_order_v<decltype(seller)>) {
-            orderbook.change_quantity(seller, -match_result->position.quantity);
-        }
-        else {
-            seller.active = false;
-        }
-        if constexpr (is_limit_order_v<decltype(buyer)>) {
-            orderbook.change_quantity(buyer, -match_result->position.quantity);
-        }
-        else {
-            buyer.active = false;
-        }
+        orders.handle_match(*match_result, order_fee_, orderbook);
         return match_result.value();
     }
     if (match_result.error() == MatchFailure::seller_failure) {
-        if constexpr (is_limit_order_v<decltype(seller)>) {
-            orderbook.mark_order_removed(seller);
-        }
-        if constexpr (AggressiveSide == side::buy)
+        if constexpr (AggressiveSide == side::buy) {
+            orderbook.mark_order_removed(orders.seller);
             return glz::unexpected(false);
+        }
     }
     if (match_result.error() == MatchFailure::buyer_failure) {
-        if constexpr (is_limit_order_v<decltype(buyer)>) {
-            orderbook.mark_order_removed(buyer);
-        }
-        if constexpr (AggressiveSide == side::sell)
+        if constexpr (AggressiveSide == side::sell) {
+            orderbook.mark_order_removed(orders.buyer);
             return glz::unexpected(false);
+        }
     }
     return glz::unexpected(true);
 }
@@ -92,22 +63,13 @@ Engine::match_incoming_order_(
 )
 {
     if constexpr (AggressiveSide == side::buy) {
-        return match_orders_<AggressiveSide>(
-            aggressive_order, passive_order, orderbook
-        );
+        OrderPair pair{aggressive_order, passive_order};
+        return match_orders_<AggressiveSide>(pair, orderbook);
     }
     else {
-        return match_orders_<AggressiveSide>(
-            passive_order, aggressive_order, orderbook
-        );
+        OrderPair pair{passive_order, aggressive_order};
+        return match_orders_<AggressiveSide>(pair, orderbook);
     }
-}
-
-template <TaggedOrder BuyerT, TaggedOrder SellerT>
-double
-Engine::potential_match_quantity(const BuyerT& order1, const SellerT& order2)
-{
-    return std::min(order1.quantity, order2.quantity);
 }
 
 util::decimal_price
@@ -118,26 +80,26 @@ Engine::total_order_cost_(decimal_price price, double quantity) const
     return price_per * quantity;
 }
 
-template <util::Side AggressiveSide, TaggedOrder BuyerT, TaggedOrder SellerT>
-requires HasLimitOrder<BuyerT, SellerT>
+template <util::Side AggressiveSide, typename OrderPairT>
 glz::expected<match, Engine::MatchFailure>
-Engine::attempt_match_(BuyerT& buyer, SellerT& seller)
+Engine::attempt_match_(OrderPairT& orders)
 {
-    auto price_opt = potential_match_price(buyer, seller);
+    auto price_opt = orders.potential_match_price();
     if (!price_opt) [[unlikely]]
         return glz::unexpected(MatchFailure::done_matching);
 
     auto match_price = *price_opt;
-    double match_quantity = potential_match_quantity(buyer, seller);
+    double match_quantity = orders.potential_match_quantity();
     decimal_price total_price{total_order_cost_(match_price, match_quantity)};
-    if (buyer.trader->get_capital() < total_price) [[unlikely]]
+    if (orders.buyer.trader->get_capital() < total_price) [[unlikely]]
         return glz::unexpected(MatchFailure::buyer_failure);
-    if (seller.trader->get_holdings(seller.ticker) < match_quantity) [[unlikely]]
+    if (orders.seller.trader->get_holdings(orders.seller.ticker) < match_quantity)
+        [[unlikely]]
         return glz::unexpected(MatchFailure::seller_failure);
-    if (buyer.trader == seller.trader) [[unlikely]] {
+    if (orders.buyer.trader == orders.seller.trader) [[unlikely]] {
         return glz::unexpected(MatchFailure::buyer_failure);
     }
-    return create_match_(match_price, match_quantity, buyer, seller);
+    return orders.template create_match<AggressiveSide>(match_quantity, match_price);
 }
 
 template <TaggedOrder OrderT>
@@ -153,40 +115,12 @@ Engine::match_incoming_order_(OrderT& aggressive_order, LimitOrderBook& orderboo
         );
     }
 
-    assert(aggressive_order.side == side::sell);
     auto passive_order = orderbook.get_top_order(side::buy);
     if (!passive_order.has_value())
         return glz::unexpected(true);
     return match_incoming_order_<side::sell>(
         aggressive_order, *passive_order, orderbook
     );
-}
-
-template <TaggedOrder BuyerT, TaggedOrder SellerT>
-requires HasLimitOrder<BuyerT, SellerT>
-messages::match
-Engine::create_match_(
-    util::decimal_price price, double quantity, BuyerT& buyer, SellerT& seller
-)
-{
-    util::Side aggressive_side =
-        buyer.timestamp < seller.timestamp ? util::Side::sell : util::Side::buy;
-
-    auto& ticker = buyer.ticker;
-    buyer.trader->notify_match(
-        {ticker, util::Side::buy, quantity,
-         price * (util::decimal_price{1.0} + order_fee_)}
-    );
-    seller.trader->notify_match(
-        {ticker, util::Side::sell, quantity,
-         price * (util::decimal_price{1.0} - order_fee_)}
-    );
-
-    util::position position{buyer.ticker, aggressive_side, quantity, price};
-    return {
-        position, buyer.trader->get_id(), seller.trader->get_id(),
-        buyer.trader->get_capital(), seller.trader->get_capital()
-    };
 }
 
 template std::vector<match> Engine::match_order<>(tagged_limit_order, LimitOrderBook&);

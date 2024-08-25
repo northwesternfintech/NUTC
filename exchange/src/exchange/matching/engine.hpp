@@ -1,6 +1,7 @@
 #pragma once
 
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
+#include "order_pair.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
 #include "shared/types/decimal_price.hpp"
 
@@ -10,9 +11,6 @@
 
 namespace nutc {
 namespace matching {
-
-template <typename... Ts>
-concept HasLimitOrder = std::disjunction_v<is_limit_order<Ts>...>;
 
 class Engine {
     using decimal_price = util::decimal_price;
@@ -38,31 +36,16 @@ private:
         LimitOrderBook& orderbook
     );
 
-    template <util::Side AggressiveSide, TaggedOrder BuyerT, TaggedOrder SellerT>
-    requires HasLimitOrder<BuyerT, SellerT>
+    template <util::Side AggressiveSide, typename OrderPairT>
     glz::expected<match, bool>
-    match_orders_(BuyerT& buyer, SellerT& seller, LimitOrderBook& orderbook);
+    match_orders_(OrderPairT& orders, LimitOrderBook& orderbook);
 
     enum class MatchFailure { buyer_failure, seller_failure, done_matching };
 
-    template <util::Side AggressiveSide, TaggedOrder BuyerT, TaggedOrder SellerT>
-    requires HasLimitOrder<BuyerT, SellerT>
-    glz::expected<match, MatchFailure> attempt_match_(BuyerT& buyer, SellerT& seller);
-
-    template <TaggedOrder BuyerT, TaggedOrder SellerT>
-    requires HasLimitOrder<BuyerT, SellerT>
-    match
-    create_match_(decimal_price price, double quantity, BuyerT& buyer, SellerT& seller);
+    template <util::Side AggressiveSide, typename OrderPairT>
+    glz::expected<match, MatchFailure> attempt_match_(OrderPairT& orders);
 
     decimal_price total_order_cost_(decimal_price price, double quantity) const;
-
-    template <TaggedOrder BuyerT, TaggedOrder SellerT>
-    requires HasLimitOrder<BuyerT, SellerT>
-    static std::optional<util::decimal_price>
-    potential_match_price(const BuyerT& buyer, const SellerT& seller);
-
-    template <TaggedOrder BuyerT, TaggedOrder SellerT>
-    static double potential_match_quantity(const BuyerT& order1, const SellerT& order2);
 };
 
 } // namespace matching

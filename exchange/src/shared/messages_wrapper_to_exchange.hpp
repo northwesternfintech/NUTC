@@ -45,7 +45,9 @@ struct limit_order {
     limit_order(
         util::Ticker ticker, util::Side side, double quantity,
         util::decimal_price price, bool ioc = false
-    ) : ticker{ticker}, side{side}, quantity{quantity}, price{price}, ioc{ioc}
+    ) :
+        ticker{ticker},
+        side{side}, quantity{quantity}, price{price}, ioc{ioc}
     {}
 
     limit_order() = default;
@@ -65,18 +67,20 @@ get_time()
 } // namespace
 
 template <typename OrderT>
-struct timed_message : public OrderT {
+struct timestamped_message : public OrderT {
     uint64_t timestamp;
 
+    timestamped_message() = delete;
+
     template <typename... Args>
-    timed_message(Args&&... args) :
+    explicit timestamped_message(Args&&... args) :
         OrderT(std::forward<Args>(args)...), timestamp(get_time())
     {}
 };
 
-using timed_init_message = timed_message<init_message>;
-using timed_limit_order = timed_message<limit_order>;
-using timed_market_order = timed_message<market_order>;
+using timed_init_message = timestamped_message<init_message>;
+using timed_limit_order = timestamped_message<limit_order>;
+using timed_market_order = timestamped_message<market_order>;
 
 } // namespace messages
 } // namespace nutc

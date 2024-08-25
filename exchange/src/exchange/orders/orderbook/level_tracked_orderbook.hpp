@@ -1,6 +1,7 @@
 #pragma once
 
 #include "exchange/orders/level_tracking/level_update_generator.hpp"
+#include "exchange/orders/storage/order_storage.hpp"
 #include "shared/types/decimal_price.hpp"
 
 namespace nutc::matching {
@@ -10,32 +11,30 @@ class LevelTrackedOrderbook : public BaseOrderBookT {
     LevelUpdateGenerator level_update_generator_;
 
 public:
-    using OrderT = BaseOrderBookT::OrderT;
-
     LevelUpdateGenerator&
     get_update_generator()
     {
         return level_update_generator_;
     }
 
-    virtual OrderT&
-    add_order(const OrderT& order) override
+    tagged_limit_order&
+    add_order(const tagged_limit_order& order) override
     {
         modify_level_(order.side, order.quantity, order.price);
 
         return BaseOrderBookT::add_order(order);
     }
 
-    virtual void
-    mark_order_removed(OrderT& order) override
+    void
+    mark_order_removed(tagged_limit_order& order) override
     {
         modify_level_(order.side, -order.quantity, order.price);
 
         BaseOrderBookT::mark_order_removed(order);
     }
 
-    virtual void
-    change_quantity(OrderT& order, double quantity_delta) override
+    void
+    change_quantity(tagged_limit_order& order, double quantity_delta) override
     {
         modify_level_(order.side, quantity_delta, order.price);
 

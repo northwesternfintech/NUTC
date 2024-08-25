@@ -12,15 +12,15 @@ LimitOrderBook::clean_tree(util::Side side)
     auto& tree = side == util::Side::buy ? bids_ : asks_;
     while (!tree.empty()) {
         auto key = side == util::Side::buy ? std::prev(tree.end()) : tree.begin();
-        auto& q = key->second;
+        auto& queue = key->second;
 
-        if (q.empty()) {
+        if (queue.empty()) {
             tree.erase(key);
             continue;
         }
 
-        if (!q.front().active) {
-            q.pop();
+        if (!queue.front().active) {
+            queue.pop();
             continue;
         }
 
@@ -28,9 +28,8 @@ LimitOrderBook::clean_tree(util::Side side)
     }
 }
 
-auto
+std::optional<std::reference_wrapper<tagged_limit_order>>
 LimitOrderBook::get_top_order(util::Side side)
-    -> std::optional<std::reference_wrapper<OrderT>>
 {
     clean_tree(side);
 
@@ -40,12 +39,12 @@ LimitOrderBook::get_top_order(util::Side side)
         return std::nullopt;
 
     auto key = side == util::Side::buy ? std::prev(tree.end()) : tree.begin();
-    auto& q = key->second;
+    auto& queue = key->second;
 
-    if (q.empty()) [[unlikely]]
+    if (queue.empty()) [[unlikely]]
         return std::nullopt;
 
-    return q.front();
+    return queue.front();
 }
 
 util::decimal_price
@@ -58,7 +57,7 @@ LimitOrderBook::get_midprice() const
 }
 
 void
-LimitOrderBook::change_quantity(OrderT& order, double quantity_delta)
+LimitOrderBook::change_quantity(tagged_limit_order& order, double quantity_delta)
 {
     if (util::is_close_to_zero(order.quantity + quantity_delta)) {
         mark_order_removed(order);
@@ -73,7 +72,7 @@ LimitOrderBook::change_quantity(OrderT& order, double quantity_delta)
 }
 
 void
-LimitOrderBook::mark_order_removed(OrderT& order)
+LimitOrderBook::mark_order_removed(tagged_limit_order& order)
 {
     order.trader->notify_position_change(
         {order.ticker, order.side, -order.quantity, order.price}
@@ -82,8 +81,8 @@ LimitOrderBook::mark_order_removed(OrderT& order)
     order.active = false;
 }
 
-auto
-LimitOrderBook::add_order(const OrderT& order) -> OrderT&
+tagged_limit_order&
+LimitOrderBook::add_order(const tagged_limit_order& order)
 {
     order.trader->notify_position_change(
         {order.ticker, order.side, order.quantity, order.price}
