@@ -1,51 +1,50 @@
 #pragma once
 
-#include "shared/config/config.h"
+#include <cstddef>
 
-#include <glaze/glaze.hpp>
-
-#include <cassert>
-
-#include <array>
+#include <optional>
+#include <stdexcept>
+#include <string>
 #include <string_view>
+#include <utility>
 
 namespace nutc::shared {
-struct Ticker {
-    std::array<char, TICKER_LENGTH> arr{};
+enum class Ticker : std::size_t { ETH = 0, BTC = 1, LTC = 2 }; // NOLINT
+static constexpr auto TICKERS = {Ticker::ETH, Ticker::BTC, Ticker::LTC};
 
-    constexpr Ticker() = default;
-
-    constexpr Ticker(std::array<char, TICKER_LENGTH> arr) : arr(arr) {}
-
-    Ticker(std::string_view str);
-    Ticker(const char* str);
-
-    operator std::array<char, TICKER_LENGTH>() const { return arr; }
-
-    bool operator==(const Ticker& other) const;
-    operator std::string() const;
-};
-} // namespace nutc::shared
-
-/// \cond
-template <>
-struct glz::meta<nutc::shared::Ticker> {
-    using t = nutc::shared::Ticker;
-    static constexpr auto value = object(&t::arr);
-};
-
-// Simple because we do a lot of hashing but have very few tickers. Maybe revisit later?
-namespace std {
-template <>
-struct hash<nutc::shared::Ticker> {
-    std::size_t
-    operator()(const nutc::shared::Ticker arr) const noexcept
-    {
-        std::size_t hash_value = 0;
-        for (size_t i = 0; i < TICKER_LENGTH; i++) {
-            hash_value += static_cast<uint8_t>(arr.arr[i]);
-        }
-        return hash_value;
+inline std::string
+to_string(Ticker ticker)
+{
+    switch (ticker) {
+        case Ticker::ETH:
+            return "ETH";
+        case Ticker::BTC:
+            return "BTC";
+        case Ticker::LTC:
+            return "LTC";
     }
-};
-} // namespace std
+    std::unreachable();
+}
+
+constexpr inline std::optional<Ticker>
+to_ticker(std::string_view ticker_str)
+{
+    if (ticker_str == "ETH")
+        return Ticker::ETH;
+    if (ticker_str == "BTC")
+        return Ticker::BTC;
+    if (ticker_str == "LTC")
+        return Ticker::LTC;
+
+    return std::nullopt;
+}
+
+constexpr inline Ticker
+force_to_ticker(std::string_view ticker_str)
+{
+    std::optional<Ticker> ticker = to_ticker(ticker_str);
+    if (!ticker)
+        throw std::invalid_argument("Invalid ticker string");
+    return *ticker;
+}
+} // namespace nutc::shared

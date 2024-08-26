@@ -7,9 +7,9 @@ namespace nutc::exchange {
 
 using match = nutc::shared::match;
 
-template <TaggedOrder OrderT>
+template <TaggedOrder ordered>
 std::vector<match>
-Engine::match_order(OrderT order, LimitOrderBook& orderbook)
+Engine::match_order(ordered order, LimitOrderBook& orderbook)
 {
     std::vector<match> matches;
 
@@ -21,7 +21,7 @@ Engine::match_order(OrderT order, LimitOrderBook& orderbook)
             break;
     }
 
-    if constexpr (is_limit_order_v<OrderT>) {
+    if constexpr (is_limit_order_v<ordered>) {
         if (!order.ioc && !shared::is_close_to_zero(order.quantity)) {
             orderbook.add_order(order);
         }
@@ -54,10 +54,10 @@ Engine::match_orders_(OrderPairT& orders, LimitOrderBook& orderbook)
     return glz::unexpected(true);
 }
 
-template <shared::Side AggressiveSide, TaggedOrder OrderT>
+template <shared::Side AggressiveSide, TaggedOrder ordered>
 glz::expected<match, bool>
 Engine::match_incoming_order_(
-    OrderT& aggressive_order, tagged_limit_order& passive_order,
+    ordered& aggressive_order, tagged_limit_order& passive_order,
     LimitOrderBook& orderbook
 )
 {
@@ -101,9 +101,9 @@ Engine::attempt_match_(OrderPairT& orders)
     return orders.template create_match<AggressiveSide>(match_quantity, match_price);
 }
 
-template <TaggedOrder OrderT>
+template <TaggedOrder ordered>
 glz::expected<match, bool>
-Engine::match_incoming_order_(OrderT& aggressive_order, LimitOrderBook& orderbook)
+Engine::match_incoming_order_(ordered& aggressive_order, LimitOrderBook& orderbook)
 {
     if (aggressive_order.side == side::buy) {
         auto passive_order = orderbook.get_top_order(side::sell);

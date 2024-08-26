@@ -3,6 +3,7 @@
 #include "exchange/orders/level_tracking/level_update_generator.hpp"
 #include "exchange/orders/storage/order_storage.hpp"
 #include "shared/types/decimal_price.hpp"
+#include "shared/types/ticker.hpp"
 
 namespace nutc::exchange {
 
@@ -11,6 +12,10 @@ class LevelTrackedOrderbook : public BaseOrderBookT {
     LevelUpdateGenerator level_update_generator_;
 
 public:
+    explicit LevelTrackedOrderbook(shared::Ticker ticker) :
+        level_update_generator_{ticker}
+    {}
+
     LevelUpdateGenerator&
     get_update_generator()
     {

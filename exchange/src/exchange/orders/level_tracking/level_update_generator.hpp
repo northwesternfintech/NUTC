@@ -8,17 +8,22 @@
 namespace nutc::exchange {
 
 class LevelUpdateGenerator {
+    shared::Ticker ticker_;
     LevelQuantityTracker quantity_tracker_;
 
     std::unordered_set<shared::decimal_price> modified_buy_levels_;
     std::unordered_set<shared::decimal_price> modified_sell_levels_;
 
 public:
+    LevelUpdateGenerator() = delete;
+
+    explicit LevelUpdateGenerator(shared::Ticker ticker) : ticker_{ticker} {}
+
     void record_level_change(
         shared::Side side, double quantity_delta, shared::decimal_price price
     );
 
-    std::vector<shared::position> get_updates(shared::Ticker ticker) const;
+    std::vector<shared::position> get_updates() const;
 
     void
     reset()

@@ -15,23 +15,20 @@ class TestMatchingCycle : public exchange::BaseMatchingCycle {
 public:
     std::optional<OrderVariant> last_order;
 
-    TestMatchingCycle(
-        std::vector<std::string> ticker_names, exchange::TraderContainer& traders,
-        double order_fee = 0.0
-    ) :
-        exchange::BaseMatchingCycle{create_tickers(ticker_names, order_fee), traders}
+    TestMatchingCycle(exchange::TraderContainer& traders, double order_fee = 0.0) :
+        exchange::BaseMatchingCycle{{order_fee}, traders}
     {}
 
     // Note: uses tick=0. If using something that relies on tick, it will not work
-    template <typename OrderT>
+    template <typename ordered>
     void
-    wait_for_order(const OrderT& order)
+    wait_for_order(const ordered& order)
     {
         log_i(testing, "Waiting for order {}", *glz::write_json(order));
 
         auto orders_are_same = [&]<typename LastOrder>(const LastOrder& last_order_v) {
-            if constexpr (std::is_base_of_v<OrderT, LastOrder>) {
-                return static_cast<const OrderT&>(last_order_v) == order;
+            if constexpr (std::is_base_of_v<ordered, LastOrder>) {
+                return static_cast<const ordered&>(last_order_v) == order;
             }
             return false;
         };
@@ -42,11 +39,7 @@ public:
     }
 
 private:
-    virtual std::vector<shared::match> match_orders_(std::vector<OrderVariant> orders
-    ) override;
-
-    exchange::TickerMapping
-    create_tickers(const std::vector<std::string>& ticker_names, double order_fee);
+    std::vector<shared::match> match_orders_(std::vector<OrderVariant> orders) override;
 };
 
 } // namespace nutc::test

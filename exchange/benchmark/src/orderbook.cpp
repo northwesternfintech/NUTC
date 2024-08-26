@@ -1,5 +1,4 @@
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
-
 #include "helpers/benchmark_trader.hpp"
 
 #include <benchmark/benchmark.h>
@@ -15,7 +14,9 @@ BM_AddOrders(benchmark::State& state)
 
     for (auto _ : state) {
         for (uint32_t i = 0; i < adds; i++) {
-            orderbook.add_order({trader, "ABC", shared::Side::sell, 0.0, 0.0,false});
+            orderbook.add_order(
+                {trader, shared::Ticker::ETH, shared::Side::sell, 0.0, 0.0, false}
+            );
         }
     }
 }

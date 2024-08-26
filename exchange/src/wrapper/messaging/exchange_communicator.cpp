@@ -124,17 +124,14 @@ ExchangeCommunicator::place_limit_order()
                const std::string& side, const std::string& ticker, double quantity,
                double price, bool ioc
            ) {
-        if (ticker.size() != TICKER_LENGTH) [[unlikely]] {
-            return false;
-        }
-
-        shared::Ticker ticker_arr;
-        std::copy(ticker.begin(), ticker.end(), ticker_arr.arr.begin());
+        std::optional<shared::Ticker> ticker_obj = to_ticker(ticker);
+        if (!ticker_obj)
+            throw std::runtime_error("uhh");
         shared::Side side_enum =
             (side == "BUY") ? shared::Side::buy : shared::Side::sell;
 
         return publish_message<limit_order>(
-            ticker_arr, side_enum, quantity, price, ioc
+            ticker_obj.value(), side_enum, quantity, price, ioc
         );
     };
 }
@@ -144,15 +141,14 @@ MarketOrderFunction
 ExchangeCommunicator::place_market_order()
 {
     return [this](const std::string& side, const std::string& ticker, double quantity) {
-        if (ticker.size() != TICKER_LENGTH) [[unlikely]] {
-            return false;
-        }
-        shared::Ticker ticker_arr;
-        std::copy(ticker.begin(), ticker.end(), ticker_arr.arr.begin());
+        std::optional<shared::Ticker> ticker_obj = to_ticker(ticker);
+        if (!ticker_obj)
+            throw std::runtime_error("uhh");
+        // return false;
         shared::Side side_enum =
             (side == "BUY") ? shared::Side::buy : shared::Side::sell;
 
-        return publish_message<market_order>(ticker_arr, side_enum, quantity);
+        return publish_message<market_order>(ticker_obj.value(), side_enum, quantity);
     };
 }
 

@@ -10,7 +10,7 @@ class Strategy:
 
     def __init__(self) -> None:
         """Your initialization code goes here."""
-        place_limit_order("BUY", "ABC", 10, 102)
+        place_limit_order("BUY", "ETH", 10, 102)
 
     def on_trade_update(
         self, ticker: str, side: str, quantity: float, price: float
@@ -70,5 +70,5 @@ class Strategy:
         print(
             f"Python Account update: {ticker} {side} {price} {quantity} {capital_remaining}"
         )
-        if ticker == "ABC" and quantity >= 10:
-            place_limit_order("BUY", "DEF", 1, 100)
+        if ticker == "ETH" and quantity >= 10:
+            place_limit_order("BUY", "BTC", 1, 100)

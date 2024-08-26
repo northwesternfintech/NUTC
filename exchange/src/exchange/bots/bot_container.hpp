@@ -14,7 +14,6 @@ namespace nutc::exchange {
  */
 class BotContainer {
     using BotVector = std::vector<std::shared_ptr<BotTrader>>;
-    shared::Ticker ticker;
     BrownianMotion theo_generator_;
     VarianceCalculator variance_calculator_;
 
@@ -27,7 +26,6 @@ public:
         shared::Ticker ticker, shared::decimal_price starting_price,
         TraderContainer& trader_container, bot_config bots
     ) :
-        ticker(ticker),
         theo_generator_(starting_price),
         bots_(create_bots(trader_container, ticker, bots))
     {}
