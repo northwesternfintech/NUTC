@@ -4,6 +4,7 @@
 
 #include <gtest/gtest.h>
 
+using nutc::shared::Ticker;
 using nutc::shared::Side::buy;
 using nutc::shared::Side::sell;
 
@@ -23,9 +24,9 @@ protected:
     void
     SetUp() override
     {
-        trader1.modify_holdings("ETH", DEFAULT_QUANTITY);
-        trader2.modify_holdings("ETH", DEFAULT_QUANTITY);
-        trader3.modify_holdings("ETH", DEFAULT_QUANTITY);
+        trader1.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+        trader2.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+        trader3.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
     }
 
     void
@@ -46,22 +47,22 @@ protected:
 
 TEST_F(UnitBasicMatching, SimpleMatch)
 {
-    tagged_limit_order order1{trader1, "ETH", buy, 1, 1.0};
-    tagged_limit_order order2{trader2, "ETH", sell, 1, 1.0};
+    tagged_limit_order order1{trader1, Ticker::ETH, buy, 1, 1.0};
+    tagged_limit_order order2{trader2, Ticker::ETH, sell, 1, 1.0};
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
     matches = add_to_engine_(order2);
     ASSERT_EQ(matches.size(), 1);
-    ASSERT_EQ_MATCH(matches[0], "ETH", "ABC", "DEF", sell, 1, 1);
+    ASSERT_EQ_MATCH(matches[0], Ticker::ETH, "ABC", "DEF", sell, 1, 1);
 }
 
 TEST_F(UnitBasicMatching, CorrectBuyPricingOrder)
 {
-    tagged_limit_order buy1{trader1, "ETH", buy, 1, 1.0};
-    tagged_limit_order buy2{trader1, "ETH", buy, 1, 2.0};
-    tagged_limit_order buy3{trader1, "ETH", buy, 1, 3.0};
-    tagged_limit_order buy4{trader1, "ETH", buy, 1, 4.0};
-    tagged_limit_order sell1{trader2, "ETH", sell, 1, 1.0};
+    tagged_limit_order buy1{trader1, Ticker::ETH, buy, 1, 1.0};
+    tagged_limit_order buy2{trader1, Ticker::ETH, buy, 1, 2.0};
+    tagged_limit_order buy3{trader1, Ticker::ETH, buy, 1, 3.0};
+    tagged_limit_order buy4{trader1, Ticker::ETH, buy, 1, 4.0};
+    tagged_limit_order sell1{trader2, Ticker::ETH, sell, 1, 1.0};
 
     // Place cheapest buy orders first, then most expensive
     auto matches = add_to_engine_(buy1);
@@ -74,17 +75,17 @@ TEST_F(UnitBasicMatching, CorrectBuyPricingOrder)
     ASSERT_EQ(matches.size(), 0);
     matches = add_to_engine_(sell1);
     ASSERT_EQ(matches.size(), 1);
-    ASSERT_EQ_MATCH(matches[0], "ETH", "ABC", "DEF", sell, 1, 4);
+    ASSERT_EQ_MATCH(matches[0], Ticker::ETH, "ABC", "DEF", sell, 1, 4);
     matches = add_to_engine_(sell1);
     ASSERT_EQ(matches.size(), 1);
-    ASSERT_EQ_MATCH(matches[0], "ETH", "ABC", "DEF", sell, 1, 3);
+    ASSERT_EQ_MATCH(matches[0], Ticker::ETH, "ABC", "DEF", sell, 1, 3);
 }
 
 TEST_F(UnitBasicMatching, NoMatchThenMatchBuy)
 {
-    tagged_limit_order order1{trader1, "ETH", sell, 1, 1.0};
-    tagged_limit_order order2{trader2, "ETH", sell, 1, 1.0};
-    tagged_limit_order order3{trader2, "ETH", buy, 1, 2.0};
+    tagged_limit_order order1{trader1, Ticker::ETH, sell, 1, 1.0};
+    tagged_limit_order order2{trader2, Ticker::ETH, sell, 1, 1.0};
+    tagged_limit_order order3{trader2, Ticker::ETH, buy, 1, 2.0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
@@ -92,14 +93,14 @@ TEST_F(UnitBasicMatching, NoMatchThenMatchBuy)
     ASSERT_EQ(matches.size(), 0);
     matches = add_to_engine_(order3);
     ASSERT_EQ(matches.size(), 1);
-    ASSERT_EQ_MATCH(matches[0], "ETH", "DEF", "ABC", buy, 1, 1);
+    ASSERT_EQ_MATCH(matches[0], Ticker::ETH, "DEF", "ABC", buy, 1, 1);
 }
 
 TEST_F(UnitBasicMatching, NoMatchThenMatchSell)
 {
-    tagged_limit_order order1{trader1, "ETH", buy, 1, 1.0};
-    tagged_limit_order order2{trader2, "ETH", buy, 1, 1.0};
-    tagged_limit_order order3{trader3, "ETH", sell, 2, 0.0};
+    tagged_limit_order order1{trader1, Ticker::ETH, buy, 1, 1.0};
+    tagged_limit_order order2{trader2, Ticker::ETH, buy, 1, 1.0};
+    tagged_limit_order order3{trader3, Ticker::ETH, sell, 2, 0.0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
@@ -109,41 +110,41 @@ TEST_F(UnitBasicMatching, NoMatchThenMatchSell)
     ASSERT_EQ(matches.size(), 0);
     matches = add_to_engine_(order3);
     ASSERT_EQ(matches.size(), 2);
-    ASSERT_EQ_MATCH(matches[0], "ETH", "ABC", "GHI", sell, 1, 1);
-    ASSERT_EQ_MATCH(matches[1], "ETH", "DEF", "GHI", sell, 1, 1);
+    ASSERT_EQ_MATCH(matches[0], Ticker::ETH, "ABC", "GHI", sell, 1, 1);
+    ASSERT_EQ_MATCH(matches[1], Ticker::ETH, "DEF", "GHI", sell, 1, 1);
 }
 
 TEST_F(UnitBasicMatching, PassivePriceMatch)
 {
-    tagged_limit_order order1{trader1, "ETH", buy, 1, 2.0};
-    tagged_limit_order order2{trader2, "ETH", sell, 1, 1.0};
+    tagged_limit_order order1{trader1, Ticker::ETH, buy, 1, 2.0};
+    tagged_limit_order order2{trader2, Ticker::ETH, sell, 1, 1.0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
 
     matches = add_to_engine_(order2);
     ASSERT_EQ(matches.size(), 1);
-    ASSERT_EQ_MATCH(matches[0], "ETH", "ABC", "DEF", sell, 1, 2);
+    ASSERT_EQ_MATCH(matches[0], Ticker::ETH, "ABC", "DEF", sell, 1, 2);
 }
 
 TEST_F(UnitBasicMatching, PartialFill)
 {
-    tagged_limit_order order1{trader1, "ETH", buy, 2, 1.0};
-    tagged_limit_order order2{trader2, "ETH", sell, 1, 1.0};
+    tagged_limit_order order1{trader1, Ticker::ETH, buy, 2, 1.0};
+    tagged_limit_order order2{trader2, Ticker::ETH, sell, 1, 1.0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
 
     matches = add_to_engine_(order2);
     ASSERT_EQ(matches.size(), 1);
-    ASSERT_EQ_MATCH(matches.at(0), "ETH", "ABC", "DEF", sell, 1, 1);
+    ASSERT_EQ_MATCH(matches.at(0), Ticker::ETH, "ABC", "DEF", sell, 1, 1);
 }
 
 TEST_F(UnitBasicMatching, MultipleFill)
 {
-    tagged_limit_order order1{trader1, "ETH", buy, 1, 1.0};
-    tagged_limit_order order2{trader1, "ETH", buy, 1, 1.0};
-    tagged_limit_order order3{trader2, "ETH", sell, 2, 1.0};
+    tagged_limit_order order1{trader1, Ticker::ETH, buy, 1, 1.0};
+    tagged_limit_order order2{trader1, Ticker::ETH, buy, 1, 1.0};
+    tagged_limit_order order3{trader2, Ticker::ETH, sell, 2, 1.0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
@@ -153,15 +154,15 @@ TEST_F(UnitBasicMatching, MultipleFill)
 
     matches = add_to_engine_(order3);
     ASSERT_EQ(matches.size(), 2);
-    ASSERT_EQ_MATCH(matches.at(0), "ETH", "ABC", "DEF", sell, 1, 1);
-    ASSERT_EQ_MATCH(matches.at(1), "ETH", "ABC", "DEF", sell, 1, 1);
+    ASSERT_EQ_MATCH(matches.at(0), Ticker::ETH, "ABC", "DEF", sell, 1, 1);
+    ASSERT_EQ_MATCH(matches.at(1), Ticker::ETH, "ABC", "DEF", sell, 1, 1);
 }
 
 TEST_F(UnitBasicMatching, MultiplePartialFill)
 {
-    tagged_limit_order order1{trader1, "ETH", buy, 1, 1.0};
-    tagged_limit_order order2{trader1, "ETH", buy, 1, 1.0};
-    tagged_limit_order order3{trader2, "ETH", sell, 3, 1.0};
+    tagged_limit_order order1{trader1, Ticker::ETH, buy, 1, 1.0};
+    tagged_limit_order order2{trader1, Ticker::ETH, buy, 1, 1.0};
+    tagged_limit_order order3{trader2, Ticker::ETH, sell, 3, 1.0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
@@ -171,25 +172,25 @@ TEST_F(UnitBasicMatching, MultiplePartialFill)
 
     matches = add_to_engine_(order3);
     ASSERT_EQ(matches.size(), 2);
-    ASSERT_EQ_MATCH(matches.at(0), "ETH", "ABC", "DEF", sell, 1, 1);
-    ASSERT_EQ_MATCH(matches.at(1), "ETH", "ABC", "DEF", sell, 1, 1);
+    ASSERT_EQ_MATCH(matches.at(0), Ticker::ETH, "ABC", "DEF", sell, 1, 1);
+    ASSERT_EQ_MATCH(matches.at(1), Ticker::ETH, "ABC", "DEF", sell, 1, 1);
 }
 
 TEST_F(UnitBasicMatching, SimpleMatchReversed)
 {
-    tagged_limit_order order1{trader1, "ETH", sell, 1, 1.0};
-    tagged_limit_order order2{trader2, "ETH", buy, 1, 1.0};
+    tagged_limit_order order1{trader1, Ticker::ETH, sell, 1, 1.0};
+    tagged_limit_order order2{trader2, Ticker::ETH, buy, 1, 1.0};
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
     matches = add_to_engine_(order2);
     ASSERT_EQ(matches.size(), 1);
-    ASSERT_EQ_MATCH(matches.at(0), "ETH", "DEF", "ABC", buy, 1, 1);
+    ASSERT_EQ_MATCH(matches.at(0), Ticker::ETH, "DEF", "ABC", buy, 1, 1);
 }
 
 TEST_F(UnitBasicMatching, PassivePriceMatchReversed)
 {
-    tagged_limit_order order1{trader1, "ETH", sell, 1, 1.0};
-    tagged_limit_order order2{trader2, "ETH", buy, 1, 2.0};
+    tagged_limit_order order1{trader1, Ticker::ETH, sell, 1, 1.0};
+    tagged_limit_order order2{trader2, Ticker::ETH, buy, 1, 2.0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
@@ -197,26 +198,26 @@ TEST_F(UnitBasicMatching, PassivePriceMatchReversed)
     matches = add_to_engine_(order2);
     ASSERT_EQ(matches.size(), 1);
     ASSERT_EQ(matches.at(0).position.price, 1.0);
-    ASSERT_EQ_MATCH(matches.at(0), "ETH", "DEF", "ABC", buy, 1, 1);
+    ASSERT_EQ_MATCH(matches.at(0), Ticker::ETH, "DEF", "ABC", buy, 1, 1);
 }
 
 TEST_F(UnitBasicMatching, PartialFillReversed)
 {
-    tagged_limit_order order1{trader1, "ETH", sell, 2, 1.0};
-    tagged_limit_order order2{trader2, "ETH", buy, 1, 1.0};
+    tagged_limit_order order1{trader1, Ticker::ETH, sell, 2, 1.0};
+    tagged_limit_order order2{trader2, Ticker::ETH, buy, 1, 1.0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
     matches = add_to_engine_(order2);
     ASSERT_EQ(matches.size(), 1);
-    ASSERT_EQ_MATCH(matches.at(0), "ETH", "DEF", "ABC", buy, 1, 1);
+    ASSERT_EQ_MATCH(matches.at(0), Ticker::ETH, "DEF", "ABC", buy, 1, 1);
 }
 
 TEST_F(UnitBasicMatching, MultipleFillReversed)
 {
-    tagged_limit_order order1{trader1, "ETH", sell, 1, 1.0};
-    tagged_limit_order order2{trader1, "ETH", sell, 1, 1.0};
-    tagged_limit_order order3{trader2, "ETH", buy, 2, 1.0};
+    tagged_limit_order order1{trader1, Ticker::ETH, sell, 1, 1.0};
+    tagged_limit_order order2{trader1, Ticker::ETH, sell, 1, 1.0};
+    tagged_limit_order order3{trader2, Ticker::ETH, buy, 2, 1.0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
@@ -226,15 +227,15 @@ TEST_F(UnitBasicMatching, MultipleFillReversed)
 
     matches = add_to_engine_(order3);
     ASSERT_EQ(matches.size(), 2);
-    ASSERT_EQ_MATCH(matches.at(0), "ETH", "DEF", "ABC", buy, 1, 1);
-    ASSERT_EQ_MATCH(matches.at(1), "ETH", "DEF", "ABC", buy, 1, 1);
+    ASSERT_EQ_MATCH(matches.at(0), Ticker::ETH, "DEF", "ABC", buy, 1, 1);
+    ASSERT_EQ_MATCH(matches.at(1), Ticker::ETH, "DEF", "ABC", buy, 1, 1);
 }
 
 TEST_F(UnitBasicMatching, MultiplePartialFillReversed)
 {
-    tagged_limit_order order1{trader1, "ETH", sell, 1, 1.0};
-    tagged_limit_order order2{trader1, "ETH", sell, 1, 1.0};
-    tagged_limit_order order3{trader2, "ETH", buy, 3, 1.0};
+    tagged_limit_order order1{trader1, Ticker::ETH, sell, 1, 1.0};
+    tagged_limit_order order2{trader1, Ticker::ETH, sell, 1, 1.0};
+    tagged_limit_order order3{trader2, Ticker::ETH, buy, 3, 1.0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
@@ -245,6 +246,6 @@ TEST_F(UnitBasicMatching, MultiplePartialFillReversed)
     matches = add_to_engine_(order3);
     ASSERT_EQ(matches.size(), 2);
 
-    ASSERT_EQ_MATCH(matches.at(0), "ETH", "DEF", "ABC", buy, 1, 1);
-    ASSERT_EQ_MATCH(matches.at(1), "ETH", "DEF", "ABC", buy, 1, 1);
+    ASSERT_EQ_MATCH(matches.at(0), Ticker::ETH, "DEF", "ABC", buy, 1, 1);
+    ASSERT_EQ_MATCH(matches.at(1), Ticker::ETH, "DEF", "ABC", buy, 1, 1);
 }

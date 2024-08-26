@@ -7,6 +7,7 @@
 
 // TODO: expiration tests
 
+using nutc::shared::Ticker;
 using nutc::shared::Side::buy;
 using nutc::shared::Side::sell;
 
@@ -25,8 +26,8 @@ protected:
     void
     SetUp() override
     {
-        trader_1.modify_holdings("ETH", DEFAULT_QUANTITY);
-        trader_2.modify_holdings("ETH", DEFAULT_QUANTITY);
+        trader_1.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+        trader_2.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
     }
 
     nutc::exchange::LimitOrderBook container_;
@@ -34,20 +35,20 @@ protected:
 
 TEST_F(UnitOrderBookTest, TestStorageRounding)
 {
-    tagged_limit_order order1{trader_1, "ETH", buy, 1, 1.000001};
+    tagged_limit_order order1{trader_1, Ticker::ETH, buy, 1, 1.000001};
     ASSERT_EQ(order1.price, 1.0);
 
-    tagged_limit_order order2{trader_2, "ETH", buy, 0.00001, .9999, 1};
+    tagged_limit_order order2{trader_2, Ticker::ETH, buy, 0.00001, .9999, 1};
     ASSERT_EQ(order2.price, 1.0);
 
-    tagged_limit_order order3{trader_2, "ETH", buy, 1, .994};
+    tagged_limit_order order3{trader_2, Ticker::ETH, buy, 1, .994};
     ASSERT_EQ(order3.price, 0.99);
 }
 
 TEST_F(UnitOrderBookTest, SimpleAddRemove)
 {
-    tagged_limit_order order1{trader_1, "ETH", buy, 1, 1.0};
-    // tagged_limit_order order2{trader_2, "ETH", sell, 1, 1.0};
+    tagged_limit_order order1{trader_1, Ticker::ETH, buy, 1, 1.0};
+    // tagged_limit_order order2{trader_2, Ticker::ETH, sell, 1, 1.0};
 
     container_.add_order(order1);
     // ASSERT_EQ(container_.get_level(buy, 1.0), 1);
@@ -66,8 +67,8 @@ TEST_F(UnitOrderBookTest, SimpleAddRemove)
 
 TEST_F(UnitOrderBookTest, ModifyQuantity)
 {
-    tagged_limit_order so1{trader_1, "ETH", buy, 1, 1.0};
-    tagged_limit_order so2{trader_1, "ETH", sell, 1, 1.0};
+    tagged_limit_order so1{trader_1, Ticker::ETH, buy, 1, 1.0};
+    tagged_limit_order so2{trader_1, Ticker::ETH, sell, 1, 1.0};
 
     container_.add_order(so1);
     container_.add_order(so2);

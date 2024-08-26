@@ -222,7 +222,6 @@ target_link_libraries(WRAPPER_exe PRIVATE ${Python3_LIBRARIES})
 add_library(SHARED_lib OBJECT     
     src/shared/file_operations/file_operations.cpp
     src/shared/firebase/firebase.cpp
-    src/shared/types/ticker.cpp
     src/shared/util.cpp
 )
 

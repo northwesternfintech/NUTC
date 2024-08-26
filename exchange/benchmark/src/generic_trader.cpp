@@ -12,10 +12,9 @@ BM_ModifyHoldings(benchmark::State& state)
 
     for (auto _ : state) {
         for (uint32_t i = 0; i < adds; i++) {
-            trader.modify_holdings("ABC", 1);
-            trader.modify_holdings("DEF", 1);
-            trader.modify_holdings("HIJ", 1);
-            trader.modify_holdings("KLM", 1);
+            trader.modify_holdings(shared::Ticker::ETH, 1);
+            trader.modify_holdings(shared::Ticker::BTC, 1);
+            trader.modify_holdings(shared::Ticker::LTC, 1);
         }
     }
 }

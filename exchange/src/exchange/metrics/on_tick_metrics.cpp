@@ -27,8 +27,8 @@ TickerMetricsPusher::report_orders(const std::vector<tagged_limit_order>& orders
     auto log_order = [&](const tagged_limit_order& order) {
         orders_quantity_counter
             .Add({
-                {"ticker",      order.ticker            },
-                {"trader_type", order.trader->get_type()}
+                {"ticker",      shared::to_string(order.ticker)},
+                {"trader_type", order.trader->get_type()       }
         })
             .Increment(order.quantity);
     };
@@ -42,7 +42,7 @@ TickerMetricsPusher::report_ticker_stats(TickerMapping& tickers)
     auto log_midprice = [&](shared::Ticker ticker, const ticker_info& info) {
         ticker_midprice_gauge
             .Add({
-                {"ticker", std::string{ticker}}
+                {"ticker", shared::to_string(ticker)}
         })
             .Set(double{info.limit_orderbook.get_midprice()});
     };
@@ -53,8 +53,8 @@ TickerMetricsPusher::report_ticker_stats(TickerMapping& tickers)
         if (best_bid.has_value()) [[likely]] {
             best_ba_gauge
                 .Add({
-                    {"ticker", std::string{ticker}},
-                    {"type",   "BID"              }
+                    {"ticker", shared::to_string(ticker)},
+                    {"type",   "BID"                    }
             })
                 .Set(double{best_bid->get().price});
         }
@@ -62,8 +62,8 @@ TickerMetricsPusher::report_ticker_stats(TickerMapping& tickers)
         if (best_ask.has_value()) [[likely]] {
             best_ba_gauge
                 .Add({
-                    {"ticker", std::string{ticker}},
-                    {"type",   "ASK"              }
+                    {"ticker", shared::to_string(ticker)},
+                    {"type",   "ASK"                    }
             })
                 .Set(double{best_ask->get().price});
         }
@@ -72,7 +72,7 @@ TickerMetricsPusher::report_ticker_stats(TickerMapping& tickers)
     // auto log_variance = [&](shared::Ticker ticker, const ticker_info& info) {
     //     ticker_midprice_variance_gauge
     //         .Add({
-    //             {"ticker", std::string{ticker}}
+    //             {"ticker", shared::to_string(ticker)}
     //     })
     //         .Set(info.bot_container.get_variance());
     // };
@@ -90,7 +90,7 @@ TickerMetricsPusher::report_matches(const std::vector<shared::match>& orders)
     auto log_match = [this](const shared::match& match) {
         matches_quantity_counter
             .Add({
-                {"ticker", match.position.ticker}
+                {"ticker", shared::to_string(match.position.ticker)}
         })
             .Increment(match.position.quantity);
     };
@@ -112,9 +112,9 @@ TickerMetricsPusher::report_trader_stats(const TickerMapping& tickers)
             double amount_held = trader.get_holdings(ticker);
             per_trader_holdings_gauge
                 .Add({
-                    {"ticker",      ticker           },
-                    {"trader_type", trader.get_type()},
-                    {"id",          trader.get_id()  },
+                    {"ticker",      shared::to_string(ticker)},
+                    {"trader_type", trader.get_type()        },
+                    {"id",          trader.get_id()          },
             })
                 .Set(amount_held);
         }

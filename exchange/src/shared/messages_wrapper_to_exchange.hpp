@@ -8,6 +8,8 @@
 #include <glaze/glaze.hpp>
 #include <glaze/util/type_traits.hpp>
 
+#include <stdexcept>
+
 #ifdef __APPLE__
 #  include <mach/mach_time.h>
 #else
@@ -40,6 +42,14 @@ struct limit_order {
     bool ioc;
 
     bool operator==(const limit_order& other) const = default;
+
+    consteval limit_order(
+        std::string_view ticker, shared::Side side, double quantity,
+        shared::decimal_price price, bool ioc = false
+    ) :
+        ticker{shared::force_to_ticker(ticker)},
+        side{side}, quantity{quantity}, price{price}, ioc{ioc}
+    {}
 
     limit_order(
         shared::Ticker ticker, shared::Side side, double quantity,
@@ -102,5 +112,5 @@ struct glz::meta<nutc::shared::market_order> {
 template <>
 struct glz::meta<nutc::shared::init_message> {
     using t = nutc::shared::init_message;
-    static constexpr auto value = object(&t::name);
+    static constexpr auto value = object("init", &t::name);
 };

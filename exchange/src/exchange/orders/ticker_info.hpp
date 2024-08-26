@@ -19,6 +19,7 @@ using DecoratedLimitOrderBook =
  * @brief Contains the canonical reference to all data coupled to a ticker. Very useful
  * because we typically have to access all at once
  */
+// TODO: rename
 struct ticker_info {
     DecoratedLimitOrderBook limit_orderbook{};
     Engine engine;
@@ -48,6 +49,7 @@ private:
     )
     {
         std::vector<BotContainer> containers;
+        containers.reserve(configs.size());
         for (const bot_config& bot_config : configs) {
             containers.emplace_back(
                 ticker, starting_price, trader_container, bot_config

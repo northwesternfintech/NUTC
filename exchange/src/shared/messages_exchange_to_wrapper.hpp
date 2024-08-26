@@ -84,17 +84,16 @@ struct algorithm_content {
 template <>
 struct glz::meta<nutc::shared::tick_update> {
     using t = nutc::shared::tick_update;
-    static constexpr auto value = object( // NOLINT
-        &t::ob_updates, &t::matches
-    );
+    static constexpr auto value = object("tick_update", &t::ob_updates, &t::matches);
 };
 
 /// \cond
 template <>
 struct glz::meta<nutc::shared::match> {
     using t = nutc::shared::match;
-    static constexpr auto value = object( // NOLINT
-        &t::position, &t::buyer_id, &t::seller_id, &t::buyer_capital, &t::seller_capital
+    static constexpr auto value = object(
+        "match", &t::position, &t::buyer_id, &t::seller_id, &t::buyer_capital,
+        &t::seller_capital
     );
 };
 
@@ -103,7 +102,7 @@ template <>
 struct glz::meta<nutc::shared::start_time> {
     using t = nutc::shared::start_time;
     static constexpr auto value = // NOLINT
-        object(&t::start_time_ns);
+        object("start_time", &t::start_time_ns);
 };
 
 /// \cond
@@ -111,5 +110,5 @@ template <>
 struct glz::meta<nutc::shared::algorithm_content> {
     using t = nutc::shared::algorithm_content;
     static constexpr auto value = // NOLINT
-        object(&t::algorithm_content_str);
+        object("algo", &t::algorithm_content_str);
 };

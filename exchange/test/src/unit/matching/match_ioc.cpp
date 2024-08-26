@@ -8,6 +8,7 @@
 
 using nutc::exchange::CancellableOrderBook;
 using nutc::exchange::LimitOrderBook;
+using nutc::shared::Ticker;
 using nutc::shared::Side::buy;
 using nutc::shared::Side::sell;
 
@@ -26,8 +27,8 @@ protected:
     void
     SetUp() override
     {
-        trader1.modify_holdings("ETH", DEFAULT_QUANTITY);
-        trader2.modify_holdings("ETH", DEFAULT_QUANTITY);
+        trader1.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+        trader2.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
     }
 
     CancellableOrderBook<LimitOrderBook> orderbook_{};
@@ -42,8 +43,8 @@ protected:
 
 TEST_F(UnitMatchIOC, BasicMatchIOC)
 {
-    tagged_limit_order order1{trader1, "ETH", buy, 1, 1.0, false};
-    tagged_limit_order order2{trader2, "ETH", sell, 1, 1.0, true};
+    tagged_limit_order order1{trader1, Ticker::ETH, buy, 1, 1.0, false};
+    tagged_limit_order order2{trader2, Ticker::ETH, sell, 1, 1.0, true};
 
     auto matches = add_to_engine_(order1);
     ASSERT_TRUE(matches.empty());
@@ -54,9 +55,9 @@ TEST_F(UnitMatchIOC, BasicMatchIOC)
 
 TEST_F(UnitMatchIOC, DoubleIOCMatchMultipleLevels)
 {
-    tagged_limit_order order1{trader1, "ETH", buy, 5, 2.0, true};
-    tagged_limit_order order2{trader2, "ETH", sell, 1, 1.0, false};
-    tagged_limit_order order3{trader2, "ETH", sell, 4, 1.0, false};
+    tagged_limit_order order1{trader1, Ticker::ETH, buy, 5, 2.0, true};
+    tagged_limit_order order2{trader2, Ticker::ETH, sell, 1, 1.0, false};
+    tagged_limit_order order3{trader2, Ticker::ETH, sell, 4, 1.0, false};
 
     auto matches = add_to_engine_(order2);
     ASSERT_TRUE(matches.empty());
@@ -70,8 +71,8 @@ TEST_F(UnitMatchIOC, DoubleIOCMatchMultipleLevels)
 
 TEST_F(UnitMatchIOC, NoMatchAfterCycle)
 {
-    tagged_limit_order order1{trader1, "ETH", buy, 1, 1.0, false};
-    tagged_limit_order order2{trader2, "ETH", sell, 1, 1.0, true};
+    tagged_limit_order order1{trader1, Ticker::ETH, buy, 1, 1.0, false};
+    tagged_limit_order order2{trader2, Ticker::ETH, sell, 1, 1.0, true};
 
     add_to_engine_(order2);
 

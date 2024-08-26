@@ -22,14 +22,12 @@ TestMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
 }
 
 exchange::TickerMapping
-TestMatchingCycle::create_tickers(
-    const std::vector<std::string>& ticker_names, double order_fee
-)
+TestMatchingCycle::create_tickers(double order_fee)
 {
-    exchange::TickerMapping mappings;
-    for (const auto& ticker : ticker_names) {
-        shared::Ticker t = ticker.c_str();
-        mappings.insert({t, {order_fee}});
+    exchange::TickerMapping mappings{};
+    for (auto ticker :
+         {shared::Ticker::ETH, shared::Ticker::BTC, shared::Ticker::LTC}) {
+        mappings.insert({ticker, {order_fee}});
     }
     return mappings;
 }

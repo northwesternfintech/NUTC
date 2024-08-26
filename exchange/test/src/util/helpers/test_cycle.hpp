@@ -15,11 +15,8 @@ class TestMatchingCycle : public exchange::BaseMatchingCycle {
 public:
     std::optional<OrderVariant> last_order;
 
-    TestMatchingCycle(
-        std::vector<std::string> ticker_names, exchange::TraderContainer& traders,
-        double order_fee = 0.0
-    ) :
-        exchange::BaseMatchingCycle{create_tickers(ticker_names, order_fee), traders}
+    TestMatchingCycle(exchange::TraderContainer& traders, double order_fee = 0.0) :
+        exchange::BaseMatchingCycle{create_tickers(order_fee), traders}
     {}
 
     // Note: uses tick=0. If using something that relies on tick, it will not work
@@ -42,11 +39,9 @@ public:
     }
 
 private:
-    virtual std::vector<shared::match> match_orders_(std::vector<OrderVariant> orders
-    ) override;
+    std::vector<shared::match> match_orders_(std::vector<OrderVariant> orders) override;
 
-    exchange::TickerMapping
-    create_tickers(const std::vector<std::string>& ticker_names, double order_fee);
+    static exchange::TickerMapping create_tickers(double order_fee);
 };
 
 } // namespace nutc::test

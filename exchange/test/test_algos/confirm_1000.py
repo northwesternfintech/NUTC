@@ -44,10 +44,10 @@ class Strategy:
             Volume placed into orderbook
         """
         print(f"Python Orderbook update: {ticker} {side} {price} {quantity}")
-        if(ticker=="ABC" and price>=0.0):
+        if(ticker=="ETH" and price>=0.0):
             self.num+=1
         if(self.num==10000):
-            place_limit_order("BUY", "ABC", 10, 100)
+            place_limit_order("BUY", "ETH", 10, 100)
 
     def on_account_update(
         self,

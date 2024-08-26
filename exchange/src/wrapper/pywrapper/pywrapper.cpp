@@ -44,7 +44,7 @@ OrderBookUpdateFunction
 ob_update_function()
 {
     return [](const shared::position& position) {
-        std::string ticker_val{position.ticker};
+        std::string ticker_val{shared::to_string(position.ticker)};
         std::string side_val = (position.side == shared::Side::buy) ? "BUY" : "SELL";
         double price_val{position.price};
         double quantity{position.quantity};
@@ -62,7 +62,7 @@ TradeUpdateFunction
 trade_update_function()
 {
     return [](const shared::position& position) {
-        std::string ticker_val{position.ticker};
+        std::string ticker_val{shared::to_string(position.ticker)};
         std::string side_val = (position.side == shared::Side::buy) ? "BUY" : "SELL";
         double price_val{position.price};
         double quantity{position.quantity};
@@ -80,7 +80,7 @@ AccountUpdateFunction
 account_update_function()
 {
     return [](const shared::position& position, shared::decimal_price held_capital) {
-        std::string ticker_val{position.ticker};
+        std::string ticker_val{shared::to_string(position.ticker)};
         std::string side_val = (position.side == shared::Side::buy) ? "BUY" : "SELL";
         double price_val{position.price};
         double quantity{position.quantity};
