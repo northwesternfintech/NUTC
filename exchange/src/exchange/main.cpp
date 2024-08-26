@@ -19,24 +19,12 @@
 namespace {
 using namespace nutc::exchange; // NOLINT
 
-TickerMapping
-load_tickers(TraderContainer& traders, double order_fee)
-{
-    TickerMapping ret;
-    const auto& tickers = Config::get().get_tickers();
-    for (const ticker_config& ticker : tickers) {
-        ret.insert({
-            ticker.TICKER, {traders, ticker, order_fee}
-        });
-    }
-    return ret;
-}
-
 std::unique_ptr<MatchingCycleInterface>
 create_cycle(TraderContainer& traders, double order_fee, const auto& mode)
 {
     using nutc::shared::Mode;
-    auto tickers = load_tickers(traders, order_fee);
+    const auto& ticker_config = Config::get().get_tickers();
+    auto tickers = TickerMapping(ticker_config, traders, order_fee);
 
     switch (mode) {
         case Mode::normal:

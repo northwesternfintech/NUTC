@@ -1,7 +1,5 @@
 #include "test_cycle.hpp"
 
-#include "exchange/orders/ticker_info.hpp"
-
 #include <glaze/glaze.hpp>
 #include <hash_table7.hpp>
 
@@ -19,19 +17,6 @@ TestMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
     }
 
     return BaseMatchingCycle::match_orders_(std::move(orders));
-}
-
-exchange::TickerMapping
-TestMatchingCycle::create_tickers(double order_fee)
-{
-    exchange::TickerMapping mappings{};
-    for (auto ticker :
-         {shared::Ticker::ETH, shared::Ticker::BTC, shared::Ticker::LTC}) {
-        mappings.insert({
-            ticker, {ticker, order_fee}
-        });
-    }
-    return mappings;
 }
 
 } // namespace nutc::test

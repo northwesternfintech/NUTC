@@ -75,15 +75,15 @@ get_time()
 }
 } // namespace
 
-template <typename OrderT>
-struct timestamped_message : public OrderT {
+template <typename ordered>
+struct timestamped_message : public ordered {
     uint64_t timestamp;
 
     timestamped_message() = delete;
 
     template <typename... Args>
     explicit timestamped_message(Args&&... args) :
-        OrderT(std::forward<Args>(args)...), timestamp(get_time())
+        ordered(std::forward<Args>(args)...), timestamp(get_time())
     {}
 };
 

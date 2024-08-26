@@ -77,7 +77,7 @@ TickerMetricsPusher::report_ticker_stats(TickerMapping& tickers)
     //         .Set(info.bot_container.get_variance());
     // };
 
-    for (auto& [info, _, ticker] : tickers) {
+    for (auto [ticker, info] : tickers) {
         log_midprice(ticker, info);
         log_best_ba(ticker, info);
         // log_variance(ticker, info);
@@ -108,7 +108,7 @@ void
 TickerMetricsPusher::report_trader_stats(const TickerMapping& tickers)
 {
     auto report_holdings = [&](const auto& trader) {
-        for (const auto& [info, _, ticker] : tickers) {
+        for (auto [ticker, info] : tickers) {
             double amount_held = trader.get_holdings(ticker);
             per_trader_holdings_gauge
                 .Add({
@@ -122,7 +122,7 @@ TickerMetricsPusher::report_trader_stats(const TickerMapping& tickers)
 
     auto portfolio_value = [&](const auto& trader) {
         double pnl = 0.0;
-        for (const auto& [info, _, ticker] : tickers) {
+        for (auto [ticker, info] : tickers) {
             double amount_held{trader.get_holdings(ticker)};
             double midprice{info.limit_orderbook.get_midprice()};
             pnl += amount_held * midprice;

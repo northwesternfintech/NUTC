@@ -3,5 +3,5 @@ builtin = clear,rare,en-GB_to_en-US,names,informal,code
 ignore-words-list = uint,deque,ba,OrderT
 check-filenames =
 check-hidden =
-skip = */.git,*/build,*/prefix,*/conan
+skip = */.git,*/build,*/prefix,*/conan,.codespellrc
 quiet-level = 2

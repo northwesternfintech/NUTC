@@ -25,21 +25,17 @@ struct ticker_info {
     Engine engine;
     std::vector<BotContainer> bot_containers;
 
-    // TODO: order fee should not be 0
-    ticker_info(
-        TraderContainer& traders, const ticker_config& config, double order_fee
-    ) :
-        limit_orderbook(config.TICKER),
-        engine(order_fee),
-        bot_containers(create_bot_containers(
-            traders, config.TICKER, config.STARTING_PRICE, config.BOTS
-        ))
-
-    {}
-
     ticker_info(shared::Ticker ticker, double order_fee) :
         limit_orderbook(ticker), engine(order_fee)
     {}
+
+    void
+    set_bot_config(TraderContainer& traders, const ticker_config& config)
+    {
+        bot_containers = create_bot_containers(
+            traders, config.TICKER, config.STARTING_PRICE, config.BOTS
+        );
+    }
 
 private:
     std::vector<BotContainer>
@@ -59,7 +55,147 @@ private:
     }
 };
 
-using TickerMapping =
-    emhash7::HashMap<shared::Ticker, ticker_info, absl::Hash<shared::Ticker>>;
+class TickerMapping {
+    std::vector<ticker_info> tickers;
+
+public:
+    TickerMapping(
+        const std::vector<ticker_config>& configs, TraderContainer& traders,
+        double order_fee
+    ) :
+        tickers(create_tickers(configs, traders, order_fee))
+    {}
+
+    TickerMapping(double order_fee) : tickers(create_tickers(order_fee)) {}
+
+    class Iterator {
+        std::size_t index_;
+        typename std::vector<ticker_info>::iterator it_;
+
+    public:
+        using iterator_category = std::forward_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = std::pair<shared::Ticker, ticker_info&>;
+        using pointer = value_type*;
+        using reference = value_type&;
+
+        Iterator(std::size_t index, typename std::vector<ticker_info>::iterator iter) :
+            index_(index), it_(iter)
+        {}
+
+        value_type
+        operator*()
+        {
+            return {static_cast<shared::Ticker>(index_), *it_};
+        }
+
+        Iterator&
+        operator++()
+        {
+            ++it_;
+            ++index_;
+            return *this;
+        }
+
+        bool
+        operator!=(const Iterator& other) const
+        {
+            return it_ != other.it_;
+        }
+    };
+
+    class ConstIterator {
+        std::size_t index_;
+        typename std::vector<ticker_info>::const_iterator it_;
+
+    public:
+        using iterator_category = std::forward_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = std::pair<shared::Ticker, const ticker_info&>;
+        using pointer = value_type*;
+        using reference = value_type&;
+
+        ConstIterator(
+            std::size_t index, typename std::vector<ticker_info>::const_iterator iter
+        ) :
+            index_(index),
+            it_(iter)
+        {}
+
+        value_type
+        operator*() const
+        {
+            return {static_cast<shared::Ticker>(index_), *it_};
+        }
+
+        ConstIterator&
+        operator++()
+        {
+            ++it_;
+            ++index_;
+            return *this;
+        }
+
+        bool
+        operator!=(const ConstIterator& other) const
+        {
+            return it_ != other.it_;
+        }
+    };
+
+    ConstIterator
+    begin() const
+    {
+        return {0, tickers.cbegin()};
+    }
+
+    ConstIterator
+    end() const
+    {
+        return {tickers.size(), tickers.cend()};
+    }
+
+    Iterator
+    begin()
+    {
+        return {0, tickers.begin()};
+    }
+
+    Iterator
+    end()
+    {
+        return {tickers.size(), tickers.end()};
+    }
+
+    ticker_info&
+    operator[](shared::Ticker ticker)
+    {
+        return tickers[std::to_underlying(ticker)];
+    }
+
+private:
+    static std::vector<ticker_info>
+    create_tickers(double order_fee)
+    {
+        std::vector<ticker_info> result;
+        for (std::size_t ticker = 0; ticker < shared::TICKERS.size(); ticker++) {
+            result.emplace_back(static_cast<shared::Ticker>(ticker), order_fee);
+        }
+        return result;
+    }
+
+    static std::vector<ticker_info>
+    create_tickers(
+        const std::vector<ticker_config>& configs, TraderContainer& traders,
+        double order_fee
+    )
+    {
+        std::vector<ticker_info> result = create_tickers(order_fee);
+        for (const auto& config : configs) {
+            result[std::to_underlying(config.TICKER)].set_bot_config(traders, config);
+        }
+        return result;
+    }
+};
 
 } // namespace nutc::exchange

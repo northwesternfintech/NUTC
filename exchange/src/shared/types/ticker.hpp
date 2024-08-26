@@ -6,10 +6,11 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <utility>
 
 namespace nutc::shared {
-enum class Ticker { ETH = 0, BTC = 1, LTC = 2 }; // NOLINT
-static constexpr size_t NUM_TICKERS = 3;
+enum class Ticker : std::size_t { ETH = 0, BTC = 1, LTC = 2 }; // NOLINT
+static constexpr auto TICKERS = {Ticker::ETH, Ticker::BTC, Ticker::LTC};
 
 inline std::string
 to_string(Ticker ticker)

@@ -9,7 +9,7 @@ namespace nutc::exchange {
 void
 BaseMatchingCycle::before_cycle_(uint64_t)
 {
-    for (auto& [ticker_info, _, symbol] : tickers_) {
+    for (auto [symbol, ticker_info] : tickers_) {
         for (auto& bot_container : ticker_info.bot_containers) {
             bot_container.generate_orders(ticker_info.limit_orderbook.get_midprice());
         }
@@ -25,13 +25,13 @@ BaseMatchingCycle::collect_orders(uint64_t) -> std::vector<OrderVariant>
         auto message_queue = trader.read_orders();
 
         auto get_tagged_order =
-            [&trader]<typename OrderT>(const OrderT& order
+            [&trader]<typename ordered>(const ordered& order
             ) -> std::variant<tagged_limit_order, tagged_market_order> {
-            if constexpr (std::is_same_v<OrderT, shared::timed_init_message>) {
+            if constexpr (std::is_same_v<ordered, shared::timed_init_message>) {
                 throw std::runtime_error("Unexpected initialization message");
             }
             else {
-                return tagged_order<OrderT>{trader, order};
+                return tagged_order<ordered>{trader, order};
             }
         };
 
@@ -52,16 +52,13 @@ BaseMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
     std::vector<shared::match> matches;
 
     for (OrderVariant& order_variant : orders) {
-        auto match_order = [&]<typename OrderT>(OrderT& order) {
+        auto match_order = [&]<typename ordered>(ordered& order) {
             if (order.quantity <= 0)
                 return;
 
-            auto it = tickers_.find(order.ticker);
-            if (it == tickers_.end())
-                return;
-
-            auto& orderbook = it->second.limit_orderbook;
-            auto& engine = it->second.engine;
+            auto& ticker_info = tickers_[order.ticker];
+            auto& orderbook = ticker_info.limit_orderbook;
+            auto& engine = ticker_info.engine;
             auto tmp = engine.match_order(order, orderbook);
             std::copy(tmp.begin(), tmp.end(), std::back_inserter(matches));
         };
@@ -75,7 +72,7 @@ BaseMatchingCycle::handle_matches_(std::vector<shared::match> matches)
 {
     std::vector<shared::position> ob_updates{};
 
-    for (auto& [info, _, ticker] : tickers_) {
+    for (auto [symbol, info] : tickers_) {
         auto tmp = info.limit_orderbook.get_update_generator().get_updates();
         std::ranges::copy(tmp, std::back_inserter(ob_updates));
     }
@@ -98,7 +95,7 @@ BaseMatchingCycle::handle_matches_(std::vector<shared::match> matches)
 void
 BaseMatchingCycle::post_cycle_(uint64_t)
 {
-    for (auto& [info, _, ticker] : tickers_) {
+    for (auto [_, info] : tickers_) {
         info.limit_orderbook.get_update_generator().reset();
     }
 }
