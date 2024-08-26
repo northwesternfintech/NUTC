@@ -30,7 +30,6 @@ tasks:
     dir: .
     cmds:
       - cmake -D FIX=YES -P cmake/lint.cmake
-      - cmake -D FIX=YES -P cmake/spell.cmake
 
   new-log-dir:
     dir: .

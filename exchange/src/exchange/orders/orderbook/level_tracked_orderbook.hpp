@@ -1,6 +1,7 @@
 #pragma once
 
 #include "exchange/orders/level_tracking/level_update_generator.hpp"
+#include "exchange/orders/orderbook/limit_orderbook.hpp"
 #include "exchange/orders/storage/order_storage.hpp"
 #include "shared/types/decimal_price.hpp"
 #include "shared/types/ticker.hpp"
@@ -22,7 +23,7 @@ public:
         return level_update_generator_;
     }
 
-    tagged_limit_order&
+    LimitOrderBook::stored_limit_order
     add_order(const tagged_limit_order& order) override
     {
         modify_level_(order.side, order.quantity, order.price);
@@ -31,17 +32,18 @@ public:
     }
 
     void
-    mark_order_removed(tagged_limit_order& order) override
+    mark_order_removed(LimitOrderBook::stored_limit_order order) override
     {
-        modify_level_(order.side, -order.quantity, order.price);
+        modify_level_(order->side, -order->quantity, order->price);
 
         BaseOrderBookT::mark_order_removed(order);
     }
 
     void
-    change_quantity(tagged_limit_order& order, double quantity_delta) override
+    change_quantity(LimitOrderBook::stored_limit_order order, double quantity_delta)
+        override
     {
-        modify_level_(order.side, quantity_delta, order.price);
+        modify_level_(order->side, quantity_delta, order->price);
 
         BaseOrderBookT::change_quantity(order, quantity_delta);
     }

@@ -48,7 +48,6 @@ add_library(
     src/exchange/bots/bot_types/market_maker.cpp
 
     src/exchange/matching/engine.cpp
-    src/exchange/matching/order_pair.cpp
     src/exchange/orders/level_tracking/level_quantity_tracker.cpp
     src/exchange/orders/ticker_container.cpp
     src/exchange/orders/orderbook/limit_orderbook.cpp

@@ -31,8 +31,8 @@ public:
     explicit DevModeAlgoInitializer(
         size_t wait_secs, const std::vector<fs::path>& algo_paths
     ) :
-        WAIT_SECS(wait_secs),
-        NUM_ALGOS(static_cast<uint8_t>(algo_paths.size())), algo_filepaths_(algo_paths)
+        WAIT_SECS(wait_secs), NUM_ALGOS(static_cast<uint8_t>(algo_paths.size())),
+        algo_filepaths_(algo_paths)
     {
         size_t max_size = std::numeric_limits<uint8_t>::max();
         if (algo_paths.size() > max_size) {

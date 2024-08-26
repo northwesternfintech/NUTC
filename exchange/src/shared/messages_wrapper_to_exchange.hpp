@@ -47,16 +47,14 @@ struct limit_order {
         std::string_view ticker, shared::Side side, double quantity,
         shared::decimal_price price, bool ioc = false
     ) :
-        ticker{shared::force_to_ticker(ticker)},
-        side{side}, quantity{quantity}, price{price}, ioc{ioc}
+        ticker{shared::force_to_ticker(ticker)}, side{side}, quantity{quantity},
+        price{price}, ioc{ioc}
     {}
 
     limit_order(
         shared::Ticker ticker, shared::Side side, double quantity,
         shared::decimal_price price, bool ioc = false
-    ) :
-        ticker{ticker},
-        side{side}, quantity{quantity}, price{price}, ioc{ioc}
+    ) : ticker{ticker}, side{side}, quantity{quantity}, price{price}, ioc{ioc}
     {}
 
     limit_order() = default;
@@ -75,15 +73,15 @@ get_time()
 }
 } // namespace
 
-template <typename ordered>
-struct timestamped_message : public ordered {
+template <typename OrderT>
+struct timestamped_message : public OrderT {
     uint64_t timestamp;
 
     timestamped_message() = delete;
 
     template <typename... Args>
     explicit timestamped_message(Args&&... args) :
-        ordered(std::forward<Args>(args)...), timestamp(get_time())
+        OrderT(std::forward<Args>(args)...), timestamp(get_time())
     {}
 };
 

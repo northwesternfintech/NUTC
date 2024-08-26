@@ -24,8 +24,7 @@ public:
         std::string trader_id, OrderBookUpdateFunction ob_update,
         TradeUpdateFunction trade_update, AccountUpdateFunction account_update
     ) :
-        TRADER_ID(std::move(trader_id)),
-        on_orderbook_update{std::move(ob_update)},
+        TRADER_ID(std::move(trader_id)), on_orderbook_update{std::move(ob_update)},
         on_trade_update{std::move(trade_update)},
         on_account_update{std::move(account_update)}
     {}
