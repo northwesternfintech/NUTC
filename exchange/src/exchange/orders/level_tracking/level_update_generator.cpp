@@ -5,19 +5,19 @@
 namespace nutc::exchange {
 
 std::vector<shared::position>
-LevelUpdateGenerator::get_updates(shared::Ticker ticker) const
+LevelUpdateGenerator::get_updates() const
 {
     std::vector<shared::position> updates;
 
     for (shared::decimal_price modified_decimal : modified_buy_levels_) {
         auto quantity =
             quantity_tracker_.get_level(shared::Side::buy, modified_decimal);
-        updates.emplace_back(ticker, shared::Side::buy, quantity, modified_decimal);
+        updates.emplace_back(ticker_, shared::Side::buy, quantity, modified_decimal);
     }
     for (shared::decimal_price modified_decimal : modified_sell_levels_) {
         auto quantity =
             quantity_tracker_.get_level(shared::Side::sell, modified_decimal);
-        updates.emplace_back(ticker, shared::Side::sell, quantity, modified_decimal);
+        updates.emplace_back(ticker_, shared::Side::sell, quantity, modified_decimal);
     }
 
     return updates;

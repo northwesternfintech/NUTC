@@ -76,7 +76,7 @@ BaseMatchingCycle::handle_matches_(std::vector<shared::match> matches)
     std::vector<shared::position> ob_updates{};
 
     for (auto& [info, _, ticker] : tickers_) {
-        auto tmp = info.limit_orderbook.get_update_generator().get_updates(ticker);
+        auto tmp = info.limit_orderbook.get_update_generator().get_updates();
         std::ranges::copy(tmp, std::back_inserter(ob_updates));
     }
 

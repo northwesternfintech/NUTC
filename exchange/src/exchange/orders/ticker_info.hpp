@@ -21,24 +21,24 @@ using DecoratedLimitOrderBook =
  */
 // TODO: rename
 struct ticker_info {
-    DecoratedLimitOrderBook limit_orderbook{};
+    DecoratedLimitOrderBook limit_orderbook;
     Engine engine;
     std::vector<BotContainer> bot_containers;
 
-    ticker_info(shared::decimal_price order_fee) : engine(order_fee) {}
-
     // TODO: order fee should not be 0
-    ticker_info(TraderContainer& traders, const ticker_config& config) :
-        ticker_info(traders, config.TICKER, config.STARTING_PRICE, 0.0, config.BOTS)
+    ticker_info(
+        TraderContainer& traders, const ticker_config& config, double order_fee
+    ) :
+        limit_orderbook(config.TICKER),
+        engine(order_fee),
+        bot_containers(create_bot_containers(
+            traders, config.TICKER, config.STARTING_PRICE, config.BOTS
+        ))
+
     {}
 
-    ticker_info(
-        TraderContainer& traders, shared::Ticker ticker,
-        shared::decimal_price starting_price, shared::decimal_price order_fee,
-        std::vector<bot_config> config
-    ) :
-        engine(order_fee),
-        bot_containers(create_bot_containers(traders, ticker, starting_price, config))
+    ticker_info(shared::Ticker ticker, double order_fee) :
+        limit_orderbook(ticker), engine(order_fee)
     {}
 
 private:

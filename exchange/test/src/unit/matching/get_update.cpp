@@ -28,14 +28,14 @@ protected:
     nutc::exchange::GenericTrader& trader3 =
         *traders.add_trader<TestTrader>(std::string("GHI"), TEST_STARTING_CAPITAL);
 
-    LevelTrackedOrderbook<LimitOrderBook> ob{};
+    LevelTrackedOrderbook<LimitOrderBook> ob{Ticker::ETH};
     LevelUpdateGenerator& generator_ = ob.get_update_generator();
 };
 
 TEST_F(UnitGetUpdate, NoOrders)
 {
     // auto updates = get_updates(Ticker::ETH, before, after);
-    auto updates = generator_.get_updates(Ticker::ETH);
+    auto updates = generator_.get_updates();
 
     ASSERT_EQ(updates.size(), 0);
 }
@@ -46,7 +46,7 @@ TEST_F(UnitGetUpdate, OrderAdded)
 
     ob.add_order(order1);
 
-    auto updates = generator_.get_updates(Ticker::ETH);
+    auto updates = generator_.get_updates();
 
     ASSERT_EQ(updates.size(), 1);
     ASSERT_EQ_OB_UPDATE(updates[0], Ticker::ETH, buy, 1, 1);
@@ -65,7 +65,7 @@ TEST_F(UnitGetUpdate, OrderDeleted)
 
     ob.mark_order_removed(order1);
     //
-    auto updates = generator_.get_updates(Ticker::ETH);
+    auto updates = generator_.get_updates();
 
     ASSERT_EQ(updates.size(), 1);
     ASSERT_EQ_OB_UPDATE(updates[0], Ticker::ETH, buy, 0, 1);
@@ -79,7 +79,7 @@ TEST_F(UnitGetUpdate, OrderQuantityChange)
 
     double quantity_delta = 5;
     ob.change_quantity(order1, quantity_delta);
-    auto updates = generator_.get_updates(Ticker::ETH);
+    auto updates = generator_.get_updates();
 
     ASSERT_EQ(updates.size(), 1);
     ASSERT_EQ_OB_UPDATE(
@@ -120,7 +120,7 @@ TEST_F(UnitGetUpdate, BuySellChange)
     ob.change_quantity(order1, 4);
     ob.change_quantity(order2, 4);
 
-    auto updates = generator_.get_updates(Ticker::ETH);
+    auto updates = generator_.get_updates();
 
     std::sort(updates.begin(), updates.end(), [](auto a, auto b) {
         return a.price < b.price;
@@ -152,7 +152,7 @@ TEST_F(UnitGetUpdate, ManyLevelChanges)
     ob.add_order(order5);
     ob.add_order(order6);
     ob.add_order(order7);
-    auto updates = generator_.get_updates(Ticker::ETH);
+    auto updates = generator_.get_updates();
 
     std::sort(updates.begin(), updates.end(), [](auto a, auto b) {
         return a.price < b.price;
@@ -190,7 +190,7 @@ TEST_F(UnitGetUpdate, ChangesAddsAndDeletes)
 
     ob.mark_order_removed(order6);
 
-    auto updates = generator_.get_updates(Ticker::ETH);
+    auto updates = generator_.get_updates();
 
     std::sort(updates.begin(), updates.end(), [](auto a, auto b) {
         return a.price < b.price;

@@ -27,7 +27,9 @@ TestMatchingCycle::create_tickers(double order_fee)
     exchange::TickerMapping mappings{};
     for (auto ticker :
          {shared::Ticker::ETH, shared::Ticker::BTC, shared::Ticker::LTC}) {
-        mappings.insert({ticker, {order_fee}});
+        mappings.insert({
+            ticker, {ticker, order_fee}
+        });
     }
     return mappings;
 }

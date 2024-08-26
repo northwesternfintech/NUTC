@@ -20,23 +20,23 @@ namespace {
 using namespace nutc::exchange; // NOLINT
 
 TickerMapping
-load_tickers(TraderContainer& traders)
+load_tickers(TraderContainer& traders, double order_fee)
 {
     TickerMapping ret;
     const auto& tickers = Config::get().get_tickers();
     for (const ticker_config& ticker : tickers) {
         ret.insert({
-            ticker.TICKER, {traders, ticker}
+            ticker.TICKER, {traders, ticker, order_fee}
         });
     }
     return ret;
 }
 
 std::unique_ptr<MatchingCycleInterface>
-create_cycle(TraderContainer& traders, const auto& mode)
+create_cycle(TraderContainer& traders, double order_fee, const auto& mode)
 {
     using nutc::shared::Mode;
-    auto tickers = load_tickers(traders);
+    auto tickers = load_tickers(traders, order_fee);
 
     switch (mode) {
         case Mode::normal:
@@ -73,7 +73,8 @@ main(int argc, const char** argv)
     TraderContainer traders{};
     AlgoInitializer::get_algo_initializer(mode)->initialize_algo_management(traders);
 
-    main_event_loop(create_cycle(traders, mode));
+    double order_fee = Config::get().constants().ORDER_FEE;
+    main_event_loop(create_cycle(traders, order_fee, mode));
 
     return 0;
 }

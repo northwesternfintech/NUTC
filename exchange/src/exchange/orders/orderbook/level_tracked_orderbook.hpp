@@ -12,6 +12,10 @@ class LevelTrackedOrderbook : public BaseOrderBookT {
     LevelUpdateGenerator level_update_generator_;
 
 public:
+    explicit LevelTrackedOrderbook(shared::Ticker ticker) :
+        level_update_generator_{ticker}
+    {}
+
     LevelUpdateGenerator&
     get_update_generator()
     {
