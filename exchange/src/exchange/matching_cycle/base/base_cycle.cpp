@@ -25,13 +25,13 @@ BaseMatchingCycle::collect_orders(uint64_t) -> std::vector<OrderVariant>
         auto message_queue = trader.read_orders();
 
         auto get_tagged_order =
-            [&trader]<typename ordered>(const ordered& order
+            [&trader]<typename OrderT>(const OrderT& order
             ) -> std::variant<tagged_limit_order, tagged_market_order> {
-            if constexpr (std::is_same_v<ordered, shared::timed_init_message>) {
+            if constexpr (std::is_same_v<OrderT, shared::timed_init_message>) {
                 throw std::runtime_error("Unexpected initialization message");
             }
             else {
-                return tagged_order<ordered>{trader, order};
+                return tagged_order<OrderT>{trader, order};
             }
         };
 
@@ -52,7 +52,7 @@ BaseMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
     std::vector<shared::match> matches;
 
     for (OrderVariant& order_variant : orders) {
-        auto match_order = [&]<typename ordered>(ordered& order) {
+        auto match_order = [&]<typename OrderT>(OrderT& order) {
             if (order.quantity <= 0)
                 return;
 

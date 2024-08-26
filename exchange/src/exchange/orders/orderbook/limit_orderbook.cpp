@@ -1,5 +1,6 @@
 #include "limit_orderbook.hpp"
 
+#include "exchange/orders/storage/order_storage.hpp"
 #include "shared/types/decimal_price.hpp"
 #include "shared/util.hpp"
 
@@ -18,16 +19,11 @@ LimitOrderBook::clean_tree(shared::Side side)
             continue;
         }
 
-        if (!queue.front().active) {
-            queue.pop();
-            continue;
-        }
-
         return;
     }
 }
 
-std::optional<std::reference_wrapper<tagged_limit_order>>
+std::optional<LimitOrderBook::order_list::iterator>
 LimitOrderBook::get_top_order(shared::Side side)
 {
     clean_tree(side);
@@ -43,7 +39,7 @@ LimitOrderBook::get_top_order(shared::Side side)
     if (queue.empty()) [[unlikely]]
         return std::nullopt;
 
-    return queue.front();
+    return queue.begin();
 }
 
 shared::decimal_price
@@ -58,29 +54,43 @@ LimitOrderBook::get_midprice() const
 void
 LimitOrderBook::change_quantity(tagged_limit_order& order, double quantity_delta)
 {
-    if (shared::is_close_to_zero(order.quantity + quantity_delta)) {
-        mark_order_removed(order);
-        return;
-    }
-
-    order.trader->notify_position_change(
-        {order.ticker, order.side, quantity_delta, order.price}
-    );
-
     order.quantity += quantity_delta;
 }
 
 void
-LimitOrderBook::mark_order_removed(tagged_limit_order& order)
+LimitOrderBook::change_quantity(tagged_market_order& order, double quantity_delta)
 {
-    order.trader->notify_position_change(
-        {order.ticker, order.side, -order.quantity, order.price}
-    );
-
-    order.active = false;
+    order.quantity += quantity_delta;
 }
 
-tagged_limit_order&
+void
+LimitOrderBook::change_quantity(order_list::iterator order, double quantity_delta)
+{
+    if (shared::is_close_to_zero(order->quantity + quantity_delta)) {
+        mark_order_removed(order);
+        return;
+    }
+
+    order->trader->notify_position_change(
+        {order->ticker, order->side, quantity_delta, order->price}
+    );
+
+    order->quantity += quantity_delta;
+}
+
+void
+LimitOrderBook::mark_order_removed(order_list::iterator order)
+{
+    order->trader->notify_position_change(
+        {order->ticker, order->side, -order->quantity, order->price}
+    );
+    if (order->side == shared::Side::buy)
+        bids_[order->price].erase(order);
+    else
+        asks_[order->price].erase(order);
+}
+
+LimitOrderBook::order_list::iterator
 LimitOrderBook::add_order(const tagged_limit_order& order)
 {
     order.trader->notify_position_change(
@@ -90,8 +100,8 @@ LimitOrderBook::add_order(const tagged_limit_order& order)
     auto& map = order.side == shared::Side::buy ? bids_ : asks_;
 
     auto& queue = map[order.price];
-    queue.push(order);
-    return queue.back();
+    queue.push_back(order);
+    return --queue.end();
 }
 
 } // namespace nutc::exchange

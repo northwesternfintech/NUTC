@@ -56,7 +56,7 @@ TickerMetricsPusher::report_ticker_stats(TickerMapping& tickers)
                     {"ticker", shared::to_string(ticker)},
                     {"type",   "BID"                    }
             })
-                .Set(double{best_bid->get().price});
+                .Set(double{(**best_bid).price});
         }
 
         if (best_ask.has_value()) [[likely]] {
@@ -65,7 +65,7 @@ TickerMetricsPusher::report_ticker_stats(TickerMapping& tickers)
                     {"ticker", shared::to_string(ticker)},
                     {"type",   "ASK"                    }
             })
-                .Set(double{best_ask->get().price});
+                .Set(double{(**best_ask).price});
         }
     };
 

@@ -21,17 +21,17 @@ class Engine {
 public:
     explicit Engine(decimal_price order_fee = 0.0) : order_fee_(order_fee) {}
 
-    template <TaggedOrder ordered>
-    std::vector<match> match_order(ordered order, LimitOrderBook& orderbook);
+    template <TaggedOrder OrderT>
+    std::vector<match> match_order(OrderT order, LimitOrderBook& orderbook);
 
 private:
-    template <TaggedOrder ordered>
+    template <TaggedOrder OrderT>
     glz::expected<match, bool>
-    match_incoming_order_(ordered& aggressive_order, LimitOrderBook& orderbook);
+    match_incoming_order_(OrderT& aggressive_order, LimitOrderBook& orderbook);
 
-    template <shared::Side AggressiveSide, TaggedOrder ordered>
+    template <shared::Side AggressiveSide, TaggedOrder OrderT>
     glz::expected<match, bool> match_incoming_order_(
-        ordered& aggressive_order, tagged_limit_order& passive_order,
+        OrderT& aggressive_order, LimitOrderBook::stored_limit_order passive_order,
         LimitOrderBook& orderbook
     );
 

@@ -57,13 +57,13 @@ TEST_F(UnitGetUpdate, OrderDeleted)
     tagged_limit_order order1{trader1, Ticker::ETH, buy, 1, 1.0};
 
     // before, we have a single order
-    ob.add_order(order1);
+    auto o1_it = ob.add_order(order1);
 
     generator_.reset();
 
     // we delete the order
 
-    ob.mark_order_removed(order1);
+    ob.mark_order_removed(o1_it);
     //
     auto updates = generator_.get_updates();
 
@@ -75,10 +75,10 @@ TEST_F(UnitGetUpdate, OrderQuantityChange)
 {
     double initial_quantity = 1;
     tagged_limit_order order1{trader1, Ticker::ETH, buy, initial_quantity, 1.0};
-    ob.add_order(order1);
+    auto o1_it = ob.add_order(order1);
 
     double quantity_delta = 5;
-    ob.change_quantity(order1, quantity_delta);
+    ob.change_quantity(o1_it, quantity_delta);
     auto updates = generator_.get_updates();
 
     ASSERT_EQ(updates.size(), 1);
@@ -114,11 +114,11 @@ TEST_F(UnitGetUpdate, BuySellChange)
     tagged_limit_order order1{trader1, Ticker::ETH, buy, 1, 1.0};
     tagged_limit_order order2{trader3, Ticker::ETH, sell, 1, 5.0};
 
-    ob.add_order(order1);
-    ob.add_order(order2);
+    auto o1_it = ob.add_order(order1);
+    auto o2_it = ob.add_order(order2);
 
-    ob.change_quantity(order1, 4);
-    ob.change_quantity(order2, 4);
+    ob.change_quantity(o1_it, 4);
+    ob.change_quantity(o2_it, 4);
 
     auto updates = generator_.get_updates();
 
@@ -178,7 +178,7 @@ TEST_F(UnitGetUpdate, ChangesAddsAndDeletes)
     ob.add_order(order3);
     ob.add_order(order4);
     ob.add_order(order5);
-    ob.add_order(order6);
+    auto o6_it = ob.add_order(order6);
 
     generator_.reset();
 
@@ -188,7 +188,7 @@ TEST_F(UnitGetUpdate, ChangesAddsAndDeletes)
     ob.add_order(order7);
     ob.add_order(order8);
 
-    ob.mark_order_removed(order6);
+    ob.mark_order_removed(o6_it);
 
     auto updates = generator_.get_updates();
 

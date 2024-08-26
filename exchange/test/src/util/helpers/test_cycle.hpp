@@ -20,15 +20,15 @@ public:
     {}
 
     // Note: uses tick=0. If using something that relies on tick, it will not work
-    template <typename ordered>
+    template <typename OrderT>
     void
-    wait_for_order(const ordered& order)
+    wait_for_order(const OrderT& order)
     {
         log_i(testing, "Waiting for order {}", *glz::write_json(order));
 
         auto orders_are_same = [&]<typename LastOrder>(const LastOrder& last_order_v) {
-            if constexpr (std::is_base_of_v<ordered, LastOrder>) {
-                return static_cast<const ordered&>(last_order_v) == order;
+            if constexpr (std::is_base_of_v<OrderT, LastOrder>) {
+                return static_cast<const OrderT&>(last_order_v) == order;
             }
             return false;
         };
