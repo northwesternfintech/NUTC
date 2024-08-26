@@ -1,7 +1,7 @@
 #pragma once
 
 #include "exchange/algos/algo_manager.hpp"
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 
 namespace nutc::exchange {
 

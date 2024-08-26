@@ -3,7 +3,7 @@
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
 #include "exchange/orders/storage/order_storage.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 #include "shared/util.hpp"
 
 namespace nutc::exchange {

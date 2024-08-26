@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 #include "shared/types/position.hpp"
 
 namespace nutc::wrapper {

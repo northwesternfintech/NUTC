@@ -1,4 +1,4 @@
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 
 #include <gtest/gtest.h>
 

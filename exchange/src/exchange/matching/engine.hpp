@@ -3,7 +3,7 @@
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
 #include "order_pair.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 
 #include <glaze/util/expected.hpp>
 

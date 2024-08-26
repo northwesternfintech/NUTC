@@ -1,6 +1,6 @@
 #pragma once
 #include "exchange/orders/level_tracking/level_quantity_tracker.hpp"
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 #include "shared/types/position.hpp"
 
 #include <unordered_set>

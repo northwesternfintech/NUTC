@@ -5,7 +5,7 @@
 #include "exchange/config/dynamic/config.hpp"
 #include "exchange/config/static/config.hpp"
 #include "normal_mode/normal_mode.hpp"
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 
 #include <memory>
 #include <stdexcept>

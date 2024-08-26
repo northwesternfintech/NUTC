@@ -3,7 +3,7 @@
 #include "exchange/orders/level_tracking/level_update_generator.hpp"
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
 #include "exchange/orders/storage/order_storage.hpp"
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 #include "shared/types/ticker.hpp"
 
 namespace nutc::exchange {

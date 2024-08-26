@@ -6,7 +6,7 @@
 #include "exchange/orders/orderbook/level_tracked_orderbook.hpp"
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
 #include "exchange/traders/trader_container.hpp"
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 
 #include <absl/hash/hash.h>
 

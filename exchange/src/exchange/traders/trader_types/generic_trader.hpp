@@ -2,7 +2,7 @@
 
 #include "hash_table7.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 #include "shared/types/position.hpp"
 
 #include <absl/hash/hash.h>

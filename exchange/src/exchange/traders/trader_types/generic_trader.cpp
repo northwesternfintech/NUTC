@@ -1,6 +1,6 @@
 #include "generic_trader.hpp"
 
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 
 namespace nutc::exchange {
 

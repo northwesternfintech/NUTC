@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types/decimal_price.hpp"
+#include "types/decimal.hpp"
 #include "types/ticker.hpp"
 #include "util.hpp"
 

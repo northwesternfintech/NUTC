@@ -1,6 +1,6 @@
 #include "exchange/orders/level_tracking/level_quantity_tracker.hpp"
 
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 
 #include <benchmark/benchmark.h>
 
@@ -17,11 +17,11 @@ BM_AddRangeOfTimes(benchmark::State& state)
 
     for (auto _ : state) {
         for (uint16_t level = 0; level < max_level; level++) {
-            decimal_price.price = level;
+            decimal_price.set_underlying(level);
             tracker.report_quantity(shared::Side::sell, level, decimal_price);
         }
         for (uint16_t level = 0; level < max_level; level++) {
-            decimal_price.price = level;
+            decimal_price.set_underlying(level);
             benchmark::DoNotOptimize(tracker.get_level(shared::Side::sell, decimal_price)
             );
         }
@@ -48,11 +48,11 @@ BM_RandomIterate(benchmark::State& state)
     shared::decimal_price decimal_price;
     for (auto _ : state) {
         for (uint16_t level : random_levels) {
-            decimal_price.price = level;
+            decimal_price.set_underlying(level);
             tracker.report_quantity(shared::Side::sell, level, decimal_price);
         }
         for (uint16_t level : random_levels_2) {
-            decimal_price.price = level;
+            decimal_price.set_underlying(level);
             benchmark::DoNotOptimize(tracker.get_level(shared::Side::sell, decimal_price)
             );
         }

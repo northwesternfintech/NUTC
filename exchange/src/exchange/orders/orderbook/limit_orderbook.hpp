@@ -1,7 +1,7 @@
 #pragma once
 
 #include "exchange/orders/storage/order_storage.hpp"
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 
 #include <boost/intrusive/list.hpp>
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "exchange/config/static/config.hpp"
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 #include "ticker_config.hpp"
 
 #include <fmt/format.h>

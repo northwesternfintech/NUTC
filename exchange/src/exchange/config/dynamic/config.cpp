@@ -1,6 +1,6 @@
 #include "config.hpp"
 
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 
 #include <fmt/core.h>
 

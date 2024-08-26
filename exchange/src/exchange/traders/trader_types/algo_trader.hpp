@@ -3,7 +3,7 @@
 #include "exchange/wrappers/handle/wrapper_handle.hpp"
 #include "generic_trader.hpp"
 #include "shared/file_operations/file_operations.hpp"
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 
 #include <fmt/format.h>
 
