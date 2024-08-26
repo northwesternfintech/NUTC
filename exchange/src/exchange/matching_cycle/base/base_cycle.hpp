@@ -1,6 +1,6 @@
 #pragma once
 #include "exchange/matching_cycle/cycle_interface.hpp"
-#include "exchange/orders/ticker_info.hpp"
+#include "exchange/orders/ticker_container.hpp"
 #include "exchange/traders/trader_container.hpp"
 
 namespace nutc::exchange {

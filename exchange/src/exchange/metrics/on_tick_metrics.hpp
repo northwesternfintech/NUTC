@@ -1,6 +1,6 @@
 #pragma once
 
-#include "exchange/orders/ticker_info.hpp"
+#include "exchange/orders/ticker_container.hpp"
 #include "exchange/traders/trader_container.hpp"
 
 #include <hash_table7.hpp>
