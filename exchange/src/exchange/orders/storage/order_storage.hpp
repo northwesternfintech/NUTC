@@ -27,8 +27,8 @@ public:
     bool operator==(const tagged_order& other) const = default;
 };
 
-using tagged_limit_order = tagged_order<common::timed_limit_order>;
-using tagged_market_order = tagged_order<common::timed_market_order>;
+using tagged_limit_order = tagged_order<common::limit_order>;
+using tagged_market_order = tagged_order<common::market_order>;
 
 template <typename T>
 inline constexpr bool is_limit_order_v =

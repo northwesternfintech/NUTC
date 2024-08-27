@@ -96,10 +96,7 @@ public:
     virtual void notify_match(common::position);
     virtual void send_message(const std::string&) = 0;
 
-    using IncomingMessageQueue = std::vector<std::variant<
-        common::timed_init_message, common::timed_limit_order,
-        common::timed_market_order>>;
-
+    using IncomingMessageQueue = std::vector<common::IncomingMessageVariant>;
     virtual IncomingMessageQueue read_orders() = 0;
 };
 } // namespace nutc::exchange

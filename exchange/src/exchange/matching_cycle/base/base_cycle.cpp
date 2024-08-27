@@ -27,7 +27,7 @@ BaseMatchingCycle::collect_orders(uint64_t) -> std::vector<OrderVariant>
         auto get_tagged_order =
             [&trader]<typename OrderT>(const OrderT& order
             ) -> std::variant<tagged_limit_order, tagged_market_order> {
-            if constexpr (std::is_same_v<OrderT, common::timed_init_message>) {
+            if constexpr (std::is_same_v<OrderT, common::init_message>) {
                 throw std::runtime_error("Unexpected initialization message");
             }
             else {

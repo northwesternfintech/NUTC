@@ -1,6 +1,7 @@
 #include "pipe_reader.hpp"
 
 #include "async_pipe_runner.hpp"
+#include "common/messages_wrapper_to_exchange.hpp"
 #include "exchange/logging.hpp"
 
 #include <boost/asio.hpp>
@@ -29,7 +30,7 @@ PipeReader::PipeReader() :
 void
 PipeReader::store_message_(const std::string& message)
 {
-    std::variant<common::init_message, common::limit_order, common::market_order> data;
+    common::IncomingMessageVariant data;
     auto err = glz::read_json(data, message);
 
     // TODO: handle better
@@ -41,12 +42,8 @@ PipeReader::store_message_(const std::string& message)
         return;
     }
 
-    auto store_message = [this]<typename MessageT>(const MessageT& v) {
-        shared.push_back(common::timestamped_message<MessageT>{v});
-    };
-
     std::lock_guard<std::mutex> lock{message_lock_};
-    std::visit(store_message, data);
+    shared.push_back(data);
 }
 
 void

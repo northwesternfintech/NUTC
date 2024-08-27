@@ -35,7 +35,7 @@ public:
     // Local (.py on disk)
     WrapperHandle(const std::string& algo_path);
 
-    std::vector<PipeReader::IncomingMessageVariant>
+    std::vector<common::IncomingMessageVariant>
     read_shared()
     {
         return reader_.get_shared();
