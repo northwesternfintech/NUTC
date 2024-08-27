@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types/decimal_price.hpp"
+#include "types/decimal.hpp"
 #include "types/ticker.hpp"
 #include "util.hpp"
 
@@ -25,7 +25,7 @@ struct init_message {
 struct market_order {
     shared::Ticker ticker;
     shared::Side side;
-    double quantity;
+    decimal_quantity quantity;
 
     market_order() = default;
 
@@ -37,7 +37,7 @@ struct market_order {
 struct limit_order {
     shared::Ticker ticker;
     shared::Side side;
-    double quantity;
+    decimal_quantity quantity;
     shared::decimal_price price;
     bool ioc;
 

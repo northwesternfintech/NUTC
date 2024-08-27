@@ -2,12 +2,13 @@
 
 #include "exchange/algos/dev_mode/dev_mode.hpp"
 #include "exchange/logging.hpp"
+#include "shared/types/decimal.hpp"
 
 namespace nutc::test {
 exchange::GenericTrader&
 start_wrappers(
     nutc::exchange::TraderContainer& users, const std::string& filename,
-    double starting_capital, size_t start_delay
+    shared::decimal_price starting_capital, size_t start_delay
 )
 {
     auto ret =
@@ -20,8 +21,8 @@ start_wrappers(
 std::vector<std::reference_wrapper<exchange::GenericTrader>>
 start_wrappers(
     nutc::exchange::TraderContainer& users,
-    const std::vector<std::string>& algo_filenames, double starting_capital,
-    size_t start_delay
+    const std::vector<std::string>& algo_filenames,
+    shared::decimal_price starting_capital, size_t start_delay
 )
 {
     using exchange::DevModeAlgoInitializer;

@@ -30,7 +30,7 @@ TickerMetricsPusher::report_orders(const std::vector<tagged_limit_order>& orders
                 {"ticker",      shared::to_string(order.ticker)},
                 {"trader_type", order.trader->get_type()       }
         })
-            .Increment(order.quantity);
+            .Increment(double{order.quantity});
     };
 
     std::for_each(orders.begin(), orders.end(), log_order);
@@ -92,7 +92,7 @@ TickerMetricsPusher::report_matches(const std::vector<shared::match>& orders)
             .Add({
                 {"ticker", shared::to_string(match.position.ticker)}
         })
-            .Increment(match.position.quantity);
+            .Increment(double{match.position.quantity});
     };
 
     std::for_each(orders.begin(), orders.end(), log_match);
@@ -109,7 +109,7 @@ TickerMetricsPusher::report_trader_stats(const TickerMapping& tickers)
 {
     auto report_holdings = [&](const auto& trader) {
         for (auto [ticker, info] : tickers) {
-            double amount_held = trader.get_holdings(ticker);
+            double amount_held{trader.get_holdings(ticker)};
             per_trader_holdings_gauge
                 .Add({
                     {"ticker",      shared::to_string(ticker)},

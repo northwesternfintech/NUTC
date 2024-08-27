@@ -2,7 +2,7 @@
 
 #include "hash_table7.hpp"
 #include "shared/messages_wrapper_to_exchange.hpp"
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 #include "shared/types/position.hpp"
 
 #include <absl/hash/hash.h>
@@ -16,7 +16,9 @@ class GenericTrader {
     const std::string USER_ID;
     const shared::decimal_price INITIAL_CAPITAL;
     shared::decimal_price capital_delta_{};
-    emhash7::HashMap<shared::Ticker, double, absl::Hash<shared::Ticker>> holdings_{};
+    emhash7::HashMap<
+        shared::Ticker, shared::decimal_quantity, absl::Hash<shared::Ticker>>
+        holdings_{};
 
 public:
     explicit GenericTrader(std::string user_id, shared::decimal_price capital) :
@@ -55,18 +57,18 @@ public:
     }
 
     // TODO: improve with find
-    double
+    shared::decimal_quantity
     get_holdings(shared::Ticker ticker) const
     {
-        auto it = holdings_.find(ticker);
-        if (it == holdings_.end())
+        auto holdings_it = holdings_.find(ticker);
+        if (holdings_it == holdings_.end()) [[unlikely]]
             return 0.0;
 
-        return it->second;
+        return holdings_it->second;
     }
 
-    double
-    modify_holdings(shared::Ticker ticker, double change_in_holdings)
+    shared::decimal_quantity
+    modify_holdings(shared::Ticker ticker, shared::decimal_quantity change_in_holdings)
     {
         holdings_[ticker] += change_in_holdings;
         return holdings_[ticker];

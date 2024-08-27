@@ -18,8 +18,7 @@ validate_match(
 {
     return match.position.ticker == ticker && match.buyer_id == buyer_id
            && match.seller_id == seller_id && match.position.side == side
-           && match.position.price == price
-           && is_nearly_equal(match.position.quantity, quantity);
+           && match.position.price == price && match.position.quantity == quantity;
 }
 
 bool
@@ -29,7 +28,7 @@ validate_ob_update(
 )
 {
     return update.ticker == ticker && update.side == side && update.price == price
-           && is_nearly_equal(update.quantity, quantity);
+           && update.quantity == quantity;
 }
 
 bool
@@ -39,7 +38,7 @@ validate_limit_order(
 )
 {
     return update.ticker == ticker && update.side == side && update.price == price
-           && is_nearly_equal(update.quantity, quantity);
+           && update.quantity == quantity;
 }
 
 } // namespace nutc::test

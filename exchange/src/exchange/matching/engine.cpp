@@ -2,6 +2,7 @@
 
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
+#include "shared/types/decimal.hpp"
 #include "shared/util.hpp"
 
 namespace nutc::exchange {
@@ -14,7 +15,7 @@ Engine::match_order(OrderT order, LimitOrderBook& orderbook)
 {
     std::vector<match> matches;
 
-    while (!shared::is_close_to_zero(order.quantity)) {
+    while (order.quantity != 0.0) {
         auto match_opt = match_incoming_order_(order, orderbook);
         if (match_opt.has_value())
             matches.push_back(match_opt.value());
@@ -23,7 +24,7 @@ Engine::match_order(OrderT order, LimitOrderBook& orderbook)
     }
 
     if constexpr (is_limit_order_v<OrderT>) {
-        if (!order.ioc && !shared::is_close_to_zero(order.quantity)) {
+        if (!(order.ioc || order.quantity == 0.0)) {
             orderbook.add_order(order);
         }
     }
@@ -82,7 +83,7 @@ Engine::match_incoming_order_(
 }
 
 shared::decimal_price
-Engine::total_order_cost_(decimal_price price, double quantity) const
+Engine::total_order_cost_(decimal_price price, shared::decimal_quantity quantity) const
 {
     decimal_price fee{order_fee_ * price};
     decimal_price price_per = price + fee;
@@ -98,7 +99,7 @@ Engine::attempt_match_(OrderPairT& orders)
         return glz::unexpected(MatchFailure::done_matching);
 
     auto match_price = *price_opt;
-    double match_quantity = orders.potential_match_quantity();
+    shared::decimal_quantity match_quantity = orders.potential_match_quantity();
     decimal_price total_price{total_order_cost_(match_price, match_quantity)};
 
     auto& buyer = orders.template get_underlying_order<shared::Side::buy>();

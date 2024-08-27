@@ -3,7 +3,7 @@
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
 #include "order_pair.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 
 #include <glaze/util/expected.hpp>
 
@@ -44,7 +44,8 @@ private:
     template <shared::Side AggressiveSide, typename OrderPairT>
     glz::expected<match, MatchFailure> attempt_match_(OrderPairT& orders);
 
-    decimal_price total_order_cost_(decimal_price price, double quantity) const;
+    decimal_price
+    total_order_cost_(decimal_price price, shared::decimal_quantity quantity) const;
 };
 
 } // namespace nutc::exchange

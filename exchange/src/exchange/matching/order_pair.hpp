@@ -3,7 +3,7 @@
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
 #include "exchange/orders/storage/order_storage.hpp"
 #include "shared/messages_exchange_to_wrapper.hpp"
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 #include "shared/util.hpp"
 
 namespace nutc::exchange {
@@ -101,7 +101,7 @@ public:
 
     template <shared::Side AggressiveSide>
     shared::match
-    create_match(double quantity, shared::decimal_price price) const
+    create_match(shared::decimal_quantity quantity, shared::decimal_price price) const
     {
         auto& buyer = get_underlying_order<side::buy>();
         auto& seller = get_underlying_order<side::sell>();
@@ -112,7 +112,7 @@ public:
         };
     }
 
-    double
+    shared::decimal_quantity
     potential_match_quantity() const
     {
         auto& buyer = get_underlying_order<side::buy>();
@@ -135,8 +135,8 @@ public:
              match.position.price * (shared::decimal_price{1.0} - order_fee)}
         );
 
-        orderbook.change_quantity(seller, -match.position.quantity);
-        orderbook.change_quantity(buyer, -match.position.quantity);
+        orderbook.change_quantity(seller, -(match.position.quantity));
+        orderbook.change_quantity(buyer, -(match.position.quantity));
     }
 };
 } // namespace nutc::exchange

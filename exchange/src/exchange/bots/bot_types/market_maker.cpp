@@ -1,7 +1,7 @@
 #include "market_maker.hpp"
 
 #include "exchange/bots/shared_bot_state.hpp"
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 #include "shared/util.hpp"
 
 #include <algorithm>

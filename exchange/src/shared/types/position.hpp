@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 #include "shared/types/ticker.hpp"
 #include "shared/util.hpp"
 
@@ -10,20 +10,22 @@ namespace nutc::shared {
 struct position {
     Ticker ticker;
     Side side;
-    double quantity;
+    shared::decimal_quantity quantity;
     shared::decimal_price price;
 
     bool
     operator==(const position& other) const noexcept
     {
         return side == other.side && ticker == other.ticker && price == other.price
-               && ((quantity - other.quantity) == 0);
+               && ((quantity - other.quantity) == 0.0);
     }
 
     position() = default;
 
-    position(Ticker ticker, Side side, double quantity, shared::decimal_price price) :
-        ticker(ticker), side(side), quantity(quantity), price(price)
+    position(
+        Ticker ticker, Side side, shared::decimal_quantity quantity,
+        shared::decimal_price price
+    ) : ticker(ticker), side(side), quantity(quantity), price(price)
     {}
 };
 

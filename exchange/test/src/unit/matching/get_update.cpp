@@ -117,8 +117,8 @@ TEST_F(UnitGetUpdate, BuySellChange)
     auto o1_it = ob.add_order(order1);
     auto o2_it = ob.add_order(order2);
 
-    ob.change_quantity(o1_it, 4);
-    ob.change_quantity(o2_it, 4);
+    ob.change_quantity(o1_it, 4.0);
+    ob.change_quantity(o2_it, 4.0);
 
     auto updates = generator_.get_updates();
 

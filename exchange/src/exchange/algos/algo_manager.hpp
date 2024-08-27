@@ -1,7 +1,7 @@
 #pragma once
 
 #include "exchange/traders/trader_container.hpp"
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 #include "shared/util.hpp"
 
 namespace nutc::exchange {

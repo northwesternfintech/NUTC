@@ -1,6 +1,6 @@
 #include "bot_trader.hpp"
 
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 
 #include <cassert>
 

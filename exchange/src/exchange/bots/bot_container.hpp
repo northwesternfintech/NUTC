@@ -3,7 +3,7 @@
 #include "exchange/theo/brownian.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "exchange/traders/trader_types/bot_trader.hpp"
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 #include "shared_bot_state.hpp"
 #include "variance.hpp"
 

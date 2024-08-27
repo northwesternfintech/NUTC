@@ -1,7 +1,7 @@
 #pragma once
 
 #include "exchange/orders/storage/order_storage.hpp"
-#include "shared/types/decimal_price.hpp"
+#include "shared/types/decimal.hpp"
 
 #include <boost/intrusive/list.hpp>
 
@@ -25,9 +25,14 @@ public:
 
     virtual order_list::iterator add_order(const tagged_limit_order& order);
     virtual void mark_order_removed(order_list::iterator order);
-    virtual void change_quantity(order_list::iterator order, double quantity_delta);
-    static void change_quantity(tagged_limit_order& order, double quantity_delta);
-    static void change_quantity(tagged_market_order& order, double quantity_delta);
+    virtual void change_quantity(
+        order_list::iterator order, shared::decimal_quantity quantity_delta
+    );
+    static void
+    change_quantity(tagged_limit_order& order, shared::decimal_quantity quantity_delta);
+    static void change_quantity(
+        tagged_market_order& order, shared::decimal_quantity quantity_delta
+    );
     virtual ~LimitOrderBook() = default;
 
     shared::decimal_price get_midprice() const;
