@@ -4,7 +4,24 @@
 
 #include <fmt/format.h>
 
+#ifdef __APPLE__
+#  include <mach/mach_time.h>
+#else
+#  include <x86intrin.h>
+#endif
+
 namespace nutc::common {
+uint64_t
+get_time()
+{
+#ifdef __APPLE__
+    static uint64_t min_time = 0;
+    return min_time = std::max(min_time + 1, mach_absolute_time());
+#else
+    return __rdtsc();
+#endif
+}
+
 std::string
 get_firebase_endpoint(const std::string& params)
 {

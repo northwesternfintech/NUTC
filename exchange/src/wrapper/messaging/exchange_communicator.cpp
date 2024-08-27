@@ -1,9 +1,9 @@
 #include "exchange_communicator.hpp"
 
-#include "common/config/config.h"
 #include "common/messages_exchange_to_wrapper.hpp"
 #include "common/messages_wrapper_to_exchange.hpp"
 #include "common/types/position.hpp"
+#include "common/util.hpp"
 #include "wrapper/pywrapper/pywrapper.hpp"
 
 #include <boost/asio.hpp>

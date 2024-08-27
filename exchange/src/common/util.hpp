@@ -8,7 +8,7 @@
 #include <string>
 
 namespace nutc::common {
-
+std::uint64_t get_time();
 std::string trader_id(const std::string& user_id, const std::string& algo_id);
 
 std::string get_firebase_endpoint(const std::string& params);

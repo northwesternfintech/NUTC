@@ -39,15 +39,15 @@ public:
     }
 
     void
-    add_order(common::limit_order order)
+    add_order(const common::limit_order& order)
     {
-        pending_orders_.push_back(common::timed_limit_order{order});
+        pending_orders_.emplace_back(order);
     }
 
     void
-    add_order(common::market_order order)
+    add_order(const common::market_order& order)
     {
-        pending_orders_.push_back(common::timed_market_order{order});
+        pending_orders_.emplace_back(order);
     }
 
     const std::string&

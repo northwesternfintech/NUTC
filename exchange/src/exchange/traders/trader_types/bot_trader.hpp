@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/types/decimal.hpp"
+#include "common/util.hpp"
 #include "exchange/bots/shared_bot_state.hpp"
 #include "exchange/traders/trader_types/generic_trader.hpp"
 
@@ -118,15 +119,13 @@ protected:
         common::Side side, double quantity, common::decimal_price price, bool ioc
     )
     {
-        orders_.emplace_back(
-            common::timed_limit_order{TICKER, side, quantity, price, ioc}
-        );
+        orders_.emplace_back(common::limit_order{TICKER, side, quantity, price, ioc});
     }
 
     void
     add_market_order(common::Side side, double quantity)
     {
-        orders_.push_back(common::timed_market_order{TICKER, side, quantity});
+        orders_.emplace_back(common::market_order{TICKER, side, quantity});
     }
 
     common::decimal_price

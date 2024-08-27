@@ -11,14 +11,8 @@ namespace bp = boost::process;
 namespace ba = boost::asio;
 
 class PipeReader {
-public:
-    using IncomingMessageVariant = std::variant<
-        common::timed_init_message, common::timed_limit_order,
-        common::timed_market_order>;
-
-private:
     std::mutex message_lock_;
-    std::vector<IncomingMessageVariant> shared;
+    std::vector<common::IncomingMessageVariant> shared;
     std::shared_ptr<ba::io_context> pipe_context_;
     bp::async_pipe pipe_in_;
 
@@ -43,7 +37,7 @@ public:
     ~PipeReader();
 
     // Blocking and O(1), use sparingly
-    IncomingMessageVariant
+    common::IncomingMessageVariant
     get_message()
     {
         while (true) {
@@ -56,11 +50,11 @@ public:
         }
     }
 
-    std::vector<IncomingMessageVariant>
+    std::vector<common::IncomingMessageVariant>
     get_shared()
     {
         std::lock_guard<std::mutex> lock{message_lock_};
-        std::vector<IncomingMessageVariant> result;
+        std::vector<common::IncomingMessageVariant> result;
         result.swap(shared);
         return result;
     }
