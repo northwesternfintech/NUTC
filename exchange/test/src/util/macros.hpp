@@ -51,7 +51,7 @@ bool validate_limit_order(
             << ", seller_id = " << (match).seller_id                                   \
             << ", side = " << static_cast<int>((match).position.side)                  \
             << ", price = " << double{(match).position.price}                          \
-            << ", quantity = " << (match).position.quantity;                           \
+            << ", quantity = " << double{(match).position.quantity};                   \
     } while (0)
 
 #define ASSERT_EQ_OB_UPDATE(/* NOLINT(cppcoreguidelines-macro-usage) */                \
@@ -68,7 +68,7 @@ bool validate_limit_order(
             << nutc::shared::to_string((update).ticker)                                \
             << ", side = " << static_cast<int>((update).side)                          \
             << ", price = " << double((update).price)                                  \
-            << ", quantity = " << (update).quantity;                                   \
+            << ", quantity = " << double{(update).quantity};                           \
     } while (0)
 
 #define ASSERT_EQ_LIMIT_ORDER(/* NOLINT (cppcoreguidelines-macro-usage) */             \
@@ -87,5 +87,5 @@ bool validate_limit_order(
             << ", ticker = " << nutc::shared::to_string((update).ticker)               \
             << ", side = " << static_cast<int>((update).side)                          \
             << ", price = " << double((update).price)                                  \
-            << ", quantity = " << (update).quantity;                                   \
+            << ", quantity = " << double{(update).quantity};                           \
     } while (0)

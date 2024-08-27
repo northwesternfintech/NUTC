@@ -3,6 +3,7 @@
 #include "exchange/bots/bot_types/market_maker.hpp"
 #include "exchange/bots/bot_types/retail.hpp"
 #include "exchange/traders/trader_container.hpp"
+#include "shared/types/decimal.hpp"
 
 #include <cmath>
 
@@ -17,7 +18,7 @@ BotContainer::generate_orders(shared::decimal_price midprice)
     variance_calculator_.record_price(midprice);
 
     decimal_price cumulative_interest_limit{};
-    double cumulative_quantity_held{};
+    shared::decimal_quantity cumulative_quantity_held{};
 
     for (const auto& bot : bots_) {
         cumulative_interest_limit += bot->get_interest_limit();

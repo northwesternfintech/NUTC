@@ -52,21 +52,27 @@ LimitOrderBook::get_midprice() const
 }
 
 void
-LimitOrderBook::change_quantity(tagged_limit_order& order, double quantity_delta)
+LimitOrderBook::change_quantity(
+    tagged_limit_order& order, shared::decimal_quantity quantity_delta
+)
 {
     order.quantity += quantity_delta;
 }
 
 void
-LimitOrderBook::change_quantity(tagged_market_order& order, double quantity_delta)
+LimitOrderBook::change_quantity(
+    tagged_market_order& order, shared::decimal_quantity quantity_delta
+)
 {
     order.quantity += quantity_delta;
 }
 
 void
-LimitOrderBook::change_quantity(order_list::iterator order, double quantity_delta)
+LimitOrderBook::change_quantity(
+    order_list::iterator order, shared::decimal_quantity quantity_delta
+)
 {
-    if (shared::is_close_to_zero(order->quantity + quantity_delta)) {
+    if (order->quantity + quantity_delta == 0.0) {
         mark_order_removed(order);
         return;
     }
@@ -82,7 +88,7 @@ void
 LimitOrderBook::mark_order_removed(order_list::iterator order)
 {
     order->trader->notify_position_change(
-        {order->ticker, order->side, -order->quantity, order->price}
+        {order->ticker, order->side, -(order->quantity), order->price}
     );
     if (order->side == shared::Side::buy)
         bids_[order->price].erase(order);

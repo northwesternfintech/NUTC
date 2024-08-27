@@ -25,7 +25,8 @@ LevelUpdateGenerator::get_updates() const
 
 void
 LevelUpdateGenerator::record_level_change(
-    shared::Side side, double quantity_delta, shared::decimal_price price
+    shared::Side side, shared::decimal_quantity quantity_delta,
+    shared::decimal_price price
 )
 {
     quantity_tracker_.report_quantity(side, quantity_delta, price);

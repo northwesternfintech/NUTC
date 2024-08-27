@@ -13,7 +13,7 @@ GenericTrader::notify_match(shared::position match)
         modify_capital(total_cap * -1.0);
     }
     else {
-        modify_holdings(match.ticker, -match.quantity);
+        modify_holdings(match.ticker, -(match.quantity));
         modify_capital(total_cap);
     }
 }

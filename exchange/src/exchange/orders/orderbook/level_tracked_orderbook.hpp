@@ -40,8 +40,10 @@ public:
     }
 
     void
-    change_quantity(LimitOrderBook::stored_limit_order order, double quantity_delta)
-        override
+    change_quantity(
+        LimitOrderBook::stored_limit_order order,
+        shared::decimal_quantity quantity_delta
+    ) override
     {
         modify_level_(order->side, quantity_delta, order->price);
 
@@ -50,7 +52,10 @@ public:
 
 private:
     void
-    modify_level_(shared::Side side, double quantity_delta, shared::decimal_price price)
+    modify_level_(
+        shared::Side side, shared::decimal_quantity quantity_delta,
+        shared::decimal_price price
+    )
     {
         level_update_generator_.record_level_change(side, quantity_delta, price);
     }

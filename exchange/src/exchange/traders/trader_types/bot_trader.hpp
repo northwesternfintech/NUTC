@@ -13,15 +13,15 @@ namespace nutc::exchange {
 class BotTrader : public GenericTrader {
     const shared::Ticker TICKER;
     const shared::decimal_price INTEREST_LIMIT;
-    shared::decimal_price short_interest_{};
-    shared::decimal_price long_interest_{};
+    shared::decimal_price short_interest_;
+    shared::decimal_price long_interest_;
 
-    double open_bids_ = 0;
-    double open_asks_ = 0;
+    shared::decimal_quantity open_bids_;
+    shared::decimal_quantity open_asks_;
     IncomingMessageQueue orders_;
 
 public:
-    double
+    shared::decimal_quantity
     get_holdings() const
     {
         return GenericTrader::get_holdings(TICKER);
@@ -75,13 +75,13 @@ public:
         return short_interest_;
     }
 
-    [[nodiscard]] double
+    [[nodiscard]] shared::decimal_quantity
     get_open_bids() const
     {
         return open_bids_;
     }
 
-    [[nodiscard]] double
+    [[nodiscard]] shared::decimal_quantity
     get_open_asks() const
     {
         return open_asks_;
@@ -152,7 +152,7 @@ protected:
      * @brief Called by the bot(derived class) when a bid position is opened
      */
     void
-    modify_open_bids(double delta)
+    modify_open_bids(shared::decimal_quantity delta)
     {
         open_bids_ += delta;
     }
@@ -161,7 +161,7 @@ protected:
      * @brief Called by the bot (derived class) when an ask position is opened
      */
     void
-    modify_open_asks(double delta)
+    modify_open_asks(shared::decimal_quantity delta)
     {
         open_asks_ += delta;
     }

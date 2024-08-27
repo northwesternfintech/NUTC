@@ -20,7 +20,8 @@ public:
     explicit LevelUpdateGenerator(shared::Ticker ticker) : ticker_{ticker} {}
 
     void record_level_change(
-        shared::Side side, double quantity_delta, shared::decimal_price price
+        shared::Side side, shared::decimal_quantity quantity_delta,
+        shared::decimal_price price
     );
 
     std::vector<shared::position> get_updates() const;

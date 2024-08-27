@@ -11,20 +11,21 @@ static constexpr auto PRICE_DECIMAL_PLACES = 2;
 static constexpr auto QUANTITY_DECIMAL_PLACES = 2;
 
 namespace {
-consteval std::int64_t
+template <typename T>
+consteval T
 pow10(int pow)
 {
     if (pow < 0) {
         throw std::invalid_argument("N must be non-negative");
     }
-    return pow == 0 ? 1 : 10 * pow10(pow - 1);
+    return pow == 0 ? 1 : 10 * pow10<T>(pow - 1);
 }
 } // namespace
 
-template <std::int64_t Scale>
+template <std::int8_t Scale>
 class Decimal {
-    static constexpr std::int64_t MULTIPLIER = pow10(Scale);
     using decimal_type = std::int64_t;
+    static constexpr std::int64_t MULTIPLIER = pow10<decimal_type>(Scale);
 
     decimal_type value_{};
 
@@ -32,6 +33,12 @@ public:
     constexpr Decimal() = default;
 
     constexpr Decimal(double value) : value_(double_to_decimal(value)) {}
+
+    Decimal
+    operator-() const
+    {
+        return -value_;
+    }
 
     decimal_type
     get_underlying() const
@@ -155,7 +162,7 @@ using decimal_quantity = Decimal<QUANTITY_DECIMAL_PLACES>;
 } // namespace nutc::shared
 
 namespace std {
-template <std::int64_t Scale>
+template <std::int8_t Scale>
 struct hash<nutc::shared::Decimal<Scale>> {
     std::size_t
     operator()(const nutc::shared::Decimal<Scale>& obj) const
@@ -166,7 +173,7 @@ struct hash<nutc::shared::Decimal<Scale>> {
 } // namespace std
 
 /// \cond
-template <std::int64_t Scale>
+template <std::int8_t Scale>
 struct glz::meta<nutc::shared::Decimal<Scale>> {
     using t = nutc::shared::Decimal<Scale>;
     static constexpr auto value = object(&t::value_);

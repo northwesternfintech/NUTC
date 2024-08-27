@@ -53,7 +53,7 @@ BaseMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
 
     for (OrderVariant& order_variant : orders) {
         auto match_order = [&]<typename OrderT>(OrderT& order) {
-            if (order.quantity <= 0)
+            if (order.quantity <= 0.0)
                 return;
 
             auto& ticker_info = tickers_[order.ticker];

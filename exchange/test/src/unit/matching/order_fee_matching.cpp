@@ -1,5 +1,6 @@
 #include "config.h"
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
+#include "shared/types/decimal.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
 
@@ -12,7 +13,7 @@ using nutc::shared::Side::sell;
 class UnitOrderFeeMatching : public ::testing::Test {
 protected:
     using TestTrader = nutc::test::TestTrader;
-    static constexpr const int DEFAULT_QUANTITY = 1000;
+    static constexpr nutc::shared::decimal_quantity DEFAULT_QUANTITY = 1000.0;
     TraderContainer traders;
     nutc::exchange::GenericTrader& trader1 =
         *traders.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
