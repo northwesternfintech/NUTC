@@ -1,9 +1,9 @@
 #include "exchange_communicator.hpp"
 
-#include "shared/config/config.h"
-#include "shared/messages_exchange_to_wrapper.hpp"
-#include "shared/messages_wrapper_to_exchange.hpp"
-#include "shared/types/position.hpp"
+#include "common/config/config.h"
+#include "common/messages_exchange_to_wrapper.hpp"
+#include "common/messages_wrapper_to_exchange.hpp"
+#include "common/types/position.hpp"
 #include "wrapper/pywrapper/pywrapper.hpp"
 
 #include <boost/asio.hpp>
@@ -31,7 +31,7 @@ ExchangeCommunicator::process_message(tick_update& tick_update)
 {
     std::ranges::for_each(
         tick_update.ob_updates,
-        [&](const shared::position& ob_update) { handle_orderbook_update(ob_update); }
+        [&](const common::position& ob_update) { handle_orderbook_update(ob_update); }
     );
     std::ranges::for_each(tick_update.matches, [&](const match& match) {
         handle_match(match);
@@ -48,7 +48,7 @@ ExchangeCommunicator::main_event_loop()
 }
 
 void
-ExchangeCommunicator::handle_orderbook_update(const shared::position& position)
+ExchangeCommunicator::handle_orderbook_update(const common::position& position)
 {
     on_orderbook_update(position);
 }
@@ -91,7 +91,7 @@ ExchangeCommunicator::publish_message(const std::string& message)
     lock.unlock();
 }
 
-shared::algorithm_content
+common::algorithm_content
 ExchangeCommunicator::consume_algorithm()
 {
     return consume_message<algorithm_content>();
@@ -124,11 +124,11 @@ ExchangeCommunicator::place_limit_order()
                const std::string& side, const std::string& ticker, double quantity,
                double price, bool ioc
            ) {
-        std::optional<shared::Ticker> ticker_obj = to_ticker(ticker);
+        std::optional<common::Ticker> ticker_obj = to_ticker(ticker);
         if (!ticker_obj)
             throw std::runtime_error("uhh");
-        shared::Side side_enum =
-            (side == "BUY") ? shared::Side::buy : shared::Side::sell;
+        common::Side side_enum =
+            (side == "BUY") ? common::Side::buy : common::Side::sell;
 
         return publish_message<limit_order>(
             ticker_obj.value(), side_enum, quantity, price, ioc
@@ -141,12 +141,12 @@ MarketOrderFunction
 ExchangeCommunicator::place_market_order()
 {
     return [this](const std::string& side, const std::string& ticker, double quantity) {
-        std::optional<shared::Ticker> ticker_obj = to_ticker(ticker);
+        std::optional<common::Ticker> ticker_obj = to_ticker(ticker);
         if (!ticker_obj)
             throw std::runtime_error("uhh");
         // return false;
-        shared::Side side_enum =
-            (side == "BUY") ? shared::Side::buy : shared::Side::sell;
+        common::Side side_enum =
+            (side == "BUY") ? common::Side::buy : common::Side::sell;
 
         return publish_message<market_order>(ticker_obj.value(), side_enum, quantity);
     };
@@ -155,7 +155,7 @@ ExchangeCommunicator::place_market_order()
 bool
 ExchangeCommunicator::report_startup_complete()
 {
-    return publish_message<shared::init_message>();
+    return publish_message<common::init_message>();
 }
 
 // If wait_blocking is disabled, we block until we *receive* the message, but not

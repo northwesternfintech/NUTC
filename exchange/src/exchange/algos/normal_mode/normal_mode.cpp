@@ -13,7 +13,7 @@ namespace nutc::exchange {
 
 void
 NormalModeAlgoInitializer::initialize_trader_container(
-    TraderContainer& traders, shared::decimal_price start_capital
+    TraderContainer& traders, common::decimal_price start_capital
 ) const
 {
     constexpr const std::array<const char*, 4> REQUIRED_DB_FIELDS = {
@@ -55,7 +55,7 @@ NormalModeAlgoInitializer::initialize_trader_container(
 glz::json_t::object_t
 NormalModeAlgoInitializer::get_remote_traders()
 {
-    const std::string endpoint = shared::get_firebase_endpoint("users.json");
+    const std::string endpoint = common::get_firebase_endpoint("users.json");
     glz::json_t res = request_to_json("GET", endpoint);
     return res.get<glz::json_t::object_t>();
 }

@@ -1,12 +1,12 @@
+#include "common/messages_exchange_to_wrapper.hpp"
+#include "common/messages_wrapper_to_exchange.hpp"
+#include "common/types/ticker.hpp"
 #include "exchange/matching/engine.hpp"
 #include "exchange/orders/storage/order_storage.hpp"
 #include "exchange/traders/trader_container.hpp"
-#include "shared/messages_exchange_to_wrapper.hpp"
-#include "shared/messages_wrapper_to_exchange.hpp"
-#include "shared/types/ticker.hpp"
 
 using Engine = nutc::exchange::Engine;
-using limit_order = nutc::shared::limit_order;
+using limit_order = nutc::common::limit_order;
 using tagged_limit_order = nutc::exchange::tagged_limit_order;
 using TraderContainer = nutc::exchange::TraderContainer;
 
@@ -15,18 +15,18 @@ namespace nutc::test {
 bool is_nearly_equal(double f_a, double f_b);
 
 bool validate_match(
-    const nutc::shared::match& match, shared::Ticker ticker,
-    const std::string& buyer_id, const std::string& seller_id, shared::Side side,
+    const nutc::common::match& match, common::Ticker ticker,
+    const std::string& buyer_id, const std::string& seller_id, common::Side side,
     double quantity, double price
 );
 
 bool validate_ob_update(
-    const shared::position& update, shared::Ticker ticker, shared::Side side,
+    const common::position& update, common::Ticker ticker, common::Side side,
     double quantity, double price
 );
 
 bool validate_limit_order(
-    const limit_order& update, shared::Ticker ticker, shared::Side side,
+    const limit_order& update, common::Ticker ticker, common::Side side,
     double quantity, double price
 );
 
@@ -42,11 +42,11 @@ bool validate_limit_order(
             (price_)                                                                   \
         );                                                                             \
         EXPECT_TRUE(isMatchValid)                                                      \
-            << "Expected match with ticker = " << (nutc::shared::to_string(ticker_))   \
+            << "Expected match with ticker = " << (nutc::common::to_string(ticker_))   \
             << ", buyer_id = " << (buyer_id_) << ", seller_id = " << (seller_id_)      \
             << ", side = " << static_cast<int>(side_) << ", price = " << (price_)      \
             << ", quantity = " << (quantity_) << ". Actual match: ticker = "           \
-            << nutc::shared::to_string((match).position.ticker)                        \
+            << nutc::common::to_string((match).position.ticker)                        \
             << ", buyer_id = " << (match).buyer_id                                     \
             << ", seller_id = " << (match).seller_id                                   \
             << ", side = " << static_cast<int>((match).position.side)                  \
@@ -62,10 +62,10 @@ bool validate_limit_order(
             (update), (ticker_), (side_), (quantity_), (price_)                        \
         );                                                                             \
         EXPECT_TRUE(isUpdateValid)                                                     \
-            << "Expected update with ticker = " << (nutc::shared::to_string(ticker_))  \
+            << "Expected update with ticker = " << (nutc::common::to_string(ticker_))  \
             << ", side = " << static_cast<int>(side_) << ", price = " << (price_)      \
             << ", quantity = " << (quantity_) << ". Actual update: ticker = "          \
-            << nutc::shared::to_string((update).ticker)                                \
+            << nutc::common::to_string((update).ticker)                                \
             << ", side = " << static_cast<int>((update).side)                          \
             << ", price = " << double((update).price)                                  \
             << ", quantity = " << double{(update).quantity};                           \
@@ -80,11 +80,11 @@ bool validate_limit_order(
         );                                                                             \
         EXPECT_TRUE(isUpdateValid)                                                     \
             << "Expected market order with"                                            \
-            << " ticker =" << (nutc::shared::to_string(ticker_))                       \
+            << " ticker =" << (nutc::common::to_string(ticker_))                       \
             << ", side = " << static_cast<int>(side_) << ", price = " << (price_)      \
             << ", quantity = " << (quantity_) << ". Actual update: client_id = "       \
             << ""                                                                      \
-            << ", ticker = " << nutc::shared::to_string((update).ticker)               \
+            << ", ticker = " << nutc::common::to_string((update).ticker)               \
             << ", side = " << static_cast<int>((update).side)                          \
             << ", price = " << double((update).price)                                  \
             << ", quantity = " << double{(update).quantity};                           \

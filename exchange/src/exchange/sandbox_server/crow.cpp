@@ -1,10 +1,10 @@
 #include "crow.hpp"
 
+#include "common/messages_exchange_to_wrapper.hpp"
 #include "exchange/config/dynamic/config.hpp"
 #include "exchange/logging.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "exchange/traders/trader_types/algo_trader.hpp"
-#include "shared/messages_exchange_to_wrapper.hpp"
 
 namespace nutc::exchange {
 
@@ -61,7 +61,7 @@ CrowServer::add_pending_trader(const std::string user_id, const std::string algo
     start_remove_timer_(trial_secs, trader);
 
     auto get_start_message = []() {
-        static auto start_message = glz::write_json(shared::start_time{0});
+        static auto start_message = glz::write_json(common::start_time{0});
         if (!start_message.has_value()) [[unlikely]]
             throw std::runtime_error(glz::format_error(start_message.error()));
         return start_message.value();

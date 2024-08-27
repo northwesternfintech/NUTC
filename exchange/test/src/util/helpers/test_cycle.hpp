@@ -7,7 +7,7 @@
 
 #include <string>
 
-std::string mo_to_string(const nutc::shared::limit_order& order);
+std::string mo_to_string(const nutc::common::limit_order& order);
 
 namespace nutc::test {
 
@@ -39,7 +39,7 @@ public:
     }
 
 private:
-    std::vector<shared::match> match_orders_(std::vector<OrderVariant> orders) override;
+    std::vector<common::match> match_orders_(std::vector<OrderVariant> orders) override;
 };
 
 } // namespace nutc::test

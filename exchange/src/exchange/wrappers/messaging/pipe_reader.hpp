@@ -1,5 +1,5 @@
 #pragma once
-#include "shared/messages_wrapper_to_exchange.hpp"
+#include "common/messages_wrapper_to_exchange.hpp"
 
 #include <boost/process.hpp>
 
@@ -7,15 +7,14 @@
 
 namespace nutc::exchange {
 
-using namespace shared;
-
 namespace bp = boost::process;
 namespace ba = boost::asio;
 
 class PipeReader {
 public:
-    using IncomingMessageVariant =
-        std::variant<timed_init_message, timed_limit_order, timed_market_order>;
+    using IncomingMessageVariant = std::variant<
+        common::timed_init_message, common::timed_limit_order,
+        common::timed_market_order>;
 
 private:
     std::mutex message_lock_;

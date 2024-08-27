@@ -16,44 +16,44 @@
 #  include <x86intrin.h>
 #endif
 
-namespace nutc::shared {
+namespace nutc::common {
 
 struct init_message {
     std::string_view name = "init_message";
 };
 
 struct market_order {
-    shared::Ticker ticker;
-    shared::Side side;
+    common::Ticker ticker;
+    common::Side side;
     decimal_quantity quantity;
 
     market_order() = default;
 
-    market_order(shared::Ticker ticker, shared::Side side, double quantity) :
+    market_order(common::Ticker ticker, common::Side side, double quantity) :
         ticker(ticker), side(side), quantity(quantity)
     {}
 };
 
 struct limit_order {
-    shared::Ticker ticker;
-    shared::Side side;
+    common::Ticker ticker;
+    common::Side side;
     decimal_quantity quantity;
-    shared::decimal_price price;
+    common::decimal_price price;
     bool ioc;
 
     bool operator==(const limit_order& other) const = default;
 
     consteval limit_order(
-        std::string_view ticker, shared::Side side, double quantity,
-        shared::decimal_price price, bool ioc = false
+        std::string_view ticker, common::Side side, double quantity,
+        common::decimal_price price, bool ioc = false
     ) :
-        ticker{shared::force_to_ticker(ticker)}, side{side}, quantity{quantity},
+        ticker{common::force_to_ticker(ticker)}, side{side}, quantity{quantity},
         price{price}, ioc{ioc}
     {}
 
     limit_order(
-        shared::Ticker ticker, shared::Side side, double quantity,
-        shared::decimal_price price, bool ioc = false
+        common::Ticker ticker, common::Side side, double quantity,
+        common::decimal_price price, bool ioc = false
     ) : ticker{ticker}, side{side}, quantity{quantity}, price{price}, ioc{ioc}
     {}
 
@@ -89,26 +89,26 @@ using timed_init_message = timestamped_message<init_message>;
 using timed_limit_order = timestamped_message<limit_order>;
 using timed_market_order = timestamped_message<market_order>;
 
-} // namespace nutc::shared
+} // namespace nutc::common
 
 /// \cond
 template <>
-struct glz::meta<nutc::shared::limit_order> {
-    using t = nutc::shared::limit_order;
+struct glz::meta<nutc::common::limit_order> {
+    using t = nutc::common::limit_order;
     static constexpr auto value =
         object("limit", &t::ticker, &t::side, &t::quantity, &t::price, &t::ioc);
 };
 
 /// \cond
 template <>
-struct glz::meta<nutc::shared::market_order> {
-    using t = nutc::shared::market_order;
+struct glz::meta<nutc::common::market_order> {
+    using t = nutc::common::market_order;
     static constexpr auto value = object("market", &t::ticker, &t::side, &t::quantity);
 };
 
 /// \cond
 template <>
-struct glz::meta<nutc::shared::init_message> {
-    using t = nutc::shared::init_message;
+struct glz::meta<nutc::common::init_message> {
+    using t = nutc::common::init_message;
     static constexpr auto value = object("init", &t::name);
 };

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "exchange/traders/trader_types/generic_trader.hpp"
-#include "shared/types/decimal.hpp"
+#include "common/types/decimal.hpp"
 
 #include <benchmark/benchmark.h>
 #include <fmt/format.h>
@@ -13,7 +13,7 @@ class BenchmarkTrader : public exchange::GenericTrader {
 public:
     BenchmarkTrader() : BenchmarkTrader("Benchmark", 0.0) {}
 
-    BenchmarkTrader(std::string trader_id, shared::decimal_price capital) :
+    BenchmarkTrader(std::string trader_id, common::decimal_price capital) :
         GenericTrader(std::move(trader_id), capital)
     {}
 
@@ -24,7 +24,7 @@ public:
     }
 
     void
-    notify_position_change(shared::position change) final
+    notify_position_change(common::position change) final
     {
         benchmark::DoNotOptimize(change);
     }

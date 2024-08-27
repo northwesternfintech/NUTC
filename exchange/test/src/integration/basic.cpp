@@ -7,11 +7,11 @@
 #include <gtest/gtest.h>
 
 namespace nutc::test {
-using nutc::shared::Ticker;
-using nutc::shared::Side::buy;
-using nutc::shared::Side::sell;
+using common::limit_order;
+using nutc::common::Ticker;
+using nutc::common::Side::buy;
+using nutc::common::Side::sell;
 using nutc::test::start_wrappers;
-using shared::limit_order;
 
 class IntegrationBasicAlgo : public ::testing::Test {
 protected:
@@ -136,10 +136,10 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateSell)
 
     TestMatchingCycle cycle{traders};
 
-    // obupdate triggers one user to place ashared::Side::buy order of 10 ABC at 102
+    // obupdate triggers one user to place acommon::Side::buy order of 10 ABC at 102
     cycle.wait_for_order(limit_order{Ticker::ETH, sell, 10, 100.0});
 
-    // on_trade_match triggers one user to place ashared::Side::buy order of 1 ABC at
+    // on_trade_match triggers one user to place acommon::Side::buy order of 1 ABC at
     // 100
     cycle.wait_for_order(limit_order{Ticker::BTC, buy, 1, 100.0});
 }
@@ -154,9 +154,9 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateBuy)
 
     TestMatchingCycle cycle{traders};
 
-    // obupdate triggers one user to place ashared::Side::buy order of 10 ABC at 102
+    // obupdate triggers one user to place acommon::Side::buy order of 10 ABC at 102
     cycle.wait_for_order(limit_order{Ticker::ETH, buy, 10, 102.0});
-    // on_trade_match triggers one user to place ashared::Side::buy order of 1 ABC at
+    // on_trade_match triggers one user to place acommon::Side::buy order of 1 ABC at
     // 100
     cycle.wait_for_order(limit_order{Ticker::BTC, buy, 1, 100.0});
 }

@@ -1,7 +1,7 @@
 #include "argparse.hpp"
 
-#include "shared/config/config.h"
-#include "shared/util.hpp"
+#include "common/config/config.h"
+#include "common/util.hpp"
 
 #include <argparse/argparse.hpp>
 #include <fmt/format.h>
@@ -57,7 +57,7 @@ process_arguments(int argc, const char** argv)
 
     bool dev_mode = program.get<bool>("--dev");
     auto trader_id = (dev_mode) ? program.get<std::string>("--algo_id")
-                                : shared::trader_id(
+                                : common::trader_id(
                                       program.get<std::string>("--uid"),
                                       program.get<std::string>("--algo_id")
                                   );

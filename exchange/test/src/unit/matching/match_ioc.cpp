@@ -1,22 +1,22 @@
+#include "common/types/decimal.hpp"
 #include "config.h"
 #include "exchange/orders/orderbook/cancellable_orderbook.hpp"
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
-#include "shared/types/decimal.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
 
 #include <gtest/gtest.h>
 
+using nutc::common::Ticker;
+using nutc::common::Side::buy;
+using nutc::common::Side::sell;
 using nutc::exchange::CancellableOrderBook;
 using nutc::exchange::LimitOrderBook;
-using nutc::shared::Ticker;
-using nutc::shared::Side::buy;
-using nutc::shared::Side::sell;
 
 class UnitMatchIOC : public ::testing::Test {
 protected:
     using TestTrader = nutc::test::TestTrader;
-    static constexpr nutc::shared::decimal_quantity DEFAULT_QUANTITY = 1000.0;
+    static constexpr nutc::common::decimal_quantity DEFAULT_QUANTITY = 1000.0;
 
     TraderContainer traders;
 
@@ -35,7 +35,7 @@ protected:
     CancellableOrderBook<LimitOrderBook> orderbook_{};
     Engine engine_;
 
-    std::vector<nutc::shared::match>
+    std::vector<nutc::common::match>
     add_to_engine_(const tagged_limit_order& order)
     {
         return engine_.match_order(order, orderbook_);

@@ -1,8 +1,8 @@
 #include "wrapper_handle.hpp"
 
-#include "shared/file_operations/file_operations.hpp"
-#include "shared/firebase/firebase.hpp"
-#include "shared/messages_exchange_to_wrapper.hpp"
+#include "common/file_operations/file_operations.hpp"
+#include "common/firebase/firebase.hpp"
+#include "common/messages_exchange_to_wrapper.hpp"
 
 #include <boost/asio.hpp>
 #include <fmt/format.h>
@@ -61,7 +61,7 @@ WrapperHandle::WrapperHandle(
     WrapperHandle(
         {"--uid", quote_id(remote_uid), "--algo_id", quote_id(algo_id)},
         force_unwrap_optional(
-            nutc::shared::get_algo(remote_uid, algo_id),
+            nutc::common::get_algo(remote_uid, algo_id),
             fmt::format(
                 "Could not read algoid {} of uid {} from firebase", algo_id, remote_uid
             )
@@ -73,7 +73,7 @@ WrapperHandle::WrapperHandle(const std::string& algo_path) :
     WrapperHandle(
         {"--uid", quote_id(algo_path), "--algo_id", quote_id(algo_path), "--dev"},
         force_unwrap_optional(
-            nutc::shared::read_file_content(algo_path),
+            nutc::common::read_file_content(algo_path),
             fmt::format("Could not read algorithm file at {}", algo_path)
         )
     )
@@ -82,7 +82,8 @@ WrapperHandle::WrapperHandle(const std::string& algo_path) :
 void
 WrapperHandle::block_on_init()
 {
-    while (!std::holds_alternative<timed_init_message>(reader_.get_message())) {}
+    while (!std::holds_alternative<common::timed_init_message>(reader_.get_message())) {
+    }
 }
 
 WrapperHandle::WrapperHandle(
@@ -99,7 +100,7 @@ WrapperHandle::WrapperHandle(
         bp::std_out > pipe_in_ptr
     );
 
-    using algorithm_t = nutc::shared::algorithm_content;
+    using algorithm_t = nutc::common::algorithm_content;
     algorithm_t algorithm_message = algorithm_t(algorithm);
 
     auto encoded_message = glz::write_json(algorithm_message);

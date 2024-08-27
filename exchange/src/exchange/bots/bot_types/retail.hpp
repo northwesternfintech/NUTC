@@ -1,8 +1,8 @@
 #pragma once
 
+#include "common/types/decimal.hpp"
 #include "exchange/bots/shared_bot_state.hpp"
 #include "exchange/traders/trader_types/bot_trader.hpp"
-#include "shared/types/decimal.hpp"
 
 #include <random>
 
@@ -12,7 +12,7 @@ class RetailBot : public BotTrader {
     std::mt19937 gen_{}; // NOLINT
     std::poisson_distribution<> poisson_dist_{};
 
-    shared::decimal_price
+    common::decimal_price
     generate_aggresiveness_()
     {
         static std::normal_distribution<> dist{1000, 2000};
@@ -20,7 +20,7 @@ class RetailBot : public BotTrader {
     }
 
 public:
-    RetailBot(shared::Ticker ticker, shared::decimal_price interest_limit) :
+    RetailBot(common::Ticker ticker, common::decimal_price interest_limit) :
         BotTrader(ticker, interest_limit), AGGRESSIVENESS(generate_aggresiveness_())
     {}
 
@@ -34,7 +34,7 @@ public:
     }
 
 private:
-    const shared::decimal_price AGGRESSIVENESS;
+    const common::decimal_price AGGRESSIVENESS;
 };
 
 } // namespace nutc::exchange

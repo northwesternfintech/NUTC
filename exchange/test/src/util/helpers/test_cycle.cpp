@@ -7,7 +7,7 @@
 
 namespace nutc::test {
 
-std::vector<shared::match>
+std::vector<common::match>
 TestMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
 {
     // TODO: FIX

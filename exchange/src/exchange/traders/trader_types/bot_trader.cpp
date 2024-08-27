@@ -1,6 +1,6 @@
 #include "bot_trader.hpp"
 
-#include "shared/types/decimal.hpp"
+#include "common/types/decimal.hpp"
 
 #include <cassert>
 
@@ -19,12 +19,12 @@ BotTrader::generate_gaussian_noise(double mean, double stddev)
 }
 
 void
-BotTrader::notify_position_change(shared::position order)
+BotTrader::notify_position_change(common::position order)
 {
     assert(order.ticker == TICKER);
 
-    shared::decimal_price total_cap = order.price * order.quantity;
-    if (order.side == shared::Side::buy) {
+    common::decimal_price total_cap = order.price * order.quantity;
+    if (order.side == common::Side::buy) {
         modify_long_capital(total_cap);
         modify_open_bids(order.quantity);
     }

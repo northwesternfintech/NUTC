@@ -1,7 +1,7 @@
 #pragma once
 
+#include "common/types/decimal.hpp"
 #include "exchange/config/static/config.hpp"
-#include "shared/types/decimal.hpp"
 #include "ticker_config.hpp"
 
 #include <fmt/format.h>
@@ -13,7 +13,7 @@
 namespace nutc::exchange {
 
 struct global_config {
-    const shared::decimal_price STARTING_CAPITAL;
+    const common::decimal_price STARTING_CAPITAL;
     const size_t WAIT_SECS;
     const unsigned int SANDBOX_TRIAL_SECS;
     const double ORDER_FEE;

@@ -36,7 +36,7 @@ public:
     void report_trader_stats(const TickerMapping& tickers);
     void report_ticker_stats(TickerMapping& tickers);
     void report_orders(const std::vector<tagged_limit_order>& orders);
-    void report_matches(const std::vector<shared::match>& orders);
+    void report_matches(const std::vector<common::match>& orders);
 
 private:
     Gauge create_gauge_(const std::string& gauge_name);

@@ -18,7 +18,7 @@ public:
     {}
 
 protected:
-    std::vector<shared::match>
+    std::vector<common::match>
     match_orders_(std::vector<OrderVariant> orders) override
     {
         // TODO: add back
@@ -27,7 +27,7 @@ protected:
     }
 
     void
-    handle_matches_(std::vector<shared::match> matches) override
+    handle_matches_(std::vector<common::match> matches) override
     {
         pusher.report_matches(matches);
         BaseMatchingCycle::handle_matches_(std::move(matches));

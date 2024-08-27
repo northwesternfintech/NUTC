@@ -1,4 +1,5 @@
 #include "algos/algo_manager.hpp"
+#include "common/util.hpp"
 #include "exchange/algos/algo_manager.hpp"
 #include "exchange/config/dynamic/argparse.hpp"
 #include "exchange/config/dynamic/config.hpp"
@@ -10,7 +11,6 @@
 #include "exchange/matching_cycle/sandbox/sandbox_cycle.hpp"
 #include "exchange/orders/ticker_info.hpp"
 #include "exchange/traders/trader_container.hpp"
-#include "shared/util.hpp"
 
 #include <csignal>
 
@@ -22,7 +22,7 @@ using namespace nutc::exchange; // NOLINT
 std::unique_ptr<MatchingCycleInterface>
 create_cycle(TraderContainer& traders, double order_fee, const auto& mode)
 {
-    using nutc::shared::Mode;
+    using nutc::common::Mode;
     const auto& ticker_config = Config::get().get_tickers();
     auto tickers = TickerMapping(ticker_config, traders, order_fee);
 

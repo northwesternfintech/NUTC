@@ -1,9 +1,9 @@
 #include "dev_mode.hpp"
 
+#include "common/file_operations/file_operations.hpp"
 #include "exchange/config/static/config.hpp"
 #include "exchange/traders/trader_types/algo_trader.hpp"
 #include "exchange/wrappers/creation/rmq_wrapper_init.hpp"
-#include "shared/file_operations/file_operations.hpp"
 
 #include <iostream>
 #include <stdexcept>
@@ -12,7 +12,7 @@ namespace nutc::exchange {
 
 void
 DevModeAlgoInitializer::initialize_trader_container(
-    TraderContainer& traders, shared::decimal_price start_capital
+    TraderContainer& traders, common::decimal_price start_capital
 ) const
 {
     for (const fs::path& filepath : algo_filepaths_)
@@ -35,9 +35,9 @@ DevModeAlgoInitializer::initialize_files()
         algo_filepaths_.emplace_back(relative_path);
     }
 
-    std::string content = shared::read_file_content("template.py");
+    std::string content = common::read_file_content("template.py");
 
-    if (!shared::create_directory(ALGO_DIR))
+    if (!common::create_directory(ALGO_DIR))
         throw std::runtime_error("Failed to create directory");
 
     for (const fs::path& path : algo_filepaths_) {

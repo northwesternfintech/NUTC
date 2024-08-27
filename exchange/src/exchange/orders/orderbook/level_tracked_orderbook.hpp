@@ -1,10 +1,10 @@
 #pragma once
 
+#include "common/types/decimal.hpp"
+#include "common/types/ticker.hpp"
 #include "exchange/orders/level_tracking/level_update_generator.hpp"
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
 #include "exchange/orders/storage/order_storage.hpp"
-#include "shared/types/decimal.hpp"
-#include "shared/types/ticker.hpp"
 
 namespace nutc::exchange {
 
@@ -13,7 +13,7 @@ class LevelTrackedOrderbook : public BaseOrderBookT {
     LevelUpdateGenerator level_update_generator_;
 
 public:
-    explicit LevelTrackedOrderbook(shared::Ticker ticker) :
+    explicit LevelTrackedOrderbook(common::Ticker ticker) :
         level_update_generator_{ticker}
     {}
 
@@ -42,7 +42,7 @@ public:
     void
     change_quantity(
         LimitOrderBook::stored_limit_order order,
-        shared::decimal_quantity quantity_delta
+        common::decimal_quantity quantity_delta
     ) override
     {
         modify_level_(order->side, quantity_delta, order->price);
@@ -53,8 +53,8 @@ public:
 private:
     void
     modify_level_(
-        shared::Side side, shared::decimal_quantity quantity_delta,
-        shared::decimal_price price
+        common::Side side, common::decimal_quantity quantity_delta,
+        common::decimal_price price
     )
     {
         level_update_generator_.record_level_change(side, quantity_delta, price);

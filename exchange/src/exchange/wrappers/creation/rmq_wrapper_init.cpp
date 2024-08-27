@@ -1,6 +1,6 @@
 #include "rmq_wrapper_init.hpp"
 
-#include "shared/messages_exchange_to_wrapper.hpp"
+#include "common/messages_exchange_to_wrapper.hpp"
 
 namespace nutc::exchange {
 
@@ -17,7 +17,7 @@ get_start_time(size_t wait_seconds)
 void
 send_start_time(GenericTrader& trader, int64_t start_time)
 {
-    static auto mess = glz::write_json(shared::start_time{start_time});
+    static auto mess = glz::write_json(common::start_time{start_time});
     if (!mess.has_value()) [[unlikely]]
         throw std::runtime_error(glz::format_error(mess.error()));
 

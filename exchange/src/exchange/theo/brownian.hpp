@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shared/types/decimal.hpp"
+#include "common/types/decimal.hpp"
 
 #include <random>
 
@@ -33,7 +33,7 @@ public:
     explicit BrownianMotion(unsigned int seed) : cur_magnitude_(0) { set_seed(seed); }
 
     // Constructor for BrownianMotion with initial price
-    explicit BrownianMotion(shared::decimal_price starting_magnitude) :
+    explicit BrownianMotion(common::decimal_price starting_magnitude) :
         cur_magnitude_(double{starting_magnitude})
     {
         std::random_device rd;

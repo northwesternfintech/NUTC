@@ -1,23 +1,23 @@
 #include "algo_manager.hpp"
 
 #include "bot_mode/bot_mode.hpp"
+#include "common/types/decimal.hpp"
 #include "dev_mode/dev_mode.hpp"
 #include "exchange/config/dynamic/config.hpp"
 #include "exchange/config/static/config.hpp"
 #include "normal_mode/normal_mode.hpp"
-#include "shared/types/decimal.hpp"
 
 #include <memory>
 #include <stdexcept>
 
 namespace nutc::exchange {
 
-using mode = shared::Mode;
+using mode = common::Mode;
 
 void
 AlgoInitializer::initialize_algo_management(TraderContainer& trader_container)
 {
-    shared::decimal_price start_cap = Config::get().constants().STARTING_CAPITAL;
+    common::decimal_price start_cap = Config::get().constants().STARTING_CAPITAL;
 
     initialize_files();
     initialize_trader_container(trader_container, start_cap);

@@ -1,17 +1,17 @@
 #include "limit_orderbook.hpp"
 
+#include "common/types/decimal.hpp"
+#include "common/util.hpp"
 #include "exchange/orders/storage/order_storage.hpp"
-#include "shared/types/decimal.hpp"
-#include "shared/util.hpp"
 
 namespace nutc::exchange {
 
 void
-LimitOrderBook::clean_tree(shared::Side side)
+LimitOrderBook::clean_tree(common::Side side)
 {
-    auto& tree = side == shared::Side::buy ? bids_ : asks_;
+    auto& tree = side == common::Side::buy ? bids_ : asks_;
     while (!tree.empty()) {
-        auto key = side == shared::Side::buy ? std::prev(tree.end()) : tree.begin();
+        auto key = side == common::Side::buy ? std::prev(tree.end()) : tree.begin();
         auto& queue = key->second;
 
         if (queue.empty()) {
@@ -24,16 +24,16 @@ LimitOrderBook::clean_tree(shared::Side side)
 }
 
 std::optional<LimitOrderBook::order_list::iterator>
-LimitOrderBook::get_top_order(shared::Side side)
+LimitOrderBook::get_top_order(common::Side side)
 {
     clean_tree(side);
 
-    auto& tree = side == shared::Side::buy ? bids_ : asks_;
+    auto& tree = side == common::Side::buy ? bids_ : asks_;
 
     if (tree.empty()) [[unlikely]]
         return std::nullopt;
 
-    auto key = side == shared::Side::buy ? std::prev(tree.end()) : tree.begin();
+    auto key = side == common::Side::buy ? std::prev(tree.end()) : tree.begin();
     auto& queue = key->second;
 
     if (queue.empty()) [[unlikely]]
@@ -42,7 +42,7 @@ LimitOrderBook::get_top_order(shared::Side side)
     return queue.begin();
 }
 
-shared::decimal_price
+common::decimal_price
 LimitOrderBook::get_midprice() const
 {
     if (bids_.empty() || asks_.empty()) [[unlikely]] {
@@ -53,7 +53,7 @@ LimitOrderBook::get_midprice() const
 
 void
 LimitOrderBook::change_quantity(
-    tagged_limit_order& order, shared::decimal_quantity quantity_delta
+    tagged_limit_order& order, common::decimal_quantity quantity_delta
 )
 {
     order.quantity += quantity_delta;
@@ -61,7 +61,7 @@ LimitOrderBook::change_quantity(
 
 void
 LimitOrderBook::change_quantity(
-    tagged_market_order& order, shared::decimal_quantity quantity_delta
+    tagged_market_order& order, common::decimal_quantity quantity_delta
 )
 {
     order.quantity += quantity_delta;
@@ -69,7 +69,7 @@ LimitOrderBook::change_quantity(
 
 void
 LimitOrderBook::change_quantity(
-    order_list::iterator order, shared::decimal_quantity quantity_delta
+    order_list::iterator order, common::decimal_quantity quantity_delta
 )
 {
     if (order->quantity + quantity_delta == 0.0) {
@@ -90,7 +90,7 @@ LimitOrderBook::mark_order_removed(order_list::iterator order)
     order->trader->notify_position_change(
         {order->ticker, order->side, -(order->quantity), order->price}
     );
-    if (order->side == shared::Side::buy)
+    if (order->side == common::Side::buy)
         bids_[order->price].erase(order);
     else
         asks_[order->price].erase(order);
@@ -103,7 +103,7 @@ LimitOrderBook::add_order(const tagged_limit_order& order)
         {order.ticker, order.side, order.quantity, order.price}
     );
 
-    auto& map = order.side == shared::Side::buy ? bids_ : asks_;
+    auto& map = order.side == common::Side::buy ? bids_ : asks_;
 
     auto& queue = map[order.price];
     queue.push_back(order);

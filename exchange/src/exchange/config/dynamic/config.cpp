@@ -1,6 +1,6 @@
 #include "config.hpp"
 
-#include "shared/types/decimal.hpp"
+#include "common/types/decimal.hpp"
 
 #include <fmt/core.h>
 
@@ -71,7 +71,7 @@ Config::get_ticker_config_(const YAML::Node& full_config)
             throw_undef_err("tickers/{ticker}/ticker");
 
         auto ticker_symb_s = ticker_symb.as<std::string>();
-        std::optional<shared::Ticker> ticker = shared::to_ticker(ticker_symb_s);
+        std::optional<common::Ticker> ticker = common::to_ticker(ticker_symb_s);
         if (!ticker)
             throw_undef_err(fmt::format("tickers/{}/ticker", ticker_symb_s));
 
@@ -106,7 +106,7 @@ Config::get_global_config_(const YAML::Node& full_config)
     if (!sandbox_secs.IsDefined())
         throw_undef_err("global/sandbox_trial_seconds");
     return {
-        shared::decimal_price(starting_capital.as<double>()), wait_secs.as<size_t>(),
+        common::decimal_price(starting_capital.as<double>()), wait_secs.as<size_t>(),
         sandbox_secs.as<unsigned int>(),
         order_fee.IsDefined() ? order_fee.as<double>() : 0
     };

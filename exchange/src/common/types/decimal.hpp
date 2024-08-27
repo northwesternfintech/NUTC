@@ -6,7 +6,7 @@
 
 #include <stdexcept>
 
-namespace nutc::shared {
+namespace nutc::common {
 static constexpr auto PRICE_DECIMAL_PLACES = 2;
 static constexpr auto QUANTITY_DECIMAL_PLACES = 2;
 
@@ -154,18 +154,18 @@ private:
     }
 
     friend std::hash<Decimal<Scale>>;
-    friend glz::meta<nutc::shared::Decimal<Scale>>;
+    friend glz::meta<nutc::common::Decimal<Scale>>;
 };
 
 using decimal_price = Decimal<PRICE_DECIMAL_PLACES>;
 using decimal_quantity = Decimal<QUANTITY_DECIMAL_PLACES>;
-} // namespace nutc::shared
+} // namespace nutc::common
 
 namespace std {
 template <std::int8_t Scale>
-struct hash<nutc::shared::Decimal<Scale>> {
+struct hash<nutc::common::Decimal<Scale>> {
     std::size_t
-    operator()(const nutc::shared::Decimal<Scale>& obj) const
+    operator()(const nutc::common::Decimal<Scale>& obj) const
     {
         return std::hash<int64_t>{}(obj.value_);
     }
@@ -174,7 +174,7 @@ struct hash<nutc::shared::Decimal<Scale>> {
 
 /// \cond
 template <std::int8_t Scale>
-struct glz::meta<nutc::shared::Decimal<Scale>> {
-    using t = nutc::shared::Decimal<Scale>;
+struct glz::meta<nutc::common::Decimal<Scale>> {
+    using t = nutc::common::Decimal<Scale>;
     static constexpr auto value = object(&t::value_);
 };

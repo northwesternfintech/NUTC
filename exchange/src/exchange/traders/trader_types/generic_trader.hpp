@@ -1,9 +1,9 @@
 #pragma once
 
+#include "common/messages_wrapper_to_exchange.hpp"
+#include "common/types/decimal.hpp"
+#include "common/types/position.hpp"
 #include "hash_table7.hpp"
-#include "shared/messages_wrapper_to_exchange.hpp"
-#include "shared/types/decimal.hpp"
-#include "shared/types/position.hpp"
 
 #include <absl/hash/hash.h>
 #include <boost/process.hpp>
@@ -14,14 +14,14 @@ namespace nutc::exchange {
 
 class GenericTrader {
     const std::string USER_ID;
-    const shared::decimal_price INITIAL_CAPITAL;
-    shared::decimal_price capital_delta_{};
+    const common::decimal_price INITIAL_CAPITAL;
+    common::decimal_price capital_delta_{};
     emhash7::HashMap<
-        shared::Ticker, shared::decimal_quantity, absl::Hash<shared::Ticker>>
+        common::Ticker, common::decimal_quantity, absl::Hash<common::Ticker>>
         holdings_{};
 
 public:
-    explicit GenericTrader(std::string user_id, shared::decimal_price capital) :
+    explicit GenericTrader(std::string user_id, common::decimal_price capital) :
         USER_ID(std::move(user_id)), INITIAL_CAPITAL(capital)
     {}
 
@@ -50,15 +50,15 @@ public:
     // For metrics purposes
     virtual const std::string& get_type() const = 0;
 
-    virtual shared::decimal_price
+    virtual common::decimal_price
     get_capital() const
     {
         return INITIAL_CAPITAL + capital_delta_;
     }
 
     // TODO: improve with find
-    shared::decimal_quantity
-    get_holdings(shared::Ticker ticker) const
+    common::decimal_quantity
+    get_holdings(common::Ticker ticker) const
     {
         auto holdings_it = holdings_.find(ticker);
         if (holdings_it == holdings_.end()) [[unlikely]]
@@ -67,38 +67,38 @@ public:
         return holdings_it->second;
     }
 
-    shared::decimal_quantity
-    modify_holdings(shared::Ticker ticker, shared::decimal_quantity change_in_holdings)
+    common::decimal_quantity
+    modify_holdings(common::Ticker ticker, common::decimal_quantity change_in_holdings)
     {
         holdings_[ticker] += change_in_holdings;
         return holdings_[ticker];
     }
 
     void
-    modify_capital(shared::decimal_price change_in_capital)
+    modify_capital(common::decimal_price change_in_capital)
     {
         capital_delta_ += change_in_capital;
     }
 
-    shared::decimal_price
+    common::decimal_price
     get_capital_delta() const
     {
         return capital_delta_;
     }
 
-    shared::decimal_price
+    common::decimal_price
     get_initial_capital() const
     {
         return INITIAL_CAPITAL;
     }
 
-    virtual void notify_position_change(shared::position) = 0;
-    virtual void notify_match(shared::position);
+    virtual void notify_position_change(common::position) = 0;
+    virtual void notify_match(common::position);
     virtual void send_message(const std::string&) = 0;
 
     using IncomingMessageQueue = std::vector<std::variant<
-        shared::timed_init_message, shared::timed_limit_order,
-        shared::timed_market_order>>;
+        common::timed_init_message, common::timed_limit_order,
+        common::timed_market_order>>;
 
     virtual IncomingMessageQueue read_orders() = 0;
 };
