@@ -1,9 +1,9 @@
 #include "bot_container.hpp"
 
+#include "common/types/decimal.hpp"
 #include "exchange/bots/bot_types/market_maker.hpp"
 #include "exchange/bots/bot_types/retail.hpp"
 #include "exchange/traders/trader_container.hpp"
-#include "shared/types/decimal.hpp"
 
 #include <cmath>
 
@@ -12,13 +12,13 @@
 namespace nutc::exchange {
 
 void
-BotContainer::generate_orders(shared::decimal_price midprice)
+BotContainer::generate_orders(common::decimal_price midprice)
 {
     auto theo = fabs(theo_generator_.generate_next_magnitude());
     variance_calculator_.record_price(midprice);
 
     decimal_price cumulative_interest_limit{};
-    shared::decimal_quantity cumulative_quantity_held{};
+    common::decimal_quantity cumulative_quantity_held{};
 
     for (const auto& bot : bots_) {
         cumulative_interest_limit += bot->get_interest_limit();
@@ -34,7 +34,7 @@ BotContainer::generate_orders(shared::decimal_price midprice)
 template <class BotType>
 BotContainer::BotVector
 BotContainer::create_bots(
-    TraderContainer& trader_container, shared::Ticker ticker,
+    TraderContainer& trader_container, common::Ticker ticker,
     decimal_price mean_capital, decimal_price stddev_capital, size_t num_bots
 )
 {
@@ -53,7 +53,7 @@ BotContainer::create_bots(
 
 BotContainer::BotVector
 BotContainer::create_bots(
-    TraderContainer& trader_container, shared::Ticker ticker,
+    TraderContainer& trader_container, common::Ticker ticker,
     const bot_config& bot_config
 )
 {

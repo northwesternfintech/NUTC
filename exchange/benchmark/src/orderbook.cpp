@@ -15,7 +15,7 @@ BM_AddOrders(benchmark::State& state)
     for (auto _ : state) {
         for (uint32_t i = 0; i < adds; i++) {
             orderbook.add_order(
-                {trader, shared::Ticker::ETH, shared::Side::sell, 0.0, 0.0, false}
+                {trader, common::Ticker::ETH, common::Side::sell, 0.0, 0.0, false}
             );
         }
     }

@@ -1,7 +1,7 @@
 #pragma once
 
+#include "common/messages_wrapper_to_exchange.hpp"
 #include "exchange/traders/trader_types/generic_trader.hpp"
-#include "shared/messages_wrapper_to_exchange.hpp"
 
 #include <fmt/format.h>
 
@@ -27,7 +27,7 @@ public:
     {}
 
     virtual void
-    notify_position_change(shared::position) final
+    notify_position_change(common::position) final
     {}
 
     IncomingMessageQueue
@@ -39,15 +39,15 @@ public:
     }
 
     void
-    add_order(shared::limit_order order)
+    add_order(common::limit_order order)
     {
-        pending_orders_.push_back(shared::timed_limit_order{order});
+        pending_orders_.push_back(common::timed_limit_order{order});
     }
 
     void
-    add_order(shared::market_order order)
+    add_order(common::market_order order)
     {
-        pending_orders_.push_back(shared::timed_market_order{order});
+        pending_orders_.push_back(common::timed_market_order{order});
     }
 
     const std::string&

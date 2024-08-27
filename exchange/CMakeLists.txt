@@ -217,33 +217,33 @@ target_link_libraries(WRAPPER_exe PRIVATE Python3::Python)
 target_link_libraries(WRAPPER_exe PRIVATE boost::boost)
 target_link_libraries(WRAPPER_exe PRIVATE ${Python3_LIBRARIES})
 
-# ---- SHARED ----------
+# ---- COMMON ----------
 
-add_library(SHARED_lib OBJECT     
-    src/shared/file_operations/file_operations.cpp
-    src/shared/firebase/firebase.cpp
-    src/shared/util.cpp
+add_library(COMMON_lib OBJECT     
+    src/common/file_operations/file_operations.cpp
+    src/common/firebase/firebase.cpp
+    src/common/util.cpp
 )
 
 target_include_directories(
-    SHARED_lib ${warning_guard}
+	COMMON_lib ${warning_guard}
     PUBLIC
     "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
 )
 
-target_link_libraries(SHARED_lib PUBLIC fmt::fmt)
-target_link_libraries(SHARED_lib PUBLIC glaze::glaze)
-target_link_libraries(SHARED_lib PUBLIC yaml-cpp::yaml-cpp)
-target_link_libraries(SHARED_lib PUBLIC glaze::glaze)
-target_link_libraries(SHARED_lib PUBLIC CURL::libcurl)
+target_link_libraries(COMMON_lib PUBLIC fmt::fmt)
+target_link_libraries(COMMON_lib PUBLIC glaze::glaze)
+target_link_libraries(COMMON_lib PUBLIC yaml-cpp::yaml-cpp)
+target_link_libraries(COMMON_lib PUBLIC glaze::glaze)
+target_link_libraries(COMMON_lib PUBLIC CURL::libcurl)
 
-target_link_libraries(EXCHANGE_lib PUBLIC SHARED_lib)
-target_link_libraries(EXCHANGE_exe PRIVATE SHARED_lib)
+target_link_libraries(EXCHANGE_lib PUBLIC COMMON_lib)
+target_link_libraries(EXCHANGE_exe PRIVATE COMMON_lib)
 
-target_link_libraries(WRAPPER_lib PUBLIC SHARED_lib)
-target_link_libraries(WRAPPER_exe PRIVATE SHARED_lib)
+target_link_libraries(WRAPPER_lib PUBLIC COMMON_lib)
+target_link_libraries(WRAPPER_exe PRIVATE COMMON_lib)
 
-target_compile_features(SHARED_lib PUBLIC cxx_std_23)
+target_compile_features(COMMON_lib PUBLIC cxx_std_23)
 
 # Enable lto for release builds
 include(CheckIPOSupported)
@@ -253,7 +253,7 @@ if(lto_supported)
   set_target_properties(WRAPPER_exe PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
   set_target_properties(EXCHANGE_lib PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
   set_target_properties(EXCHANGE_exe PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
-  set_target_properties(SHARED_lib PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+  set_target_properties(COMMON_lib PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
 else()
     message(WARNING "LTO is not supported: ${error}")
 endif()

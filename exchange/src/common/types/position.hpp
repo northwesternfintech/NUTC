@@ -1,17 +1,17 @@
 #pragma once
 
-#include "shared/types/decimal.hpp"
-#include "shared/types/ticker.hpp"
-#include "shared/util.hpp"
+#include "common/types/decimal.hpp"
+#include "common/types/ticker.hpp"
+#include "common/util.hpp"
 
 #include <glaze/glaze.hpp>
 
-namespace nutc::shared {
+namespace nutc::common {
 struct position {
     Ticker ticker;
     Side side;
-    shared::decimal_quantity quantity;
-    shared::decimal_price price;
+    common::decimal_quantity quantity;
+    common::decimal_price price;
 
     bool
     operator==(const position& other) const noexcept
@@ -23,17 +23,17 @@ struct position {
     position() = default;
 
     position(
-        Ticker ticker, Side side, shared::decimal_quantity quantity,
-        shared::decimal_price price
+        Ticker ticker, Side side, common::decimal_quantity quantity,
+        common::decimal_price price
     ) : ticker(ticker), side(side), quantity(quantity), price(price)
     {}
 };
 
-} // namespace nutc::shared
+} // namespace nutc::common
 
 /// \cond
 template <>
-struct glz::meta<nutc::shared::position> {
-    using t = nutc::shared::position;
+struct glz::meta<nutc::common::position> {
+    using t = nutc::common::position;
     static constexpr auto value = object(&t::side, &t::ticker, &t::quantity, &t::price);
 };

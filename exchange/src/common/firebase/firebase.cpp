@@ -1,16 +1,16 @@
 #include "firebase.hpp"
 
-#include "shared/util.hpp"
+#include "common/util.hpp"
 
 #include <fmt/format.h>
 
-namespace nutc::shared {
+namespace nutc::common {
 
 glz::json_t
 get_user_info(const std::string& uid)
 {
     auto params = fmt::format("users/{}.json", uid);
-    auto url = shared::get_firebase_endpoint(params);
+    auto url = common::get_firebase_endpoint(params);
     return firebase_request("GET", url);
 }
 
@@ -120,4 +120,4 @@ firebase_request(
     }
     return json;
 }
-} // namespace nutc::shared
+} // namespace nutc::common

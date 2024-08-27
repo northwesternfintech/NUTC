@@ -1,8 +1,8 @@
 #pragma once
 
+#include "common/types/decimal.hpp"
 #include "exchange/algos/algo_manager.hpp"
 #include "exchange/traders/trader_container.hpp"
-#include "shared/types/decimal.hpp"
 
 #include <filesystem>
 #include <limits>
@@ -43,7 +43,7 @@ public:
     }
 
     void initialize_trader_container(
-        TraderContainer& traders, shared::decimal_price start_capital
+        TraderContainer& traders, common::decimal_price start_capital
     ) const override;
 
     void initialize_files() final;

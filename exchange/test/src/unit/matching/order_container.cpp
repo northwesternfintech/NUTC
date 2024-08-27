@@ -1,6 +1,6 @@
+#include "common/types/decimal.hpp"
 #include "config.h"
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
-#include "shared/types/decimal.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
 
@@ -8,14 +8,14 @@
 
 // TODO: expiration tests
 
-using nutc::shared::Ticker;
-using nutc::shared::Side::buy;
-using nutc::shared::Side::sell;
+using nutc::common::Ticker;
+using nutc::common::Side::buy;
+using nutc::common::Side::sell;
 
 class UnitOrderBookTest : public ::testing::Test {
 protected:
     using TestTrader = nutc::test::TestTrader;
-    static constexpr nutc::shared::decimal_quantity DEFAULT_QUANTITY = 1000.0;
+    static constexpr nutc::common::decimal_quantity DEFAULT_QUANTITY = 1000.0;
 
     TraderContainer traders;
 

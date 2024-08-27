@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shared/messages_exchange_to_wrapper.hpp"
+#include "common/messages_exchange_to_wrapper.hpp"
 #include "wrapper/pywrapper/pywrapper.hpp"
 #include "wrapper/pywrapper/rate_limiter.hpp"
 
@@ -10,7 +10,7 @@
 
 namespace nutc::wrapper {
 
-using namespace nutc::shared;
+using namespace nutc::common;
 
 class ExchangeCommunicator {
     RateLimiter limiter{};
@@ -39,10 +39,10 @@ public:
 
     void main_event_loop();
 
-    shared::algorithm_content consume_algorithm();
+    common::algorithm_content consume_algorithm();
 
 private:
-    void handle_orderbook_update(const shared::position& update);
+    void handle_orderbook_update(const common::position& update);
     void handle_match(const match& match);
 
     template <typename T>

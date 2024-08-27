@@ -1,16 +1,16 @@
 #pragma once
 
-#include "shared/types/decimal.hpp"
-#include "shared/types/position.hpp"
+#include "common/types/decimal.hpp"
+#include "common/types/position.hpp"
 
 namespace nutc::wrapper {
 
 using OrderBookUpdateFunction =
-    std::function<void(const shared::position& position_change)>;
+    std::function<void(const common::position& position_change)>;
 using TradeUpdateFunction =
-    std::function<void(const shared::position& position_change)>;
+    std::function<void(const common::position& position_change)>;
 using AccountUpdateFunction = std::function<
-    void(const shared::position& position_change, shared::decimal_price held_capital)>;
+    void(const common::position& position_change, common::decimal_price held_capital)>;
 
 OrderBookUpdateFunction ob_update_function();
 

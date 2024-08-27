@@ -1,4 +1,5 @@
 #pragma once
+#include "common/types/decimal.hpp"
 #include "exchange/bots/bot_container.hpp"
 #include "exchange/config/dynamic/ticker_config.hpp"
 #include "exchange/matching/engine.hpp"
@@ -6,7 +7,6 @@
 #include "exchange/orders/orderbook/level_tracked_orderbook.hpp"
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
 #include "exchange/traders/trader_container.hpp"
-#include "shared/types/decimal.hpp"
 
 #include <absl/hash/hash.h>
 
@@ -25,7 +25,7 @@ struct ticker_info {
     Engine engine;
     std::vector<BotContainer> bot_containers;
 
-    ticker_info(shared::Ticker ticker, double order_fee) :
+    ticker_info(common::Ticker ticker, double order_fee) :
         limit_orderbook(ticker), engine(order_fee)
     {}
 
@@ -40,8 +40,8 @@ struct ticker_info {
 private:
     std::vector<BotContainer>
     create_bot_containers(
-        TraderContainer& trader_container, shared::Ticker ticker,
-        shared::decimal_price starting_price, const std::vector<bot_config>& configs
+        TraderContainer& trader_container, common::Ticker ticker,
+        common::decimal_price starting_price, const std::vector<bot_config>& configs
     )
     {
         std::vector<BotContainer> containers;

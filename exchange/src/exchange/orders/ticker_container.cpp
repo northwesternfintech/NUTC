@@ -18,7 +18,7 @@ TickerMapping::Iterator::Iterator(
 TickerMapping::Iterator::value_type
 TickerMapping::Iterator::operator*()
 {
-    return {static_cast<shared::Ticker>(index_), *it_};
+    return {static_cast<common::Ticker>(index_), *it_};
 }
 
 TickerMapping::Iterator&
@@ -43,7 +43,7 @@ TickerMapping::ConstIterator::ConstIterator(
 TickerMapping::ConstIterator::value_type
 TickerMapping::ConstIterator::operator*() const
 {
-    return {static_cast<shared::Ticker>(index_), *it_};
+    return {static_cast<common::Ticker>(index_), *it_};
 }
 
 TickerMapping::ConstIterator&
@@ -85,13 +85,13 @@ TickerMapping::end()
 }
 
 ticker_info&
-TickerMapping::operator[](shared::Ticker ticker)
+TickerMapping::operator[](common::Ticker ticker)
 {
     return tickers[std::to_underlying(ticker)];
 }
 
 const ticker_info&
-TickerMapping::operator[](shared::Ticker ticker) const
+TickerMapping::operator[](common::Ticker ticker) const
 {
     return tickers[std::to_underlying(ticker)];
 }
@@ -100,8 +100,8 @@ std::vector<ticker_info>
 TickerMapping::create_tickers(double order_fee)
 {
     std::vector<ticker_info> result;
-    for (std::size_t ticker = 0; ticker < shared::TICKERS.size(); ticker++) {
-        result.emplace_back(static_cast<shared::Ticker>(ticker), order_fee);
+    for (std::size_t ticker = 0; ticker < common::TICKERS.size(); ticker++) {
+        result.emplace_back(static_cast<common::Ticker>(ticker), order_fee);
     }
     return result;
 }

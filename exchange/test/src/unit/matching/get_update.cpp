@@ -1,7 +1,7 @@
+#include "common/util.hpp"
 #include "config.h"
 #include "exchange/orders/level_tracking/level_update_generator.hpp"
 #include "exchange/orders/orderbook/level_tracked_orderbook.hpp"
-#include "shared/util.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
 
@@ -9,12 +9,12 @@
 
 #include <algorithm>
 
+using nutc::common::Ticker;
+using nutc::common::Side::buy;
+using nutc::common::Side::sell;
 using nutc::exchange::LevelTrackedOrderbook;
 using nutc::exchange::LevelUpdateGenerator;
 using nutc::exchange::LimitOrderBook;
-using nutc::shared::Ticker;
-using nutc::shared::Side::buy;
-using nutc::shared::Side::sell;
 
 class UnitGetUpdate : public ::testing::Test {
 protected:

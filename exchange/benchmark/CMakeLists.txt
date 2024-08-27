@@ -22,7 +22,7 @@ target_include_directories(
 target_link_libraries(
   NUTC_benchmarks PRIVATE
   EXCHANGE_lib 
-  SHARED_lib
+  COMMON_lib
   benchmark::benchmark
 )
 

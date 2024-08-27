@@ -35,9 +35,9 @@ protected:
 
     std::vector<OrderVariant> collect_orders(uint64_t) override;
 
-    std::vector<shared::match> match_orders_(std::vector<OrderVariant> orders) override;
+    std::vector<common::match> match_orders_(std::vector<OrderVariant> orders) override;
 
-    void handle_matches_(std::vector<shared::match> matches) override;
+    void handle_matches_(std::vector<common::match> matches) override;
 
     void post_cycle_(uint64_t) override;
 };

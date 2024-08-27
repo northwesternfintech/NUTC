@@ -1,14 +1,14 @@
 #pragma once
+#include "common/types/decimal.hpp"
 #include "exchange/bots/shared_bot_state.hpp"
 #include "exchange/traders/trader_types/bot_trader.hpp"
-#include "shared/types/decimal.hpp"
 
 #include <sys/types.h>
 
 #include <random>
 
 namespace nutc::exchange {
-using shared::decimal_price;
+using common::decimal_price;
 
 /**
  * No thread safety - do not run functions on multiple threads
@@ -26,7 +26,7 @@ class MarketMakerBot : public BotTrader {
     float aggressiveness = gen_aggressiveness();
 
 public:
-    MarketMakerBot(shared::Ticker ticker, double interest_limit) :
+    MarketMakerBot(common::Ticker ticker, double interest_limit) :
         BotTrader(ticker, interest_limit)
     {}
 
@@ -43,7 +43,7 @@ public:
 
 private:
     void
-    place_orders(shared::Side side, decimal_price theo, decimal_price spread_offset);
+    place_orders(common::Side side, decimal_price theo, decimal_price spread_offset);
 };
 
 } // namespace nutc::exchange

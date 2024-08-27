@@ -1,9 +1,9 @@
 #pragma once
+#include "common/types/decimal.hpp"
 #include "exchange/config/dynamic/ticker_config.hpp"
 #include "exchange/theo/brownian.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "exchange/traders/trader_types/bot_trader.hpp"
-#include "shared/types/decimal.hpp"
 #include "shared_bot_state.hpp"
 #include "variance.hpp"
 
@@ -20,17 +20,17 @@ class BotContainer {
     BotVector bots_{};
 
 public:
-    void generate_orders(shared::decimal_price midprice);
+    void generate_orders(common::decimal_price midprice);
 
     BotContainer(
-        shared::Ticker ticker, shared::decimal_price starting_price,
+        common::Ticker ticker, common::decimal_price starting_price,
         TraderContainer& trader_container, bot_config bots
     ) :
         theo_generator_(starting_price),
         bots_(create_bots(trader_container, ticker, bots))
     {}
 
-    shared::decimal_price
+    common::decimal_price
     get_theo() const
     {
         return theo_generator_.get_magnitude();
@@ -46,13 +46,13 @@ private:
     void generate_orders(const shared_bot_state& shared_state);
 
     static BotVector create_bots(
-        TraderContainer& traders, shared::Ticker ticker, const bot_config& bot_config
+        TraderContainer& traders, common::Ticker ticker, const bot_config& bot_config
     );
 
     template <class BotType>
     static BotVector create_bots(
-        TraderContainer& trader_container, shared::Ticker ticker,
-        shared::decimal_price mean_capital, shared::decimal_price stddev_capital,
+        TraderContainer& trader_container, common::Ticker ticker,
+        common::decimal_price mean_capital, common::decimal_price stddev_capital,
         size_t num_bots
     );
 };

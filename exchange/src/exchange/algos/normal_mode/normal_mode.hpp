@@ -1,7 +1,7 @@
 #pragma once
 
+#include "common/types/decimal.hpp"
 #include "exchange/algos/algo_manager.hpp"
-#include "shared/types/decimal.hpp"
 
 namespace nutc::exchange {
 
@@ -12,7 +12,7 @@ public:
     NormalModeAlgoInitializer(size_t wait_secs) : WAIT_SECS(wait_secs) {}
 
     void initialize_trader_container(
-        TraderContainer& traders, shared::decimal_price start_capital
+        TraderContainer& traders, common::decimal_price start_capital
     ) const override;
 
     // No files to initialize

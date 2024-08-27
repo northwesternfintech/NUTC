@@ -1,8 +1,8 @@
 #pragma once
 
+#include "common/types/decimal.hpp"
 #include "exchange/bots/shared_bot_state.hpp"
 #include "exchange/traders/trader_types/generic_trader.hpp"
-#include "shared/types/decimal.hpp"
 
 #include <cassert>
 
@@ -11,23 +11,23 @@
 namespace nutc::exchange {
 
 class BotTrader : public GenericTrader {
-    const shared::Ticker TICKER;
-    const shared::decimal_price INTEREST_LIMIT;
-    shared::decimal_price short_interest_;
-    shared::decimal_price long_interest_;
+    const common::Ticker TICKER;
+    const common::decimal_price INTEREST_LIMIT;
+    common::decimal_price short_interest_;
+    common::decimal_price long_interest_;
 
-    shared::decimal_quantity open_bids_;
-    shared::decimal_quantity open_asks_;
+    common::decimal_quantity open_bids_;
+    common::decimal_quantity open_asks_;
     IncomingMessageQueue orders_;
 
 public:
-    shared::decimal_quantity
+    common::decimal_quantity
     get_holdings() const
     {
         return GenericTrader::get_holdings(TICKER);
     }
 
-    BotTrader(shared::Ticker ticker, shared::decimal_price interest_limit) :
+    BotTrader(common::Ticker ticker, common::decimal_price interest_limit) :
         GenericTrader(generate_user_id(), interest_limit), TICKER(ticker),
         INTEREST_LIMIT(interest_limit)
     {}
@@ -47,41 +47,41 @@ public:
     disable() final
     {}
 
-    [[nodiscard]] shared::decimal_price
+    [[nodiscard]] common::decimal_price
     get_capital_utilization() const
     {
-        shared::decimal_price capital_util =
+        common::decimal_price capital_util =
             (get_long_interest() + get_short_interest()) / get_interest_limit();
         assert(capital_util <= 1.0);
         // assert(capital_util >= 0);
         return capital_util;
     }
 
-    [[nodiscard]] shared::decimal_price
+    [[nodiscard]] common::decimal_price
     get_long_interest() const
     {
         return long_interest_;
     }
 
-    [[nodiscard]] shared::decimal_price
+    [[nodiscard]] common::decimal_price
     get_interest_limit() const
     {
         return INTEREST_LIMIT;
     }
 
-    [[nodiscard]] shared::decimal_price
+    [[nodiscard]] common::decimal_price
     get_short_interest() const
     {
         return short_interest_;
     }
 
-    [[nodiscard]] shared::decimal_quantity
+    [[nodiscard]] common::decimal_quantity
     get_open_bids() const
     {
         return open_bids_;
     }
 
-    [[nodiscard]] shared::decimal_quantity
+    [[nodiscard]] common::decimal_quantity
     get_open_asks() const
     {
         return open_asks_;
@@ -89,7 +89,7 @@ public:
 
     ~BotTrader() override = default;
 
-    void notify_position_change(shared::position order) final;
+    void notify_position_change(common::position order) final;
 
     /**
      * midprice, theo
@@ -107,7 +107,7 @@ public:
 protected:
     static double generate_gaussian_noise(double mean, double stddev);
 
-    [[nodiscard]] shared::decimal_price
+    [[nodiscard]] common::decimal_price
     compute_net_exposure_() const
     {
         return (get_long_interest() - get_short_interest());
@@ -115,35 +115,35 @@ protected:
 
     void
     add_limit_order(
-        shared::Side side, double quantity, shared::decimal_price price, bool ioc
+        common::Side side, double quantity, common::decimal_price price, bool ioc
     )
     {
         orders_.emplace_back(
-            shared::timed_limit_order{TICKER, side, quantity, price, ioc}
+            common::timed_limit_order{TICKER, side, quantity, price, ioc}
         );
     }
 
     void
-    add_market_order(shared::Side side, double quantity)
+    add_market_order(common::Side side, double quantity)
     {
-        orders_.push_back(shared::timed_market_order{TICKER, side, quantity});
+        orders_.push_back(common::timed_market_order{TICKER, side, quantity});
     }
 
-    shared::decimal_price
+    common::decimal_price
     compute_capital_tolerance_()
     {
-        return (shared::decimal_price{1.0} - get_capital_utilization())
+        return (common::decimal_price{1.0} - get_capital_utilization())
                * (get_interest_limit() / 2.0);
     }
 
     void
-    modify_short_capital(shared::decimal_price delta)
+    modify_short_capital(common::decimal_price delta)
     {
         short_interest_ += delta;
     }
 
     void
-    modify_long_capital(shared::decimal_price delta)
+    modify_long_capital(common::decimal_price delta)
     {
         long_interest_ += delta;
     }
@@ -152,7 +152,7 @@ protected:
      * @brief Called by the bot(derived class) when a bid position is opened
      */
     void
-    modify_open_bids(shared::decimal_quantity delta)
+    modify_open_bids(common::decimal_quantity delta)
     {
         open_bids_ += delta;
     }
@@ -161,7 +161,7 @@ protected:
      * @brief Called by the bot (derived class) when an ask position is opened
      */
     void
-    modify_open_asks(shared::decimal_quantity delta)
+    modify_open_asks(common::decimal_quantity delta)
     {
         open_asks_ += delta;
     }

@@ -1,10 +1,10 @@
 #include "util.hpp"
 
-#include "shared/config/config.h"
+#include "common/config/config.h"
 
 #include <fmt/format.h>
 
-namespace nutc::shared {
+namespace nutc::common {
 std::string
 get_firebase_endpoint(const std::string& params)
 {
@@ -27,4 +27,4 @@ trader_id(const std::string& user_id, const std::string& algo_id)
     return fmt::format("{}-{}", user_id, algo_id);
 }
 
-} // namespace nutc::shared
+} // namespace nutc::common

@@ -1,19 +1,19 @@
+#include "common/types/decimal.hpp"
 #include "config.h"
 #include "exchange/traders/trader_container.hpp"
-#include "shared/types/decimal.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
 
 #include <gtest/gtest.h>
 
-using nutc::shared::Ticker;
-using nutc::shared::Side::buy;
-using nutc::shared::Side::sell;
+using nutc::common::Ticker;
+using nutc::common::Side::buy;
+using nutc::common::Side::sell;
 
 class UnitManyOrders : public ::testing::Test {
 protected:
     using TestTrader = nutc::test::TestTrader;
-    static constexpr nutc::shared::decimal_quantity DEFAULT_QUANTITY = 1000.0;
+    static constexpr nutc::common::decimal_quantity DEFAULT_QUANTITY = 1000.0;
     TraderContainer traders;
 
     nutc::exchange::GenericTrader& trader1 =
@@ -37,7 +37,7 @@ protected:
     nutc::exchange::LimitOrderBook orderbook_;
     Engine engine_;
 
-    std::vector<nutc::shared::match>
+    std::vector<nutc::common::match>
     add_to_engine_(const tagged_limit_order& order)
     {
         return engine_.match_order(order, orderbook_);

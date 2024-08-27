@@ -1,13 +1,13 @@
 #include "engine.hpp"
 
+#include "common/messages_exchange_to_wrapper.hpp"
+#include "common/types/decimal.hpp"
+#include "common/util.hpp"
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
-#include "shared/messages_exchange_to_wrapper.hpp"
-#include "shared/types/decimal.hpp"
-#include "shared/util.hpp"
 
 namespace nutc::exchange {
 
-using match = nutc::shared::match;
+using match = nutc::common::match;
 
 template <TaggedOrder OrderT>
 std::vector<match>
@@ -32,7 +32,7 @@ Engine::match_order(OrderT order, LimitOrderBook& orderbook)
     return matches;
 }
 
-template <shared::Side AggressiveSide, typename OrderPairT>
+template <common::Side AggressiveSide, typename OrderPairT>
 glz::expected<match, bool>
 Engine::match_orders_(OrderPairT& orders, LimitOrderBook& orderbook)
 {
@@ -43,14 +43,14 @@ Engine::match_orders_(OrderPairT& orders, LimitOrderBook& orderbook)
     }
     if (match_result.error() == MatchFailure::seller_failure) {
         if constexpr (AggressiveSide == side::buy) {
-            orderbook.mark_order_removed(orders.template get_order<shared::Side::sell>()
+            orderbook.mark_order_removed(orders.template get_order<common::Side::sell>()
             );
             return glz::unexpected(false);
         }
     }
     if (match_result.error() == MatchFailure::buyer_failure) {
         if constexpr (AggressiveSide == side::sell) {
-            orderbook.mark_order_removed(orders.template get_order<shared::Side::buy>()
+            orderbook.mark_order_removed(orders.template get_order<common::Side::buy>()
             );
             return glz::unexpected(false);
         }
@@ -58,7 +58,7 @@ Engine::match_orders_(OrderPairT& orders, LimitOrderBook& orderbook)
     return glz::unexpected(true);
 }
 
-template <shared::Side AggressiveSide, TaggedOrder OrderT>
+template <common::Side AggressiveSide, TaggedOrder OrderT>
 glz::expected<match, bool>
 Engine::match_incoming_order_(
     OrderT& aggressive_order, LimitOrderBook::stored_limit_order passive_order,
@@ -82,15 +82,15 @@ Engine::match_incoming_order_(
     }
 }
 
-shared::decimal_price
-Engine::total_order_cost_(decimal_price price, shared::decimal_quantity quantity) const
+common::decimal_price
+Engine::total_order_cost_(decimal_price price, common::decimal_quantity quantity) const
 {
     decimal_price fee{order_fee_ * price};
     decimal_price price_per = price + fee;
     return price_per * quantity;
 }
 
-template <shared::Side AggressiveSide, typename OrderPairT>
+template <common::Side AggressiveSide, typename OrderPairT>
 glz::expected<match, Engine::MatchFailure>
 Engine::attempt_match_(OrderPairT& orders)
 {
@@ -99,11 +99,11 @@ Engine::attempt_match_(OrderPairT& orders)
         return glz::unexpected(MatchFailure::done_matching);
 
     auto match_price = *price_opt;
-    shared::decimal_quantity match_quantity = orders.potential_match_quantity();
+    common::decimal_quantity match_quantity = orders.potential_match_quantity();
     decimal_price total_price{total_order_cost_(match_price, match_quantity)};
 
-    auto& buyer = orders.template get_underlying_order<shared::Side::buy>();
-    auto& seller = orders.template get_underlying_order<shared::Side::sell>();
+    auto& buyer = orders.template get_underlying_order<common::Side::buy>();
+    auto& seller = orders.template get_underlying_order<common::Side::sell>();
 
     if (buyer.trader->get_capital() < total_price) [[unlikely]]
         return glz::unexpected(MatchFailure::buyer_failure);

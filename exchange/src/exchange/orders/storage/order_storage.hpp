@@ -1,6 +1,6 @@
 #pragma once
+#include "common/messages_wrapper_to_exchange.hpp"
 #include "exchange/traders/trader_types/generic_trader.hpp"
-#include "shared/messages_wrapper_to_exchange.hpp"
 
 #include <fmt/format.h>
 
@@ -27,8 +27,8 @@ public:
     bool operator==(const tagged_order& other) const = default;
 };
 
-using tagged_limit_order = tagged_order<shared::timed_limit_order>;
-using tagged_market_order = tagged_order<shared::timed_market_order>;
+using tagged_limit_order = tagged_order<common::timed_limit_order>;
+using tagged_market_order = tagged_order<common::timed_market_order>;
 
 template <typename T>
 inline constexpr bool is_limit_order_v =

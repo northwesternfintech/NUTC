@@ -1,8 +1,8 @@
-#include "shared/types/decimal.hpp"
+#include "common/types/decimal.hpp"
 
 #include <gtest/gtest.h>
 
-using nutc::shared::decimal_price;
+using nutc::common::decimal_price;
 
 TEST(UnitDecimalPrice, CorrectlyHandleSubtraction)
 {

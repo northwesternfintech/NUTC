@@ -3,9 +3,9 @@
 namespace nutc::exchange {
 
 void
-VarianceCalculator::record_price(shared::decimal_price price)
+VarianceCalculator::record_price(common::decimal_price price)
 {
-    if (price == shared::decimal_price{0.0})
+    if (price == common::decimal_price{0.0})
         return;
 
     prices.push_back(price);

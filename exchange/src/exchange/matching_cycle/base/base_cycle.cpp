@@ -1,6 +1,6 @@
 #include "base_cycle.hpp"
 
-#include "shared/messages_exchange_to_wrapper.hpp"
+#include "common/messages_exchange_to_wrapper.hpp"
 
 #include <variant>
 
@@ -27,7 +27,7 @@ BaseMatchingCycle::collect_orders(uint64_t) -> std::vector<OrderVariant>
         auto get_tagged_order =
             [&trader]<typename OrderT>(const OrderT& order
             ) -> std::variant<tagged_limit_order, tagged_market_order> {
-            if constexpr (std::is_same_v<OrderT, shared::timed_init_message>) {
+            if constexpr (std::is_same_v<OrderT, common::timed_init_message>) {
                 throw std::runtime_error("Unexpected initialization message");
             }
             else {
@@ -46,10 +46,10 @@ BaseMatchingCycle::collect_orders(uint64_t) -> std::vector<OrderVariant>
     return orders;
 }
 
-std::vector<shared::match>
+std::vector<common::match>
 BaseMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
 {
-    std::vector<shared::match> matches;
+    std::vector<common::match> matches;
 
     for (OrderVariant& order_variant : orders) {
         auto match_order = [&]<typename OrderT>(OrderT& order) {
@@ -68,9 +68,9 @@ BaseMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
 }
 
 void
-BaseMatchingCycle::handle_matches_(std::vector<shared::match> matches)
+BaseMatchingCycle::handle_matches_(std::vector<common::match> matches)
 {
-    std::vector<shared::position> ob_updates{};
+    std::vector<common::position> ob_updates{};
 
     for (auto [symbol, info] : tickers_) {
         auto tmp = info.limit_orderbook.get_update_generator().get_updates();
@@ -80,7 +80,7 @@ BaseMatchingCycle::handle_matches_(std::vector<shared::match> matches)
     if (ob_updates.empty() && matches.empty())
         return;
 
-    shared::tick_update updates{ob_updates, matches};
+    common::tick_update updates{ob_updates, matches};
     auto update = glz::write_json(updates);
     if (!update.has_value()) [[unlikely]] {
         throw std::runtime_error(glz::format_error(update.error()));

@@ -29,7 +29,7 @@ PipeReader::PipeReader() :
 void
 PipeReader::store_message_(const std::string& message)
 {
-    std::variant<init_message, limit_order, market_order> data;
+    std::variant<common::init_message, common::limit_order, common::market_order> data;
     auto err = glz::read_json(data, message);
 
     // TODO: handle better
@@ -42,7 +42,7 @@ PipeReader::store_message_(const std::string& message)
     }
 
     auto store_message = [this]<typename MessageT>(const MessageT& v) {
-        shared.push_back(timestamped_message<MessageT>{v});
+        shared.push_back(common::timestamped_message<MessageT>{v});
     };
 
     std::lock_guard<std::mutex> lock{message_lock_};

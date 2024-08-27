@@ -12,7 +12,7 @@ public:
     constexpr BotModeAlgoInitializer() = default;
 
     constexpr void
-    initialize_trader_container(TraderContainer&, shared::decimal_price) const final
+    initialize_trader_container(TraderContainer&, common::decimal_price) const final
     {}
 
     constexpr void

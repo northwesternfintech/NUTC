@@ -6,13 +6,13 @@ bool
 is_nearly_equal(double f_a, double f_b)
 {
     double diff = std::fabs(f_a - f_b);
-    return shared::is_close_to_zero(diff);
+    return common::is_close_to_zero(diff);
 }
 
 bool
 validate_match(
-    const nutc::shared::match& match, shared::Ticker ticker,
-    const std::string& buyer_id, const std::string& seller_id, shared::Side side,
+    const nutc::common::match& match, common::Ticker ticker,
+    const std::string& buyer_id, const std::string& seller_id, common::Side side,
     double quantity, double price
 )
 {
@@ -23,7 +23,7 @@ validate_match(
 
 bool
 validate_ob_update(
-    const shared::position& update, shared::Ticker ticker, shared::Side side,
+    const common::position& update, common::Ticker ticker, common::Side side,
     double quantity, double price
 )
 {
@@ -33,7 +33,7 @@ validate_ob_update(
 
 bool
 validate_limit_order(
-    const limit_order& update, shared::Ticker ticker, shared::Side side,
+    const limit_order& update, common::Ticker ticker, common::Side side,
     double quantity, double price
 )
 {

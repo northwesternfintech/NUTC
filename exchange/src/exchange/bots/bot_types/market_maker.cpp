@@ -1,21 +1,21 @@
 #include "market_maker.hpp"
 
+#include "common/types/decimal.hpp"
+#include "common/util.hpp"
 #include "exchange/bots/shared_bot_state.hpp"
-#include "shared/types/decimal.hpp"
-#include "shared/util.hpp"
 
 #include <algorithm>
 #include <array>
 
-using nutc::shared::Side;
+using nutc::common::Side;
 
 namespace {
 struct price_level {
-    const nutc::shared::decimal_price PRICE_DELTA;
+    const nutc::common::decimal_price PRICE_DELTA;
     const double QUANTITY_FACTOR;
 
     consteval price_level(
-        nutc::shared::decimal_price price_delta, double quantity_factor
+        nutc::common::decimal_price price_delta, double quantity_factor
     ) : PRICE_DELTA(price_delta), QUANTITY_FACTOR(quantity_factor)
     {}
 };

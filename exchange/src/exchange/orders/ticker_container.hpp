@@ -24,7 +24,7 @@ public:
     public:
         using iterator_category = std::forward_iterator_tag;
         using difference_type = std::ptrdiff_t;
-        using value_type = std::pair<shared::Ticker, ticker_info&>;
+        using value_type = std::pair<common::Ticker, ticker_info&>;
         using pointer = value_type*;
         using reference = value_type&;
 
@@ -44,7 +44,7 @@ public:
     public:
         using iterator_category = std::forward_iterator_tag;
         using difference_type = std::ptrdiff_t;
-        using value_type = std::pair<shared::Ticker, const ticker_info&>;
+        using value_type = std::pair<common::Ticker, const ticker_info&>;
         using pointer = value_type*;
         using reference = value_type&;
 
@@ -64,8 +64,8 @@ public:
     Iterator begin();
     Iterator end();
 
-    ticker_info& operator[](shared::Ticker ticker);
-    const ticker_info& operator[](shared::Ticker ticker) const;
+    ticker_info& operator[](common::Ticker ticker);
+    const ticker_info& operator[](common::Ticker ticker) const;
 
 private:
     static std::vector<ticker_info> create_tickers(double order_fee);
