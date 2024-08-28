@@ -32,8 +32,8 @@ public:
     bool report_startup_complete();
 
     LimitOrderFunction place_limit_order();
-
     MarketOrderFunction place_market_order();
+    CancelOrderFunction cancel_order();
 
     void wait_for_start_time();
 
@@ -50,9 +50,7 @@ private:
 
     static void publish_message(const std::string& message);
 
-    template <typename T, typename... Args>
-    requires std::is_constructible_v<T, Args...>
-    [[nodiscard]] bool publish_message(Args&&...);
+    [[nodiscard]] bool publish_message(const auto& message);
 
     template <typename T>
     T consume_message();

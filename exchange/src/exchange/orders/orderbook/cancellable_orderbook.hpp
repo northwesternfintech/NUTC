@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/util.hpp"
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
 #include "exchange/orders/storage/order_storage.hpp"
 
@@ -20,17 +21,20 @@ class CancellableOrderBook : public BaseOrderBookT {
 
 public:
     bool
-    contains_order(uint64_t order_id) const
+    contains_order(common::order_id_t order_id) const
     {
         return order_map_.contains(order_id);
     }
 
-    LimitOrderBook::stored_limit_order
-    mark_order_removed(uint64_t order_id)
+    std::optional<LimitOrderBook::stored_limit_order>
+    mark_order_removed(common::order_id_t order_id)
     {
-        auto order = order_map_.at(order_id);
-        mark_order_removed(order);
-        return order;
+        auto order_it = order_map_.find(order_id);
+        if (order_it == order_map_.end()) {
+            return std::nullopt;
+        }
+        mark_order_removed(order_it);
+        return order_it->second;
     }
 
     LimitOrderBook::stored_limit_order
@@ -39,7 +43,7 @@ public:
         auto added_order = BaseOrderBookT::add_order(order);
 
         if (!order.ioc) {
-            order_map_.emplace(order.order_index, added_order);
+            order_map_.emplace(order.order_id, added_order);
         }
 
         return added_order;
@@ -48,7 +52,7 @@ public:
     void
     mark_order_removed(LimitOrderBook::stored_limit_order order) override
     {
-        order_map_.erase(order->order_index);
+        order_map_.erase(order->order_id);
 
         BaseOrderBookT::mark_order_removed(order);
     }

@@ -49,7 +49,8 @@ main(int argc, const char** argv)
     communicator.wait_for_start_time();
 
     create_api_module(
-        communicator.place_limit_order(), communicator.place_market_order()
+        communicator.place_limit_order(), communicator.place_market_order(),
+        communicator.cancel_order()
     );
     run_initialization_code(algorithm.algorithm_content_str);
 

@@ -1,6 +1,7 @@
 #include "base_cycle.hpp"
 
 #include "common/messages_exchange_to_wrapper.hpp"
+#include "common/messages_wrapper_to_exchange.hpp"
 
 #include <variant>
 
@@ -16,6 +17,7 @@ BaseMatchingCycle::before_cycle_(uint64_t)
     }
 }
 
+// TODO: clean up with new cancel_order logic
 auto
 BaseMatchingCycle::collect_orders(uint64_t) -> std::vector<OrderVariant>
 {
@@ -24,11 +26,14 @@ BaseMatchingCycle::collect_orders(uint64_t) -> std::vector<OrderVariant>
     auto collect_orders = [&orders](GenericTrader& trader) {
         auto message_queue = trader.read_orders();
 
-        auto get_tagged_order =
-            [&trader]<typename OrderT>(const OrderT& order
-            ) -> std::variant<tagged_limit_order, tagged_market_order> {
+        auto get_tagged_order = [&trader]<typename OrderT>(const OrderT& order)
+            -> std::variant<
+                common::cancel_order, tagged_limit_order, tagged_market_order> {
             if constexpr (std::is_same_v<OrderT, common::init_message>) {
                 throw std::runtime_error("Unexpected initialization message");
+            }
+            else if constexpr (std::is_same_v<OrderT, common::cancel_order>) {
+                return order;
             }
             else {
                 return tagged_order<OrderT>{trader, order};
@@ -53,14 +58,20 @@ BaseMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
 
     for (OrderVariant& order_variant : orders) {
         auto match_order = [&]<typename OrderT>(OrderT& order) {
-            if (order.quantity <= 0.0)
+            // TODO: expose correct thing yk
+            if constexpr (std::is_same_v<OrderT, common::cancel_order>) {
                 return;
+            }
+            else {
+                auto& ticker_info = tickers_[order.ticker];
+                auto& orderbook = ticker_info.limit_orderbook;
 
-            auto& ticker_info = tickers_[order.ticker];
-            auto& orderbook = ticker_info.limit_orderbook;
-            auto& engine = ticker_info.engine;
-            auto tmp = engine.match_order(order, orderbook);
-            std::copy(tmp.begin(), tmp.end(), std::back_inserter(matches));
+                if (order.quantity <= 0.0)
+                    return;
+                auto& engine = ticker_info.engine;
+                auto tmp = engine.match_order(order, orderbook);
+                std::copy(tmp.begin(), tmp.end(), std::back_inserter(matches));
+            }
         };
         std::visit(match_order, order_variant);
     }

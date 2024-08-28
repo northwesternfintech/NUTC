@@ -15,16 +15,27 @@ struct init_message {
     std::string_view name = "init_message";
 };
 
+struct cancel_order {
+    order_id_t order_id;
+    std::uint64_t timestamp = get_time();
+
+    bool
+    operator==(const cancel_order& other) const
+    {
+        return order_id == other.order_id;
+    }
+};
+
 struct market_order {
     common::Ticker ticker;
     common::Side side;
     decimal_quantity quantity;
-    std::uint64_t timestamp;
+    std::uint64_t timestamp = get_time();
 
     constexpr market_order() = default;
 
     market_order(common::Ticker ticker, common::Side side, double quantity) :
-        ticker(ticker), side(side), quantity(quantity), timestamp(get_time())
+        ticker(ticker), side(side), quantity(quantity)
     {}
 
     bool
@@ -38,8 +49,16 @@ struct market_order {
 struct limit_order : market_order {
     common::decimal_price price;
     bool ioc{false};
+    order_id_t order_id = generate_order_id();
 
-    bool operator==(const limit_order& other) const = default;
+    // TODO: fix tests and remove
+    bool
+    operator==(const limit_order& other) const
+    {
+        return ticker == other.ticker && side == other.side
+               && quantity == other.quantity && price == other.price
+               && ioc == other.ioc;
+    }
 
     limit_order(
         std::string_view ticker, common::Side side, double quantity,
@@ -58,16 +77,25 @@ struct limit_order : market_order {
     limit_order() = default;
 };
 
-using IncomingMessageVariant = std::variant<init_message, limit_order, market_order>;
+using IncomingMessageVariant =
+    std::variant<init_message, cancel_order, limit_order, market_order>;
 
 } // namespace nutc::common
+
+/// \cond
+template <>
+struct glz::meta<nutc::common::cancel_order> {
+    using t = nutc::common::cancel_order;
+    static constexpr auto value = object("cancel", &t::order_id);
+};
 
 /// \cond
 template <>
 struct glz::meta<nutc::common::limit_order> {
     using t = nutc::common::limit_order;
     static constexpr auto value = object(
-        "limit", &t::timestamp, &t::ticker, &t::side, &t::quantity, &t::price, &t::ioc
+        "limit", &t::timestamp, &t::ticker, &t::side, &t::quantity, &t::price, &t::ioc,
+        &t::order_id
     );
 };
 

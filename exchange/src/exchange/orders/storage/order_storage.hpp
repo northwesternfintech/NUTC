@@ -8,11 +8,8 @@ namespace nutc::exchange {
 
 template <typename BaseOrderT>
 class tagged_order : public BaseOrderT {
-    inline static constinit std::uint64_t global_index = 0;
-
 public:
     GenericTrader* trader;
-    uint64_t order_index{++global_index};
 
     tagged_order(GenericTrader& order_creator, const auto& order) :
         BaseOrderT(order), trader(&order_creator)

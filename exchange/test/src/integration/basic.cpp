@@ -23,7 +23,6 @@ TEST_F(IntegrationBasicAlgo, InitialLiquidity)
     start_wrappers(traders, "test_algos/buy_tsla_at_100.py");
     auto trader2 = traders.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 1000.0); // NOLINT
-    // trader2->add_order({Ticker::ETH, sell, 100.0});
     trader2->add_order(limit_order{Ticker::ETH, sell, 100.0, 100.0});
 
     TestMatchingCycle cycle{traders};

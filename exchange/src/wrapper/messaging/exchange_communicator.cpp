@@ -14,7 +14,6 @@
 
 #include <iostream>
 #include <stdexcept>
-#include <type_traits>
 
 namespace nutc::wrapper {
 
@@ -48,9 +47,9 @@ ExchangeCommunicator::main_event_loop()
 }
 
 void
-ExchangeCommunicator::handle_orderbook_update(const common::position& position)
+ExchangeCommunicator::handle_orderbook_update(const common::position& update)
 {
-    on_orderbook_update(position);
+    on_orderbook_update(update);
 }
 
 void
@@ -66,19 +65,17 @@ ExchangeCommunicator::handle_match(const match& match)
     }
 }
 
-template <typename T, typename... Args>
-requires std::is_constructible_v<T, Args...>
 bool
-ExchangeCommunicator::publish_message(Args&&... args)
+ExchangeCommunicator::publish_message(const auto& message)
 {
     if (limiter.should_rate_limit()) {
         return false;
     }
-    auto message = glz::write_json(T{std::forward<Args>(args)...});
-    if (!message.has_value()) [[unlikely]]
-        throw std::runtime_error(glz::format_error(message.error()));
+    auto message_opt = glz::write_json(message);
+    if (!message_opt.has_value()) [[unlikely]]
+        throw std::runtime_error(glz::format_error(message_opt.error()));
 
-    publish_message(*message);
+    publish_message(message_opt.value());
     return true;
 }
 
@@ -123,39 +120,50 @@ ExchangeCommunicator::place_limit_order()
     return [this](
                const std::string& side, const std::string& ticker, double quantity,
                double price, bool ioc
-           ) {
+           ) -> order_id_t {
         std::optional<common::Ticker> ticker_obj = to_ticker(ticker);
-        if (!ticker_obj)
-            throw std::runtime_error("uhh");
+        if (!ticker_obj) [[unlikely]]
+            return -1;
+
         common::Side side_enum =
             (side == "BUY") ? common::Side::buy : common::Side::sell;
 
-        return publish_message<limit_order>(
-            ticker_obj.value(), side_enum, quantity, price, ioc
-        );
+        limit_order order{ticker_obj.value(), side_enum, quantity, price, ioc};
+        if (!publish_message(order))
+            return -1;
+        return order.order_id;
     };
 }
 
-// TODO: check for valid side/ticker
+CancelOrderFunction
+ExchangeCommunicator::cancel_order()
+{
+    return [this](order_id_t order_id) -> bool {
+        return publish_message(common::cancel_order{order_id});
+    };
+}
+
+// TODO: check for valid side
 MarketOrderFunction
 ExchangeCommunicator::place_market_order()
 {
     return [this](const std::string& side, const std::string& ticker, double quantity) {
         std::optional<common::Ticker> ticker_obj = to_ticker(ticker);
-        if (!ticker_obj)
-            throw std::runtime_error("uhh");
-        // return false;
+        if (!ticker_obj) [[unlikely]]
+            return false;
+
         common::Side side_enum =
             (side == "BUY") ? common::Side::buy : common::Side::sell;
 
-        return publish_message<market_order>(ticker_obj.value(), side_enum, quantity);
+        market_order order{ticker_obj.value(), side_enum, quantity};
+        return publish_message(order);
     };
 }
 
 bool
 ExchangeCommunicator::report_startup_complete()
 {
-    return publish_message<common::init_message>();
+    return publish_message(common::init_message{});
 }
 
 // If wait_blocking is disabled, we block until we *receive* the message, but not

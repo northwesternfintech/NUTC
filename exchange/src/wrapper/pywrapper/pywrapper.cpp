@@ -11,7 +11,8 @@ namespace py = pybind11;
 
 void
 create_api_module(
-    LimitOrderFunction publish_limit_order, MarketOrderFunction publish_market_order
+    LimitOrderFunction publish_limit_order, MarketOrderFunction publish_market_order,
+    CancelOrderFunction cancel_order
 )
 {
     py::module_ sys = py::module_::import("sys");
@@ -33,6 +34,7 @@ create_api_module(
 
     module.def("publish_market_order", publish_market_order);
     module.def("publish_limit_order", publish_limit_order);
+    module.def("cancel_order", cancel_order);
 
     auto sys_modules = sys.attr("modules").cast<py::dict>();
     sys_modules["nutc_api"] = module;
@@ -106,6 +108,10 @@ run_initialization_code(const std::string& py_code)
     py::exec(R"(
         def place_limit_order(side: str, ticker: str, quantity: float, price: float, ioc: bool = False):
             return nutc_api.publish_limit_order(side, ticker, quantity, price, ioc)
+    )");
+    py::exec(R"(
+        def cancel_order(order_id):
+            return nutc_api.cancel_order(order_id)
     )");
     py::exec("strategy = Strategy()");
 }

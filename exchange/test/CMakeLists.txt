@@ -30,6 +30,7 @@ add_executable(NUTC_tests
   src/unit/types/decimal_price.cpp
   
   src/integration/basic.cpp
+  src/integration/cancellation.cpp
   )
 
 target_include_directories(
