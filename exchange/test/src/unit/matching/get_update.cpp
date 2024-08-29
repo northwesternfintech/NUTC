@@ -1,7 +1,7 @@
 #include "common/util.hpp"
 #include "config.h"
 #include "exchange/orders/level_tracking/level_update_generator.hpp"
-#include "exchange/orders/orderbook/level_tracked_orderbook.hpp"
+#include "exchange/orders/orderbook/composite_orderbook.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
 
@@ -12,9 +12,7 @@
 using nutc::common::Ticker;
 using nutc::common::Side::buy;
 using nutc::common::Side::sell;
-using nutc::exchange::LevelTrackedOrderbook;
 using nutc::exchange::LevelUpdateGenerator;
-using nutc::exchange::LimitOrderBook;
 
 class UnitGetUpdate : public ::testing::Test {
 protected:
@@ -28,7 +26,7 @@ protected:
     nutc::exchange::GenericTrader& trader3 =
         *traders.add_trader<TestTrader>(std::string("GHI"), TEST_STARTING_CAPITAL);
 
-    LevelTrackedOrderbook<LimitOrderBook> ob{Ticker::ETH};
+    nutc::exchange::CompositeOrderBook ob{Ticker::ETH};
     LevelUpdateGenerator& generator_ = ob.get_update_generator();
 };
 
@@ -63,7 +61,7 @@ TEST_F(UnitGetUpdate, OrderDeleted)
 
     // we delete the order
 
-    ob.mark_order_removed(o1_it);
+    ob.remove_order(o1_it);
     //
     auto updates = generator_.get_updates();
 
@@ -188,7 +186,7 @@ TEST_F(UnitGetUpdate, ChangesAddsAndDeletes)
     ob.add_order(order7);
     ob.add_order(order8);
 
-    ob.mark_order_removed(o6_it);
+    ob.remove_order(o6_it);
 
     auto updates = generator_.get_updates();
 

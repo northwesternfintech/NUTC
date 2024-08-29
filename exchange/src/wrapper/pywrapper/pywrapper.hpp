@@ -25,7 +25,8 @@ using LimitOrderFunction = std::function<common::order_id_t(
 )>;
 using MarketOrderFunction = std::function<
     bool(const std::string& side, const std::string& ticker, double quantity)>;
-using CancelOrderFunction = std::function<void(common::order_id_t order_id)>;
+using CancelOrderFunction =
+    std::function<bool(const std::string& ticker, common::order_id_t order_id)>;
 
 void create_api_module(
     LimitOrderFunction publish_limit_order, MarketOrderFunction publish_market_order,

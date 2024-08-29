@@ -11,8 +11,7 @@
 
 namespace nutc::exchange {
 
-template <typename BaseOrderBookT>
-class CancellableOrderBook : public BaseOrderBookT {
+class OrderIdTracker {
     // Invariant: any order in order_map has a corresponding reference in the queues
     // In other words, when we remove from the queue, we remove from order map as well
     using OrderIdMap = emhash7::HashMap<
@@ -20,41 +19,24 @@ class CancellableOrderBook : public BaseOrderBookT {
     OrderIdMap order_map_;
 
 public:
-    bool
-    contains_order(common::order_id_t order_id) const
-    {
-        return order_map_.contains(order_id);
-    }
-
     std::optional<LimitOrderBook::stored_limit_order>
-    mark_order_removed(common::order_id_t order_id)
+    remove_order(common::order_id_t order_id)
     {
         auto order_it = order_map_.find(order_id);
         if (order_it == order_map_.end()) {
             return std::nullopt;
         }
-        mark_order_removed(order_it);
-        return order_it->second;
-    }
-
-    LimitOrderBook::stored_limit_order
-    add_order(const tagged_limit_order& order) override
-    {
-        auto added_order = BaseOrderBookT::add_order(order);
-
-        if (!order.ioc) {
-            order_map_.emplace(order.order_id, added_order);
-        }
-
-        return added_order;
+        auto order = order_it->second;
+        order_map_.erase(order_it);
+        return order;
     }
 
     void
-    mark_order_removed(LimitOrderBook::stored_limit_order order) override
+    add_order(LimitOrderBook::stored_limit_order order)
     {
-        order_map_.erase(order->order_id);
-
-        BaseOrderBookT::mark_order_removed(order);
+        if (!order->ioc) {
+            order_map_.emplace(order->order_id, order);
+        }
     }
 };
 

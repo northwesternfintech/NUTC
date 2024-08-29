@@ -22,7 +22,7 @@ TEST_F(IntegrationBasicCancellation, BasicSendCancelAfterOrder)
 
     auto order_id = cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
     EXPECT_TRUE(order_id.has_value());
-    cycle.wait_for_order(common::cancel_order{*order_id});
+    cycle.wait_for_order(common::cancel_order{common::Ticker::ETH, *order_id});
 }
 
 } // namespace nutc::test

@@ -1,5 +1,6 @@
 #include "common/types/decimal.hpp"
 #include "config.h"
+#include "exchange/orders/orderbook/composite_orderbook.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
 
@@ -36,7 +37,7 @@ protected:
         SetUp();
     }
 
-    nutc::exchange::LimitOrderBook orderbook_{};
+    nutc::exchange::CompositeOrderBook orderbook_{Ticker::ETH};
     Engine engine_;
 
     std::vector<nutc::common::match>

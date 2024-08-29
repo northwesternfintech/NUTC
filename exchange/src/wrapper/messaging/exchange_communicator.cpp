@@ -138,8 +138,11 @@ ExchangeCommunicator::place_limit_order()
 CancelOrderFunction
 ExchangeCommunicator::cancel_order()
 {
-    return [this](order_id_t order_id) -> bool {
-        return publish_message(common::cancel_order{order_id});
+    return [this](const std::string& ticker, order_id_t order_id) -> bool {
+        std::optional<common::Ticker> ticker_opt = to_ticker(ticker);
+        if (!ticker_opt)
+            return false;
+        return publish_message(common::cancel_order{ticker_opt.value(), order_id});
     };
 }
 

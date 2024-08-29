@@ -16,13 +16,14 @@ struct init_message {
 };
 
 struct cancel_order {
+    common::Ticker ticker;
     order_id_t order_id;
     std::uint64_t timestamp = get_time();
 
     bool
     operator==(const cancel_order& other) const
     {
-        return order_id == other.order_id;
+        return ticker == other.ticker && order_id == other.order_id;
     }
 };
 
@@ -86,7 +87,7 @@ using IncomingMessageVariant =
 template <>
 struct glz::meta<nutc::common::cancel_order> {
     using t = nutc::common::cancel_order;
-    static constexpr auto value = object("cancel", &t::order_id);
+    static constexpr auto value = object("cancel", &t::ticker, &t::order_id);
 };
 
 /// \cond

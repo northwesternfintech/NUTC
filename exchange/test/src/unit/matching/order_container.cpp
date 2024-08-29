@@ -1,5 +1,6 @@
 #include "common/types/decimal.hpp"
 #include "config.h"
+#include "exchange/orders/orderbook/composite_orderbook.hpp"
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
@@ -31,7 +32,7 @@ protected:
         trader_2.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
     }
 
-    nutc::exchange::LimitOrderBook container_;
+    nutc::exchange::CompositeOrderBook container_{Ticker::ETH};
 };
 
 TEST_F(UnitOrderBookTest, TestStorageRounding)

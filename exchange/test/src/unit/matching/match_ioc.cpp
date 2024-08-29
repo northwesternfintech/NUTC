@@ -1,7 +1,6 @@
 #include "common/types/decimal.hpp"
 #include "config.h"
-#include "exchange/orders/orderbook/cancellable_orderbook.hpp"
-#include "exchange/orders/orderbook/limit_orderbook.hpp"
+#include "exchange/orders/orderbook/composite_orderbook.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
 
@@ -10,8 +9,6 @@
 using nutc::common::Ticker;
 using nutc::common::Side::buy;
 using nutc::common::Side::sell;
-using nutc::exchange::CancellableOrderBook;
-using nutc::exchange::LimitOrderBook;
 
 class UnitMatchIOC : public ::testing::Test {
 protected:
@@ -32,7 +29,7 @@ protected:
         trader2.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
     }
 
-    CancellableOrderBook<LimitOrderBook> orderbook_{};
+    nutc::exchange::CompositeOrderBook orderbook_{Ticker::ETH};
     Engine engine_;
 
     std::vector<nutc::common::match>

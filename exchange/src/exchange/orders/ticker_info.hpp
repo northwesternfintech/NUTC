@@ -3,17 +3,12 @@
 #include "exchange/bots/bot_container.hpp"
 #include "exchange/config/dynamic/ticker_config.hpp"
 #include "exchange/matching/engine.hpp"
-#include "exchange/orders/orderbook/cancellable_orderbook.hpp"
-#include "exchange/orders/orderbook/level_tracked_orderbook.hpp"
-#include "exchange/orders/orderbook/limit_orderbook.hpp"
+#include "exchange/orders/orderbook/composite_orderbook.hpp"
 #include "exchange/traders/trader_container.hpp"
 
 #include <absl/hash/hash.h>
 
 namespace nutc::exchange {
-
-using DecoratedLimitOrderBook =
-    LevelTrackedOrderbook<CancellableOrderBook<LimitOrderBook>>;
 
 /**
  * @brief Contains the canonical reference to all data coupled to a ticker. Very useful
@@ -21,7 +16,7 @@ using DecoratedLimitOrderBook =
  */
 // TODO: rename
 struct ticker_info {
-    DecoratedLimitOrderBook limit_orderbook;
+    CompositeOrderBook limit_orderbook;
     Engine engine;
     std::vector<BotContainer> bot_containers;
 

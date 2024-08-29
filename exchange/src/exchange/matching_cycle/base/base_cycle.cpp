@@ -59,13 +59,12 @@ BaseMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
     for (OrderVariant& order_variant : orders) {
         auto match_order = [&]<typename OrderT>(OrderT& order) {
             // TODO: expose correct thing yk
+            auto& ticker_info = tickers_[order.ticker];
+            auto& orderbook = ticker_info.limit_orderbook;
             if constexpr (std::is_same_v<OrderT, common::cancel_order>) {
-                return;
+                orderbook.remove_order(order.order_id);
             }
             else {
-                auto& ticker_info = tickers_[order.ticker];
-                auto& orderbook = ticker_info.limit_orderbook;
-
                 if (order.quantity <= 0.0)
                     return;
                 auto& engine = ticker_info.engine;

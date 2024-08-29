@@ -110,8 +110,8 @@ run_initialization_code(const std::string& py_code)
             return nutc_api.publish_limit_order(side, ticker, quantity, price, ioc)
     )");
     py::exec(R"(
-        def cancel_order(order_id):
-            return nutc_api.cancel_order(order_id)
+        def cancel_order(ticker: str, order_id: int):
+            return nutc_api.cancel_order(ticker, order_id)
     )");
     py::exec("strategy = Strategy()");
 }

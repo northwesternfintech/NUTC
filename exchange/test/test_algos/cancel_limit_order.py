@@ -16,7 +16,7 @@ class Strategy:
         order_id = place_limit_order("BUY", "ETH", 100, 10)
         import sys
         print(order_id, file=sys.stderr)
-        cancel_order(order_id)
+        cancel_order("ETH", order_id)
 
     def on_trade_update(self, ticker: str, side: str, quantity: float, price: float) -> None:
         """Called whenever two orders match. Could be one of your orders, or two other people's orders.
