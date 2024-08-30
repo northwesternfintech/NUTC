@@ -18,12 +18,8 @@ protected:
     using TestTrader = nutc::test::TestTrader;
     static constexpr nutc::common::decimal_quantity DEFAULT_QUANTITY = 1000.0;
 
-    TraderContainer traders;
-
-    nutc::exchange::GenericTrader& trader_1 =
-        *traders.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
-    nutc::exchange::GenericTrader& trader_2 =
-        *traders.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
+    TestTrader trader_1{"ABC", TEST_STARTING_CAPITAL};
+    TestTrader trader_2{"DEF", TEST_STARTING_CAPITAL};
 
     void
     SetUp() override

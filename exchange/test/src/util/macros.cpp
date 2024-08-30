@@ -1,6 +1,20 @@
 #include "macros.hpp"
 
 namespace nutc::test {
+bool
+order_equality(const common::market_order& order1, const common::market_order& order2)
+{
+    return order1.ticker == order2.ticker && order1.side == order2.side
+           && order1.quantity == order2.quantity;
+}
+
+bool
+order_equality(const limit_order& order1, const limit_order& order2)
+{
+    return order1.ticker == order2.ticker && order1.side == order2.side
+           && order1.quantity == order2.quantity && order1.price == order2.price
+           && order1.ioc == order2.ioc;
+}
 
 bool
 is_nearly_equal(double f_a, double f_b)

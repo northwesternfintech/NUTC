@@ -1,16 +1,18 @@
 def place_market_order(side: str, ticker: str, quantity: float) -> None:
-    """Place a market order - DO NOT MODIFY""" 
+    return
 
-def place_limit_order(side: str, ticker: str, quantity: float, price: float, ioc: bool = False) -> None:
-    """Place a limit order - DO NOT MODIFY""" 
+def place_limit_order(side: str, ticker: str, quantity: float, price: float, ioc: bool = False) -> int:
+    return 0
 
+def cancel_order(ticker: str, order_id: int) -> int:
+    return 0
 
 class Strategy:
     """Template for a strategy."""
 
     def __init__(self) -> None:
         """Your initialization code goes here."""
-        place_market_order("SELL", "ETH", 5)
+        place_limit_order("BUY", "ETH", 10, 102)
 
     def on_trade_update(
         self, ticker: str, side: str, quantity: float, price: float
@@ -27,8 +29,6 @@ class Strategy:
             Volume traded
         """
         print(f"Python Trade update: {ticker} {side} {price} {quantity}")
-        if(ticker=="ETH" and price <= 101.0 and price>=99.0 and quantity == 1):
-            place_limit_order("BUY", "BTC", 1, 100)
 
     def on_orderbook_update(
         self, ticker: str, side: str, quantity: float, price: float
@@ -72,3 +72,5 @@ class Strategy:
         print(
             f"Python Account update: {ticker} {side} {price} {quantity} {capital_remaining}"
         )
+        if ticker == "ETH" and quantity >= 10:
+            place_limit_order("BUY", "BTC", 1, 100)

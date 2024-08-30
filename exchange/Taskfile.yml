@@ -120,7 +120,7 @@ tasks:
       - task: build
         # Don't want to check the mode
       - echo $NUTC_WRAPPER_BINARY_PATH
-      - cp -r test/test_algos {{.TEST_DIR}}
+      - cp -r test/src/integration/test_algos {{.TEST_DIR}}
       - task: run-itest
 
   run-itest:
@@ -133,4 +133,4 @@ tasks:
     env:
       NUTC_WRAPPER_BINARY_PATH: '{{.PWD}}/{{.WRAPPER_RELATIVE_PATH}}'
     cmds:
-      - ctest {{.TEST_FLAGS}} -R "Integration*" 
+      - ctest -j 4 {{.TEST_FLAGS}} -R "Integration*" 

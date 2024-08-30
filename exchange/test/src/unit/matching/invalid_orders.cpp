@@ -15,11 +15,8 @@ class UnitInvalidOrders : public ::testing::Test {
 protected:
     using TestTrader = nutc::test::TestTrader;
     static constexpr nutc::common::decimal_quantity DEFAULT_QUANTITY = 1000.0;
-    TraderContainer manager_;
-    nutc::exchange::GenericTrader& trader1 =
-        *manager_.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
-    nutc::exchange::GenericTrader& trader2 =
-        *manager_.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
+    TestTrader trader1{"ABC", TEST_STARTING_CAPITAL};
+    TestTrader trader2{"DEF", TEST_STARTING_CAPITAL};
 
     void
     SetUp() override
@@ -83,14 +80,10 @@ TEST_F(UnitInvalidOrders, MatchingInvalidFunds)
 
 TEST_F(UnitInvalidOrders, SimpleManyInvalidOrder)
 {
-    nutc::exchange::GenericTrader& t1 =
-        *(manager_.add_trader<TestTrader>(std::string("A"), TEST_STARTING_CAPITAL));
-    nutc::exchange::GenericTrader& t2 =
-        *(manager_.add_trader<TestTrader>(std::string("B"), 0));
-    nutc::exchange::GenericTrader& t3 =
-        *(manager_.add_trader<TestTrader>(std::string("C"), TEST_STARTING_CAPITAL));
-    nutc::exchange::GenericTrader& t4 =
-        *(manager_.add_trader<TestTrader>(std::string("D"), TEST_STARTING_CAPITAL));
+    TestTrader t1{"A", TEST_STARTING_CAPITAL};
+    TestTrader t2{"B", 0};
+    TestTrader t3{"C", TEST_STARTING_CAPITAL};
+    TestTrader t4{"D", TEST_STARTING_CAPITAL};
 
     t1.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
     t2.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);

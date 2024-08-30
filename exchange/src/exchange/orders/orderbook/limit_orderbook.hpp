@@ -21,8 +21,8 @@ public:
     using stored_limit_order = order_list::iterator;
 
     order_list::iterator add_order(const tagged_limit_order& order);
-    void mark_order_removed(order_list::iterator order);
-    static void mark_order_removed(
+    void remove_order(order_list::iterator order);
+    static void remove_order(
         order_list::iterator order, std::map<common::decimal_price, order_list>& map
     );
     static void change_quantity(

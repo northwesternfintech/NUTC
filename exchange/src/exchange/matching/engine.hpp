@@ -3,7 +3,6 @@
 #include "common/messages_exchange_to_wrapper.hpp"
 #include "common/types/decimal.hpp"
 #include "exchange/orders/orderbook/composite_orderbook.hpp"
-#include "order_pair.hpp"
 
 #include <glaze/util/expected.hpp>
 

@@ -44,19 +44,19 @@ LimitOrderBook::change_quantity(
 }
 
 void
-LimitOrderBook::mark_order_removed(order_list::iterator order)
+LimitOrderBook::remove_order(order_list::iterator order)
 {
     order->trader->notify_position_change(
         {order->ticker, order->side, -(order->quantity), order->price}
     );
     if (order->side == common::Side::buy)
-        mark_order_removed(order, bids_);
+        remove_order(order, bids_);
     else
-        mark_order_removed(order, asks_);
+        remove_order(order, asks_);
 }
 
 void
-LimitOrderBook::mark_order_removed(
+LimitOrderBook::remove_order(
     order_list::iterator order, std::map<common::decimal_price, order_list>& map
 )
 {

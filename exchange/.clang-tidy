@@ -16,7 +16,6 @@ Checks: "\
   portability-*,\
   readability-*,\
   fuchsia-multiple-inheritance,\
-  fuchsia-trailing-return,\
   fuchsia-virtual-inheritance,\
   google-runtime-int,\
   -hicpp-braces-around-statements,\

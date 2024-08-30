@@ -4,6 +4,7 @@
 #include "common/types/decimal.hpp"
 #include "common/util.hpp"
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
+#include "order_pair.hpp"
 
 namespace nutc::exchange {
 

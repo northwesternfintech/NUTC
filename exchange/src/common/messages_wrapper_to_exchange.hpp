@@ -16,7 +16,7 @@ struct init_message {
 };
 
 struct cancel_order {
-    common::Ticker ticker;
+    Ticker ticker;
     order_id_t order_id;
     std::uint64_t timestamp = get_time();
 
@@ -28,14 +28,14 @@ struct cancel_order {
 };
 
 struct market_order {
-    common::Ticker ticker;
-    common::Side side;
+    Ticker ticker;
+    Side side;
     decimal_quantity quantity;
     std::uint64_t timestamp = get_time();
 
     constexpr market_order() = default;
 
-    market_order(common::Ticker ticker, common::Side side, double quantity) :
+    market_order(Ticker ticker, Side side, double quantity) :
         ticker(ticker), side(side), quantity(quantity)
     {}
 
@@ -48,7 +48,7 @@ struct market_order {
 };
 
 struct limit_order : market_order {
-    common::decimal_price price;
+    decimal_price price;
     bool ioc{false};
     order_id_t order_id = generate_order_id();
 
@@ -62,16 +62,13 @@ struct limit_order : market_order {
     }
 
     limit_order(
-        std::string_view ticker, common::Side side, double quantity,
-        common::decimal_price price, bool ioc = false
-    ) :
-        market_order{common::force_to_ticker(ticker), side, quantity}, price{price},
-        ioc{ioc}
+        std::string_view ticker, Side side, double quantity, decimal_price price,
+        bool ioc = false
+    ) : market_order{force_to_ticker(ticker), side, quantity}, price{price}, ioc{ioc}
     {}
 
     limit_order(
-        common::Ticker ticker, common::Side side, double quantity,
-        common::decimal_price price, bool ioc = false
+        Ticker ticker, Side side, double quantity, decimal_price price, bool ioc = false
     ) : market_order{ticker, side, quantity}, price{price}, ioc{ioc}
     {}
 

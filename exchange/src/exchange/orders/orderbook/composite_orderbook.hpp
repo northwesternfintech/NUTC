@@ -24,60 +24,23 @@ public:
         return orderbook_.get_midprice();
     }
 
-    LevelUpdateGenerator&
-    get_update_generator()
+    std::vector<common::position>
+    get_and_reset_updates()
     {
-        return level_update_generator_;
+        auto updates = level_update_generator_.get_updates();
+        level_update_generator_.reset();
+        return updates;
     }
 
-    order_list::iterator
-    add_order(const tagged_limit_order& order)
-    {
-        auto stored_order = orderbook_.add_order(order);
-        level_update_generator_.record_level_change(
-            order.side, order.quantity, order.price
-        );
-        order_id_tracker_.add_order(stored_order);
-        return stored_order;
-    }
+    order_list::iterator add_order(const tagged_limit_order& order);
 
-    void
-    remove_order(common::order_id_t order_id)
-    {
-        std::optional<LimitOrderBook::stored_limit_order> order =
-            order_id_tracker_.remove_order(order_id);
-        if (!order.has_value())
-            return;
+    void remove_order(common::order_id_t order_id);
 
-        level_update_generator_.record_level_change(
-            order.value()->side, -order.value()->quantity, order.value()->price
-        );
-        orderbook_.mark_order_removed(order.value());
-    }
+    void remove_order(order_list::iterator order);
 
-    void
-    remove_order(order_list::iterator order)
-
-    {
-        orderbook_.mark_order_removed(order);
-        level_update_generator_.record_level_change(
-            order->side, -order->quantity, order->price
-        );
-        order_id_tracker_.remove_order(order->order_id);
-    }
-
-    void
-    change_quantity(order_list::iterator order, common::decimal_quantity quantity_delta)
-    {
-        if (order->quantity + quantity_delta == 0.0) {
-            remove_order(order);
-            return;
-        }
-        LimitOrderBook::change_quantity(order, quantity_delta);
-        level_update_generator_.record_level_change(
-            order->side, quantity_delta, order->price
-        );
-    }
+    void change_quantity(
+        order_list::iterator order, common::decimal_quantity quantity_delta
+    );
 
     std::optional<LimitOrderBook::stored_limit_order>
     get_top_order(common::Side side)

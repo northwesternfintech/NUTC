@@ -83,7 +83,7 @@ BaseMatchingCycle::handle_matches_(std::vector<common::match> matches)
     std::vector<common::position> ob_updates{};
 
     for (auto [symbol, info] : tickers_) {
-        auto tmp = info.limit_orderbook.get_update_generator().get_updates();
+        auto tmp = info.limit_orderbook.get_and_reset_updates();
         std::ranges::copy(tmp, std::back_inserter(ob_updates));
     }
 
@@ -100,14 +100,6 @@ BaseMatchingCycle::handle_matches_(std::vector<common::match> matches)
         traders_.begin(), traders_.end(),
         [&message = *update](GenericTrader& trader) { trader.send_message(message); }
     );
-}
-
-void
-BaseMatchingCycle::post_cycle_(uint64_t)
-{
-    for (auto [_, info] : tickers_) {
-        info.limit_orderbook.get_update_generator().reset();
-    }
 }
 
 } // namespace nutc::exchange

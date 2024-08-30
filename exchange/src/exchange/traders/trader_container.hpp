@@ -68,9 +68,9 @@ static constexpr auto CACHED_TRADERS = 256;
 static constexpr auto CACHED_TRADER_SIZE = CACHED_TRADERS * sizeof(GenericTrader);
 
 class TraderContainer {
-    std::array<std::byte, CACHED_TRADER_SIZE> buf;
-    std::pmr::monotonic_buffer_resource res{&buf, sizeof(buf)};
-    std::pmr::polymorphic_allocator<GenericTrader> pmr_allocator{&res};
+    std::array<std::byte, CACHED_TRADER_SIZE> buf_{};
+    std::pmr::monotonic_buffer_resource res_{&buf_, sizeof(buf_)};
+    std::pmr::polymorphic_allocator<GenericTrader> pmr_allocator_{&res_};
     std::vector<std::shared_ptr<GenericTrader>> traders_;
 
 public:
@@ -92,7 +92,7 @@ public:
     add_trader(Args&&... args)
     {
         std::shared_ptr<GenericTrader> trader =
-            make_shared_trader<T>(std::forward<Args>(args)...);
+            make_shared_trader_<T>(std::forward<Args>(args)...);
         traders_.emplace_back(trader);
         return std::static_pointer_cast<T>(trader);
     }
@@ -100,22 +100,22 @@ public:
     TraderIterator
     begin()
     {
-        return TraderIterator(&traders_[0]);
+        return traders_.data();
     }
 
     TraderIterator
     end()
     {
-        return TraderIterator(&traders_[traders_.size()]);
+        return &traders_[traders_.size()];
     }
 
 private:
     template <typename T, typename... Args>
     requires std::is_base_of_v<GenericTrader, T>
     std::shared_ptr<GenericTrader>
-    make_shared_trader(Args&&... args)
+    make_shared_trader_(Args&&... args)
     {
-        return std::allocate_shared<T>(pmr_allocator, std::forward<Args>(args)...);
+        return std::allocate_shared<T>(pmr_allocator_, std::forward<Args>(args)...);
     }
 };
 

@@ -14,14 +14,10 @@ class UnitBasicMatching : public ::testing::Test {
 protected:
     using TestTrader = nutc::test::TestTrader;
     static constexpr nutc::common::decimal_quantity DEFAULT_QUANTITY = 1000.0;
-    TraderContainer traders;
 
-    nutc::exchange::GenericTrader& trader1 =
-        *traders.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
-    nutc::exchange::GenericTrader& trader2 =
-        *traders.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
-    nutc::exchange::GenericTrader& trader3 =
-        *traders.add_trader<TestTrader>(std::string("GHI"), TEST_STARTING_CAPITAL);
+    TestTrader trader1{"ABC", TEST_STARTING_CAPITAL};
+    TestTrader trader2{"DEF", TEST_STARTING_CAPITAL};
+    TestTrader trader3{"GHI", TEST_STARTING_CAPITAL};
 
     void
     SetUp() override
