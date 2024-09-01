@@ -1,5 +1,26 @@
-def place_market_order(side: str, ticker: str, quantity: float, price: float) -> bool:
+def place_market_order(side: str, ticker: str, quantity: float) -> bool:
     """Place a market order - DO NOT MODIFY
+
+    Parameters
+    ----------
+    side
+        Side of order to place ("BUY" or "SELL")
+    ticker
+        Ticker of order to place ("ETH", "BTC", or "LTC")
+    quantity
+        Volume of order to place
+
+    Returns
+    -------
+    True if order succeeded, False if order failed due to rate limiting
+
+    ((IMPORTANT))
+    You should handle the case where the order fails due to rate limiting (maybe wait and try again?)
+    """
+    return True
+
+def place_limit_order(side: str, ticker: str, quantity: float, price: float, ioc: bool = False) -> int:
+    """Place a limit order - DO NOT MODIFY
 
     Parameters
     ----------
@@ -14,8 +35,24 @@ def place_market_order(side: str, ticker: str, quantity: float, price: float) ->
 
     Returns
     -------
-    True if order succeeded, False if order failed due to rate limiting
+    order_id if order succeeded, -1 if order failed due to rate limiting
     """
+    return 0
+
+def cancel_order(ticker: str, order_id: int) -> bool:
+    """Place a limit order - DO NOT MODIFY
+    Parameters
+    ----------
+    ticker
+        Ticker of order to place ("ETH", "BTC", or "LTC")
+    order_id
+        order_id returned by place_limit_order
+
+    Returns
+    -------
+    True if order succeeded, False if cancellation failed due to rate limiting
+    """
+    return True
 
 class Strategy:
     """Template for a strategy."""
@@ -23,7 +60,7 @@ class Strategy:
     def __init__(self) -> None:
         """Your initialization code goes here."""
 
-    def on_trade_update(self, ticker: str, side: str, price: float, quantity: float) -> None:
+    def on_trade_update(self, ticker: str, side: str, quantity: float, price: float) -> None:
         """Called whenever two orders match. Could be one of your orders, or two other people's orders.
 
         Parameters
@@ -40,10 +77,9 @@ class Strategy:
         print(f"Python Trade update: {ticker} {side} {price} {quantity}")
 
     def on_orderbook_update(
-        self, ticker: str, side: str, price: float, quantity: float
+        self, ticker: str, side: str, quantity: float, price: float
     ) -> None:
         """Called whenever the orderbook changes. This could be because of a trade, or because of a new order, or both.
-        Returns the total quantity available at the given level
 
         Parameters
         ----------
