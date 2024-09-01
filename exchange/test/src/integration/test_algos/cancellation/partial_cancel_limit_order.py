@@ -1,26 +1,30 @@
 def place_market_order(side: str, ticker: str, quantity: float) -> None:
-    """Place a market order - DO NOT MODIFY""" 
+    return
 
-def place_limit_order(side: str, ticker: str, quantity: float, price: float, ioc: bool = False) -> None:
-    """Place a limit order - DO NOT MODIFY""" 
+def place_limit_order(side: str, ticker: str, quantity: float, price: float, ioc: bool = False) -> int:
+    return 0
 
+def cancel_order(ticker: str, order_id: int) -> int:
+    return 0
 
 class Strategy:
     """Template for a strategy."""
 
     def __init__(self) -> None:
         """Your initialization code goes here."""
-        place_limit_order("SELL", "ETH", 10, 100)
+        order_id = place_limit_order("BUY", "ETH", 100, 10)
+        place_limit_order("BUY", "ETH", 100, 20)
+        cancel_order("ETH", order_id)
 
-    def on_trade_update(
-        self, ticker: str, side: str, quantity: float, price: float
-    ) -> None:
+    def on_trade_update(self, ticker: str, side: str, quantity: float, price: float) -> None:
         """Called whenever two orders match. Could be one of your orders, or two other people's orders.
+
         Parameters
         ----------
         ticker
             Ticker of orders that were matched
         side
+
         price
             Price that trade was executed at
         quantity
@@ -32,6 +36,7 @@ class Strategy:
         self, ticker: str, side: str, quantity: float, price: float
     ) -> None:
         """Called whenever the orderbook changes. This could be because of a trade, or because of a new order, or both.
+
         Parameters
         ----------
         ticker
@@ -54,6 +59,7 @@ class Strategy:
         capital_remaining: float,
     ) -> None:
         """Called whenever one of your orders is filled.
+
         Parameters
         ----------
         ticker
@@ -70,5 +76,3 @@ class Strategy:
         print(
             f"Python Account update: {ticker} {side} {price} {quantity} {capital_remaining}"
         )
-        if ticker == "ETH" and quantity >= 10:
-            place_limit_order("BUY", "BTC", 1, 100)

@@ -1,6 +1,6 @@
 #include "common/types/decimal.hpp"
 #include "config.h"
-#include "exchange/traders/trader_container.hpp"
+#include "exchange/orders/orderbook/composite_orderbook.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
 
@@ -14,16 +14,11 @@ class UnitManyOrders : public ::testing::Test {
 protected:
     using TestTrader = nutc::test::TestTrader;
     static constexpr nutc::common::decimal_quantity DEFAULT_QUANTITY = 1000.0;
-    TraderContainer traders;
 
-    nutc::exchange::GenericTrader& trader1 =
-        *traders.add_trader<TestTrader>(std::string("A"), TEST_STARTING_CAPITAL);
-    nutc::exchange::GenericTrader& trader2 =
-        *traders.add_trader<TestTrader>(std::string("B"), TEST_STARTING_CAPITAL);
-    nutc::exchange::GenericTrader& trader3 =
-        *traders.add_trader<TestTrader>(std::string("C"), TEST_STARTING_CAPITAL);
-    nutc::exchange::GenericTrader& trader4 =
-        *traders.add_trader<TestTrader>(std::string("D"), TEST_STARTING_CAPITAL);
+    TestTrader trader1{"A", TEST_STARTING_CAPITAL};
+    TestTrader trader2{"B", TEST_STARTING_CAPITAL};
+    TestTrader trader3{"C", TEST_STARTING_CAPITAL};
+    TestTrader trader4{"D", TEST_STARTING_CAPITAL};
 
     void
     SetUp() override
@@ -34,7 +29,7 @@ protected:
         trader4.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
     }
 
-    nutc::exchange::LimitOrderBook orderbook_;
+    nutc::exchange::CompositeOrderBook orderbook_{Ticker::ETH};
     Engine engine_;
 
     std::vector<nutc::common::match>

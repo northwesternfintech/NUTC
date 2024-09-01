@@ -1,9 +1,11 @@
 def place_market_order(side: str, ticker: str, quantity: float) -> None:
-    """Place a market order - DO NOT MODIFY""" 
+    return
 
-def place_limit_order(side: str, ticker: str, quantity: float, price: float, ioc: bool = False) -> None:
-    """Place a limit order - DO NOT MODIFY""" 
+def place_limit_order(side: str, ticker: str, quantity: float, price: float, ioc: bool = False) -> int:
+    return 0
 
+def cancel_order(ticker: str, order_id: int) -> int:
+    return 0
 
 class Strategy:
     """Template for a strategy."""

@@ -3,6 +3,7 @@
 #include "common/messages_exchange_to_wrapper.hpp"
 #include "common/types/decimal.hpp"
 #include "common/util.hpp"
+#include "exchange/orders/orderbook/composite_orderbook.hpp"
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
 #include "exchange/orders/storage/order_storage.hpp"
 
@@ -123,7 +124,7 @@ public:
     void
     handle_match(
         const common::match& match, common::decimal_price order_fee,
-        LimitOrderBook& orderbook
+        CompositeOrderBook& orderbook
     )
     {
         get_underlying_order<side::buy>().trader->notify_match(
@@ -135,8 +136,24 @@ public:
              match.position.price * (common::decimal_price{1.0} - order_fee)}
         );
 
-        orderbook.change_quantity(seller, -(match.position.quantity));
-        orderbook.change_quantity(buyer, -(match.position.quantity));
+        change_order_quantity(seller, -match.position.quantity, orderbook);
+        change_order_quantity(buyer, -match.position.quantity, orderbook);
+    }
+
+private:
+    template <IsOrder OrderT>
+    static void
+    change_order_quantity(
+        OrderT& order, common::decimal_quantity quantity_delta,
+        CompositeOrderBook& orderbook
+    )
+    {
+        if constexpr (is_stored_limit_order_v<OrderT>) {
+            orderbook.change_quantity(order, quantity_delta);
+        }
+        else {
+            order.quantity += quantity_delta;
+        }
     }
 };
 } // namespace nutc::exchange

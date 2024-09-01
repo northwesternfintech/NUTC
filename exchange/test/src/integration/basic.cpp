@@ -15,30 +15,29 @@ using nutc::test::start_wrappers;
 
 class IntegrationBasicAlgo : public ::testing::Test {
 protected:
-    TraderContainer traders;
+    TraderContainer traders_;
 };
 
 TEST_F(IntegrationBasicAlgo, InitialLiquidity)
 {
-    start_wrappers(traders, "test_algos/buy_tsla_at_100.py");
-    auto trader2 = traders.add_trader<TestTrader>(0);
+    start_wrappers(traders_, "test_algos/basic/buy_tsla_at_100.py");
+    auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 1000.0); // NOLINT
-    // trader2->add_order({Ticker::ETH, sell, 100.0});
     trader2->add_order(limit_order{Ticker::ETH, sell, 100.0, 100.0});
 
-    TestMatchingCycle cycle{traders};
+    TestMatchingCycle cycle{traders_};
 
     cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
 }
 
 TEST_F(IntegrationBasicAlgo, RemoveIOCOrder)
 {
-    auto& trader1 = start_wrappers(traders, "test_algos/buy_tsla_at_100.py");
-    auto trader2 = traders.add_trader<TestTrader>(0);
+    auto& trader1 = start_wrappers(traders_, "test_algos/basic/buy_tsla_at_100.py");
+    auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 1000.0); // NOLINT
     trader2->add_order({Ticker::ETH, sell, 100.0, 100.0});
 
-    TestMatchingCycle cycle{traders};
+    TestMatchingCycle cycle{traders_};
 
     cycle.on_tick(0);
     usleep(500);
@@ -52,40 +51,40 @@ TEST_F(IntegrationBasicAlgo, RemoveIOCOrder)
 
 TEST_F(IntegrationBasicAlgo, MarketOrderBuy)
 {
-    start_wrappers(traders, "test_algos/buy_market_order_1000.py");
-    auto trader2 = traders.add_trader<TestTrader>(0);
+    start_wrappers(traders_, "test_algos/basic/buy_market_order_1000.py");
+    auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 1000.0);
     trader2->add_order({Ticker::ETH, sell, 100.0, 100.0});
 
-    TestMatchingCycle cycle{traders};
+    TestMatchingCycle cycle{traders_};
 
     cycle.wait_for_order(limit_order{Ticker::BTC, buy, 1, 100.0});
 }
 
 TEST_F(IntegrationBasicAlgo, MarketOrderSell)
 {
-    auto& trader1 = start_wrappers(traders, "test_algos/sell_market_order_1.py");
-    auto trader2 = traders.add_trader<TestTrader>(0);
+    auto& trader1 = start_wrappers(traders_, "test_algos/basic/sell_market_order_1.py");
+    auto trader2 = traders_.add_trader<TestTrader>(0);
     trader1.modify_holdings(Ticker::ETH, 1000.0);
     trader2->add_order({Ticker::ETH, buy, 1, 100.0});
     trader2->modify_capital(1000.0);
 
-    TestMatchingCycle cycle{traders};
+    TestMatchingCycle cycle{traders_};
 
     cycle.wait_for_order(limit_order{Ticker::BTC, buy, 1, 100.0});
 }
 
 TEST_F(IntegrationBasicAlgo, ManyUpdates)
 {
-    start_wrappers(traders, "test_algos/confirm_1000.py");
-    auto trader2 = traders.add_trader<TestTrader>(0);
+    start_wrappers(traders_, "test_algos/basic/confirm_1000.py");
+    auto trader2 = traders_.add_trader<TestTrader>(0);
 
     trader2->modify_holdings(Ticker::ETH, 100000.0); // NOLINT
 
-    TestMatchingCycle cycle{traders};
+    TestMatchingCycle cycle{traders_};
 
-    for (double i = 0; i < 10000; i++) {
-        trader2->add_order({Ticker::ETH, sell, 1, i / 100});
+    for (int i = 0; i < 10000; i++) {
+        trader2->add_order({Ticker::ETH, sell, 1, static_cast<double>(i)});
     }
 
     cycle.on_tick(0);
@@ -95,12 +94,12 @@ TEST_F(IntegrationBasicAlgo, ManyUpdates)
 
 TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
 {
-    start_wrappers(traders, "test_algos/buy_tsla_on_trade.py");
+    start_wrappers(traders_, "test_algos/basic/buy_tsla_on_trade.py");
 
-    auto trader2 = traders.add_trader<TestTrader>(0);
+    auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 10000.0); // NOLINT
 
-    TestMatchingCycle cycle{traders};
+    TestMatchingCycle cycle{traders_};
 
     trader2->add_order({Ticker::ETH, sell, 100.0, 100.0});
 
@@ -112,12 +111,12 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
 // Sanity check that it goes through the orderbook
 TEST_F(IntegrationBasicAlgo, MultipleLevelOrder)
 {
-    auto& trader1 = start_wrappers(traders, "test_algos/buy_tsla_at_100.py");
+    auto& trader1 = start_wrappers(traders_, "test_algos/basic/buy_tsla_at_100.py");
 
-    auto trader2 = traders.add_trader<TestTrader>(0);
+    auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 1000.0); // NOLINT
 
-    TestMatchingCycle cycle{traders};
+    TestMatchingCycle cycle{traders_};
 
     trader2->add_order({Ticker::ETH, sell, 55, 1.0});
     trader2->add_order({Ticker::ETH, sell, 45, 1.0});
@@ -128,13 +127,14 @@ TEST_F(IntegrationBasicAlgo, MultipleLevelOrder)
 
 TEST_F(IntegrationBasicAlgo, OnAccountUpdateSell)
 {
-    auto& trader1 = start_wrappers(traders, "test_algos/sell_tsla_on_account.py");
+    auto& trader1 =
+        start_wrappers(traders_, "test_algos/basic/sell_tsla_on_account.py");
     trader1.modify_holdings(Ticker::ETH, 1000.0);
 
-    auto trader2 = traders.add_trader<TestTrader>(100000);
+    auto trader2 = traders_.add_trader<TestTrader>(100000);
     trader2->add_order({Ticker::ETH, buy, 102, 102.0});
 
-    TestMatchingCycle cycle{traders};
+    TestMatchingCycle cycle{traders_};
 
     // obupdate triggers one user to place acommon::Side::buy order of 10 ABC at 102
     cycle.wait_for_order(limit_order{Ticker::ETH, sell, 10, 100.0});
@@ -146,13 +146,13 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateSell)
 
 TEST_F(IntegrationBasicAlgo, OnAccountUpdateBuy)
 {
-    start_wrappers(traders, "test_algos/buy_tsla_on_account.py");
+    start_wrappers(traders_, "test_algos/basic/buy_tsla_on_account.py");
 
-    auto trader2 = traders.add_trader<TestTrader>(0);
+    auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 1000.0); // NOLINT
     trader2->add_order({Ticker::ETH, sell, 100.0, 100.0});
 
-    TestMatchingCycle cycle{traders};
+    TestMatchingCycle cycle{traders_};
 
     // obupdate triggers one user to place acommon::Side::buy order of 10 ABC at 102
     cycle.wait_for_order(limit_order{Ticker::ETH, buy, 10, 102.0});
@@ -164,40 +164,40 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateBuy)
 TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
 {
     start_wrappers(
-        traders, "test_algos/buy_tsla_at_100.py", TEST_STARTING_CAPITAL,
+        traders_, "test_algos/basic/buy_tsla_at_100.py", TEST_STARTING_CAPITAL,
         TEST_CLIENT_WAIT_SECS
     );
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    auto trader2 = traders.add_trader<TestTrader>(0);
+    auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 1000.0); // NOLINT
     trader2->add_order({Ticker::ETH, sell, 100.0, 100.0});
 
-    TestMatchingCycle cycle{traders};
+    TestMatchingCycle cycle{traders_};
 
     cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
 
     auto end = std::chrono::high_resolution_clock::now();
-    const int64_t duration_ms =
+    const int64_t observed_duration_ms =
         std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     const double wait_time_ms = TEST_CLIENT_WAIT_SECS * 1000;
 
-    EXPECT_GE(duration_ms, wait_time_ms);
-    EXPECT_LE(duration_ms, wait_time_ms + 1000.0);
+    EXPECT_GE(observed_duration_ms, wait_time_ms);
+    EXPECT_LE(observed_duration_ms, 1.5 * wait_time_ms);
 }
 
 // Disable trader and confirm it doesn't send any orders
 TEST_F(IntegrationBasicAlgo, DisableTrader)
 {
-    auto& trader1 = start_wrappers(traders, "test_algos/buy_tsla_at_100.py");
-    auto trader2 = traders.add_trader<TestTrader>(0);
+    auto& trader1 = start_wrappers(traders_, "test_algos/basic/buy_tsla_at_100.py");
+    auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 1000.0); // NOLINT
     trader2->add_order({Ticker::ETH, sell, 100.0, 100.0});
 
     trader1.disable();
 
-    TestMatchingCycle cycle{traders};
+    TestMatchingCycle cycle{traders_};
 
     cycle.on_tick(0);
     sleep(1);

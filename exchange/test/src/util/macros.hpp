@@ -1,5 +1,6 @@
 #include "common/messages_exchange_to_wrapper.hpp"
 #include "common/messages_wrapper_to_exchange.hpp"
+#include "common/types/decimal.hpp"
 #include "common/types/ticker.hpp"
 #include "exchange/matching/engine.hpp"
 #include "exchange/orders/storage/order_storage.hpp"
@@ -29,6 +30,11 @@ bool validate_limit_order(
     const limit_order& update, common::Ticker ticker, common::Side side,
     double quantity, double price
 );
+
+bool order_equality(const limit_order& order1, const limit_order& order2);
+
+bool
+order_equality(const common::market_order& order1, const common::market_order& order2);
 
 } // namespace nutc::test
 

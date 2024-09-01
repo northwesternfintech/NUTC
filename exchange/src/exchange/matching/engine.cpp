@@ -4,6 +4,7 @@
 #include "common/types/decimal.hpp"
 #include "common/util.hpp"
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
+#include "order_pair.hpp"
 
 namespace nutc::exchange {
 
@@ -11,7 +12,7 @@ using match = nutc::common::match;
 
 template <TaggedOrder OrderT>
 std::vector<match>
-Engine::match_order(OrderT order, LimitOrderBook& orderbook)
+Engine::match_order(OrderT order, CompositeOrderBook& orderbook)
 {
     std::vector<match> matches;
 
@@ -34,7 +35,7 @@ Engine::match_order(OrderT order, LimitOrderBook& orderbook)
 
 template <common::Side AggressiveSide, typename OrderPairT>
 glz::expected<match, bool>
-Engine::match_orders_(OrderPairT& orders, LimitOrderBook& orderbook)
+Engine::match_orders_(OrderPairT& orders, CompositeOrderBook& orderbook)
 {
     auto match_result = attempt_match_<AggressiveSide>(orders);
     if (match_result.has_value()) [[likely]] {
@@ -43,15 +44,13 @@ Engine::match_orders_(OrderPairT& orders, LimitOrderBook& orderbook)
     }
     if (match_result.error() == MatchFailure::seller_failure) {
         if constexpr (AggressiveSide == side::buy) {
-            orderbook.mark_order_removed(orders.template get_order<common::Side::sell>()
-            );
+            orderbook.remove_order(orders.template get_order<common::Side::sell>());
             return glz::unexpected(false);
         }
     }
     if (match_result.error() == MatchFailure::buyer_failure) {
         if constexpr (AggressiveSide == side::sell) {
-            orderbook.mark_order_removed(orders.template get_order<common::Side::buy>()
-            );
+            orderbook.remove_order(orders.template get_order<common::Side::buy>());
             return glz::unexpected(false);
         }
     }
@@ -62,7 +61,7 @@ template <common::Side AggressiveSide, TaggedOrder OrderT>
 glz::expected<match, bool>
 Engine::match_incoming_order_(
     OrderT& aggressive_order, LimitOrderBook::stored_limit_order passive_order,
-    LimitOrderBook& orderbook
+    CompositeOrderBook& orderbook
 )
 {
     // We can copy stored_limit_order because it's already pointing to the order. We
@@ -117,7 +116,7 @@ Engine::attempt_match_(OrderPairT& orders)
 
 template <TaggedOrder OrderT>
 glz::expected<match, bool>
-Engine::match_incoming_order_(OrderT& aggressive_order, LimitOrderBook& orderbook)
+Engine::match_incoming_order_(OrderT& aggressive_order, CompositeOrderBook& orderbook)
 {
     if (aggressive_order.side == side::buy) {
         auto passive_order = orderbook.get_top_order(side::sell);
@@ -136,8 +135,10 @@ Engine::match_incoming_order_(OrderT& aggressive_order, LimitOrderBook& orderboo
     );
 }
 
-template std::vector<match> Engine::match_order<>(tagged_limit_order, LimitOrderBook&);
+template std::vector<match>
+Engine::match_order<>(tagged_limit_order, CompositeOrderBook&);
 
-template std::vector<match> Engine::match_order<>(tagged_market_order, LimitOrderBook&);
+template std::vector<match>
+Engine::match_order<>(tagged_market_order, CompositeOrderBook&);
 
 } // namespace nutc::exchange

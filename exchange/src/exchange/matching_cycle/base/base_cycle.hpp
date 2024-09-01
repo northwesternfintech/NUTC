@@ -39,7 +39,9 @@ protected:
 
     void handle_matches_(std::vector<common::match> matches) override;
 
-    void post_cycle_(uint64_t) override;
+    void
+    post_cycle_(uint64_t) override
+    {}
 };
 
 } // namespace nutc::exchange

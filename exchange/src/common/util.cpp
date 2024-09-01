@@ -4,6 +4,8 @@
 
 #include <fmt/format.h>
 
+#include <random>
+
 #ifdef __APPLE__
 #  include <mach/mach_time.h>
 #else
@@ -11,6 +13,14 @@
 #endif
 
 namespace nutc::common {
+order_id_t
+generate_order_id()
+{
+    static std::mt19937_64 gen{std::random_device{}()};
+    static std::uniform_int_distribution<order_id_t> dis;
+    return dis(gen);
+}
+
 uint64_t
 get_time()
 {

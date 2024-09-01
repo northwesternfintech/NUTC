@@ -1,5 +1,6 @@
 #include "common/types/decimal.hpp"
 #include "config.h"
+#include "exchange/orders/orderbook/composite_orderbook.hpp"
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
@@ -17,12 +18,8 @@ protected:
     using TestTrader = nutc::test::TestTrader;
     static constexpr nutc::common::decimal_quantity DEFAULT_QUANTITY = 1000.0;
 
-    TraderContainer traders;
-
-    nutc::exchange::GenericTrader& trader_1 =
-        *traders.add_trader<TestTrader>(std::string("ABC"), TEST_STARTING_CAPITAL);
-    nutc::exchange::GenericTrader& trader_2 =
-        *traders.add_trader<TestTrader>(std::string("DEF"), TEST_STARTING_CAPITAL);
+    TestTrader trader_1{"ABC", TEST_STARTING_CAPITAL};
+    TestTrader trader_2{"DEF", TEST_STARTING_CAPITAL};
 
     void
     SetUp() override
@@ -31,7 +28,7 @@ protected:
         trader_2.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
     }
 
-    nutc::exchange::LimitOrderBook container_;
+    nutc::exchange::CompositeOrderBook container_{Ticker::ETH};
 };
 
 TEST_F(UnitOrderBookTest, TestStorageRounding)
