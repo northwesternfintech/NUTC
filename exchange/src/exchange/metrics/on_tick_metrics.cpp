@@ -1,5 +1,6 @@
 #include "on_tick_metrics.hpp"
 
+#include "common/messages_wrapper_to_exchange.hpp"
 #include "exchange/metrics/prometheus.hpp"
 #include "exchange/orders/ticker_info.hpp"
 #include "exchange/traders/trader_container.hpp"
@@ -22,18 +23,29 @@ TickerMetricsPusher::create_counter_(const std::string& gauge_name)
 }
 
 void
-TickerMetricsPusher::report_orders(const std::vector<tagged_limit_order>& orders)
+TickerMetricsPusher::report_orders(const std::vector<OrderVariant>& orders)
 {
-    auto log_order = [&](const tagged_limit_order& order) {
-        orders_quantity_counter
-            .Add({
-                {"ticker",      common::to_string(order.ticker)},
-                {"trader_type", order.trader->get_type()       }
-        })
-            .Increment(double{order.quantity});
+    auto log_order = [&]<typename OrderT>(const OrderT& order) {
+        if constexpr (std::is_same_v<OrderT, common::cancel_order>) {
+            cancellation_counter
+                .Add({
+                    {"ticker", common::to_string(order.ticker)}
+            })
+                .Increment(1);
+        }
+        else {
+            orders_quantity_counter
+                .Add({
+                    {"ticker",      common::to_string(order.ticker)},
+                    {"trader_type", order.trader->get_type()       }
+            })
+                .Increment(double{order.quantity});
+        }
     };
 
-    std::for_each(orders.begin(), orders.end(), log_order);
+    std::ranges::for_each(orders, [&](const auto& order) {
+        std::visit(log_order, order);
+    });
 }
 
 void
@@ -90,7 +102,8 @@ TickerMetricsPusher::report_matches(const std::vector<common::match>& orders)
     auto log_match = [this](const common::match& match) {
         matches_quantity_counter
             .Add({
-                {"ticker", common::to_string(match.position.ticker)}
+                {"ticker",     common::to_string(match.position.ticker)},
+                {"match_type", match.match_type                        }
         })
             .Increment(double{match.position.quantity});
     };

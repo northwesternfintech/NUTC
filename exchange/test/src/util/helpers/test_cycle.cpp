@@ -11,7 +11,7 @@
 namespace nutc::test {
 
 std::vector<common::match>
-TestMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
+TestMatchingCycle::match_orders_(std::vector<exchange::OrderVariant> orders)
 {
     // TODO: FIX
     if (!orders.empty()) {

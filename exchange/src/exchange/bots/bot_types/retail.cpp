@@ -11,13 +11,14 @@ RetailBot::take_action(const shared_bot_state& state)
 {
     static std::uniform_real_distribution<> dis{0.0, 1.0};
 
-    common::decimal_price p_trade =
-        (common::decimal_price{1.0} - get_capital_utilization());
+    auto p_trade = common::decimal_price{1.0} - get_capital_utilization();
 
     double noise_factor = dis(gen_);
 
     common::decimal_price signal_strength =
-        AGGRESSIVENESS * state.THEO.difference(state.MIDPRICE) / state.MIDPRICE;
+        state.MIDPRICE == 0.0
+            ? 0.0
+            : AGGRESSIVENESS * state.THEO.difference(state.MIDPRICE) / state.MIDPRICE;
 
     if (noise_factor >= p_trade * signal_strength)
         return;
@@ -25,7 +26,7 @@ RetailBot::take_action(const shared_bot_state& state)
         return;
 
     common::decimal_price noised_theo = state.THEO + generate_gaussian_noise(0, .1);
-    double quantity{
+    common::decimal_quantity quantity{
         (common::decimal_price{1.0} - get_capital_utilization()) * get_interest_limit()
         / noised_theo
     };
@@ -34,8 +35,6 @@ RetailBot::take_action(const shared_bot_state& state)
     auto side = (state.MIDPRICE < noised_theo) ? common::Side::buy : common::Side::sell;
 
     add_market_order(side, quantity);
-
-    return;
 }
 
 } // namespace nutc::exchange

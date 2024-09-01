@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/messages_exchange_to_wrapper.hpp"
-#include "common/messages_wrapper_to_exchange.hpp"
 #include "exchange/orders/storage/order_storage.hpp"
 
 #include <vector>
@@ -27,9 +26,6 @@ public:
     virtual ~MatchingCycleInterface() = default;
 
 protected:
-    using OrderVariant =
-        std::variant<common::cancel_order, tagged_limit_order, tagged_market_order>;
-
     virtual void before_cycle_(uint64_t new_tick) = 0;
 
     virtual std::vector<OrderVariant> collect_orders(uint64_t new_tick) = 0;

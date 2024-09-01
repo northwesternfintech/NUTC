@@ -25,7 +25,7 @@ Engine::match_order(OrderT order, CompositeOrderBook& orderbook)
     }
 
     if constexpr (is_limit_order_v<OrderT>) {
-        if (!(order.ioc || order.quantity == 0.0)) {
+        if (!order.ioc && order.quantity > 0.0) {
             orderbook.add_order(order);
         }
     }
@@ -101,14 +101,18 @@ Engine::attempt_match_(OrderPairT& orders)
     common::decimal_quantity match_quantity = orders.potential_match_quantity();
     decimal_price total_price{total_order_cost_(match_price, match_quantity)};
 
-    auto& buyer = orders.template get_underlying_order<common::Side::buy>();
-    auto& seller = orders.template get_underlying_order<common::Side::sell>();
+    auto& buy_order = orders.template get_underlying_order<common::Side::buy>();
+    auto& sell_order = orders.template get_underlying_order<common::Side::sell>();
 
-    if (buyer.trader->get_capital() < total_price) [[unlikely]]
+    GenericTrader* buyer = buy_order.trader;
+    GenericTrader* seller = sell_order.trader;
+
+    if (!buyer->can_leverage() && buyer->get_capital() < total_price) [[unlikely]]
         return glz::unexpected(MatchFailure::buyer_failure);
-    if (seller.trader->get_holdings(buyer.ticker) < match_quantity) [[unlikely]]
+    if (!seller->can_leverage()
+        && seller->get_holdings(buy_order.ticker) < match_quantity) [[unlikely]]
         return glz::unexpected(MatchFailure::seller_failure);
-    if (buyer.trader == seller.trader) [[unlikely]] {
+    if (buyer == seller) [[unlikely]] {
         return glz::unexpected(MatchFailure::buyer_failure);
     }
     return orders.template create_match<AggressiveSide>(match_quantity, match_price);

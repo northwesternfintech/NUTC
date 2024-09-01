@@ -114,16 +114,25 @@ protected:
         return (get_long_interest() - get_short_interest());
     }
 
-    void
+    [[nodiscard]] common::order_id_t
     add_limit_order(
-        common::Side side, double quantity, common::decimal_price price, bool ioc
+        common::Side side, common::decimal_quantity quantity,
+        common::decimal_price price, bool ioc
     )
     {
-        orders_.emplace_back(common::limit_order{TICKER, side, quantity, price, ioc});
+        common::limit_order order{TICKER, side, quantity, price, ioc};
+        orders_.emplace_back(order);
+        return order.order_id;
     }
 
     void
-    add_market_order(common::Side side, double quantity)
+    cancel_order(common::order_id_t order_id)
+    {
+        orders_.emplace_back(common::cancel_order{TICKER, order_id});
+    }
+
+    void
+    add_market_order(common::Side side, common::decimal_quantity quantity)
     {
         orders_.emplace_back(common::market_order{TICKER, side, quantity});
     }

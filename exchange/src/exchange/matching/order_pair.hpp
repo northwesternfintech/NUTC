@@ -107,10 +107,14 @@ public:
         auto& buyer = get_underlying_order<side::buy>();
         auto& seller = get_underlying_order<side::sell>();
         common::position position{buyer.ticker, AggressiveSide, quantity, price};
-        return {
+        std::string match_type =
+            fmt::format("{}->{}", seller.trader->get_type(), buyer.trader->get_type());
+        common::match m{
             position, buyer.trader->get_id(), seller.trader->get_id(),
             buyer.trader->get_capital(), seller.trader->get_capital()
         };
+        m.match_type = match_type;
+        return m;
     }
 
     common::decimal_quantity

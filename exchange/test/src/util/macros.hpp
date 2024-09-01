@@ -1,6 +1,5 @@
 #include "common/messages_exchange_to_wrapper.hpp"
 #include "common/messages_wrapper_to_exchange.hpp"
-#include "common/types/decimal.hpp"
 #include "common/types/ticker.hpp"
 #include "exchange/matching/engine.hpp"
 #include "exchange/orders/storage/order_storage.hpp"

@@ -27,6 +27,9 @@ public:
 using tagged_limit_order = tagged_order<common::limit_order>;
 using tagged_market_order = tagged_order<common::market_order>;
 
+using OrderVariant =
+    std::variant<common::cancel_order, tagged_limit_order, tagged_market_order>;
+
 template <typename T>
 inline constexpr bool is_limit_order_v =
     std::is_same_v<std::remove_cvref_t<T>, tagged_limit_order>;

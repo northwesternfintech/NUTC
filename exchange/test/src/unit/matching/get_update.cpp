@@ -35,7 +35,7 @@ TEST_F(UnitGetUpdate, NoOrders)
 
 TEST_F(UnitGetUpdate, OrderAdded)
 {
-    tagged_limit_order order1{trader1, Ticker::ETH, buy, 1, 1.0};
+    tagged_limit_order order1{trader1, Ticker::ETH, buy, 1.0, 1.0};
 
     orderbook_.add_order(order1);
 
@@ -47,7 +47,7 @@ TEST_F(UnitGetUpdate, OrderAdded)
 
 TEST_F(UnitGetUpdate, OrderDeleted)
 {
-    tagged_limit_order order1{trader1, Ticker::ETH, buy, 1, 1.0};
+    tagged_limit_order order1{trader1, Ticker::ETH, buy, 1.0, 1.0};
 
     // before, we have a single order
     auto o1_it = orderbook_.add_order(order1);
@@ -104,8 +104,8 @@ TEST_F(UnitGetUpdate, OrderQuantityChange)
 
 TEST_F(UnitGetUpdate, BuySellChange)
 {
-    tagged_limit_order order1{trader1, Ticker::ETH, buy, 1, 1.0};
-    tagged_limit_order order2{trader3, Ticker::ETH, sell, 1, 5.0};
+    tagged_limit_order order1{trader1, Ticker::ETH, buy, 1.0, 1.0};
+    tagged_limit_order order2{trader3, Ticker::ETH, sell, 1.0, 5.0};
 
     auto o1_it = orderbook_.add_order(order1);
     auto o2_it = orderbook_.add_order(order2);
@@ -126,10 +126,10 @@ TEST_F(UnitGetUpdate, BuySellChange)
 
 TEST_F(UnitGetUpdate, ManyLevelChanges)
 {
-    tagged_limit_order order1{trader1, Ticker::ETH, buy, 1, 1.0};
-    tagged_limit_order order2{trader1, Ticker::ETH, buy, 1, 2.0};
-    tagged_limit_order order3{trader1, Ticker::ETH, buy, 1, 3.0};
-    tagged_limit_order order4{trader3, Ticker::ETH, buy, 1, 4.0};
+    tagged_limit_order order1{trader1, Ticker::ETH, buy, 1.0, 1.0};
+    tagged_limit_order order2{trader1, Ticker::ETH, buy, 1.0, 2.0};
+    tagged_limit_order order3{trader1, Ticker::ETH, buy, 1.0, 3.0};
+    tagged_limit_order order4{trader3, Ticker::ETH, buy, 1.0, 4.0};
 
     orderbook_.add_order(order1);
     orderbook_.add_order(order2);
@@ -138,9 +138,9 @@ TEST_F(UnitGetUpdate, ManyLevelChanges)
 
     orderbook_.get_and_reset_updates();
 
-    tagged_limit_order order5{trader1, Ticker::ETH, buy, 8, 2.0};
-    tagged_limit_order order6{trader1, Ticker::ETH, buy, 9, 3.0};
-    tagged_limit_order order7{trader1, Ticker::ETH, buy, 7, 4.0};
+    tagged_limit_order order5{trader1, Ticker::ETH, buy, 8.0, 2.0};
+    tagged_limit_order order6{trader1, Ticker::ETH, buy, 9.0, 3.0};
+    tagged_limit_order order7{trader1, Ticker::ETH, buy, 7.0, 4.0};
 
     orderbook_.add_order(order5);
     orderbook_.add_order(order6);
@@ -159,12 +159,12 @@ TEST_F(UnitGetUpdate, ManyLevelChanges)
 
 TEST_F(UnitGetUpdate, ChangesAddsAndDeletes)
 {
-    tagged_limit_order order1{trader1, Ticker::ETH, buy, 1, 1.0};
-    tagged_limit_order order2{trader1, Ticker::ETH, buy, 1, 2.0};
-    tagged_limit_order order3{trader1, Ticker::ETH, buy, 1, 3.0};
-    tagged_limit_order order4{trader3, Ticker::ETH, buy, 10, 4.0};
-    tagged_limit_order order5{trader3, Ticker::ETH, buy, 5, 5.0};
-    tagged_limit_order order6{trader3, Ticker::ETH, buy, 5, 5.0};
+    tagged_limit_order order1{trader1, Ticker::ETH, buy, 1.0, 1.0};
+    tagged_limit_order order2{trader1, Ticker::ETH, buy, 1.0, 2.0};
+    tagged_limit_order order3{trader1, Ticker::ETH, buy, 1.0, 3.0};
+    tagged_limit_order order4{trader3, Ticker::ETH, buy, 10.0, 4.0};
+    tagged_limit_order order5{trader3, Ticker::ETH, buy, 5.0, 5.0};
+    tagged_limit_order order6{trader3, Ticker::ETH, buy, 5.0, 5.0};
 
     orderbook_.add_order(order1);
     orderbook_.add_order(order2);
@@ -175,8 +175,8 @@ TEST_F(UnitGetUpdate, ChangesAddsAndDeletes)
 
     orderbook_.get_and_reset_updates();
 
-    tagged_limit_order order7{trader1, Ticker::ETH, buy, 8, 2.0};
-    tagged_limit_order order8{trader1, Ticker::ETH, buy, 9, 3.0};
+    tagged_limit_order order7{trader1, Ticker::ETH, buy, 8.0, 2.0};
+    tagged_limit_order order8{trader1, Ticker::ETH, buy, 9.0, 3.0};
 
     orderbook_.add_order(order7);
     orderbook_.add_order(order8);
