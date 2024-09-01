@@ -12,7 +12,7 @@ using nutc::common::Side;
 namespace {
 struct price_level {
     const nutc::common::decimal_price PRICE_DELTA;
-    const double QUANTITY_FACTOR;
+    const nutc::common::decimal_quantity QUANTITY_FACTOR;
 
     consteval price_level(
         nutc::common::decimal_price price_delta, double quantity_factor
@@ -37,11 +37,12 @@ void
 MarketMakerBot::place_orders(Side side, decimal_price theo, decimal_price spread_offset)
 {
     // Approximation
-    double total_quantity =
-        double{compute_capital_tolerance_() / (theo + spread_offset)};
+    common::decimal_quantity total_quantity = {
+        compute_capital_tolerance_() / (theo + spread_offset)
+    };
 
     // Placing orders on both sides
-    total_quantity /= 2;
+    total_quantity /= 2.0;
 
     for (const auto& [price_delta, quantity_factor] : PRICE_LEVELS) {
         decimal_price price = (side == Side::buy) ? theo - price_delta - spread_offset
@@ -50,7 +51,10 @@ MarketMakerBot::place_orders(Side side, decimal_price theo, decimal_price spread
         if (price <= 0.0) [[unlikely]]
             return;
 
-        add_limit_order(side, total_quantity * quantity_factor, price, true);
+        auto order_id = add_limit_order(
+            side, total_quantity * quantity_factor, price, /*ioc=*/false
+        );
+        open_orders.push_back(order_id);
     }
 }
 
@@ -65,6 +69,10 @@ MarketMakerBot::calculate_lean_percent(const shared_bot_state& state)
 void
 MarketMakerBot::take_action(const shared_bot_state& state)
 {
+    std::ranges::for_each(open_orders, [this](auto order_id) {
+        cancel_order(order_id);
+    });
+    open_orders.clear();
     // decimal_price spread_offset = state.MIDPRICE * (1.0 / 600 +
     // state.REALIZED_VOLATILITY); spread_offset *= aggressiveness; spread_offset =
     // std::min(spread_offset, 1.0); spread_offset = std::max(spread_offset, -1.0);
@@ -74,7 +82,7 @@ MarketMakerBot::take_action(const shared_bot_state& state)
     decimal_price spread_offset = 0.0;
 
     decimal_price lean = calculate_lean_percent(state);
-    decimal_price theo = state.THEO - (lean * 15.0) + generate_gaussian_noise(0, .05);
+    decimal_price theo = state.THEO - (lean * 10.0) + generate_gaussian_noise(0, .05);
 
     place_orders(Side::buy, theo, spread_offset);
     place_orders(Side::sell, theo, spread_offset);

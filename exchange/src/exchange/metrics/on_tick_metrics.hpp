@@ -25,6 +25,7 @@ class TickerMetricsPusher {
     Gauge ticker_midprice_variance_gauge = create_gauge_("ticker_midprice_variance");
     Counter matches_quantity_counter = create_counter_("matches_quantity_total");
     Counter orders_quantity_counter = create_counter_("orders_quantity_total");
+    Counter cancellation_counter = create_counter_("order_cancellations_total");
     Gauge current_tick_gauge = create_gauge_("current_tick");
 
 public:
@@ -35,7 +36,7 @@ public:
     void report_current_tick(uint64_t tick_num);
     void report_trader_stats(const TickerMapping& tickers);
     void report_ticker_stats(TickerMapping& tickers);
-    void report_orders(const std::vector<tagged_limit_order>& orders);
+    void report_orders(const std::vector<OrderVariant>& orders);
     void report_matches(const std::vector<common::match>& orders);
 
 private:

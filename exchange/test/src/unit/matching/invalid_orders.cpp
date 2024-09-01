@@ -39,8 +39,8 @@ TEST_F(UnitInvalidOrders, RemoveThenAddFunds)
 {
     trader1.modify_capital(-TEST_STARTING_CAPITAL);
 
-    tagged_limit_order order2{trader2, Ticker::ETH, sell, 1, 1.0};
-    tagged_limit_order order1{trader1, Ticker::ETH, buy, 1, 1.0};
+    tagged_limit_order order2{trader2, Ticker::ETH, sell, 1.0, 1.0};
+    tagged_limit_order order1{trader1, Ticker::ETH, buy, 1.0, 1.0};
 
     // Thrown out
     auto matches = add_to_engine_(order1);
@@ -66,8 +66,8 @@ TEST_F(UnitInvalidOrders, MatchingInvalidFunds)
 {
     trader1.modify_capital(-TEST_STARTING_CAPITAL);
 
-    tagged_limit_order order1{trader1, Ticker::ETH, buy, 1, 1.0};
-    tagged_limit_order order2{trader2, Ticker::ETH, sell, 1, 1.0};
+    tagged_limit_order order1{trader1, Ticker::ETH, buy, 1.0, 1.0};
+    tagged_limit_order order2{trader2, Ticker::ETH, sell, 1.0, 1.0};
 
     // Thrown out
     auto matches = add_to_engine_(order1);
@@ -90,10 +90,10 @@ TEST_F(UnitInvalidOrders, SimpleManyInvalidOrder)
     t3.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
     t4.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
 
-    tagged_limit_order order1{t1, Ticker::ETH, buy, 1, 1.0};
-    tagged_limit_order order2{t2, Ticker::ETH, buy, 1, 1.0};
-    tagged_limit_order order3{t3, Ticker::ETH, buy, 1, 1.0};
-    tagged_limit_order order4{t4, Ticker::ETH, sell, 3, 1.0};
+    tagged_limit_order order1{t1, Ticker::ETH, buy, 1.0, 1.0};
+    tagged_limit_order order2{t2, Ticker::ETH, buy, 1.0, 1.0};
+    tagged_limit_order order3{t3, Ticker::ETH, buy, 1.0, 1.0};
+    tagged_limit_order order4{t4, Ticker::ETH, sell, 3.0, 1.0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);

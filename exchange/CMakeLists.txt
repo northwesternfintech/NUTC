@@ -225,6 +225,7 @@ add_library(COMMON_lib OBJECT
     src/common/file_operations/file_operations.cpp
     src/common/firebase/firebase.cpp
     src/common/util.cpp
+    src/common/types/decimal.cpp
 )
 
 target_include_directories(

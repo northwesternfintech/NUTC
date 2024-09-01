@@ -1,5 +1,6 @@
 #pragma once
 #include "common/types/decimal.hpp"
+#include "common/util.hpp"
 #include "exchange/bots/shared_bot_state.hpp"
 #include "exchange/traders/trader_types/bot_trader.hpp"
 
@@ -24,6 +25,7 @@ class MarketMakerBot : public BotTrader {
     }
 
     float aggressiveness = gen_aggressiveness();
+    std::vector<common::order_id_t> open_orders;
 
 public:
     MarketMakerBot(common::Ticker ticker, double interest_limit) :

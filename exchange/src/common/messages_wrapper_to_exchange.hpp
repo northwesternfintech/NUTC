@@ -35,7 +35,7 @@ struct market_order {
 
     constexpr market_order() = default;
 
-    market_order(Ticker ticker, Side side, double quantity) :
+    market_order(Ticker ticker, Side side, decimal_quantity quantity) :
         ticker(ticker), side(side), quantity(quantity)
     {}
 
@@ -62,13 +62,14 @@ struct limit_order : market_order {
     }
 
     limit_order(
-        std::string_view ticker, Side side, double quantity, decimal_price price,
-        bool ioc = false
+        std::string_view ticker, Side side, decimal_quantity quantity,
+        decimal_price price, bool ioc = false
     ) : market_order{force_to_ticker(ticker), side, quantity}, price{price}, ioc{ioc}
     {}
 
     limit_order(
-        Ticker ticker, Side side, double quantity, decimal_price price, bool ioc = false
+        Ticker ticker, Side side, decimal_quantity quantity, decimal_price price,
+        bool ioc = false
     ) : market_order{ticker, side, quantity}, price{price}, ioc{ioc}
     {}
 

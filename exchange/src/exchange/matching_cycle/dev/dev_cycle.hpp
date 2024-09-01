@@ -22,7 +22,7 @@ protected:
     match_orders_(std::vector<OrderVariant> orders) override
     {
         // TODO: add back
-        // pusher.report_orders(orders);
+        pusher.report_orders(orders);
         return BaseMatchingCycle::match_orders_(std::move(orders));
     }
 

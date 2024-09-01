@@ -58,7 +58,7 @@ TEST_F(IntegrationBasicAlgo, MarketOrderBuy)
 
     TestMatchingCycle cycle{traders_};
 
-    cycle.wait_for_order(limit_order{Ticker::BTC, buy, 1, 100.0});
+    cycle.wait_for_order(limit_order{Ticker::BTC, buy, 1.0, 100.0});
 }
 
 TEST_F(IntegrationBasicAlgo, MarketOrderSell)
@@ -66,12 +66,12 @@ TEST_F(IntegrationBasicAlgo, MarketOrderSell)
     auto& trader1 = start_wrappers(traders_, "test_algos/basic/sell_market_order_1.py");
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader1.modify_holdings(Ticker::ETH, 1000.0);
-    trader2->add_order({Ticker::ETH, buy, 1, 100.0});
+    trader2->add_order({Ticker::ETH, buy, 1.0, 100.0});
     trader2->modify_capital(1000.0);
 
     TestMatchingCycle cycle{traders_};
 
-    cycle.wait_for_order(limit_order{Ticker::BTC, buy, 1, 100.0});
+    cycle.wait_for_order(limit_order{Ticker::BTC, buy, 1.0, 100.0});
 }
 
 TEST_F(IntegrationBasicAlgo, ManyUpdates)
@@ -84,12 +84,12 @@ TEST_F(IntegrationBasicAlgo, ManyUpdates)
     TestMatchingCycle cycle{traders_};
 
     for (int i = 0; i < 10000; i++) {
-        trader2->add_order({Ticker::ETH, sell, 1, static_cast<double>(i)});
+        trader2->add_order({Ticker::ETH, sell, 1.0, static_cast<double>(i)});
     }
 
     cycle.on_tick(0);
 
-    cycle.wait_for_order(limit_order{Ticker::ETH, buy, 10, 100.0});
+    cycle.wait_for_order(limit_order{Ticker::ETH, buy, 10.0, 100.0});
 }
 
 TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
@@ -103,9 +103,9 @@ TEST_F(IntegrationBasicAlgo, OnTradeUpdate)
 
     trader2->add_order({Ticker::ETH, sell, 100.0, 100.0});
 
-    cycle.wait_for_order(limit_order{Ticker::ETH, buy, 10, 102.0});
+    cycle.wait_for_order(limit_order{Ticker::ETH, buy, 10.0, 102.0});
 
-    cycle.wait_for_order(limit_order{Ticker::BTC, buy, 1, 100.0});
+    cycle.wait_for_order(limit_order{Ticker::BTC, buy, 1.0, 100.0});
 }
 
 // Sanity check that it goes through the orderbook
@@ -118,8 +118,8 @@ TEST_F(IntegrationBasicAlgo, MultipleLevelOrder)
 
     TestMatchingCycle cycle{traders_};
 
-    trader2->add_order({Ticker::ETH, sell, 55, 1.0});
-    trader2->add_order({Ticker::ETH, sell, 45, 1.0});
+    trader2->add_order({Ticker::ETH, sell, 55.0, 1.0});
+    trader2->add_order({Ticker::ETH, sell, 45.0, 1.0});
 
     cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
     ASSERT_EQ(trader1.get_capital() - trader1.get_initial_capital(), -100.0);
@@ -132,16 +132,16 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateSell)
     trader1.modify_holdings(Ticker::ETH, 1000.0);
 
     auto trader2 = traders_.add_trader<TestTrader>(100000);
-    trader2->add_order({Ticker::ETH, buy, 102, 102.0});
+    trader2->add_order({Ticker::ETH, buy, 102.0, 102.0});
 
     TestMatchingCycle cycle{traders_};
 
     // obupdate triggers one user to place acommon::Side::buy order of 10 ABC at 102
-    cycle.wait_for_order(limit_order{Ticker::ETH, sell, 10, 100.0});
+    cycle.wait_for_order(limit_order{Ticker::ETH, sell, 10.0, 100.0});
 
     // on_trade_match triggers one user to place acommon::Side::buy order of 1 ABC at
     // 100
-    cycle.wait_for_order(limit_order{Ticker::BTC, buy, 1, 100.0});
+    cycle.wait_for_order(limit_order{Ticker::BTC, buy, 1.0, 100.0});
 }
 
 TEST_F(IntegrationBasicAlgo, OnAccountUpdateBuy)
@@ -155,10 +155,10 @@ TEST_F(IntegrationBasicAlgo, OnAccountUpdateBuy)
     TestMatchingCycle cycle{traders_};
 
     // obupdate triggers one user to place acommon::Side::buy order of 10 ABC at 102
-    cycle.wait_for_order(limit_order{Ticker::ETH, buy, 10, 102.0});
+    cycle.wait_for_order(limit_order{Ticker::ETH, buy, 10.0, 102.0});
     // on_trade_match triggers one user to place acommon::Side::buy order of 1 ABC at
     // 100
-    cycle.wait_for_order(limit_order{Ticker::BTC, buy, 1, 100.0});
+    cycle.wait_for_order(limit_order{Ticker::BTC, buy, 1.0, 100.0});
 }
 
 TEST_F(IntegrationBasicAlgo, AlgoStartDelay)

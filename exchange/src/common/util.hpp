@@ -10,6 +10,7 @@
 namespace nutc::common {
 using order_id_t = std::int64_t;
 order_id_t generate_order_id();
+
 std::uint64_t get_time();
 std::string trader_id(const std::string& user_id, const std::string& algo_id);
 

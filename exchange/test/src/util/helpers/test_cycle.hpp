@@ -13,7 +13,7 @@ std::string mo_to_string(const nutc::common::limit_order& order);
 namespace nutc::test {
 
 class TestMatchingCycle : public exchange::BaseMatchingCycle {
-    std::optional<OrderVariant> last_order;
+    std::optional<exchange::OrderVariant> last_order;
 
 public:
     TestMatchingCycle(exchange::TraderContainer& traders, double order_fee = 0.0) :
@@ -26,7 +26,8 @@ public:
     wait_for_order(const OrderT& order, std::function<bool(const OrderT&, const OrderT&)> equality_function = soft_equality<OrderT>);
 
 private:
-    std::vector<common::match> match_orders_(std::vector<OrderVariant> orders) override;
+    std::vector<common::match> match_orders_(std::vector<exchange::OrderVariant> orders
+    ) override;
 };
 
 } // namespace nutc::test

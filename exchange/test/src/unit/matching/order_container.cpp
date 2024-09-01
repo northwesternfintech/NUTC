@@ -1,7 +1,6 @@
 #include "common/types/decimal.hpp"
 #include "config.h"
 #include "exchange/orders/orderbook/composite_orderbook.hpp"
-#include "exchange/orders/orderbook/limit_orderbook.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
 
@@ -33,19 +32,19 @@ protected:
 
 TEST_F(UnitOrderBookTest, TestStorageRounding)
 {
-    tagged_limit_order order1{trader_1, Ticker::ETH, buy, 1, 1.000001};
+    tagged_limit_order order1{trader_1, Ticker::ETH, buy, 1.0, 1.000001};
     ASSERT_EQ(order1.price, 1.0);
 
     tagged_limit_order order2{trader_2, Ticker::ETH, buy, 0.00001, .9999, 1};
     ASSERT_EQ(order2.price, 1.0);
 
-    tagged_limit_order order3{trader_2, Ticker::ETH, buy, 1, .994};
+    tagged_limit_order order3{trader_2, Ticker::ETH, buy, 1.0, .994};
     ASSERT_EQ(order3.price, 0.99);
 }
 
 TEST_F(UnitOrderBookTest, SimpleAddRemove)
 {
-    tagged_limit_order order1{trader_1, Ticker::ETH, buy, 1, 1.0};
+    tagged_limit_order order1{trader_1, Ticker::ETH, buy, 1.0, 1.0};
     // tagged_limit_order order2{trader_2, Ticker::ETH, sell, 1, 1.0};
 
     container_.add_order(order1);
@@ -65,8 +64,8 @@ TEST_F(UnitOrderBookTest, SimpleAddRemove)
 
 TEST_F(UnitOrderBookTest, ModifyQuantity)
 {
-    tagged_limit_order so1{trader_1, Ticker::ETH, buy, 1, 1.0};
-    tagged_limit_order so2{trader_1, Ticker::ETH, sell, 1, 1.0};
+    tagged_limit_order so1{trader_1, Ticker::ETH, buy, 1.0, 1.0};
+    tagged_limit_order so2{trader_1, Ticker::ETH, sell, 1.0, 1.0};
 
     container_.add_order(so1);
     container_.add_order(so2);

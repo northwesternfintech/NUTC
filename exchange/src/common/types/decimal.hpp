@@ -4,13 +4,15 @@
 #include <cmath>
 #include <cstdint>
 
+#include <functional>
 #include <stdexcept>
 
-namespace nutc::common {
-static constexpr auto PRICE_DECIMAL_PLACES = 2;
-static constexpr auto QUANTITY_DECIMAL_PLACES = 2;
+#define PRICE_DECIMAL_PLACES    2
+#define QUANTITY_DECIMAL_PLACES 2
 
-namespace {
+namespace nutc::common {
+
+namespace detail {
 template <typename T>
 consteval T
 pow10(int pow)
@@ -20,12 +22,12 @@ pow10(int pow)
     }
     return pow == 0 ? 1 : 10 * pow10<T>(pow - 1);
 }
-} // namespace
+} // namespace detail
 
 template <std::int8_t Scale>
 class Decimal {
     using decimal_type = std::int64_t;
-    static constexpr std::int64_t MULTIPLIER = pow10<decimal_type>(Scale);
+    static constexpr std::int64_t MULTIPLIER = detail::pow10<decimal_type>(Scale);
 
     decimal_type value_{};
 
@@ -34,96 +36,29 @@ public:
 
     constexpr Decimal(double value) : value_(double_to_decimal(value)) {}
 
-    Decimal
-    operator-() const
-    {
-        return -value_;
-    }
+    Decimal operator-() const;
+    decimal_type get_underlying() const;
+    void set_underlying(decimal_type value);
+    Decimal operator-(const Decimal& other) const;
+    Decimal operator+(const Decimal& other) const;
+    Decimal operator/(const Decimal& other) const;
+    Decimal operator*(const Decimal& other) const;
+    Decimal& operator*=(const Decimal& other);
+    Decimal& operator/=(const Decimal& other);
+    Decimal& operator+=(const Decimal& other);
+    bool operator==(double other) const;
 
-    decimal_type
-    get_underlying() const
-    {
-        return value_;
-    }
+    explicit operator double() const;
+    explicit operator float() const;
+    auto operator<=>(const Decimal& other) const = default;
+    bool operator==(const Decimal& other) const = default;
 
-    void
-    set_underlying(decimal_type value)
-    {
-        value_ = value;
-    }
-
-    constexpr Decimal
-    operator-(const Decimal& other) const
-    {
-        return value_ - other.value_;
-    }
-
-    constexpr Decimal
-    operator+(const Decimal& other) const
-    {
-        return value_ + other.value_;
-    }
-
-    constexpr Decimal
-    operator/(const Decimal& other) const
-    {
-        return value_ / other.value_;
-    }
-
-    constexpr Decimal
-    operator*(const Decimal& other) const
-    {
-        return (value_ * other.value_) / MULTIPLIER;
-    }
-
-    constexpr Decimal&
-    operator/=(const Decimal& other)
-    {
-        value_ /= other.value_;
-        return *this;
-    }
-
-    constexpr Decimal&
-    operator+=(const Decimal& other)
-    {
-        value_ += other.value_;
-        return *this;
-    }
-
-    constexpr bool
-    operator==(double other) const
-    {
-        return value_ == static_cast<decimal_type>(other * MULTIPLIER);
-    }
-
-    explicit constexpr
-    operator double() const
-    {
-        return static_cast<double>(value_) / static_cast<double>(MULTIPLIER);
-    }
-
-    explicit constexpr
-    operator float() const
-    {
-        return static_cast<float>(value_) / static_cast<float>(MULTIPLIER);
-    }
-
-    constexpr auto operator<=>(const Decimal& other) const = default;
-    constexpr bool operator==(const Decimal& other) const = default;
-
-    Decimal
-    difference(const Decimal& other) const
-    {
-        if (value_ >= other.value_) {
-            return value_ - other.value_;
-        }
-        return other.value_ - value_;
-    }
+    Decimal difference(const Decimal& other) const;
 
 private:
     constexpr Decimal(decimal_type value) : value_(value) {}
 
-    static bool
+    static constexpr bool
     double_within_bounds(double value)
     {
         bool lower_bound =
@@ -139,7 +74,6 @@ private:
     static constexpr decimal_type
     double_to_decimal(double value)
     {
-        // Necessary to support constexpr constructors
         if consteval {
             return static_cast<decimal_type>(value * MULTIPLIER);
         }
@@ -159,6 +93,7 @@ private:
 
 using decimal_price = Decimal<PRICE_DECIMAL_PLACES>;
 using decimal_quantity = Decimal<QUANTITY_DECIMAL_PLACES>;
+
 } // namespace nutc::common
 
 namespace std {

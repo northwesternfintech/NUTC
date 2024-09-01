@@ -27,7 +27,7 @@ add_executable(NUTC_tests
 
   src/unit/traders/trader_container.cpp
 
-  src/unit/types/decimal_price.cpp
+  src/unit/types/decimal.cpp
   
   src/integration/basic.cpp
   src/integration/cancellation.cpp

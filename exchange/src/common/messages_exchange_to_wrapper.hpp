@@ -32,11 +32,12 @@ struct match {
     std::string seller_id;
     common::decimal_price buyer_capital;
     common::decimal_price seller_capital;
+    std::string match_type{};
 
     match() = default;
 
     match(
-        common::Ticker ticker, common::Side side, double quantity,
+        common::Ticker ticker, common::Side side, decimal_quantity quantity,
         common::decimal_price price, std::string bid, std::string sid,
         common::decimal_price bcap, common::decimal_price scap
     ) :
