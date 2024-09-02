@@ -16,7 +16,7 @@ void
 CompositeOrderBook::remove_order(common::order_id_t order_id)
 {
     auto order_opt = order_id_tracker_.remove_order(order_id);
-    if (!order_opt.has_value())
+    if (!order_opt.has_value()) [[unlikely]]
         return;
 
     auto order_it = order_opt.value();
@@ -45,9 +45,9 @@ CompositeOrderBook::change_quantity(
         remove_order(order);
         return;
     }
-    LimitOrderBook::change_quantity(order, quantity_delta);
     level_update_generator_.record_level_change(
         order->side, quantity_delta, order->price
     );
+    LimitOrderBook::change_quantity(order, quantity_delta);
 }
 } // namespace nutc::exchange

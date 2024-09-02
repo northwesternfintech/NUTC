@@ -7,8 +7,6 @@
 
 #include <gtest/gtest.h>
 
-// TODO: expiration tests
-
 using nutc::common::Ticker;
 using nutc::common::Side::buy;
 using nutc::common::Side::sell;
@@ -107,13 +105,13 @@ TEST_F(UnitCompositeOrderBookTest, RemoveNonExistingOrder)
 
 TEST_F(UnitCompositeOrderBookTest, GetMidpriceTest)
 {
-    tagged_limit_order order1{trader_1, Ticker::ETH, buy, 1.0, 1.0};
-    tagged_limit_order order2{trader_2, Ticker::ETH, sell, 1.0, 1.0};
+    tagged_limit_order order1{trader_1, Ticker::ETH, buy, 1.0, 10.0};
+    tagged_limit_order order2{trader_2, Ticker::ETH, sell, 1.0, 0.0};
 
     container_.add_order(order1);
     container_.add_order(order2);
 
-    EXPECT_EQ(container_.get_midprice(), 1.0);
+    EXPECT_EQ(container_.get_midprice(), 5.0);
 
     container_.remove_order(order1.order_id);
     EXPECT_EQ(container_.get_midprice(), 0.0);
@@ -147,4 +145,15 @@ TEST_F(UnitCompositeOrderBookTest, ChangeQuantityRemovesOrderWhenZero)
     ASSERT_EQ_OB_UPDATE(updates[0], Ticker::ETH, buy, 0, 1);
 
     EXPECT_FALSE(container_.get_top_order(buy).has_value());
+}
+
+TEST_F(UnitCompositeOrderBookTest, GetTopOrder)
+{
+    tagged_limit_order order{trader_1, Ticker::ETH, buy, 1.0, 1.0};
+
+    container_.add_order(order);
+
+    auto top_order = container_.get_top_order(buy);
+    ASSERT_TRUE(top_order.has_value());
+    EXPECT_EQ((*top_order)->quantity, 1.0);
 }
