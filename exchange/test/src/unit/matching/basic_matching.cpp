@@ -247,3 +247,66 @@ TEST_F(UnitBasicMatching, MultiplePartialFillReversed)
     ASSERT_EQ_MATCH(matches.at(0), Ticker::ETH, "DEF", "ABC", buy, 1, 1);
     ASSERT_EQ_MATCH(matches.at(1), Ticker::ETH, "DEF", "ABC", buy, 1, 1);
 }
+
+TEST_F(UnitBasicMatching, MultipleOrders)
+{
+    tagged_limit_order order1{trader1, Ticker::ETH, buy, 1.0, 1.0};
+    tagged_limit_order order2{trader1, Ticker::ETH, buy, 1.0, 1.0};
+    tagged_limit_order order3{trader2, Ticker::ETH, sell, 1.0, 1.0};
+    tagged_limit_order order4{trader2, Ticker::ETH, sell, 1.0, 1.0};
+
+    auto matches = add_to_engine_(order1);
+    ASSERT_EQ(matches.size(), 0);
+
+    matches = add_to_engine_(order2);
+    ASSERT_EQ(matches.size(), 0);
+
+    matches = add_to_engine_(order3);
+    ASSERT_EQ(matches.size(), 1);
+    ASSERT_EQ_MATCH(matches.at(0), Ticker::ETH, "ABC", "DEF", sell, 1, 1);
+
+    matches = add_to_engine_(order4);
+    ASSERT_EQ(matches.size(), 1);
+    ASSERT_EQ_MATCH(matches.at(0), Ticker::ETH, "ABC", "DEF", sell, 1, 1);
+}
+
+TEST_F(UnitBasicMatching, VerifyOrderbook)
+{
+    tagged_limit_order order1{trader1, Ticker::ETH, buy, 1.0, 1.0};
+    tagged_limit_order order2{trader1, Ticker::ETH, buy, 1.0, 1.0};
+    tagged_limit_order order3{trader2, Ticker::ETH, sell, 1.0, 1.0};
+    tagged_limit_order order4{trader2, Ticker::ETH, sell, 1.0, 1.0};
+
+    auto matches = add_to_engine_(order1);
+    ASSERT_EQ(matches.size(), 0);
+
+    matches = add_to_engine_(order2);
+    ASSERT_EQ(matches.size(), 0);
+
+    matches = add_to_engine_(order3);
+    ASSERT_EQ(matches.size(), 1);
+    ASSERT_EQ_MATCH(matches.at(0), Ticker::ETH, "ABC", "DEF", sell, 1, 1);
+
+    auto buy_order = orderbook_.get_top_order(buy);
+    ASSERT_TRUE(buy_order.has_value());
+    ASSERT_EQ((*buy_order)->quantity, 1.0);
+
+    auto sell_order = orderbook_.get_top_order(sell);
+    ASSERT_FALSE(sell_order.has_value());
+}
+
+TEST_F(UnitBasicMatching, VerifyOrderbookAfterPartialMatch)
+{
+    tagged_limit_order order1{trader1, Ticker::ETH, buy, 2.0, 1.0};
+    tagged_limit_order order2{trader2, Ticker::ETH, sell, 1.0, 1.0};
+
+    add_to_engine_(order1);
+    add_to_engine_(order2);
+
+    auto buy_orders = orderbook_.get_top_order(buy);
+    ASSERT_TRUE(buy_orders.has_value());
+    ASSERT_EQ((*buy_orders)->quantity, 1.0);
+
+    auto sell_orders = orderbook_.get_top_order(sell);
+    ASSERT_FALSE(sell_orders.has_value());
+}

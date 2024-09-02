@@ -14,34 +14,32 @@ class Engine {
     using decimal_price = common::decimal_price;
 
     decimal_price order_fee_;
-    using side = nutc::common::Side;
-    using match = common::match;
 
 public:
     explicit Engine(decimal_price order_fee = 0.0) : order_fee_(order_fee) {}
 
     template <TaggedOrder OrderT>
-    std::vector<match> match_order(OrderT order, CompositeOrderBook& orderbook);
+    std::vector<common::match> match_order(OrderT order, CompositeOrderBook& orderbook);
 
 private:
     template <TaggedOrder OrderT>
-    glz::expected<match, bool>
+    glz::expected<common::match, bool>
     match_incoming_order_(OrderT& aggressive_order, CompositeOrderBook& orderbook);
 
     template <common::Side AggressiveSide, TaggedOrder OrderT>
-    glz::expected<match, bool> match_incoming_order_(
+    glz::expected<common::match, bool> match_incoming_order_(
         OrderT& aggressive_order, LimitOrderBook::stored_limit_order passive_order,
         CompositeOrderBook& orderbook
     );
 
     template <common::Side AggressiveSide, typename OrderPairT>
-    glz::expected<match, bool>
+    glz::expected<common::match, bool>
     match_orders_(OrderPairT& orders, CompositeOrderBook& orderbook);
 
     enum class MatchFailure { buyer_failure, seller_failure, done_matching };
 
     template <common::Side AggressiveSide, typename OrderPairT>
-    glz::expected<match, MatchFailure> attempt_match_(OrderPairT& orders);
+    glz::expected<common::match, MatchFailure> attempt_match_(OrderPairT& orders);
 
     decimal_price
     total_order_cost_(decimal_price price, common::decimal_quantity quantity) const;

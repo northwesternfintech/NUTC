@@ -43,13 +43,13 @@ Engine::match_orders_(OrderPairT& orders, CompositeOrderBook& orderbook)
         return match_result.value();
     }
     if (match_result.error() == MatchFailure::seller_failure) {
-        if constexpr (AggressiveSide == side::buy) {
+        if constexpr (AggressiveSide == common::Side::buy) {
             orderbook.remove_order(orders.template get_order<common::Side::sell>());
             return glz::unexpected(false);
         }
     }
     if (match_result.error() == MatchFailure::buyer_failure) {
-        if constexpr (AggressiveSide == side::sell) {
+        if constexpr (AggressiveSide == common::Side::sell) {
             orderbook.remove_order(orders.template get_order<common::Side::buy>());
             return glz::unexpected(false);
         }
@@ -67,7 +67,7 @@ Engine::match_incoming_order_(
     // We can copy stored_limit_order because it's already pointing to the order. We
     // cannot copy OrderT by value because it will then point to something else
     // This is a confusing micro optimization. Trust tho.
-    if constexpr (AggressiveSide == side::buy) {
+    if constexpr (AggressiveSide == common::Side::buy) {
         OrderPair<OrderT&, LimitOrderBook::stored_limit_order> pair{
             aggressive_order, passive_order
         };
@@ -122,19 +122,19 @@ template <TaggedOrder OrderT>
 glz::expected<match, bool>
 Engine::match_incoming_order_(OrderT& aggressive_order, CompositeOrderBook& orderbook)
 {
-    if (aggressive_order.side == side::buy) {
-        auto passive_order = orderbook.get_top_order(side::sell);
+    if (aggressive_order.side == common::Side::buy) {
+        auto passive_order = orderbook.get_top_order(common::Side::sell);
         if (!passive_order.has_value())
             return glz::unexpected(true);
-        return match_incoming_order_<side::buy>(
+        return match_incoming_order_<common::Side::buy>(
             aggressive_order, passive_order.value(), orderbook
         );
     }
 
-    auto passive_order = orderbook.get_top_order(side::buy);
+    auto passive_order = orderbook.get_top_order(common::Side::buy);
     if (!passive_order.has_value())
         return glz::unexpected(true);
-    return match_incoming_order_<side::sell>(
+    return match_incoming_order_<common::Side::sell>(
         aggressive_order, passive_order.value(), orderbook
     );
 }
