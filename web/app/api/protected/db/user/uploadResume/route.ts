@@ -26,7 +26,7 @@ export async function GET() {
   });
   const params = {
     Bucket: "nutc",
-    Key: resume.key,
+    Key: resume.s3Key,
     ContentType: "application/pdf",
   } satisfies PutObjectCommandInput;
 

@@ -20,7 +20,7 @@ model User {
 }
 
 model Algo {
-  algoFileKey        String  @id
+  algoFileS3Key      String  @id
   name               String  @unique
   description        String
   case               String
@@ -29,7 +29,7 @@ model Algo {
   lintFailureMessage String?
   lintSuccessMessage String?
 
-  algoFile AlgoFile @relation(fields: [algoFileKey], references: [key])
+  algoFile AlgoFile @relation(fields: [algoFileS3Key], references: [s3Key])
   uid      String
   user     User     @relation(fields: [uid], references: [uid])
 
@@ -38,7 +38,7 @@ model Algo {
 }
 
 model AlgoFile {
-  key       String   @id @default(uuid())
+  s3Key     String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   Algo      Algo?
@@ -62,7 +62,7 @@ model Profile {
 }
 
 model Resume {
-  key       String   @id @default(uuid())
+  s3Key     String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

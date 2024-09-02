@@ -24,7 +24,7 @@ export async function getAlgos() {
   });
 }
 
-export async function getAlgo(algoFileKey: string) {
+export async function getAlgo(algoFileS3Key: string) {
   const session = await getSession();
   if (!session?.user.sub) {
     return null;
@@ -40,7 +40,7 @@ export async function getAlgo(algoFileKey: string) {
       user: {
         uid: uid,
       },
-      algoFileKey: algoFileKey,
+      algoFileS3Key,
     },
     include: {
       algoFile: true,

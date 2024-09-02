@@ -38,7 +38,7 @@ export default function SubmissionForm(props: { user: any }) {
     name: string;
     case: string;
     description: string;
-    algoFileKey: string;
+    algoFileS3Key: string;
   };
 
   const { handleSubmit, register, watch, setValue } = useForm<Inputs>({
@@ -46,7 +46,7 @@ export default function SubmissionForm(props: { user: any }) {
       name: "",
       case: "HFT",
       description: "",
-      algoFileKey: "",
+      algoFileS3Key: "",
     },
   });
 
@@ -86,7 +86,7 @@ export default function SubmissionForm(props: { user: any }) {
       Swal.showLoading();
 
       const linterResponse = await fetch(
-        `${process.env.API_ENDPOINT}/webserver/submit/${props.user.sub}/${data.algoFileKey}`,
+        `${process.env.API_ENDPOINT}/webserver/submit/${props.user.sub}/${data.algoFileS3Key}`,
         {
           method: "POST",
           headers: {
@@ -104,7 +104,7 @@ export default function SubmissionForm(props: { user: any }) {
           timer: 2000,
           timerProgressBar: true,
           willClose: () => {
-            window.location.href = "submissions/" + data.algoFileKey;
+            window.location.href = "submissions/" + data.algoFileS3Key;
           },
         });
       } else {
@@ -116,7 +116,7 @@ export default function SubmissionForm(props: { user: any }) {
             timer: 4000,
             timerProgressBar: true,
             willClose: () => {
-              window.location.href = "submissions/" + data.algoFileKey;
+              window.location.href = "submissions/" + data.algoFileS3Key;
             },
           });
         } else {
@@ -130,7 +130,7 @@ export default function SubmissionForm(props: { user: any }) {
     }
   };
 
-  const [caseValue, algoFileKey] = watch(["case", "algoFileKey"]);
+  const [caseValue, algoFileS3Key] = watch(["case", "algoFileS3Key"]);
 
   const handleAlgoChange = async (file: File) => {
     const fileExtension = file.name.split(".").pop()?.toLowerCase();
@@ -167,7 +167,7 @@ export default function SubmissionForm(props: { user: any }) {
     if (!uploadResp.ok) {
       Swal.fire({ icon: "error", title: "Error uploading algorithm" });
     } else {
-      setValue("algoFileKey", key);
+      setValue("algoFileS3Key", key);
     }
   };
 
@@ -323,7 +323,7 @@ export default function SubmissionForm(props: { user: any }) {
               </label>
               <div
                 className={
-                  algoFileKey
+                  algoFileS3Key
                     ? "mt-2 flex justify-center rounded-lg border border-solid border-green-400 px-6 py-10"
                     : isDragOver
                     ? "mt-2 flex justify-center rounded-lg border border-solid border-indigo-500 px-6 py-10"
@@ -333,7 +333,7 @@ export default function SubmissionForm(props: { user: any }) {
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}>
                 <div className="text-center">
-                  {algoFileKey ? (
+                  {algoFileS3Key ? (
                     <CheckIcon
                       className="mx-auto h-12 w-12 text-green-500"
                       aria-hidden="true"

@@ -25,14 +25,14 @@ export async function POST() {
 
   const params = {
     Bucket: "nutc",
-    Key: algoFile.key,
+    Key: algoFile.s3Key,
     ContentType: "text/x-python",
   } satisfies PutObjectCommandInput;
 
   try {
     const command = new PutObjectCommand(params);
     const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
-    return NextResponse.json({ url: url, key: algoFile.key });
+    return NextResponse.json({ url: url, key: algoFile.s3Key });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
