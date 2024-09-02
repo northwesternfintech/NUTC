@@ -10,7 +10,7 @@ export async function POST(req: Request) {
       !algo.name ||
       !algo.description ||
       !algo.case ||
-      !algo.algoFileKey ||
+      !algo.algoFileS3Key ||
       !algo.uid
     ) {
       return new Response("Not all fields in algo added", { status: 402 });
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
         lintResults: "pending",
         algoFile: {
           connect: {
-            key: algo.algoFileKey,
+            s3Key: algo.algoFileS3Key,
           },
         },
         user: {

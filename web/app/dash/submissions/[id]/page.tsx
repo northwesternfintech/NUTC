@@ -59,7 +59,7 @@ export default async function SubmissionPage(props: {
         <a
           type="button"
           target="_blank"
-          href={`${process.env.S3_ENDPOINT}/nutc/${algo.algoFile.key}`}
+          href={`${process.env.S3_ENDPOINT}/nutc/${algo.algoFile.s3Key}`}
           className="inline-flex items-center gap-x-1.5 rounded-md bg-indigo-700 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-700">
           Download Submission
           <ArrowDownTrayIcon className="-mr-0.5 h-5 w-5" aria-hidden="true" />

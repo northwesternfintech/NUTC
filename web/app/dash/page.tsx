@@ -142,7 +142,7 @@ export default function Dashboard() {
               )
               .map(deployment => (
                 <li
-                  key={deployment.algoFileKey}
+                  key={deployment.algoFileS3Key}
                   className="relative flex items-center space-x-4 px-4 py-4 sm:px-6 lg:px-8">
                   <div className="min-w-0 flex-auto">
                     <div className="flex items-center gap-x-3">
@@ -155,7 +155,7 @@ export default function Dashboard() {
                       </div>
                       <h2 className="min-w-0 text-sm font-semibold leading-6 text-white">
                         <a
-                          href={`/dash/submissions/${deployment.algoFileKey}`}
+                          href={`/dash/submissions/${deployment.algoFileS3Key}`}
                           className="flex gap-x-2">
                           {/* <span className="hidden truncate">
                             {deployment.teamName}
