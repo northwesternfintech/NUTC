@@ -38,6 +38,12 @@ process_arguments(int argc, const char** argv)
         })
         .required();
 
+    program.add_argument("-B", "--binary_algo")
+        .help("Run a binary, compiled algorithm")
+        .default_value(false)
+        .implicit_value(true)
+        .nargs(0);
+
     uint8_t verbosity = 0;
     program.add_argument("-v", "--verbose")
         .help("increase output verbosity")
@@ -62,6 +68,10 @@ process_arguments(int argc, const char** argv)
                                       program.get<std::string>("--algo_id")
                                   );
 
-    return {verbosity, trader_id};
+    common::AlgoType algo_type = program.get<bool>("--binary_algo")
+                                     ? common::AlgoType::binary
+                                     : common::AlgoType::python;
+
+    return {verbosity, trader_id, algo_type};
 }
 } // namespace nutc::wrapper

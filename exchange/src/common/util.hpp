@@ -19,7 +19,13 @@ std::string get_firebase_endpoint(const std::string& params);
 enum class Side { buy, sell };
 std::string to_string(Side side);
 
+// https://stackoverflow.com/questions/7053538/how-do-i-encode-a-string-to-base64-using-only-boost
+std::string base64_encode(const std::string& data);
+
+std::string base64_decode(const std::string& data);
+
 enum class Mode { dev, sandbox, normal, bots_only };
+enum class AlgoType { python, binary };
 
 struct algorithm {
     const std::string UID;

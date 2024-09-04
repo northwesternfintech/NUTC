@@ -3,6 +3,10 @@
 #include "common/config/config.h"
 
 #include <fmt/format.h>
+#include <boost/algorithm/string.hpp>
+#include <boost/archive/iterators/base64_from_binary.hpp>
+#include <boost/archive/iterators/binary_from_base64.hpp>
+#include <boost/archive/iterators/transform_width.hpp>
 
 #include <random>
 
@@ -46,6 +50,32 @@ std::string
 to_string(Side side)
 {
     return side == Side::buy ? "BUY" : "SELL";
+}
+
+std::string
+base64_encode(const std::string& data)
+{
+    using boost::archive::iterators::base64_from_binary;
+    using boost::archive::iterators::transform_width;
+    using base64_it =
+        base64_from_binary<transform_width<std::string::const_iterator, 6, 8>>;
+
+    auto tmp = std::string(base64_it(data.begin()), base64_it(data.end()));
+    return tmp.append((3 - data.size() % 3) % 3, '=');
+}
+
+std::string
+base64_decode(const std::string& data)
+{
+    using boost::archive::iterators::binary_from_base64;
+    using boost::archive::iterators::transform_width;
+    using base64_it =
+        transform_width<binary_from_base64<std::string::const_iterator>, 8, 6>;
+
+    return boost::algorithm::trim_right_copy_if(
+        std::string(base64_it(data.begin()), base64_it(data.end())),
+        [](char c) { return c == '\0'; }
+    );
 }
 
 std::string
