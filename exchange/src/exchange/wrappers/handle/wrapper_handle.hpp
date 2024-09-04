@@ -1,5 +1,4 @@
-#pragma once
-
+#include "common/util.hpp"
 #include "exchange/wrappers/messaging/pipe_reader.hpp"
 #include "exchange/wrappers/messaging/pipe_writer.hpp"
 
@@ -15,8 +14,8 @@ namespace fs = std::filesystem;
 
 class WrapperHandle {
     bp::child wrapper_;
-    PipeReader reader_{};
-    PipeWriter writer_{};
+    std::unique_ptr<PipeReader> reader_{};
+    std::unique_ptr<PipeWriter> writer_{};
 
     WrapperHandle(const std::vector<std::string>& args, const std::string& algorithm);
     void block_on_init();
@@ -33,18 +32,23 @@ public:
     WrapperHandle(const std::string& remote_uid, const std::string& algo_id);
 
     // Local (.py on disk)
-    WrapperHandle(const std::string& algo_path);
+    WrapperHandle(const std::string& algo_path, common::AlgoType algo_type);
+
+    WrapperHandle(const WrapperHandle&) = delete;
+    WrapperHandle(WrapperHandle&&) = default;
+    WrapperHandle& operator=(const WrapperHandle&) = delete;
+    WrapperHandle& operator=(WrapperHandle&&) noexcept = default;
 
     std::vector<common::IncomingMessageVariant>
     read_shared()
     {
-        return reader_.get_shared();
+        return reader_->get_shared();
     }
 
     void
     send_message(const std::string& message)
     {
-        return writer_.send_message(message);
+        return writer_->send_message(message);
     }
 
     ~WrapperHandle();
