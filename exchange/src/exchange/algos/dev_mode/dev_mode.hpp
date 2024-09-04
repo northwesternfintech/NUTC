@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/types/decimal.hpp"
+#include "common/util.hpp"
 #include "exchange/algos/algo_manager.hpp"
 #include "exchange/traders/trader_container.hpp"
 
@@ -10,6 +11,7 @@
 #include <vector>
 
 namespace nutc::exchange {
+using algo_type = common::AlgoType;
 
 namespace fs = std::filesystem;
 
@@ -21,7 +23,7 @@ protected:
     const uint8_t NUM_ALGOS;
 
     // Create the files ourselves if not provided
-    std::vector<fs::path> algo_filepaths_;
+    std::vector<std::pair<fs::path, algo_type>> algo_filepaths_;
 
 public:
     explicit DevModeAlgoInitializer(size_t wait_secs, uint8_t num_algos) :
@@ -29,7 +31,7 @@ public:
     {}
 
     explicit DevModeAlgoInitializer(
-        size_t wait_secs, const std::vector<fs::path>& algo_paths
+        size_t wait_secs, const std::vector<std::pair<fs::path, algo_type>>& algo_paths
     ) :
         WAIT_SECS(wait_secs), NUM_ALGOS(static_cast<uint8_t>(algo_paths.size())),
         algo_filepaths_(algo_paths)
@@ -47,12 +49,6 @@ public:
     ) const override;
 
     void initialize_files() final;
-
-    const std::vector<fs::path>&
-    get_algo_filepaths()
-    {
-        return algo_filepaths_;
-    }
 };
 
 } // namespace nutc::exchange

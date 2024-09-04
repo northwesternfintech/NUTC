@@ -1,14 +1,20 @@
+#include "wrapper/algo_wrapper/binary/binary_wrapper.hpp"
+#include "wrapper/algo_wrapper/python/python_wrapper.hpp"
+#include "wrapper/algo_wrapper/wrapper.hpp"
 #include "wrapper/config/argparse.hpp"
 #include "wrapper/messaging/exchange_communicator.hpp"
-#include "wrapper/pywrapper/pywrapper.hpp"
 #include "wrapper/util/logging.hpp"
 #include "wrapper/util/resource_limits.hpp"
 
+#include <boost/algorithm/string/trim.hpp>
 #include <pybind11/embed.h>
 #include <pybind11/pybind11.h>
 
 #include <csignal>
 
+#include <iostream>
+#include <memory>
+#include <stdexcept>
 #include <string>
 
 // We stop the exchange with sigint. The wrapper should exit gracefully
@@ -25,13 +31,9 @@ main(int argc, const char** argv)
     using namespace nutc::wrapper;
 
     std::signal(SIGINT, catch_sigint);
-    auto [verbosity, trader_id] = process_arguments(argc, argv);
-    pybind11::scoped_interpreter guard{};
+    auto [verbosity, trader_id, algo_type] = process_arguments(argc, argv);
 
-    ExchangeCommunicator communicator{
-        trader_id, ob_update_function(), trade_update_function(),
-        account_update_function()
-    };
+    ExchangeCommunicator communicator{trader_id};
 
     if (!set_memory_limit(1024) || !kill_on_exchange_death()) {
         log_e(main, "Failed to set memory limit");
@@ -39,7 +41,7 @@ main(int argc, const char** argv)
         return 1;
     }
 
-    algorithm_content algorithm = communicator.consume_algorithm();
+    nutc::common::algorithm_content algorithm = communicator.consume_algorithm();
 
     if (algorithm.algorithm_content_str.empty()) {
         communicator.report_startup_complete();
@@ -48,12 +50,23 @@ main(int argc, const char** argv)
     communicator.report_startup_complete();
     communicator.wait_for_start_time();
 
-    create_api_module(
-        communicator.place_limit_order(), communicator.place_market_order(),
-        communicator.cancel_order()
-    );
-    run_initialization_code(algorithm.algorithm_content_str);
+    std::unique_ptr<Wrapper> wrapper;
 
-    communicator.main_event_loop();
+    if (algo_type == nutc::common::AlgoType::python) {
+        wrapper = std::make_unique<PyWrapper>(
+            algorithm.algorithm_content_str, trader_id, communicator
+        );
+    }
+    else {
+        wrapper = std::make_unique<BinaryWrapper>(
+            algorithm.algorithm_content_str, trader_id, communicator
+        );
+        // std::cerr << "binary_algo!!\n";
+        // throw std::runtime_error("hello from cpp land!");
+    }
+
+    wrapper->main_event_loop();
+
+    // communicator.main_event_loop();
     return 0;
 }

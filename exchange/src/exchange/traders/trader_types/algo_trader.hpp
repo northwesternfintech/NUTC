@@ -18,17 +18,20 @@ public:
     // Remote (firebase)
     explicit AlgoTrader(
         std::string remote_uid, std::string algo_id, std::string full_name,
-        common::decimal_price capital
+        common::decimal_price capital, WrapperHandle wrapper_handle
     ) :
         GenericTrader(common::trader_id(remote_uid, algo_id), capital),
         DISPLAY_NAME(std::move(full_name)), ALGO_ID(algo_id),
-        wrapper_handle_(std::make_optional<WrapperHandle>(remote_uid, algo_id))
+        wrapper_handle_(std::move(wrapper_handle))
     {}
 
     // Local (algo .py on disk)
-    explicit AlgoTrader(std::string algo_path, common::decimal_price capital) :
+    explicit AlgoTrader(
+        std::string algo_path, common::decimal_price capital,
+        WrapperHandle wrapper_handle
+    ) :
         GenericTrader(algo_path, capital), DISPLAY_NAME(algo_path), ALGO_ID(algo_path),
-        wrapper_handle_(std::make_optional<WrapperHandle>(algo_path))
+        wrapper_handle_(std::move(wrapper_handle))
     {
         if (!common::file_exists(ALGO_ID)) [[unlikely]] {
             std::string err_str =
