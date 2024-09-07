@@ -118,3 +118,24 @@ TEST_F(UnitManyOrders, PassiveAndAggressivePartial)
     ASSERT_EQ(matches.size(), 1);
     ASSERT_EQ_MATCH(matches[0], Ticker::ETH, "D", "B", buy, 9, 1);
 }
+
+TEST_F(UnitManyOrders, ComplexManyOrder)
+{
+    tagged_limit_order order1{trader1, Ticker::ETH, buy, 1.0, 1.0};
+    tagged_limit_order order2{trader2, Ticker::ETH, buy, 1.0, 1.0};
+    tagged_limit_order order3{trader3, Ticker::ETH, buy, 1.0, 1.0};
+    tagged_limit_order order4{trader4, Ticker::ETH, sell, 3.0, 1.0};
+
+    auto matches = add_to_engine_(order1);
+    ASSERT_EQ(matches.size(), 0);
+    matches = add_to_engine_(order2);
+    ASSERT_EQ(matches.size(), 0);
+    matches = add_to_engine_(order3);
+    ASSERT_EQ(matches.size(), 0);
+
+    matches = add_to_engine_(order4);
+    ASSERT_EQ(matches.size(), 3);
+    ASSERT_EQ_MATCH(matches[0], Ticker::ETH, "A", "D", sell, 1, 1);
+    ASSERT_EQ_MATCH(matches[1], Ticker::ETH, "B", "D", sell, 1, 1);
+    ASSERT_EQ_MATCH(matches[2], Ticker::ETH, "C", "D", sell, 1, 1);
+}

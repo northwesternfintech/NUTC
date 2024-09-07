@@ -8,6 +8,7 @@
 using Engine = nutc::exchange::Engine;
 using limit_order = nutc::common::limit_order;
 using tagged_limit_order = nutc::exchange::tagged_limit_order;
+using tagged_market_order = nutc::exchange::tagged_market_order;
 using TraderContainer = nutc::exchange::TraderContainer;
 
 namespace nutc::test {

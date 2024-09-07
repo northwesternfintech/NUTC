@@ -13,18 +13,17 @@ namespace nutc::exchange {
 
 class LimitOrderBook {
     using order_list = std::list<tagged_limit_order>;
+    using order_map = std::map<common::decimal_price, order_list>;
 
-    std::map<common::decimal_price, order_list> bids_;
-    std::map<common::decimal_price, order_list> asks_;
+    order_map bids_;
+    order_map asks_;
 
 public:
     using stored_limit_order = order_list::iterator;
 
     order_list::iterator add_order(const tagged_limit_order& order);
     void remove_order(order_list::iterator order);
-    static void remove_order(
-        order_list::iterator order, std::map<common::decimal_price, order_list>& map
-    );
+    static void remove_order(order_list::iterator order, order_map& map);
     static void change_quantity(
         order_list::iterator order, common::decimal_quantity quantity_delta
     );

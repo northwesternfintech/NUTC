@@ -49,7 +49,7 @@ PipeReader::store_message_(const std::string& message)
 void
 PipeReader::async_read_pipe(std::shared_ptr<std::string> buffer)
 {
-    auto prox_message = [this, buffer](const auto& ec, auto length) {
+    auto prox_message = [this, buffer](const auto& ec, auto length) mutable {
         if (!ec) [[likely]] {
             auto mess = std::string(buffer->data(), length);
             store_message_(mess);

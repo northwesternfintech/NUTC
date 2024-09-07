@@ -3,13 +3,11 @@
 #include "exchange/algos/algo_manager.hpp"
 #include "exchange/config/dynamic/argparse.hpp"
 #include "exchange/config/dynamic/config.hpp"
-#include "exchange/config/dynamic/ticker_config.hpp"
 #include "exchange/logging.hpp"
 #include "exchange/matching_cycle/base/base_cycle.hpp"
 #include "exchange/matching_cycle/cycle_interface.hpp"
 #include "exchange/matching_cycle/dev/dev_cycle.hpp"
 #include "exchange/matching_cycle/sandbox/sandbox_cycle.hpp"
-#include "exchange/orders/ticker_info.hpp"
 #include "exchange/traders/trader_container.hpp"
 
 #include <csignal>
@@ -20,12 +18,14 @@ namespace {
 using namespace nutc::exchange; // NOLINT
 
 std::unique_ptr<MatchingCycleInterface>
-create_cycle(TraderContainer& traders, double order_fee, const auto& mode)
+create_cycle(TraderContainer& traders, const auto& mode)
 {
     using nutc::common::Mode;
     const auto& ticker_config = Config::get().get_tickers();
+    double order_fee = Config::get().constants().ORDER_FEE;
     auto tickers = TickerMapping(ticker_config, traders, order_fee);
 
+    return std::make_unique<BaseMatchingCycle>(tickers, traders);
     switch (mode) {
         case Mode::normal:
             return std::make_unique<BaseMatchingCycle>(tickers, traders);
@@ -61,8 +61,7 @@ main(int argc, const char** argv)
     TraderContainer traders{};
     AlgoInitializer::get_algo_initializer(mode)->initialize_algo_management(traders);
 
-    double order_fee = Config::get().constants().ORDER_FEE;
-    main_event_loop(create_cycle(traders, order_fee, mode));
+    main_event_loop(create_cycle(traders, mode));
 
     return 0;
 }

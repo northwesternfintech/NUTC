@@ -21,9 +21,10 @@ add_executable(NUTC_tests
   src/unit/matching/invalid_orders.cpp
   src/unit/matching/many_orders.cpp
   src/unit/matching/order_fee_matching.cpp
-  src/unit/matching/order_container.cpp
+  src/unit/matching/composite_orderbook_test.cpp
   src/unit/matching/get_update.cpp
   src/unit/matching/match_ioc.cpp
+  src/unit/matching/match_market.cpp
 
   src/unit/traders/trader_container.cpp
 

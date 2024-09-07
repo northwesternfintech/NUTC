@@ -1,58 +1,11 @@
-def place_market_order(side: str, ticker: str, quantity: float) -> bool:
-    """Place a market order - DO NOT MODIFY
-
-    Parameters
-    ----------
-    side
-        Side of order to place ("BUY" or "SELL")
-    ticker
-        Ticker of order to place ("ETH", "BTC", or "LTC")
-    quantity
-        Volume of order to place
-
-    Returns
-    -------
-    True if order succeeded, False if order failed due to rate limiting
-
-    ((IMPORTANT))
-    You should handle the case where the order fails due to rate limiting (maybe wait and try again?)
-    """
-    return True
+def place_market_order(side: str, ticker: str, quantity: float) -> None:
+    return
 
 def place_limit_order(side: str, ticker: str, quantity: float, price: float, ioc: bool = False) -> int:
-    """Place a limit order - DO NOT MODIFY
-
-    Parameters
-    ----------
-    side
-        Side of order to place ("BUY" or "SELL")
-    ticker
-        Ticker of order to place ("ETH", "BTC", or "LTC")
-    quantity
-        Volume of order to place
-    price
-        Price of order to place
-
-    Returns
-    -------
-    order_id if order succeeded, -1 if order failed due to rate limiting
-    """
     return 0
 
-def cancel_order(ticker: str, order_id: int) -> bool:
-    """Place a limit order - DO NOT MODIFY
-    Parameters
-    ----------
-    ticker
-        Ticker of order to place ("ETH", "BTC", or "LTC")
-    order_id
-        order_id returned by place_limit_order
-
-    Returns
-    -------
-    True if order succeeded, False if cancellation failed due to rate limiting
-    """
-    return True
+def cancel_order(ticker: str, order_id: int) -> int:
+    return 0
 
 class Strategy:
     """Template for a strategy."""
@@ -66,9 +19,9 @@ class Strategy:
         Parameters
         ----------
         ticker
-            Ticker of orders that were matched ("ETH", "BTC", or "LTC")
-        side 
-            Side of orders that were matched ("BUY" or "SELL")
+            Ticker of orders that were matched
+        side
+
         price
             Price that trade was executed at
         quantity
@@ -84,22 +37,25 @@ class Strategy:
         Parameters
         ----------
         ticker
-            Ticker that has an orderbook update ("ETH", "BTC", or "LTC")
+            Ticker that has an orderbook update
         side
-            Which orderbook was updated ("BUY" or "SELL")
+            Which orderbook was updated
         price
             Price of orderbook that has an update
         quantity
             Volume placed into orderbook
         """
         print(f"Python Orderbook update: {ticker} {side} {price} {quantity}")
+        if(ticker=="ETH" and quantity<101.0 and quantity>99.0):
+            place_limit_order("BUY", "ETH\n", 10, 10)
+            place_limit_order("BUY", "ETH", 100, 10)
 
     def on_account_update(
         self,
         ticker: str,
         side: str,
-        price: float,
         quantity: float,
+        price: float,
         capital_remaining: float,
     ) -> None:
         """Called whenever one of your orders is filled.
@@ -107,9 +63,9 @@ class Strategy:
         Parameters
         ----------
         ticker
-            Ticker of order that was fulfilled ("ETH", "BTC", or "LTC")
+            Ticker of order that was fulfilled
         side
-            Side of order that was fulfilled ("BUY" or "SELL")
+            Side of order that was fulfilled
         price
             Price that order was fulfilled at
         quantity

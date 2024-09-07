@@ -27,7 +27,7 @@ LimitOrderBook::get_midprice() const
     if (bids_.empty() || asks_.empty()) [[unlikely]] {
         return 0.0;
     }
-    return (double{std::prev(bids_.end())->first} + double{asks_.begin()->first}) / 2.0;
+    return (std::prev(bids_.end())->first + asks_.begin()->first) / 2.0;
 }
 
 void
