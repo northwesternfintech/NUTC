@@ -5,7 +5,7 @@ services:
     image: node:latest
     working_dir: /app
     volumes:
-      - .:/app
+      - ..:/app
     command: ["npm", "run", "dev"]
     ports:
       - "3000:3000"

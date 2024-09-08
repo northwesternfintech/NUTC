@@ -1,14 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
-
-const transporter = nodemailer.createTransport({
-	host: 'smtp-relay.brevo.com',
-	port: 587,
-	auth: {
-		user: process.env.SENDINBLUE_USER,
-		pass: process.env.SENDINBLUE_API_KEY,
-	},
-});
+import { SendEmail } from '../sendEmail';
 
 export async function POST(req: NextRequest) {
 	const { firstName, lastName, email, message } = await req.json();
@@ -20,11 +11,11 @@ export async function POST(req: NextRequest) {
 		text: `${firstName} ${lastName} submitted a contact form on nutc.io. Respond at email: ${email}\n\n${message}`,
 	};
 
-	try {
-		await transporter.sendMail(mailOptions);
+	const res = await SendEmail(mailOptions.from, mailOptions.to, mailOptions.subject, mailOptions.text)
+
+	if (res) {
 		return NextResponse.json({ success: true }, { status: 200 });
-	} catch (error) {
-		console.log(error);
+	} else {
 		return NextResponse.json({ success: false, error: "Failed to send message" }, { status: 500 });
 	}
 };
