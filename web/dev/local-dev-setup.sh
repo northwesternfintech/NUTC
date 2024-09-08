@@ -1,5 +1,7 @@
 #!/bin/bash
 
+docker-compose -f ./dev/docker-compose.yml down -t 1
+
 npm i
 
 # Starting local s3 and postgres instances
