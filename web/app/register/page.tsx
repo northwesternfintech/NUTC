@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import getUser from '@/app/api/protected/db/user/getUser'
 import Form from './Form'
 
-export async function userExistsInDb(session: Claims) {
+async function userExistsInDb(session: Claims) {
   const user = await getUser(session?.user.sub);
   return user?.profile != null;
 }
