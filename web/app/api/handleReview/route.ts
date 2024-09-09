@@ -7,8 +7,9 @@ import { NextApiRequest } from "next";
 export async function GET(req: NextRequest) {
 	try {
 		const token = req.nextUrl.searchParams.get("token") || "";
+		const accepted = req.nextUrl.searchParams.get("accept") == "true";
 		const uid = (await prisma.emailTokens.findUnique({ where: { token } }))?.uid || "";
-		console.log("Uid: " + uid);
+		console.log("Uid: " + uid + ", accepted: " + accepted);
 		return NextResponse.json({ message: "Successful" }, { status: 200 });
 	} catch (error) {
 		console.log(error);
