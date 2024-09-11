@@ -13,7 +13,7 @@ export default async function createDefaultUser(session: Claims) {
 		data: {
 			uid: session.user.sub,
 			email: session.user.email,
-			participantState: ParticipantState.WAITING,
+			participantState: ParticipantState.PRE_REGISTRATION,
 		},
 	})
 }
