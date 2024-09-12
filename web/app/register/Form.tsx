@@ -102,7 +102,7 @@ export default function RegistrationForm(props: { user: any }) {
       didOpen: toast => {
         toast.addEventListener("mouseenter", Swal.stopTimer);
         toast.addEventListener("mouseleave", Swal.resumeTimer);
-      }
+      },
     });
   };
 
@@ -201,8 +201,8 @@ export default function RegistrationForm(props: { user: any }) {
                   resumeUploaded
                     ? "mt-2 flex justify-center rounded-lg border border-solid border-green-400 px-6 py-10"
                     : isDragOver
-                      ? "mt-2 flex justify-center rounded-lg border border-dashed border-indigo-500 px-6 py-10"
-                      : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"
+                    ? "mt-2 flex justify-center rounded-lg border border-dashed border-indigo-500 px-6 py-10"
+                    : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"
                 }
                 ref={dropRef}
                 onDragOver={handleDragOver}
