@@ -8,13 +8,30 @@ datasource db {
   url      = env("PRISMA_DATABASE_URL")
 }
 
+// Token is a secret. Using this token, api routes will accept or reject user
+// We need this because just using uid would mean someone could spoof the accept route
+model EmailTokens {
+  token String @id @default(cuid())
+  uid   String
+
+  @@map("email_tokens")
+}
+
+enum ParticipantState {
+  PRE_REGISTRATION
+  WAITING
+  REJECTED
+  ACCEPTED
+}
+
 model User {
-  uid      String     @id
-  email    String     @unique
-  Resume   Resume[]
-  Algo     Algo[]
-  profile  Profile?
-  AlgoFile AlgoFile[]
+  uid              String           @id
+  email            String           @unique
+  participantState ParticipantState @default(PRE_REGISTRATION)
+  Resume           Resume[]
+  Algo             Algo[]
+  profile          Profile?
+  AlgoFile         AlgoFile[]
 
   @@map("users")
 }

@@ -89,26 +89,33 @@ export default function RegistrationForm(props: { user: any }) {
     handleResumeChange(files[0]);
   };
 
+  const alertUnfilledField = (fieldName: string) => {
+    Swal.fire({
+      title: "Please fill out all fields",
+      icon: "warning",
+      text: "Missing field: " + fieldName,
+      toast: true,
+      position: "top-end",
+      showConfirmButton: false,
+      timer: 4000,
+      timerProgressBar: true,
+      didOpen: toast => {
+        toast.addEventListener("mouseenter", Swal.stopTimer);
+        toast.addEventListener("mouseleave", Swal.resumeTimer);
+      },
+    });
+  };
+
   const confirmEntriesAdded = () => {
-    if(!resumeUploaded) return false;
     for (const [key, value] of Object.entries(profile)) {
       if (!value) {
-        Swal.fire({
-          title: "Please fill out all fields",
-          icon: "warning",
-          text: "Missing field: " + key,
-          toast: true,
-          position: "top-end",
-          showConfirmButton: false,
-          timer: 4000,
-          timerProgressBar: true,
-          didOpen: toast => {
-            toast.addEventListener("mouseenter", Swal.stopTimer);
-            toast.addEventListener("mouseleave", Swal.resumeTimer);
-          },
-        });
+        alertUnfilledField(key);
         return false;
       }
+    }
+    if (!resumeUploaded) {
+      alertUnfilledField("Resume");
+      return false;
     }
     return true;
   };
