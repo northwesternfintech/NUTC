@@ -35,7 +35,7 @@ export async function GenerateApplicationEmail(user: User, profile: Profile) {
 		<li>Last Name: ${profile.lastName}</li>
 		<li>Email: ${user.email}</li>
 		<li>School: ${profile.school}</li>
-		<li>Graduation Year: ${profile.about}</li>
+		<li>Graduation Year: ${profile.year}</li>
     <li><a href=${resume_link}>Resume</a></li>
 		<li><a href="${accept_link}">Accept</a></li>
 		<li><a href="${deny_link}">Deny</a></li>
