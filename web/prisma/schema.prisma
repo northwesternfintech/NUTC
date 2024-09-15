@@ -70,6 +70,7 @@ model Profile {
   firstName String
   lastName  String
   school    String
+  year      String
   about     String
 
   uid  String @id
