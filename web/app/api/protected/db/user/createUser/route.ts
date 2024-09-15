@@ -37,13 +37,13 @@ export async function POST(req: Request) {
       data: profile,
     });
 
-    SendEmail(
+    await SendEmail(
       "info@nutc.io",
       session?.user.email,
       "Application Submitted",
       "Your NUTC application was submitted. You will hear back in the next 72 hours.",
     );
-    GenerateApplicationEmail(user, profile);
+    await GenerateApplicationEmail(user, profile);
 
     return NextResponse.json({ status: 200 });
   } catch (error) {

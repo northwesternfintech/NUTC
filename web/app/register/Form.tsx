@@ -56,6 +56,7 @@ export default function RegistrationForm(props: { user: any }) {
     lastName: "",
     about: "",
     school: "Northwestern",
+    year: "2025"
   };
 
   const [profile, setProfile] = useState(defaultProfile);
@@ -161,15 +162,7 @@ export default function RegistrationForm(props: { user: any }) {
     <div>
       <div className="space-y-12">
         <div className="border-y border-white/10 pb-12 pt-12">
-          <h2 className="text-base font-semibold leading-7 text-white">
-            Profile
-          </h2>
-          <p className="mt-1 text-sm leading-6 text-gray-400">
-            This information will be displayed publicly so be careful what you
-            share.
-          </p>
-
-          <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+          <div className="mt-2 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
             <div className="col-span-full">
               <label
                 htmlFor="about"
@@ -201,8 +194,8 @@ export default function RegistrationForm(props: { user: any }) {
                   resumeUploaded
                     ? "mt-2 flex justify-center rounded-lg border border-solid border-green-400 px-6 py-10"
                     : isDragOver
-                    ? "mt-2 flex justify-center rounded-lg border border-dashed border-indigo-500 px-6 py-10"
-                    : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"
+                      ? "mt-2 flex justify-center rounded-lg border border-dashed border-indigo-500 px-6 py-10"
+                      : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"
                 }
                 ref={dropRef}
                 onDragOver={handleDragOver}
@@ -323,16 +316,34 @@ export default function RegistrationForm(props: { user: any }) {
                 School
               </label>
               <div className="mt-2">
-                <select
+                <input
+                  type="text"
                   id="school"
                   name="school"
                   onChange={handleInputChange}
-                  className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6 [&_*]:text-black">
-                  <option>Northwestern</option>
-                  <option>UChicago</option>
-                  <option>Other</option>
-                </select>
+                  defaultValue="Northwestern University"
+                  className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6" />
               </div>
+              </div>
+
+              <div className="sm:col-span-2">
+                <label
+                  htmlFor="year"
+                  className="block text-sm font-medium leading-6 text-white">
+                  Graduation Year
+                </label>
+                <div className="mt-2">
+                  <select
+                    id="year"
+                    name="year"
+                    onChange={handleInputChange}
+                    className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                    <option>2025</option>
+                    <option>2026</option>
+                    <option>2027</option>
+                    <option>2028</option>
+                  </select>
+                </div>
             </div>
           </div>
         </div>
@@ -352,6 +363,6 @@ export default function RegistrationForm(props: { user: any }) {
           Finish Registration
         </button>
       </div>
-    </div>
+    </div >
   );
 }
