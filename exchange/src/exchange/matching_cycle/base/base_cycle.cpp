@@ -3,7 +3,6 @@
 #include "common/messages_exchange_to_wrapper.hpp"
 #include "common/messages_wrapper_to_exchange.hpp"
 #include "exchange/matching/engine.hpp"
-#include "exchange/config/dynamic/config.hpp"
 
 #include <variant>
 
@@ -12,10 +11,8 @@ namespace nutc::exchange {
 void
 BaseMatchingCycle::before_cycle_(uint64_t)
 {
-    for (auto [symbol, ticker_info] : tickers_) {
-        for (auto& bot_container : ticker_info.bot_containers) {
-            bot_container.generate_orders(ticker_info.limit_orderbook.get_midprice());
-        }
+    for (auto [symbol, ticker_data] : tickers_) {
+        ticker_data.generate_bot_orders();
     }
 }
 
@@ -44,7 +41,7 @@ BaseMatchingCycle::collect_orders(uint64_t) -> std::vector<OrderVariant>
 
         std::transform(
             message_queue.begin(), message_queue.end(), std::back_inserter(orders),
-            [&](auto& v) { return std::visit(get_tagged_order, v); }
+            [&](auto& order) { return std::visit(get_tagged_order, order); }
         );
     };
 
@@ -60,8 +57,8 @@ BaseMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
 
     for (OrderVariant& order_variant : orders) {
         auto match_incoming_order = [&]<typename OrderT>(OrderT& order) {
-            auto& ticker_info = tickers_[order.ticker];
-            auto& orderbook = ticker_info.limit_orderbook;
+            auto& ticker_data = tickers_[order.ticker];
+            auto& orderbook = ticker_data.get_orderbook();
             if constexpr (std::is_same_v<OrderT, common::cancel_order>) {
                 orderbook.remove_order(order.order_id);
             }
@@ -83,7 +80,7 @@ BaseMatchingCycle::handle_matches_(std::vector<common::match> matches)
     std::vector<common::position> ob_updates{};
 
     for (auto [symbol, info] : tickers_) {
-        auto tmp = info.limit_orderbook.get_and_reset_updates();
+        auto tmp = info.get_orderbook().get_and_reset_updates();
         std::ranges::copy(tmp, std::back_inserter(ob_updates));
     }
 

@@ -35,8 +35,8 @@ public:
     {}
 
     void report_current_tick(uint64_t tick_num);
-    void report_trader_stats(const TickerMapping& tickers);
-    void report_ticker_stats(TickerMapping& tickers);
+    void report_trader_stats(const TickerContainer& tickers);
+    void report_ticker_stats(TickerContainer& tickers);
     void report_orders(const std::vector<OrderVariant>& orders);
     void report_matches(const std::vector<common::match>& orders);
 
