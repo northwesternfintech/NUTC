@@ -32,7 +32,7 @@ const faqs = [
     id: 6,
     question: "What resources are provided to participants?",
     answer:
-      "Participants are given access to market/case information, historiocal data, and an online backtester.",
+      "Participants are given access to market/case information, historical data, and an online backtester.",
   },
 ];
 
