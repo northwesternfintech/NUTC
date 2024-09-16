@@ -2,6 +2,7 @@
 
 #include "exchange/orders/ticker_container.hpp"
 #include "exchange/traders/trader_container.hpp"
+#include "common/messages_exchange_to_wrapper.hpp"
 
 #include <hash_table7.hpp>
 #include <prometheus/counter.h>

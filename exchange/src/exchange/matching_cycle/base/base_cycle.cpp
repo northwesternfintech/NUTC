@@ -2,6 +2,8 @@
 
 #include "common/messages_exchange_to_wrapper.hpp"
 #include "common/messages_wrapper_to_exchange.hpp"
+#include "exchange/matching/engine.hpp"
+#include "exchange/config/dynamic/config.hpp"
 
 #include <variant>
 
@@ -57,8 +59,7 @@ BaseMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
     std::vector<common::match> matches;
 
     for (OrderVariant& order_variant : orders) {
-        auto match_order = [&]<typename OrderT>(OrderT& order) {
-            // TODO: expose correct thing yk
+        auto match_incoming_order = [&]<typename OrderT>(OrderT& order) {
             auto& ticker_info = tickers_[order.ticker];
             auto& orderbook = ticker_info.limit_orderbook;
             if constexpr (std::is_same_v<OrderT, common::cancel_order>) {
@@ -67,12 +68,11 @@ BaseMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
             else {
                 if (order.quantity <= 0.0)
                     return;
-                auto& engine = ticker_info.engine;
-                auto tmp = engine.match_order(order, orderbook);
+                auto tmp = match_order(order, orderbook, order_fee_);
                 std::copy(tmp.begin(), tmp.end(), std::back_inserter(matches));
             }
         };
-        std::visit(match_order, order_variant);
+        std::visit(match_incoming_order, order_variant);
     }
     return matches;
 }

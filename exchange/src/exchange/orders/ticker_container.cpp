@@ -3,12 +3,11 @@
 namespace nutc::exchange {
 
 TickerMapping::TickerMapping(
-    const std::vector<ticker_config>& configs, TraderContainer& traders,
-    double order_fee
-) : tickers(create_tickers(configs, traders, order_fee))
+    const std::vector<ticker_config>& configs, TraderContainer& traders
+) : tickers(create_tickers(configs, traders))
 {}
 
-TickerMapping::TickerMapping(double order_fee) : tickers(create_tickers(order_fee)) {}
+TickerMapping::TickerMapping() : tickers(create_tickers()) {}
 
 TickerMapping::Iterator::Iterator(
     std::size_t index, typename std::vector<ticker_info>::iterator iter
@@ -97,22 +96,21 @@ TickerMapping::operator[](common::Ticker ticker) const
 }
 
 std::vector<ticker_info>
-TickerMapping::create_tickers(double order_fee)
+TickerMapping::create_tickers()
 {
     std::vector<ticker_info> result;
     for (std::size_t ticker = 0; ticker < common::TICKERS.size(); ticker++) {
-        result.emplace_back(static_cast<common::Ticker>(ticker), order_fee);
+        result.emplace_back(static_cast<common::Ticker>(ticker));
     }
     return result;
 }
 
 std::vector<ticker_info>
 TickerMapping::create_tickers(
-    const std::vector<ticker_config>& configs, TraderContainer& traders,
-    double order_fee
+    const std::vector<ticker_config>& configs, TraderContainer& traders
 )
 {
-    std::vector<ticker_info> result = create_tickers(order_fee);
+    std::vector<ticker_info> result = create_tickers();
     for (const auto& config : configs) {
         result[std::to_underlying(config.TICKER)].set_bot_config(traders, config);
     }

@@ -1,11 +1,9 @@
 #include "common/messages_exchange_to_wrapper.hpp"
 #include "common/messages_wrapper_to_exchange.hpp"
 #include "common/types/ticker.hpp"
-#include "exchange/matching/engine.hpp"
 #include "exchange/orders/storage/order_storage.hpp"
 #include "exchange/traders/trader_container.hpp"
 
-using Engine = nutc::exchange::Engine;
 using limit_order = nutc::common::limit_order;
 using tagged_limit_order = nutc::exchange::tagged_limit_order;
 using tagged_market_order = nutc::exchange::tagged_market_order;

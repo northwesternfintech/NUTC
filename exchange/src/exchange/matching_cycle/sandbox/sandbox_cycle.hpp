@@ -8,12 +8,12 @@ namespace nutc::exchange {
 
 class SandboxMatchingCycle : public DevMatchingCycle {
 public:
-    SandboxMatchingCycle(TickerMapping tickers, TraderContainer& traders) :
-        DevMatchingCycle(std::move(tickers), traders)
+    SandboxMatchingCycle(TickerMapping tickers, TraderContainer& traders, common::decimal_price order_fee) :
+        DevMatchingCycle(std::move(tickers), traders, order_fee)
     {}
 
 private:
-    virtual void
+    void
     before_cycle_(uint64_t) override
     {
         auto traders = CrowServer::get_instance().get_and_clear_pending_traders();

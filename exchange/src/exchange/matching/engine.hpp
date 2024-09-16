@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/messages_exchange_to_wrapper.hpp"
-#include "common/types/decimal.hpp"
 #include "exchange/orders/orderbook/composite_orderbook.hpp"
 
 #include <glaze/util/expected.hpp>
@@ -10,39 +9,9 @@
 
 namespace nutc::exchange {
 
-class Engine {
-    using decimal_price = common::decimal_price;
-
-    decimal_price order_fee_;
-
-public:
-    explicit Engine(decimal_price order_fee = 0.0) : order_fee_(order_fee) {}
-
-    template <TaggedOrder OrderT>
-    std::vector<common::match> match_order(OrderT order, CompositeOrderBook& orderbook);
-
-private:
-    template <TaggedOrder OrderT>
-    glz::expected<common::match, bool>
-    match_incoming_order_(OrderT& aggressive_order, CompositeOrderBook& orderbook);
-
-    template <common::Side AggressiveSide, TaggedOrder OrderT>
-    glz::expected<common::match, bool> match_incoming_order_(
-        OrderT& aggressive_order, LimitOrderBook::stored_limit_order passive_order,
-        CompositeOrderBook& orderbook
-    );
-
-    template <common::Side AggressiveSide, typename OrderPairT>
-    glz::expected<common::match, bool>
-    match_orders_(OrderPairT& orders, CompositeOrderBook& orderbook);
-
-    enum class MatchFailure { buyer_failure, seller_failure, done_matching };
-
-    template <common::Side AggressiveSide, typename OrderPairT>
-    glz::expected<common::match, MatchFailure> attempt_match_(OrderPairT& orders);
-
-    decimal_price
-    total_order_cost_(decimal_price price, common::decimal_quantity quantity) const;
-};
+template <TaggedOrder OrderT>
+std::vector<common::match> match_order(
+    OrderT order, CompositeOrderBook& orderbook, common::decimal_price order_fee = 0.0
+);
 
 } // namespace nutc::exchange

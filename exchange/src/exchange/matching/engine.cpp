@@ -8,38 +8,18 @@
 
 namespace nutc::exchange {
 
+enum class MatchFailure { buyer_failure, seller_failure, done_matching };
 using match = nutc::common::match;
-
-template <TaggedOrder OrderT>
-std::vector<match>
-Engine::match_order(OrderT order, CompositeOrderBook& orderbook)
-{
-    std::vector<match> matches;
-
-    while (order.quantity != 0.0) {
-        auto match_opt = match_incoming_order_(order, orderbook);
-        if (match_opt.has_value())
-            matches.push_back(match_opt.value());
-        else if (match_opt.error())
-            break;
-    }
-
-    if constexpr (is_limit_order_v<OrderT>) {
-        if (!order.ioc && order.quantity > 0.0) {
-            orderbook.add_order(order);
-        }
-    }
-
-    return matches;
-}
 
 template <common::Side AggressiveSide, typename OrderPairT>
 glz::expected<match, bool>
-Engine::match_orders_(OrderPairT& orders, CompositeOrderBook& orderbook)
+match_orders_(
+    OrderPairT& orders, CompositeOrderBook& orderbook, common::decimal_price order_fee
+)
 {
-    auto match_result = attempt_match_<AggressiveSide>(orders);
+    auto match_result = attempt_match_<AggressiveSide>(orders, order_fee);
     if (match_result.has_value()) [[likely]] {
-        orders.handle_match(*match_result, order_fee_, orderbook);
+        orders.handle_match(*match_result, order_fee, orderbook);
         return match_result.value();
     }
     if (match_result.error() == MatchFailure::seller_failure) {
@@ -59,9 +39,9 @@ Engine::match_orders_(OrderPairT& orders, CompositeOrderBook& orderbook)
 
 template <common::Side AggressiveSide, TaggedOrder OrderT>
 glz::expected<match, bool>
-Engine::match_incoming_order_(
+match_incoming_order_(
     OrderT& aggressive_order, LimitOrderBook::stored_limit_order passive_order,
-    CompositeOrderBook& orderbook
+    CompositeOrderBook& orderbook, common::decimal_price order_fee
 )
 {
     // We can copy stored_limit_order because it's already pointing to the order. We
@@ -71,27 +51,30 @@ Engine::match_incoming_order_(
         OrderPair<OrderT&, LimitOrderBook::stored_limit_order> pair{
             aggressive_order, passive_order
         };
-        return match_orders_<AggressiveSide>(pair, orderbook);
+        return match_orders_<AggressiveSide>(pair, orderbook, order_fee);
     }
     else {
         OrderPair<LimitOrderBook::stored_limit_order, OrderT&> pair{
             passive_order, aggressive_order
         };
-        return match_orders_<AggressiveSide>(pair, orderbook);
+        return match_orders_<AggressiveSide>(pair, orderbook, order_fee);
     }
 }
 
 common::decimal_price
-Engine::total_order_cost_(decimal_price price, common::decimal_quantity quantity) const
+total_order_cost_(
+    common::decimal_price price, common::decimal_quantity quantity,
+    common::decimal_price order_fee
+)
 {
-    decimal_price fee{order_fee_ * price};
-    decimal_price price_per = price + fee;
+    common::decimal_price fee{order_fee * price};
+    common::decimal_price price_per = price + fee;
     return price_per * quantity;
 }
 
 template <common::Side AggressiveSide, typename OrderPairT>
-glz::expected<match, Engine::MatchFailure>
-Engine::attempt_match_(OrderPairT& orders)
+glz::expected<match, MatchFailure>
+attempt_match_(OrderPairT& orders, common::decimal_price order_fee)
 {
     auto price_opt = orders.potential_match_price();
     if (!price_opt) [[unlikely]]
@@ -99,7 +82,9 @@ Engine::attempt_match_(OrderPairT& orders)
 
     auto match_price = *price_opt;
     common::decimal_quantity match_quantity = orders.potential_match_quantity();
-    decimal_price total_price{total_order_cost_(match_price, match_quantity)};
+    common::decimal_price total_price{
+        total_order_cost_(match_price, match_quantity, order_fee)
+    };
 
     auto& buy_order = orders.template get_underlying_order<common::Side::buy>();
     auto& sell_order = orders.template get_underlying_order<common::Side::sell>();
@@ -120,14 +105,17 @@ Engine::attempt_match_(OrderPairT& orders)
 
 template <TaggedOrder OrderT>
 glz::expected<match, bool>
-Engine::match_incoming_order_(OrderT& aggressive_order, CompositeOrderBook& orderbook)
+match_incoming_order_(
+    OrderT& aggressive_order, CompositeOrderBook& orderbook,
+    common::decimal_price order_fee
+)
 {
     if (aggressive_order.side == common::Side::buy) {
         auto passive_order = orderbook.get_top_order(common::Side::sell);
         if (!passive_order.has_value())
             return glz::unexpected(true);
         return match_incoming_order_<common::Side::buy>(
-            aggressive_order, passive_order.value(), orderbook
+            aggressive_order, passive_order.value(), orderbook, order_fee
         );
     }
 
@@ -135,14 +123,38 @@ Engine::match_incoming_order_(OrderT& aggressive_order, CompositeOrderBook& orde
     if (!passive_order.has_value())
         return glz::unexpected(true);
     return match_incoming_order_<common::Side::sell>(
-        aggressive_order, passive_order.value(), orderbook
+        aggressive_order, passive_order.value(), orderbook, order_fee
     );
 }
 
-template std::vector<match>
-Engine::match_order<>(tagged_limit_order, CompositeOrderBook&);
+template <TaggedOrder OrderT>
+std::vector<match>
+match_order(
+    OrderT order, CompositeOrderBook& orderbook, common::decimal_price order_fee
+)
+{
+    std::vector<match> matches;
+
+    while (order.quantity != 0.0) {
+        auto match_opt = match_incoming_order_(order, orderbook, order_fee);
+        if (match_opt.has_value())
+            matches.push_back(match_opt.value());
+        else if (match_opt.error())
+            break;
+    }
+
+    if constexpr (is_limit_order_v<OrderT>) {
+        if (!order.ioc && order.quantity > 0.0) {
+            orderbook.add_order(order);
+        }
+    }
+
+    return matches;
+}
 
 template std::vector<match>
-Engine::match_order<>(tagged_market_order, CompositeOrderBook&);
+match_order<>(tagged_limit_order, CompositeOrderBook&, common::decimal_price);
 
+template std::vector<match>
+match_order<>(tagged_market_order, CompositeOrderBook&, common::decimal_price);
 } // namespace nutc::exchange
