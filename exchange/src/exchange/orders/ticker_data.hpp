@@ -13,38 +13,57 @@ namespace nutc::exchange {
  * @brief Contains the canonical reference to all data coupled to a ticker. Very useful
  * because we typically have to access all at once
  */
-// TODO: rename
-struct ticker_info {
-    CompositeOrderBook limit_orderbook;
-    std::vector<BotContainer> bot_containers;
+class TickerData {
+    CompositeOrderBook limit_orderbook_;
+    std::vector<BotContainer> bot_containers_;
 
-    ticker_info(common::Ticker ticker) :
-        limit_orderbook(ticker)
-    {}
+public:
+    explicit TickerData(common::Ticker ticker) : limit_orderbook_{ticker} {}
+
+    CompositeOrderBook&
+    get_orderbook()
+    {
+        return limit_orderbook_;
+    }
+
+    const CompositeOrderBook&
+    get_orderbook() const
+    {
+        return limit_orderbook_;
+    }
+
+    void
+    generate_bot_orders()
+    {
+        auto midprice = get_orderbook().get_midprice();
+        std::ranges::for_each(bot_containers_, [&](auto& bot_container) {
+            bot_container.generate_orders(midprice);
+        });
+    }
 
     void
     set_bot_config(TraderContainer& traders, const ticker_config& config)
     {
-        bot_containers = create_bot_containers(
+        bot_containers_ = create_bot_containers(
             traders, config.TICKER, config.STARTING_PRICE, config.BOTS
         );
     }
 
 private:
-    std::vector<BotContainer>
+    static std::vector<BotContainer>
     create_bot_containers(
         TraderContainer& trader_container, common::Ticker ticker,
         common::decimal_price starting_price, const std::vector<bot_config>& configs
     )
     {
-        std::vector<BotContainer> containers;
-        containers.reserve(configs.size());
+        std::vector<BotContainer> bot_containers;
+        bot_containers.reserve(configs.size());
         for (const bot_config& bot_config : configs) {
-            containers.emplace_back(
+            bot_containers.emplace_back(
                 ticker, starting_price, trader_container, bot_config
             );
         }
-        return containers;
+        return bot_containers;
     }
 };
 

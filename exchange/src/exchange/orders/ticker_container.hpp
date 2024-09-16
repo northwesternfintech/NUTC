@@ -1,31 +1,31 @@
 #pragma once
 
-#include "ticker_info.hpp"
+#include "ticker_data.hpp"
 
 #include <vector>
 
 namespace nutc::exchange {
 
-class TickerMapping {
-    std::vector<ticker_info> tickers;
+class TickerContainer {
+    std::vector<TickerData> tickers;
 
 public:
-    TickerMapping(const std::vector<ticker_config>& configs, TraderContainer& traders);
+    TickerContainer(const std::vector<ticker_config>& configs, TraderContainer& traders);
 
-    TickerMapping();
+    TickerContainer();
 
     class Iterator {
         std::size_t index_;
-        typename std::vector<ticker_info>::iterator it_;
+        typename std::vector<TickerData>::iterator it_;
 
     public:
         using iterator_category = std::forward_iterator_tag;
         using difference_type = std::ptrdiff_t;
-        using value_type = std::pair<common::Ticker, ticker_info&>;
+        using value_type = std::pair<common::Ticker, TickerData&>;
         using pointer = value_type*;
         using reference = value_type&;
 
-        Iterator(std::size_t index, typename std::vector<ticker_info>::iterator iter);
+        Iterator(std::size_t index, typename std::vector<TickerData>::iterator iter);
 
         value_type operator*();
 
@@ -36,17 +36,17 @@ public:
 
     class ConstIterator {
         std::size_t index_;
-        typename std::vector<ticker_info>::const_iterator it_;
+        typename std::vector<TickerData>::const_iterator it_;
 
     public:
         using iterator_category = std::forward_iterator_tag;
         using difference_type = std::ptrdiff_t;
-        using value_type = std::pair<common::Ticker, const ticker_info&>;
+        using value_type = std::pair<common::Ticker, const TickerData&>;
         using pointer = value_type*;
         using reference = value_type&;
 
         ConstIterator(
-            std::size_t index, typename std::vector<ticker_info>::const_iterator iter
+            std::size_t index, typename std::vector<TickerData>::const_iterator iter
         );
 
         value_type operator*() const;
@@ -61,12 +61,12 @@ public:
     Iterator begin();
     Iterator end();
 
-    ticker_info& operator[](common::Ticker ticker);
-    const ticker_info& operator[](common::Ticker ticker) const;
+    TickerData& operator[](common::Ticker ticker);
+    const TickerData& operator[](common::Ticker ticker) const;
 
 private:
-    static std::vector<ticker_info> create_tickers();
-    static std::vector<ticker_info>
+    static std::vector<TickerData> create_tickers();
+    static std::vector<TickerData>
     create_tickers(const std::vector<ticker_config>& configs, TraderContainer& traders);
 };
 

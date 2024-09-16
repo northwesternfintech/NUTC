@@ -23,7 +23,7 @@ create_cycle(TraderContainer& traders, const auto& mode)
     using nutc::common::Mode;
     const auto& ticker_config = Config::get().get_tickers();
     double order_fee = Config::get().constants().ORDER_FEE;
-    auto tickers = TickerMapping(ticker_config, traders);
+    auto tickers = TickerContainer(ticker_config, traders);
 
     return std::make_unique<BaseMatchingCycle>(tickers, traders, order_fee);
     switch (mode) {

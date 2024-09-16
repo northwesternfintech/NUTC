@@ -2,7 +2,7 @@
 
 #include "common/messages_wrapper_to_exchange.hpp"
 #include "exchange/metrics/prometheus.hpp"
-#include "exchange/orders/ticker_info.hpp"
+#include "exchange/orders/ticker_data.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "prometheus.hpp"
 
@@ -49,18 +49,18 @@ TickerMetricsPusher::report_orders(const std::vector<OrderVariant>& orders)
 }
 
 void
-TickerMetricsPusher::report_ticker_stats(TickerMapping& tickers)
+TickerMetricsPusher::report_ticker_stats(TickerContainer& tickers)
 {
-    auto log_midprice = [&](common::Ticker ticker, const ticker_info& info) {
+    auto log_midprice = [&](common::Ticker ticker, const TickerData& info) {
         ticker_midprice_gauge
             .Add({
                 {"ticker", common::to_string(ticker)}
         })
-            .Set(double{info.limit_orderbook.get_midprice()});
+            .Set(double{info.get_orderbook().get_midprice()});
     };
-    auto log_best_ba = [&](common::Ticker ticker, ticker_info& info) {
-        auto best_bid = info.limit_orderbook.get_top_order(common::Side::buy);
-        auto best_ask = info.limit_orderbook.get_top_order(common::Side::sell);
+    auto log_best_ba = [&](common::Ticker ticker, TickerData& info) {
+        auto best_bid = info.get_orderbook().get_top_order(common::Side::buy);
+        auto best_ask = info.get_orderbook().get_top_order(common::Side::sell);
 
         if (best_bid.has_value()) [[likely]] {
             best_ba_gauge
@@ -81,7 +81,7 @@ TickerMetricsPusher::report_ticker_stats(TickerMapping& tickers)
         }
     };
 
-    // auto log_variance = [&](common::Ticker ticker, const ticker_info& info) {
+    // auto log_variance = [&](common::Ticker ticker, const TickerData& info) {
     //     ticker_midprice_variance_gauge
     //         .Add({
     //             {"ticker", common::to_string(ticker)}
@@ -118,7 +118,7 @@ TickerMetricsPusher::report_current_tick(uint64_t tick_num)
 }
 
 void
-TickerMetricsPusher::report_trader_stats(const TickerMapping& tickers)
+TickerMetricsPusher::report_trader_stats(const TickerContainer& tickers)
 {
     auto report_holdings = [&](const auto& trader) {
         for (auto [ticker, info] : tickers) {
@@ -137,7 +137,7 @@ TickerMetricsPusher::report_trader_stats(const TickerMapping& tickers)
         double pnl = 0.0;
         for (auto [ticker, info] : tickers) {
             double amount_held{trader.get_holdings(ticker)};
-            double midprice{info.limit_orderbook.get_midprice()};
+            double midprice{info.get_orderbook().get_midprice()};
             pnl += amount_held * midprice;
         }
         return pnl;

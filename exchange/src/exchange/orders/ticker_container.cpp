@@ -2,26 +2,26 @@
 
 namespace nutc::exchange {
 
-TickerMapping::TickerMapping(
+TickerContainer::TickerContainer(
     const std::vector<ticker_config>& configs, TraderContainer& traders
 ) : tickers(create_tickers(configs, traders))
 {}
 
-TickerMapping::TickerMapping() : tickers(create_tickers()) {}
+TickerContainer::TickerContainer() : tickers(create_tickers()) {}
 
-TickerMapping::Iterator::Iterator(
-    std::size_t index, typename std::vector<ticker_info>::iterator iter
+TickerContainer::Iterator::Iterator(
+    std::size_t index, typename std::vector<TickerData>::iterator iter
 ) : index_(index), it_(iter)
 {}
 
-TickerMapping::Iterator::value_type
-TickerMapping::Iterator::operator*()
+TickerContainer::Iterator::value_type
+TickerContainer::Iterator::operator*()
 {
     return {static_cast<common::Ticker>(index_), *it_};
 }
 
-TickerMapping::Iterator&
-TickerMapping::Iterator::operator++()
+TickerContainer::Iterator&
+TickerContainer::Iterator::operator++()
 {
     ++it_;
     ++index_;
@@ -29,24 +29,24 @@ TickerMapping::Iterator::operator++()
 }
 
 bool
-TickerMapping::Iterator::operator!=(const Iterator& other) const
+TickerContainer::Iterator::operator!=(const Iterator& other) const
 {
     return it_ != other.it_;
 }
 
-TickerMapping::ConstIterator::ConstIterator(
-    std::size_t index, typename std::vector<ticker_info>::const_iterator iter
+TickerContainer::ConstIterator::ConstIterator(
+    std::size_t index, typename std::vector<TickerData>::const_iterator iter
 ) : index_(index), it_(iter)
 {}
 
-TickerMapping::ConstIterator::value_type
-TickerMapping::ConstIterator::operator*() const
+TickerContainer::ConstIterator::value_type
+TickerContainer::ConstIterator::operator*() const
 {
     return {static_cast<common::Ticker>(index_), *it_};
 }
 
-TickerMapping::ConstIterator&
-TickerMapping::ConstIterator::operator++()
+TickerContainer::ConstIterator&
+TickerContainer::ConstIterator::operator++()
 {
     ++it_;
     ++index_;
@@ -54,63 +54,63 @@ TickerMapping::ConstIterator::operator++()
 }
 
 bool
-TickerMapping::ConstIterator::operator!=(const ConstIterator& other) const
+TickerContainer::ConstIterator::operator!=(const ConstIterator& other) const
 {
     return it_ != other.it_;
 }
 
-TickerMapping::ConstIterator
-TickerMapping::begin() const
+TickerContainer::ConstIterator
+TickerContainer::begin() const
 {
     return {0, tickers.cbegin()};
 }
 
-TickerMapping::ConstIterator
-TickerMapping::end() const
+TickerContainer::ConstIterator
+TickerContainer::end() const
 {
     return {tickers.size(), tickers.cend()};
 }
 
-TickerMapping::Iterator
-TickerMapping::begin()
+TickerContainer::Iterator
+TickerContainer::begin()
 {
     return {0, tickers.begin()};
 }
 
-TickerMapping::Iterator
-TickerMapping::end()
+TickerContainer::Iterator
+TickerContainer::end()
 {
     return {tickers.size(), tickers.end()};
 }
 
-ticker_info&
-TickerMapping::operator[](common::Ticker ticker)
+TickerData&
+TickerContainer::operator[](common::Ticker ticker)
 {
     return tickers[std::to_underlying(ticker)];
 }
 
-const ticker_info&
-TickerMapping::operator[](common::Ticker ticker) const
+const TickerData&
+TickerContainer::operator[](common::Ticker ticker) const
 {
     return tickers[std::to_underlying(ticker)];
 }
 
-std::vector<ticker_info>
-TickerMapping::create_tickers()
+std::vector<TickerData>
+TickerContainer::create_tickers()
 {
-    std::vector<ticker_info> result;
+    std::vector<TickerData> result;
     for (std::size_t ticker = 0; ticker < common::TICKERS.size(); ticker++) {
         result.emplace_back(static_cast<common::Ticker>(ticker));
     }
     return result;
 }
 
-std::vector<ticker_info>
-TickerMapping::create_tickers(
+std::vector<TickerData>
+TickerContainer::create_tickers(
     const std::vector<ticker_config>& configs, TraderContainer& traders
 )
 {
-    std::vector<ticker_info> result = create_tickers();
+    std::vector<TickerData> result = create_tickers();
     for (const auto& config : configs) {
         result[std::to_underlying(config.TICKER)].set_bot_config(traders, config);
     }

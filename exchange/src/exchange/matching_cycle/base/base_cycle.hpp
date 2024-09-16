@@ -9,14 +9,14 @@ namespace nutc::exchange {
  * @brief Barebones matching cycle. Likely to be overridden for more logging
  */
 class BaseMatchingCycle : public MatchingCycleInterface {
-    TickerMapping tickers_;
+    TickerContainer tickers_;
     TraderContainer& traders_;
     common::decimal_price order_fee_;
 
 public:
     // Require transfer of ownership
     BaseMatchingCycle(
-        TickerMapping tickers, TraderContainer& traders, common::decimal_price order_fee
+        TickerContainer tickers, TraderContainer& traders, common::decimal_price order_fee
     ) : tickers_(std::move(tickers)), traders_(traders), order_fee_(order_fee)
     {}
 
