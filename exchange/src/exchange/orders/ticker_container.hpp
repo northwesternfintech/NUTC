@@ -10,12 +10,9 @@ class TickerMapping {
     std::vector<ticker_info> tickers;
 
 public:
-    TickerMapping(
-        const std::vector<ticker_config>& configs, TraderContainer& traders,
-        double order_fee
-    );
+    TickerMapping(const std::vector<ticker_config>& configs, TraderContainer& traders);
 
-    TickerMapping(double order_fee);
+    TickerMapping();
 
     class Iterator {
         std::size_t index_;
@@ -68,11 +65,9 @@ public:
     const ticker_info& operator[](common::Ticker ticker) const;
 
 private:
-    static std::vector<ticker_info> create_tickers(double order_fee);
-    static std::vector<ticker_info> create_tickers(
-        const std::vector<ticker_config>& configs, TraderContainer& traders,
-        double order_fee
-    );
+    static std::vector<ticker_info> create_tickers();
+    static std::vector<ticker_info>
+    create_tickers(const std::vector<ticker_config>& configs, TraderContainer& traders);
 };
 
 } // namespace nutc::exchange

@@ -1,5 +1,6 @@
 #include "common/types/decimal.hpp"
 #include "config.h"
+#include "exchange/matching/engine.hpp"
 #include "exchange/orders/orderbook/composite_orderbook.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
@@ -30,12 +31,11 @@ protected:
     }
 
     nutc::exchange::CompositeOrderBook orderbook_{Ticker::ETH};
-    Engine engine_;
 
     std::vector<nutc::common::match>
     add_to_engine_(const auto& order)
     {
-        return engine_.match_order(order, orderbook_);
+        return nutc::exchange::match_order(order, orderbook_);
     }
 };
 

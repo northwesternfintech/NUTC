@@ -2,7 +2,6 @@
 #include "common/types/decimal.hpp"
 #include "exchange/bots/bot_container.hpp"
 #include "exchange/config/dynamic/ticker_config.hpp"
-#include "exchange/matching/engine.hpp"
 #include "exchange/orders/orderbook/composite_orderbook.hpp"
 #include "exchange/traders/trader_container.hpp"
 
@@ -17,11 +16,10 @@ namespace nutc::exchange {
 // TODO: rename
 struct ticker_info {
     CompositeOrderBook limit_orderbook;
-    Engine engine;
     std::vector<BotContainer> bot_containers;
 
-    ticker_info(common::Ticker ticker, double order_fee) :
-        limit_orderbook(ticker), engine(order_fee)
+    ticker_info(common::Ticker ticker) :
+        limit_orderbook(ticker)
     {}
 
     void

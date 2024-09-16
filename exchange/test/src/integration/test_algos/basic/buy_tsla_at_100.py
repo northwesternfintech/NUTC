@@ -46,7 +46,7 @@ class Strategy:
             Volume placed into orderbook
         """
         print(f"Python Orderbook update: {ticker} {side} {price} {quantity}")
-        if(ticker=="ETH" and quantity<101.0 and quantity>99.0):
+        if(True or (ticker=="ETH" and quantity<101.0 and quantity>99.0)):
             place_limit_order("BUY", "ETH", 100, 10)
 
     def on_account_update(

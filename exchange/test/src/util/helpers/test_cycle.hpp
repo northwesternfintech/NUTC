@@ -16,8 +16,8 @@ class TestMatchingCycle : public exchange::BaseMatchingCycle {
     std::optional<exchange::OrderVariant> last_order;
 
 public:
-    TestMatchingCycle(exchange::TraderContainer& traders, double order_fee = 0.0) :
-        exchange::BaseMatchingCycle{{order_fee}, traders}
+    TestMatchingCycle(exchange::TraderContainer& traders, common::decimal_price order_fee = 0.0) :
+        exchange::BaseMatchingCycle{{}, traders, order_fee}
     {}
 
     // Note: uses tick=0. If using something that relies on tick, it will not work

@@ -107,6 +107,8 @@ public:
         auto& buyer = get_underlying_order<side::buy>();
         auto& seller = get_underlying_order<side::sell>();
         common::position position{buyer.ticker, AggressiveSide, quantity, price};
+        // TODO: match_type is pretty bad, we should have a better way of tracking this.
+        // It's only used for metrics
         std::string match_type =
             fmt::format("{}->{}", seller.trader->get_type(), buyer.trader->get_type());
         common::match m{
