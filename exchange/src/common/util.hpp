@@ -25,7 +25,6 @@ std::string base64_encode(const std::string& data);
 std::string base64_decode(const std::string& data);
 
 enum class Mode { dev, sandbox, normal, bots_only };
-enum class AlgoType { python, binary };
 
 struct algorithm {
     const std::string UID;

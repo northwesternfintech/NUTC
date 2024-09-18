@@ -1,7 +1,5 @@
 #include "wrapper_handle.hpp"
 
-#include "common/file_operations/file_operations.hpp"
-#include "common/firebase/firebase.hpp"
 #include "common/messages_exchange_to_wrapper.hpp"
 #include "common/util.hpp"
 
@@ -14,16 +12,6 @@ quote_id(std::string user_id)
 {
     std::replace(user_id.begin(), user_id.end(), '-', ' ');
     return user_id;
-}
-
-std::string
-force_unwrap_optional(std::optional<std::string> opt, std::string error_msg)
-{
-    if (!opt.has_value()) [[unlikely]] {
-        throw std::runtime_error(error_msg);
-    }
-
-    return opt.value();
 }
 
 } // namespace
@@ -58,66 +46,44 @@ WrapperHandle::~WrapperHandle()
 
 namespace {
 std::vector<std::string>
-create_arguments(
-    const std::string& user_id, const std::string& algo_id, bool dev_mode,
-    common::AlgoType algo_type
-)
+create_arguments(const common::algorithm_variant& algo_variant)
 {
-    std::vector<std::string> args = {
-        "--uid", quote_id(user_id), "--algo_id", quote_id(algo_id)
-    };
+    std::vector<std::string> args = {"--uid", quote_id(common::get_id(algo_variant))};
 
-    if (dev_mode) {
+    if (std::holds_alternative<common::LocalAlgorithm>(algo_variant)) {
         args.emplace_back("--dev");
     }
 
-    if (algo_type == common::AlgoType::binary) {
+    auto language =
+        std::visit([](auto& algo) { return algo.get_language(); }, algo_variant);
+    if (language == common::AlgoLanguage::cpp) {
         args.emplace_back("--binary_algo");
     }
     return args;
 }
 } // namespace
 
-WrapperHandle::WrapperHandle(
-    const std::string& remote_uid, const std::string& algo_id
-) :
+WrapperHandle::WrapperHandle(const common::algorithm_variant& algo_variant) :
     WrapperHandle(
-        create_arguments(
-            remote_uid, algo_id, /*dev_mode=*/false, common::AlgoType::python
-        ),
-        force_unwrap_optional(
-            nutc::common::get_algo(remote_uid, algo_id),
-            fmt::format(
-                "Could not read algoid {} of uid {} from firebase", algo_id, remote_uid
-            )
-        )
-    )
-{}
-
-WrapperHandle::WrapperHandle(const std::string& algo_path, common::AlgoType algo_type) :
-    WrapperHandle(
-        create_arguments(algo_path, algo_path, /*dev_mode=*/true, algo_type),
-        force_unwrap_optional(
-            nutc::common::read_file_content(algo_path),
-            fmt::format("Could not read algorithm file at {}", algo_path)
-        )
+        create_arguments(algo_variant),
+        std::visit([](auto& algo) { return algo.get_algo_string(); }, algo_variant)
     )
 {}
 
 void
 WrapperHandle::block_on_init()
 {
-    while (!std::holds_alternative<common::init_message>(reader_->get_message())) {}
+    while (!std::holds_alternative<common::init_message>(reader_.get_message())) {}
 }
 
 WrapperHandle::WrapperHandle(
-    const std::vector<std::string>& args, const std::string& algorithm
-) : reader_(std::make_unique<PipeReader>()), writer_(std::make_unique<PipeWriter>())
+    const std::vector<std::string>& args, const std::string& algo_string
+)
 {
     static const std::string path{wrapper_binary_path()};
 
-    auto& pipe_in_ptr = reader_->get_pipe();
-    auto& pipe_out_ptr = writer_->get_pipe();
+    auto& pipe_in_ptr = reader_.get_pipe();
+    auto& pipe_out_ptr = writer_.get_pipe();
 
     wrapper_ = bp::child(
         bp::exe(path), bp::args(args), bp::std_in<pipe_out_ptr, bp::std_err> stderr,
@@ -125,14 +91,14 @@ WrapperHandle::WrapperHandle(
     );
 
     using algorithm_t = nutc::common::algorithm_content;
-    algorithm_t algorithm_message = algorithm_t(common::base64_encode(algorithm));
+    algorithm_t algorithm_message = algorithm_t(common::base64_encode(algo_string));
 
     auto encoded_message = glz::write_json(algorithm_message);
     if (!encoded_message.has_value()) [[unlikely]] {
         throw std::runtime_error(glz::format_error(encoded_message.error()));
     }
 
-    writer_->send_message(*encoded_message);
+    writer_.send_message(*encoded_message);
     block_on_init();
 }
 

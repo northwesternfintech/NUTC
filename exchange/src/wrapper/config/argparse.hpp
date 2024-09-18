@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/util.hpp"
+#include "common/types/algorithm.hpp"
 
 #include <cstdint>
 
@@ -10,7 +10,7 @@ namespace nutc::wrapper {
 struct wrapper_args {
     const uint8_t VERBOSITY;
     const std::string TRADER_ID;
-    const common::AlgoType ALGO_TYPE;
+    const common::AlgoLanguage ALGO_TYPE;
 };
 
 wrapper_args process_arguments(int argc, const char** argv);
