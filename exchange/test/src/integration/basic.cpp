@@ -20,6 +20,15 @@ protected:
     TraderContainer traders_;
 };
 
+TEST_F(IntegrationBasicAlgo, CppAlgo)
+{
+    start_wrappers(traders_, "test_algos/basic/buy_eth_cpp.so", AlgoType::binary);
+    TestMatchingCycle cycle{traders_};
+
+    cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
+    ASSERT_TRUE(1 == 1);
+}
+
 TEST_F(IntegrationBasicAlgo, ConfirmOrderReceived)
 {
     start_wrappers(traders_, "test_algos/basic/buy_tsla_at_100.py", AlgoType::python);
@@ -30,12 +39,14 @@ TEST_F(IntegrationBasicAlgo, ConfirmOrderReceived)
     TestMatchingCycle cycle{traders_};
 
     cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
-	ASSERT_EQ(double{trader2->get_capital()-trader2->get_initial_capital()}, 100.0*10.0);
+    ASSERT_EQ(
+        double{trader2->get_capital() - trader2->get_initial_capital()}, 100.0 * 10.0
+    );
 }
 
 TEST_F(IntegrationBasicAlgo, ConfirmOrderFeeApplied)
 {
-    start_wrappers(traders_, "test_algos/basic/buy_tsla_at_100.py");
+    start_wrappers(traders_, "test_algos/basic/buy_tsla_at_100.py", AlgoType::python);
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 1000.0); // NOLINT
     trader2->add_order(limit_order{Ticker::ETH, sell, 100.0, 10.0});
@@ -43,12 +54,17 @@ TEST_F(IntegrationBasicAlgo, ConfirmOrderFeeApplied)
     TestMatchingCycle cycle{traders_, .5};
 
     cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
-	ASSERT_EQ(double{trader2->get_capital()-trader2->get_initial_capital()}, 100.0*10.0/2);
+    ASSERT_EQ(
+        double{trader2->get_capital() - trader2->get_initial_capital()},
+        100.0 * 10.0 / 2
+    );
 }
 
 TEST_F(IntegrationBasicAlgo, NewlineInMessageDoesNotAffectSubsequentMessages)
 {
-    start_wrappers(traders_, "test_algos/basic/buy_tsla_at_100_newline.py");
+    start_wrappers(
+        traders_, "test_algos/basic/buy_tsla_at_100_newline.py", AlgoType::python
+    );
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 1000.0); // NOLINT
     trader2->add_order(limit_order{Ticker::ETH, sell, 100.0, 100.0});
@@ -56,16 +72,6 @@ TEST_F(IntegrationBasicAlgo, NewlineInMessageDoesNotAffectSubsequentMessages)
     TestMatchingCycle cycle{traders_};
 
     cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
-}
-
-TEST_F(IntegrationBasicAlgo, CppAlgo)
-{
-    auto& trader =
-        start_wrappers(traders_, "test_algos/basic/buy_eth_cpp.so", AlgoType::binary);
-    TestMatchingCycle cycle{traders_};
-
-    cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
-    ASSERT_TRUE(1 == 1);
 }
 
 TEST_F(IntegrationBasicAlgo, RemoveIOCOrder)
