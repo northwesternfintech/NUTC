@@ -67,7 +67,7 @@ BinaryWrapper::BinaryWrapper(
     if (dl_handle_ == nullptr) {
         std::string err = dlerror();
         close(fd_);
-        throw std::runtime_error("Failed to dlopen");
+        throw std::runtime_error(fmt::format("Failed to dlopen: {}", err));
     }
 
     auto init_func = reinterpret_cast<InitFunc>(dlsym(dl_handle_, "init"));
