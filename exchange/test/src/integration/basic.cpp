@@ -37,6 +37,7 @@ TEST_F(IntegrationBasicAlgo, CppAlgo)
     auto& trader =
         start_wrappers(traders_, "test_algos/basic/buy_eth_cpp.so", AlgoType::binary);
     TestMatchingCycle cycle{traders_};
+    // dummy commit
 
     cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
     ASSERT_TRUE(1 == 1);
