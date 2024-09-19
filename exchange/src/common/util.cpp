@@ -73,7 +73,7 @@ base64_decode(const std::string& data)
 
     return boost::algorithm::trim_right_copy_if(
         std::string(base64_it(data.begin()), base64_it(data.end())),
-        [](char c) { return c == '\0'; }
+        [](char chr) { return chr == '\0'; }
     );
 }
 

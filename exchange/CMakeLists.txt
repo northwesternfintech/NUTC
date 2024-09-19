@@ -230,6 +230,7 @@ add_library(COMMON_lib OBJECT
     src/common/firebase/firebase.cpp
     src/common/util.cpp
     src/common/types/decimal.cpp
+    src/common/types/algorithm/local_algorithm.cpp
 )
 
 target_include_directories(

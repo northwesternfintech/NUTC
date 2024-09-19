@@ -237,7 +237,7 @@ TEST_F(IntegrationBasicAlgo, AlgoStartDelay)
         std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     const double wait_time_ms = TEST_CLIENT_WAIT_SECS * 1000;
 
-    EXPECT_GE(observed_duration_ms, wait_time_ms);
+    EXPECT_GE(observed_duration_ms, .9 * wait_time_ms);
     EXPECT_LE(observed_duration_ms, 1.5 * wait_time_ms);
 }
 

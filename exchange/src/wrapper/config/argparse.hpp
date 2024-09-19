@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/types/algorithm.hpp"
+#include "common/types/algorithm/base_algorithm.hpp"
 
 #include <cstdint>
 

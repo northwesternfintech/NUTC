@@ -9,13 +9,13 @@
 namespace nutc::testing {
 // TODO: filepaths
 inline void
-compile_cpp(const std::string& algo_name)
+compile_cpp(std::string_view algo_name)
 {
     static constexpr std::string_view TEMPLATE_PATH = "test_algos/cpp/template.cpp";
     std::string output_path = fmt::format("test_algos/cpp/{}.so", algo_name);
     std::string input_path = fmt::format("test_algos/cpp/{}.hpp", algo_name);
     std::string command = fmt::format(
-        "g++ -std=c++23 -fPIC -shared -o {} -include {} {}", output_path, input_path,
+        "g++ -std=c++20 -fPIC -shared -o {} -include {} {}", output_path, input_path,
         TEMPLATE_PATH
     );
 

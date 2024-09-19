@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/types/algorithm.hpp"
+#include "common/types/algorithm/algorithm.hpp"
 #include "common/types/decimal.hpp"
 #include "exchange/wrappers/handle/wrapper_handle.hpp"
 #include "generic_trader.hpp"

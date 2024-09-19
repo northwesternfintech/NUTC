@@ -1,7 +1,6 @@
 #include "argparse.hpp"
 
 #include "common/config/config.h"
-#include "common/types/algorithm.hpp"
 
 #include <argparse/argparse.hpp>
 #include <fmt/format.h>
