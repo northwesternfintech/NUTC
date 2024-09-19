@@ -55,3 +55,4 @@ void on_account_update(
     strategy->on_account_update(ticker, side, price, quantity, capital_remaining);
 }
 }
+

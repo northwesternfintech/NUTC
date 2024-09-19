@@ -11,8 +11,6 @@ using TraderContainer = nutc::exchange::TraderContainer;
 
 namespace nutc::test {
 
-bool is_nearly_equal(double f_a, double f_b);
-
 bool validate_match(
     const nutc::common::match& match, common::Ticker ticker,
     const std::string& buyer_id, const std::string& seller_id, common::Side side,

@@ -1,4 +1,4 @@
-#include "common/types/algorithm.hpp"
+#include "common/types/algorithm/algorithm.hpp"
 #include "exchange/wrappers/messaging/pipe_reader.hpp"
 #include "exchange/wrappers/messaging/pipe_writer.hpp"
 
