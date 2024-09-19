@@ -1,6 +1,7 @@
 #include "wrapper_handle.hpp"
 
 #include "common/messages_exchange_to_wrapper.hpp"
+#include "common/types/algorithm.hpp"
 #include "common/util.hpp"
 
 #include <boost/asio.hpp>
@@ -44,25 +45,6 @@ WrapperHandle::~WrapperHandle()
     }
 }
 
-namespace {
-std::vector<std::string>
-create_arguments(const common::algorithm_variant& algo_variant)
-{
-    std::vector<std::string> args = {"--uid", quote_id(common::get_id(algo_variant))};
-
-    if (std::holds_alternative<common::LocalAlgorithm>(algo_variant)) {
-        args.emplace_back("--dev");
-    }
-
-    auto language =
-        std::visit([](auto& algo) { return algo.get_language(); }, algo_variant);
-    if (language == common::AlgoLanguage::cpp) {
-        args.emplace_back("--binary_algo");
-    }
-    return args;
-}
-} // namespace
-
 WrapperHandle::WrapperHandle(const common::algorithm_variant& algo_variant) :
     WrapperHandle(
         create_arguments(algo_variant),
@@ -100,6 +82,23 @@ WrapperHandle::WrapperHandle(
 
     writer_.send_message(*encoded_message);
     block_on_init();
+}
+
+std::vector<std::string>
+WrapperHandle::create_arguments(const common::algorithm_variant& algo_variant)
+{
+    std::vector<std::string> args = {"--uid", quote_id(common::get_id(algo_variant))};
+
+    auto language =
+        std::visit([](auto& algo) { return algo.get_language(); }, algo_variant);
+
+    if (language == common::AlgoLanguage::cpp) {
+        args.emplace_back("--cpp_algo");
+    }
+    else if (language == common::AlgoLanguage::python) {
+        args.emplace_back("--python_algo");
+    }
+    return args;
 }
 
 } // namespace nutc::exchange

@@ -43,5 +43,9 @@ public:
     }
 
     ~WrapperHandle();
+
+private:
+    static std::vector<std::string>
+    create_arguments(const common::algorithm_variant& algo_variant);
 };
 } // namespace nutc::exchange
