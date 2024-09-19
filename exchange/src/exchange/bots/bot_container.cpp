@@ -12,9 +12,10 @@
 namespace nutc::exchange {
 
 void
-BotContainer::generate_orders(common::decimal_price midprice)
+BotContainer::generate_orders(
+    common::decimal_price midprice, common::decimal_price theo
+)
 {
-    auto theo = fabs(theo_generator_.generate_next_magnitude());
     variance_calculator_.record_price(midprice);
 
     decimal_price cumulative_interest_limit{};
@@ -53,20 +54,19 @@ BotContainer::create_bots(
 
 BotContainer::BotVector
 BotContainer::create_bots(
-    TraderContainer& trader_container, common::Ticker ticker,
-    const bot_config& bot_config
+    TraderContainer& traders, common::Ticker ticker, const bot_config& bot_config
 )
 {
     switch (bot_config.TYPE) {
         case BotType::retail:
             return create_bots<RetailBot>(
-                trader_container, ticker, bot_config.AVERAGE_CAPITAL,
-                bot_config.STD_DEV_CAPITAL, bot_config.NUM_BOTS
+                traders, ticker, bot_config.AVERAGE_CAPITAL, bot_config.STD_DEV_CAPITAL,
+                bot_config.NUM_BOTS
             );
         case BotType::market_maker:
             return create_bots<MarketMakerBot>(
-                trader_container, ticker, bot_config.AVERAGE_CAPITAL,
-                bot_config.STD_DEV_CAPITAL, bot_config.NUM_BOTS
+                traders, ticker, bot_config.AVERAGE_CAPITAL, bot_config.STD_DEV_CAPITAL,
+                bot_config.NUM_BOTS
             );
     }
 

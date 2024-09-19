@@ -3,6 +3,7 @@
 #include "exchange/bots/bot_container.hpp"
 #include "exchange/config/dynamic/ticker_config.hpp"
 #include "exchange/orders/orderbook/composite_orderbook.hpp"
+#include "exchange/theo/brownian.hpp"
 #include "exchange/traders/trader_container.hpp"
 
 #include <absl/hash/hash.h>
@@ -15,10 +16,17 @@ namespace nutc::exchange {
  */
 class TickerData {
     CompositeOrderBook limit_orderbook_;
+    BrownianMotion theo_generator_;
     std::vector<BotContainer> bot_containers_;
 
 public:
     explicit TickerData(common::Ticker ticker) : limit_orderbook_{ticker} {}
+
+    common::decimal_price
+    get_theo() const
+    {
+        return theo_generator_.get_magnitude();
+    }
 
     CompositeOrderBook&
     get_orderbook()
@@ -36,6 +44,7 @@ public:
     generate_bot_orders()
     {
         auto midprice = get_orderbook().get_midprice();
+		auto theo = theo_generator_.generate_next_magnitude();
         std::ranges::for_each(bot_containers_, [&](auto& bot_container) {
             bot_container.generate_orders(midprice);
         });
