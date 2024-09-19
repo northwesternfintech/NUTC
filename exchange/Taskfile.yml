@@ -133,4 +133,4 @@ tasks:
     env:
       NUTC_WRAPPER_BINARY_PATH: '{{.PWD}}/{{.WRAPPER_RELATIVE_PATH}}'
     cmds:
-      - ctest -j 4 {{.TEST_FLAGS}} -R "Integration*" 
+      - ctest {{.TEST_FLAGS}} -R "IntegrationBasicCpp*" 

@@ -51,7 +51,6 @@ process_arguments(int argc, const char** argv)
         exit(1); // NOLINT(concurrency-*)
     }
 
-    bool dev_mode = program.get<bool>("--dev");
     auto trader_id = program.get<std::string>("--uid");
 
     auto algo_type = program.get<bool>("--binary_algo") ? common::AlgoLanguage::cpp

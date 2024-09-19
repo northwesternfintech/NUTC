@@ -31,6 +31,7 @@ add_executable(NUTC_tests
   src/unit/types/decimal.cpp
   
   src/integration/basic_python.cpp
+  src/integration/basic_cpp.cpp
   src/integration/cancellation.cpp
   )
 
