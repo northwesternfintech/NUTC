@@ -8,7 +8,7 @@
 #include <gtest/gtest.h>
 
 namespace nutc::test {
-using nutc::common::AlgoType;
+using nutc::common::AlgoLanguage;
 
 class IntegrationBasicCancellation : public ::testing::Test {
 protected:
@@ -21,7 +21,8 @@ protected:
 TEST_F(IntegrationBasicCancellation, CancelMessageHasSameIdAsOrder)
 {
     start_wrappers(
-        traders_, "test_algos/cancellation/cancel_limit_order.py", AlgoType::python
+        traders_,
+        {AlgoLanguage::python, "test_algos/cancellation/cancel_limit_order.py"}
     );
     TestMatchingCycle cycle{traders_};
 
@@ -33,7 +34,8 @@ TEST_F(IntegrationBasicCancellation, CancelMessageHasSameIdAsOrder)
 TEST_F(IntegrationBasicCancellation, CancelMessagePreventsOrderFromExecuting)
 {
     auto& trader1 = start_wrappers(
-        traders_, "test_algos/cancellation/cancel_limit_order.py", AlgoType::python
+        traders_,
+        {AlgoLanguage::python, "test_algos/cancellation/cancel_limit_order.py"}
     );
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 100.0);
@@ -54,8 +56,11 @@ TEST_F(IntegrationBasicCancellation, CancelMessagePreventsOrderFromExecuting)
 TEST_F(IntegrationBasicCancellation, OneOfTwoOrdersCancelledResultsInMatch)
 {
     auto& trader1 = start_wrappers(
-        traders_, "test_algos/cancellation/partial_cancel_limit_order.py",
-        AlgoType::python
+        traders_,
+        {
+            AlgoLanguage::python,
+            "test_algos/cancellation/partial_cancel_limit_order.py",
+        }
     );
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 100.0);

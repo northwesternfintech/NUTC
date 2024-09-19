@@ -50,22 +50,14 @@ main(int argc, const char** argv)
     communicator.report_startup_complete();
     communicator.wait_for_start_time();
 
-    std::unique_ptr<Wrapper> wrapper;
-
-    if (algo_type == nutc::common::AlgoType::python) {
-        wrapper = std::make_unique<PyWrapper>(
-            algorithm.algorithm_content_str, trader_id, communicator
-        );
+    if (algo_type == nutc::common::AlgoLanguage::python) {
+        PyWrapper{algorithm.algorithm_content_str, trader_id, communicator}
+            .main_event_loop();
     }
     else {
-        wrapper = std::make_unique<BinaryWrapper>(
-            algorithm.algorithm_content_str, trader_id, communicator
-        );
-        // std::cerr << "binary_algo!!\n";
-        // throw std::runtime_error("hello from cpp land!");
+        BinaryWrapper{algorithm.algorithm_content_str, trader_id, communicator}
+            .main_event_loop();
     }
-
-    wrapper->main_event_loop();
 
     // communicator.main_event_loop();
     return 0;

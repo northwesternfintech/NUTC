@@ -1,7 +1,6 @@
 #include "argparse.hpp"
 
 #include "common/config/config.h"
-#include "common/util.hpp"
 
 #include <argparse/argparse.hpp>
 #include <fmt/format.h>
@@ -29,15 +28,6 @@ process_arguments(int argc, const char** argv)
         })
         .required();
 
-    program.add_argument("-A", "--algo_id")
-        .help("set the algo ID")
-        .action([](const auto& value) {
-            std::string algo_id = std::string(value);
-            std::replace(algo_id.begin(), algo_id.end(), ' ', '-');
-            return algo_id;
-        })
-        .required();
-
     program.add_argument("-B", "--binary_algo")
         .help("Run a binary, compiled algorithm")
         .default_value(false)
@@ -62,15 +52,10 @@ process_arguments(int argc, const char** argv)
     }
 
     bool dev_mode = program.get<bool>("--dev");
-    auto trader_id = (dev_mode) ? program.get<std::string>("--algo_id")
-                                : common::trader_id(
-                                      program.get<std::string>("--uid"),
-                                      program.get<std::string>("--algo_id")
-                                  );
+    auto trader_id = program.get<std::string>("--uid");
 
-    common::AlgoType algo_type = program.get<bool>("--binary_algo")
-                                     ? common::AlgoType::binary
-                                     : common::AlgoType::python;
+    auto algo_type = program.get<bool>("--binary_algo") ? common::AlgoLanguage::cpp
+                                                        : common::AlgoLanguage::python;
 
     return {verbosity, trader_id, algo_type};
 }

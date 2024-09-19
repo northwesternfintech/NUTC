@@ -40,10 +40,7 @@ NormalModeAlgoInitializer::initialize_trader_container(
         std::string algo_id = user["latestAlgoId"].get<std::string>();
 
         try {
-            WrapperHandle handle(user_id, algo_id);
-            traders.add_trader<AlgoTrader>(
-                user_id, algo_id, full_name, start_capital, std::move(handle)
-            );
+            traders.add_trader<AlgoTrader>(common::RemoteAlgorithm{}, start_capital);
             log_i(main, "Created user");
         } catch (const std::runtime_error& err) {
             log_w(main, "Failed to create user {}", user_id);
