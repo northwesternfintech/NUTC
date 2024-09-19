@@ -1,8 +1,8 @@
-#include "wrapper/algo_wrapper/binary/binary_wrapper.hpp"
-#include "wrapper/algo_wrapper/python/python_wrapper.hpp"
-#include "wrapper/algo_wrapper/wrapper.hpp"
+#include "wrapper/runtime/python/python_runtime.hpp"
+#include "wrapper/runtime/runtime.hpp"
 #include "wrapper/config/argparse.hpp"
 #include "wrapper/messaging/exchange_communicator.hpp"
+#include "wrapper/runtime/cpp/cpp_runtime.hpp"
 #include "wrapper/util/logging.hpp"
 #include "wrapper/util/resource_limits.hpp"
 
@@ -12,10 +12,6 @@
 
 #include <csignal>
 
-#include <iostream>
-#include <memory>
-#include <stdexcept>
-#include <string>
 
 // We stop the exchange with sigint. The wrapper should exit gracefully
 void
@@ -51,14 +47,13 @@ main(int argc, const char** argv)
     communicator.wait_for_start_time();
 
     if (algo_type == nutc::common::AlgoLanguage::python) {
-        PyWrapper{algorithm.algorithm_content_str, trader_id, communicator}
+        PyRuntime{algorithm.algorithm_content_str, trader_id, communicator}
             .main_event_loop();
     }
     else {
-        BinaryWrapper{algorithm.algorithm_content_str, trader_id, communicator}
+        CppRuntime{algorithm.algorithm_content_str, trader_id, communicator}
             .main_event_loop();
     }
 
-    // communicator.main_event_loop();
     return 0;
 }

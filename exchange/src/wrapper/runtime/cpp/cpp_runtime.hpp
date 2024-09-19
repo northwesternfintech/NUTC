@@ -1,16 +1,16 @@
 #pragma once
 
-#include "wrapper/algo_wrapper/wrapper.hpp"
+#include "wrapper/runtime/runtime.hpp"
 
 namespace nutc::wrapper {
 
-class BinaryWrapper : public Wrapper {
+class CppRuntime : public Runtime {
 public:
-    BinaryWrapper(
+    CppRuntime(
         std::string algo, std::string trader_id, ExchangeCommunicator communicator
     );
 
-    ~BinaryWrapper() override;
+    ~CppRuntime() override;
 
 private:
     void fire_on_trade_update(

@@ -1,4 +1,4 @@
-#include "binary_wrapper.hpp"
+#include "cpp_runtime.hpp"
 
 #include "common/util.hpp"
 #include "wrapper/messaging/exchange_communicator.hpp"
@@ -51,9 +51,9 @@ get_temp_file()
 
 namespace nutc::wrapper {
 
-BinaryWrapper::BinaryWrapper(
+CppRuntime::CppRuntime(
     std::string algo, std::string trader_id, ExchangeCommunicator communicator
-) : Wrapper(std::move(algo), std::move(trader_id), std::move(communicator))
+) : Runtime(std::move(algo), std::move(trader_id), std::move(communicator))
 {
     auto [fd, path] = get_temp_file();
 
@@ -91,14 +91,14 @@ BinaryWrapper::BinaryWrapper(
     );
 }
 
-BinaryWrapper::~BinaryWrapper()
+CppRuntime::~CppRuntime()
 {
     dlclose(dl_handle_);
     close(fd_);
 }
 
 void
-BinaryWrapper::fire_on_trade_update(
+CppRuntime::fire_on_trade_update(
     Ticker ticker, Side side, decimal_price price, decimal_quantity quantity
 ) const
 {
@@ -112,7 +112,7 @@ BinaryWrapper::fire_on_trade_update(
 }
 
 void
-BinaryWrapper::fire_on_orderbook_update(
+CppRuntime::fire_on_orderbook_update(
     Ticker ticker, Side side, decimal_price price, decimal_quantity quantity
 ) const
 {
@@ -126,7 +126,7 @@ BinaryWrapper::fire_on_orderbook_update(
 }
 
 void
-BinaryWrapper::fire_on_account_update(
+CppRuntime::fire_on_account_update(
     Ticker ticker, Side side, decimal_price price, decimal_quantity quantity,
     decimal_price capital
 ) const

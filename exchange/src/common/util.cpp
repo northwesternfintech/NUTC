@@ -2,11 +2,11 @@
 
 #include "common/config/config.h"
 
-#include <fmt/format.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/archive/iterators/base64_from_binary.hpp>
 #include <boost/archive/iterators/binary_from_base64.hpp>
 #include <boost/archive/iterators/transform_width.hpp>
+#include <fmt/format.h>
 
 #include <random>
 
@@ -17,6 +17,8 @@
 #endif
 
 namespace nutc::common {
+namespace bi = boost::archive::iterators;
+
 order_id_t
 generate_order_id()
 {
@@ -52,13 +54,12 @@ to_string(Side side)
     return side == Side::buy ? "BUY" : "SELL";
 }
 
+// https://stackoverflow.com/questions/7053538/how-do-i-encode-a-string-to-base64-using-only-boost
 std::string
 base64_encode(const std::string& data)
 {
-    using boost::archive::iterators::base64_from_binary;
-    using boost::archive::iterators::transform_width;
     using base64_it =
-        base64_from_binary<transform_width<std::string::const_iterator, 6, 8>>;
+        bi::base64_from_binary<bi::transform_width<std::string::const_iterator, 6, 8>>;
 
     auto tmp = std::string(base64_it(data.begin()), base64_it(data.end()));
     return tmp.append((3 - data.size() % 3) % 3, '=');
@@ -67,10 +68,8 @@ base64_encode(const std::string& data)
 std::string
 base64_decode(const std::string& data)
 {
-    using boost::archive::iterators::binary_from_base64;
-    using boost::archive::iterators::transform_width;
     using base64_it =
-        transform_width<binary_from_base64<std::string::const_iterator>, 8, 6>;
+        bi::transform_width<bi::binary_from_base64<std::string::const_iterator>, 8, 6>;
 
     return boost::algorithm::trim_right_copy_if(
         std::string(base64_it(data.begin()), base64_it(data.end())),

@@ -1,4 +1,4 @@
-#include "python_wrapper.hpp"
+#include "python_runtime.hpp"
 
 #include "wrapper/messaging/exchange_communicator.hpp"
 
@@ -12,7 +12,7 @@ namespace nutc::wrapper {
 namespace py = pybind11;
 
 void
-PyWrapper::fire_on_trade_update(
+PyRuntime::fire_on_trade_update(
     Ticker ticker, Side side, decimal_price price, decimal_quantity quantity
 ) const
 {
@@ -30,7 +30,7 @@ PyWrapper::fire_on_trade_update(
 }
 
 void
-PyWrapper::fire_on_orderbook_update(
+PyRuntime::fire_on_orderbook_update(
     Ticker ticker, Side side, decimal_price price, decimal_quantity quantity
 ) const
 {
@@ -47,7 +47,7 @@ PyWrapper::fire_on_orderbook_update(
 }
 
 void
-PyWrapper::fire_on_account_update(
+PyRuntime::fire_on_account_update(
     Ticker ticker, Side side, decimal_price price, decimal_quantity quantity,
     decimal_price capital
 ) const
@@ -65,7 +65,7 @@ PyWrapper::fire_on_account_update(
 }
 
 void
-PyWrapper::create_api_module(
+PyRuntime::create_api_module(
     LimitOrderFunction publish_limit_order, MarketOrderFunction publish_market_order,
     CancelOrderFunction cancel_order
 )
@@ -98,7 +98,7 @@ PyWrapper::create_api_module(
 }
 
 void
-PyWrapper::run_initialization_code(const std::string& py_code)
+PyRuntime::run_initialization_code(const std::string& py_code)
 {
     py::exec(py_code);
     py::exec(R"(
