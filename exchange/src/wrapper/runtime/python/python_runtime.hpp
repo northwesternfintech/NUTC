@@ -2,18 +2,18 @@
 
 #include "common/types/decimal.hpp"
 #include "common/util.hpp"
-#include "wrapper/algo_wrapper/wrapper.hpp"
 #include "wrapper/messaging/exchange_communicator.hpp"
+#include "wrapper/runtime/runtime.hpp"
 
 #include <pybind11/embed.h>
 
 namespace nutc::wrapper {
 
-class PyWrapper : public Wrapper {
+class PyRuntime : public Runtime {
 public:
-    PyWrapper(
+    PyRuntime(
         std::string algo, std::string trader_id, ExchangeCommunicator communicator
-    ) : Wrapper(std::move(algo), std::move(trader_id), std::move(communicator))
+    ) : Runtime(std::move(algo), std::move(trader_id), std::move(communicator))
     {
         create_api_module(
             communicator_.place_limit_order(), communicator_.place_market_order(),

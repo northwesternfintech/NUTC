@@ -1,4 +1,4 @@
-#include "wrapper.hpp"
+#include "runtime.hpp"
 
 #include "wrapper/messaging/exchange_communicator.hpp"
 
@@ -6,12 +6,12 @@ namespace nutc::wrapper {
 
 template <>
 void
-Wrapper::process_message(start_time&)
+Runtime::process_message(start_time&)
 {}
 
 template <>
 void
-Wrapper::process_message(tick_update& tick_update)
+Runtime::process_message(tick_update& tick_update)
 {
     std::ranges::for_each(tick_update.ob_updates, [&](const position& u) {
         fire_on_orderbook_update(u.ticker, u.side, u.price, u.quantity);
@@ -36,7 +36,7 @@ Wrapper::process_message(tick_update& tick_update)
 using start_tick_variant_t = std::variant<start_time, tick_update>;
 
 void
-Wrapper::main_event_loop()
+Runtime::main_event_loop()
 {
     while (true) {
         auto data = communicator_.consume_message<start_tick_variant_t>();

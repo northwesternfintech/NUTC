@@ -9,16 +9,16 @@
 
 namespace nutc::wrapper {
 
-class Wrapper {
+class Runtime {
 public:
-    virtual ~Wrapper() = default;
+    virtual ~Runtime() = default;
 
-    Wrapper(const Wrapper&) = default;
-    Wrapper(Wrapper&&) noexcept = default;
-    Wrapper& operator=(const Wrapper&) = default;
-    Wrapper& operator=(Wrapper&&) noexcept = default;
+    Runtime(const Runtime&) = default;
+    Runtime(Runtime&&) noexcept = default;
+    Runtime& operator=(const Runtime&) = default;
+    Runtime& operator=(Runtime&&) noexcept = default;
 
-    Wrapper(
+    Runtime(
         std::string algo, std::string trader_id, ExchangeCommunicator communicator
     ) :
         algo_(std::move(algo)), trader_id_(std::move(trader_id)),

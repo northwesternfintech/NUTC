@@ -1,4 +1,5 @@
 #include "common/util.hpp"
+#include "util/helpers/compilation.hpp"
 #include "util/helpers/test_cycle.hpp"
 #include "util/process.hpp"
 
@@ -11,14 +12,15 @@ using nutc::common::Ticker;
 using nutc::common::Side::buy;
 using nutc::common::Side::sell;
 
-class IntegrationBasicAlgo : public ::testing::Test {
+class IntegrationBasicCpp : public ::testing::Test {
 protected:
     exchange::TraderContainer traders_;
 };
 
-TEST_F(IntegrationBasicAlgo, CppAlgo)
+TEST_F(IntegrationBasicCpp, CppAlgo)
 {
-    start_wrappers(traders_, {AlgoLanguage::cpp, "test_algos/cpp/buy_eth_cpp.so"});
+    testing::compile_cpp("test_algos/cpp/buy_eth.hpp", "./test_algos/cpp/buy_eth.so");
+    start_wrappers(traders_, {AlgoLanguage::cpp, "test_algos/cpp/buy_eth.so"});
     TestMatchingCycle cycle{traders_};
 
     cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
