@@ -1,6 +1,7 @@
 #include "argparse.hpp"
 
 #include "common/config/config.h"
+#include "common/types/algorithm.hpp"
 
 #include <argparse/argparse.hpp>
 #include <fmt/format.h>
@@ -13,12 +14,6 @@ process_arguments(int argc, const char** argv)
         "NUTC Wrapper", NUTC_VERSION, argparse::default_arguments::help
     );
 
-    program.add_argument("-D", "--dev")
-        .help("Pull algorithm from localhost")
-        .default_value(false)
-        .implicit_value(true)
-        .nargs(0);
-
     program.add_argument("-U", "--uid")
         .help("set the user ID")
         .action([](const auto& value) {
@@ -28,8 +23,12 @@ process_arguments(int argc, const char** argv)
         })
         .required();
 
-    program.add_argument("-B", "--binary_algo")
-        .help("Run a binary, compiled algorithm")
+    auto& language_group = program.add_mutually_exclusive_group(true);
+    language_group.add_argument("-B", "--cpp_algo")
+        .default_value(false)
+        .implicit_value(true)
+        .nargs(0);
+    language_group.add_argument("-P", "--python_algo")
         .default_value(false)
         .implicit_value(true)
         .nargs(0);
@@ -53,9 +52,13 @@ process_arguments(int argc, const char** argv)
 
     auto trader_id = program.get<std::string>("--uid");
 
-    auto algo_type = program.get<bool>("--binary_algo") ? common::AlgoLanguage::cpp
-                                                        : common::AlgoLanguage::python;
+    if (program.get<bool>("--cpp_algo")) {
+        return {verbosity, trader_id, common::AlgoLanguage::cpp};
+    }
+    if (program.get<bool>("--python_algo")) {
+        return {verbosity, trader_id, common::AlgoLanguage::python};
+    }
 
-    return {verbosity, trader_id, algo_type};
+    throw std::runtime_error("No language provided");
 }
 } // namespace nutc::wrapper

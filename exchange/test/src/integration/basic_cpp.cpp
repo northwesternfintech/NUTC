@@ -19,7 +19,7 @@ protected:
 
 TEST_F(IntegrationBasicCpp, CppAlgo)
 {
-    testing::compile_cpp("test_algos/cpp/buy_eth.hpp", "./test_algos/cpp/buy_eth.so");
+    testing::compile_cpp("buy_eth");
     start_wrappers(traders_, {AlgoLanguage::cpp, "test_algos/cpp/buy_eth.so"});
     TestMatchingCycle cycle{traders_};
 
