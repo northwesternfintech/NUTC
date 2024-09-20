@@ -287,6 +287,7 @@ jobs:
       CLANG_DIR: '/usr/lib/llvm-18/lib/cmake/clang'
       LLVM_DIR: '/usr/lib/llvm-18/lib/cmake/llvm'
       NUTC_WRAPPER_BINARY_PATH: ${{ github.workspace }}/exchange/build/WRAPPER
+      NUTC_CPP_TEMPLATE_PATH: ${{ github.workspace }}/exchange/template.cpp
 
     steps:
     - uses: actions/checkout@v3
@@ -332,7 +333,7 @@ jobs:
       run: |
         pip3 install conan numpy
         
-        sudo apt install libssl-dev rabbitmq-server -y
+        sudo apt install libssl-dev -y
         
         bash < ../.github/scripts/conan-profile.sh
         conan install . -s build_type=Release -b missing
@@ -359,23 +360,6 @@ jobs:
     - name: Move test algo files
       run: cp -r -L test/src/integration/test_algos build/test/test_algos
       
-    # TODO: use secrets
-    - name: Configure RabbitMQ
-      run: |
-        sudo rabbitmqctl add_user NUFT ADMIN
-        sudo rabbitmqctl set_permissions -p / NUFT ".*" ".*" ".*"
-        sudo rabbitmqctl set_user_tags NUFT administrator
-
-    - name: Start RabbitMQ
-      run: |
-        sudo systemctl start rabbitmq-server
-        sudo rabbitmqctl status
-
-    - name: Configure RabbitMQ Port
-      run: |
-        echo "listeners.tcp.default = 5672" | sudo tee -a /etc/rabbitmq/rabbitmq.conf
-        sudo systemctl restart rabbitmq-server
-
     - name: Test exchange
       working-directory: exchange/build
       run: ctest --output-on-failure --no-tests=error --timeout 10 -C Release -R "Integration*"

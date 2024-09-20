@@ -8,27 +8,36 @@
 #include <cassert>
 
 #include <filesystem>
-#include <optional>
 
 namespace nutc::common {
+namespace {
 std::string
-LocalAlgorithm::compile_cpp_() const
+get_cpp_template_path()
 {
-    assert(get_language() == AlgoLanguage::cpp);
-    static constexpr std::string_view TEMPLATE_PATH = "test_algos/cpp/template.cpp";
+    static const char* template_path_env = std::getenv("NUTC_CPP_TEMPLATE_PATH");
+    if (template_path_env == nullptr)
+        throw std::runtime_error("Template.cpp path not set, unable to compile cpp");
+    return template_path_env;
+}
+} // namespace
+
+std::string
+LocalAlgorithm::compile_cpp(const std::filesystem::path& filepath)
+{
     std::string binary_output = (boost::filesystem::temp_directory_path()
                                  / boost::filesystem::unique_path("%%%%-%%%%-%%%%.tmp"))
                                     .string();
+
     std::string command = fmt::format(
         "g++ -std=c++20 -fPIC -shared -o {} -include {} {}", binary_output,
-        filepath_.string(), TEMPLATE_PATH
+        filepath.string(), get_cpp_template_path()
     );
 
     int result = system(command.c_str());
 
     if (result != 0) {
         throw std::runtime_error(
-            fmt::format("Compilation of {} failed", filepath_.string())
+            fmt::format("Compilation of {} failed", filepath.string())
         );
     }
     return binary_output;
@@ -36,13 +45,7 @@ LocalAlgorithm::compile_cpp_() const
 
 LocalAlgorithm::LocalAlgorithm(AlgoLanguage language, std::filesystem::path filepath) :
     BaseAlgorithm{language}, filepath_{std::move(filepath)}
-{
-    if (!std::filesystem::exists(filepath_)) [[unlikely]] {
-        throw std::runtime_error(
-            fmt::format("Local algorithm file not found: {}", filepath_.string())
-        );
-    }
-}
+{}
 
 const std::filesystem::path&
 LocalAlgorithm::get_path() const
@@ -53,21 +56,14 @@ LocalAlgorithm::get_path() const
 std::string
 LocalAlgorithm::get_algo_string() const
 {
-    std::optional<std::string> algorithm;
     if (get_language() == AlgoLanguage::cpp) {
-        algorithm = common::read_file_content(compile_cpp_());
+        return common::read_file_content(compile_cpp(filepath_));
     }
-    else {
-        algorithm = common::read_file_content(filepath_);
-    }
-
-    if (!algorithm) {
-        throw std::runtime_error(
-            fmt::format("Unable to find algorithm at {}", filepath_.string())
-        );
+    if (get_language() == AlgoLanguage::python) {
+        return common::read_file_content(filepath_);
     }
 
-    return algorithm.value();
+    throw std::runtime_error("Unknown algo language");
 }
 
 std::string
