@@ -357,7 +357,7 @@ jobs:
       run: cp -r config.yml build/test/config.yml
 
     - name: Move test algo files
-      run: cp -r test/src/integration/test_algos build/test/test_algos
+      run: cp -r -L test/src/integration/test_algos build/test/test_algos
       
     # TODO: use secrets
     - name: Configure RabbitMQ

@@ -7,6 +7,8 @@
 #include <boost/asio.hpp>
 #include <glaze/glaze.hpp>
 
+#include <iostream>
+
 namespace nutc::exchange {
 
 void

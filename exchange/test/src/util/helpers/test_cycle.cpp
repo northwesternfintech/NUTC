@@ -2,36 +2,45 @@
 
 #include "common/messages_wrapper_to_exchange.hpp"
 #include "common/util.hpp"
+#include "exchange/logging.hpp"
 
 #include <glaze/glaze.hpp>
 #include <hash_table7.hpp>
 
+#include <queue>
 #include <utility>
 
 namespace nutc::test {
 
+namespace {
+template <typename OrderT>
+auto
+get_base_order(const OrderT& order)
+{
+    if constexpr (std::is_same_v<exchange::tagged_limit_order, OrderT>) {
+        return static_cast<const common::limit_order&>(order);
+    }
+    else if constexpr (std::is_same_v<exchange::tagged_market_order, OrderT>) {
+        return static_cast<const common::market_order&>(order);
+    }
+    else if constexpr (std::is_same_v<common::cancel_order, OrderT>) {
+        return static_cast<const common::cancel_order&>(order);
+    }
+    else {
+        throw std::runtime_error("Unexpected order");
+    }
+}
+} // namespace
+
 std::vector<common::match>
 TestMatchingCycle::match_orders_(std::vector<exchange::OrderVariant> orders)
 {
-    // TODO: FIX
-    if (!orders.empty()) {
-        auto& order = orders.back();
-        last_order.emplace(order);
+    for (auto& order : orders) {
+        incoming_orders_.push(order);
     }
 
     auto print_order = []<typename T>(const T& message) -> std::string {
-        if constexpr (std::is_base_of_v<common::market_order, T>) {
-            return *glz::write_json(static_cast<const common::market_order&>(message));
-        }
-        else if constexpr (std::is_base_of_v<common::limit_order, T>) {
-            return *glz::write_json(static_cast<const common::limit_order&>(message));
-        }
-        else if constexpr (std::is_base_of_v<common::cancel_order, T>) {
-            return *glz::write_json(static_cast<const common::cancel_order&>(message));
-        }
-        else {
-            throw std::runtime_error("Unexpected message");
-        }
+        return *glz::write_json(get_base_order(message));
     };
 
     for (auto& order_variant : orders) {
@@ -54,14 +63,20 @@ TestMatchingCycle::wait_for_order(
 {
     log_i(testing, "Waiting for order {}", *glz::write_json(order));
 
-    auto orders_are_equal = [&]<typename LastOrder>(const LastOrder& last_order_v) {
-        if constexpr (std::is_base_of_v<OrderT, LastOrder>) {
-            return equality_function(order, static_cast<const OrderT&>(last_order_v));
+    auto orders_are_equal = [&](const auto& last_order) {
+        const auto& base_order = get_base_order(last_order);
+        if constexpr (std::is_same_v<
+                          OrderT, std::remove_cvref_t<decltype(base_order)>>) {
+            return equality_function(base_order, order);
         }
         return false;
     };
 
-    while (!last_order.has_value() || !std::visit(orders_are_equal, *last_order)) {
+    while (incoming_orders_.empty()
+           || !std::visit(orders_are_equal, incoming_orders_.front())) {
+        if (!incoming_orders_.empty()) {
+            incoming_orders_.pop();
+        }
         on_tick(0);
     }
     log_i(testing, "Expected order received. Continuing...");
@@ -74,7 +89,7 @@ TestMatchingCycle::wait_for_order(
             return std::nullopt;
         }
     };
-    return std::visit(get_order_id, *last_order);
+    return std::visit(get_order_id, incoming_orders_.front());
 }
 
 template std::optional<common::order_id_t> TestMatchingCycle::

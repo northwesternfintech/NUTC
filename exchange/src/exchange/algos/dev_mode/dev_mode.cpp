@@ -15,8 +15,9 @@ DevModeAlgoInitializer::initialize_trader_container(
     TraderContainer& traders, common::decimal_price start_capital
 ) const
 {
-    for (const fs::path& filepath : algo_filepaths_)
-        traders.add_trader<AlgoTrader>(filepath, start_capital);
+    for (const common::LocalAlgorithm& algo : algorithms_) {
+        traders.add_trader<AlgoTrader>(algo, start_capital);
+    }
 
     int64_t start_time = get_start_time(WAIT_SECS);
     std::for_each(traders.begin(), traders.end(), [start_time](auto& trader) {
@@ -27,12 +28,12 @@ DevModeAlgoInitializer::initialize_trader_container(
 void
 DevModeAlgoInitializer::initialize_files()
 {
-    if (!algo_filepaths_.empty())
+    if (!algorithms_.empty())
         return;
 
     for (size_t i = 0; i < NUM_ALGOS; i++) {
         auto relative_path = fmt::format("{}/algo_{}.py", ALGO_DIR, i);
-        algo_filepaths_.emplace_back(relative_path);
+        algorithms_.emplace_back(common::AlgoLanguage::python, relative_path);
     }
 
     std::string content = common::read_file_content("template.py");
@@ -40,11 +41,11 @@ DevModeAlgoInitializer::initialize_files()
     if (!common::create_directory(ALGO_DIR))
         throw std::runtime_error("Failed to create directory");
 
-    for (const fs::path& path : algo_filepaths_) {
-        if (fs::exists(path))
+    for (const common::LocalAlgorithm& algo : algorithms_) {
+        if (fs::exists(algo.get_path()))
             continue;
 
-        std::ofstream file(path);
+        std::ofstream file(algo.get_path());
 
         if (!file)
             throw std::runtime_error("Failed to create local algo");

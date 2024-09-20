@@ -1,8 +1,8 @@
 #include "wrapper_handle.hpp"
 
-#include "common/file_operations/file_operations.hpp"
-#include "common/firebase/firebase.hpp"
 #include "common/messages_exchange_to_wrapper.hpp"
+#include "common/types/algorithm/algorithm.hpp"
+#include "common/util.hpp"
 
 #include <boost/asio.hpp>
 #include <fmt/format.h>
@@ -13,16 +13,6 @@ quote_id(std::string user_id)
 {
     std::replace(user_id.begin(), user_id.end(), '-', ' ');
     return user_id;
-}
-
-std::string
-force_unwrap_optional(std::optional<std::string> opt, std::string error_msg)
-{
-    if (!opt.has_value()) [[unlikely]] {
-        throw std::runtime_error(error_msg);
-    }
-
-    return opt.value();
 }
 
 } // namespace
@@ -55,27 +45,10 @@ WrapperHandle::~WrapperHandle()
     }
 }
 
-WrapperHandle::WrapperHandle(
-    const std::string& remote_uid, const std::string& algo_id
-) :
+WrapperHandle::WrapperHandle(const common::algorithm_variant& algo_variant) :
     WrapperHandle(
-        {"--uid", quote_id(remote_uid), "--algo_id", quote_id(algo_id)},
-        force_unwrap_optional(
-            nutc::common::get_algo(remote_uid, algo_id),
-            fmt::format(
-                "Could not read algoid {} of uid {} from firebase", algo_id, remote_uid
-            )
-        )
-    )
-{}
-
-WrapperHandle::WrapperHandle(const std::string& algo_path) :
-    WrapperHandle(
-        {"--uid", quote_id(algo_path), "--algo_id", quote_id(algo_path), "--dev"},
-        force_unwrap_optional(
-            nutc::common::read_file_content(algo_path),
-            fmt::format("Could not read algorithm file at {}", algo_path)
-        )
+        create_arguments(algo_variant),
+        std::visit([](auto& algo) { return algo.get_algo_string(); }, algo_variant)
     )
 {}
 
@@ -86,7 +59,7 @@ WrapperHandle::block_on_init()
 }
 
 WrapperHandle::WrapperHandle(
-    const std::vector<std::string>& args, const std::string& algorithm
+    const std::vector<std::string>& args, const std::string& algo_string
 )
 {
     static const std::string path{wrapper_binary_path()};
@@ -100,7 +73,7 @@ WrapperHandle::WrapperHandle(
     );
 
     using algorithm_t = nutc::common::algorithm_content;
-    algorithm_t algorithm_message = algorithm_t(algorithm);
+    algorithm_t algorithm_message = algorithm_t(common::base64_encode(algo_string));
 
     auto encoded_message = glz::write_json(algorithm_message);
     if (!encoded_message.has_value()) [[unlikely]] {
@@ -109,6 +82,23 @@ WrapperHandle::WrapperHandle(
 
     writer_.send_message(*encoded_message);
     block_on_init();
+}
+
+std::vector<std::string>
+WrapperHandle::create_arguments(const common::algorithm_variant& algo_variant)
+{
+    std::vector<std::string> args = {"--uid", quote_id(common::get_id(algo_variant))};
+
+    auto language =
+        std::visit([](auto& algo) { return algo.get_language(); }, algo_variant);
+
+    if (language == common::AlgoLanguage::cpp) {
+        args.emplace_back("--cpp_algo");
+    }
+    else if (language == common::AlgoLanguage::python) {
+        args.emplace_back("--python_algo");
+    }
+    return args;
 }
 
 } // namespace nutc::exchange

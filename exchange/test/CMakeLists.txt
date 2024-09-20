@@ -30,9 +30,14 @@ add_executable(NUTC_tests
 
   src/unit/types/decimal.cpp
   
-  src/integration/basic.cpp
+  src/integration/basic_python.cpp
+  src/integration/basic_cpp.cpp
   src/integration/cancellation.cpp
   )
+
+if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+  target_sources(NUTC_tests PRIVATE src/integration/basic_cpp.cpp)
+endif()
 
 target_include_directories(
   NUTC_tests ${warning_guard}

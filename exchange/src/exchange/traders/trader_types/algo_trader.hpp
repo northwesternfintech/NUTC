@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/file_operations/file_operations.hpp"
+#include "common/types/algorithm/algorithm.hpp"
 #include "common/types/decimal.hpp"
 #include "exchange/wrappers/handle/wrapper_handle.hpp"
 #include "generic_trader.hpp"
@@ -11,31 +11,16 @@ namespace nutc::exchange {
 
 class AlgoTrader : public GenericTrader {
     const std::string DISPLAY_NAME;
-    const std::string ALGO_ID;
     std::optional<WrapperHandle> wrapper_handle_;
 
 public:
-    // Remote (firebase)
     explicit AlgoTrader(
-        std::string remote_uid, std::string algo_id, std::string full_name,
-        common::decimal_price capital
+        const common::algorithm_variant& algo_variant, common::decimal_price capital
     ) :
-        GenericTrader(common::trader_id(remote_uid, algo_id), capital),
-        DISPLAY_NAME(std::move(full_name)), ALGO_ID(algo_id),
-        wrapper_handle_(std::make_optional<WrapperHandle>(remote_uid, algo_id))
+        GenericTrader(common::get_id(algo_variant), capital),
+        DISPLAY_NAME(common::get_id(algo_variant)),
+        wrapper_handle_(std::make_optional<WrapperHandle>(algo_variant))
     {}
-
-    // Local (algo .py on disk)
-    explicit AlgoTrader(std::string algo_path, common::decimal_price capital) :
-        GenericTrader(algo_path, capital), DISPLAY_NAME(algo_path), ALGO_ID(algo_path),
-        wrapper_handle_(std::make_optional<WrapperHandle>(algo_path))
-    {
-        if (!common::file_exists(ALGO_ID)) [[unlikely]] {
-            std::string err_str =
-                fmt::format("Unable to find local algorithm file: {}", algo_path);
-            throw std::runtime_error(err_str);
-        }
-    }
 
     const std::string&
     get_type() const override

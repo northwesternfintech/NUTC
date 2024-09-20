@@ -1,7 +1,6 @@
 #include "argparse.hpp"
 
 #include "common/config/config.h"
-#include "common/util.hpp"
 
 #include <argparse/argparse.hpp>
 #include <fmt/format.h>
@@ -14,12 +13,6 @@ process_arguments(int argc, const char** argv)
         "NUTC Wrapper", NUTC_VERSION, argparse::default_arguments::help
     );
 
-    program.add_argument("-D", "--dev")
-        .help("Pull algorithm from localhost")
-        .default_value(false)
-        .implicit_value(true)
-        .nargs(0);
-
     program.add_argument("-U", "--uid")
         .help("set the user ID")
         .action([](const auto& value) {
@@ -29,14 +22,15 @@ process_arguments(int argc, const char** argv)
         })
         .required();
 
-    program.add_argument("-A", "--algo_id")
-        .help("set the algo ID")
-        .action([](const auto& value) {
-            std::string algo_id = std::string(value);
-            std::replace(algo_id.begin(), algo_id.end(), ' ', '-');
-            return algo_id;
-        })
-        .required();
+    auto& language_group = program.add_mutually_exclusive_group(true);
+    language_group.add_argument("-B", "--cpp_algo")
+        .default_value(false)
+        .implicit_value(true)
+        .nargs(0);
+    language_group.add_argument("-P", "--python_algo")
+        .default_value(false)
+        .implicit_value(true)
+        .nargs(0);
 
     uint8_t verbosity = 0;
     program.add_argument("-v", "--verbose")
@@ -55,13 +49,15 @@ process_arguments(int argc, const char** argv)
         exit(1); // NOLINT(concurrency-*)
     }
 
-    bool dev_mode = program.get<bool>("--dev");
-    auto trader_id = (dev_mode) ? program.get<std::string>("--algo_id")
-                                : common::trader_id(
-                                      program.get<std::string>("--uid"),
-                                      program.get<std::string>("--algo_id")
-                                  );
+    auto trader_id = program.get<std::string>("--uid");
 
-    return {verbosity, trader_id};
+    if (program.get<bool>("--cpp_algo")) {
+        return {verbosity, trader_id, common::AlgoLanguage::cpp};
+    }
+    if (program.get<bool>("--python_algo")) {
+        return {verbosity, trader_id, common::AlgoLanguage::python};
+    }
+
+    throw std::runtime_error("No language provided");
 }
 } // namespace nutc::wrapper

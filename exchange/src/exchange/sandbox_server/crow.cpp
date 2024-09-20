@@ -3,7 +3,6 @@
 #include "common/messages_exchange_to_wrapper.hpp"
 #include "exchange/config/dynamic/config.hpp"
 #include "exchange/logging.hpp"
-#include "exchange/traders/trader_container.hpp"
 #include "exchange/traders/trader_types/algo_trader.hpp"
 
 namespace nutc::exchange {
@@ -45,13 +44,15 @@ CrowServer::CrowServer() :
 }
 
 void
-CrowServer::add_pending_trader(const std::string user_id, const std::string algo_id)
+CrowServer::add_pending_trader(
+    [[maybe_unused]] const std::string& user_id,
+    [[maybe_unused]] const std::string& algo_id
+)
 {
     static const auto STARTING_CAPITAL = Config::get().constants().STARTING_CAPITAL;
 
-    auto trader = std::make_shared<AlgoTrader>(
-        user_id, algo_id, "SANDBOX_USER", STARTING_CAPITAL
-    );
+    auto trader =
+        std::make_shared<AlgoTrader>(common::RemoteAlgorithm{}, STARTING_CAPITAL);
 
     trader_lock.lock();
     traders_to_add.push_back(trader);

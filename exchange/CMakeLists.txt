@@ -171,10 +171,14 @@ target_link_libraries(EXCHANGE_exe PRIVATE prometheus-cpp::prometheus-cpp)
 
 add_library(
     WRAPPER_lib OBJECT
+
+    src/wrapper/runtime/runtime.cpp
+    src/wrapper/runtime/python/python_runtime.cpp
+    src/wrapper/runtime/cpp/cpp_runtime.cpp
     
     src/wrapper/messaging/exchange_communicator.cpp
-    src/wrapper/pywrapper/pywrapper.cpp
-    src/wrapper/pywrapper/rate_limiter.cpp
+    src/wrapper/messaging/rate_limiter.cpp
+
     # Utils
     src/wrapper/util/logging.cpp
     src/wrapper/config/argparse.cpp
@@ -226,6 +230,7 @@ add_library(COMMON_lib OBJECT
     src/common/firebase/firebase.cpp
     src/common/util.cpp
     src/common/types/decimal.cpp
+    src/common/types/algorithm/local_algorithm.cpp
 )
 
 target_include_directories(
@@ -239,6 +244,7 @@ target_link_libraries(COMMON_lib PUBLIC glaze::glaze)
 target_link_libraries(COMMON_lib PUBLIC yaml-cpp::yaml-cpp)
 target_link_libraries(COMMON_lib PUBLIC glaze::glaze)
 target_link_libraries(COMMON_lib PUBLIC CURL::libcurl)
+target_link_libraries(COMMON_lib PRIVATE boost::boost)
 
 target_link_libraries(EXCHANGE_lib PUBLIC COMMON_lib)
 target_link_libraries(EXCHANGE_exe PRIVATE COMMON_lib)

@@ -17,13 +17,6 @@ order_equality(const limit_order& order1, const limit_order& order2)
 }
 
 bool
-is_nearly_equal(double f_a, double f_b)
-{
-    double diff = std::fabs(f_a - f_b);
-    return common::is_close_to_zero(diff);
-}
-
-bool
 validate_match(
     const nutc::common::match& match, common::Ticker ticker,
     const std::string& buyer_id, const std::string& seller_id, common::Side side,

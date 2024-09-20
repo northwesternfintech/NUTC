@@ -3,7 +3,6 @@
 #include <glaze/glaze.hpp>
 
 #include <cassert>
-#include <cmath>
 
 #include <string>
 
@@ -19,17 +18,10 @@ std::string get_firebase_endpoint(const std::string& params);
 enum class Side { buy, sell };
 std::string to_string(Side side);
 
+std::string base64_encode(const std::string& data);
+
+std::string base64_decode(const std::string& data);
+
 enum class Mode { dev, sandbox, normal, bots_only };
-
-struct algorithm {
-    const std::string UID;
-    const std::string ALGO_ID;
-};
-
-constexpr bool
-is_close_to_zero(double value, double epsilon = 1e-6)
-{
-    return std::fabs(value) < epsilon;
-}
 
 } // namespace nutc::common

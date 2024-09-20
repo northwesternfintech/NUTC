@@ -1,5 +1,4 @@
-#pragma once
-
+#include "common/types/algorithm/algorithm.hpp"
 #include "exchange/wrappers/messaging/pipe_reader.hpp"
 #include "exchange/wrappers/messaging/pipe_writer.hpp"
 
@@ -15,10 +14,10 @@ namespace fs = std::filesystem;
 
 class WrapperHandle {
     bp::child wrapper_;
-    PipeReader reader_{};
-    PipeWriter writer_{};
+    PipeReader reader_;
+    PipeWriter writer_;
 
-    WrapperHandle(const std::vector<std::string>& args, const std::string& algorithm);
+    WrapperHandle(const std::vector<std::string>& args, const std::string& algo_string);
     void block_on_init();
 
     const fs::path& wrapper_binary_path();
@@ -29,11 +28,7 @@ public:
      * wrapper does not send an init_message. this MUST happen
      */
 
-    // Remote (algo in firebase)
-    WrapperHandle(const std::string& remote_uid, const std::string& algo_id);
-
-    // Local (.py on disk)
-    WrapperHandle(const std::string& algo_path);
+    explicit WrapperHandle(const common::algorithm_variant& algo_variant);
 
     std::vector<common::IncomingMessageVariant>
     read_shared()
@@ -48,5 +43,9 @@ public:
     }
 
     ~WrapperHandle();
+
+private:
+    static std::vector<std::string>
+    create_arguments(const common::algorithm_variant& algo_variant);
 };
 } // namespace nutc::exchange
