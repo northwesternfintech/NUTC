@@ -2,6 +2,8 @@
 
 #include "common/file_operations/file_operations.hpp"
 
+#include <optional>
+
 namespace nutc::common {
 LocalAlgorithm::LocalAlgorithm(AlgoLanguage language, std::filesystem::path filepath) :
     BaseAlgorithm{language}, filepath_{std::move(filepath)}
