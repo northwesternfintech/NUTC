@@ -10,7 +10,7 @@
 namespace nutc::test {
 using nutc::common::AlgoLanguage;
 
-class IntegrationBasicpython : public ::testing::Test {
+class IntegrationBasicCancellation : public ::testing::Test {
 protected:
     using Ticker = nutc::common::Ticker;
     using nutc::common::Side::buy;
@@ -18,12 +18,9 @@ protected:
     exchange::TraderContainer traders_;
 };
 
-TEST_F(IntegrationBasicpython, CancelMessageHasSameIdAsOrder)
+TEST_F(IntegrationBasicCancellation, CancelMessageHasSameIdAsOrder)
 {
-    start_wrappers(
-        traders_,
-        {AlgoLanguage::python, "test_algos/python/cancel_limit_order.py"}
-    );
+    start_wrappers(traders_, AlgoLanguage::python, "cancel_limit_order");
     TestMatchingCycle cycle{traders_};
 
     auto order_id = cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
@@ -31,12 +28,10 @@ TEST_F(IntegrationBasicpython, CancelMessageHasSameIdAsOrder)
     cycle.wait_for_order(common::cancel_order{common::Ticker::ETH, *order_id});
 }
 
-TEST_F(IntegrationBasicpython, CancelMessagePreventsOrderFromExecuting)
+TEST_F(IntegrationBasicCancellation, CancelMessagePreventsOrderFromExecuting)
 {
-    auto& trader1 = start_wrappers(
-        traders_,
-        {AlgoLanguage::python, "test_algos/python/cancel_limit_order.py"}
-    );
+    auto& trader1 =
+        start_wrappers(traders_, AlgoLanguage::python, "cancel_limit_order");
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 100.0);
     TestMatchingCycle cycle{traders_};
@@ -53,15 +48,10 @@ TEST_F(IntegrationBasicpython, CancelMessagePreventsOrderFromExecuting)
     EXPECT_EQ(trader1.get_holdings(Ticker::ETH), 0);
 }
 
-TEST_F(IntegrationBasicpython, OneOfTwoOrdersCancelledResultsInMatch)
+TEST_F(IntegrationBasicCancellation, OneOfTwoOrdersCancelledResultsInMatch)
 {
-    auto& trader1 = start_wrappers(
-        traders_,
-        {
-            AlgoLanguage::python,
-            "test_algos/python/partial_cancel_limit_order.py",
-        }
-    );
+    auto& trader1 =
+        start_wrappers(traders_, AlgoLanguage::python, "partial_cancel_limit_order");
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 100.0);
     TestMatchingCycle cycle{traders_};

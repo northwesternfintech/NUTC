@@ -7,6 +7,24 @@
 
 #include <gtest/gtest.h>
 
+namespace nutc::common {
+void
+PrintTo(const AlgoLanguage& op, std::ostream* os)
+{
+    switch (op) {
+        case AlgoLanguage::cpp:
+            *os << "CPP";
+            break;
+        case AlgoLanguage::python:
+            *os << "PYTHON";
+            break;
+        default:
+            *os << "UNKNOWN_LANGUAGE";
+            break;
+    }
+}
+} // namespace nutc::common
+
 namespace nutc::test {
 using common::limit_order;
 using nutc::common::AlgoLanguage;
@@ -15,16 +33,14 @@ using nutc::common::Side::buy;
 using nutc::common::Side::sell;
 using nutc::test::start_wrappers;
 
-class IntegrationpythonAlgo : public ::testing::Test {
+class IntegrationBasicAlgo : public ::testing::TestWithParam<AlgoLanguage> {
 protected:
     TraderContainer traders_;
 };
 
-TEST_F(IntegrationpythonAlgo, ConfirmOrderReceived)
+TEST_P(IntegrationBasicAlgo, ConfirmOrderReceived)
 {
-    start_wrappers(
-        traders_, {AlgoLanguage::python, "test_algos/python/buy_tsla_at_100.py"}
-    );
+    start_wrappers(traders_, GetParam(), "buy_tsla_at_100");
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 1000.0); // NOLINT
     trader2->add_order(limit_order{Ticker::ETH, sell, 100.0, 10.0});
@@ -37,11 +53,9 @@ TEST_F(IntegrationpythonAlgo, ConfirmOrderReceived)
     );
 }
 
-TEST_F(IntegrationpythonAlgo, ConfirmOrderFeeApplied)
+TEST_P(IntegrationBasicAlgo, ConfirmOrderFeeApplied)
 {
-    start_wrappers(
-        traders_, {AlgoLanguage::python, "test_algos/python/buy_tsla_at_100.py"}
-    );
+    start_wrappers(traders_, GetParam(), "buy_tsla_at_100");
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 1000.0); // NOLINT
     trader2->add_order(limit_order{Ticker::ETH, sell, 100.0, 10.0});
@@ -55,11 +69,9 @@ TEST_F(IntegrationpythonAlgo, ConfirmOrderFeeApplied)
     );
 }
 
-TEST_F(IntegrationpythonAlgo, NewlineInMessageDoesNotAffectSubsequentMessages)
+TEST_P(IntegrationBasicAlgo, NewlineInMessageDoesNotAffectSubsequentMessages)
 {
-    start_wrappers(
-        traders_, {AlgoLanguage::python, "test_algos/python/buy_tsla_at_100_newline.py"}
-    );
+    start_wrappers(traders_, GetParam(), "buy_tsla_at_100_newline");
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 1000.0); // NOLINT
     trader2->add_order(limit_order{Ticker::ETH, sell, 100.0, 100.0});
@@ -69,11 +81,9 @@ TEST_F(IntegrationpythonAlgo, NewlineInMessageDoesNotAffectSubsequentMessages)
     cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
 }
 
-TEST_F(IntegrationpythonAlgo, RemoveIOCOrder)
+TEST_P(IntegrationBasicAlgo, RemoveIOCOrder)
 {
-    auto& trader1 = start_wrappers(
-        traders_, {AlgoLanguage::python, "test_algos/python/buy_tsla_at_100.py"}
-    );
+    auto& trader1 = start_wrappers(traders_, GetParam(), "buy_tsla_at_100");
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 1000.0); // NOLINT
     trader2->add_order({Ticker::ETH, sell, 100.0, 100.0});
@@ -90,11 +100,9 @@ TEST_F(IntegrationpythonAlgo, RemoveIOCOrder)
     ASSERT_TRUE(orders.empty());
 }
 
-TEST_F(IntegrationpythonAlgo, MarketOrderBuy)
+TEST_P(IntegrationBasicAlgo, MarketOrderBuy)
 {
-    start_wrappers(
-        traders_, {AlgoLanguage::python, "test_algos/python/buy_market_order_1000.py"}
-    );
+    start_wrappers(traders_, GetParam(), "buy_market_order_1000");
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 1000.0);
     trader2->add_order({Ticker::ETH, sell, 100.0, 100.0});
@@ -104,11 +112,9 @@ TEST_F(IntegrationpythonAlgo, MarketOrderBuy)
     cycle.wait_for_order(limit_order{Ticker::BTC, buy, 1.0, 100.0});
 }
 
-TEST_F(IntegrationpythonAlgo, MarketOrderSell)
+TEST_P(IntegrationBasicAlgo, MarketOrderSell)
 {
-    auto& trader1 = start_wrappers(
-        traders_, {AlgoLanguage::python, "test_algos/python/sell_market_order_1.py"}
-    );
+    auto& trader1 = start_wrappers(traders_, GetParam(), "sell_market_order_1000");
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader1.modify_holdings(Ticker::ETH, 1000.0);
     trader2->add_order({Ticker::ETH, buy, 1.0, 100.0});
@@ -119,11 +125,10 @@ TEST_F(IntegrationpythonAlgo, MarketOrderSell)
     cycle.wait_for_order(limit_order{Ticker::BTC, buy, 1.0, 100.0});
 }
 
-TEST_F(IntegrationpythonAlgo, ManyUpdates)
+
+TEST_P(IntegrationBasicAlgo, ManyUpdates)
 {
-    start_wrappers(
-        traders_, {AlgoLanguage::python, "test_algos/python/confirm_1000.py"}
-    );
+    start_wrappers(traders_, GetParam(), "confirm_1000");
     auto trader2 = traders_.add_trader<TestTrader>(0);
 
     trader2->modify_holdings(Ticker::ETH, 100000.0); // NOLINT
@@ -139,11 +144,9 @@ TEST_F(IntegrationpythonAlgo, ManyUpdates)
     cycle.wait_for_order(limit_order{Ticker::ETH, buy, 10.0, 100.0});
 }
 
-TEST_F(IntegrationpythonAlgo, OnTradeUpdate)
+TEST_P(IntegrationBasicAlgo, OnTradeUpdate)
 {
-    start_wrappers(
-        traders_, {AlgoLanguage::python, "test_algos/python/buy_tsla_on_trade.py"}
-    );
+    start_wrappers(traders_, GetParam(), "buy_tsla_on_trade");
 
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 10000.0); // NOLINT
@@ -158,11 +161,9 @@ TEST_F(IntegrationpythonAlgo, OnTradeUpdate)
 }
 
 // Sanity check that it goes through the orderbook
-TEST_F(IntegrationpythonAlgo, MultipleLevelOrder)
+TEST_P(IntegrationBasicAlgo, MultipleLevelOrder)
 {
-    auto& trader1 = start_wrappers(
-        traders_, {AlgoLanguage::python, "test_algos/python/buy_tsla_at_100.py"}
-    );
+    auto& trader1 = start_wrappers(traders_, GetParam(), "buy_tsla_at_100");
 
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 1000.0); // NOLINT
@@ -176,11 +177,9 @@ TEST_F(IntegrationpythonAlgo, MultipleLevelOrder)
     ASSERT_EQ(trader1.get_capital() - trader1.get_initial_capital(), -100.0);
 }
 
-TEST_F(IntegrationpythonAlgo, OnAccountUpdateSell)
+TEST_P(IntegrationBasicAlgo, OnAccountUpdateSell)
 {
-    auto& trader1 = start_wrappers(
-        traders_, {AlgoLanguage::python, "test_algos/python/sell_tsla_on_account.py"}
-    );
+    auto& trader1 = start_wrappers(traders_, GetParam(), "sell_tsla_on_account");
     trader1.modify_holdings(Ticker::ETH, 1000.0);
 
     auto trader2 = traders_.add_trader<TestTrader>(100000);
@@ -196,11 +195,9 @@ TEST_F(IntegrationpythonAlgo, OnAccountUpdateSell)
     cycle.wait_for_order(limit_order{Ticker::BTC, buy, 1.0, 100.0});
 }
 
-TEST_F(IntegrationpythonAlgo, OnAccountUpdateBuy)
+TEST_P(IntegrationBasicAlgo, OnAccountUpdateBuy)
 {
-    start_wrappers(
-        traders_, {AlgoLanguage::python, "test_algos/python/buy_tsla_on_account.py"}
-    );
+    start_wrappers(traders_, GetParam(), "buy_tsla_on_account");
 
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 1000.0); // NOLINT
@@ -215,11 +212,11 @@ TEST_F(IntegrationpythonAlgo, OnAccountUpdateBuy)
     cycle.wait_for_order(limit_order{Ticker::BTC, buy, 1.0, 100.0});
 }
 
-TEST_F(IntegrationpythonAlgo, AlgoStartDelay)
+TEST_P(IntegrationBasicAlgo, AlgoStartDelay)
 {
     start_wrappers(
-        traders_, {AlgoLanguage::python, "test_algos/python/buy_tsla_at_100.py"},
-        TEST_STARTING_CAPITAL, TEST_CLIENT_WAIT_SECS
+        traders_, GetParam(), "buy_tsla_at_100", TEST_STARTING_CAPITAL,
+        TEST_CLIENT_WAIT_SECS
     );
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -242,11 +239,9 @@ TEST_F(IntegrationpythonAlgo, AlgoStartDelay)
 }
 
 // Disable trader and confirm it doesn't send any orders
-TEST_F(IntegrationpythonAlgo, DisableTrader)
+TEST_P(IntegrationBasicAlgo, DisableTrader)
 {
-    auto& trader1 = start_wrappers(
-        traders_, {AlgoLanguage::python, "test_algos/python/buy_tsla_at_100.py"}
-    );
+    auto& trader1 = start_wrappers(traders_, GetParam(), "buy_tsla_at_100");
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 1000.0); // NOLINT
     trader2->add_order({Ticker::ETH, sell, 100.0, 100.0});
@@ -260,4 +255,10 @@ TEST_F(IntegrationpythonAlgo, DisableTrader)
     auto orders = trader1.read_orders();
     ASSERT_TRUE(orders.empty());
 }
+
+
+INSTANTIATE_TEST_SUITE_P(
+    IntegrationBasic, IntegrationBasicAlgo,
+    ::testing::Values(AlgoLanguage::python, AlgoLanguage::cpp)
+);
 } // namespace nutc::test

@@ -15,5 +15,8 @@ public:
     std::string get_algo_string() const;
 
     std::string get_id() const;
+
+private:
+    std::string compile_cpp_() const;
 };
 } // namespace nutc::common

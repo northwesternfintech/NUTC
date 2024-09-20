@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/types/algorithm/algorithm.hpp"
+#include "common/types/algorithm/local_algorithm.hpp"
 #include "common/types/decimal.hpp"
 #include "config.h"
 #include "exchange/traders/trader_container.hpp"
@@ -15,7 +15,8 @@ std::vector<std::reference_wrapper<exchange::GenericTrader>> start_wrappers(
 );
 
 exchange::GenericTrader& start_wrappers(
-    nutc::exchange::TraderContainer& users, const common::LocalAlgorithm& algo,
+    nutc::exchange::TraderContainer& users, common::AlgoLanguage language,
+    const std::string& algo_name,
     common::decimal_price starting_capital = TEST_STARTING_CAPITAL,
     size_t start_delay = 0
 );
