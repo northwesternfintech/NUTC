@@ -10,7 +10,7 @@
 namespace nutc::test {
 using nutc::common::AlgoLanguage;
 
-class IntegrationBasicCancellation : public ::testing::Test {
+class IntegrationBasicCancellation : public ::testing::TestWithParam<AlgoLanguage> {
 protected:
     using Ticker = nutc::common::Ticker;
     using nutc::common::Side::buy;
@@ -18,12 +18,9 @@ protected:
     exchange::TraderContainer traders_;
 };
 
-TEST_F(IntegrationBasicCancellation, CancelMessageHasSameIdAsOrder)
+TEST_P(IntegrationBasicCancellation, CancelMessageHasSameIdAsOrder)
 {
-    start_wrappers(
-        traders_,
-        {AlgoLanguage::python, "test_algos/cancellation/cancel_limit_order.py"}
-    );
+    start_wrappers(traders_, GetParam(), "cancel_limit_order");
     TestMatchingCycle cycle{traders_};
 
     auto order_id = cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
@@ -31,12 +28,9 @@ TEST_F(IntegrationBasicCancellation, CancelMessageHasSameIdAsOrder)
     cycle.wait_for_order(common::cancel_order{common::Ticker::ETH, *order_id});
 }
 
-TEST_F(IntegrationBasicCancellation, CancelMessagePreventsOrderFromExecuting)
+TEST_P(IntegrationBasicCancellation, CancelMessagePreventsOrderFromExecuting)
 {
-    auto& trader1 = start_wrappers(
-        traders_,
-        {AlgoLanguage::python, "test_algos/cancellation/cancel_limit_order.py"}
-    );
+    auto& trader1 = start_wrappers(traders_, GetParam(), "cancel_limit_order");
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 100.0);
     TestMatchingCycle cycle{traders_};
@@ -53,15 +47,9 @@ TEST_F(IntegrationBasicCancellation, CancelMessagePreventsOrderFromExecuting)
     EXPECT_EQ(trader1.get_holdings(Ticker::ETH), 0);
 }
 
-TEST_F(IntegrationBasicCancellation, OneOfTwoOrdersCancelledResultsInMatch)
+TEST_P(IntegrationBasicCancellation, OneOfTwoOrdersCancelledResultsInMatch)
 {
-    auto& trader1 = start_wrappers(
-        traders_,
-        {
-            AlgoLanguage::python,
-            "test_algos/cancellation/partial_cancel_limit_order.py",
-        }
-    );
+    auto& trader1 = start_wrappers(traders_, GetParam(), "partial_cancel_limit_order");
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 100.0);
     TestMatchingCycle cycle{traders_};
@@ -78,4 +66,9 @@ TEST_F(IntegrationBasicCancellation, OneOfTwoOrdersCancelledResultsInMatch)
     EXPECT_EQ(double{trader2->get_capital_delta()}, 200);
     EXPECT_EQ(double{trader1.get_holdings(Ticker::ETH)}, 10);
 }
+
+INSTANTIATE_TEST_SUITE_P(
+    IntegrationBasicCancellation, IntegrationBasicCancellation,
+    ::testing::Values(AlgoLanguage::python, AlgoLanguage::cpp)
+);
 } // namespace nutc::test
