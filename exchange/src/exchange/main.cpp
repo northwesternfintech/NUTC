@@ -25,7 +25,6 @@ create_cycle(TraderContainer& traders, const auto& mode)
     double order_fee = Config::get().constants().ORDER_FEE;
     auto tickers = TickerContainer(ticker_config, traders);
 
-    return std::make_unique<BaseMatchingCycle>(tickers, traders, order_fee);
     switch (mode) {
         case Mode::normal:
             return std::make_unique<BaseMatchingCycle>(tickers, traders, order_fee);

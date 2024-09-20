@@ -5,7 +5,6 @@
 #include "exchange/traders/trader_types/algo_trader.hpp"
 #include "exchange/wrappers/creation/rmq_wrapper_init.hpp"
 
-#include <iostream>
 #include <stdexcept>
 
 namespace nutc::exchange {
@@ -28,15 +27,15 @@ DevModeAlgoInitializer::initialize_trader_container(
 void
 DevModeAlgoInitializer::initialize_files()
 {
-    if (!algorithms_.empty())
-        return;
-
     for (size_t i = 0; i < NUM_ALGOS; i++) {
-        auto relative_path = fmt::format("{}/algo_{}.py", ALGO_DIR, i);
-        algorithms_.emplace_back(common::AlgoLanguage::python, relative_path);
+        auto relative_py_path = fmt::format("{}/algo_{}.py", ALGO_DIR, i);
+        auto relative_cpp_path = fmt::format("{}/algo_{}.hpp", ALGO_DIR, i);
+        algorithms_.emplace_back(common::AlgoLanguage::python, relative_py_path);
+        algorithms_.emplace_back(common::AlgoLanguage::cpp, relative_cpp_path);
     }
 
-    std::string content = common::read_file_content("template.py");
+    std::string py_content = common::read_file_content("template.py");
+    std::string cpp_content = common::read_file_content("template.hpp");
 
     if (!common::create_directory(ALGO_DIR))
         throw std::runtime_error("Failed to create directory");
@@ -50,7 +49,12 @@ DevModeAlgoInitializer::initialize_files()
         if (!file)
             throw std::runtime_error("Failed to create local algo");
 
-        file << content;
+        if (algo.get_language() == common::AlgoLanguage::python) {
+            file << py_content;
+        }
+        else {
+            file << cpp_content;
+        }
         file.close();
     }
 }
