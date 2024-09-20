@@ -40,6 +40,17 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  prisma-studio:
+    image: node:latest
+    working_dir: /app
+    volumes:
+      - ..:/app
+    command: ["npx", "prisma", "studio"]
+    ports:
+      - "5555:5555"  # You can customize this port if needed
+    depends_on:
+      - postgres
+
 volumes:
   postgres_data:
   localstack:
