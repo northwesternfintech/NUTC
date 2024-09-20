@@ -10,7 +10,7 @@
 namespace nutc::test {
 using nutc::common::AlgoLanguage;
 
-class IntegrationBasicCancellation : public ::testing::Test {
+class IntegrationBasicpython : public ::testing::Test {
 protected:
     using Ticker = nutc::common::Ticker;
     using nutc::common::Side::buy;
@@ -18,11 +18,11 @@ protected:
     exchange::TraderContainer traders_;
 };
 
-TEST_F(IntegrationBasicCancellation, CancelMessageHasSameIdAsOrder)
+TEST_F(IntegrationBasicpython, CancelMessageHasSameIdAsOrder)
 {
     start_wrappers(
         traders_,
-        {AlgoLanguage::python, "test_algos/cancellation/cancel_limit_order.py"}
+        {AlgoLanguage::python, "test_algos/python/cancel_limit_order.py"}
     );
     TestMatchingCycle cycle{traders_};
 
@@ -31,11 +31,11 @@ TEST_F(IntegrationBasicCancellation, CancelMessageHasSameIdAsOrder)
     cycle.wait_for_order(common::cancel_order{common::Ticker::ETH, *order_id});
 }
 
-TEST_F(IntegrationBasicCancellation, CancelMessagePreventsOrderFromExecuting)
+TEST_F(IntegrationBasicpython, CancelMessagePreventsOrderFromExecuting)
 {
     auto& trader1 = start_wrappers(
         traders_,
-        {AlgoLanguage::python, "test_algos/cancellation/cancel_limit_order.py"}
+        {AlgoLanguage::python, "test_algos/python/cancel_limit_order.py"}
     );
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->modify_holdings(Ticker::ETH, 100.0);
@@ -53,13 +53,13 @@ TEST_F(IntegrationBasicCancellation, CancelMessagePreventsOrderFromExecuting)
     EXPECT_EQ(trader1.get_holdings(Ticker::ETH), 0);
 }
 
-TEST_F(IntegrationBasicCancellation, OneOfTwoOrdersCancelledResultsInMatch)
+TEST_F(IntegrationBasicpython, OneOfTwoOrdersCancelledResultsInMatch)
 {
     auto& trader1 = start_wrappers(
         traders_,
         {
             AlgoLanguage::python,
-            "test_algos/cancellation/partial_cancel_limit_order.py",
+            "test_algos/python/partial_cancel_limit_order.py",
         }
     );
     auto trader2 = traders_.add_trader<TestTrader>(0);
