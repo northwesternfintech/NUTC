@@ -3,8 +3,11 @@
 #include "base_algorithm.hpp"
 #include "common/file_operations/file_operations.hpp"
 
+#include <boost/filesystem.hpp>
+
 #include <cassert>
 
+#include <filesystem>
 #include <optional>
 
 namespace nutc::common {
@@ -13,9 +16,11 @@ LocalAlgorithm::compile_cpp_() const
 {
     assert(get_language() == AlgoLanguage::cpp);
     static constexpr std::string_view TEMPLATE_PATH = "test_algos/cpp/template.cpp";
-    std::string output_path = fmt::format("/tmp/algo_cpp_path.so", filepath_.string());
+    std::string binary_output = (boost::filesystem::temp_directory_path()
+                                 / boost::filesystem::unique_path("%%%%-%%%%-%%%%.tmp"))
+                                    .string();
     std::string command = fmt::format(
-        "g++ -std=c++20 -fPIC -shared -o {} -include {} {}", output_path,
+        "g++ -std=c++20 -fPIC -shared -o {} -include {} {}", binary_output,
         filepath_.string(), TEMPLATE_PATH
     );
 
@@ -26,7 +31,7 @@ LocalAlgorithm::compile_cpp_() const
             fmt::format("Compilation of {} failed", filepath_.string())
         );
     }
-    return output_path;
+    return binary_output;
 }
 
 LocalAlgorithm::LocalAlgorithm(AlgoLanguage language, std::filesystem::path filepath) :

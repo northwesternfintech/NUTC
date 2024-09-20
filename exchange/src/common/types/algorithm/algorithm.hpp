@@ -3,6 +3,8 @@
 #include "local_algorithm.hpp"
 #include "remote_algorithm.hpp"
 
+#include <variant>
+
 namespace nutc::common {
 using algorithm_variant = std::variant<RemoteAlgorithm, LocalAlgorithm>;
 

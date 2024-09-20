@@ -1,5 +1,6 @@
 #include "common/messages_exchange_to_wrapper.hpp"
 #include "common/messages_wrapper_to_exchange.hpp"
+#include "common/types/algorithm/base_algorithm.hpp"
 #include "common/types/ticker.hpp"
 #include "exchange/orders/storage/order_storage.hpp"
 #include "exchange/traders/trader_container.hpp"
@@ -8,6 +9,24 @@ using limit_order = nutc::common::limit_order;
 using tagged_limit_order = nutc::exchange::tagged_limit_order;
 using tagged_market_order = nutc::exchange::tagged_market_order;
 using TraderContainer = nutc::exchange::TraderContainer;
+
+namespace nutc::common {
+inline void
+PrintTo(const AlgoLanguage& op, std::ostream* os)
+{
+    switch (op) {
+        case AlgoLanguage::cpp:
+            *os << "CPP";
+            break;
+        case AlgoLanguage::python:
+            *os << "PYTHON";
+            break;
+        default:
+            *os << "UNKNOWN_LANGUAGE";
+            break;
+    }
+}
+} // namespace nutc::common
 
 namespace nutc::test {
 
@@ -84,8 +103,7 @@ order_equality(const common::market_order& order1, const common::market_order& o
             << "Expected market order with"                                            \
             << " ticker =" << (nutc::common::to_string(ticker_))                       \
             << ", side = " << static_cast<int>(side_) << ", price = " << (price_)      \
-            << ", quantity = " << (quantity_) << ". Actual update: client_id = "       \
-            << ""                                                                      \
+            << ", quantity = " << (quantity_) << ". Actual update: client_id = " << "" \
             << ", ticker = " << nutc::common::to_string((update).ticker)               \
             << ", side = " << static_cast<int>((update).side)                          \
             << ", price = " << double((update).price)                                  \

@@ -7,24 +7,6 @@
 
 #include <gtest/gtest.h>
 
-namespace nutc::common {
-void
-PrintTo(const AlgoLanguage& op, std::ostream* os)
-{
-    switch (op) {
-        case AlgoLanguage::cpp:
-            *os << "CPP";
-            break;
-        case AlgoLanguage::python:
-            *os << "PYTHON";
-            break;
-        default:
-            *os << "UNKNOWN_LANGUAGE";
-            break;
-    }
-}
-} // namespace nutc::common
-
 namespace nutc::test {
 using common::limit_order;
 using nutc::common::AlgoLanguage;
@@ -124,7 +106,6 @@ TEST_P(IntegrationBasicAlgo, MarketOrderSell)
 
     cycle.wait_for_order(limit_order{Ticker::BTC, buy, 1.0, 100.0});
 }
-
 
 TEST_P(IntegrationBasicAlgo, ManyUpdates)
 {
@@ -255,7 +236,6 @@ TEST_P(IntegrationBasicAlgo, DisableTrader)
     auto orders = trader1.read_orders();
     ASSERT_TRUE(orders.empty());
 }
-
 
 INSTANTIATE_TEST_SUITE_P(
     IntegrationBasic, IntegrationBasicAlgo,
