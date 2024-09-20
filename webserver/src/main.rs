@@ -1,21 +1,13 @@
 use actix_cors::Cors;
-use actix_web::{http::header, get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{get, http::header, post, web, App, HttpResponse, HttpServer, Responder};
+use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod};
+use reqwest::Client;
 use serde::Deserialize;
 use serde_json::json;
-use reqwest::Client;
-use tokio_postgres::{NoTls};
+use tokio_postgres::NoTls;
 
 const LINTER_BASE_URL: &str = "http://linter:18081";
 const SANDBOX_BASE_URL: &str = "http://sandbox:18080";
-
-// #[repr(i32)]
-// #[derive(Deserialize, Debug, PartialEq)]
-// pub enum LintingResultOption {
-//     Unknown = -1,
-//     Failure = 0,
-//     Success = 1,
-//     Pending = 2,
-// }
 
 #[derive(Deserialize, Debug)]
 pub struct LinterResponse {
@@ -85,27 +77,21 @@ async fn linter(data: web::Path<(String, String)>) -> impl Responder {
     }
 }
 
-async fn get_algorithms(case: String, uid: Option<String>) -> impl Responder {
-    let (postgres_client, connection) = match tokio_postgres::connect("host=localhost user=postgres password=yourpassword dbname=nutc", NoTls).await {
-        Ok((client, connection)) => (client, connection),
+async fn get_algorithms(case: String, uid: Option<String>, pool: &Pool) -> impl Responder {
+    let postgres_client = match pool.get().await {
+        Ok(client) => client,
         Err(e) => {
             eprintln!("Failed to connect to the database: {}", e);
             return HttpResponse::InternalServerError().finish();
         }
     };
 
-    actix_web::rt::spawn(async move {
-        if let Err(e) = connection.await {
-            eprintln!("connection error: {}", e);
-        }
-    });
-
     let query = r#"
     WITH "MostRecentAlgos" AS (
       WITH "FilteredAlgosByCase" AS (
-        SELECT a."uid", f."key", f."createdAt" AS "timestamp"
+        SELECT a."uid", f."s3Key", f."createdAt" AS "timestamp"
         FROM "algos" AS a
-        INNER JOIN "AlgoFile" AS f ON a."algoFileKey" = f."key"
+        INNER JOIN "algo_file" AS f ON a."algoFileS3Key" = f."s3Key"
         WHERE a."case" = $1
         AND ($2::text IS NULL OR a."uid" = $2)
       )
@@ -115,18 +101,17 @@ async fn get_algorithms(case: String, uid: Option<String>) -> impl Responder {
     )
     SELECT 
       p."firstName" || ' ' || p."lastName" AS "name", 
-      a."uid", 
-      a."key"
+      a."s3Key" 
     FROM "profiles" AS p
     INNER JOIN (
-      SELECT u."uid", f."key"
+      SELECT u."uid", f."s3Key"
       FROM "MostRecentAlgos" AS u
-      INNER JOIN "AlgoFile" AS f ON u."timestamp" = f."createdAt"
+      INNER JOIN "algo_file" AS f ON u."timestamp" = f."createdAt"
     ) AS a ON p."uid" = a."uid";
     "#;
-    
+
     let params: Vec<&(dyn tokio_postgres::types::ToSql + Sync)> = vec![&case, &uid];
-    
+
     let rows = match postgres_client.query(query, &params).await {
         Ok(rows) => rows,
         Err(e) => {
@@ -139,7 +124,10 @@ async fn get_algorithms(case: String, uid: Option<String>) -> impl Responder {
         .into_iter()
         .map(|row| {
             let values: Vec<String> = (0..row.len())
-                .map(|i| row.get::<usize, Option<String>>(i).unwrap_or_else(|| "NULL".to_string()))
+                .map(|i| {
+                    row.get::<usize, Option<String>>(i)
+                        .unwrap_or_else(|| "NULL".to_string())
+                })
                 .collect();
             json!(values)
         })
@@ -150,20 +138,51 @@ async fn get_algorithms(case: String, uid: Option<String>) -> impl Responder {
 
 #[tracing::instrument]
 #[get("/algorithms/{case}/{uid}")]
-async fn get_single_user_algorithm(data: web::Path<(String, String)>) -> impl Responder {
+async fn get_single_user_algorithm(
+    data: web::Path<(String, String)>,
+    db_pool: web::Data<Pool>,
+) -> impl Responder {
     let (case, uid) = data.into_inner();
-    get_algorithms(case, Some(uid)).await
+    get_algorithms(case, Some(uid), &db_pool).await
 }
 
 #[tracing::instrument]
 #[get("/algorithms/{case}")]
-async fn get_all_user_algorithms(data: web::Path<String>) -> impl Responder {
+async fn get_all_user_algorithms(
+    data: web::Path<String>,
+    db_pool: web::Data<Pool>,
+) -> impl Responder {
     let case = data.into_inner();
-    get_algorithms(case, None).await
+    get_algorithms(case, None, &db_pool).await
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    dotenv::dotenv().ok();
+
+    let host =
+        std::env::var("WEBSERVER_DB_HOST").expect("env variable `WEBSERVER_DB_HOST` should be set");
+    let user =
+        std::env::var("WEBSERVER_DB_USER").expect("env variable `WEBSERVER_DB_USER` should be set");
+    let password = std::env::var("WEBSERVER_DB_PASSWORD")
+        .expect("env variable `WEBSERVER_DB_PASSWORD` should be set");
+    let dbname =
+        std::env::var("WEBSERVER_DB_NAME").expect("env variable `WEBSERVER_DB_NAME` should be set");
+
+    let mut pg_config = tokio_postgres::Config::new();
+    pg_config.host(host);
+    pg_config.user(user);
+    pg_config.password(password);
+    pg_config.dbname(dbname);
+    let mgr_config = ManagerConfig {
+        recycling_method: RecyclingMethod::Fast,
+    };
+
+    let pool = Pool::builder(Manager::from_config(pg_config, NoTls, mgr_config))
+        .max_size(16)
+        .build()
+        .expect("Failed to connect to DB");
+
     tracing_subscriber::fmt()
         .event_format(
             tracing_subscriber::fmt::format()
@@ -175,8 +194,9 @@ async fn main() -> std::io::Result<()> {
 
     tracing::info!("Starting server.");
 
-    HttpServer::new(|| {
+    HttpServer::new(move || {
         let cors = Cors::default()
+            .allowed_origin("http://localhost:3000")
             .allowed_origin("http://localhost:3001")
             .allowed_origin("https://nutc.io")
             .allowed_origin("https://www.nutc.io")
@@ -190,6 +210,7 @@ async fn main() -> std::io::Result<()> {
             ])
             .supports_credentials();
         App::new()
+            .app_data(web::Data::new(pool.clone()))
             .service(linter)
             .service(get_single_user_algorithm)
             .service(get_all_user_algorithms)
