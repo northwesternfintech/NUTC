@@ -32,8 +32,17 @@ model User {
   Algo             Algo[]
   profile          Profile?
   AlgoFile         AlgoFile[]
+  team			   Team?			@relation(fields: [teamName], references: [name])
+  teamName		   String?
 
   @@map("users")
+}
+
+model Team {
+  name    String  @id @unique
+  members User[]
+
+  @@map("teams")
 }
 
 model Algo {

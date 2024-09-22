@@ -13,6 +13,7 @@ import {
   ArrowDownOnSquareIcon,
   ArrowTrendingUpIcon,
   ArrowUpTrayIcon,
+  UserPlusIcon,
   Bars3Icon,
   QuestionMarkCircleIcon,
   XMarkIcon,
@@ -47,12 +48,12 @@ const navigation = [
     icon: ArrowUpTrayIcon,
     activeName: "/dash/submit",
   },
-  // {
-  //   name: "Partner Settings",
-  //   href: "/dash/group",
-  //   icon: UserPlusIcon,
-  //   activeName: "/dash/group",
-  // },
+  {
+    name: "Partner Settings",
+    href: "/dash/group",
+    icon: UserPlusIcon,
+    activeName: "/dash/group",
+  },
 ];
 
 function classNames(...classes: any) {
