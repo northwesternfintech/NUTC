@@ -2,7 +2,7 @@ import { ArrowDownOnSquareIcon } from "@heroicons/react/20/solid";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import dark from "react-syntax-highlighter/dist/esm/styles/prism/coldark-dark";
 
-const codeString = `def place_market_order(side: str, ticker: str, quantity: float, price: float) -> bool:
+const pythonCodeString = `def place_market_order(side: str, ticker: str, quantity: float, price: float) -> bool:
  """Place a market order - DO NOT MODIFY"""
 
 class Strategy:
@@ -21,10 +21,39 @@ class Strategy:
  print(f"Python Account update: {ticker} {side} {price} {quantity} {capital_remaining}")
 `;
 
-const CodeBlock = () => {
+const cppCodeString = `// Place a market order - DO NOT MODIFY
+bool place_market_order(std::string const& side, std::string const& ticker, double quantity);
+
+// Template for a strategy
+class Strategy {
+public:
+  Strategy() {
+    // Your initialization code goes here
+  }
+
+  // Called whenever two orders match. Could be one of your orders, or two other people's orders.
+  void on_trade_update(std::string ticker, std::string side, double quantity, double price) { }
+
+  // Called whenever the orderbook changes. This could be because of a trade, or because of a new order, or both.
+  void on_orderbook_update(std::string ticker, std::string side, double quantity, double price) { }
+
+  // Called whenever one of your orders is filled.
+  void on_account_update(std::string ticker, std::string side, double price, double quantity, double capital_remaining) { }
+}
+`;
+
+const PythonCodeBlock = () => {
   return (
     <SyntaxHighlighter language="python" style={dark}>
-      {codeString}
+      {pythonCodeString}
+    </SyntaxHighlighter>
+  );
+};
+
+const CppCodeBlock = () => {
+  return (
+    <SyntaxHighlighter language="cpp" style={dark}>
+      {cppCodeString}
     </SyntaxHighlighter>
   );
 };
@@ -40,7 +69,7 @@ export default function Template() {
             </div>
           </div>
           <div className="p-6">
-            <CodeBlock />
+            <PythonCodeBlock />
           </div>
         </div>
       </div>
