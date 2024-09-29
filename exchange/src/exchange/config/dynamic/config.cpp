@@ -41,6 +41,8 @@ Config::get_bot_config_(const YAML::Node& bots_config)
         BotType type{};
         if (type_s == "market_maker")
             type = BotType::market_maker;
+        else if (type_s == "institutional")
+            type = BotType::institutional;
         else if (type_s == "retail")
             type = BotType::retail;
         else

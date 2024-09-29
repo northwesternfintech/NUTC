@@ -14,6 +14,10 @@ tickers:
         number_of_bots: 50
         average_capital: 200000
         std_dev_capital: 50000
+      - type: "institutional"
+        number_of_bots: 1
+        average_capital: 1000000
+        std_dev_capital: 2000
       - type: "retail"
         number_of_bots: 250
         average_capital: 5000

@@ -20,6 +20,7 @@ BaseMatchingCycle::before_cycle_(uint64_t)
 auto
 BaseMatchingCycle::collect_orders(uint64_t) -> std::vector<OrderVariant>
 {
+	usleep(500000);
     std::vector<OrderVariant> orders;
 
     auto collect_orders = [&orders](GenericTrader& trader) {

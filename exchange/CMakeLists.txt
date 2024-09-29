@@ -46,6 +46,7 @@ add_library(
     src/exchange/bots/bot_types/retail.cpp
     src/exchange/bots/variance.cpp
     src/exchange/bots/bot_types/market_maker.cpp
+    src/exchange/bots/bot_types/institutional.cpp
 
     src/exchange/matching/engine.cpp
     src/exchange/orders/level_tracking/level_quantity_tracker.cpp

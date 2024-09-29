@@ -1,5 +1,6 @@
 #include "bot_container.hpp"
 
+#include "bot_types/institutional.hpp"
 #include "common/types/decimal.hpp"
 #include "exchange/bots/bot_types/market_maker.hpp"
 #include "exchange/bots/bot_types/retail.hpp"
@@ -65,6 +66,11 @@ BotContainer::create_bots(
             );
         case BotType::market_maker:
             return create_bots<MarketMakerBot>(
+                trader_container, ticker, bot_config.AVERAGE_CAPITAL,
+                bot_config.STD_DEV_CAPITAL, bot_config.NUM_BOTS
+            );
+        case BotType::institutional:
+            return create_bots<InstitutionalBot>(
                 trader_container, ticker, bot_config.AVERAGE_CAPITAL,
                 bot_config.STD_DEV_CAPITAL, bot_config.NUM_BOTS
             );
