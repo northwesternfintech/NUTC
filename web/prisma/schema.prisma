@@ -50,6 +50,7 @@ model Algo {
   name               String  @unique
   description        String
   case               String
+  language           String
   lintResults        String
   sandboxLogFileURL  String?
   lintFailureMessage String?

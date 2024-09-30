@@ -6,12 +6,70 @@ use serde::Deserialize;
 use serde_json::json;
 use tokio_postgres::NoTls;
 
-const LINTER_BASE_URL: &str = "http://linter:18081";
-const SANDBOX_BASE_URL: &str = "http://sandbox:18080";
+// const LINTER_BASE_URL: &str = "http://linter:18081";
+// const SANDBOX_BASE_URL: &str = "http://sandbox:18080";
+const LINTER_BASE_URL: &str = "http://localhost:18081";
 
 #[derive(Deserialize, Debug)]
 pub struct LinterResponse {
     pub linting_status: i32,
+}
+
+#[derive(Deserialize, Debug)]
+struct LintResult {
+    success: bool,
+    message: String,
+}
+
+#[tracing::instrument]
+#[post("/lint-result/{uid}/{algo_id}")]
+async fn set_lint_result(
+    path_info: web::Path<(String, String)>,
+    lint_result: web::Json<LintResult>,
+    db_pool: web::Data<Pool>,
+) -> impl Responder {
+    let (uid, algo_id) = path_info.into_inner();
+
+    let postgres_client = match db_pool.get().await {
+        Ok(client) => client,
+        Err(e) => {
+            eprintln!("Failed to connect to the database: {}", e);
+            return HttpResponse::InternalServerError().finish();
+        }
+    };
+
+    let query = if lint_result.success {
+        r#"
+        UPDATE "algos"
+        SET "lintResults" = $1, 
+            "lintSuccessMessage" = $2
+        WHERE "uid" = $3 AND "algoFileS3Key" = $4;
+        "#
+    } else {
+        r#"
+        UPDATE "algos"
+        SET "lintResults" = $1, 
+            "lintFailureMessage" = $2
+        WHERE "uid" = $3 AND "algoFileS3Key" = $4;
+        "#
+    };
+
+    let result = if lint_result.success {
+        "success"
+    } else {
+        "failure"
+    };
+
+    match postgres_client
+        .execute(query, &[&result, &lint_result.message, &uid, &algo_id])
+        .await
+    {
+        Ok(_) => HttpResponse::Ok().finish(),
+        Err(e) => {
+            tracing::error!("Failed to update lint result in the database: {e}");
+            HttpResponse::InternalServerError().finish()
+        }
+    }
 }
 
 #[tracing::instrument]
@@ -214,6 +272,7 @@ async fn main() -> std::io::Result<()> {
             .service(linter)
             .service(get_single_user_algorithm)
             .service(get_all_user_algorithms)
+            .service(set_lint_result)
             .wrap(cors)
     })
     .bind(("0.0.0.0", 16124))?

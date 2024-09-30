@@ -46,14 +46,13 @@ tasks:
       - test -f CMakeUserPresets.json
     cmds:
       - cmake --build {{.CMAKE_SUFFIX}} -j 
-
   run:
     env:
       NUTC_SPAWNER_BINARY_PATH: '{{if eq .RELEASE_BUILD "true"}}./build/NUTC-linter-spawner{{else}}./build/dev/NUTC-linter-spawner{{end}}'
     vars:
       LINTER_PATH: '{{if eq .RELEASE_BUILD "true"}}build/{{.NAME}}{{else}}build/dev/{{.NAME}}{{end}}'
     cmds:
-      - task: built
+      - task: build
       - ./{{ .LINTER_PATH }}
 
   run-v:

@@ -10,6 +10,7 @@ export async function POST(req: Request) {
       !algo.name ||
       !algo.description ||
       !algo.case ||
+      !algo.language ||
       !algo.algoFileS3Key ||
       !algo.uid
     ) {
@@ -26,6 +27,7 @@ export async function POST(req: Request) {
         name: algo.name,
         description: algo.description,
         case: algo.case,
+        language: algo.language,
         lintResults: "pending",
         algoFile: {
           connect: {

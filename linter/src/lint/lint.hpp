@@ -1,13 +1,12 @@
 #pragma once
 
 #include "lint/lint_result.hpp"
-
-#include <string>
+#include "runtime/runtime.hpp"
 
 namespace nutc {
 namespace lint {
 
-[[nodiscard]] lint_result lint(const std::string& algo_code);
+[[nodiscard]] lint_result lint(Runtime& runtime);
 
 } // namespace lint
 } // namespace nutc
