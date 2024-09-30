@@ -3,7 +3,6 @@
 #include "common/messages_wrapper_to_exchange.hpp"
 #include "common/types/decimal.hpp"
 #include "common/types/position.hpp"
-#include "hash_table7.hpp"
 
 #include <absl/hash/hash.h>
 #include <boost/process.hpp>
@@ -13,17 +12,20 @@
 namespace nutc::exchange {
 
 class GenericTrader {
-    const std::string USER_ID;
-    const common::decimal_price INITIAL_CAPITAL;
-    common::decimal_price capital_delta_{};
-    emhash7::HashMap<
-        common::Ticker, common::decimal_quantity, absl::Hash<common::Ticker>>
-        holdings_{};
+    std::string user_id_;
+    common::decimal_price initial_capital_;
+    common::decimal_price capital_delta_;
+    std::array<common::decimal_quantity, common::TICKERS.size()> holdings_{};
 
 public:
     explicit GenericTrader(std::string user_id, common::decimal_price capital) :
-        USER_ID(std::move(user_id)), INITIAL_CAPITAL(capital)
+        user_id_(std::move(user_id)), initial_capital_(capital)
     {}
+
+    GenericTrader(GenericTrader&&) = default;
+    GenericTrader(const GenericTrader&) = default;
+    GenericTrader& operator=(GenericTrader&&) = default;
+    GenericTrader& operator=(const GenericTrader&) = default;
 
     virtual ~GenericTrader() = default;
 
@@ -38,13 +40,13 @@ public:
     virtual const std::string&
     get_display_name() const
     {
-        return USER_ID;
+        return user_id_;
     }
 
     const std::string&
     get_id() const
     {
-        return USER_ID;
+        return user_id_;
     }
 
     // For metrics purposes
@@ -53,25 +55,24 @@ public:
     virtual common::decimal_price
     get_capital() const
     {
-        return INITIAL_CAPITAL + capital_delta_;
+        return initial_capital_ + capital_delta_;
     }
 
     // TODO: improve with find
     common::decimal_quantity
     get_holdings(common::Ticker ticker) const
     {
-        auto holdings_it = holdings_.find(ticker);
-        if (holdings_it == holdings_.end()) [[unlikely]]
-            return 0.0;
-
-        return holdings_it->second;
+        auto ticker_index = std::to_underlying(ticker);
+        assert(ticker_index < holdings_.size());
+        return holdings_[ticker_index];
     }
 
     common::decimal_quantity
     modify_holdings(common::Ticker ticker, common::decimal_quantity change_in_holdings)
     {
-        holdings_[ticker] += change_in_holdings;
-        return holdings_[ticker];
+        auto ticker_index = std::to_underlying(ticker);
+        assert(ticker_index < holdings_.size());
+        return holdings_[ticker_index] += change_in_holdings;
     }
 
     void
@@ -89,7 +90,7 @@ public:
     common::decimal_price
     get_initial_capital() const
     {
-        return INITIAL_CAPITAL;
+        return initial_capital_;
     }
 
     virtual void notify_position_change(common::position) = 0;
