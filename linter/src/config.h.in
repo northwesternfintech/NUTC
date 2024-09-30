@@ -23,10 +23,14 @@
 #define LOG_BACKUP_COUNT   5
 
 #ifdef NUTC_LOCAL_DEV
-#  define FIREBASE_URL "http://firebase:9000/"
+#  define S3_URL        "http://localhost:4566"
+#  define WEBSERVER_URL "http://localhost:16124"
 #else
-#  define FIREBASE_URL "https://nutc-web-default-rtdb.firebaseio.com/"
+#  define S3_URL        "https://nutc.s3.us-east-2.amazonaws.com"
+#  define WEBSERVER_URL "http://localhost:16124"
 #endif
+
+#define S3_BUCKET "nutc"
 
 // Linting
 #define LINT_AUTO_TIMEOUT_SECONDS 10

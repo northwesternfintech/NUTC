@@ -41,8 +41,9 @@ endif()
 
 add_library(
     NUTC-linter_lib OBJECT 
-    src/firebase/fetching.cpp
-    src/pywrapper/runtime.cpp
+    src/fetching/fetching.cpp
+    src/runtime/cpp/cpp_runtime.cpp
+    src/runtime/python/python_runtime.cpp
     src/spawning/spawning.cpp
     src/crow/crow.cpp
     # Utils
@@ -52,7 +53,8 @@ add_library(
 add_library(
     NUTC-linter-spawner_lib OBJECT
     src/lint/lint.cpp
-    src/pywrapper/runtime.cpp
+    src/runtime/cpp/cpp_runtime.cpp
+    src/runtime/python/python_runtime.cpp
 )
 
 # --- Main executable libs ----

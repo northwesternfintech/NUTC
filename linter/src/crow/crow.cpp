@@ -1,6 +1,6 @@
 #include "crow.hpp"
 
-#include "firebase/fetching.hpp"
+#include "fetching/fetching.hpp"
 #include "logging.hpp"
 #include "spawning/spawning.hpp"
 
@@ -41,14 +41,32 @@ get_server_thread()
                 log_e(main, "No algo_id provided");
                 return crow::response(400);
             }
+            if (!req.url_params.get("language")) {
+                log_e(main, "No language provided");
+                return crow::response(400);
+            }
             std::string uid = req.url_params.get("uid");
             std::string algo_id = req.url_params.get("algo_id");
+            std::string language = req.url_params.get("language");
 
-            auto algo_code = nutc::client::get_algo(uid, algo_id);
+            spawning::AlgoLanguage algo_language;
+            if (language == "python") {
+                algo_language = spawning::AlgoLanguage::Python;
+            }
+            else if (language == "cpp") {
+                algo_language = spawning::AlgoLanguage::Cpp;
+            }
+            else {
+                log_e(main, "Invalid language provided: {}", language);
+                return crow::response(400);
+            }
+
+            auto algo_code = nutc::client::get_algo(algo_id);
             if (!algo_code.has_value()) {
-                nutc::client::set_lint_failure(
+                nutc::client::set_lint_result(
                     uid,
                     algo_id,
+                    false,
                     fmt::format(
                         "[linter] FAILURE - could not find algo {} for id {}\n",
                         algo_id,
@@ -66,17 +84,16 @@ get_server_thread()
                 return res;
             }
 
-            client::LintingResultOption algo_status_code;
-            auto lint_res = spawner_manager.spawn_client(algo_code.value());
-            if (lint_res.success) {
-                nutc::client::set_lint_success(uid, algo_id, lint_res.message);
-                algo_status_code = client::LintingResultOption::SUCCESS;
-            }
-            else {
-                nutc::client::set_lint_failure(uid, algo_id, lint_res.message);
-                algo_status_code = client::LintingResultOption::FAILURE;
-            }
+            auto lint_res =
+                spawner_manager.spawn_client(algo_code.value(), algo_language);
 
+            nutc::client::set_lint_result(
+                uid, algo_id, lint_res.success, lint_res.message
+            );
+
+            client::LintingResultOption algo_status_code =
+                lint_res.success ? client::LintingResultOption::SUCCESS
+                                 : client::LintingResultOption::FAILURE;
             crow::json::wvalue response({
                 {"linting_status", static_cast<int>(algo_status_code)}
             });

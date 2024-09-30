@@ -127,23 +127,26 @@ const std::string missing_on_account_update_algo = R"(class Strategy:
 
 TEST_F(IntegrationLinterTest, basic)
 {
-    auto lint_result = manager.spawn_client(basic_algo);
+    auto lint_result =
+        manager.spawn_client(basic_algo, nutc::spawning::AlgoLanguage::Python);
     ASSERT_TRUE(lint_result.success);
 }
 
 TEST_F(IntegrationLinterTest, invalidSideArg)
 {
-    auto lint_result = manager.spawn_client(incorrect_arguments_algo);
+    auto lint_result = manager.spawn_client(
+        incorrect_arguments_algo, nutc::spawning::AlgoLanguage::Python
+    );
     ASSERT_FALSE(lint_result.success);
     ASSERT_TRUE(
-        lint_result.message.find("Side should be BUY or SELL")
-        != std::string::npos
+        lint_result.message.find("Side should be BUY or SELL") != std::string::npos
     );
 }
 
 TEST_F(IntegrationLinterTest, timeout)
 {
-    auto lint_result = manager.spawn_client(timeout_algo);
+    auto lint_result =
+        manager.spawn_client(timeout_algo, nutc::spawning::AlgoLanguage::Python);
     ASSERT_FALSE(lint_result.success);
     ASSERT_TRUE(
         lint_result.message.find("Your code did not execute within")
@@ -154,7 +157,7 @@ TEST_F(IntegrationLinterTest, timeout)
 TEST_F(IntegrationLinterTest, invalidAlgo)
 {
     std::string algo = R"(not_valid_python)";
-    auto lint_result = manager.spawn_client(algo);
+    auto lint_result = manager.spawn_client(algo, nutc::spawning::AlgoLanguage::Python);
     ASSERT_FALSE(lint_result.success);
     ASSERT_TRUE(
         lint_result.message.find("Failed to import code:") != std::string::npos
@@ -164,7 +167,7 @@ TEST_F(IntegrationLinterTest, invalidAlgo)
 TEST_F(IntegrationLinterTest, noStrategyClass)
 {
     std::string algo = R"(import math)";
-    auto lint_result = manager.spawn_client(algo);
+    auto lint_result = manager.spawn_client(algo, nutc::spawning::AlgoLanguage::Python);
     ASSERT_FALSE(lint_result.success);
     ASSERT_TRUE(
         lint_result.message.find("NameError: name 'Strategy' is not defined")
@@ -174,21 +177,27 @@ TEST_F(IntegrationLinterTest, noStrategyClass)
 
 TEST_F(IntegrationLinterTest, missingRequiredFunction)
 {
-    auto lint_result = manager.spawn_client(missing_on_trade_update_algo);
+    auto lint_result = manager.spawn_client(
+        missing_on_trade_update_algo, nutc::spawning::AlgoLanguage::Python
+    );
     ASSERT_FALSE(lint_result.success);
     ASSERT_TRUE(
         lint_result.message.find("has no attribute 'on_trade_update'")
         != std::string::npos
     );
 
-    lint_result = manager.spawn_client(missing_on_orderbook_update_algo);
+    lint_result = manager.spawn_client(
+        missing_on_orderbook_update_algo, nutc::spawning::AlgoLanguage::Python
+    );
     ASSERT_FALSE(lint_result.success);
     ASSERT_TRUE(
         lint_result.message.find("has no attribute 'on_orderbook_update'")
         != std::string::npos
     );
 
-    lint_result = manager.spawn_client(missing_on_account_update_algo);
+    lint_result = manager.spawn_client(
+        missing_on_account_update_algo, nutc::spawning::AlgoLanguage::Python
+    );
     ASSERT_FALSE(lint_result.success);
     ASSERT_TRUE(
         lint_result.message.find("has no attribute 'on_account_update'")

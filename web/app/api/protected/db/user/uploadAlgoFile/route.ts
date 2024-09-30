@@ -26,7 +26,7 @@ export async function POST() {
   const params = {
     Bucket: "nutc",
     Key: algoFile.s3Key,
-    ContentType: "text/x-python",
+    ContentType: "text/plain",
   } satisfies PutObjectCommandInput;
 
   try {

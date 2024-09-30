@@ -28,14 +28,26 @@ LintProcessManager::spawner_binary_path()
 }
 
 nutc::lint::lint_result
-LintProcessManager::spawn_client(const std::string& algo_code)
+LintProcessManager::spawn_client(const std::string& algo_code, AlgoLanguage language)
 {
     static const std::string path{spawner_binary_path()};
     auto in_pipe = std::make_shared<bp::async_pipe>(io_context);
     bp::opstream out_pipe;
 
+    auto get_language_flag = [](AlgoLanguage language) {
+        switch (language) {
+            case nutc::spawning::AlgoLanguage::Python:
+                return "-python";
+            case nutc::spawning::AlgoLanguage::Cpp:
+                return "-cpp";
+        }
+    };
+
     auto child = std::make_shared<bp::child>(
-        bp::exe(path), bp::std_in<out_pipe, bp::std_out> * in_pipe, io_context
+        bp::exe(path),
+        bp::args(get_language_flag(language)),
+        bp::std_in<out_pipe, bp::std_out> * in_pipe,
+        io_context
     );
 
     out_pipe << algo_code << std::flush;
@@ -51,7 +63,8 @@ LintProcessManager::spawn_client(const std::string& algo_code)
             in_pipe->close();
             res.success = false;
             res.message += fmt::format(
-                "[linter] FAILED to lint algo\n\nYour code did not execute within {} "
+                "[linter] FAILED to lint algo\n\nYour code did not execute within "
+                "{} "
                 "seconds. Check all "
                 "functions to see if you have an infinite loop or infinite "
                 "recursion.\n\nIf you continue to experience this error, "
@@ -89,7 +102,8 @@ LintProcessManager::spawn_client(const std::string& algo_code)
                 if (error) {
                     res = {
                         false,
-                        "Internal server error. Reach out to nuft@u.northwesten.edu "
+                        "Internal server error. Reach out to "
+                        "nuft@u.northwesten.edu "
                         "for support"
                     };
                 };
