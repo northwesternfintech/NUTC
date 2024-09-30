@@ -122,7 +122,7 @@ export default function Contact() {
                   <dd>
                     <a
                       className="hover:text-white"
-                      href="mailto:hello@example.com">
+                      href="mailto:nuft@u.northwestern.edu">
                       nuft@u.northwestern.edu
                     </a>
                   </dd>
