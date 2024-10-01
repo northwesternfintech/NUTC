@@ -12,13 +12,12 @@ namespace nutc::wrapper {
 using namespace nutc::common;
 
 using LimitOrderFunction = std::function<order_id_t(
-    common::Side side, const std::string& ticker, double quantity, double price,
-    bool ioc
+    common::Side side, common::Ticker ticker, double quantity, double price, bool ioc
 )>;
 using MarketOrderFunction =
-    std::function<bool(common::Side side, const std::string& ticker, double quantity)>;
+    std::function<bool(common::Side side, common::Ticker ticker, double quantity)>;
 using CancelOrderFunction =
-    std::function<bool(const std::string& ticker, order_id_t order_id)>;
+    std::function<bool(common::Ticker ticker, order_id_t order_id)>;
 
 class ExchangeCommunicator {
     RateLimiter limiter_{};

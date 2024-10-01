@@ -4,13 +4,18 @@ class Side(Enum):
     BUY = 0
     SELL = 1
 
-def place_market_order(side: Side, ticker: str, quantity: float) -> None:
+class Ticker(Enum):
+    ETH = 0
+    BTC = 1
+    LTC = 2
+
+def place_market_order(side: Side, ticker: Ticker, quantity: float) -> None:
     return
 
-def place_limit_order(side: Side, ticker: str, quantity: float, price: float, ioc: bool = False) -> int:
+def place_limit_order(side: Side, ticker: Ticker, quantity: float, price: float, ioc: bool = False) -> int:
     return 0
 
-def cancel_order(ticker: str, order_id: int) -> int:
+def cancel_order(ticker: Ticker, order_id: int) -> int:
     return 0
 
 class Strategy:
@@ -18,10 +23,10 @@ class Strategy:
 
     def __init__(self) -> None:
         """Your initialization code goes here."""
-        place_limit_order(Side.BUY, "ETH", 10, 102)
+        place_limit_order(Side.BUY, Ticker.ETH, 10, 102)
 
     def on_trade_update(
-        self, ticker: str, side: Side, quantity: float, price: float
+        self, ticker: Ticker, side: Side, quantity: float, price: float
     ) -> None:
         """Called whenever two orders match. Could be one of your orders, or two other people's orders.
         Parameters
@@ -37,7 +42,7 @@ class Strategy:
         print(f"Python Trade update: {ticker} {side} {price} {quantity}")
 
     def on_orderbook_update(
-        self, ticker: str, side: Side, quantity: float, price: float
+        self, ticker: Ticker, side: Side, quantity: float, price: float
     ) -> None:
         """Called whenever the orderbook changes. This could be because of a trade, or because of a new order, or both.
         Parameters
@@ -55,7 +60,7 @@ class Strategy:
 
     def on_account_update(
         self,
-        ticker: str,
+        ticker: Ticker,
         side: Side,
         price: float,
         quantity: float,
@@ -78,5 +83,5 @@ class Strategy:
         print(
             f"Python Account update: {ticker} {side} {price} {quantity} {capital_remaining}"
         )
-        if ticker == "ETH" and quantity >= 10:
-            place_limit_order(Side.BUY, "BTC", 1, 100)
+        if ticker == Ticker.ETH and quantity >= 10:
+            place_limit_order(Side.BUY, Ticker.BTC, 1, 100)
