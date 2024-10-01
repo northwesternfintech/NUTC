@@ -11,6 +11,7 @@ docker-compose -f ./dev/docker-compose.yml up -d
 # Creating nutc bucket in s3
 
 aws --endpoint-url=http://localhost:4566 s3 mb s3://nutc
+sleep 1
 aws --endpoint-url=http://localhost:4566 s3api put-bucket-cors --bucket nutc --cors-configuration file://./dev/cors.json
 
 # Generating prisma schema and migrating to postgres

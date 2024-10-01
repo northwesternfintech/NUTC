@@ -42,7 +42,7 @@ public:
 
 const PythonCodeBlock = () => {
   return (
-    <SyntaxHighlighter language="python" style={dark}>
+    <SyntaxHighlighter language="python" style={dark} className="text-sm">
       {pythonCodeString}
     </SyntaxHighlighter>
   );
@@ -50,7 +50,7 @@ const PythonCodeBlock = () => {
 
 const CppCodeBlock = () => {
   return (
-    <SyntaxHighlighter language="cpp" style={dark}>
+    <SyntaxHighlighter language="cpp" style={dark} className="text-sm">
       {cppCodeString}
     </SyntaxHighlighter>
   );
@@ -66,7 +66,7 @@ export default function Template() {
       <div className="overflow-hidden rounded-xl shadow-lg bg-gray-900">
         <div className="flex bg-gray-800">
           <div className="flex-1 text-sm font-medium text-gray-300 px-4 py-2 border-b border-gray-700">
-            Template.py
+            template.py - Python
           </div>
         </div>
         <div className="p-6 overflow-x-auto max-w-full max-h-screen">
@@ -78,7 +78,7 @@ export default function Template() {
         className="mt-4 inline-flex items-center justify-center gap-x-2 rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500 focus-visible:ring-opacity-50"
       >
         <ArrowDownOnSquareIcon className="h-5 w-5" aria-hidden="true" />
-        Download Template
+        Download Python Template
       </a>
     </div>
 
@@ -87,7 +87,7 @@ export default function Template() {
       <div className="overflow-hidden rounded-xl shadow-lg bg-gray-900">
         <div className="flex bg-gray-800">
           <div className="flex-1 text-sm font-medium text-gray-300 px-4 py-2 border-b border-gray-700">
-            Template.cpp
+            template.hpp - C++
           </div>
         </div>
         <div className="p-6 overflow-x-auto max-w-full max-h-screen">
@@ -95,11 +95,11 @@ export default function Template() {
         </div>
       </div>
       <a
-        href="/template.cpp"
+        href="/template.hpp"
         className="mt-4 inline-flex items-center justify-center gap-x-2 rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500 focus-visible:ring-opacity-50"
       >
         <ArrowDownOnSquareIcon className="h-5 w-5" aria-hidden="true" />
-        Download Template
+        Download C++ Template
       </a>
     </div>
   </div>
