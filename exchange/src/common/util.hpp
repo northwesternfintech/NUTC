@@ -15,7 +15,9 @@ std::string trader_id(const std::string& user_id, const std::string& algo_id);
 
 std::string get_firebase_endpoint(const std::string& params);
 
-enum class Side { buy, sell };
+// NOTE: this must be the same as Side in template.hpp
+enum class Side { buy = 0, sell = 1 };
+
 std::string to_string(Side side);
 
 std::string base64_encode(const std::string& data);
