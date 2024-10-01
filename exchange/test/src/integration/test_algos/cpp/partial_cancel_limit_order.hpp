@@ -2,6 +2,8 @@
 
 #include <string>
 
+enum class Side { buy = 0, sell = 1 };
+
 /**
  * Place a market order
  *
@@ -60,7 +62,7 @@ public:
      * @quantity quantity Volume traded
      */
     void
-    on_trade_update(std::string ticker, std::string side, double quantity, double price)
+    on_trade_update(std::string ticker, Side side, double quantity, double price)
     {}
 
     /**
@@ -74,7 +76,7 @@ public:
      */
     void
     on_orderbook_update(
-        std::string ticker, std::string side, double quantity, double price
+        std::string ticker, Side side, double quantity, double price
     )
     {}
 
@@ -88,7 +90,7 @@ public:
      */
     void
     on_account_update(
-        std::string ticker, std::string side, double price, double quantity,
+        std::string ticker, Side side, double price, double quantity,
         double capital_remaining
     )
     {}

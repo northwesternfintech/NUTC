@@ -72,15 +72,16 @@ CppRuntime::CppRuntime(
 
     auto init_func = reinterpret_cast<InitFunc>(dlsym(dl_handle_, "init"));
     on_trade_update_func_ =
-        reinterpret_cast<OnTradeUpdateFunc>(dlsym(dl_handle_, "on_trade_update"));
-    on_orderbook_update_func_ =
-        reinterpret_cast<OnOrderBookUpdateFunc>(dlsym(dl_handle_, "on_orderbook_update")
-        );
+        reinterpret_cast<on_trade_update_func>(dlsym(dl_handle_, "on_trade_update"));
+    on_orderbook_update_func_ = reinterpret_cast<on_orderbook_update_func>(
+        dlsym(dl_handle_, "on_orderbook_update")
+    );
     on_account_update_func_ =
-        reinterpret_cast<OnAccountUpdateFunc>(dlsym(dl_handle_, "on_account_update"));
+        reinterpret_cast<on_account_update_func>(dlsym(dl_handle_, "on_account_update")
+        );
 
-    if (!init_func || !on_trade_update_func_ || !on_orderbook_update_func_
-        || !on_account_update_func_) {
+    if (init_func == nullptr || on_trade_update_func_ == nullptr
+        || on_orderbook_update_func_ == nullptr || on_account_update_func_ == nullptr) {
         dlclose(dl_handle_);
         close(fd_);
         throw std::runtime_error("Failed to dynamically load functions");
@@ -103,10 +104,9 @@ CppRuntime::fire_on_trade_update(
 ) const
 {
     std::string ticker_val{to_string(ticker)};
-    std::string side_val = (side == Side::buy) ? "BUY" : "SELL";
 
     on_trade_update_func_(
-        strategy_object_, ticker_val, side_val, static_cast<double>(quantity),
+        strategy_object_, ticker_val, side, static_cast<double>(quantity),
         static_cast<double>(price)
     );
 }
@@ -117,10 +117,9 @@ CppRuntime::fire_on_orderbook_update(
 ) const
 {
     std::string ticker_val{to_string(ticker)};
-    std::string side_val = (side == Side::buy) ? "BUY" : "SELL";
 
     on_orderbook_update_func_(
-        strategy_object_, ticker_val, side_val, static_cast<double>(quantity),
+        strategy_object_, ticker_val, side, static_cast<double>(quantity),
         static_cast<double>(price)
     );
 }
@@ -132,10 +131,9 @@ CppRuntime::fire_on_account_update(
 ) const
 {
     std::string ticker_val{to_string(ticker)};
-    std::string side_val = (side == Side::buy) ? "BUY" : "SELL";
 
     on_account_update_func_(
-        strategy_object_, ticker_val, side_val, static_cast<double>(quantity),
+        strategy_object_, ticker_val, side, static_cast<double>(quantity),
         static_cast<double>(price), static_cast<double>(capital)
     );
 }

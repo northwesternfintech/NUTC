@@ -38,19 +38,19 @@ init(PlaceMarketOrder place_market_order, PlaceLimitOrder place_limit_order, Can
 }
 
 void on_trade_update(
-    Strategy* strategy, std::string const& ticker, std::string const& side,
+    Strategy* strategy, std::string const& ticker, Side side,
     double quantity, double price) {
     strategy->on_trade_update(ticker, side, quantity, price);
 }
 
 void on_orderbook_update(
-    Strategy* strategy, std::string const& ticker, std::string const& side,
+    Strategy* strategy, std::string const& ticker, Side side,
     double quantity, double price) {
     strategy->on_orderbook_update(ticker, side, quantity, price);
 }
 
 void on_account_update(
-    Strategy* strategy, std::string const& ticker, std::string const& side,
+    Strategy* strategy, std::string const& ticker, Side side,
     double price, double quantity, double capital_remaining) {
     strategy->on_account_update(ticker, side, price, quantity, capital_remaining);
 }

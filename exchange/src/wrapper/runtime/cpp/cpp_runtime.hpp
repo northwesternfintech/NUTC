@@ -29,16 +29,16 @@ private:
     using Strategy = void;
     using InitFunc = Strategy* (*)(MarketOrderFunction, LimitOrderFunction,
                                    CancelOrderFunction);
-    using OnTradeUpdateFunc =
-        void (*)(Strategy*, const std::string&, const std::string&, double, double);
-    using OnOrderBookUpdateFunc = OnTradeUpdateFunc;
-    using OnAccountUpdateFunc = void (*)(
-        Strategy*, const std::string&, const std::string&, double, double, double
-    );
+    using on_trade_update_func =
+        void (*)(Strategy*, const std::string&, Side, double, double);
+    using on_orderbook_update_func =
+        void (*)(Strategy*, const std::string&, Side, double, double);
+    using on_account_update_func =
+        void (*)(Strategy*, const std::string&, Side, double, double, double);
 
-    OnTradeUpdateFunc on_trade_update_func_;
-    OnOrderBookUpdateFunc on_orderbook_update_func_;
-    OnAccountUpdateFunc on_account_update_func_;
+    on_trade_update_func on_trade_update_func_;
+    on_orderbook_update_func on_orderbook_update_func_;
+    on_account_update_func on_account_update_func_;
 
     Strategy* strategy_object_;
     void* dl_handle_;
