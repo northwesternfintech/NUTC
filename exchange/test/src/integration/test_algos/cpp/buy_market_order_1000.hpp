@@ -3,6 +3,7 @@
 #include <string>
 
 enum class Side { buy = 0, sell = 1 };
+enum class Ticker : std::uint8_t { ETH = 0, BTC = 1, LTC = 2 }; // NOLINT
 
 /**
  * Place a market order
@@ -12,13 +13,12 @@ enum class Side { buy = 0, sell = 1 };
  * (maybe wait and try again?)
  *
  * @param side Side of the order to place (Side::buy or Side::sell)
- * @param ticker Ticker of the order to place ("ETH", "BTC", or "LTC")
+ * @param ticker Ticker of the order to place (Ticker::ETH, Ticker::BTC, or "LTC")
  * @param quantity Volume of the order to place
  *
  * @return true if order succeeded, false if order failed due to rate limiting
  */
-bool
-place_market_order(Side side, std::string const& ticker, double quantity);
+bool place_market_order(Side side, Ticker ticker, double quantity);
 
 /**
  * Place a limit order
@@ -28,7 +28,7 @@ place_market_order(Side side, std::string const& ticker, double quantity);
  * (maybe wait and try again?)
  *
  * @param side Side of the order to place (Side::buy or Side::sell)
- * @param ticker Ticker of the order to place ("ETH", "BTC", or "LTC")
+ * @param ticker Ticker of the order to place (Ticker::ETH, Ticker::BTC, or "LTC")
  * @param quantity Volume of the order to place
  * @param price Price of the order to place
  * @param ioc Immediate or cancel
@@ -36,31 +36,30 @@ place_market_order(Side side, std::string const& ticker, double quantity);
  * @return true if order succeeded, false if order failed due to rate limiting
  */
 std::int64_t place_limit_order(
-    Side side, std::string const& ticker, double quantity, double price,
-    bool ioc = false
+    Side side, Ticker ticker, double quantity, double price, bool ioc = false
 );
 
-bool cancel_order(std::string const& ticker, std::int64_t order_id);
+bool cancel_order(Ticker ticker, std::int64_t order_id);
 
 class Strategy {
 public:
-    Strategy() { place_market_order(Side::buy, "ETH", 5); }
+    Strategy() { place_market_order(Side::buy, Ticker::ETH, 5); }
 
     /**
      * Called whenever two orders match. Could be one of your orders, or two other
      * people's orders.
      *
-     * @param ticker Ticker of the orders that were matched ("ETH", "BTC", or
-     * "LTC)
+     * @param ticker Ticker of the orders that were matched (Ticker::ETH, Ticker::BTC,
+     * or "LTC)
      * @param side Side of the orders that were matched (Side::buy or Side::sell)
      * @param price Price that trade was executed at
      * @quantity quantity Volume traded
      */
     void
-    on_trade_update(std::string ticker, Side side, double quantity, double price)
+    on_trade_update(Ticker ticker, Side side, double quantity, double price)
     {
-        if (ticker == "ETH" && price <= 101 && price >= 99 && quantity == 5) {
-            place_limit_order(Side::buy, "BTC", 1, 100);
+        if (ticker == Ticker::ETH && price <= 101 && price >= 99 && quantity == 5) {
+            place_limit_order(Side::buy, Ticker::BTC, 1, 100);
         }
     }
 
@@ -68,28 +67,28 @@ public:
      * Called whenever the orderbook changes. This could be because of a trade, or
      * because of a new order, or both.
      *
-     * @param ticker Ticker that has an orderbook update ("ETH", "BTC", or "LTC")
+     * @param ticker Ticker that has an orderbook update (Ticker::ETH, Ticker::BTC, or
+     * "LTC")
      * @param side Which orderbook as updated (Side::buy or Side::sell)
      * @param price Price of orderbook that has an update
      * @param quantity Volume placed into orderbook
      */
     void
-    on_orderbook_update(
-        std::string ticker, Side side, double quantity, double price
-    )
+    on_orderbook_update(Ticker ticker, Side side, double quantity, double price)
     {}
 
     /**
      * Called whenever one of your orders is filled.
      *
-     * @param ticker Ticker of order that was fulfilled ("ETH", "BTC", or "LTC")
+     * @param ticker Ticker of order that was fulfilled (Ticker::ETH, Ticker::BTC, or
+     * "LTC")
      * @param side Side of order that was fulfilled (Side::buy or Side::sell)
      * @param price Price that order was fulfilled at
      * @param quantity Amount of capital after fulfilling order
      */
     void
     on_account_update(
-        std::string ticker, Side side, double price, double quantity,
+        Ticker ticker, Side side, double price, double quantity,
         double capital_remaining
     )
     {}

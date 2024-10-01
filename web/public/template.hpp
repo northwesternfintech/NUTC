@@ -3,6 +3,7 @@
 #include <string>
 
 enum class Side { buy = 0, sell = 1 };
+enum class Ticker { ETH = 0, BTC = 1, LTC = 2 }; // NOLINT
 
 /**
  * Place a market order
@@ -17,7 +18,7 @@ enum class Side { buy = 0, sell = 1 };
  *
  * @return true if order succeeded, false if order failed due to rate limiting
  */
-bool place_market_order(Side side, std::string const &ticker, double quantity);
+bool place_market_order(Side side, Ticker ticker, double quantity);
 
 /**
  * Place a limit order
@@ -34,10 +35,10 @@ bool place_market_order(Side side, std::string const &ticker, double quantity);
  *
  * @return true if order succeeded, false if order failed due to rate limiting
  */
-std::int64_t place_limit_order(Side side, std::string const &ticker,
-                               double quantity, double price, bool ioc = false);
+std::int64_t place_limit_order(Side side, Ticker ticker, double quantity,
+                               double price, bool ioc = false);
 
-bool cancel_order(std::string const &ticker, std::int64_t order_id);
+bool cancel_order(Ticker ticker, std::int64_t order_id);
 
 class Strategy {
 public:
@@ -55,7 +56,7 @@ public:
    * @param price Price that trade was executed at
    * @quantity quantity Volume traded
    */
-  void on_trade_update(std::string ticker, Side side, double quantity,
+  void on_trade_update(Ticker ticker, Side side, double quantity,
                        double price) {}
 
   /**
@@ -67,7 +68,7 @@ public:
    * @param price Price of orderbook that has an update
    * @param quantity Volume placed into orderbook
    */
-  void on_orderbook_update(std::string ticker, Side side, double quantity,
+  void on_orderbook_update(Ticker ticker, Side side, double quantity,
                            double price) {}
 
   /**
@@ -78,6 +79,6 @@ public:
    * @param price Price that order was fulfilled at
    * @param quantity Amount of capital after fulfilling order
    */
-  void on_account_update(std::string ticker, Side side, double price,
+  void on_account_update(Ticker ticker, Side side, double price,
                          double quantity, double capital_remaining) {}
 };

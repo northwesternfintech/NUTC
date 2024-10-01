@@ -59,14 +59,10 @@ LimitOrderFunction
 ExchangeCommunicator::place_limit_order()
 {
     return [this](
-               common::Side side, const std::string& ticker, double quantity,
-               double price, bool ioc
+               common::Side side, common::Ticker ticker, double quantity, double price,
+               bool ioc
            ) -> order_id_t {
-        std::optional<Ticker> ticker_obj = to_ticker(ticker);
-        if (!ticker_obj) [[unlikely]]
-            return -1;
-
-        limit_order order{ticker_obj.value(), side, quantity, price, ioc};
+        limit_order order{ticker, side, quantity, price, ioc};
         if (!publish_message(order))
             return -1;
         return order.order_id;
@@ -76,12 +72,8 @@ ExchangeCommunicator::place_limit_order()
 MarketOrderFunction
 ExchangeCommunicator::place_market_order()
 {
-    return [this](common::Side side, const std::string& ticker, double quantity) {
-        std::optional<Ticker> ticker_obj = to_ticker(ticker);
-        if (!ticker_obj) [[unlikely]]
-            return false;
-
-        market_order order{ticker_obj.value(), side, quantity};
+    return [this](common::Side side, common::Ticker ticker, double quantity) {
+        market_order order{ticker, side, quantity};
         return publish_message(order);
     };
 }
@@ -89,11 +81,8 @@ ExchangeCommunicator::place_market_order()
 CancelOrderFunction
 ExchangeCommunicator::cancel_order()
 {
-    return [this](const std::string& ticker, order_id_t order_id) -> bool {
-        std::optional<Ticker> ticker_opt = to_ticker(ticker);
-        if (!ticker_opt)
-            return false;
-        return publish_message(common::cancel_order{ticker_opt.value(), order_id});
+    return [this](common::Ticker ticker, order_id_t order_id) -> bool {
+        return publish_message(common::cancel_order{ticker, order_id});
     };
 }
 

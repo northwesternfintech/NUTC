@@ -16,11 +16,9 @@ PyRuntime::fire_on_trade_update(
     Ticker ticker, Side side, decimal_price price, decimal_quantity quantity
 ) const
 {
-    std::string ticker_val{to_string(ticker)};
-
     try {
         py::globals()["strategy"].attr("on_trade_update")(
-            ticker_val, side, static_cast<double>(quantity), static_cast<double>(price)
+            ticker, side, static_cast<double>(quantity), static_cast<double>(price)
         );
     } catch (const py::error_already_set& err) {
         std::cerr << err.what() << "\n";
@@ -32,10 +30,9 @@ PyRuntime::fire_on_orderbook_update(
     Ticker ticker, Side side, decimal_price price, decimal_quantity quantity
 ) const
 {
-    std::string ticker_val{to_string(ticker)};
     try {
         py::globals()["strategy"].attr("on_orderbook_update")(
-            ticker_val, side, static_cast<double>(quantity), static_cast<double>(price)
+            ticker, side, static_cast<double>(quantity), static_cast<double>(price)
         );
     } catch (const py::error_already_set& err) {
         std::cerr << err.what() << "\n";
@@ -48,10 +45,9 @@ PyRuntime::fire_on_account_update(
     decimal_price capital
 ) const
 {
-    std::string ticker_val{to_string(ticker)};
     try {
         py::globals()["strategy"].attr("on_account_update")(
-            ticker_val, side, static_cast<double>(quantity), static_cast<double>(price),
+            ticker, side, static_cast<double>(quantity), static_cast<double>(price),
             static_cast<double>(capital)
         );
     } catch (const py::error_already_set& err) {
@@ -86,6 +82,11 @@ PyRuntime::create_api_module(
         .value("BUY", common::Side::buy)
         .value("SELL", common::Side::sell)
         .export_values();
+    py::enum_<common::Ticker>(module, "Ticker")
+        .value("ETH", common::Ticker::ETH)
+        .value("BTC", common::Ticker::BTC)
+        .value("LTC", common::Ticker::LTC)
+        .export_values();
     module.def("publish_market_order", publish_market_order);
     module.def("publish_limit_order", publish_limit_order);
     module.def("cancel_order", cancel_order);
@@ -112,7 +113,8 @@ PyRuntime::run_initialization_code(const std::string& py_code)
         def cancel_order(ticker: str, order_id: int):
             return nutc_api.cancel_order(ticker, order_id)
     )");
-	py::exec("Side = nutc_api.Side");
+    py::exec("Side = nutc_api.Side");
+    py::exec("Ticker = nutc_api.Ticker");
     py::exec("strategy = Strategy()");
 }
 

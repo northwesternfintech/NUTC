@@ -18,12 +18,12 @@
 #include <stdexcept>
 
 namespace {
-namespace fs = std::filesystem;
 
 std::pair<int, std::filesystem::path>
 get_temp_file()
 {
 #ifdef __APPLE__
+    namespace fs = std::filesystem;
     std::string template_path = (fs::temp_directory_path() / "algoXXXXXX").string();
     std::vector<char> writable_template_path(
         template_path.begin(), template_path.end()
@@ -103,10 +103,8 @@ CppRuntime::fire_on_trade_update(
     Ticker ticker, Side side, decimal_price price, decimal_quantity quantity
 ) const
 {
-    std::string ticker_val{to_string(ticker)};
-
     on_trade_update_func_(
-        strategy_object_, ticker_val, side, static_cast<double>(quantity),
+        strategy_object_, ticker, side, static_cast<double>(quantity),
         static_cast<double>(price)
     );
 }
@@ -116,10 +114,8 @@ CppRuntime::fire_on_orderbook_update(
     Ticker ticker, Side side, decimal_price price, decimal_quantity quantity
 ) const
 {
-    std::string ticker_val{to_string(ticker)};
-
     on_orderbook_update_func_(
-        strategy_object_, ticker_val, side, static_cast<double>(quantity),
+        strategy_object_, ticker, side, static_cast<double>(quantity),
         static_cast<double>(price)
     );
 }
@@ -130,10 +126,8 @@ CppRuntime::fire_on_account_update(
     decimal_price capital
 ) const
 {
-    std::string ticker_val{to_string(ticker)};
-
     on_account_update_func_(
-        strategy_object_, ticker_val, side, static_cast<double>(quantity),
+        strategy_object_, ticker, side, static_cast<double>(quantity),
         static_cast<double>(price), static_cast<double>(capital)
     );
 }
