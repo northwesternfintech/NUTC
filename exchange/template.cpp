@@ -6,20 +6,20 @@
 
 #include <functional>
 
-using PlaceMarketOrder = std::function<bool(std::string const&, std::string const&, double)>;
-using PlaceLimitOrder = std::function<std::int64_t(std::string const&, std::string const&, double, double, bool)>;
+using PlaceMarketOrder = std::function<bool(Side, std::string const&, double)>;
+using PlaceLimitOrder = std::function<std::int64_t(Side, std::string const&, double, double, bool)>;
 using CancelOrder = std::function<bool(std::string const& ticker, std::int64_t order_id)>;
 
 static PlaceMarketOrder s_place_market_order;
 static PlaceLimitOrder s_place_limit_order;
 static CancelOrder s_cancel_order;
 
-bool place_market_order(std::string const& side, std::string const& ticker, double quantity) {
+bool place_market_order(Side side, std::string const& ticker, double quantity) {
     return s_place_market_order(side, ticker, quantity);
 }
 
 std::int64_t place_limit_order(
-    std::string const& side, std::string const& ticker, double quantity, double price,
+    Side side, std::string const& ticker, double quantity, double price,
     bool ioc) {
     return s_place_limit_order(side, ticker, quantity, price, ioc);
 }

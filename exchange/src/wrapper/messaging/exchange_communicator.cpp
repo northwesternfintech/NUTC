@@ -59,16 +59,14 @@ LimitOrderFunction
 ExchangeCommunicator::place_limit_order()
 {
     return [this](
-               const std::string& side, const std::string& ticker, double quantity,
+               common::Side side, const std::string& ticker, double quantity,
                double price, bool ioc
            ) -> order_id_t {
         std::optional<Ticker> ticker_obj = to_ticker(ticker);
         if (!ticker_obj) [[unlikely]]
             return -1;
 
-        Side side_enum = (side == "BUY") ? Side::buy : Side::sell;
-
-        limit_order order{ticker_obj.value(), side_enum, quantity, price, ioc};
+        limit_order order{ticker_obj.value(), side, quantity, price, ioc};
         if (!publish_message(order))
             return -1;
         return order.order_id;
@@ -78,14 +76,12 @@ ExchangeCommunicator::place_limit_order()
 MarketOrderFunction
 ExchangeCommunicator::place_market_order()
 {
-    return [this](const std::string& side, const std::string& ticker, double quantity) {
+    return [this](common::Side side, const std::string& ticker, double quantity) {
         std::optional<Ticker> ticker_obj = to_ticker(ticker);
         if (!ticker_obj) [[unlikely]]
             return false;
 
-        Side side_enum = (side == "BUY") ? Side::buy : Side::sell;
-
-        market_order order{ticker_obj.value(), side_enum, quantity};
+        market_order order{ticker_obj.value(), side, quantity};
         return publish_message(order);
     };
 }

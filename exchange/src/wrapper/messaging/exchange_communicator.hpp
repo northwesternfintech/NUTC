@@ -12,11 +12,11 @@ namespace nutc::wrapper {
 using namespace nutc::common;
 
 using LimitOrderFunction = std::function<order_id_t(
-    const std::string& side, const std::string& ticker, double quantity, double price,
+    common::Side side, const std::string& ticker, double quantity, double price,
     bool ioc
 )>;
-using MarketOrderFunction = std::function<
-    bool(const std::string& side, const std::string& ticker, double quantity)>;
+using MarketOrderFunction =
+    std::function<bool(common::Side side, const std::string& ticker, double quantity)>;
 using CancelOrderFunction =
     std::function<bool(const std::string& ticker, order_id_t order_id)>;
 

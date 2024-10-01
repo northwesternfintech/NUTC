@@ -11,14 +11,14 @@ enum class Side { buy = 0, sell = 1 };
  * You should handle the case where the order fails due to rate limiting
  * (maybe wait and try again?)
  *
- * @param side Side of the order to place ("BUY" or "SELL")
+ * @param side Side of the order to place (Side::buy or Side::sell)
  * @param ticker Ticker of the order to place ("ETH", "BTC", or "LTC")
  * @param quantity Volume of the order to place
  *
  * @return true if order succeeded, false if order failed due to rate limiting
  */
 bool
-place_market_order(std::string const& side, std::string const& ticker, double quantity);
+place_market_order(Side side, std::string const& ticker, double quantity);
 
 /**
  * Place a limit order
@@ -27,7 +27,7 @@ place_market_order(std::string const& side, std::string const& ticker, double qu
  * You should handle the case where the order fails due to rate limiting
  * (maybe wait and try again?)
  *
- * @param side Side of the order to place ("BUY" or "SELL")
+ * @param side Side of the order to place (Side::buy or Side::sell)
  * @param ticker Ticker of the order to place ("ETH", "BTC", or "LTC")
  * @param quantity Volume of the order to place
  * @param price Price of the order to place
@@ -36,7 +36,7 @@ place_market_order(std::string const& side, std::string const& ticker, double qu
  * @return true if order succeeded, false if order failed due to rate limiting
  */
 std::int64_t place_limit_order(
-    std::string const& side, std::string const& ticker, double quantity, double price,
+    Side side, std::string const& ticker, double quantity, double price,
     bool ioc = false
 );
 
@@ -52,7 +52,7 @@ public:
      *
      * @param ticker Ticker of the orders that were matched ("ETH", "BTC", or
      * "LTC)
-     * @param side Side of the orders that were matched ("BUY" or "SELL")
+     * @param side Side of the orders that were matched (Side::buy or Side::sell)
      * @param price Price that trade was executed at
      * @quantity quantity Volume traded
      */
@@ -65,7 +65,7 @@ public:
      * because of a new order, or both.
      *
      * @param ticker Ticker that has an orderbook update ("ETH", "BTC", or "LTC")
-     * @param side Which orderbook as updated ("BUY" or "SELL")
+     * @param side Which orderbook as updated (Side::buy or Side::sell)
      * @param price Price of orderbook that has an update
      * @param quantity Volume placed into orderbook
      */
@@ -75,8 +75,8 @@ public:
     )
     {
         if (ticker == "ETH" && quantity < 101 && quantity > 99) {
-            place_limit_order("BUY", "ETH\n", 100, 10);
-            place_limit_order("BUY", "ETH", 100, 10);
+            place_limit_order(Side::buy, "ETH\n", 100, 10);
+            place_limit_order(Side::buy, "ETH", 100, 10);
         }
     }
 
@@ -84,7 +84,7 @@ public:
      * Called whenever one of your orders is filled.
      *
      * @param ticker Ticker of order that was fulfilled ("ETH", "BTC", or "LTC")
-     * @param side Side of order that was fulfilled ("BUY" or "SELL")
+     * @param side Side of order that was fulfilled (Side::buy or Side::sell)
      * @param price Price that order was fulfilled at
      * @param quantity Amount of capital after fulfilling order
      */

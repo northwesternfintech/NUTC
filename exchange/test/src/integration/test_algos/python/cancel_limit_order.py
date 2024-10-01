@@ -1,7 +1,13 @@
-def place_market_order(side: str, ticker: str, quantity: float) -> None:
+from enum import Enum
+
+class Side(Enum):
+    BUY = 0
+    SELL = 1
+
+def place_market_order(side: Side, ticker: str, quantity: float) -> None:
     return
 
-def place_limit_order(side: str, ticker: str, quantity: float, price: float, ioc: bool = False) -> int:
+def place_limit_order(side: Side, ticker: str, quantity: float, price: float, ioc: bool = False) -> int:
     return 0
 
 def cancel_order(ticker: str, order_id: int) -> int:
@@ -12,10 +18,10 @@ class Strategy:
 
     def __init__(self) -> None:
         """Your initialization code goes here."""
-        order_id = place_limit_order("BUY", "ETH", 100, 10)
+        order_id = place_limit_order(Side.BUY, "ETH", 100, 10)
         cancel_order("ETH", order_id)
 
-    def on_trade_update(self, ticker: str, side: str, quantity: float, price: float) -> None:
+    def on_trade_update(self, ticker: str, side: Side, quantity: float, price: float) -> None:
         """Called whenever two orders match. Could be one of your orders, or two other people's orders.
 
         Parameters
@@ -32,7 +38,7 @@ class Strategy:
         print(f"Python Trade update: {ticker} {side} {price} {quantity}")
 
     def on_orderbook_update(
-        self, ticker: str, side: str, quantity: float, price: float
+        self, ticker: str, side: Side, quantity: float, price: float
     ) -> None:
         """Called whenever the orderbook changes. This could be because of a trade, or because of a new order, or both.
 
@@ -52,7 +58,7 @@ class Strategy:
     def on_account_update(
         self,
         ticker: str,
-        side: str,
+        side: Side,
         quantity: float,
         price: float,
         capital_remaining: float,
