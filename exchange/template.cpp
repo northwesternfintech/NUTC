@@ -6,8 +6,8 @@
 
 #include <functional>
 
-using PlaceMarketOrder = std::function<bool(Side, Ticker, double)>;
-using PlaceLimitOrder = std::function<std::int64_t(Side, Ticker, double, double, bool)>;
+using PlaceMarketOrder = std::function<bool(Side, Ticker, float)>;
+using PlaceLimitOrder = std::function<std::int64_t(Side, Ticker, float, float, bool)>;
 using CancelOrder = std::function<bool(Ticker, std::int64_t order_id)>;
 
 static PlaceMarketOrder s_place_market_order;
@@ -15,13 +15,13 @@ static PlaceLimitOrder s_place_limit_order;
 static CancelOrder s_cancel_order;
 
 bool
-place_market_order(Side side, Ticker ticker, double quantity)
+place_market_order(Side side, Ticker ticker, float quantity)
 {
     return s_place_market_order(side, ticker, quantity);
 }
 
 std::int64_t
-place_limit_order(Side side, Ticker ticker, double quantity, double price, bool ioc)
+place_limit_order(Side side, Ticker ticker, float quantity, float price, bool ioc)
 {
     return s_place_limit_order(side, ticker, quantity, price, ioc);
 }
@@ -47,7 +47,7 @@ init(
 
 void
 on_trade_update(
-    Strategy* strategy, Ticker ticker, Side side, double quantity, double price
+    Strategy* strategy, Ticker ticker, Side side, float quantity, float price
 )
 {
     strategy->on_trade_update(ticker, side, quantity, price);
@@ -55,7 +55,7 @@ on_trade_update(
 
 void
 on_orderbook_update(
-    Strategy* strategy, Ticker ticker, Side side, double quantity, double price
+    Strategy* strategy, Ticker ticker, Side side, float quantity, float price
 )
 {
     strategy->on_orderbook_update(ticker, side, quantity, price);
@@ -63,8 +63,8 @@ on_orderbook_update(
 
 void
 on_account_update(
-    Strategy* strategy, Ticker ticker, Side side, double price, double quantity,
-    double capital_remaining
+    Strategy* strategy, Ticker ticker, Side side, float price, float quantity,
+    float capital_remaining
 )
 {
     strategy->on_account_update(ticker, side, price, quantity, capital_remaining);

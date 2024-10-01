@@ -104,8 +104,8 @@ CppRuntime::fire_on_trade_update(
 ) const
 {
     on_trade_update_func_(
-        strategy_object_, ticker, side, static_cast<double>(quantity),
-        static_cast<double>(price)
+        strategy_object_, ticker, side, static_cast<float>(quantity),
+        static_cast<float>(price)
     );
 }
 
@@ -115,8 +115,8 @@ CppRuntime::fire_on_orderbook_update(
 ) const
 {
     on_orderbook_update_func_(
-        strategy_object_, ticker, side, static_cast<double>(quantity),
-        static_cast<double>(price)
+        strategy_object_, ticker, side, static_cast<float>(quantity),
+        static_cast<float>(price)
     );
 }
 
@@ -127,8 +127,8 @@ CppRuntime::fire_on_account_update(
 ) const
 {
     on_account_update_func_(
-        strategy_object_, ticker, side, static_cast<double>(quantity),
-        static_cast<double>(price), static_cast<double>(capital)
+        strategy_object_, ticker, side, static_cast<float>(quantity),
+        static_cast<float>(price), static_cast<float>(capital)
     );
 }
 

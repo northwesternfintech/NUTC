@@ -18,7 +18,7 @@ LevelQuantityTracker::report_quantity(
     // TODO: guarantee size checks
     if (levels.size() <= static_cast<uint64_t>(price.get_underlying())) [[unlikely]] {
         auto new_size =
-            static_cast<size_t>(static_cast<double>(price.get_underlying()) * 1.5);
+            static_cast<size_t>(static_cast<float>(price.get_underlying()) * 1.5f);
         bid_levels_.resize(new_size);
         ask_levels_.resize(new_size);
     }

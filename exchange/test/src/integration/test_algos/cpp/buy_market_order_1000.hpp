@@ -18,7 +18,7 @@ enum class Ticker : std::uint8_t { ETH = 0, BTC = 1, LTC = 2 }; // NOLINT
  *
  * @return true if order succeeded, false if order failed due to rate limiting
  */
-bool place_market_order(Side side, Ticker ticker, double quantity);
+bool place_market_order(Side side, Ticker ticker, float quantity);
 
 /**
  * Place a limit order
@@ -36,7 +36,7 @@ bool place_market_order(Side side, Ticker ticker, double quantity);
  * @return true if order succeeded, false if order failed due to rate limiting
  */
 std::int64_t place_limit_order(
-    Side side, Ticker ticker, double quantity, double price, bool ioc = false
+    Side side, Ticker ticker, float quantity, float price, bool ioc = false
 );
 
 bool cancel_order(Ticker ticker, std::int64_t order_id);
@@ -56,7 +56,7 @@ public:
      * @quantity quantity Volume traded
      */
     void
-    on_trade_update(Ticker ticker, Side side, double quantity, double price)
+    on_trade_update(Ticker ticker, Side side, float quantity, float price)
     {
         if (ticker == Ticker::ETH && price <= 101 && price >= 99 && quantity == 5) {
             place_limit_order(Side::buy, Ticker::BTC, 1, 100);
@@ -74,7 +74,7 @@ public:
      * @param quantity Volume placed into orderbook
      */
     void
-    on_orderbook_update(Ticker ticker, Side side, double quantity, double price)
+    on_orderbook_update(Ticker ticker, Side side, float quantity, float price)
     {}
 
     /**
@@ -88,8 +88,8 @@ public:
      */
     void
     on_account_update(
-        Ticker ticker, Side side, double price, double quantity,
-        double capital_remaining
+        Ticker ticker, Side side, float price, float quantity,
+        float capital_remaining
     )
     {}
 };

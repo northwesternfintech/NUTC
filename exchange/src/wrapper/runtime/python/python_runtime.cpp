@@ -18,7 +18,7 @@ PyRuntime::fire_on_trade_update(
 {
     try {
         py::globals()["strategy"].attr("on_trade_update")(
-            ticker, side, static_cast<double>(quantity), static_cast<double>(price)
+            ticker, side, static_cast<float>(quantity), static_cast<float>(price)
         );
     } catch (const py::error_already_set& err) {
         std::cerr << err.what() << "\n";
@@ -32,7 +32,7 @@ PyRuntime::fire_on_orderbook_update(
 {
     try {
         py::globals()["strategy"].attr("on_orderbook_update")(
-            ticker, side, static_cast<double>(quantity), static_cast<double>(price)
+            ticker, side, static_cast<float>(quantity), static_cast<float>(price)
         );
     } catch (const py::error_already_set& err) {
         std::cerr << err.what() << "\n";
@@ -47,8 +47,8 @@ PyRuntime::fire_on_account_update(
 {
     try {
         py::globals()["strategy"].attr("on_account_update")(
-            ticker, side, static_cast<double>(quantity), static_cast<double>(price),
-            static_cast<double>(capital)
+            ticker, side, static_cast<float>(quantity), static_cast<float>(price),
+            static_cast<float>(capital)
         );
     } catch (const py::error_already_set& err) {
         std::cerr << err.what() << "\n";

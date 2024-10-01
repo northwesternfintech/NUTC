@@ -19,7 +19,7 @@ enum class Ticker: std::uint8_t { ETH = 0, BTC = 1, LTC = 2 }; // NOLINT
  * @return true if order succeeded, false if order failed due to rate limiting
  */
 bool
-place_market_order(Side side, Ticker ticker, double quantity);
+place_market_order(Side side, Ticker ticker, float quantity);
 
 /**
  * Place a limit order
@@ -37,7 +37,7 @@ place_market_order(Side side, Ticker ticker, double quantity);
  * @return true if order succeeded, false if order failed due to rate limiting
  */
 std::int64_t place_limit_order(
-    Side side, Ticker ticker, double quantity, double price,
+    Side side, Ticker ticker, float quantity, float price,
     bool ioc = false
 );
 
@@ -58,7 +58,7 @@ public:
      * @quantity quantity Volume traded
      */
     void
-    on_trade_update(Ticker ticker, Side side, double quantity, double price)
+    on_trade_update(Ticker ticker, Side side, float quantity, float price)
     {}
 
     /**
@@ -72,7 +72,7 @@ public:
      */
     void
     on_orderbook_update(
-        Ticker ticker, Side side, double quantity, double price
+        Ticker ticker, Side side, float quantity, float price
     )
     {
         if (ticker == Ticker::ETH && quantity < 101 && quantity > 99) {
@@ -90,8 +90,8 @@ public:
      */
     void
     on_account_update(
-        Ticker ticker, Side side, double price, double quantity,
-        double capital_remaining
+        Ticker ticker, Side side, float price, float quantity,
+        float capital_remaining
     )
     {}
 };
