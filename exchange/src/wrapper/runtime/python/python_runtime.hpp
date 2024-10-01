@@ -9,6 +9,8 @@
 
 namespace nutc::wrapper {
 
+#pragma GCC visibility push(hidden)
+
 class PyRuntime : public Runtime {
 public:
     PyRuntime(
@@ -44,5 +46,7 @@ private:
     );
     static void run_initialization_code(const std::string& py_code);
 };
+
+#pragma GCC visibility pop
 
 } // namespace nutc::wrapper
