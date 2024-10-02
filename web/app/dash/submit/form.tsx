@@ -61,11 +61,22 @@ export default function SubmissionForm(props: { user: any }) {
     });
 
   const onSubmit: SubmitHandler<Inputs> = async data => {
-    const response = await fetch("/api/protected/db/user/createAlgo", {
+    const responsePromise = fetch("/api/protected/db/user/createAlgo", {
       method: "POST",
-      body: JSON.stringify({ uid: props.user.sub, ...data }),
+      body: JSON.stringify(data),
     });
+    Swal.fire({
+      title: "Algorithm submitted. Waiting for initial results...",
+      text: "This may take up to 30 seconds.",
+      icon: "info",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      allowEnterKey: false,
+    });
+    Swal.showLoading();
 
+    const response = await responsePromise;
+    Swal.close();
     if (!response.ok) {
       Swal.fire({
         title: "Error",
@@ -83,61 +94,19 @@ export default function SubmissionForm(props: { user: any }) {
       });
       const errMsg = await response.text();
       alert(errMsg);
-      return;
     } else {
       Swal.fire({
-        title: "Algorithm submitted. Waiting for initial results...",
-        text: "This may take up to 30 seconds.",
-        icon: "info",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        allowEnterKey: false,
-      });
-      Swal.showLoading();
-
-      const linterResponse = await fetch(
-        `${process.env.API_ENDPOINT}/webserver/submit/${props.user.sub}/${data.algoFileS3Key}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+        title: "Linting complete!",
+        text: "View results in the dashboard.",
+        icon: "success",
+        timer: 2000,
+        timerProgressBar: true,
+        willClose: () => {
+          window.location.href = "submissions/" + data.algoFileS3Key;
         },
-      );
-
-      if (linterResponse.ok) {
-        Swal.close();
-        Swal.fire({
-          title: "Linting complete!",
-          text: "View results in the dashboard.",
-          icon: "success",
-          timer: 2000,
-          timerProgressBar: true,
-          willClose: () => {
-            window.location.href = "submissions/" + data.algoFileS3Key;
-          },
-        });
-      } else {
-        if (response.status) {
-          Swal.fire({
-            icon: "error",
-            title: "Error linting algorithm",
-            text: "View results...",
-            timer: 4000,
-            timerProgressBar: true,
-            willClose: () => {
-              window.location.href = "submissions/" + data.algoFileS3Key;
-            },
-          });
-        } else {
-          Swal.fire({
-            icon: "error",
-            title:
-              "Your code timed out - if you don't see results on the submissions page within 2 minutes, contact NUTC dev support",
-          });
-        }
-      }
+      });
     }
+
   };
 
   const [caseValue, languageValue, algoFileS3Key] = watch([
@@ -433,8 +402,8 @@ export default function SubmissionForm(props: { user: any }) {
                   algoFileS3Key
                     ? "mt-2 flex justify-center rounded-lg border border-solid border-green-400 px-6 py-10"
                     : isDragOver
-                    ? "mt-2 flex justify-center rounded-lg border border-solid border-indigo-500 px-6 py-10"
-                    : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"
+                      ? "mt-2 flex justify-center rounded-lg border border-solid border-indigo-500 px-6 py-10"
+                      : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"
                 }
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}

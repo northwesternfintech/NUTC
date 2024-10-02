@@ -11,16 +11,16 @@ export async function POST(req: Request) {
       !algo.description ||
       !algo.case ||
       !algo.language ||
-      !algo.algoFileS3Key ||
-      !algo.uid
+      !algo.algoFileS3Key
     ) {
       return new Response("Not all fields in algo added", { status: 402 });
     }
 
     const session = await getSession();
-    if (!session?.user.sub || session.user.sub != algo.uid) {
+    if (!session?.user.sub) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 402 });
     }
+    const uid = session.user.sub;
 
     await prisma.algo.create({
       data: {
@@ -36,13 +36,24 @@ export async function POST(req: Request) {
         },
         user: {
           connect: {
-            uid: algo.uid,
+            uid
           },
         },
       },
     });
 
-    return NextResponse.json({ status: 200 });
+    const url = `${process.env.WEBSERVER_INTERNAL_ENDPOINT}/submit/${uid}/${algo.algoFileS3Key}`;
+    console.log("Fetching " + url);
+    const linterResponse = await fetch(
+      url,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
+    return linterResponse;
   } catch (error) {
     console.log(error);
     return NextResponse.json({ message: error }, { status: 500 });

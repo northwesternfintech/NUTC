@@ -6,9 +6,9 @@ use serde::Deserialize;
 use serde_json::json;
 use tokio_postgres::NoTls;
 
-// const LINTER_BASE_URL: &str = "http://linter:18081";
-// const SANDBOX_BASE_URL: &str = "http://sandbox:18080";
-const LINTER_BASE_URL: &str = "http://localhost:18081";
+const LINTER_BASE_URL: &str = "http://linter:18081";
+const SANDBOX_BASE_URL: &str = "http://sandbox:18080";
+// const LINTER_BASE_URL: &str = "http://localhost:18081";
 
 #[derive(Deserialize, Debug)]
 pub struct LinterResponse {
@@ -219,19 +219,10 @@ async fn main() -> std::io::Result<()> {
     dotenv::dotenv().ok();
 
     let host =
-        std::env::var("WEBSERVER_DB_HOST").expect("env variable `WEBSERVER_DB_HOST` should be set");
-    let user =
-        std::env::var("WEBSERVER_DB_USER").expect("env variable `WEBSERVER_DB_USER` should be set");
-    let password = std::env::var("WEBSERVER_DB_PASSWORD")
-        .expect("env variable `WEBSERVER_DB_PASSWORD` should be set");
-    let dbname =
-        std::env::var("WEBSERVER_DB_NAME").expect("env variable `WEBSERVER_DB_NAME` should be set");
+        std::env::var("PRISMA_DATABASE_URL").expect("env variable `WEBSERVER_DB_HOST` should be set");
 
     let mut pg_config = tokio_postgres::Config::new();
     pg_config.host(host);
-    pg_config.user(user);
-    pg_config.password(password);
-    pg_config.dbname(dbname);
     let mgr_config = ManagerConfig {
         recycling_method: RecyclingMethod::Fast,
     };
@@ -256,6 +247,7 @@ async fn main() -> std::io::Result<()> {
         let cors = Cors::default()
             .allowed_origin("http://localhost:3000")
             .allowed_origin("http://localhost:3001")
+            .allowed_origin("http://desktop.tail78d9b.ts.net:3000")
             .allowed_origin("https://nutc.io")
             .allowed_origin("https://www.nutc.io")
             .allowed_methods(vec!["GET", "POST", "DELETE"])
