@@ -22,6 +22,7 @@ export async function POST(req: Request) {
     }
     const uid = session.user.sub;
 
+    // TODO: validation
     await prisma.algo.create({
       data: {
         name: algo.name,
@@ -42,9 +43,9 @@ export async function POST(req: Request) {
       },
     });
 
-    const url = `${process.env.WEBSERVER_INTERNAL_ENDPOINT}/submit/${uid}/${algo.algoFileS3Key}`;
+    const url = `${process.env.WEBSERVER_INTERNAL_ENDPOINT}/submit/${algo.algoFileS3Key}/${algo.language}`;
     console.log("Fetching " + url);
-    const linterResponse = await fetch(
+    const submission_response = await fetch(
       url,
       {
         method: "POST",
@@ -53,7 +54,10 @@ export async function POST(req: Request) {
         },
       },
     );
-    return linterResponse;
+    if (!submission_response.ok) {
+      console.log("Failed to lint/sandbox");
+    }
+    return submission_response;
   } catch (error) {
     console.log(error);
     return NextResponse.json({ message: error }, { status: 500 });

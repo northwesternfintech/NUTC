@@ -40,6 +40,8 @@ LintProcessManager::spawn_client(const std::string& algo_code, AlgoLanguage lang
                 return "-python";
             case nutc::spawning::AlgoLanguage::Cpp:
                 return "-cpp";
+            default:
+                throw std::runtime_error("Unknown language");
         }
     };
 

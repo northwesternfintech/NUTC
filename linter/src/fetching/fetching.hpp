@@ -14,25 +14,8 @@ struct SetLintBody {
     std::string message;
 };
 
-enum class LintingResultOption { UNKNOWN = -1, FAILURE, SUCCESS, PENDING };
-
-std::optional<glz::json_t> database_request(
-    const std::string& method,
-    const std::string& url,
-    const std::string& data = "",
-    bool json_body = false
-);
-
 std::optional<std::string> storage_request(const std::string& url);
-
-void set_lint_result(
-    const std::string& uid,
-    const std::string& algo_id,
-    bool succeeded,
-    const std::string& message
-);
-
-[[nodiscard]] std::optional<std::string> get_algo(const std::string& algo_id);
+std::string replaceDisallowedValues(const std::string& input);
 
 } // namespace client
 } // namespace nutc

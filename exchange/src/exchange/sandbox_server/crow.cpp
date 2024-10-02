@@ -1,9 +1,12 @@
 #include "crow.hpp"
 
 #include "common/messages_exchange_to_wrapper.hpp"
+#include "common/types/algorithm/base_algorithm.hpp"
 #include "exchange/config/dynamic/config.hpp"
 #include "exchange/logging.hpp"
 #include "exchange/traders/trader_types/algo_trader.hpp"
+
+#include <crow/common.h>
 
 namespace nutc::exchange {
 
@@ -12,47 +15,57 @@ CrowServer::CrowServer() :
     timer_thread([this]() { io_context_.run(); })
 {
     CROW_ROUTE(app, "/sandbox/<string>/<string>")
-    ([this](const crow::request& req, std::string user_id, std::string algo_id) {
-        crow::response res;
-        res.code = 200;
-        // Set CORS headers
-        res.add_header("Access-Control-Allow-Origin", "*");
-        res.add_header(
-            "Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS"
+        .methods(crow::HTTPMethod::POST, crow::HTTPMethod::OPTIONS)(
+            [this](
+                const crow::request& req, std::string algo_id, std::string language
+            ) {
+                crow::response res;
+                res.code = 200;
+                // Set CORS headers
+                res.add_header("Access-Control-Allow-Origin", "*");
+                res.add_header("Access-Control-Allow-Methods", "POST, OPTIONS");
+                res.add_header(
+                    "Access-Control-Allow-Headers", "Origin, Content-Type, Accept"
+                );
+
+                // Handle preflight request for OPTIONS method
+                if (req.method == crow::HTTPMethod::OPTIONS) {
+                    res.code = 204;
+                    return res;
+                }
+
+                try {
+                    log_i(
+                        sandbox_server,
+                        "Received sandbox request with algo_id {} and language {}",
+                        algo_id, language
+                    );
+                    common::AlgoLanguage language_enum =
+                        language == "Python" ? common::AlgoLanguage::python
+                                             : common::AlgoLanguage::cpp;
+                    std::string algorithm_data = req.body;
+                    add_pending_trader_(algo_id, language_enum, algorithm_data);
+                    return res;
+                } catch (...) {
+                    log_e(sandbox_server, "Failed to spawn algorithm");
+                    return crow::response(500);
+                }
+            }
         );
-        res.add_header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept");
-
-        // Handle preflight request for OPTIONS method
-        if (req.method == crow::HTTPMethod::OPTIONS) {
-            res.code = 204;
-            return res;
-        }
-
-        try {
-            log_i(
-                sandbox_server,
-                "Received sandbox request with user id {} and algoid {}", user_id,
-                algo_id
-            );
-            add_pending_trader(user_id, algo_id);
-            return res;
-        } catch (...) {
-            return crow::response(500);
-        }
-    });
     server_thread = std::thread([this] { app.signal_clear().port(18080).run(); });
 }
 
 void
-CrowServer::add_pending_trader(
-    [[maybe_unused]] const std::string& user_id,
-    [[maybe_unused]] const std::string& algo_id
+CrowServer::add_pending_trader_(
+    const std::string& algo_id, common::AlgoLanguage language,
+    const std::string& algorithm_data
 )
 {
     static const auto STARTING_CAPITAL = Config::get().constants().STARTING_CAPITAL;
 
-    auto trader =
-        std::make_shared<AlgoTrader>(common::RemoteAlgorithm{}, STARTING_CAPITAL);
+    auto trader = std::make_shared<AlgoTrader>(
+        common::RemoteAlgorithm{language, algo_id, algorithm_data}, STARTING_CAPITAL
+    );
 
     trader_lock.lock();
     traders_to_add.push_back(trader);

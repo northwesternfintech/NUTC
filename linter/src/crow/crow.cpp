@@ -33,11 +33,7 @@ get_server_thread()
                 return res;
             }
 
-            if (!req.url_params.get("uid")) {
-                log_e(main, "No uid provided");
-                return crow::response(400);
-            };
-            if (!req.url_params.get("algo_id")) {
+            if (!req.url_params.get("algo_url")) {
                 log_e(main, "No algo_id provided");
                 return crow::response(400);
             }
@@ -45,15 +41,14 @@ get_server_thread()
                 log_e(main, "No language provided");
                 return crow::response(400);
             }
-            std::string uid = req.url_params.get("uid");
-            std::string algo_id = req.url_params.get("algo_id");
+            std::string algo_url = req.url_params.get("algo_url");
             std::string language = req.url_params.get("language");
 
             spawning::AlgoLanguage algo_language;
-            if (language == "python") {
+            if (language == "Python") {
                 algo_language = spawning::AlgoLanguage::Python;
             }
-            else if (language == "cpp") {
+            else if (language == "Cpp") {
                 algo_language = spawning::AlgoLanguage::Cpp;
             }
             else {
@@ -61,21 +56,11 @@ get_server_thread()
                 return crow::response(400);
             }
 
-            auto algo_code = nutc::client::get_algo(algo_id);
+            auto algo_code = client::storage_request(algo_url);
             if (!algo_code.has_value()) {
-                nutc::client::set_lint_result(
-                    uid,
-                    algo_id,
-                    false,
-                    fmt::format(
-                        "[linter] FAILURE - could not find algo {} for id {}\n",
-                        algo_id,
-                        uid
-                    )
-                );
                 crow::json::wvalue response = crow::json::wvalue({
-                    {"linting_status",
-                     static_cast<int>(client::LintingResultOption::UNKNOWN)}
+                    {"lint_success", false                },
+                    {"message", "Algo file not found"}
                 });
 
                 res.body = response.dump();
@@ -86,16 +71,9 @@ get_server_thread()
 
             auto lint_res =
                 spawner_manager.spawn_client(algo_code.value(), algo_language);
-
-            nutc::client::set_lint_result(
-                uid, algo_id, lint_res.success, lint_res.message
-            );
-
-            client::LintingResultOption algo_status_code =
-                lint_res.success ? client::LintingResultOption::SUCCESS
-                                 : client::LintingResultOption::FAILURE;
             crow::json::wvalue response({
-                {"linting_status", static_cast<int>(algo_status_code)}
+                {"lint_success", lint_res.success                                 },
+                {"message", client::replaceDisallowedValues(lint_res.message)}
             });
 
             res.body = response.dump();

@@ -5,23 +5,25 @@
 namespace nutc::common {
 // TODO
 class RemoteAlgorithm : public BaseAlgorithm {
+    std::string id_;
+    std::string algo_data_;
+
 public:
-    RemoteAlgorithm() : BaseAlgorithm(AlgoLanguage::cpp)
+    RemoteAlgorithm(AlgoLanguage language, std::string algo_id, std::string algo_data) :
+        BaseAlgorithm{language}, id_{std::move(algo_id)},
+        algo_data_{std::move(algo_data)}
+    {}
+
+    std::string
+    get_algo_string() const
     {
-        throw std::runtime_error("Not implemented");
+        return algo_data_;
     }
 
-    static std::string
-    get_algo_string()
+    std::string
+    get_id() const
     {
-        throw std::runtime_error("Not implemented");
-    }
-
-    // todo: deprecate
-    static std::string
-    get_id()
-    {
-        throw std::runtime_error("Not implemented");
+        return id_;
     }
 };
 } // namespace nutc::common
