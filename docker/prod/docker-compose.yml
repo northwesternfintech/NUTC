@@ -7,24 +7,21 @@ services:
     image: nutc-exchange
     build:
       context: ..
-      dockerfile: exchange/docker/sandbox/SandboxDockerfile
+      dockerfile: exchange/docker/sandbox/Dockerfile
       args:
         firebase_emulator: "false"
     restart: unless-stopped
     environment:
       - NUTC_EXPOSE_METRICS=1
     command: ["--bots-only"]
-    networks:
-      - net
 
+    #port: 16124
   webserver:
     image: nutc-webserver
     build:
       context: ..
       dockerfile: webserver/WebserverDockerfile
     restart: unless-stopped
-    networks:
-      - net
 
   linter:
     image: nutc-linter
@@ -34,46 +31,6 @@ services:
       dockerfile: linter/LinterDockerfile
       args:
         firebase_emulator: "false"
-    networks:
-      - net
-
-  firebase:
-    image: spine3/firebase-emulator
-    depends_on:
-      - website
-    restart: unless-stopped
-    ports:
-      - "4000:4000" 
-      - "4400:4400" 
-      - "5001:5001"
-      - "9000:9000"
-      - "9099:9099"
-      - "9199:9199"
-    environment:
-      GCP_PROJECT: "nutc-web"
-      ENABLE_UI: "true"
-    volumes:
-      - ../web/firebase.json:/firebase/firebase.json
-      - ../web/baseline-data:/firebase/baseline-data
-      - ../web/database.rules.json:/firebase/database.rules.json
-      - ../web/storage.rules:/firebase/storage.rules
-      - ../web/functions:/firebase/functions
-    networks:
-      - net
-
-  website:
-    image: node:20
-    restart: unless-stopped
-    working_dir: /app
-    volumes: 
-      - ../web:/app
-      - /app/node_modules
-    ports:
-      - "3001:3001"
-    command: >
-      sh -c "npm i && cd functions && npm i && npm run build && cd .. && npm run dev"
-    environment:
-      - NODE_ENV=development
 
   # Exposed on port 9000
   prometheus:
@@ -84,8 +41,6 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.retention.time=12h'
     restart: unless-stopped
-    networks:
-      - net
 
   reverse-proxy:
     image: nginx:latest
@@ -97,15 +52,13 @@ services:
     depends_on:
       - webserver
       - grafana
-    networks:
-      - net
 
   grafana:
     image: grafana/grafana
     restart: unless-stopped
-    user: "472:472"
+    user: "${UID}:${GID}"
     ports:
-      - "3000:3000"
+      - "3001:3001"
     environment:
     - GF_SECURITY_ALLOW_EMBEDDING=true
     - GF_AUTH_ANONYMOUS_ENABLED=true
@@ -113,13 +66,6 @@ services:
     - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
     volumes:
       - ../exchange/docker/sandbox/grafana_data:/var/lib/grafana
-      - /var/lib/grafana/grafana.db
-      - /var/lib/grafana/alerting
-    networks:
-      - net
+      # - /var/lib/grafana/grafana.db
+      # - /var/lib/grafana/alerting
 
-networks:
-  net:
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16

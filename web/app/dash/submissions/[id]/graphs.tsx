@@ -12,7 +12,7 @@ export function AlgoGraphs({
 }) {
   const upTime = (algo?.algoFile?.createdAt?.getMilliseconds() || 0) + 1000;
   const sandboxTimeMs = 300000;
-  const baseEndpoint = `${process.env.API_ENDPOINT}/d-solo/cdk4teh4zl534a/ppl?orgId=1&var-traderid=${userId}-${algo.algoFileS3Key}&from=${upTime}&theme=dark`;
+  const baseEndpoint = `${process.env.NGINX_ENDPOINT}/d-solo/cdk4teh4zl534a/ppl?orgId=1&var-traderid=${userId}-${algo.algoFileS3Key}&from=${upTime}&theme=dark`;
   const [url, setUrl] = useState(baseEndpoint + `&refresh=5s`);
 
   useEffect(() => {
