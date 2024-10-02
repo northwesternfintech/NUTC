@@ -13,7 +13,7 @@ services:
     restart: unless-stopped
     environment:
       - NUTC_EXPOSE_METRICS=1
-    command: ["--bots-only"]
+    command: ["--sandbox"]
 
     #port: 16124
   webserver:
@@ -58,7 +58,7 @@ services:
     restart: unless-stopped
     user: "${UID}:${GID}"
     ports:
-      - "3001:3001"
+      - "3000:3000"
     environment:
     - GF_SECURITY_ALLOW_EMBEDDING=true
     - GF_AUTH_ANONYMOUS_ENABLED=true
@@ -71,17 +71,21 @@ services:
 
   web:
     image: node:latest
+    restart: unless-stopped
     working_dir: /app
+    environment:
+      - PORT=3001
     volumes:
       - ../../web:/app
-    command: ["npm", "run", "dev"]
+    command: ["npm", "run", "dev",]
     ports:
-      - "3000:3000"
+      - "3001:3001"
     depends_on:
       - postgres
 
   localstack:
     image: localstack/localstack
+    restart: unless-stopped
     ports:
       - "4566:4566"
       - "4571:4571"

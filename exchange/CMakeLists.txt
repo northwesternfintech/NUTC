@@ -276,7 +276,6 @@ endif()
 
 # ---- Developer mode ----
 if(NOT NUTC24_DEVELOPER_MODE)
-message("lol")
   return()
 elseif(NOT PROJECT_IS_TOP_LEVEL)
   message(
