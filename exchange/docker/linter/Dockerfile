@@ -19,27 +19,21 @@ COPY ./exchange/CMakePresets.json /app/exchange
 COPY ./exchange/cmake /app/exchange/cmake
 COPY ./exchange/test /app/exchange/test
 
-ARG firebase_emulator=false
-
-RUN if [ "$firebase_emulator" = "false" ]; then \
-    cmake --preset=ci-docker; \
-    else \
-    cmake --preset=ci-docker -DLOCAL_DEV=ON; \
-    fi
+RUN cmake --preset=ci-docker
 
 RUN cmake --build build --config Release -j
 
-ENV NUTC_LINTER_SPAWNER_BINARY_PATH="/bin/LINTER_spawner"
+RUN mv /app/exchange/build/LINTER_spawner /app/LINTER_spawner
+RUN mv /app/exchange/build/LINTER /app/LINTER
 
-RUN mv /app/exchange/build/LINTER_spawner /bin/LINTER_spawner
-RUN mv /app/exchange/build/linter /bin/LINTER
+ENV NUTC_LINTER_SPAWNER_BINARY_PATH="/app/LINTER_spawner"
 
-RUN chmod +x /bin/LINTER
-RUN chmod +x /bin/LINTER_spawner
+RUN chmod +x /app/LINTER
+RUN chmod +x /app/LINTER_spawner
 
 COPY ./exchange/template.cpp /app/template.cpp
 ENV NUTC_CPP_TEMPLATE_PATH="/app/template.cpp"
 
 EXPOSE 18081
 
-CMD LINTER
+CMD /app/LINTER

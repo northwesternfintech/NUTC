@@ -3,7 +3,8 @@
 import { getSession } from "@auth0/nextjs-auth0";
 import prisma from "@/prisma/prismaClient";
 import { redirect } from "next/navigation";
-import { ParticipantState } from "@prisma/client";
+import { ParticipantState, Prisma } from "@prisma/client";
+import { Prism } from "react-syntax-highlighter";
 
 export async function getUserRegistrationState() {
   const session = await getSession();
@@ -63,6 +64,11 @@ export async function getAlgos() {
     },
     include: {
       algoFile: true,
+    },
+    orderBy: {
+      algoFile: {
+        createdAt: "desc",
+      }
     },
   });
 }

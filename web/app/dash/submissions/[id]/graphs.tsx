@@ -10,9 +10,9 @@ export function AlgoGraphs({
   algo: Algo & { algoFile: AlgoFile };
   userId: string;
 }) {
-  const upTime = (algo?.algoFile?.createdAt?.getMilliseconds() || 0) + 1000;
+  const upTime = new Date(algo?.algoFile?.createdAt).getTime() + 1000;
   const sandboxTimeMs = 300000;
-  const baseEndpoint = `${process.env.NGINX_ENDPOINT}/d-solo/cdk4teh4zl534a/ppl?orgId=1&var-traderid=${userId}-${algo.algoFileS3Key}&from=${upTime}&theme=dark`;
+  const baseEndpoint = `${process.env.NEXT_PUBLIC_NGINX_ENDPOINT}/d-solo/cdk4teh4zl534a/nutc-dev?orgId=1&var-traderid=${algo.algoFileS3Key}&from=${upTime}&theme=dark`;
   const [url, setUrl] = useState(baseEndpoint + `&refresh=5s`);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export function AlgoGraphs({
         <h2 className="text-xl font-semibold mb-2">Profit and Loss</h2>
         <iframe
           className="border border-gray-300"
-          src={url + "&panelId=1"}
+          src={url + "&panelId=14"}
           width="950"
           height="400"
           frameBorder="0"
@@ -44,7 +44,7 @@ export function AlgoGraphs({
         <h2 className="text-xl font-semibold mb-2">Capital</h2>
         <iframe
           className="border border-gray-300 "
-          src={url + "&panelId=2"}
+          src={url + "&panelId=13"}
           width="950"
           height="400"
           frameBorder="0"

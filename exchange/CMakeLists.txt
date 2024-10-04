@@ -273,7 +273,7 @@ target_link_libraries(LINTER_spawner_lib PRIVATE boost::boost)
 add_executable(LINTER_exe src/linter/main.cpp)
 add_executable(LINTER::exe ALIAS LINTER_exe)
 
-set_property(TARGET LINTER_exe PROPERTY OUTPUT_NAME linter)
+set_property(TARGET LINTER_exe PROPERTY OUTPUT_NAME LINTER)
 
 target_compile_features(LINTER_exe PRIVATE cxx_std_20)
 

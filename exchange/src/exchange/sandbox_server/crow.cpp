@@ -46,8 +46,8 @@ CrowServer::CrowServer() :
                     std::string algorithm_data = req.body;
                     add_pending_trader_(algo_id, language_enum, algorithm_data);
                     return res;
-                } catch (...) {
-                    log_e(sandbox_server, "Failed to spawn algorithm");
+                } catch (const std::exception& e) {
+                    log_e(sandbox_server, "Failed to spawn algorithm: {}", e.what());
                     return crow::response(500);
                 }
             }
