@@ -21,15 +21,49 @@ struct LintResult {
     message: String,
 }
 
+async fn set_linter_status(
+    algo_id: &String,
+    success: bool,
+    message: &String,
+    pool: &Pool,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let postgres_cient = pool.get().await?;
+
+    let query = if success {
+        r#"
+        UPDATE "algos"
+        SET "lintResults" = $1, "lintSuccessMessage" = $2
+        WHERE "algoFileS3Key" = $3
+    "#
+    } else {
+        r#"
+        UPDATE "algos"
+        SET "lintResults" = $1, "lintFailureMessage" = $2
+        WHERE "algoFileS3Key" = $3
+    "#
+    };
+
+    let success_message = if success { "success" } else { "failure" };
+
+    postgres_cient
+        .execute(query, &[&success_message, &message, &algo_id])
+        .await?;
+
+    Ok(())
+}
+
 #[tracing::instrument]
 #[post("/submit/{algo_id}/{language}")]
-async fn handle_algo_submission(data: web::Path<(String, String)>) -> impl Responder {
+async fn handle_algo_submission(
+    data: web::Path<(String, String)>,
+    db_pool: web::Data<Pool>,
+) -> impl Responder {
     dotenv::dotenv().ok();
 
     let (algo_id, language) = data.into_inner();
 
-    let s3_endpoint =
-        std::env::var("INTERNAL_S3_ENDPOINT").expect("env variable `INTERNAL_S3_ENDPOINT` should be set");
+    let s3_endpoint = std::env::var("INTERNAL_S3_ENDPOINT")
+        .expect("env variable `INTERNAL_S3_ENDPOINT` should be set");
     let algo_url = format!("{}/nutc/{}", s3_endpoint, algo_id);
 
     let linter_url = format!(
@@ -48,23 +82,26 @@ async fn handle_algo_submission(data: web::Path<(String, String)>) -> impl Respo
     }
 
     let linter_response = linter_response.unwrap();
-    let linter_response_body = linter_response.json::<LintResult>().await;
 
-    if linter_response_body.is_err() {
+    let linter_response = if let Ok(linter_response) = linter_response.json::<LintResult>().await {
+        linter_response
+    } else {
         tracing::error!("failed to decode linter response");
         return HttpResponse::BadGateway().finish();
-    }
+    };
 
-    let linter_response_body_unwrapped = linter_response_body.unwrap();
-    if linter_response_body_unwrapped.lint_success {
+    if let Err(e) = set_linter_status(&algo_id, true, &linter_response.message, &db_pool).await {
+        tracing::error!("failed to update linter status in database, {:?}", e);
+        return HttpResponse::BadGateway().finish();
+    }
+    if linter_response.lint_success {
         tracing::info!("linting success now requesting sandbox");
     } else {
         // forward the error message from the linter, and add something in the response
         // to indicate that the linter Failed
-        tracing::error!("linting failed: {}", linter_response_body_unwrapped.message);
-        return HttpResponse::Ok().json(
-            json!({"status": "lint failure", "message": linter_response_body_unwrapped.message}),
-        );
+        tracing::error!("linting failed: {}", linter_response.message);
+        return HttpResponse::Ok()
+            .json(json!({"status": "lint failure", "message": linter_response.message}));
     }
 
     // todo: this function shouldnt return a http request
@@ -77,9 +114,21 @@ async fn request_sandbox(algo_id: String, algo_url: String, language: String) ->
     tracing::info!("linting success now requesting sandbox {}", sandbox_url);
 
     // download the algo file
-    let algo_data = client.get(algo_url).send().await.unwrap().bytes().await.unwrap();
+    let algo_data = client
+        .get(algo_url)
+        .send()
+        .await
+        .unwrap()
+        .bytes()
+        .await
+        .unwrap();
 
-    let sandbox_response = client.post(&sandbox_url).header("Content-Type", "application/json").body(algo_data).send().await;
+    let sandbox_response = client
+        .post(&sandbox_url)
+        .header("Content-Type", "application/json")
+        .body(algo_data)
+        .send()
+        .await;
 
     match sandbox_response {
         Ok(response) => {
@@ -183,9 +232,14 @@ async fn main() -> std::io::Result<()> {
 
     let host = std::env::var("PRISMA_DATABASE_URL")
         .expect("env variable `WEBSERVER_DB_HOST` should be set");
+    let host_url = match host.find('?') {
+        Some(idx) => &host[..idx],
+        None => &host[..],
+    };
 
-    let mut pg_config = tokio_postgres::Config::new();
-    pg_config.host(host);
+    let pg_config = host_url
+        .parse::<tokio_postgres::Config>()
+        .expect("unable to parse DB url");
     let mgr_config = ManagerConfig {
         recycling_method: RecyclingMethod::Fast,
     };
