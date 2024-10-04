@@ -10,7 +10,9 @@ class TickerContainer {
     std::vector<TickerData> tickers;
 
 public:
-    TickerContainer(const std::vector<ticker_config>& configs, TraderContainer& traders);
+    TickerContainer(
+        const std::vector<ticker_config>& configs, TraderContainer& traders
+    );
 
     TickerContainer();
 

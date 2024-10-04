@@ -14,13 +14,15 @@ public:
 
 private:
     void
-    before_cycle_(uint64_t) override
+    before_cycle_(uint64_t tick) override
     {
         auto traders = CrowServer::get_instance().get_and_clear_pending_traders();
 
         std::for_each(traders.begin(), traders.end(), [this](auto&& trader) {
             get_traders().add_trader(trader);
         });
+
+		DevMatchingCycle::before_cycle_(tick);
     }
 };
 } // namespace nutc::exchange

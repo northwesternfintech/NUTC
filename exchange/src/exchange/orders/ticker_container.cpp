@@ -1,5 +1,7 @@
 #include "ticker_container.hpp"
 
+#include "common/types/ticker.hpp"
+
 namespace nutc::exchange {
 
 TickerContainer::TickerContainer(
@@ -110,9 +112,21 @@ TickerContainer::create_tickers(
     const std::vector<ticker_config>& configs, TraderContainer& traders
 )
 {
-    std::vector<TickerData> result = create_tickers();
+    std::vector<TickerData> result;
+    // this is really bad. fix soon
+    std::unordered_map<std::size_t, TickerData> ticker_map;
     for (const auto& config : configs) {
-        result[std::to_underlying(config.TICKER)].set_bot_config(traders, config);
+        ticker_map.emplace(
+            std::piecewise_construct,
+            std::forward_as_tuple(std::to_underlying(config.TICKER)),
+            std::forward_as_tuple(traders, config)
+        );
+    }
+    for (std::size_t ticker = 0; ticker < common::TICKERS.size(); ticker++) {
+        if (ticker_map.contains(ticker))
+            result.emplace_back(ticker_map.at(ticker));
+        else
+            result.emplace_back(static_cast<common::Ticker>(ticker));
     }
     return result;
 }

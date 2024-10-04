@@ -55,6 +55,7 @@ model Algo {
   sandboxLogFileURL  String?
   lintFailureMessage String?
   lintSuccessMessage String?
+  uploadedAt  DateTime @default(now())
 
   algoFile AlgoFile @relation(fields: [algoFileS3Key], references: [s3Key])
   uid      String

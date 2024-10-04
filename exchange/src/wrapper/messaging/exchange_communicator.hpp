@@ -32,8 +32,7 @@ public:
 
     algorithm_content consume_algorithm();
 
-    template <typename T>
-    T consume_message();
+	common::tick_update consume_tick_update();
 
     static void publish_message(const std::string& message);
 
@@ -54,6 +53,10 @@ public:
     LimitOrderFunction place_limit_order();
     MarketOrderFunction place_market_order();
     CancelOrderFunction cancel_order();
+
+private:
+    template <typename T>
+    T consume_message();
 };
 
 } // namespace nutc::wrapper

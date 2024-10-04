@@ -30,7 +30,6 @@ export default function Dashboard() {
     queryFn: async () => await getAlgos(),
     queryKey: ["algos"],
   });
-  console.log(algos);
 
   const [searchTerm, setSearchTerm] = useState("");
 

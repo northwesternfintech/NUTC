@@ -12,9 +12,10 @@
 namespace nutc::exchange {
 
 void
-BotContainer::generate_orders(common::decimal_price midprice)
+BotContainer::generate_orders(
+    common::decimal_price midprice, common::decimal_price theo
+)
 {
-    auto theo = fabs(theo_generator_.generate_next_magnitude());
     variance_calculator_.record_price(midprice);
 
     decimal_price cumulative_interest_limit{};
