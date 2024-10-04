@@ -3,7 +3,7 @@
 #include "common/messages_exchange_to_wrapper.hpp"
 #include "common/types/algorithm/base_algorithm.hpp"
 #include "exchange/config/dynamic/config.hpp"
-#include "exchange/logging.hpp"
+#include "common/logging/logging.hpp"
 #include "exchange/traders/trader_types/algo_trader.hpp"
 
 #include <crow/common.h>

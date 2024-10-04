@@ -2,7 +2,7 @@
 
 #include "common/types/decimal.hpp"
 #include "exchange/algos/dev_mode/dev_mode.hpp"
-#include "exchange/logging.hpp"
+#include "common/logging/logging.hpp"
 
 #include <fmt/format.h>
 
