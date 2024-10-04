@@ -313,6 +313,7 @@ add_library(COMMON_lib OBJECT
     src/common/types/decimal.cpp
     src/common/types/algorithm/local_algorithm.cpp
     src/common/logging/logging.cpp
+    src/common/compilation/compile_cpp.cpp
 )
 
 target_include_directories(

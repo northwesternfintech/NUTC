@@ -31,33 +31,33 @@ PyRuntime::init()
 
 void
 PyRuntime::fire_on_trade_update(
-    common::Ticker ticker, common::Side side, double price, double quantity
+    common::Ticker ticker, common::Side side, float price, float quantity
 ) const
 {
     py::globals()["strategy"].attr("on_trade_update")(
-        ticker, side, static_cast<double>(quantity), static_cast<double>(price)
+        ticker, side, static_cast<float>(quantity), static_cast<float>(price)
     );
 }
 
 void
 PyRuntime::fire_on_orderbook_update(
-    common::Ticker ticker, common::Side side, double price, double quantity
+    common::Ticker ticker, common::Side side, float price, float quantity
 ) const
 {
     py::globals()["strategy"].attr("on_orderbook_update")(
-        ticker, side, static_cast<double>(quantity), static_cast<double>(price)
+        ticker, side, static_cast<float>(quantity), static_cast<float>(price)
     );
 }
 
 void
 PyRuntime::fire_on_account_update(
-    common::Ticker ticker, common::Side side, double price, double quantity,
-    double capital
+    common::Ticker ticker, common::Side side, float price, float quantity,
+    float capital
 ) const
 {
     py::globals()["strategy"].attr("on_account_update")(
-        ticker, side, static_cast<double>(quantity), static_cast<double>(price),
-        static_cast<double>(capital)
+        ticker, side, static_cast<float>(quantity), static_cast<float>(price),
+        static_cast<float>(capital)
     );
 }
 

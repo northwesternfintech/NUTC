@@ -1,5 +1,8 @@
 #include "cpp_runtime.hpp"
 
+#include "common/compilation/compile_cpp.hpp"
+#include "common/file_operations/file_operations.hpp"
+
 #include <dlfcn.h>
 #include <fcntl.h>
 #include <fmt/core.h>
@@ -12,6 +15,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <stdexcept>
 
 namespace {
@@ -51,11 +55,16 @@ namespace nutc::lint {
 CppRuntime::CppRuntime(
     std::string algo, LimitOrderFunction limit_order, MarketOrderFunction market_order,
     CancelOrderFunction cancel_order
-) : Runtime(std::move(algo), limit_order, market_order, cancel_order)
+) :
+    Runtime(
+        std::move(algo), std::move(limit_order), std::move(market_order),
+        std::move(cancel_order)
+    )
 {}
 
 CppRuntime::~CppRuntime()
 {
+    // TODO: shoudl not do
     dlclose(dl_handle_);
     close(fd_);
 }
@@ -63,15 +72,17 @@ CppRuntime::~CppRuntime()
 std::optional<std::string>
 CppRuntime::init()
 {
-    auto [fd, path] = get_temp_file();
+    boost::filesystem::path temp_dir = boost::filesystem::temp_directory_path();
+    boost::filesystem::path temp_file =
+        temp_dir / boost::filesystem::unique_path("tempfile-%%%%-%%%%");
 
-    fd_ = fd;
-
-    std::ofstream algo_file(path);
+    std::ofstream algo_file(temp_file.string());
     algo_file << algo_ << std::flush;
     algo_file.close();
 
-    dl_handle_ = dlopen(path.c_str(), RTLD_NOW);
+    std::string compiled_binary_path = common::compile_cpp(temp_file.string());
+
+    dl_handle_ = dlopen(compiled_binary_path.c_str(), RTLD_NOW);
     if (dl_handle_ == nullptr) {
         std::string err = dlerror();
         close(fd_);
@@ -87,8 +98,8 @@ CppRuntime::init()
     on_account_update_func_ =
         reinterpret_cast<OnAccountUpdateFunc>(dlsym(dl_handle_, "on_account_update"));
 
-    if (!init_func || !on_trade_update_func_ || !on_orderbook_update_func_
-        || !on_account_update_func_) {
+    if (init_func == nullptr || on_trade_update_func_ == nullptr
+        || on_orderbook_update_func_ == nullptr || on_account_update_func_ == nullptr) {
         dlclose(dl_handle_);
         close(fd_);
         return fmt::format("[linter] failed to dynamically load functions");
@@ -101,36 +112,26 @@ CppRuntime::init()
 
 void
 CppRuntime::fire_on_trade_update(
-    common::Ticker ticker, common::Side side, double price, double quantity
+    common::Ticker ticker, common::Side side, float price, float quantity
 ) const
 {
-    on_trade_update_func_(
-        strategy_object_, ticker, side, static_cast<double>(quantity),
-        static_cast<double>(price)
-    );
+    on_trade_update_func_(strategy_object_, ticker, side, quantity, price);
 }
 
 void
 CppRuntime::fire_on_orderbook_update(
-    common::Ticker ticker, common::Side side, double price, double quantity
+    common::Ticker ticker, common::Side side, float price, float quantity
 ) const
 {
-    on_orderbook_update_func_(
-        strategy_object_, ticker, side, static_cast<double>(quantity),
-        static_cast<double>(price)
-    );
+    on_orderbook_update_func_(strategy_object_, ticker, side, quantity, price);
 }
 
 void
 CppRuntime::fire_on_account_update(
-    common::Ticker ticker, common::Side side, double price, double quantity,
-    double capital
+    common::Ticker ticker, common::Side side, float price, float quantity, float capital
 ) const
 {
-    on_account_update_func_(
-        strategy_object_, ticker, side, static_cast<double>(quantity),
-        static_cast<double>(price), static_cast<double>(capital)
-    );
+    on_account_update_func_(strategy_object_, ticker, side, quantity, price, capital);
 }
 
 } // namespace nutc::lint

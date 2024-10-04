@@ -1,5 +1,6 @@
 #include "spawning.hpp"
 
+#include "common/util.hpp"
 #include "linter/config.h"
 
 #include <fmt/core.h>
@@ -47,10 +48,10 @@ LintProcessManager::spawn_client(const std::string& algo_code, AlgoLanguage lang
 
     auto child = std::make_shared<bp::child>(
         bp::exe(path), bp::args(get_language_flag(language)),
-        bp::std_in<out_pipe, bp::std_out> * in_pipe, io_context
+        bp::std_in<out_pipe, bp::std_err> stderr, bp::std_out > *in_pipe, io_context
     );
 
-    out_pipe << algo_code << std::flush;
+    out_pipe << common::base64_encode(algo_code) << std::endl;
     out_pipe.pipe().close();
 
     auto kill_timer = std::make_shared<ba::steady_timer>(io_context);

@@ -25,16 +25,16 @@ public:
     std::optional<std::string> init() override;
 
     void fire_on_trade_update(
-        common::Ticker ticker, common::Side side, double price, double quantity
+        common::Ticker ticker, common::Side side, float price, float quantity
     ) const override;
 
     void fire_on_orderbook_update(
-        common::Ticker ticker, common::Side side, double price, double quantity
+        common::Ticker ticker, common::Side side, float price, float quantity
     ) const override;
 
     void fire_on_account_update(
-        common::Ticker ticker, common::Side side, double price, double quantity,
-        double capital
+        common::Ticker ticker, common::Side side, float price, float quantity,
+        float capital
     ) const override;
 
 private:

@@ -1,3 +1,4 @@
+#include "common/types/decimal.hpp"
 #include "common/types/ticker.hpp"
 #include "common/util.hpp"
 #include "linter/lint/lint.hpp"
@@ -18,7 +19,7 @@
 
 namespace {
 bool
-mock_limit_func(nutc::common::Side, nutc::common::Ticker, float, float, bool)
+mock_limit_func(nutc::common::Side, nutc::common::Ticker, float, float, bool = false)
 {
     return true;
 }
@@ -44,11 +45,14 @@ main(int argc, char* argv[])
         return 1;
     }
 
-    std::string algo_code;
-    std::string line;
-    while (std::getline(std::cin, line)) {
-        algo_code += line + '\n';
-    }
+    std::cerr << "TESTING" << std::endl;
+
+    std::string algo_code_base64;
+    std::getline(std::cin, algo_code_base64);
+    std::cerr << "gotline" << std::endl;
+
+    std::string algo_code = nutc::common::base64_decode(algo_code_base64);
+    std::cerr << "decoded\n" << algo_code << std::endl;
 
     nutc::lint::lint_result lint_result;
     std::string flag = argv[1];
@@ -59,17 +63,31 @@ main(int argc, char* argv[])
         lint_result = nutc::lint::lint(runtime);
     }
     else if (flag == "-cpp") {
+        std::cerr << "cpprun" << std::endl;
         nutc::lint::CppRuntime runtime(
             algo_code, mock_limit_func, mock_market_func, mock_cancel_func
         );
+        std::cerr << "cpplint" << std::endl;
         lint_result = nutc::lint::lint(runtime);
+        std::cerr << "lint output" << std::endl << lint_result.message << std::endl;
+        std::cerr << "cpplintdone" << std::endl;
     }
     else {
         std::cout << "[linter] no language provided\n";
         return 1;
     }
 
-    std::cout << *glz::write_json(lint_result) << "\n";
+    auto output = glz::write_json(lint_result);
+    if (output) {
+        std::cerr << "output" << *output << std::endl;
+        std::cout << *output << std::endl;
+    }
+    else {
+        std::cerr << "error" << std::endl;
+        std::cout << fmt::format(
+            "[linter] ERROR WRITING LINT RESULT: {}", glz::format_error(output.error())
+        ) << std::endl;
+    }
 
     return 0;
 }

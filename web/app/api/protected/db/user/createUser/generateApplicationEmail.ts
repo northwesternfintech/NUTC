@@ -22,9 +22,8 @@ export async function GenerateApplicationEmail(user: User, profile: Profile) {
   const link = process.env.AUTH0_BASE_URL + `/api/handleReview?token=${token}`;
   const accept_link = link + "&accept=true";
   const deny_link = link + "&accept=false";
-  const resume_link = `${process.env.S3_ENDPOINT}/nutc/${
-    s3Key?.Resume?.at(-1)?.s3Key
-  }`;
+  const resume_link = `${process.env.EXTERNAL_S3_ENDPOINT}/nutc/${s3Key?.Resume?.at(-1)?.s3Key
+    }`;
 
   const mailOptions = {
     from: "contact@nutc.io",
