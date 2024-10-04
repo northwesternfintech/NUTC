@@ -12,10 +12,10 @@
 namespace nutc::lint {
 
 using LimitOrderFunction = std::function<std::int64_t(
-    common::Side side, common::Ticker ticker, double quantity, double price, bool ioc
+    common::Side side, common::Ticker ticker, float quantity, float price, bool ioc
 )>;
 using MarketOrderFunction =
-    std::function<bool(common::Side side, common::Ticker ticker, double quantity)>;
+    std::function<bool(common::Side side, common::Ticker ticker, float quantity)>;
 using CancelOrderFunction =
     std::function<bool(common::Ticker ticker, std::int64_t order_id)>;
 
@@ -39,14 +39,14 @@ public:
 
     virtual std::optional<std::string> init() = 0;
     virtual void fire_on_trade_update(
-        common::Ticker ticker, common::Side side, double price, double quantity
+        common::Ticker ticker, common::Side side, float price, float quantity
     ) const = 0;
     virtual void fire_on_orderbook_update(
-        common::Ticker ticker, common::Side side, double price, double quantity
+        common::Ticker ticker, common::Side side, float price, float quantity
     ) const = 0;
     virtual void fire_on_account_update(
-        common::Ticker ticker, common::Side side, double price, double quantity,
-        double buyer_capital
+        common::Ticker ticker, common::Side side, float price, float quantity,
+        float buyer_capital
     ) const = 0;
 
 protected:

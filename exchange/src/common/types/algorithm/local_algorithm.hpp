@@ -17,6 +17,5 @@ public:
     std::string get_id() const;
 
 private:
-    static std::string compile_cpp(const std::filesystem::path& filepath);
 };
 } // namespace nutc::common

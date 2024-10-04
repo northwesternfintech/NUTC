@@ -28,7 +28,7 @@ services:
     restart: unless-stopped
     build:
       context: ../..
-      dockerfile: linter/LinterDockerfile
+      dockerfile: exchange/docker/linter/LinterDockerfile
       args:
         firebase_emulator: "false"
 

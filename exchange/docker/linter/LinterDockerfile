@@ -6,18 +6,18 @@ RUN pip install conan numpy pandas polars scipy scikit-learn sortedcontainers li
     && apt update \
     && apt install -y --no-install-recommends build-essential libssl-dev cmake git
 
-WORKDIR /app/linter
-COPY ./linter/conanfile.py /app/linter/conanfile.py
-COPY ./.github/scripts/conan-profile.sh /app/linter
+WORKDIR /app/exchange
+COPY ./exchange/conanfile.py /app/exchange/conanfile.py
+COPY ./.github/scripts/conan-profile.sh /app/exchange
 
 RUN cat conan-profile.sh | bash \
     && conan install . -b missing
 
-COPY ./linter/src /app/linter/src
-COPY ./linter/CMakeLists.txt /app/linter
-COPY ./linter/CMakePresets.json /app/linter
-COPY ./linter/cmake /app/linter/cmake
-COPY ./linter/test /app/linter/test
+COPY ./exchange/src /app/exchange/src
+COPY ./exchange/CMakeLists.txt /app/exchange
+COPY ./exchange/CMakePresets.json /app/exchange
+COPY ./exchange/cmake /app/exchange/cmake
+COPY ./exchange/test /app/exchange/test
 
 ARG firebase_emulator=false
 
@@ -27,17 +27,19 @@ RUN if [ "$firebase_emulator" = "false" ]; then \
     cmake --preset=ci-docker -DLOCAL_DEV=ON; \
     fi
 
-RUN cmake --build build --config Release -j6
+RUN cmake --build build --config Release -j
 
-ENV NUTC_SPAWNER_BINARY_PATH="/bin/NUTC-linter-spawner"
+ENV NUTC_LINTER_SPAWNER_BINARY_PATH="/bin/LINTER_spawner"
 
-RUN mv /app/linter/build/NUTC-linter-spawner /bin/NUTC-linter-spawner
-RUN mv /app/linter/build/NUTC-linter /bin/NUTC-linter
+RUN mv /app/exchange/build/LINTER_spawner /bin/LINTER_spawner
+RUN mv /app/exchange/build/linter /bin/LINTER
 
-RUN chmod +x /bin/NUTC-linter
-RUN chmod +x /bin/NUTC-linter-spawner
+RUN chmod +x /bin/LINTER
+RUN chmod +x /bin/LINTER_spawner
+
+COPY ./exchange/template.cpp /app/template.cpp
+ENV NUTC_CPP_TEMPLATE_PATH="/app/template.cpp"
 
 EXPOSE 18081
 
-
-CMD NUTC-linter
+CMD LINTER

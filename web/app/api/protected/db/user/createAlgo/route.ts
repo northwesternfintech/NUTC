@@ -15,6 +15,9 @@ export async function POST(req: Request) {
     ) {
       return new Response("Not all fields in algo added", { status: 402 });
     }
+    if (algo.language == "C++") {
+      algo.language = "Cpp";
+    }
 
     const session = await getSession();
     if (!session?.user.sub) {
@@ -57,8 +60,11 @@ export async function POST(req: Request) {
     if (!submission_response.ok) {
       console.log("Failed to lint/sandbox");
     }
-    console.log(JSON.stringify(await submission_response.json()));
-    return submission_response;
+    const resp = await submission_response.text();
+    console.log(resp);
+    return NextResponse.json({
+      message: "Linter response: " + resp
+    }, { status: 200 });
   } catch (error) {
     console.log(error);
     return NextResponse.json({ message: error }, { status: 500 });

@@ -29,7 +29,7 @@ async fn handle_algo_submission(data: web::Path<(String, String)>) -> impl Respo
     let (algo_id, language) = data.into_inner();
 
     let s3_endpoint =
-        std::env::var("S3_ENDPOINT").expect("env variable `WEBSERVER_DB_HOST` should be set");
+        std::env::var("INTERNAL_S3_ENDPOINT").expect("env variable `INTERNAL_S3_ENDPOINT` should be set");
     let algo_url = format!("{}/nutc/{}", s3_endpoint, algo_id);
 
     let linter_url = format!(
