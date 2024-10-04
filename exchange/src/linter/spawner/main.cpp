@@ -1,3 +1,5 @@
+#include "common/types/ticker.hpp"
+#include "common/util.hpp"
 #include "linter/lint/lint.hpp"
 #include "linter/lint/lint_result.hpp"
 #include "linter/runtime/cpp/cpp_runtime.hpp"
@@ -16,27 +18,19 @@
 
 namespace {
 bool
-mock_limit_func(const std::string& side, const std::string&, float, float, bool)
+mock_limit_func(nutc::common::Side, nutc::common::Ticker, float, float, bool)
 {
-    if (side == "BUY" || side == "SELL")
-        return true;
-    throw std::runtime_error(
-        fmt::format("Side should be BUY or SELL, but called with side: {}", side)
-    );
+    return true;
 }
 
 bool
-mock_market_func(const std::string& side, const std::string&, float)
+mock_market_func(nutc::common::Side, nutc::common::Ticker, float)
 {
-    if (side == "BUY" || side == "SELL")
-        return true;
-    throw std::runtime_error(
-        fmt::format("Side should be BUY or SELL, but called with side: {}", side)
-    );
+    return true;
 }
 
 bool
-mock_cancel_func(const std::string&, std::int64_t)
+mock_cancel_func(nutc::common::Ticker, std::int64_t)
 {
     return true;
 }

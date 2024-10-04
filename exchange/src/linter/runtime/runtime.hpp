@@ -1,24 +1,23 @@
 #pragma once
 
+#include "common/types/ticker.hpp"
+#include "common/util.hpp"
+
 #include <cstdint>
-#include <optional>
 
 #include <functional>
+#include <optional>
 #include <string>
 
 namespace nutc::lint {
 
 using LimitOrderFunction = std::function<std::int64_t(
-    const std::string& side,
-    const std::string& ticker,
-    double quantity,
-    double price,
-    bool ioc
+    common::Side side, common::Ticker ticker, double quantity, double price, bool ioc
 )>;
-using MarketOrderFunction = std::function<
-    bool(const std::string& side, const std::string& ticker, double quantity)>;
+using MarketOrderFunction =
+    std::function<bool(common::Side side, common::Ticker ticker, double quantity)>;
 using CancelOrderFunction =
-    std::function<bool(const std::string& ticker, std::int64_t order_id)>;
+    std::function<bool(common::Ticker ticker, std::int64_t order_id)>;
 
 class Runtime {
 public:
@@ -30,29 +29,23 @@ public:
     Runtime& operator=(Runtime&&) noexcept = default;
 
     Runtime(
-        std::string algo,
-        LimitOrderFunction limit_order,
-        MarketOrderFunction market_order,
-        CancelOrderFunction cancel_order
+        std::string algo, LimitOrderFunction limit_order,
+        MarketOrderFunction market_order, CancelOrderFunction cancel_order
     ) :
-        algo_(std::move(algo)),
-        m_limit_order_func(limit_order),
-        m_market_order_func(market_order),
-        m_cancel_order_func(cancel_order)
+        algo_(std::move(algo)), m_limit_order_func(std::move(limit_order)),
+        m_market_order_func(std::move(market_order)),
+        m_cancel_order_func(std::move(cancel_order))
     {}
 
-    virtual std::optional<std::string> init()  = 0;
+    virtual std::optional<std::string> init() = 0;
     virtual void fire_on_trade_update(
-        std::string ticker, std::string side, double price, double quantity
+        common::Ticker ticker, common::Side side, double price, double quantity
     ) const = 0;
     virtual void fire_on_orderbook_update(
-        std::string ticker, std::string side, double price, double quantity
+        common::Ticker ticker, common::Side side, double price, double quantity
     ) const = 0;
     virtual void fire_on_account_update(
-        std::string ticker,
-        std::string side,
-        double price,
-        double quantity,
+        common::Ticker ticker, common::Side side, double price, double quantity,
         double buyer_capital
     ) const = 0;
 

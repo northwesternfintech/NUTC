@@ -2,6 +2,8 @@
 
 #include <gtest/gtest.h>
 
+#include <iostream>
+
 class IntegrationLinterTest : public ::testing::Test {
 protected:
     nutc::spawning::LintProcessManager manager;
@@ -11,18 +13,18 @@ const std::string basic_algo = R"(class Strategy:
     def __init__(self) -> None:
         pass
 
-    def on_trade_update(self, ticker: str, side: str, price: float, quantity: float) -> None:
+    def on_trade_update(self, ticker: Ticker, side: Side, price: float, quantity: float) -> None:
         pass
 
     def on_orderbook_update(
-        self, ticker: str, side: str, price: float, quantity: float
+        self, ticker: Ticker, side: Side, price: float, quantity: float
     ) -> None:
         pass
 
     def on_account_update(
         self,
-        ticker: str,
-        side: str,
+        ticker: Ticker,
+        side: Side,
         price: float,
         quantity: float,
         capital_remaining: float,
@@ -34,18 +36,18 @@ const std::string incorrect_arguments_algo = R"(class Strategy:
     def __init__(self) -> None:
         pass
 
-    def on_trade_update(self, ticker: str, side: str, price: float, quantity: float) -> None:
-        place_limit_order("ETHUSD", "BUY", 5, 5)
+    def on_trade_update(self, ticker: Ticker, side: Side, price: float, quantity: float) -> None:
+		place_limit_order(Side.BUY, Ticker.ETH, 5, 5)
 
     def on_orderbook_update(
-        self, ticker: str, side: str, price: float, quantity: float
+        self, ticker: Ticker, side: Side, price: float, quantity: float
     ) -> None:
         pass
 
     def on_account_update(
         self,
-        ticker: str,
-        side: str,
+        ticker: Ticker,
+        side: Side,
         price: float,
         quantity: float,
         capital_remaining: float,
@@ -59,18 +61,18 @@ class Strategy:
     def __init__(self) -> None:
         time.sleep(20)
 
-    def on_trade_update(self, ticker: str, side: str, price: float, quantity: float) -> None:
+    def on_trade_update(self, ticker: Ticker, side: Side, price: float, quantity: float) -> None:
         pass
 
     def on_orderbook_update(
-        self, ticker: str, side: str, price: float, quantity: float
+        self, ticker: Ticker, side: Side, price: float, quantity: float
     ) -> None:
         pass
 
     def on_account_update(
         self,
-        ticker: str,
-        side: str,
+        ticker: Ticker,
+        side: Side,
         price: float,
         quantity: float,
         capital_remaining: float,
@@ -82,14 +84,14 @@ const std::string missing_on_trade_update_algo = R"(class Strategy:
     def __init__(self) -> None:
         pass
     def on_orderbook_update(
-        self, ticker: str, side: str, price: float, quantity: float
+        self, ticker: Ticker, side: Side, price: float, quantity: float
     ) -> None:
         pass
 
     def on_account_update(
         self,
-        ticker: str,
-        side: str,
+        ticker: Ticker,
+        side: Side,
         price: float,
         quantity: float,
         capital_remaining: float,
@@ -101,12 +103,12 @@ const std::string missing_on_orderbook_update_algo = R"(class Strategy:
     def __init__(self) -> None:
         pass
 
-    def on_trade_update(self, ticker: str, side: str, price: float, quantity: float) -> None:
+    def on_trade_update(self, ticker: Ticker, side: Side, price: float, quantity: float) -> None:
         pass
     def on_account_update(
         self,
-        ticker: str,
-        side: str,
+        ticker: Ticker,
+        side: Side,
         price: float,
         quantity: float,
         capital_remaining: float,
@@ -118,10 +120,10 @@ const std::string missing_on_account_update_algo = R"(class Strategy:
     def __init__(self) -> None:
         pass
         
-    def on_trade_update(self, ticker: str, side: str, price: float, quantity: float) -> None:
+    def on_trade_update(self, ticker: Ticker, side: Side, price: float, quantity: float) -> None:
         pass
     def on_orderbook_update(
-        self, ticker: str, side: str, price: float, quantity: float
+        self, ticker: Ticker, side: Side, price: float, quantity: float
     ) -> None:
         pass
 )";
@@ -130,23 +132,13 @@ TEST_F(IntegrationLinterTest, basic)
 {
     auto lint_result =
         manager.spawn_client(basic_algo, nutc::spawning::AlgoLanguage::Python);
+    std::cout << lint_result.message << "\n";
     ASSERT_TRUE(lint_result.success);
-}
-
-TEST_F(IntegrationLinterTest, invalidSideArg)
-{
-    auto lint_result = manager.spawn_client(
-        incorrect_arguments_algo, nutc::spawning::AlgoLanguage::Python
-    );
-    ASSERT_FALSE(lint_result.success);
-    ASSERT_TRUE(
-        lint_result.message.find("Side should be BUY or SELL") != std::string::npos
-    );
 }
 
 TEST_F(IntegrationLinterTest, timeout)
 {
-	// TODO: complete
+    // TODO: complete
     return;
     auto lint_result =
         manager.spawn_client(timeout_algo, nutc::spawning::AlgoLanguage::Python);

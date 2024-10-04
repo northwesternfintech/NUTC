@@ -49,12 +49,9 @@ get_temp_file()
 namespace nutc::lint {
 
 CppRuntime::CppRuntime(
-    std::string algo,
-    LimitOrderFunction limit_order,
-    MarketOrderFunction market_order,
+    std::string algo, LimitOrderFunction limit_order, MarketOrderFunction market_order,
     CancelOrderFunction cancel_order
-) :
-    Runtime(std::move(algo), limit_order, market_order, cancel_order)
+) : Runtime(std::move(algo), limit_order, market_order, cancel_order)
 {}
 
 CppRuntime::~CppRuntime()
@@ -104,44 +101,35 @@ CppRuntime::init()
 
 void
 CppRuntime::fire_on_trade_update(
-    std::string ticker, std::string side, double price, double quantity
+    common::Ticker ticker, common::Side side, double price, double quantity
 ) const
 {
     on_trade_update_func_(
-        strategy_object_,
-        ticker,
-        side,
-        static_cast<double>(quantity),
+        strategy_object_, ticker, side, static_cast<double>(quantity),
         static_cast<double>(price)
     );
 }
 
 void
 CppRuntime::fire_on_orderbook_update(
-    std::string ticker, std::string side, double price, double quantity
+    common::Ticker ticker, common::Side side, double price, double quantity
 ) const
 {
     on_orderbook_update_func_(
-        strategy_object_,
-        ticker,
-        side,
-        static_cast<double>(quantity),
+        strategy_object_, ticker, side, static_cast<double>(quantity),
         static_cast<double>(price)
     );
 }
 
 void
 CppRuntime::fire_on_account_update(
-    std::string ticker, std::string side, double price, double quantity, double capital
+    common::Ticker ticker, common::Side side, double price, double quantity,
+    double capital
 ) const
 {
     on_account_update_func_(
-        strategy_object_,
-        ticker,
-        side,
-        static_cast<double>(quantity),
-        static_cast<double>(price),
-        static_cast<double>(capital)
+        strategy_object_, ticker, side, static_cast<double>(quantity),
+        static_cast<double>(price), static_cast<double>(capital)
     );
 }
 
