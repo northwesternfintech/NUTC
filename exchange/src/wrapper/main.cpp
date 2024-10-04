@@ -3,7 +3,7 @@
 #include "wrapper/config/argparse.hpp"
 #include "wrapper/messaging/exchange_communicator.hpp"
 #include "wrapper/runtime/cpp/cpp_runtime.hpp"
-#include "wrapper/util/logging.hpp"
+#include "common/logging/logging.hpp"
 #include "wrapper/util/resource_limits.hpp"
 
 #include <boost/algorithm/string/trim.hpp>

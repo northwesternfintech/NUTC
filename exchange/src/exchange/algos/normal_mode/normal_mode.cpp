@@ -2,7 +2,7 @@
 
 #include "common/util.hpp"
 #include "exchange/curl/curl.hpp"
-#include "exchange/logging.hpp"
+#include "common/logging/logging.hpp"
 #include "exchange/traders/trader_types/algo_trader.hpp"
 #include "exchange/wrappers/creation/rmq_wrapper_init.hpp"
 

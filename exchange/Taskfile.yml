@@ -127,6 +127,7 @@ tasks:
   run-itest:
     dir: '{{if eq .RELEASE_BUILD "false"}}.{{else}}build{{end}}'
     vars:
+      LINTER_SPAWNER_RELATIVE_PATH: './build{{if eq .RELEASE_BUILD "false"}}/dev{{end}}/LINTER_spawner'
       WRAPPER_RELATIVE_PATH: './build{{if eq .RELEASE_BUILD "false"}}/dev{{end}}/WRAPPER'
       DEV_TEST_FLAGS: '--timeout 2 --preset=dev'
       RELEASE_TEST_FLAGS: '--output-on-failure --no-tests=error --timeout 10 -C Release'
@@ -134,5 +135,6 @@ tasks:
     env:
       NUTC_CPP_TEMPLATE_PATH: 'test_algos/cpp/template.cpp'
       NUTC_WRAPPER_BINARY_PATH: '{{.PWD}}/{{.WRAPPER_RELATIVE_PATH}}'
+      NUTC_LINTER_SPAWNER_BINARY_PATH: '{{.PWD}}/{{.LINTER_SPAWNER_RELATIVE_PATH}}'
     cmds:
       - ctest -j 4 {{.TEST_FLAGS}} -R "Integration*" 
