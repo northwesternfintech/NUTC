@@ -338,6 +338,9 @@ target_link_libraries(EXCHANGE_exe PRIVATE COMMON_lib)
 target_link_libraries(LINTER_lib PRIVATE COMMON_lib)
 target_link_libraries(LINTER_exe PUBLIC COMMON_lib)
 
+target_link_libraries(LINTER_spawner_lib PRIVATE COMMON_lib)
+target_link_libraries(LINTER_spawner_exe PUBLIC COMMON_lib)
+
 target_link_libraries(WRAPPER_lib PUBLIC COMMON_lib)
 target_link_libraries(WRAPPER_exe PRIVATE COMMON_lib)
 
