@@ -1,8 +1,10 @@
 #pragma once
 #include "common/types/decimal.hpp"
+#include "common/types/ticker.hpp"
 #include "exchange/bots/bot_container.hpp"
 #include "exchange/config/dynamic/ticker_config.hpp"
 #include "exchange/orders/orderbook/composite_orderbook.hpp"
+#include "exchange/theo/brownian.hpp"
 #include "exchange/traders/trader_container.hpp"
 
 #include <absl/hash/hash.h>
@@ -15,9 +17,15 @@ namespace nutc::exchange {
  */
 class TickerData {
     CompositeOrderBook limit_orderbook_;
+    BrownianMotion theo_generator_; // NOLINT
     std::vector<BotContainer> bot_containers_;
 
 public:
+    explicit TickerData(TraderContainer& traders, const ticker_config& config) :
+        limit_orderbook_{config.TICKER}, theo_generator_{config.STARTING_PRICE},
+        bot_containers_{create_bot_containers(traders, config.TICKER, config.BOTS)}
+    {}
+
     explicit TickerData(common::Ticker ticker) : limit_orderbook_{ticker} {}
 
     CompositeOrderBook&
@@ -36,32 +44,29 @@ public:
     generate_bot_orders()
     {
         auto midprice = get_orderbook().get_midprice();
+        auto theo = fabs(theo_generator_.generate_next_magnitude());
         std::ranges::for_each(bot_containers_, [&](auto& bot_container) {
-            bot_container.generate_orders(midprice);
+            bot_container.generate_orders(midprice, theo);
         });
     }
 
-    void
-    set_bot_config(TraderContainer& traders, const ticker_config& config)
+    common::decimal_price
+    get_theo() const
     {
-        bot_containers_ = create_bot_containers(
-            traders, config.TICKER, config.STARTING_PRICE, config.BOTS
-        );
+        return theo_generator_.get_magnitude();
     }
 
 private:
     static std::vector<BotContainer>
     create_bot_containers(
         TraderContainer& trader_container, common::Ticker ticker,
-        common::decimal_price starting_price, const std::vector<bot_config>& configs
+        const std::vector<bot_config>& configs
     )
     {
         std::vector<BotContainer> bot_containers;
         bot_containers.reserve(configs.size());
         for (const bot_config& bot_config : configs) {
-            bot_containers.emplace_back(
-                ticker, starting_price, trader_container, bot_config
-            );
+            bot_containers.emplace_back(ticker, trader_container, bot_config);
         }
         return bot_containers;
     }

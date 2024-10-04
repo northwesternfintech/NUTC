@@ -22,11 +22,12 @@ struct price_level {
 
 // TODO: parameterize
 constexpr double BASE_SPREAD = 0.16;
-constexpr uint8_t LEVELS = 3;
+constexpr uint8_t LEVELS = 4;
 constexpr std::array<price_level, LEVELS> PRICE_LEVELS{
-    price_level{BASE_SPREAD + .00, 1.0 / 2},
-    price_level{BASE_SPREAD + .05, 1.0 / 3},
-    price_level{BASE_SPREAD + .10, 1.0 / 6}
+    price_level{BASE_SPREAD + .00, 1.0 / 2 },
+    price_level{BASE_SPREAD + .05, 1.0 / 3 },
+    price_level{BASE_SPREAD + .10, 1.0 / 8 },
+    price_level{BASE_SPREAD + .15, 1.0 / 24}
 };
 
 } // namespace
@@ -34,7 +35,7 @@ constexpr std::array<price_level, LEVELS> PRICE_LEVELS{
 namespace nutc::exchange {
 
 void
-MarketMakerBot::place_orders(Side side, decimal_price theo, decimal_price spread_offset)
+MarketMakerBot::place_orders_(Side side, decimal_price theo, decimal_price spread_offset)
 {
     // Approximation
     common::decimal_quantity total_quantity = {
@@ -82,9 +83,10 @@ MarketMakerBot::take_action(const shared_bot_state& state)
     decimal_price spread_offset = 0.0;
 
     decimal_price lean = calculate_lean_percent(state);
-    decimal_price theo = state.THEO - (lean * 10.0) + generate_gaussian_noise(0, .05);
 
-    place_orders(Side::buy, theo, spread_offset);
-    place_orders(Side::sell, theo, spread_offset);
+    decimal_price theo = state.THEO - (lean * 1.0) + generate_gaussian_noise(0, .05);
+
+    place_orders_(Side::buy, theo, spread_offset);
+    place_orders_(Side::sell, theo, spread_offset);
 }
 } // namespace nutc::exchange

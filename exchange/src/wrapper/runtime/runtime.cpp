@@ -11,7 +11,7 @@ Runtime::process_message(start_time&)
 
 template <>
 void
-Runtime::process_message(tick_update& tick_update)
+Runtime::process_message(tick_update&& tick_update)
 {
     std::ranges::for_each(tick_update.ob_updates, [&](const position& u) {
         fire_on_orderbook_update(u.ticker, u.side, u.price, u.quantity);
@@ -39,8 +39,7 @@ void
 Runtime::main_event_loop()
 {
     while (true) {
-        auto data = communicator_.consume_message<start_tick_variant_t>();
-        std::visit([this](auto message) { process_message(message); }, std::move(data));
+        process_message(communicator_.consume_tick_update());
     }
 }
 } // namespace nutc::wrapper

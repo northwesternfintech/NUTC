@@ -68,6 +68,12 @@ BrownianMotion::generate_market_tick_()
     return delta;
 }
 
+bool
+BrownianMotion::market_event_ongoing_() const
+{
+    return event_ticks_remaining_ > 0;
+}
+
 double
 BrownianMotion::generate_nonmarket_tick_()
 {
@@ -85,14 +91,11 @@ BrownianMotion::should_start_new_market_event_()
 double
 BrownianMotion::generate_next_magnitude()
 {
-    bool market_event_ongoing = event_ticks_remaining_ > 0;
-
-    if (!market_event_ongoing && should_start_new_market_event_()) {
+    if (!market_event_ongoing_() && should_start_new_market_event_()) {
         config_new_market_event_();
-        market_event_ongoing = true;
     }
 
-    if (market_event_ongoing) {
+    if (market_event_ongoing_()) {
         event_ticks_remaining_--;
         cur_magnitude_ += generate_market_tick_();
         return fabs(cur_magnitude_);
@@ -100,6 +103,7 @@ BrownianMotion::generate_next_magnitude()
 
     // Handle as a normal tick
     cur_magnitude_ += generate_nonmarket_tick_();
+    assert(fabs(cur_magnitude_) < 1000);
     return fabs(cur_magnitude_);
 }
 

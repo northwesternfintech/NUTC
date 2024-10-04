@@ -57,6 +57,7 @@ export async function POST(req: Request) {
     if (!submission_response.ok) {
       console.log("Failed to lint/sandbox");
     }
+    console.log(JSON.stringify(await submission_response.json()));
     return submission_response;
   } catch (error) {
     console.log(error);

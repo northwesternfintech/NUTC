@@ -1,7 +1,6 @@
 #pragma once
 #include "common/types/decimal.hpp"
 #include "exchange/config/dynamic/ticker_config.hpp"
-#include "exchange/theo/brownian.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "exchange/traders/trader_types/bot_trader.hpp"
 #include "shared_bot_state.hpp"
@@ -14,27 +13,17 @@ namespace nutc::exchange {
  */
 class BotContainer {
     using BotVector = std::vector<std::shared_ptr<BotTrader>>;
-    BrownianMotion theo_generator_;
     VarianceCalculator variance_calculator_;
 
     BotVector bots_{};
 
 public:
-    void generate_orders(common::decimal_price midprice);
+    void generate_orders(common::decimal_price midprice, common::decimal_price theo);
 
     BotContainer(
-        common::Ticker ticker, common::decimal_price starting_price,
-        TraderContainer& trader_container, bot_config bots
-    ) :
-        theo_generator_(starting_price),
-        bots_(create_bots(trader_container, ticker, bots))
+        common::Ticker ticker, TraderContainer& trader_container, bot_config bots
+    ) : bots_(create_bots(trader_container, ticker, bots))
     {}
-
-    common::decimal_price
-    get_theo() const
-    {
-        return theo_generator_.get_magnitude();
-    }
 
     double
     get_variance() const

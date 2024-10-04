@@ -81,6 +81,14 @@ TickerMetricsPusher::report_ticker_stats(TickerContainer& tickers)
         }
     };
 
+    auto log_theo = [&](common::Ticker ticker, TickerData& info) {
+        ticker_theo
+            .Add({
+                {"ticker", common::to_string(ticker)}
+        })
+            .Set(double{(info.get_theo())});
+    };
+
     // auto log_variance = [&](common::Ticker ticker, const TickerData& info) {
     //     ticker_midprice_variance_gauge
     //         .Add({
@@ -92,6 +100,7 @@ TickerMetricsPusher::report_ticker_stats(TickerContainer& tickers)
     for (auto [ticker, info] : tickers) {
         log_midprice(ticker, info);
         log_best_ba(ticker, info);
+        log_theo(ticker, info);
         // log_variance(ticker, info);
     }
 }
@@ -153,14 +162,14 @@ TickerMetricsPusher::report_trader_stats(const TickerContainer& tickers)
 
         per_trader_pnl_gauge
             .Add({
-                {"trader_type", trader.get_type()},
                 {"id",          trader.get_id()  },
+                {"trader_type", trader.get_type()},
         })
             .Set(pnl);
         per_trader_capital_gauge
             .Add({
-                {"trader_type", trader.get_type()},
                 {"id",          trader.get_id()  },
+                {"trader_type", trader.get_type()},
         })
             .Set(capital);
     };

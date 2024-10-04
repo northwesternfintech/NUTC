@@ -41,11 +41,11 @@ public:
         return TYPE;
     }
 
-    decimal_price calculate_lean_percent(const shared_bot_state& state);
+    static decimal_price calculate_lean_percent(const shared_bot_state& state);
 
 private:
     void
-    place_orders(common::Side side, decimal_price theo, decimal_price spread_offset);
+    place_orders_(common::Side side, decimal_price theo, decimal_price spread_offset);
 };
 
 } // namespace nutc::exchange

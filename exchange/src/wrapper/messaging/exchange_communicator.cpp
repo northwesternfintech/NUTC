@@ -35,6 +35,12 @@ ExchangeCommunicator::consume_algorithm()
     return algorithm;
 }
 
+common::tick_update
+ExchangeCommunicator::consume_tick_update()
+{
+    return consume_message<common::tick_update>();
+}
+
 template <typename T>
 T
 ExchangeCommunicator::consume_message()

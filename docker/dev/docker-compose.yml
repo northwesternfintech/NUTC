@@ -65,7 +65,7 @@ services:
     - GF_AUTH_ANONYMOUS_ORG_NAME=MAIN
     - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
     volumes:
-      - ../../exchange/docker/sandbox/grafana_data:/var/lib/grafana
+      - ../../exchange/docker/dev/grafana_data:/var/lib/grafana
       # - /var/lib/grafana/grafana.db
       # - /var/lib/grafana/alerting
 
