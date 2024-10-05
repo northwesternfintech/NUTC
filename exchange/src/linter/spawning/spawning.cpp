@@ -25,8 +25,11 @@ LintProcessManager::spawner_binary_path()
     }
 
     static const std::filesystem::path spawner_binary_path{spawner_binary_location};
-    if (!std::filesystem::exists(spawner_binary_path))
-        throw std::runtime_error("File at NUTC_SPAWNER_BINARY_PATH does not exist");
+    if (!std::filesystem::exists(spawner_binary_path)) {
+        throw std::runtime_error(
+            fmt::format("File at {} does not exist", LINTER_SPAWNER_BINARY_ENV_VAR)
+        );
+    }
 
     return spawner_binary_path;
 }
