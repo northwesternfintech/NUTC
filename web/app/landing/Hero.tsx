@@ -29,13 +29,15 @@ export default function Hero() {
           />
         </div>
         <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
-          <div className="hidden sm:mb-8 sm:flex sm:justify-center">
-            <div className="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-400 ring-1 ring-white/10 hover:ring-white/20">
-              Applications open for Fall 2024.{" "}
-              <a href="/register" className="font-semibold text-white">
-                <span className="absolute inset-0" aria-hidden="true" />
-                Apply <span aria-hidden="true">&rarr;</span>
-              </a>
+          <div className="hidden">
+            <div className="hidden sm:mb-8 sm:flex sm:justify-center">
+              <div className="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-400 ring-1 ring-white/10 hover:ring-white/20">
+                Applications open for Fall 2024.{" "}
+                <a href="/register" className="font-semibold text-white">
+                  <span className="absolute inset-0" aria-hidden="true" />
+                  Apply <span aria-hidden="true">&rarr;</span>
+                </a>
+              </div>
             </div>
           </div>
           <div className="text-center">

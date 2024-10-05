@@ -16,10 +16,11 @@ export default async function DashOrRegister() {
       <a
         href="/register"
         className="text-md font-semibold leading-6 text-white">
-        Apply <span aria-hidden="true">&rarr;</span>
+        Sign in <span aria-hidden="true">&rarr;</span>
       </a>
     );
   }
+  // TODO: Change above to "Apply" when apps reopen
 
   return (
     <a href="/dash" className="text-md font-semibold leading-6 text-white">
