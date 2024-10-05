@@ -61,8 +61,8 @@ export default function SubmissionForm(props: { user: any }) {
     });
 
   const onSubmit: SubmitHandler<Inputs> = async data => {
-    Swal.fire({ title: "Submissions not yet open", text: "Check back October 6th" });
-    return;
+    // Swal.fire({ title: "Submissions not yet open", text: "Check back October 6th" });
+    // return;
     const responsePromise = fetch("/api/protected/db/user/createAlgo", {
       method: "POST",
       body: JSON.stringify(data),
@@ -78,24 +78,21 @@ export default function SubmissionForm(props: { user: any }) {
     Swal.showLoading();
 
     const response = await responsePromise;
-    Swal.close();
     if (!response.ok) {
+      Swal.fire({ title: "Error", icon: "error", text: "Server error. Please contact the nuft team in the piazza" });
+      return;
+    }
+    Swal.close();
+    var { success, message } = await response.json();
+    message = message.replace(/\\n/g, "<br />");
+    if (!success) {
       Swal.fire({
-        title: "Error",
+        title: "Compilation/Linting Error",
         icon: "error",
-        text: "An error occurred",
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 4000,
-        timerProgressBar: true,
-        didOpen: toast => {
-          toast.addEventListener("mouseenter", Swal.stopTimer);
-          toast.addEventListener("mouseleave", Swal.resumeTimer);
-        },
+        html: message,
+        width: 800,
+        showConfirmButton: true,
       });
-      const errMsg = await response.text();
-      alert(errMsg);
     } else {
       Swal.fire({
         title: "Linting complete!",
@@ -178,8 +175,6 @@ export default function SubmissionForm(props: { user: any }) {
     const files = e.dataTransfer.files;
     handleAlgoChange(files[0]);
   };
-
-  console.log("key", algoFileS3Key);
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-24 pt-12 sm:px-6 sm:pb-32 sm:pt-16 lg:px-8">

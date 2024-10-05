@@ -17,7 +17,7 @@ pub struct LinterResponse {
 
 #[derive(Deserialize, Debug)]
 struct LintResult {
-    lint_success: bool,
+    success: bool,
     message: String,
 }
 
@@ -62,8 +62,8 @@ async fn handle_algo_submission(
 
     let (algo_id, language) = data.into_inner();
 
-    let s3_endpoint = std::env::var("INTERNAL_S3_ENDPOINT")
-        .expect("env variable `INTERNAL_S3_ENDPOINT` should be set");
+    let s3_endpoint =
+        std::env::var("S3_ENDPOINT").expect("env variable `S3_ENDPOINT` should be set");
     let algo_url = format!("{}/nutc/{}", s3_endpoint, algo_id);
 
     let linter_url = format!(
@@ -94,14 +94,14 @@ async fn handle_algo_submission(
         tracing::error!("failed to update linter status in database, {:?}", e);
         return HttpResponse::BadGateway().finish();
     }
-    if linter_response.lint_success {
-        tracing::info!("linting success now requesting sandbox");
+    if linter_response.success {
+        tracing::info!("Linting succeeded, now requesting sandbox");
     } else {
         // forward the error message from the linter, and add something in the response
         // to indicate that the linter Failed
         tracing::error!("linting failed: {}", linter_response.message);
         return HttpResponse::Ok()
-            .json(json!({"status": "lint failure", "message": linter_response.message}));
+            .json(json!({"success": false, "message": linter_response.message}));
     }
 
     // todo: this function shouldnt return a http request
@@ -132,17 +132,19 @@ async fn request_sandbox(algo_id: String, algo_url: String, language: String) ->
 
     match sandbox_response {
         Ok(response) => {
-            let body = response.text().await;
-            tracing::info!(
-                "sandbox response: {}",
-                body.unwrap_or("failed to decode sandbox response".into())
-            );
-            return HttpResponse::Ok().finish();
+            let text_body = response.text().await;
+            let text = text_body.unwrap();
+            tracing::info!("sandbox response: {}", text);
+            return HttpResponse::Ok()
+                .content_type("application/json")
+                .body(text);
         }
         Err(err) => {
             tracing::error!("failed to request sandbox {:#?}", err);
             tracing::error!("someting went wrong requesting to sandbox");
-            return HttpResponse::BadGateway().finish();
+            return HttpResponse::BadGateway()
+                .content_type("application/json")
+                .body("{\"success\": false}");
         }
     }
 }

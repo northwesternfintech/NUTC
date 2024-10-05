@@ -1,7 +1,7 @@
 #include "crow.hpp"
 
-#include "linter/fetching/fetching.hpp"
 #include "common/logging/logging.hpp"
+#include "linter/fetching/fetching.hpp"
 #include "linter/spawning/spawning.hpp"
 
 namespace nutc {
@@ -59,7 +59,7 @@ get_server_thread()
             auto algo_code = client::storage_request(algo_url);
             if (!algo_code.has_value()) {
                 crow::json::wvalue response = crow::json::wvalue({
-                    {"lint_success", false                },
+                    {"success", false                },
                     {"message", "Algo file not found"}
                 });
 
@@ -72,7 +72,7 @@ get_server_thread()
             auto lint_res =
                 spawner_manager.spawn_client(algo_code.value(), algo_language);
             crow::json::wvalue response({
-                {"lint_success", lint_res.success                                 },
+                {"success", lint_res.success                                 },
                 {"message", client::replaceDisallowedValues(lint_res.message)}
             });
 

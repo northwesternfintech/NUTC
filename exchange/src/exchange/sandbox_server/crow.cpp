@@ -45,10 +45,20 @@ CrowServer::CrowServer() :
                                              : common::AlgoLanguage::cpp;
                     std::string algorithm_data = req.body;
                     add_pending_trader_(algo_id, language_enum, algorithm_data);
+                    crow::json::wvalue response_json({
+                        {"success", true},
+                        {"message", "Algorithm Successfully Submitted"  }
+                    });
+                    res.body = response_json.dump();
                     return res;
                 } catch (const std::exception& e) {
                     log_e(sandbox_server, "Failed to spawn algorithm: {}", e.what());
-                    return crow::response(500);
+                    crow::json::wvalue response_json({
+                        {"success", false   },
+                        {"message", e.what()}
+                    });
+                    res.body = response_json.dump();
+                    return crow::response(500, e.what());
                 }
             }
         );

@@ -47,7 +47,6 @@ export async function POST(req: Request) {
     });
 
     const url = `${process.env.WEBSERVER_INTERNAL_ENDPOINT}/submit/${algo.algoFileS3Key}/${algo.language}`;
-    console.log("Fetching " + url);
     const submission_response = await fetch(
       url,
       {
@@ -60,10 +59,11 @@ export async function POST(req: Request) {
     if (!submission_response.ok) {
       console.log("Failed to lint/sandbox");
     }
-    const resp = await submission_response.text();
-    console.log(resp);
+    const { success, message } = await submission_response.json();
+    console.log("Success state: " + success);
+    console.log("Lint message: " + message);
     return NextResponse.json({
-      message: "Linter response: " + resp
+      success, message
     }, { status: 200 });
   } catch (error) {
     console.log(error);

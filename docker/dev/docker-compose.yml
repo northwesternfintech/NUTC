@@ -20,7 +20,7 @@ services:
     image: nutc-webserver
     build:
       context: ../..
-      dockerfile: webserver/WebserverDockerfile
+      dockerfile: webserver/Dockerfile
     restart: unless-stopped
 
   linter:
