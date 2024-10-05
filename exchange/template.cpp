@@ -5,6 +5,8 @@
 // #include "template.hpp"
 
 #include <functional>
+#include <string>
+#include <cstdint>
 
 using PlaceMarketOrder = std::function<bool(Side, Ticker, float)>;
 using PlaceLimitOrder = std::function<std::int64_t(Side, Ticker, float, float, bool)>;

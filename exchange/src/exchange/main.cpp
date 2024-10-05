@@ -3,7 +3,7 @@
 #include "exchange/algos/algo_manager.hpp"
 #include "exchange/config/dynamic/argparse.hpp"
 #include "exchange/config/dynamic/config.hpp"
-#include "exchange/logging.hpp"
+#include "common/logging/logging.hpp"
 #include "exchange/matching_cycle/base/base_cycle.hpp"
 #include "exchange/matching_cycle/cycle_interface.hpp"
 #include "exchange/matching_cycle/dev/dev_cycle.hpp"

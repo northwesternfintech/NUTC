@@ -62,6 +62,7 @@ private:
     generate_norm_(double mean, double stdev, Signedness sign = Signedness::Either);
     double generate_uniform_(double low, double high);
     bool generate_bool_(double probability_of_true);
+	bool market_event_ongoing_() const;
 
     double
     generate_brownian_motion_(double mean, Signedness direction = Signedness::Either);

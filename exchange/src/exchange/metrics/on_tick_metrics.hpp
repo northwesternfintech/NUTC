@@ -24,6 +24,7 @@ class TickerMetricsPusher {
     Gauge ticker_midprice_gauge = create_gauge_("ticker_midprice");
     Gauge best_ba_gauge = create_gauge_("best_ba");
     Gauge ticker_midprice_variance_gauge = create_gauge_("ticker_midprice_variance");
+    Gauge ticker_theo = create_gauge_("ticker_theo");
     Counter matches_quantity_counter = create_counter_("matches_quantity_total");
     Counter orders_quantity_counter = create_counter_("orders_quantity_total");
     Counter cancellation_counter = create_counter_("order_cancellations_total");

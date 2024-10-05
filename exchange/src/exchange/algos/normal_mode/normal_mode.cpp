@@ -2,7 +2,7 @@
 
 #include "common/util.hpp"
 #include "exchange/curl/curl.hpp"
-#include "exchange/logging.hpp"
+#include "common/logging/logging.hpp"
 #include "exchange/traders/trader_types/algo_trader.hpp"
 #include "exchange/wrappers/creation/rmq_wrapper_init.hpp"
 
@@ -40,7 +40,8 @@ NormalModeAlgoInitializer::initialize_trader_container(
         std::string algo_id = user["latestAlgoId"].get<std::string>();
 
         try {
-            traders.add_trader<AlgoTrader>(common::RemoteAlgorithm{}, start_capital);
+			// TODO: add back
+            // traders.add_trader<AlgoTrader>(common::RemoteAlgorithm{}, start_capital);
             log_i(main, "Created user");
         } catch (const std::runtime_error& err) {
             log_w(main, "Failed to create user {}", user_id);

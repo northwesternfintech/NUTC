@@ -1,0 +1,130 @@
+# Full stack docker compose
+# Remove web/firebase components for prod
+
+version: '3'
+services:
+  sandbox:
+    image: nutc-exchange
+    build:
+      context: ../..
+      dockerfile: exchange/docker/sandbox/Dockerfile
+      args:
+        firebase_emulator: "false"
+    restart: unless-stopped
+    environment:
+      - NUTC_EXPOSE_METRICS=1
+    command: ["--sandbox"]
+
+    #port: 16124
+  webserver:
+    image: nutc-webserver
+    build:
+      context: ../..
+      dockerfile: webserver/WebserverDockerfile
+    restart: unless-stopped
+
+  linter:
+    image: nutc-linter
+    restart: unless-stopped
+    build:
+      context: ../..
+      dockerfile: exchange/docker/linter/Dockerfile
+      args:
+        firebase_emulator: "false"
+
+  # Exposed on port 9000
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ../../exchange/docker/sandbox/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=12h'
+    restart: unless-stopped
+
+  reverse-proxy:
+    image: nginx:latest
+    ports:
+      - "26389:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    restart: unless-stopped
+    depends_on:
+      - webserver
+      - grafana
+
+  grafana:
+    image: grafana/grafana
+    restart: unless-stopped
+    user: "${UID}:${GID}"
+    ports:
+      - "3000:3000"
+    environment:
+    - GF_SECURITY_ALLOW_EMBEDDING=true
+    - GF_AUTH_ANONYMOUS_ENABLED=true
+    - GF_AUTH_ANONYMOUS_ORG_NAME=MAIN
+    - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+    volumes:
+      - ../../exchange/docker/dev/grafana_data:/var/lib/grafana
+      # - /var/lib/grafana/grafana.db
+      # - /var/lib/grafana/alerting
+
+  web:
+    image: node:latest
+    restart: unless-stopped
+    working_dir: /app
+    environment:
+      - PORT=3001
+    volumes:
+      - ../../web:/app
+    command: ["npm", "run", "dev",]
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+
+  localstack:
+    image: localstack/localstack
+    restart: unless-stopped
+    ports:
+      - "4566:4566"
+      - "4571:4571"
+      - "8080:8080"
+    environment:
+      - SERVICES=s3
+      - DEFAULT_REGION=us-east-1
+      - DATA_DIR=/var/lib/localstack/data
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - S3_FORCE_PATH_STYLE=true
+    volumes:
+     - localstack:/var/lib/localstack
+
+  awscli:
+    image: amazon/aws-cli
+    environment:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: us-east-1
+    depends_on: 
+     - localstack
+    volumes:
+     - ../../web/dev/local-dev-setup.sh:/home/init.sh
+     - ../../web/dev/cors.json:/home/cors.json
+    entrypoint: /home/init.sh
+
+  postgres:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: nutc
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+  localstack:

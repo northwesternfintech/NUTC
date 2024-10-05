@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useRef } from "react";
 import {
   CheckIcon,
   PaperClipIcon,
@@ -17,10 +17,16 @@ import {
 } from "@headlessui/react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import { isNull } from "util";
 
 const CASES = [
   { id: 1, name: "HFT" },
   { id: 2, name: "Crypto Trading" },
+];
+
+const LANGUAGES = [
+  { id: 1, name: "Python" },
+  { id: 2, name: "C++" },
 ];
 
 function classNames(...classes: any) {
@@ -33,29 +39,46 @@ const CASE_DOCUMENT_URL =
 export default function SubmissionForm(props: { user: any }) {
   const router = useRouter();
   const [isDragOver, setDragOver] = useState(false);
+  const fileSubmitRef = useRef<HTMLInputElement>(null);
 
   type Inputs = {
     name: string;
     case: string;
+    language: string;
     description: string;
     algoFileS3Key: string;
   };
 
-  const { handleSubmit, register, watch, setValue } = useForm<Inputs>({
-    defaultValues: {
-      name: "",
-      case: "HFT",
-      description: "",
-      algoFileS3Key: "",
-    },
-  });
-
-  const onSubmit: SubmitHandler<Inputs> = async data => {
-    const response = await fetch("/api/protected/db/user/createAlgo", {
-      method: "POST",
-      body: JSON.stringify({ uid: props.user.sub, ...data }),
+  const { handleSubmit, register, watch, setValue, resetField } =
+    useForm<Inputs>({
+      defaultValues: {
+        name: "",
+        case: "HFT",
+        language: "Python",
+        description: "",
+        algoFileS3Key: "",
+      },
     });
 
+  const onSubmit: SubmitHandler<Inputs> = async data => {
+    Swal.fire({ title: "Submissions not yet open", text: "Check back October 6th" });
+    return;
+    const responsePromise = fetch("/api/protected/db/user/createAlgo", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+    Swal.fire({
+      title: "Algorithm submitted. Waiting for initial results...",
+      text: "This may take up to 30 seconds.",
+      icon: "info",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      allowEnterKey: false,
+    });
+    Swal.showLoading();
+
+    const response = await responsePromise;
+    Swal.close();
     if (!response.ok) {
       Swal.fire({
         title: "Error",
@@ -73,70 +96,38 @@ export default function SubmissionForm(props: { user: any }) {
       });
       const errMsg = await response.text();
       alert(errMsg);
-      return;
     } else {
       Swal.fire({
-        title: "Algorithm submitted. Waiting for initial results...",
-        text: "This may take up to 30 seconds.",
-        icon: "info",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        allowEnterKey: false,
-      });
-      Swal.showLoading();
-
-      const linterResponse = await fetch(
-        `${process.env.API_ENDPOINT}/webserver/submit/${props.user.sub}/${data.algoFileS3Key}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+        title: "Linting complete!",
+        text: "View results in the dashboard.",
+        icon: "success",
+        timer: 2000,
+        timerProgressBar: true,
+        willClose: () => {
+          window.location.href = "submissions/" + data.algoFileS3Key;
         },
-      );
-
-      if (linterResponse.ok) {
-        Swal.close();
-        Swal.fire({
-          title: "Linting complete!",
-          text: "View results in the dashboard.",
-          icon: "success",
-          timer: 2000,
-          timerProgressBar: true,
-          willClose: () => {
-            window.location.href = "submissions/" + data.algoFileS3Key;
-          },
-        });
-      } else {
-        if (response.status) {
-          Swal.fire({
-            icon: "error",
-            title: "Error linting algorithm",
-            text: "View results...",
-            timer: 4000,
-            timerProgressBar: true,
-            willClose: () => {
-              window.location.href = "submissions/" + data.algoFileS3Key;
-            },
-          });
-        } else {
-          Swal.fire({
-            icon: "error",
-            title:
-              "Your code timed out - if you don't see results on the submissions page within 2 minutes, contact NUTC dev support",
-          });
-        }
-      }
+      });
     }
+
   };
 
-  const [caseValue, algoFileS3Key] = watch(["case", "algoFileS3Key"]);
+  const [caseValue, languageValue, algoFileS3Key] = watch([
+    "case",
+    "language",
+    "algoFileS3Key",
+  ]);
 
   const handleAlgoChange = async (file: File) => {
     const fileExtension = file.name.split(".").pop()?.toLowerCase();
-    if (fileExtension !== "py") {
+
+    if (
+      (languageValue === "Python" && fileExtension !== "py") ||
+      (languageValue === "C++" &&
+        fileExtension !== "h" &&
+        fileExtension !== "hpp")
+    ) {
       Swal.fire({
-        title: "Please upload a Python file",
+        title: `Please upload a ${languageValue} file`,
         icon: "error",
         toast: true,
         position: "top-end",
@@ -187,6 +178,8 @@ export default function SubmissionForm(props: { user: any }) {
     const files = e.dataTransfer.files;
     handleAlgoChange(files[0]);
   };
+
+  console.log("key", algoFileS3Key);
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-24 pt-12 sm:px-6 sm:pb-32 sm:pt-16 lg:px-8">
@@ -296,6 +289,91 @@ export default function SubmissionForm(props: { user: any }) {
               )}
             </Listbox>
 
+            <Listbox
+              value={languageValue}
+              onChange={v => {
+                // clear the file input
+                if (fileSubmitRef.current) {
+                  fileSubmitRef.current.value = "";
+                }
+
+                setValue("algoFileS3Key", "");
+                setValue("language", v);
+              }}>
+              {({ open }) => (
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-cols items-center gap-x-1">
+                    <Label className="block text-sm font-medium leading-6 text-white">
+                      Language:
+                    </Label>
+                    <a href={CASE_DOCUMENT_URL} target="_blank">
+                      <QuestionMarkSVG className="w-4 h-4 opacity-90" />
+                    </a>
+                  </div>
+
+                  <div className="relative ring-white">
+                    <ListboxButton className="w-full cursor-default rounded-md bg-white/5 py-1.5 pl-3 pr-10 text-left text-white shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                      <span className="block truncate">{languageValue}</span>
+                      <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                        <ChevronUpDownIcon
+                          className="h-5 w-5 text-gray-400"
+                          aria-hidden="true"
+                        />
+                      </span>
+                    </ListboxButton>
+
+                    <Transition
+                      show={open}
+                      as={Fragment}
+                      leave="transition ease-in duration-100"
+                      leaveFrom="opacity-100"
+                      leaveTo="opacity-0">
+                      <ListboxOptions className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-gray-900 py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                        {LANGUAGES.map(languageOption => (
+                          <ListboxOption
+                            key={languageOption.id}
+                            value={languageOption.name}
+                            className={({ focus }) =>
+                              classNames(
+                                focus
+                                  ? "bg-indigo-600 text-white"
+                                  : "text-white",
+                                "relative cursor-default select-none py-2 pl-3 pr-9",
+                              )
+                            }>
+                            {({ selected, focus }) => (
+                              <>
+                                <span
+                                  className={classNames(
+                                    selected ? "font-semibold" : "font-normal",
+                                    "block truncate",
+                                  )}>
+                                  {languageOption.name}
+                                </span>
+
+                                {selected ? (
+                                  <span
+                                    className={classNames(
+                                      focus ? "text-white" : "text-indigo-600",
+                                      "absolute inset-y-0 right-0 flex items-center pr-4",
+                                    )}>
+                                    <CheckIcon
+                                      className="h-5 w-5"
+                                      aria-hidden="true"
+                                    />
+                                  </span>
+                                ) : null}
+                              </>
+                            )}
+                          </ListboxOption>
+                        ))}
+                      </ListboxOptions>
+                    </Transition>
+                  </div>
+                </div>
+              )}
+            </Listbox>
+
             <div className="flex flex-col gap-2">
               <label
                 htmlFor="description"
@@ -326,8 +404,8 @@ export default function SubmissionForm(props: { user: any }) {
                   algoFileS3Key
                     ? "mt-2 flex justify-center rounded-lg border border-solid border-green-400 px-6 py-10"
                     : isDragOver
-                    ? "mt-2 flex justify-center rounded-lg border border-solid border-indigo-500 px-6 py-10"
-                    : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"
+                      ? "mt-2 flex justify-center rounded-lg border border-solid border-indigo-500 px-6 py-10"
+                      : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"
                 }
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -351,6 +429,7 @@ export default function SubmissionForm(props: { user: any }) {
                       className="relative cursor-pointer rounded-md bg-gray-900 font-semibold text-white focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 focus-within:ring-offset-gray-900 hover:text-indigo-500">
                       <span>Upload a file</span>
                       <input
+                        ref={fileSubmitRef}
                         id="file-upload"
                         name="file-upload"
                         onChange={e => {
@@ -364,7 +443,9 @@ export default function SubmissionForm(props: { user: any }) {
                     <p className="pl-1">or drag and drop</p>
                   </div>
                   <p className="text-xs leading-5 text-gray-400">
-                    .py up to 100KB
+                    {languageValue === "Python"
+                      ? ".py up to 100KB"
+                      : ".h up to 100KB"}
                   </p>
                 </div>
               </div>

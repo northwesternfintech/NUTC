@@ -9,7 +9,7 @@ namespace nutc::exchange {
 void
 RetailBot::take_action(const shared_bot_state& state)
 {
-    static std::uniform_real_distribution<> dis{0.0, 1.0};
+    static std::uniform_real_distribution<> dis{0.0, 1};
 
     auto p_trade = common::decimal_price{1.0} - get_capital_utilization();
 

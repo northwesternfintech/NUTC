@@ -8,71 +8,141 @@ use tokio_postgres::NoTls;
 
 const LINTER_BASE_URL: &str = "http://linter:18081";
 const SANDBOX_BASE_URL: &str = "http://sandbox:18080";
+// const LINTER_BASE_URL: &str = "http://localhost:18081";
 
 #[derive(Deserialize, Debug)]
 pub struct LinterResponse {
     pub linting_status: i32,
 }
 
-#[tracing::instrument]
-#[post("/submit/{uid}/{algo_id}")]
-async fn linter(data: web::Path<(String, String)>) -> impl Responder {
-    let (uid, algo_id) = data.into_inner();
-    let client = Client::new();
+#[derive(Deserialize, Debug)]
+struct LintResult {
+    lint_success: bool,
+    message: String,
+}
 
-    let linter_url = format!("{}/?uid={}&algo_id={}", LINTER_BASE_URL, uid, algo_id);
+async fn set_linter_status(
+    algo_id: &String,
+    success: bool,
+    message: &String,
+    pool: &Pool,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let postgres_cient = pool.get().await?;
+
+    let query = if success {
+        r#"
+        UPDATE "algos"
+        SET "lintResults" = $1, "lintSuccessMessage" = $2
+        WHERE "algoFileS3Key" = $3
+    "#
+    } else {
+        r#"
+        UPDATE "algos"
+        SET "lintResults" = $1, "lintFailureMessage" = $2
+        WHERE "algoFileS3Key" = $3
+    "#
+    };
+
+    let success_message = if success { "success" } else { "failure" };
+
+    postgres_cient
+        .execute(query, &[&success_message, &message, &algo_id])
+        .await?;
+
+    Ok(())
+}
+
+#[tracing::instrument]
+#[post("/submit/{algo_id}/{language}")]
+async fn handle_algo_submission(
+    data: web::Path<(String, String)>,
+    db_pool: web::Data<Pool>,
+) -> impl Responder {
+    dotenv::dotenv().ok();
+
+    let (algo_id, language) = data.into_inner();
+
+    let s3_endpoint = std::env::var("INTERNAL_S3_ENDPOINT")
+        .expect("env variable `INTERNAL_S3_ENDPOINT` should be set");
+    let algo_url = format!("{}/nutc/{}", s3_endpoint, algo_id);
+
+    let linter_url = format!(
+        "{}/?algo_url={}&language={}",
+        LINTER_BASE_URL, algo_url, language
+    );
 
     tracing::info!("sending request to linter url {}", linter_url);
 
+    let client = Client::new();
     let linter_response = client.get(&linter_url).send().await;
 
-    match linter_response {
+    if linter_response.is_err() {
+        tracing::error!("failed to request linter");
+        return HttpResponse::BadGateway().finish();
+    }
+
+    let linter_response = linter_response.unwrap();
+
+    let linter_response = if let Ok(linter_response) = linter_response.json::<LintResult>().await {
+        linter_response
+    } else {
+        tracing::error!("failed to decode linter response");
+        return HttpResponse::BadGateway().finish();
+    };
+
+    if let Err(e) = set_linter_status(&algo_id, true, &linter_response.message, &db_pool).await {
+        tracing::error!("failed to update linter status in database, {:?}", e);
+        return HttpResponse::BadGateway().finish();
+    }
+    if linter_response.lint_success {
+        tracing::info!("linting success now requesting sandbox");
+    } else {
+        // forward the error message from the linter, and add something in the response
+        // to indicate that the linter Failed
+        tracing::error!("linting failed: {}", linter_response.message);
+        return HttpResponse::Ok()
+            .json(json!({"status": "lint failure", "message": linter_response.message}));
+    }
+
+    // todo: this function shouldnt return a http request
+    return request_sandbox(algo_id, algo_url, language).await;
+}
+
+async fn request_sandbox(algo_id: String, algo_url: String, language: String) -> HttpResponse {
+    let client = Client::new();
+    let sandbox_url = format!("{}/sandbox/{}/{}", SANDBOX_BASE_URL, algo_id, language);
+    tracing::info!("linting success now requesting sandbox {}", sandbox_url);
+
+    // download the algo file
+    let algo_data = client
+        .get(algo_url)
+        .send()
+        .await
+        .unwrap()
+        .bytes()
+        .await
+        .unwrap();
+
+    let sandbox_response = client
+        .post(&sandbox_url)
+        .header("Content-Type", "application/json")
+        .body(algo_data)
+        .send()
+        .await;
+
+    match sandbox_response {
         Ok(response) => {
-            if response.status().is_success() {
-                match response.json::<LinterResponse>().await {
-                    Ok(linting_response) => {
-                        // only call sandbox if linting is successful
-                        if linting_response.linting_status != 1 {
-                            tracing::info!("linting failed");
-                            return HttpResponse::BadRequest().finish();
-                        }
-
-                        tracing::info!("linting success, now requesting sandbox");
-                        let sandbox_url =
-                            format!("{}/sandbox/{}/{}", SANDBOX_BASE_URL, uid, algo_id);
-                        tracing::info!("linting success now requesting sandbox {}", sandbox_url);
-
-                        let sandbox_response = client.get(&sandbox_url).send().await;
-
-                        match sandbox_response {
-                            Ok(response) => {
-                                let body = response.text().await;
-                                tracing::info!(
-                                    "sandbox response: {}",
-                                    body.unwrap_or("failed to decode sandbox response".into())
-                                );
-                                HttpResponse::Ok().finish()
-                            }
-                            Err(err) => {
-                                tracing::error!("failed to request sandbox {:#?}", err);
-                                tracing::error!("someting went wrong requesting to sandbox");
-                                HttpResponse::BadGateway().finish()
-                            }
-                        }
-                    }
-                    Err(err) => {
-                        tracing::error!("failed to decode linter response {:#?}", err);
-                        return HttpResponse::BadRequest().finish();
-                    }
-                }
-            } else {
-                tracing::error!("linter response status isn't 200");
-                HttpResponse::BadGateway().finish()
-            }
+            let body = response.text().await;
+            tracing::info!(
+                "sandbox response: {}",
+                body.unwrap_or("failed to decode sandbox response".into())
+            );
+            return HttpResponse::Ok().finish();
         }
         Err(err) => {
-            tracing::error!("someting went wrong requesting to linter {:#?}", err);
-            HttpResponse::BadGateway().finish()
+            tracing::error!("failed to request sandbox {:#?}", err);
+            tracing::error!("someting went wrong requesting to sandbox");
+            return HttpResponse::BadGateway().finish();
         }
     }
 }
@@ -160,20 +230,16 @@ async fn get_all_user_algorithms(
 async fn main() -> std::io::Result<()> {
     dotenv::dotenv().ok();
 
-    let host =
-        std::env::var("WEBSERVER_DB_HOST").expect("env variable `WEBSERVER_DB_HOST` should be set");
-    let user =
-        std::env::var("WEBSERVER_DB_USER").expect("env variable `WEBSERVER_DB_USER` should be set");
-    let password = std::env::var("WEBSERVER_DB_PASSWORD")
-        .expect("env variable `WEBSERVER_DB_PASSWORD` should be set");
-    let dbname =
-        std::env::var("WEBSERVER_DB_NAME").expect("env variable `WEBSERVER_DB_NAME` should be set");
+    let host = std::env::var("PRISMA_DATABASE_URL")
+        .expect("env variable `WEBSERVER_DB_HOST` should be set");
+    let host_url = match host.find('?') {
+        Some(idx) => &host[..idx],
+        None => &host[..],
+    };
 
-    let mut pg_config = tokio_postgres::Config::new();
-    pg_config.host(host);
-    pg_config.user(user);
-    pg_config.password(password);
-    pg_config.dbname(dbname);
+    let pg_config = host_url
+        .parse::<tokio_postgres::Config>()
+        .expect("unable to parse DB url");
     let mgr_config = ManagerConfig {
         recycling_method: RecyclingMethod::Fast,
     };
@@ -198,6 +264,7 @@ async fn main() -> std::io::Result<()> {
         let cors = Cors::default()
             .allowed_origin("http://localhost:3000")
             .allowed_origin("http://localhost:3001")
+            .allowed_origin("http://desktop.tail78d9b.ts.net:3000")
             .allowed_origin("https://nutc.io")
             .allowed_origin("https://www.nutc.io")
             .allowed_methods(vec!["GET", "POST", "DELETE"])
@@ -211,7 +278,7 @@ async fn main() -> std::io::Result<()> {
             .supports_credentials();
         App::new()
             .app_data(web::Data::new(pool.clone()))
-            .service(linter)
+            .service(handle_algo_submission)
             .service(get_single_user_algorithm)
             .service(get_all_user_algorithms)
             .wrap(cors)

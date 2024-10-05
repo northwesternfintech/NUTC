@@ -10,22 +10,28 @@ export async function POST(req: Request) {
       !algo.name ||
       !algo.description ||
       !algo.case ||
-      !algo.algoFileS3Key ||
-      !algo.uid
+      !algo.language ||
+      !algo.algoFileS3Key
     ) {
       return new Response("Not all fields in algo added", { status: 402 });
     }
-
-    const session = await getSession();
-    if (!session?.user.sub || session.user.sub != algo.uid) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 402 });
+    if (algo.language == "C++") {
+      algo.language = "Cpp";
     }
 
+    const session = await getSession();
+    if (!session?.user.sub) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 402 });
+    }
+    const uid = session.user.sub;
+
+    // TODO: validation
     await prisma.algo.create({
       data: {
         name: algo.name,
         description: algo.description,
         case: algo.case,
+        language: algo.language,
         lintResults: "pending",
         algoFile: {
           connect: {
@@ -34,13 +40,31 @@ export async function POST(req: Request) {
         },
         user: {
           connect: {
-            uid: algo.uid,
+            uid
           },
         },
       },
     });
 
-    return NextResponse.json({ status: 200 });
+    const url = `${process.env.WEBSERVER_INTERNAL_ENDPOINT}/submit/${algo.algoFileS3Key}/${algo.language}`;
+    console.log("Fetching " + url);
+    const submission_response = await fetch(
+      url,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
+    if (!submission_response.ok) {
+      console.log("Failed to lint/sandbox");
+    }
+    const resp = await submission_response.text();
+    console.log(resp);
+    return NextResponse.json({
+      message: "Linter response: " + resp
+    }, { status: 200 });
   } catch (error) {
     console.log(error);
     return NextResponse.json({ message: error }, { status: 500 });

@@ -31,6 +31,8 @@ add_executable(NUTC_tests
   src/unit/types/decimal.cpp
   
   src/integration/tests/basic.cpp
+  src/integration/tests/linter_py_test.cpp
+  src/integration/tests/linter_cpp_test.cpp
   src/integration/tests/cancellation.cpp
   )
 
@@ -43,6 +45,7 @@ target_include_directories(
 target_link_libraries(
   NUTC_tests PRIVATE
   EXCHANGE_lib 
+  LINTER_lib
   COMMON_lib
   GTest::gtest_main
 )

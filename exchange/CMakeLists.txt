@@ -30,8 +30,6 @@ add_library(
     src/exchange/algos/normal_mode/normal_mode.cpp
     src/exchange/algos/algo_manager.cpp
     
-    src/exchange/logging.cpp
-
     src/exchange/curl/curl.cpp
     
     src/exchange/wrappers/handle/wrapper_handle.cpp
@@ -97,10 +95,6 @@ target_link_libraries(EXCHANGE_lib PUBLIC Crow::Crow)
 # Fmt
 find_package(fmt REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC fmt::fmt)
-
-# quill
-find_package(quill REQUIRED)
-target_link_libraries(EXCHANGE_lib PUBLIC quill::quill)
 
 # libcurl
 find_package(CURL REQUIRED)
@@ -180,7 +174,6 @@ add_library(
     src/wrapper/messaging/rate_limiter.cpp
 
     # Utils
-    src/wrapper/util/logging.cpp
     src/wrapper/config/argparse.cpp
 )
 
@@ -223,14 +216,103 @@ target_link_libraries(WRAPPER_exe PRIVATE Python3::Python)
 target_link_libraries(WRAPPER_exe PRIVATE boost::boost)
 target_link_libraries(WRAPPER_exe PRIVATE ${Python3_LIBRARIES})
 
+# ---- LINTER ----------
+add_library(
+	LINTER_lib OBJECT 
+
+    src/linter/fetching/fetching.cpp
+    src/linter/runtime/cpp/cpp_runtime.cpp
+    src/linter/runtime/python/python_runtime.cpp
+    src/linter/spawning/spawning.cpp
+    src/linter/crow/crow.cpp
+    # Utils
+)
+
+add_library(
+	LINTER_spawner_lib OBJECT
+
+    src/linter/lint/lint.cpp
+    src/linter/runtime/cpp/cpp_runtime.cpp
+    src/linter/runtime/python/python_runtime.cpp
+)
+
+target_include_directories(
+	LINTER_lib ${warning_guard}
+    PUBLIC
+    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
+)
+
+target_compile_features(LINTER_lib PUBLIC cxx_std_23)
+
+target_link_libraries(LINTER_lib PUBLIC fmt::fmt)
+target_link_libraries(LINTER_lib PUBLIC quill::quill)
+target_link_libraries(LINTER_lib PUBLIC CURL::libcurl)
+target_link_libraries(LINTER_lib PUBLIC glaze::glaze)
+target_link_libraries(LINTER_lib PUBLIC pybind11::pybind11)
+target_link_libraries(LINTER_lib PUBLIC Crow::Crow)
+target_link_libraries(LINTER_lib PUBLIC Python3::Python)
+target_link_libraries(LINTER_lib PUBLIC argparse::argparse)
+target_link_libraries(LINTER_lib PUBLIC boost::boost)
+
+target_include_directories(
+    LINTER_spawner_lib ${warning_guard}
+    PUBLIC
+    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
+)
+
+target_link_libraries(LINTER_spawner_lib PRIVATE quill::quill)
+target_link_libraries(LINTER_spawner_lib PRIVATE glaze::glaze)
+target_link_libraries(LINTER_spawner_lib PRIVATE pybind11::pybind11)
+target_link_libraries(LINTER_spawner_lib PRIVATE Python3::Python)
+target_link_libraries(LINTER_spawner_lib PRIVATE CURL::libcurl)
+target_link_libraries(LINTER_spawner_lib PRIVATE boost::boost)
+
+# ---- Declare main executable ----
+
+add_executable(LINTER_exe src/linter/main.cpp)
+add_executable(LINTER::exe ALIAS LINTER_exe)
+
+set_property(TARGET LINTER_exe PROPERTY OUTPUT_NAME LINTER)
+
+target_compile_features(LINTER_exe PRIVATE cxx_std_23)
+
+target_link_libraries(LINTER_exe PRIVATE LINTER_lib)
+target_link_libraries(LINTER_exe PRIVATE fmt::fmt)
+target_link_libraries(LINTER_exe PRIVATE quill::quill)
+
+target_link_libraries(LINTER_exe PRIVATE argparse::argparse)
+target_link_libraries(LINTER_exe PRIVATE CURL::libcurl)
+target_link_libraries(LINTER_exe PRIVATE glaze::glaze)
+target_link_libraries(LINTER_exe PRIVATE pybind11::pybind11)
+target_link_libraries(LINTER_exe PRIVATE Crow::Crow)
+target_link_libraries(LINTER_exe PRIVATE Python3::Python)
+
+# ---- Declare secondary (process spawning) executable ----
+
+add_executable(LINTER_spawner_exe src/linter/spawner/main.cpp)
+add_executable(LINTER_spawner::exe ALIAS LINTER_spawner_exe)
+
+set_property(TARGET LINTER_spawner_exe PROPERTY OUTPUT_NAME LINTER_spawner)
+
+target_compile_features(LINTER_spawner_exe PRIVATE cxx_std_23)
+
+target_link_libraries(LINTER_spawner_exe PRIVATE LINTER_spawner_lib)
+target_link_libraries(LINTER_spawner_exe PRIVATE CURL::libcurl)
+target_link_libraries(LINTER_spawner_exe PRIVATE pybind11::pybind11)
+target_link_libraries(LINTER_spawner_exe PRIVATE quill::quill)
+target_link_libraries(LINTER_spawner_exe PRIVATE glaze::glaze)
+target_link_libraries(LINTER_spawner_exe PRIVATE Python3::Python)
+
 # ---- COMMON ----------
 
 add_library(COMMON_lib OBJECT     
-    src/common/file_operations/file_operations.cpp
     src/common/firebase/firebase.cpp
+    src/common/file_operations/file_operations.cpp
     src/common/util.cpp
     src/common/types/decimal.cpp
     src/common/types/algorithm/local_algorithm.cpp
+    src/common/logging/logging.cpp
+    src/common/compilation/compile_cpp.cpp
 )
 
 target_include_directories(
@@ -238,6 +320,10 @@ target_include_directories(
     PUBLIC
     "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
 )
+
+# quill
+find_package(quill REQUIRED)
+target_link_libraries(COMMON_lib PUBLIC quill::quill)
 
 target_link_libraries(COMMON_lib PUBLIC fmt::fmt)
 target_link_libraries(COMMON_lib PUBLIC glaze::glaze)
@@ -248,6 +334,12 @@ target_link_libraries(COMMON_lib PRIVATE boost::boost)
 
 target_link_libraries(EXCHANGE_lib PUBLIC COMMON_lib)
 target_link_libraries(EXCHANGE_exe PRIVATE COMMON_lib)
+
+target_link_libraries(LINTER_lib PUBLIC COMMON_lib)
+target_link_libraries(LINTER_exe PRIVATE COMMON_lib)
+
+target_link_libraries(LINTER_spawner_lib PUBLIC COMMON_lib)
+target_link_libraries(LINTER_spawner_exe PRIVATE COMMON_lib)
 
 target_link_libraries(WRAPPER_lib PUBLIC COMMON_lib)
 target_link_libraries(WRAPPER_exe PRIVATE COMMON_lib)
@@ -263,6 +355,10 @@ if(lto_supported)
   set_target_properties(EXCHANGE_lib PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
   set_target_properties(EXCHANGE_exe PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
   set_target_properties(COMMON_lib PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+  set_target_properties(LINTER_exe PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+  set_target_properties(LINTER_lib PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+  set_target_properties(LINTER_spawner_lib PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+  set_target_properties(LINTER_spawner_exe PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
 else()
     message(WARNING "LTO is not supported: ${error}")
 endif()
@@ -276,7 +372,6 @@ endif()
 
 # ---- Developer mode ----
 if(NOT NUTC24_DEVELOPER_MODE)
-message("lol")
   return()
 elseif(NOT PROJECT_IS_TOP_LEVEL)
   message(

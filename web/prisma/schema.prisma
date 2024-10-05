@@ -25,7 +25,7 @@ enum ParticipantState {
 }
 
 model User {
-  uid              String           @id
+  uid              String           @id @unique
   email            String           @unique
   participantState ParticipantState @default(PRE_REGISTRATION)
   Resume           Resume[]
@@ -46,10 +46,11 @@ model Team {
 }
 
 model Algo {
-  algoFileS3Key      String  @id
-  name               String  @unique
+  algoFileS3Key      String  @id @unique
+  name               String  
   description        String
   case               String
+  language           String
   lintResults        String
   sandboxLogFileURL  String?
   lintFailureMessage String?
