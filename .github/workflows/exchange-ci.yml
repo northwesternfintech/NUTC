@@ -288,7 +288,7 @@ jobs:
       LLVM_DIR: '/usr/lib/llvm-18/lib/cmake/llvm'
       NUTC_WRAPPER_BINARY_PATH: ${{ github.workspace }}/exchange/build/WRAPPER
       NUTC_CPP_TEMPLATE_PATH: ${{ github.workspace }}/exchange/template.cpp
-      NUTC_LINTER_SPAWNER_BINARY_PATH: ${{ github.workspace }}/exchange/build/LINTER-spawner
+      NUTC_LINTER_SPAWNER_BINARY_PATH: ${{ github.workspace }}/exchange/build/LINTER_spawner
 
     steps:
     - uses: actions/checkout@v3

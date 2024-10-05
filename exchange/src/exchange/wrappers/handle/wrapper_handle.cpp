@@ -22,17 +22,22 @@ namespace nutc::exchange {
 const fs::path&
 WrapperHandle::wrapper_binary_path()
 {
+    static constexpr auto WRAPPER_BINARY_PATH_ENV_VAR = "NUTC_WRAPPER_BINARY_PATH";
     static const char* const wrapper_binary_location =
-        std::getenv("NUTC_WRAPPER_BINARY_PATH");
+        std::getenv(WRAPPER_BINARY_PATH_ENV_VAR);
 
     if (wrapper_binary_location == nullptr) [[unlikely]] {
-        throw std::runtime_error("NUTC_WRAPPER_BINARY_PATH environment variable not set"
+        throw std::runtime_error(
+            fmt::format("{} environment variable not set", WRAPPER_BINARY_PATH_ENV_VAR)
         );
     }
 
     static const fs::path wrapper_binary_path{wrapper_binary_location};
-    if (!fs::exists(wrapper_binary_path))
-        throw std::runtime_error("File at NUTC_WRAPPER_BINARY_PATH does not exist");
+    if (!fs::exists(wrapper_binary_path)) {
+        throw std::runtime_error(
+            fmt::format("File at {} does not exist", WRAPPER_BINARY_PATH_ENV_VAR)
+        );
+    }
 
     return wrapper_binary_path;
 }
