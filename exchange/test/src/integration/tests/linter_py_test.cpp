@@ -2,9 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include <iostream>
-
-class IntegrationLinterTest : public ::testing::Test {
+class IntegrationLinterPyTest : public ::testing::Test {
 protected:
     nutc::spawning::LintProcessManager manager;
 };
@@ -15,29 +13,6 @@ const std::string basic_algo = R"(class Strategy:
 
     def on_trade_update(self, ticker: Ticker, side: Side, price: float, quantity: float) -> None:
         pass
-
-    def on_orderbook_update(
-        self, ticker: Ticker, side: Side, price: float, quantity: float
-    ) -> None:
-        pass
-
-    def on_account_update(
-        self,
-        ticker: Ticker,
-        side: Side,
-        price: float,
-        quantity: float,
-        capital_remaining: float,
-    ) -> None:
-        pass
-)";
-
-const std::string incorrect_arguments_algo = R"(class Strategy:
-    def __init__(self) -> None:
-        pass
-
-    def on_trade_update(self, ticker: Ticker, side: Side, price: float, quantity: float) -> None:
-		place_limit_order(Side.BUY, Ticker.ETH, 5, 5)
 
     def on_orderbook_update(
         self, ticker: Ticker, side: Side, price: float, quantity: float
@@ -128,15 +103,14 @@ const std::string missing_on_account_update_algo = R"(class Strategy:
         pass
 )";
 
-TEST_F(IntegrationLinterTest, basic)
+TEST_F(IntegrationLinterPyTest, basic)
 {
     auto lint_result =
         manager.spawn_client(basic_algo, nutc::spawning::AlgoLanguage::Python);
-    std::cout << lint_result.message << "\n";
     ASSERT_TRUE(lint_result.success);
 }
 
-TEST_F(IntegrationLinterTest, timeout)
+TEST_F(IntegrationLinterPyTest, timeout)
 {
     // TODO: complete
     return;
@@ -149,7 +123,7 @@ TEST_F(IntegrationLinterTest, timeout)
     );
 }
 
-TEST_F(IntegrationLinterTest, invalidAlgo)
+TEST_F(IntegrationLinterPyTest, invalidAlgo)
 {
     std::string algo = R"(not_valid_python)";
     auto lint_result = manager.spawn_client(algo, nutc::spawning::AlgoLanguage::Python);
@@ -159,7 +133,7 @@ TEST_F(IntegrationLinterTest, invalidAlgo)
     );
 }
 
-TEST_F(IntegrationLinterTest, noStrategyClass)
+TEST_F(IntegrationLinterPyTest, noStrategyClass)
 {
     std::string algo = R"(import math)";
     auto lint_result = manager.spawn_client(algo, nutc::spawning::AlgoLanguage::Python);
@@ -170,7 +144,7 @@ TEST_F(IntegrationLinterTest, noStrategyClass)
     );
 }
 
-TEST_F(IntegrationLinterTest, missingRequiredFunction)
+TEST_F(IntegrationLinterPyTest, missingRequiredFunction)
 {
     auto lint_result = manager.spawn_client(
         missing_on_trade_update_algo, nutc::spawning::AlgoLanguage::Python

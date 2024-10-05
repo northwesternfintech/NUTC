@@ -242,7 +242,7 @@ target_include_directories(
     "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
 )
 
-target_compile_features(LINTER_lib PUBLIC cxx_std_20)
+target_compile_features(LINTER_lib PUBLIC cxx_std_23)
 
 target_link_libraries(LINTER_lib PUBLIC fmt::fmt)
 target_link_libraries(LINTER_lib PUBLIC quill::quill)
@@ -258,7 +258,6 @@ target_include_directories(
     LINTER_spawner_lib ${warning_guard}
     PUBLIC
     "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
-    "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/>"
 )
 
 target_link_libraries(LINTER_spawner_lib PRIVATE quill::quill)
@@ -275,7 +274,7 @@ add_executable(LINTER::exe ALIAS LINTER_exe)
 
 set_property(TARGET LINTER_exe PROPERTY OUTPUT_NAME LINTER)
 
-target_compile_features(LINTER_exe PRIVATE cxx_std_20)
+target_compile_features(LINTER_exe PRIVATE cxx_std_23)
 
 target_link_libraries(LINTER_exe PRIVATE LINTER_lib)
 target_link_libraries(LINTER_exe PRIVATE fmt::fmt)
@@ -295,7 +294,7 @@ add_executable(LINTER_spawner::exe ALIAS LINTER_spawner_exe)
 
 set_property(TARGET LINTER_spawner_exe PROPERTY OUTPUT_NAME LINTER_spawner)
 
-target_compile_features(LINTER_spawner_exe PRIVATE cxx_std_20)
+target_compile_features(LINTER_spawner_exe PRIVATE cxx_std_23)
 
 target_link_libraries(LINTER_spawner_exe PRIVATE LINTER_spawner_lib)
 target_link_libraries(LINTER_spawner_exe PRIVATE CURL::libcurl)
@@ -307,8 +306,8 @@ target_link_libraries(LINTER_spawner_exe PRIVATE Python3::Python)
 # ---- COMMON ----------
 
 add_library(COMMON_lib OBJECT     
-    src/common/file_operations/file_operations.cpp
     src/common/firebase/firebase.cpp
+    src/common/file_operations/file_operations.cpp
     src/common/util.cpp
     src/common/types/decimal.cpp
     src/common/types/algorithm/local_algorithm.cpp
@@ -336,11 +335,11 @@ target_link_libraries(COMMON_lib PRIVATE boost::boost)
 target_link_libraries(EXCHANGE_lib PUBLIC COMMON_lib)
 target_link_libraries(EXCHANGE_exe PRIVATE COMMON_lib)
 
-target_link_libraries(LINTER_lib PRIVATE COMMON_lib)
-target_link_libraries(LINTER_exe PUBLIC COMMON_lib)
+target_link_libraries(LINTER_lib PUBLIC COMMON_lib)
+target_link_libraries(LINTER_exe PRIVATE COMMON_lib)
 
-target_link_libraries(LINTER_spawner_lib PRIVATE COMMON_lib)
-target_link_libraries(LINTER_spawner_exe PUBLIC COMMON_lib)
+target_link_libraries(LINTER_spawner_lib PUBLIC COMMON_lib)
+target_link_libraries(LINTER_spawner_exe PRIVATE COMMON_lib)
 
 target_link_libraries(WRAPPER_lib PUBLIC COMMON_lib)
 target_link_libraries(WRAPPER_exe PRIVATE COMMON_lib)
@@ -358,6 +357,8 @@ if(lto_supported)
   set_target_properties(COMMON_lib PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
   set_target_properties(LINTER_exe PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
   set_target_properties(LINTER_lib PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+  set_target_properties(LINTER_spawner_lib PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+  set_target_properties(LINTER_spawner_exe PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
 else()
     message(WARNING "LTO is not supported: ${error}")
 endif()

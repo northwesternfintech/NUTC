@@ -50,7 +50,6 @@ private:
     OnAccountUpdateFunc on_account_update_func_;
 
     Strategy* strategy_object_;
-    void* dl_handle_;
-    int fd_;
+    void* dl_handle_{};
 };
 } // namespace nutc::lint

@@ -37,11 +37,17 @@ mock_cancel_func(nutc::common::Ticker, std::int64_t)
 }
 } // namespace
 
+void
+send_response(const std::string& response)
+{
+    std::cout << nutc::common::base64_encode(response) << std::endl;
+}
+
 int
 main(int argc, char* argv[])
 {
     if (argc < 2) {
-        std::cout << "[linter] no language provided\n";
+        send_response("[linter] no language provided");
         return 1;
     }
 
@@ -65,18 +71,18 @@ main(int argc, char* argv[])
         lint_result = nutc::lint::lint(runtime);
     }
     else {
-        std::cout << "[linter] no language provided\n";
+        send_response("[linter] no language provided");
         return 1;
     }
 
     auto output = glz::write_json(lint_result);
     if (output) {
-        std::cout << *output << std::endl;
+        send_response(output.value());
     }
     else {
-        std::cout << fmt::format(
+        send_response(fmt::format(
             "[linter] ERROR WRITING LINT RESULT: {}", glz::format_error(output.error())
-        ) << std::endl;
+        ));
     }
 
     return 0;

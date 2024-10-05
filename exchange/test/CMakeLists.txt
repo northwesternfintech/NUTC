@@ -31,7 +31,8 @@ add_executable(NUTC_tests
   src/unit/types/decimal.cpp
   
   src/integration/tests/basic.cpp
-  src/integration/tests/linter_test.cpp
+  src/integration/tests/linter_py_test.cpp
+  src/integration/tests/linter_cpp_test.cpp
   src/integration/tests/cancellation.cpp
   )
 

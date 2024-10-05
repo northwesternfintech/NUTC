@@ -14,11 +14,14 @@ namespace spawning {
 const std::filesystem::path&
 LintProcessManager::spawner_binary_path()
 {
+    static constexpr auto LINTER_SPAWNER_BINARY_ENV_VAR =
+        "NUTC_LINTER_SPAWNER_BINARY_PATH";
     static const char* spawner_binary_location =
-        std::getenv("NUTC_LINTER_SPAWNER_BINARY_PATH"); // NOLINT
+        std::getenv(LINTER_SPAWNER_BINARY_ENV_VAR); // NOLINT
     if (spawner_binary_location == nullptr) [[unlikely]] {
-        throw std::runtime_error("NUTC_SPAWNER_BINARY_PATH environment variable not set"
-        );
+        throw std::runtime_error(fmt::format(
+            "{} environment variable not set", LINTER_SPAWNER_BINARY_ENV_VAR
+        ));
     }
 
     static const std::filesystem::path spawner_binary_path{spawner_binary_location};
@@ -96,8 +99,10 @@ LintProcessManager::spawn_client(const std::string& algo_code, AlgoLanguage lang
                 if (child->running()) {
                     child->terminate();
                 }
+                std::string decoded_message = common::base64_decode(message);
 
-                auto error = glz::read_json<nutc::lint::lint_result>(res, message);
+                auto error =
+                    glz::read_json<nutc::lint::lint_result>(res, decoded_message);
                 if (error) {
                     res = {
                         false, "Internal server error. Reach out to "
