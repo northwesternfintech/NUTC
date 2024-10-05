@@ -123,6 +123,8 @@ export default function RegistrationForm(props: { user: any }) {
 
   // TODO: sanitize better
   const createNewUserHandler = async () => {
+    Swal.fire({ icon: 'info', title: 'Applications closed for Fall 2024.' });
+    return;
     if (!confirmEntriesAdded()) return;
 
     const response = await fetch("/api/protected/db/user/createUser", {
@@ -324,26 +326,26 @@ export default function RegistrationForm(props: { user: any }) {
                   defaultValue="Northwestern University"
                   className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6" />
               </div>
-              </div>
+            </div>
 
-              <div className="sm:col-span-2">
-                <label
-                  htmlFor="year"
-                  className="block text-sm font-medium leading-6 text-white">
-                  Graduation Year
-                </label>
-                <div className="mt-2">
-                  <select
-                    id="year"
-                    name="year"
-                    onChange={handleInputChange}
-                    className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
-                    <option>2025</option>
-                    <option>2026</option>
-                    <option>2027</option>
-                    <option>2028</option>
-                  </select>
-                </div>
+            <div className="sm:col-span-2">
+              <label
+                htmlFor="year"
+                className="block text-sm font-medium leading-6 text-white">
+                Graduation Year
+              </label>
+              <div className="mt-2">
+                <select
+                  id="year"
+                  name="year"
+                  onChange={handleInputChange}
+                  className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                  <option>2025</option>
+                  <option>2026</option>
+                  <option>2027</option>
+                  <option>2028</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
