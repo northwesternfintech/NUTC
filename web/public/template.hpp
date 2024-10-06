@@ -40,6 +40,10 @@ std::int64_t place_limit_order(Side side, Ticker ticker, float quantity,
 
 bool cancel_order(Ticker ticker, std::int64_t order_id);
 
+// Prints log, viewable in the sandbox after 5mins. Might help for debugging
+// DO NOT USE std::cout. Your code will not work
+void println(const std::string &text);
+
 class Strategy {
 public:
   Strategy() {
@@ -65,7 +69,7 @@ public:
    * @param ticker Ticker that has an orderbook update ("ETH", "BTC", or "LTC")
    * @param side Which orderbook as updated ("BUY" or Side::sell)
    * @param price Price of orderbook that has an update
-   * @param quantity Volume placed into orderbook
+   * @param quantity Total available volume at given price level
    */
   void on_orderbook_update(Ticker ticker, Side side, float quantity,
                            float price) {}

@@ -46,8 +46,8 @@ CrowServer::CrowServer() :
                     std::string algorithm_data = req.body;
                     add_pending_trader_(algo_id, language_enum, algorithm_data);
                     crow::json::wvalue response_json({
-                        {"success", true},
-                        {"message", "Algorithm Successfully Submitted"  }
+                        {"success", true                              },
+                        {"message", "Algorithm Successfully Submitted"}
                     });
                     res.body = response_json.dump();
                     return res;
@@ -125,14 +125,14 @@ CrowServer::start_remove_timer_(
             );
             return;
         }
-        if (!err_code) {
-            log_i(sandbox_server, "Removing trader {}", trader->get_display_name());
-            trader->disable();
-        }
-        else {
+        if (err_code) {
             log_e(
                 sandbox_server, "Unable to remove trader {}", trader->get_display_name()
             );
+        }
+        else {
+            log_i(sandbox_server, "Removing trader {}", trader->get_display_name());
+            trader->disable();
         }
     });
     timers_.push_back(std::move(timer));

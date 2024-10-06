@@ -18,6 +18,7 @@ using MarketOrderFunction =
     std::function<bool(common::Side side, common::Ticker ticker, float quantity)>;
 using CancelOrderFunction =
     std::function<bool(common::Ticker ticker, std::int64_t order_id)>;
+using PrintLnFunction = std::function<void(const std::string& text)>;
 
 class Runtime {
 public:
@@ -54,6 +55,10 @@ protected:
     LimitOrderFunction m_limit_order_func;
     MarketOrderFunction m_market_order_func;
     CancelOrderFunction m_cancel_order_func;
+
+    static void
+    log_text(const std::string&)
+    {}
 };
 
 } // namespace nutc::lint

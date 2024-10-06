@@ -10,7 +10,6 @@
 #include <iostream>
 #include <string>
 #include <thread>
-#include <tuple>
 
 static void
 process_arguments(int argc, const char** argv)
@@ -44,7 +43,7 @@ main(int argc, const char** argv)
     process_arguments(argc, argv);
 
     // Start logging and print the build info
-    nutc::logging::init(quill::LogLevel::Info);
+    nutc::logging::init("linter.log", quill::LogLevel::Info);
     log_i(main, "Starting NUTC Linter");
 
     auto server_thread = nutc::crow::get_server_thread();

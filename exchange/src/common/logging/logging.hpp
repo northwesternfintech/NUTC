@@ -5,7 +5,6 @@
 #include <string>
 
 #define LOG_DIR            "logs"
-#define LOG_FILE           (LOG_DIR "/app.log")
 #define LOG_BACKTRACE_SIZE 10
 
 namespace nutc {
@@ -52,7 +51,11 @@ set_thread_name(const std::string& name)
 /**
  * Set up logging.
  */
-void init(quill::LogLevel log_level = DEFAULT_LOG_LEVEL);
+void init(const std::string& log_file, quill::LogLevel log_level = DEFAULT_LOG_LEVEL);
+void init_file_only(
+    const std::string& log_file, std::uint32_t max_size_bytes,
+    quill::LogLevel log_level = DEFAULT_LOG_LEVEL
+);
 
 /******************************************************************************
  *                                 LOGGERS
@@ -78,6 +81,8 @@ get_main_logger()
 
 // Create loggers here for every category
 CREATE_LOG_CATEGORY(sandbox_server);
+CREATE_LOG_CATEGORY(algo_print);
+CREATE_LOG_CATEGORY(ALGO_ERROR);
 CREATE_LOG_CATEGORY(pipe_reader);
 CREATE_LOG_CATEGORY(testing);
 
