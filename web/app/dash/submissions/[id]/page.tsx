@@ -19,14 +19,8 @@ export default async function SubmissionPage(props: {
     notFound();
   }
 
-  const formatNewLines = (str: string) => {
-    const LINES = str.split("\n");
-    return LINES.map((line: string, index: number) => (
-      <React.Fragment key={`line_${index}`}>
-        <p>{line}</p>
-        {index < LINES.length - 1 && <br />}
-      </React.Fragment>
-    ));
+  function formatNewLines(str: string): TrustedHTML {
+    return str.replace(/\\n/g, "<br />");
   };
 
   const lintFailureMessage = algo?.lintFailureMessage;
@@ -69,6 +63,11 @@ export default async function SubmissionPage(props: {
       </div>
     );
   } else {
-    return formatNewLines(stringToRender);
+    return <div className="flex flex-col items-center pt-12">
+      <h1 className="text-3xl font-bold mb-12">Error Log</h1>
+      <div className="bg-gray-800 p-6 rounded-lg">
+        <div dangerouslySetInnerHTML={{ __html: formatNewLines(stringToRender) }} />
+      </div>
+    </div>
   }
 }

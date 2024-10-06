@@ -12,7 +12,7 @@ COPY webserver/src src
 
 RUN cargo build --release
 
-COPY web/.env .env
+COPY webserver/.env .env
 
 EXPOSE 16124
 
