@@ -10,12 +10,11 @@ namespace nutc::exchange {
 
 class RetailBot : public BotTrader {
     std::mt19937 gen_{}; // NOLINT
-    std::poisson_distribution<> poisson_dist_{};
 
     common::decimal_price
     generate_aggresiveness_()
     {
-        static std::normal_distribution<> dist{1000, 2000};
+        static std::normal_distribution<> dist{700, 1400};
         return dist(gen_);
     }
 
@@ -24,7 +23,7 @@ public:
         BotTrader(ticker, interest_limit), AGGRESSIVENESS(generate_aggresiveness_())
     {}
 
-    void take_action(const shared_bot_state& state) override;
+    void take_action(const shared_bot_state& state) final;
 
     const std::string&
     get_type() const final

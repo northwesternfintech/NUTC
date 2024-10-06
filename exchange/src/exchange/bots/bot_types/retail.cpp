@@ -22,8 +22,6 @@ RetailBot::take_action(const shared_bot_state& state)
 
     if (noise_factor >= p_trade * signal_strength)
         return;
-    if (poisson_dist_(gen_) <= 0)
-        return;
 
     common::decimal_price noised_theo = state.THEO + generate_gaussian_noise(0, .1);
     common::decimal_quantity quantity{

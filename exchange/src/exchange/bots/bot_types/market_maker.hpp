@@ -32,7 +32,7 @@ public:
         BotTrader(ticker, interest_limit)
     {}
 
-    void take_action(const shared_bot_state& state) override;
+    void take_action(const shared_bot_state& state) final;
 
     const std::string&
     get_type() const final
