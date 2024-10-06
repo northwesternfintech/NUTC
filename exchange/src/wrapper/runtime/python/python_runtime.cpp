@@ -21,7 +21,8 @@ PyRuntime::fire_on_trade_update(
             ticker, side, static_cast<float>(quantity), static_cast<float>(price)
         );
     } catch (const py::error_already_set& err) {
-        std::cerr << err.what() << "\n";
+        log_error(err.what());
+        // std::cerr << err.what() << "\n";
     }
 }
 
@@ -35,7 +36,8 @@ PyRuntime::fire_on_orderbook_update(
             ticker, side, static_cast<float>(quantity), static_cast<float>(price)
         );
     } catch (const py::error_already_set& err) {
-        std::cerr << err.what() << "\n";
+        log_error(err.what());
+        // std::cerr << err.what() << "\n";
     }
 }
 
@@ -51,7 +53,8 @@ PyRuntime::fire_on_account_update(
             static_cast<float>(capital)
         );
     } catch (const py::error_already_set& err) {
-        std::cerr << err.what() << "\n";
+        log_error(err.what());
+        // std::cerr << err.what() << "\n";
     }
 }
 
@@ -90,6 +93,7 @@ PyRuntime::create_api_module(
     module.def("publish_market_order", publish_market_order);
     module.def("publish_limit_order", publish_limit_order);
     module.def("cancel_order", cancel_order);
+    module.def("print", log_text);
 
     auto sys_modules = sys.attr("modules").cast<py::dict>();
     sys_modules["nutc_api"] = module;
@@ -113,6 +117,9 @@ PyRuntime::run_initialization_code(const std::string& py_code)
         def cancel_order(ticker: str, order_id: int):
             return nutc_api.cancel_order(ticker, order_id)
     )");
+    py::exec(R"(
+		print = nutc_api.print
+	)");
     py::exec("Side = nutc_api.Side");
     py::exec("Ticker = nutc_api.Ticker");
     py::exec("strategy = Strategy()");

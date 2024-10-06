@@ -72,8 +72,9 @@ CppRuntime::init()
         || on_orderbook_update_func_ == nullptr || on_account_update_func_ == nullptr) {
         return fmt::format("[linter] failed to dynamically load functions");
     }
-    strategy_object_ =
-        init_func(m_market_order_func, m_limit_order_func, m_cancel_order_func);
+    strategy_object_ = init_func(
+        m_market_order_func, m_limit_order_func, m_cancel_order_func, log_text
+    );
 
     return std::nullopt;
 }

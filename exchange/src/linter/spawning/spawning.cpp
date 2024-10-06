@@ -74,8 +74,9 @@ LintProcessManager::spawn_client(const std::string& algo_code, AlgoLanguage lang
                 "{} "
                 "seconds. Check all "
                 "functions to see if you have an infinite loop or infinite "
-                "recursion.\n\nIf you continue to experience this error, "
-                "reach out to #nuft-support.\n",
+                "recursion. This could also be a result of a particularly nasty error "
+                "in your code.\n\nIf you continue to experience this error, "
+                "reach out on piazza.\n",
                 LINT_AUTO_TIMEOUT_SECONDS
             );
 

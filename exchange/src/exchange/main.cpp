@@ -1,9 +1,9 @@
 #include "algos/algo_manager.hpp"
+#include "common/logging/logging.hpp"
 #include "common/util.hpp"
 #include "exchange/algos/algo_manager.hpp"
 #include "exchange/config/dynamic/argparse.hpp"
 #include "exchange/config/dynamic/config.hpp"
-#include "common/logging/logging.hpp"
 #include "exchange/matching_cycle/base/base_cycle.hpp"
 #include "exchange/matching_cycle/cycle_interface.hpp"
 #include "exchange/matching_cycle/dev/dev_cycle.hpp"
@@ -52,7 +52,7 @@ main_event_loop(std::unique_ptr<MatchingCycleInterface> cycle)
 int
 main(int argc, const char** argv)
 {
-    nutc::logging::init(quill::LogLevel::Info);
+    nutc::logging::init("exchange.log", quill::LogLevel::Info);
     std::signal(SIGINT, [](auto) { std::exit(0); });
     std::signal(SIGPIPE, SIG_IGN);
 

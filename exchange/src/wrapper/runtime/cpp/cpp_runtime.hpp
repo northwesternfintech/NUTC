@@ -3,6 +3,7 @@
 #include "wrapper/runtime/runtime.hpp"
 
 namespace nutc::wrapper {
+using PrintLn = std::function<void(const std::string&)>;
 
 class CppRuntime : public Runtime {
 public:
@@ -28,7 +29,7 @@ private:
 
     using Strategy = void;
     using InitFunc = Strategy* (*)(MarketOrderFunction, LimitOrderFunction,
-                                   CancelOrderFunction);
+                                   CancelOrderFunction, PrintLn);
     using on_trade_update_func = void (*)(Strategy*, Ticker, Side, float, float);
     using on_orderbook_update_func = void (*)(Strategy*, Ticker, Side, float, float);
     using on_account_update_func =

@@ -65,6 +65,8 @@ def cancel_order(ticker: Ticker, order_id: int) -> bool:
     """
     return True
 
+# You can use print() and view the logs after sandbox run has completed
+# Might help for debugging
 class Strategy:
     """Template for a strategy."""
 

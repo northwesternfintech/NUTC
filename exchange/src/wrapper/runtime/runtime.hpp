@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/logging/logging.hpp"
 #include "common/types/decimal.hpp"
 #include "common/types/ticker.hpp"
 #include "common/util.hpp"
@@ -8,7 +9,8 @@
 #include <string>
 
 namespace nutc::wrapper {
-
+// TODO: PrintLn function should use dependency injection
+// Then we can test printing functionality as well
 class Runtime {
 public:
     virtual ~Runtime() = default;
@@ -51,6 +53,18 @@ protected:
     std::string algo_;
     std::string trader_id_;
     ExchangeCommunicator communicator_;
+
+    static void
+    log_text(const std::string& text)
+    {
+        log_i(algo_print, "{}", text);
+    }
+
+    static void
+    log_error(const std::string& text)
+    {
+        log_e(ALGO_ERROR, "{}", text);
+    }
 };
 
 } // namespace nutc::wrapper

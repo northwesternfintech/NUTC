@@ -1,9 +1,8 @@
-#include "wrapper/runtime/python/python_runtime.hpp"
-#include "wrapper/runtime/runtime.hpp"
+#include "common/logging/logging.hpp"
 #include "wrapper/config/argparse.hpp"
 #include "wrapper/messaging/exchange_communicator.hpp"
 #include "wrapper/runtime/cpp/cpp_runtime.hpp"
-#include "common/logging/logging.hpp"
+#include "wrapper/runtime/python/python_runtime.hpp"
 #include "wrapper/util/resource_limits.hpp"
 
 #include <boost/algorithm/string/trim.hpp>
@@ -11,7 +10,6 @@
 #include <pybind11/pybind11.h>
 
 #include <csignal>
-
 
 // We stop the exchange with sigint. The wrapper should exit gracefully
 void
@@ -28,6 +26,11 @@ main(int argc, const char** argv)
 
     std::signal(SIGINT, catch_sigint);
     auto [verbosity, trader_id, algo_type] = process_arguments(argc, argv);
+
+    static constexpr std::uint32_t MAX_LOG_SIZE = 50'000;
+    nutc::logging::init_file_only(
+        fmt::format("{}.log", trader_id), MAX_LOG_SIZE, quill::LogLevel::Info
+    );
 
     ExchangeCommunicator communicator{trader_id};
 

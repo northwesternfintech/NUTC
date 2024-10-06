@@ -1,8 +1,8 @@
 #include "process.hpp"
 
+#include "common/logging/logging.hpp"
 #include "common/types/decimal.hpp"
 #include "exchange/algos/dev_mode/dev_mode.hpp"
-#include "common/logging/logging.hpp"
 
 #include <fmt/format.h>
 
@@ -41,7 +41,7 @@ start_wrappers(
 {
     using exchange::DevModeAlgoInitializer;
 
-    logging::init(quill::LogLevel::Info);
+    logging::init("integration_tests.log", quill::LogLevel::Info);
 
     DevModeAlgoInitializer algo_manager{start_delay, algos};
     algo_manager.initialize_trader_container(users, starting_capital);
