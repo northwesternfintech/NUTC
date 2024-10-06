@@ -1,9 +1,8 @@
-#include "wrapper/runtime/python/python_runtime.hpp"
-#include "wrapper/runtime/runtime.hpp"
+#include "common/logging/logging.hpp"
 #include "wrapper/config/argparse.hpp"
 #include "wrapper/messaging/exchange_communicator.hpp"
 #include "wrapper/runtime/cpp/cpp_runtime.hpp"
-#include "common/logging/logging.hpp"
+#include "wrapper/runtime/python/python_runtime.hpp"
 #include "wrapper/util/resource_limits.hpp"
 
 #include <boost/algorithm/string/trim.hpp>
@@ -12,13 +11,20 @@
 
 #include <csignal>
 
-
 // We stop the exchange with sigint. The wrapper should exit gracefully
 void
 catch_sigint(int)
 {
+    quill::flush();
     // Wait until we're forced to terminate
     while (true) {}
+}
+
+void
+catch_sigterm(int)
+{
+    quill::flush();
+    std::exit(0);
 }
 
 int
@@ -27,6 +33,7 @@ main(int argc, const char** argv)
     using namespace nutc::wrapper;
 
     std::signal(SIGINT, catch_sigint);
+    std::signal(SIGTERM, catch_sigterm);
     auto [verbosity, trader_id, algo_type] = process_arguments(argc, argv);
 
     ExchangeCommunicator communicator{trader_id};
