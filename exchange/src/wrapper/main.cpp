@@ -15,8 +15,16 @@
 void
 catch_sigint(int)
 {
+    quill::flush();
     // Wait until we're forced to terminate
     while (true) {}
+}
+
+void
+catch_sigterm(int)
+{
+    quill::flush();
+    std::exit(0);
 }
 
 int
@@ -25,6 +33,7 @@ main(int argc, const char** argv)
     using namespace nutc::wrapper;
 
     std::signal(SIGINT, catch_sigint);
+    std::signal(SIGTERM, catch_sigterm);
     auto [verbosity, trader_id, algo_type] = process_arguments(argc, argv);
 
     static constexpr std::uint32_t MAX_LOG_SIZE = 50'000;
