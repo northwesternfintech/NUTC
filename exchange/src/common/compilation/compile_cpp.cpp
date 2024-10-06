@@ -50,7 +50,7 @@ compile_cpp(const std::filesystem::path& filepath)
                                     .string();
 
     std::string command = fmt::format(
-        "g++ -std=c++20 -fPIC -shared -o {} -include {} {}", binary_output,
+        "g++ -std=c++20 -fPIC -O3 -shared -o {} -include {} {}", binary_output,
         filepath.string(), get_cpp_template_path()
     );
 
