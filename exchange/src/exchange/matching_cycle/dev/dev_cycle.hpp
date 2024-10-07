@@ -13,8 +13,12 @@ class DevMatchingCycle : public BaseMatchingCycle {
     TickerMetricsPusher pusher;
 
 public:
-    DevMatchingCycle(TickerContainer tickers, TraderContainer& traders, common::decimal_price order_fee) :
-        BaseMatchingCycle(std::move(tickers), traders, order_fee), pusher(traders)
+    DevMatchingCycle(
+        TickerContainer tickers, TraderContainer& traders,
+        common::decimal_price order_fee, common::decimal_quantity max_order_volume
+    ) :
+        BaseMatchingCycle(std::move(tickers), traders, order_fee, max_order_volume),
+        pusher(traders)
     {}
 
 protected:

@@ -26,12 +26,12 @@ BotTrader::notify_position_change(common::position order)
     common::decimal_price total_cap = order.price * order.quantity;
     if (order.side == common::Side::buy) {
         modify_long_capital(total_cap);
-        modify_open_bids(order.quantity);
     }
     else {
         modify_short_capital(total_cap);
-        modify_open_asks(order.quantity);
     }
+
+    GenericTrader::notify_position_change(order);
 }
 
 } // namespace nutc::exchange

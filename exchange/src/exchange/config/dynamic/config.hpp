@@ -17,6 +17,7 @@ struct global_config {
     const size_t WAIT_SECS;
     const unsigned int SANDBOX_TRIAL_SECS;
     const double ORDER_FEE;
+    const common::decimal_quantity MAX_CUMULATIVE_OPEN_ORDER_VOLUME;
 };
 
 class Config {

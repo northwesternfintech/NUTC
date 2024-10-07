@@ -24,7 +24,7 @@ pow10(int pow)
 }
 } // namespace detail
 
-template <std::int8_t Scale>
+template <std::uint8_t Scale>
 class Decimal {
     using decimal_type = std::int64_t;
     static constexpr std::int64_t MULTIPLIER = detail::pow10<decimal_type>(Scale);
@@ -88,6 +88,7 @@ private:
     }
 
     friend std::hash<Decimal<Scale>>;
+    friend std::numeric_limits<Decimal<Scale>>;
     friend glz::meta<nutc::common::Decimal<Scale>>;
 };
 
@@ -97,7 +98,7 @@ using decimal_quantity = Decimal<QUANTITY_DECIMAL_PLACES>;
 } // namespace nutc::common
 
 namespace std {
-template <std::int8_t Scale>
+template <std::uint8_t Scale>
 struct hash<nutc::common::Decimal<Scale>> {
     std::size_t
     operator()(const nutc::common::Decimal<Scale>& obj) const
@@ -105,10 +106,30 @@ struct hash<nutc::common::Decimal<Scale>> {
         return std::hash<int64_t>{}(obj.value_);
     }
 };
+
+// TODO: add unit tests
+template <std::uint8_t Scale>
+class numeric_limits<nutc::common::Decimal<Scale>> {
+public:
+    static nutc::common::Decimal<Scale>
+    max()
+    {
+        return std::numeric_limits<
+            typename nutc::common::Decimal<Scale>::decimal_type>::max();
+    }
+
+    static nutc::common::Decimal<Scale>
+    min()
+    {
+        return std::numeric_limits<
+            typename nutc::common::Decimal<Scale>::decimal_type>::min();
+    }
+};
+
 } // namespace std
 
 /// \cond
-template <std::int8_t Scale>
+template <std::uint8_t Scale>
 struct glz::meta<nutc::common::Decimal<Scale>> {
     using t = nutc::common::Decimal<Scale>;
     static constexpr auto value = object(&t::value_);

@@ -8,8 +8,8 @@ namespace nutc::exchange {
 
 class SandboxMatchingCycle : public DevMatchingCycle {
 public:
-    SandboxMatchingCycle(TickerContainer tickers, TraderContainer& traders, common::decimal_price order_fee) :
-        DevMatchingCycle(std::move(tickers), traders, order_fee)
+    SandboxMatchingCycle(TickerContainer tickers, TraderContainer& traders, common::decimal_price order_fee, common::decimal_quantity max_order_volume) :
+        DevMatchingCycle(std::move(tickers), traders, order_fee, max_order_volume)
     {}
 
 private:

@@ -1,8 +1,8 @@
 #include "test_cycle.hpp"
 
+#include "common/logging/logging.hpp"
 #include "common/messages_wrapper_to_exchange.hpp"
 #include "common/util.hpp"
-#include "common/logging/logging.hpp"
 
 #include <glaze/glaze.hpp>
 #include <hash_table7.hpp>
@@ -54,6 +54,9 @@ TestMatchingCycle::match_orders_(std::vector<exchange::OrderVariant> orders)
 // This is kinda bad practice. We shouldn't return an optional based on a template
 // parameter, we should just return void or the object itself. However, I am lazy and
 // this is a test function. Peace
+//
+// Also todo: this doesnt work correctly when we have orders of the same type that need
+// to be processed. Rework this entire thing later
 template <typename OrderT>
 std::optional<common::order_id_t>
 TestMatchingCycle::wait_for_order(

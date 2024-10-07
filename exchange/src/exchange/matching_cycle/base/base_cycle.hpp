@@ -12,12 +12,16 @@ class BaseMatchingCycle : public MatchingCycleInterface {
     TickerContainer tickers_;
     TraderContainer& traders_;
     common::decimal_price order_fee_;
+    common::decimal_quantity max_cumulative_order_volume_;
 
 public:
     // Require transfer of ownership
     BaseMatchingCycle(
-        TickerContainer tickers, TraderContainer& traders, common::decimal_price order_fee
-    ) : tickers_(std::move(tickers)), traders_(traders), order_fee_(order_fee)
+        TickerContainer tickers, TraderContainer& traders,
+        common::decimal_price order_fee, common::decimal_quantity max_order_volume
+    ) :
+        tickers_(std::move(tickers)), traders_(traders), order_fee_(order_fee),
+        max_cumulative_order_volume_{max_order_volume}
     {}
 
 protected:

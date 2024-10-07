@@ -2,6 +2,7 @@
 
 #include "common/types/decimal.hpp"
 #include "common/util.hpp"
+#include "exchange/config/dynamic/config.hpp"
 #include "exchange/orders/storage/order_storage.hpp"
 
 namespace nutc::exchange {

@@ -62,10 +62,6 @@ public:
 
         return wrapper_handle_->read_shared();
     }
-
-    void
-    notify_position_change(common::position) final
-    {}
 };
 
 } // namespace nutc::exchange

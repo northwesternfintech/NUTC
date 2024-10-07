@@ -356,7 +356,7 @@ jobs:
       run: cmake --install build --config Release --prefix .
 
     - name: Move config file
-      run: cp -r config.yml build/test/config.yml
+      run: cp config.yml build/test/config.yml
 
     - name: Move test algo files
       run: cp -r -L test/src/integration/test_algos build/test/test_algos
