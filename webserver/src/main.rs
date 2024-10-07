@@ -90,7 +90,7 @@ async fn handle_algo_submission(
         return HttpResponse::BadGateway().finish();
     };
 
-    if let Err(e) = set_linter_status(&algo_id, true, &linter_response.message, &db_pool).await {
+    if let Err(e) = set_linter_status(&algo_id, linter_response.success, &linter_response.message, &db_pool).await {
         tracing::error!("failed to update linter status in database, {:?}", e);
         return HttpResponse::BadGateway().finish();
     }
