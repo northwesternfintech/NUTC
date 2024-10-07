@@ -22,20 +22,17 @@ RUN cmake --preset=ci-docker
 
 RUN cmake --build build --config Release -j
 
-RUN mv /app/exchange/build/NUTC /app/NUTC
-RUN mv /app/exchange/build/WRAPPER /app/WRAPPER
-
 # Todo: make default?
 COPY ./exchange/config.yml /app/exchange/config.yml
 
-RUN chmod +x /app/NUTC /app/WRAPPER
+RUN chmod +x /app/exchange/build/NUTC /app/exchange/build/WRAPPER
 
 COPY ./exchange/template.cpp /app/template.cpp
 
-ENV NUTC_WRAPPER_BINARY_PATH="/app/WRAPPER"
+ENV NUTC_WRAPPER_BINARY_PATH="/app/exchange/build/WRAPPER"
 ENV NUTC_CONFIG_FILE="/app/exchange/config.yml"
 ENV NUTC_CPP_TEMPLATE_PATH="/app/template.cpp"
 
 EXPOSE 4152 18080
 
-ENTRYPOINT ["/app/NUTC"]
+ENTRYPOINT ["/app/exchange/build/NUTC"]
