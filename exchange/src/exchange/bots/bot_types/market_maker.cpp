@@ -35,7 +35,9 @@ constexpr std::array<price_level, LEVELS> PRICE_LEVELS{
 namespace nutc::exchange {
 
 void
-MarketMakerBot::place_orders_(Side side, decimal_price theo, decimal_price spread_offset)
+MarketMakerBot::place_orders_(
+    Side side, decimal_price theo, decimal_price spread_offset
+)
 {
     // Approximation
     common::decimal_quantity total_quantity = {
@@ -62,8 +64,8 @@ MarketMakerBot::place_orders_(Side side, decimal_price theo, decimal_price sprea
 decimal_price
 MarketMakerBot::calculate_lean_percent(const shared_bot_state& state)
 {
-    auto lean_price = state.MIDPRICE * state.CUMULATIVE_QUANTITY_HELD;
-    return lean_price / state.CUMULATIVE_INTEREST_LIMIT;
+    auto lean_price = state.CUMULATIVE_QUANTITY_HELD / state.CUMULATIVE_INTEREST_LIMIT;
+    return lean_price * state.MIDPRICE;
 }
 
 // TODO: clean up
