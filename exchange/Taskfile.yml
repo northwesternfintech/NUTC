@@ -6,8 +6,8 @@ vars:
   # BOTS, DEV, or NORMAL
   MODE: "BOTS"
   
-  RELEASE_BUILD: "false"
-  RELEASE_PRESET: "ci-ubuntu"
+  RELEASE_BUILD: "true"
+  RELEASE_PRESET: "ci-sanitize"
 
 tasks:
   start-nix:
@@ -82,10 +82,10 @@ tasks:
       NUTC_WRAPPER_BINARY_PATH: '{{if eq .RELEASE_BUILD "true"}}./build/WRAPPER{{else}}./build/dev/WRAPPER{{end}}'
       NUTC_EXPOSE_METRICS: 1
     vars:
-      NUTC_PATH: '{{if eq .RELEASE_BUILD "true"}}build/{{.NAME}}{{else}}build/dev/{{.NAME}}{{end}}'
+      NUTC_PATH: '{{if eq .RELEASE_BUILD "true"}}build/sanitize/{{.NAME}}{{else}}build/dev/{{.NAME}}{{end}}'
       MODE_FLAG: '{{if eq .MODE "BOTS"}}--bots-only{{else if eq .MODE "DEV"}}--dev{{end}}'
     cmds:
-      - task: build
+      # - task: build
       - task: new-log-dir
       - ./{{ .NUTC_PATH }} {{ .MODE_FLAG }}
       

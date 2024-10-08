@@ -22,8 +22,8 @@
  *
  * https://stackoverflow.com/a/3160643
  */
-#ifdef NDEBUG
-#  define DEBUG() 1
-#else
-#  define DEBUG() 0
-#endif
+// #ifdef NDEBUG
+// #  define DEBUG() 1
+// #else
+// #  define DEBUG() 0
+// #endif

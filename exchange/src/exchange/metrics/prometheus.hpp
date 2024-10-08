@@ -1,5 +1,7 @@
 #pragma once
 
+#undef DEBUG
+
 #include <prometheus/exposer.h>
 #include <prometheus/registry.h>
 

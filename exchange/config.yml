@@ -9,20 +9,7 @@ global:
 
 tickers:
   - ticker: "ETH"
-    start_price: 100
-    bots:
-      - type: "market_maker"
-        number_of_bots: 50
-        average_capital: 200000
-        std_dev_capital: 50000
-      - type: "retail"
-        number_of_bots: 250
-        average_capital: 5000
-        std_dev_capital: 2000
-
-        # perfect: 5/250000/5000, 25/1000/200
-  - ticker: "LTC"
-    start_price: 50
+    start_price: 10
     bots:
       - type: "market_maker"
         number_of_bots: 5
@@ -33,14 +20,27 @@ tickers:
         average_capital: 5000
         std_dev_capital: 2000
 
-  - ticker: "BTC"
-    start_price: 200
-    bots:
-      - type: "market_maker"
-        number_of_bots: 25
-        average_capital: 200000
-        std_dev_capital: 50000
-      - type: "retail"
-        number_of_bots: 125
-        average_capital: 5000
-        std_dev_capital: 2000
+        # perfect: 5/250000/5000, 25/1000/200
+  # - ticker: "LTC"
+  #   start_price: 50
+  #   bots:
+  #     - type: "market_maker"
+  #       number_of_bots: 5
+  #       average_capital: 200000
+  #       std_dev_capital: 50000
+  #     - type: "retail"
+  #       number_of_bots: 25
+  #       average_capital: 5000
+  #       std_dev_capital: 2000
+  #
+  # - ticker: "BTC"
+  #   start_price: 200
+  #   bots:
+  #     - type: "market_maker"
+  #       number_of_bots: 25
+  #       average_capital: 200000
+  #       std_dev_capital: 50000
+  #     - type: "retail"
+  #       number_of_bots: 125
+  #       average_capital: 5000
+  #       std_dev_capital: 2000

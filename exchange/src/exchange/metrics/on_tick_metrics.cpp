@@ -109,12 +109,12 @@ void
 TickerMetricsPusher::report_matches(const std::vector<common::match>& orders)
 {
     auto log_match = [this](const common::match& match) {
-        matches_quantity_counter
-            .Add({
-                {"ticker",     common::to_string(match.position.ticker)},
-                {"match_type", match.match_type                        }
-        })
-            .Increment(double{match.position.quantity});
+        // matches_quantity_counter
+        //     .Add({
+        //         {"ticker",     common::to_string(match.position.ticker)},
+        //         {"match_type", match.match_type                        }
+        // })
+        //     .Increment(double{match.position.quantity});
     };
 
     std::for_each(orders.begin(), orders.end(), log_match);
@@ -160,12 +160,12 @@ TickerMetricsPusher::report_trader_stats(const TickerContainer& tickers)
             - trader.get_initial_capital()
         };
 
-        per_trader_pnl_gauge
-            .Add({
-                {"id",          trader.get_id()  },
-                {"trader_type", trader.get_type()},
-        })
-            .Set(pnl);
+        // per_trader_pnl_gauge
+        //     .Add({
+        //         {"id",          trader.get_id()  },
+        //         {"trader_type", trader.get_type()},
+        // })
+        //     .Set(pnl);
         per_trader_capital_gauge
             .Add({
                 {"id",          trader.get_id()  },
