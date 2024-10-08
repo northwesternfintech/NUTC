@@ -99,16 +99,22 @@ Config::get_global_config_(const YAML::Node& full_config)
     const auto& wait_secs = global["wait_secs"];
     const auto& sandbox_secs = global["sandbox_trial_seconds"];
     const auto& order_fee = global["order_fee"];
+    const auto& max_order_volume = global["max_cumulative_order_volume"];
+
     if (!starting_capital.IsDefined())
         throw_undef_err("global/starting_capital");
     if (!wait_secs.IsDefined())
         throw_undef_err("global/wait_secs");
     if (!sandbox_secs.IsDefined())
         throw_undef_err("global/sandbox_trial_seconds");
+    if (!max_order_volume.IsDefined())
+        throw_undef_err("global/max_cumulative_order_volume");
+
     return {
         common::decimal_price(starting_capital.as<double>()), wait_secs.as<size_t>(),
         sandbox_secs.as<unsigned int>(),
-        order_fee.IsDefined() ? order_fee.as<double>() : 0
+        order_fee.IsDefined() ? order_fee.as<double>() : 0,
+        common::decimal_quantity(max_order_volume.as<double>())
     };
 }
 

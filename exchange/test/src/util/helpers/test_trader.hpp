@@ -26,10 +26,6 @@ public:
     send_message(const std::string&) final
     {}
 
-    virtual void
-    notify_position_change(common::position) final
-    {}
-
     IncomingMessageQueue
     read_orders() final
     {

@@ -17,8 +17,6 @@ class BotTrader : public GenericTrader {
     common::decimal_price short_interest_;
     common::decimal_price long_interest_;
 
-    common::decimal_quantity open_bids_;
-    common::decimal_quantity open_asks_;
     IncomingMessageQueue orders_;
 
 public:
@@ -74,18 +72,6 @@ public:
     get_short_interest() const
     {
         return short_interest_;
-    }
-
-    [[nodiscard]] common::decimal_quantity
-    get_open_bids() const
-    {
-        return open_bids_;
-    }
-
-    [[nodiscard]] common::decimal_quantity
-    get_open_asks() const
-    {
-        return open_asks_;
     }
 
     ~BotTrader() override = default;
@@ -154,24 +140,6 @@ protected:
     modify_long_capital(common::decimal_price delta)
     {
         long_interest_ += delta;
-    }
-
-    /**
-     * @brief Called by the bot(derived class) when a bid position is opened
-     */
-    void
-    modify_open_bids(common::decimal_quantity delta)
-    {
-        open_bids_ += delta;
-    }
-
-    /**
-     * @brief Called by the bot (derived class) when an ask position is opened
-     */
-    void
-    modify_open_asks(common::decimal_quantity delta)
-    {
-        open_asks_ += delta;
     }
 
     void

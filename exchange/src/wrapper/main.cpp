@@ -24,7 +24,7 @@ void
 catch_sigterm(int)
 {
     quill::flush();
-    std::exit(0);
+    std::terminate();
 }
 
 int

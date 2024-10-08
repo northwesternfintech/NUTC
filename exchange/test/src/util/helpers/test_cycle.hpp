@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/types/decimal.hpp"
 #include "common/util.hpp"
 #include "exchange/matching_cycle/base/base_cycle.hpp"
 #include "exchange/traders/trader_container.hpp"
@@ -14,8 +15,10 @@ class TestMatchingCycle : public exchange::BaseMatchingCycle {
 
 public:
     TestMatchingCycle(
-        exchange::TraderContainer& traders, common::decimal_price order_fee = 0.0
-    ) : exchange::BaseMatchingCycle{{}, traders, order_fee}
+        exchange::TraderContainer& traders, common::decimal_price order_fee = 0.0,
+        common::decimal_quantity max_order_volume =
+            std::numeric_limits<common::decimal_quantity>::max()
+    ) : exchange::BaseMatchingCycle{{}, traders, order_fee, max_order_volume}
     {}
 
     // Note: uses tick=0. If using something that relies on tick, it will not work

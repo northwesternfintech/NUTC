@@ -15,6 +15,8 @@ class GenericTrader {
     std::string user_id_;
     common::decimal_price initial_capital_;
     common::decimal_price capital_delta_;
+    common::decimal_quantity open_bids_;
+    common::decimal_quantity open_asks_;
     std::array<common::decimal_quantity, common::TICKERS.size()> holdings_{};
 
 public:
@@ -47,6 +49,30 @@ public:
     get_id() const
     {
         return user_id_;
+    }
+
+    [[nodiscard]] common::decimal_quantity
+    get_open_bids() const
+    {
+        return open_bids_;
+    }
+
+    [[nodiscard]] common::decimal_quantity
+    get_open_asks() const
+    {
+        return open_asks_;
+    }
+
+    void
+    modify_open_bids(common::decimal_quantity delta)
+    {
+        open_bids_ += delta;
+    }
+
+    void
+    modify_open_asks(common::decimal_quantity delta)
+    {
+        open_asks_ += delta;
     }
 
     // For metrics purposes
@@ -93,7 +119,17 @@ public:
         return initial_capital_;
     }
 
-    virtual void notify_position_change(common::position) = 0;
+    virtual void
+    notify_position_change(common::position order)
+    {
+        if (order.side == common::Side::buy) {
+            open_bids_ += order.quantity;
+        }
+        else {
+            open_asks_ += order.quantity;
+        }
+    }
+
     virtual void notify_match(common::position);
     virtual void send_message(const std::string&) = 0;
 

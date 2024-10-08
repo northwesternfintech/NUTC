@@ -55,20 +55,27 @@ BaseMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
 {
     std::vector<common::match> matches;
 
+    auto match_incoming_order = [&]<typename OrderT>(OrderT& order) {
+        auto& ticker_data = tickers_[order.ticker];
+        auto& orderbook = ticker_data.get_orderbook();
+        if constexpr (std::is_same_v<OrderT, common::cancel_order>) {
+            orderbook.remove_order(order.order_id);
+        }
+        else {
+            if (order.quantity <= 0.0)
+                return;
+            // TODO: delegate elsewhere
+            if (order.quantity + order.trader->get_open_bids()
+                    + order.trader->get_open_asks()
+                > max_cumulative_order_volume_) {
+                return;
+            }
+            auto tmp = match_order(order, orderbook, order_fee_);
+            std::copy(tmp.begin(), tmp.end(), std::back_inserter(matches));
+        }
+    };
+
     for (OrderVariant& order_variant : orders) {
-        auto match_incoming_order = [&]<typename OrderT>(OrderT& order) {
-            auto& ticker_data = tickers_[order.ticker];
-            auto& orderbook = ticker_data.get_orderbook();
-            if constexpr (std::is_same_v<OrderT, common::cancel_order>) {
-                orderbook.remove_order(order.order_id);
-            }
-            else {
-                if (order.quantity <= 0.0)
-                    return;
-                auto tmp = match_order(order, orderbook, order_fee_);
-                std::copy(tmp.begin(), tmp.end(), std::back_inserter(matches));
-            }
-        };
         std::visit(match_incoming_order, order_variant);
     }
     return matches;

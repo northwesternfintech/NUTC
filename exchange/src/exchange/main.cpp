@@ -24,15 +24,22 @@ create_cycle(TraderContainer& traders, const auto& mode)
     const auto& ticker_config = Config::get().get_tickers();
     double order_fee = Config::get().constants().ORDER_FEE;
     auto tickers = TickerContainer(ticker_config, traders);
+    auto max_order_volume = Config::get().constants().MAX_CUMULATIVE_OPEN_ORDER_VOLUME;
 
     switch (mode) {
         case Mode::normal:
-            return std::make_unique<BaseMatchingCycle>(tickers, traders, order_fee);
+            return std::make_unique<BaseMatchingCycle>(
+                tickers, traders, order_fee, max_order_volume
+            );
         case Mode::sandbox:
-            return std::make_unique<SandboxMatchingCycle>(tickers, traders, order_fee);
+            return std::make_unique<SandboxMatchingCycle>(
+                tickers, traders, order_fee, max_order_volume
+            );
         case Mode::bots_only:
         case Mode::dev:
-            return std::make_unique<DevMatchingCycle>(tickers, traders, order_fee);
+            return std::make_unique<DevMatchingCycle>(
+                tickers, traders, order_fee, max_order_volume
+            );
     }
 
     std::unreachable();

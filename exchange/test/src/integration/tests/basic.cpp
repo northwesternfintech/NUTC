@@ -113,6 +113,21 @@ TEST_P(IntegrationBasicAlgo, ManyUpdates)
     cycle.wait_for_order(limit_order{Ticker::ETH, buy, 10.0, 100.0});
 }
 
+TEST_P(IntegrationBasicAlgo, OrderVolumeLimitsPreventGoingAboveLimit)
+{
+    auto& trader1 = start_wrappers(traders_, GetParam(), "many_orders");
+
+    TestMatchingCycle cycle{traders_, 0.0, 10.0};
+
+    for (int i = 1; i < 21; i++) {
+        cycle.wait_for_order(limit_order{Ticker::ETH, buy, 1.0, static_cast<double>(i)}
+        );
+        cycle.on_tick(0);
+    }
+
+    ASSERT_EQ(static_cast<double>(trader1.get_open_bids()), 10.0);
+}
+
 TEST_P(IntegrationBasicAlgo, OnTradeUpdate)
 {
     start_wrappers(traders_, GetParam(), "buy_tsla_on_trade");
