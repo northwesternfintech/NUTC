@@ -6,7 +6,7 @@ template <std::uint8_t Scale>
 Decimal<Scale>
 Decimal<Scale>::operator-() const
 {
-    return -value_;
+    return Decimal{-value_};
 }
 
 template <std::uint8_t Scale>
@@ -27,28 +27,28 @@ template <std::uint8_t Scale>
 Decimal<Scale>
 Decimal<Scale>::operator-(const Decimal& other) const
 {
-    return value_ - other.value_;
+    return Decimal{value_ - other.value_};
 }
 
 template <std::uint8_t Scale>
 Decimal<Scale>
 Decimal<Scale>::operator+(const Decimal& other) const
 {
-    return value_ + other.value_;
+    return Decimal{value_ + other.value_};
 }
 
 template <std::uint8_t Scale>
 Decimal<Scale>
 Decimal<Scale>::operator/(const Decimal& other) const
 {
-    return value_ * MULTIPLIER / other.value_;
+    return Decimal{value_ * MULTIPLIER / other.value_};
 }
 
 template <std::uint8_t Scale>
 Decimal<Scale>
 Decimal<Scale>::operator*(const Decimal& other) const
 {
-    return (value_ * other.value_) / MULTIPLIER;
+    return Decimal{(value_ * other.value_) / MULTIPLIER};
 }
 
 template <std::uint8_t Scale>
@@ -101,9 +101,9 @@ Decimal<Scale>
 Decimal<Scale>::difference(const Decimal& other) const
 {
     if (value_ >= other.value_) {
-        return value_ - other.value_;
+        return Decimal{value_ - other.value_};
     }
-    return other.value_ - value_;
+    return Decimal{other.value_ - value_};
 }
 
 template class Decimal<PRICE_DECIMAL_PLACES>;
@@ -111,4 +111,5 @@ template class Decimal<PRICE_DECIMAL_PLACES>;
 #if PRICE_DECIMAL_PLACES != QUANTITY_DECIMAL_PLACES
 template class Decimal<QUANTITY_DECIMAL_PLACES>;
 #endif
+
 } // namespace nutc::common

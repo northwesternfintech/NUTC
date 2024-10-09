@@ -24,6 +24,7 @@ pow10(int pow)
 }
 } // namespace detail
 
+// THIS CLASS PRIORITIZES PRECISION OVER AVOIDING OVERFLOW
 template <std::uint8_t Scale>
 class Decimal {
     using decimal_type = std::int64_t;
@@ -56,7 +57,7 @@ public:
     Decimal difference(const Decimal& other) const;
 
 private:
-    constexpr Decimal(decimal_type value) : value_(value) {}
+    constexpr explicit Decimal(decimal_type value) : value_(value) {}
 
     static constexpr bool
     double_within_bounds(double value)
@@ -110,19 +111,23 @@ struct hash<nutc::common::Decimal<Scale>> {
 // TODO: add unit tests
 template <std::uint8_t Scale>
 class numeric_limits<nutc::common::Decimal<Scale>> {
+    using scaled_decimal = nutc::common::Decimal<Scale>;
+
 public:
-    static nutc::common::Decimal<Scale>
+    static scaled_decimal
     max()
     {
-        return std::numeric_limits<
-            typename nutc::common::Decimal<Scale>::decimal_type>::max();
+        return scaled_decimal{
+            std::numeric_limits<typename scaled_decimal::decimal_type>::max()
+        };
     }
 
-    static nutc::common::Decimal<Scale>
+    static scaled_decimal
     min()
     {
-        return std::numeric_limits<
-            typename nutc::common::Decimal<Scale>::decimal_type>::min();
+        return scaled_decimal{
+            std::numeric_limits<typename scaled_decimal::decimal_type>::min()
+        };
     }
 };
 
