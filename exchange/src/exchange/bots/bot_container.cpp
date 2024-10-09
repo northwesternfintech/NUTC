@@ -18,7 +18,7 @@ BotContainer::generate_orders(
 {
     variance_calculator_.record_price(midprice);
 
-    decimal_price cumulative_interest_limit{};
+	common::decimal_price cumulative_interest_limit{};
     common::decimal_quantity cumulative_quantity_held{};
 
     for (const auto& bot : bots_) {

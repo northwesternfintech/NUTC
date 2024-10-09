@@ -64,8 +64,9 @@ MarketMakerBot::place_orders_(
 decimal_price
 MarketMakerBot::calculate_lean_percent(const shared_bot_state& state)
 {
-    auto lean_price = state.CUMULATIVE_QUANTITY_HELD / state.CUMULATIVE_INTEREST_LIMIT;
-    return lean_price * state.MIDPRICE;
+    double ratio = double{state.CUMULATIVE_QUANTITY_HELD}
+                   / double{state.CUMULATIVE_INTEREST_LIMIT};
+    return ratio * static_cast<double>(state.MIDPRICE);
 }
 
 // TODO: clean up
