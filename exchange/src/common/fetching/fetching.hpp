@@ -16,6 +16,7 @@ struct SetLintBody {
 
 std::optional<std::string> storage_request(const std::string& url);
 std::string replaceDisallowedValues(const std::string& input);
+std::optional<std::string> put_request(const std::string& url, const std::string& body);
 
 } // namespace client
 } // namespace nutc

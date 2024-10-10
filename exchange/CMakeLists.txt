@@ -220,7 +220,6 @@ target_link_libraries(WRAPPER_exe PRIVATE ${Python3_LIBRARIES})
 add_library(
 	LINTER_lib OBJECT 
 
-    src/linter/fetching/fetching.cpp
     src/linter/runtime/cpp/cpp_runtime.cpp
     src/linter/runtime/python/python_runtime.cpp
     src/linter/spawning/spawning.cpp
@@ -313,6 +312,7 @@ add_library(COMMON_lib OBJECT
     src/common/types/algorithm/local_algorithm.cpp
     src/common/logging/logging.cpp
     src/common/compilation/compile_cpp.cpp
+    src/common/fetching/fetching.cpp
 )
 
 target_include_directories(

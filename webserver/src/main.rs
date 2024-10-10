@@ -1,5 +1,7 @@
 use actix_cors::Cors;
 use actix_web::{get, http::header, post, web, App, HttpResponse, HttpServer, Responder};
+use aws_config::{meta::region::RegionProviderChain, Region};
+use aws_sdk_s3::{config::endpoint::Endpoint, presigning::PresigningConfig};
 use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod};
 use reqwest::Client;
 use serde::Deserialize;
@@ -27,7 +29,7 @@ async fn set_linter_status(
     message: &String,
     pool: &Pool,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let postgres_cient = pool.get().await?;
+    let postgres_client = pool.get().await?;
 
     let query = if success {
         r#"
@@ -45,7 +47,7 @@ async fn set_linter_status(
 
     let success_message = if success { "success" } else { "failure" };
 
-    postgres_cient
+    postgres_client
         .execute(query, &[&success_message, &message, &algo_id])
         .await?;
 
@@ -90,7 +92,14 @@ async fn handle_algo_submission(
         return HttpResponse::BadGateway().finish();
     };
 
-    if let Err(e) = set_linter_status(&algo_id, linter_response.success, &linter_response.message, &db_pool).await {
+    if let Err(e) = set_linter_status(
+        &algo_id,
+        linter_response.success,
+        &linter_response.message,
+        &db_pool,
+    )
+    .await
+    {
         tracing::error!("failed to update linter status in database, {:?}", e);
         return HttpResponse::BadGateway().finish();
     }
@@ -105,10 +114,21 @@ async fn handle_algo_submission(
     }
 
     // todo: this function shouldnt return a http request
-    return request_sandbox(algo_id, algo_url, language).await;
+    return request_sandbox(algo_id, algo_url, language, &db_pool).await;
 }
 
-async fn request_sandbox(algo_id: String, algo_url: String, language: String) -> HttpResponse {
+async fn request_sandbox(
+    algo_id: String,
+    algo_url: String,
+    language: String,
+    pool: &Pool,
+) -> HttpResponse {
+    let mut postgres_client = if let Ok(client) = pool.get().await {
+        client
+    } else {
+        return HttpResponse::BadGateway().finish();
+    };
+
     let client = Client::new();
     let sandbox_url = format!("{}/sandbox/{}/{}", SANDBOX_BASE_URL, algo_id, language);
     tracing::info!("linting success now requesting sandbox {}", sandbox_url);
@@ -123,8 +143,84 @@ async fn request_sandbox(algo_id: String, algo_url: String, language: String) ->
         .await
         .unwrap();
 
+    let s3_region = std::env::var("AWS_REGION").expect("env variable `AWS_REGION` should be set");
+    let s3_endpoint =
+        std::env::var("S3_ENDPOINT").expect("env variable `S3_ENDPOINT` should be set");
+
+    let region_provider = RegionProviderChain::default_provider().or_else(Region::new(s3_region));
+    let mut sdk_config = aws_config::from_env()
+        .region(region_provider)
+        .endpoint_url(s3_endpoint)
+        .load()
+        .await;
+
+    let config = aws_sdk_s3::config::Builder::from(&sdk_config)
+        .force_path_style(true)
+        .build();
+
+    let s3_client = aws_sdk_s3::Client::from_conf(config);
+
+    let expires_in = match PresigningConfig::expires_in(std::time::Duration::from_secs(60 * 10)) {
+        Ok(expires_in) => expires_in,
+        Err(e) => {
+            eprintln!("Failed to create presigned config: {}", e);
+            return HttpResponse::InternalServerError().finish();
+        }
+    };
+
+    let file_key = format!("{algo_id}.log");
+    let presigned_request = match s3_client
+        .put_object()
+        .bucket("nutc")
+        .key(&file_key)
+        .presigned(expires_in)
+        .await
+    {
+        Ok(req) => req,
+        Err(e) => {
+            eprintln!("Failed to create presigned request: {}", e);
+            return HttpResponse::InternalServerError().finish();
+        }
+    };
+
+    let presigned_url = presigned_request.uri();
+    let logfile_query = r#"
+        INSERT INTO "log_files" ("s3Key", "createdAt", "updatedAt") VALUES ($1, NOW(), NOW())
+    "#;
+
+    let update_algo_query = r#"
+        UPDATE "algos"
+        SET "logFileS3Key" = $1
+        where "algoFileS3Key" = $2
+    "#;
+
+    let transaction = match postgres_client.transaction().await {
+        Ok(tx) => tx,
+        Err(e) => {
+            eprintln!("Failed to create DB transaction: {}", e);
+            return HttpResponse::InternalServerError().finish();
+        }
+    };
+
+    if let Err(e) = transaction.execute(logfile_query, &[&file_key]).await {
+        eprintln!("Failed to execute logfile_query: {}", e);
+        return HttpResponse::InternalServerError().finish();
+    }
+    if let Err(e) = transaction
+        .execute(update_algo_query, &[&file_key, &algo_id])
+        .await
+    {
+        eprintln!("Failed to execute update_algo_query: {}", e);
+        return HttpResponse::InternalServerError().finish();
+    }
+
+    if let Err(e) = transaction.commit().await {
+        eprintln!("Failed to commit transaction: {}", e);
+        return HttpResponse::InternalServerError().finish();
+    }
+
     let sandbox_response = client
-        .post(&sandbox_url)
+        .post(format!("{sandbox_url}?logfile_url={presigned_url}"))
         .header("Content-Type", "application/json")
         .body(algo_data)
         .send()
