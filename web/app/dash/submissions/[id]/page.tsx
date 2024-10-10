@@ -1,3 +1,4 @@
+'use server'
 import { getAlgo } from "@/api";
 import { getSession } from "@auth0/nextjs-auth0";
 import { ArrowDownTrayIcon } from "@heroicons/react/16/solid";
@@ -21,7 +22,7 @@ export default async function SubmissionPage(props: {
 
   function formatNewLines(str: string): TrustedHTML {
     return str.replace(/\\n/g, "<br />");
-  };
+  }
 
   const lintFailureMessage = algo?.lintFailureMessage;
   const lintSuccessMessage = algo?.lintSuccessMessage;
@@ -59,15 +60,26 @@ export default async function SubmissionPage(props: {
           <ArrowDownTrayIcon className="-mr-0.5 h-5 w-5" aria-hidden="true" />
         </a>
 
-        <AlgoGraphs algo={algo} userId={session.user.sub} />
+        <AlgoGraphs
+          algo={algo}
+          userId={session.user.sub}
+          // This is a crazy hack to let us have the "internal" s3 endpoint that is within the docker
+          // and then the external s3 that the user can see
+          // Probably should be implemented with process.env.NEXT_PUBLIC_S3_ENDPOINT? idk in prod it will be all the same
+          s3Endpoint={process.env.S3_ENDPOINT!}
+        />
       </div>
     );
   } else {
-    return <div className="flex flex-col items-center pt-12">
-      <h1 className="text-3xl font-bold mb-12">Error Log</h1>
-      <div className="bg-gray-800 p-6 rounded-lg">
-        <div dangerouslySetInnerHTML={{ __html: formatNewLines(stringToRender) }} />
+    return (
+      <div className="flex flex-col items-center pt-12">
+        <h1 className="text-3xl font-bold mb-12">Error Log</h1>
+        <div className="bg-gray-800 p-6 rounded-lg">
+          <div
+            dangerouslySetInnerHTML={{ __html: formatNewLines(stringToRender) }}
+          />
+        </div>
       </div>
-    </div>
+    );
   }
 }

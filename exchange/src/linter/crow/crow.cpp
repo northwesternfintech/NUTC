@@ -1,7 +1,7 @@
 #include "crow.hpp"
 
 #include "common/logging/logging.hpp"
-#include "linter/fetching/fetching.hpp"
+#include "common/fetching/fetching.hpp"
 #include "linter/spawning/spawning.hpp"
 
 namespace nutc {
