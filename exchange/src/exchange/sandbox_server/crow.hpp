@@ -50,10 +50,12 @@ public:
 private:
     void add_pending_trader_(
         const std::string& algo_id, common::AlgoLanguage language,
-        const std::string& algorithm_data
+        const std::string& algorithm_data, const std::string& logfile_url
     );
-    void
-    start_remove_timer_(unsigned int time_ms, std::weak_ptr<GenericTrader> trader_ptr);
+    void start_remove_timer_(
+        unsigned int time_ms, std::weak_ptr<GenericTrader> trader_ptr,
+        const std::string& algo_id, const std::string& logfile_url
+    );
 };
 
 } // namespace nutc::exchange
