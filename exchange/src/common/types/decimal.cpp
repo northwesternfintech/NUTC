@@ -25,35 +25,35 @@ Decimal<Scale>::set_underlying(decimal_type value)
 
 template <std::uint8_t Scale>
 Decimal<Scale>
-Decimal<Scale>::operator-(const Decimal& other) const
+Decimal<Scale>::operator-(const Decimal<Scale>& other) const
 {
     return Decimal{value_ - other.value_};
 }
 
 template <std::uint8_t Scale>
 Decimal<Scale>
-Decimal<Scale>::operator+(const Decimal& other) const
+Decimal<Scale>::operator+(const Decimal<Scale>& other) const
 {
     return Decimal{value_ + other.value_};
 }
 
 template <std::uint8_t Scale>
 Decimal<Scale>
-Decimal<Scale>::operator/(const Decimal& other) const
+Decimal<Scale>::operator/(const Decimal<Scale>& other) const
 {
     return Decimal{value_ * MULTIPLIER / other.value_};
 }
 
 template <std::uint8_t Scale>
 Decimal<Scale>
-Decimal<Scale>::operator*(const Decimal& other) const
+Decimal<Scale>::operator*(const Decimal<Scale>& other) const
 {
     return Decimal{(value_ * other.value_) / MULTIPLIER};
 }
 
 template <std::uint8_t Scale>
 Decimal<Scale>&
-Decimal<Scale>::operator*=(const Decimal& other)
+Decimal<Scale>::operator*=(const Decimal<Scale>& other)
 {
     value_ *= other.value_;
     value_ /= MULTIPLIER;
@@ -62,7 +62,7 @@ Decimal<Scale>::operator*=(const Decimal& other)
 
 template <std::uint8_t Scale>
 Decimal<Scale>&
-Decimal<Scale>::operator/=(const Decimal& other)
+Decimal<Scale>::operator/=(const Decimal<Scale>& other)
 {
     value_ *= MULTIPLIER;
     value_ /= other.value_;
@@ -71,7 +71,7 @@ Decimal<Scale>::operator/=(const Decimal& other)
 
 template <std::uint8_t Scale>
 Decimal<Scale>&
-Decimal<Scale>::operator+=(const Decimal& other)
+Decimal<Scale>::operator+=(const Decimal<Scale>& other)
 {
     value_ += other.value_;
     return *this;
@@ -98,7 +98,7 @@ Decimal<Scale>::operator float() const
 
 template <std::uint8_t Scale>
 Decimal<Scale>
-Decimal<Scale>::difference(const Decimal& other) const
+Decimal<Scale>::difference(const Decimal<Scale>& other) const
 {
     if (value_ >= other.value_) {
         return Decimal{value_ - other.value_};
@@ -107,6 +107,7 @@ Decimal<Scale>::difference(const Decimal& other) const
 }
 
 template class Decimal<PRICE_DECIMAL_PLACES>;
+template class Decimal<HIGH_PRECISION_DECIMAL>;
 
 #if PRICE_DECIMAL_PLACES != QUANTITY_DECIMAL_PLACES
 template class Decimal<QUANTITY_DECIMAL_PLACES>;

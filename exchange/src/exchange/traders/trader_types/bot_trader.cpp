@@ -23,7 +23,8 @@ BotTrader::notify_position_change(common::position order)
 {
     assert(order.ticker == TICKER);
 
-    common::decimal_price total_cap = order.price * order.quantity;
+    common::decimal_high_precision total_cap =
+        order.price.high_precision_multiply(order.quantity);
     if (order.side == common::Side::buy) {
         modify_long_capital(total_cap);
     }

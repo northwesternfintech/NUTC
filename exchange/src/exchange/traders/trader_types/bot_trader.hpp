@@ -14,8 +14,8 @@ namespace nutc::exchange {
 class BotTrader : public GenericTrader {
     const common::Ticker TICKER;
     const common::decimal_price INTEREST_LIMIT;
-    common::decimal_price short_interest_;
-    common::decimal_price long_interest_;
+    common::decimal_high_precision short_interest_;
+    common::decimal_high_precision long_interest_;
 
     IncomingMessageQueue orders_;
 
@@ -59,7 +59,7 @@ public:
     [[nodiscard]] common::decimal_price
     get_long_interest() const
     {
-        return long_interest_;
+        return common::decimal_price{long_interest_};
     }
 
     [[nodiscard]] common::decimal_price
@@ -71,7 +71,7 @@ public:
     [[nodiscard]] common::decimal_price
     get_short_interest() const
     {
-        return short_interest_;
+        return common::decimal_price{short_interest_};
     }
 
     ~BotTrader() override = default;
@@ -131,13 +131,13 @@ protected:
     }
 
     void
-    modify_short_capital(common::decimal_price delta)
+    modify_short_capital(common::decimal_high_precision delta)
     {
         short_interest_ += delta;
     }
 
     void
-    modify_long_capital(common::decimal_price delta)
+    modify_long_capital(common::decimal_high_precision delta)
     {
         long_interest_ += delta;
     }
