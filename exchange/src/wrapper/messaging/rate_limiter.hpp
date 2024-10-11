@@ -8,7 +8,7 @@ class RateLimiter {
     std::queue<std::chrono::steady_clock::time_point> timestamps_;
 
     // TODO(stevenewald): make configurable
-    static constexpr size_t MAX_CALLS = 30;
+    static constexpr size_t MAX_CALLS = 50'000;
     static constexpr std::chrono::seconds TIME_WINDOW = std::chrono::seconds(1);
 
 public:
