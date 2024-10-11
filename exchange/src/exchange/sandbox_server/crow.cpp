@@ -14,7 +14,7 @@
 
 namespace nutc::exchange {
 
-CrowServer::CrowServer() :
+CrowServer::CrowServer(std::uint16_t port) :
     work_guard_(ba::make_work_guard(io_context_)),
     timer_thread([this]() { io_context_.run(); })
 {
@@ -76,7 +76,7 @@ CrowServer::CrowServer() :
                 }
             }
         );
-    server_thread = std::thread([this] { app.signal_clear().port(18080).run(); });
+    server_thread = std::jthread([this, port] { app.signal_clear().port(port).run(); });
 }
 
 void
@@ -111,17 +111,7 @@ CrowServer::add_pending_trader_(
 
 CrowServer::~CrowServer()
 {
-    // Quill deconstruction can cause segfault
-    app.loglevel(crow::LogLevel::CRITICAL);
-    app.stop();
-
     io_context_.stop();
-
-    if (server_thread.joinable())
-        server_thread.join();
-
-    if (timer_thread.joinable())
-        timer_thread.join();
 }
 
 void

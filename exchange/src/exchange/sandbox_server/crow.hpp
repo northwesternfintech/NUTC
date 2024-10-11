@@ -16,10 +16,10 @@ using lock_guard = std::lock_guard<std::mutex>;
 class CrowServer {
     ba::io_context io_context_;
     ba::executor_work_guard<ba::io_context::executor_type> work_guard_;
-    std::thread timer_thread;
+    std::jthread timer_thread;
 
     crow::SimpleApp app{};
-    std::thread server_thread;
+    std::jthread server_thread;
     std::vector<ba::steady_timer> timers_{};
 
     mutable std::mutex trader_lock;
@@ -36,14 +36,7 @@ public:
         return pending_traders;
     }
 
-    static CrowServer&
-    get_instance()
-    {
-        static CrowServer server{};
-        return server;
-    }
-
-    CrowServer();
+    explicit CrowServer(std::uint16_t port);
 
     ~CrowServer();
 
