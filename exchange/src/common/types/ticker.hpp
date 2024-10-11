@@ -11,7 +11,9 @@
 namespace nutc::common {
 // NOTE: this must be the same as Side in template.hpp
 enum class Ticker : std::uint8_t { ETH = 0, BTC = 1, LTC = 2 }; // NOLINT
-static constexpr auto TICKERS = {Ticker::ETH, Ticker::BTC, Ticker::LTC};
+[[maybe_unused]] static constexpr auto TICKERS = {
+    Ticker::ETH, Ticker::BTC, Ticker::LTC
+};
 
 inline std::string
 to_string(Ticker ticker)
