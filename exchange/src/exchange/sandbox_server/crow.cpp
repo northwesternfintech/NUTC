@@ -3,7 +3,6 @@
 #include "common/fetching/fetching.hpp"
 #include "common/logging/logging.hpp"
 #include "common/messages_exchange_to_wrapper.hpp"
-#include "common/types/algorithm/base_algorithm.hpp"
 #include "exchange/config/dynamic/config.hpp"
 #include "exchange/config/static/config.hpp"
 #include "exchange/traders/trader_types/algo_trader.hpp"

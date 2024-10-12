@@ -1,15 +1,10 @@
+#include "common/util.hpp"
 #include "linter/spawning/spawning.hpp"
 
 #include <gtest/gtest.h>
 
-#include <iostream>
-
-class IntegrationLinterCppTest : public ::testing::Test {
-protected:
-    nutc::spawning::LintProcessManager manager;
-};
-
-const std::string basic_algo = R"(#include <cstdint>
+namespace {
+constexpr auto BASIC_ALGO = R"(#include <cstdint>
 #include <string>
 enum class Side { buy = 0, sell = 1 };
 enum class Ticker : std::uint8_t { ETH = 0, BTC = 1, LTC = 2 }; // NOLINT
@@ -33,7 +28,7 @@ public:
 };
 )";
 
-const std::string syntax_error = R"(#include <cstdint>
+constexpr auto SYNTAX_ERROR = R"(#include <cstdint>
 #include <string>
 enum class Side { buy = 0, sell = 1 };
 enum class Ticker : std::uint8_t { ETH = 0, BTC = 1, LTC = 2 }; // NOLINT
@@ -56,7 +51,7 @@ public:
 };
 )";
 
-const std::string exception_thrown = R"(#include <cstdint>
+constexpr auto EXCEPTION_THROWN = R"(#include <cstdint>
 #include <string>
 #include <stdexcept>
 enum class Side { buy = 0, sell = 1 };
@@ -80,26 +75,28 @@ public:
 };
 )";
 
-using nutc::spawning::AlgoLanguage;
+using nutc::common::AlgoLanguage;
+using nutc::linter::spawn_client;
+} // namespace
 
-TEST_F(IntegrationLinterCppTest, basic)
+TEST(IntegrationLinterCppTest, basic)
 {
-    auto lint_result = manager.spawn_client(basic_algo, AlgoLanguage::Cpp);
+    auto lint_result = spawn_client(BASIC_ALGO, AlgoLanguage::cpp);
     std::cout << "first " << lint_result.message << "\n";
     ASSERT_TRUE(lint_result.success);
 }
 
-TEST_F(IntegrationLinterCppTest, SyntaxErrorDetection)
+TEST(IntegrationLinterCppTest, SyntaxErrorDetection)
 {
-    auto lint_result = manager.spawn_client(syntax_error, AlgoLanguage::Cpp);
+    auto lint_result = spawn_client(SYNTAX_ERROR, AlgoLanguage::cpp);
     ASSERT_FALSE(lint_result.success);
     EXPECT_TRUE(lint_result.message.contains("‘SYNTAX’ was not declared in this scope")
     );
 }
 
-TEST_F(IntegrationLinterCppTest, RuntimeError)
+TEST(IntegrationLinterCppTest, RuntimeError)
 {
-    auto lint_result = manager.spawn_client(exception_thrown, AlgoLanguage::Cpp);
+    auto lint_result = spawn_client(EXCEPTION_THROWN, AlgoLanguage::cpp);
     ASSERT_FALSE(lint_result.success);
     EXPECT_TRUE(lint_result.message.contains("Failed to run on_orderbook_update"));
     EXPECT_TRUE(lint_result.message.contains("This is an error"));

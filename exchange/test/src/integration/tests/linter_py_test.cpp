@@ -1,13 +1,10 @@
+#include "common/util.hpp"
 #include "linter/spawning/spawning.hpp"
 
 #include <gtest/gtest.h>
 
-class IntegrationLinterPyTest : public ::testing::Test {
-protected:
-    nutc::spawning::LintProcessManager manager;
-};
-
-const std::string basic_algo = R"(class Strategy:
+namespace {
+constexpr auto BASIC_ALGO = R"(class Strategy:
     def __init__(self) -> None:
         pass
 
@@ -31,7 +28,7 @@ const std::string basic_algo = R"(class Strategy:
 )";
 
 // TODO: fix/restore
-const std::string timeout_algo = R"(import time
+constexpr auto timeout_algo = R"(import time
 class Strategy:
     def __init__(self) -> None:
         time.sleep(20)
@@ -55,7 +52,7 @@ class Strategy:
         pass
 )";
 
-const std::string missing_on_trade_update_algo = R"(class Strategy:
+constexpr auto MISSING_ON_TRADE_UPDATE_ALGO = R"(class Strategy:
     def __init__(self) -> None:
         pass
     def on_orderbook_update(
@@ -74,7 +71,7 @@ const std::string missing_on_trade_update_algo = R"(class Strategy:
         pass
 )";
 
-const std::string missing_on_orderbook_update_algo = R"(class Strategy:
+constexpr auto MISSING_ON_ORDERBOOK_UPDATE_ALGO = R"(class Strategy:
     def __init__(self) -> None:
         pass
 
@@ -91,7 +88,7 @@ const std::string missing_on_orderbook_update_algo = R"(class Strategy:
         pass
 )";
 
-const std::string missing_on_account_update_algo = R"(class Strategy:
+constexpr auto MISSING_ON_ACCOUNT_UPDATE_ALGO = R"(class Strategy:
     def __init__(self) -> None:
         pass
         
@@ -103,40 +100,42 @@ const std::string missing_on_account_update_algo = R"(class Strategy:
         pass
 )";
 
-TEST_F(IntegrationLinterPyTest, basic)
+using nutc::common::AlgoLanguage;
+using nutc::linter::spawn_client;
+} // namespace
+
+TEST(IntegrationLinterPyTest, basic)
 {
-    auto lint_result =
-        manager.spawn_client(basic_algo, nutc::spawning::AlgoLanguage::Python);
+    auto lint_result = spawn_client(BASIC_ALGO, AlgoLanguage::python);
     ASSERT_TRUE(lint_result.success);
 }
 
-TEST_F(IntegrationLinterPyTest, timeout)
+TEST(IntegrationLinterPyTest, timeout)
 {
     // TODO: complete
     return;
-    auto lint_result =
-        manager.spawn_client(timeout_algo, nutc::spawning::AlgoLanguage::Python);
+    auto lint_result = spawn_client(timeout_algo, AlgoLanguage::python);
     ASSERT_FALSE(lint_result.success);
-    ASSERT_TRUE(
+    EXPECT_TRUE(
         lint_result.message.find("Your code did not execute within")
         != std::string::npos
     );
 }
 
-TEST_F(IntegrationLinterPyTest, invalidAlgo)
+TEST(IntegrationLinterPyTest, invalidAlgo)
 {
     std::string algo = R"(not_valid_python)";
-    auto lint_result = manager.spawn_client(algo, nutc::spawning::AlgoLanguage::Python);
+    auto lint_result = spawn_client(algo, AlgoLanguage::python);
     ASSERT_FALSE(lint_result.success);
     ASSERT_TRUE(
         lint_result.message.find("Failed to import code:") != std::string::npos
     );
 }
 
-TEST_F(IntegrationLinterPyTest, noStrategyClass)
+TEST(IntegrationLinterPyTest, noStrategyClass)
 {
     std::string algo = R"(import math)";
-    auto lint_result = manager.spawn_client(algo, nutc::spawning::AlgoLanguage::Python);
+    auto lint_result = spawn_client(algo, AlgoLanguage::python);
     ASSERT_FALSE(lint_result.success);
     ASSERT_TRUE(
         lint_result.message.find("NameError: name 'Strategy' is not defined")
@@ -144,31 +143,33 @@ TEST_F(IntegrationLinterPyTest, noStrategyClass)
     );
 }
 
-TEST_F(IntegrationLinterPyTest, missingRequiredFunction)
+TEST(IntegrationLinterPyTest, MissingOnTradeUpdateFunction)
 {
-    auto lint_result = manager.spawn_client(
-        missing_on_trade_update_algo, nutc::spawning::AlgoLanguage::Python
-    );
+    auto lint_result = spawn_client(MISSING_ON_TRADE_UPDATE_ALGO, AlgoLanguage::python);
     ASSERT_FALSE(lint_result.success);
-    ASSERT_TRUE(
+    EXPECT_TRUE(
         lint_result.message.find("has no attribute 'on_trade_update'")
         != std::string::npos
     );
+}
 
-    lint_result = manager.spawn_client(
-        missing_on_orderbook_update_algo, nutc::spawning::AlgoLanguage::Python
-    );
+TEST(IntegrationLinterPyTest, MissingOnOrderBookUpdateFunction)
+{
+    auto lint_result =
+        spawn_client(MISSING_ON_ORDERBOOK_UPDATE_ALGO, AlgoLanguage::python);
     ASSERT_FALSE(lint_result.success);
-    ASSERT_TRUE(
+    EXPECT_TRUE(
         lint_result.message.find("has no attribute 'on_orderbook_update'")
         != std::string::npos
     );
+}
 
-    lint_result = manager.spawn_client(
-        missing_on_account_update_algo, nutc::spawning::AlgoLanguage::Python
-    );
+TEST(IntegrationLinterPyTest, MissingOnAccountUpdatefunction)
+{
+    auto lint_result =
+        spawn_client(MISSING_ON_ACCOUNT_UPDATE_ALGO, AlgoLanguage::python);
     ASSERT_FALSE(lint_result.success);
-    ASSERT_TRUE(
+    EXPECT_TRUE(
         lint_result.message.find("has no attribute 'on_account_update'")
         != std::string::npos
     );

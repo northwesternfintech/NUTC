@@ -46,6 +46,9 @@ send_response(const std::string& response)
 int
 main(int argc, char* argv[])
 {
+    using namespace nutc::common;
+    using namespace nutc::linter;
+
     if (argc < 2) {
         send_response("[linter] no language provided");
         return 1;
@@ -56,19 +59,19 @@ main(int argc, char* argv[])
 
     std::string algo_code = nutc::common::base64_decode(algo_code_base64);
 
-    nutc::lint::lint_result lint_result;
+    lint_result lint_result;
     std::string flag = argv[1];
     if (flag == "-python") {
-        nutc::lint::PyRuntime runtime(
+        PyRuntime runtime(
             algo_code, mock_limit_func, mock_market_func, mock_cancel_func
         );
-        lint_result = nutc::lint::lint(runtime);
+        lint_result = lint(runtime);
     }
     else if (flag == "-cpp") {
-        nutc::lint::CppRuntime runtime(
+        CppRuntime runtime(
             algo_code, mock_limit_func, mock_market_func, mock_cancel_func
         );
-        lint_result = nutc::lint::lint(runtime);
+        lint_result = lint(runtime);
     }
     else {
         send_response("[linter] no language provided");

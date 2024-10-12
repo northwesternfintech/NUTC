@@ -4,7 +4,7 @@
 
 #include <pybind11/embed.h>
 
-namespace nutc::lint {
+namespace nutc::linter {
 
 class PyRuntime : public Runtime {
 public:
@@ -46,4 +46,4 @@ private:
     );
 };
 
-} // namespace nutc::lint
+} // namespace nutc::linter

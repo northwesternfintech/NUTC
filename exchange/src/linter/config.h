@@ -29,7 +29,7 @@
 #define S3_BUCKET "nutc"
 
 // Linting
-#define LINT_AUTO_TIMEOUT_SECONDS 10
+#define LINT_AUTO_TIMEOUT_SECONDS 4
 
 /**
  * If we are in debug mode.

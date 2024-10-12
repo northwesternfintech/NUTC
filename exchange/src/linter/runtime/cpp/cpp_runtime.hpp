@@ -2,7 +2,7 @@
 
 #include "linter/runtime/runtime.hpp"
 
-namespace nutc::lint {
+namespace nutc::linter {
 
 class CppRuntime : public Runtime {
 public:
@@ -38,11 +38,11 @@ private:
     using OnAccountUpdateFunc =
         void (*)(Strategy*, common::Ticker, common::Side, float, float, float);
 
-    OnTradeUpdateFunc on_trade_update_func_;
-    OnOrderBookUpdateFunc on_orderbook_update_func_;
-    OnAccountUpdateFunc on_account_update_func_;
+    OnTradeUpdateFunc on_trade_update_func_{};
+    OnOrderBookUpdateFunc on_orderbook_update_func_{};
+    OnAccountUpdateFunc on_account_update_func_{};
 
-    Strategy* strategy_object_;
+    Strategy* strategy_object_{};
     void* dl_handle_{};
 };
-} // namespace nutc::lint
+} // namespace nutc::linter

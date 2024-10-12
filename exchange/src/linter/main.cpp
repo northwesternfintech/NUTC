@@ -1,3 +1,5 @@
+#include "linter/spawning/spawning.hpp"
+
 #include <quill/LogLevel.h>
 #define CROW_MAIN
 #include "common/logging/logging.hpp"
@@ -9,7 +11,6 @@
 
 #include <iostream>
 #include <string>
-#include <thread>
 
 static void
 process_arguments(int argc, const char** argv)
@@ -46,9 +47,7 @@ main(int argc, const char** argv)
     nutc::logging::init("linter.log", quill::LogLevel::Info);
     log_i(main, "Starting NUTC Linter");
 
-    auto server_thread = nutc::crow::get_server_thread();
-
-    server_thread.join();
+    nutc::linter::get_crow_app().port(18081).run();
 
     return 0;
 }

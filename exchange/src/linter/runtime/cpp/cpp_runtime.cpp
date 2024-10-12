@@ -15,7 +15,7 @@
 #include <fstream>
 #include <iostream>
 
-namespace nutc::lint {
+namespace nutc::linter {
 
 CppRuntime::CppRuntime(
     std::string algo, LimitOrderFunction limit_order, MarketOrderFunction market_order,
@@ -34,6 +34,7 @@ CppRuntime::~CppRuntime()
     }
 }
 
+// TODO: should be in the constructor
 std::optional<std::string>
 CppRuntime::init()
 {
@@ -103,4 +104,4 @@ CppRuntime::fire_on_account_update(
     on_account_update_func_(strategy_object_, ticker, side, quantity, price, capital);
 }
 
-} // namespace nutc::lint
+} // namespace nutc::linter
