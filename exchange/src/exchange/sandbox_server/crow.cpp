@@ -43,7 +43,8 @@ CrowServer::CrowServer(std::uint16_t port) :
                     return crow::response(400);
                 }
 
-                std::string logfile_url = req.url_params.get("logfile_url");
+                std::string logfile_url =
+                    common::base64_decode(req.url_params.get("logfile_url"));
 
                 try {
                     log_i(
@@ -76,7 +77,7 @@ CrowServer::CrowServer(std::uint16_t port) :
                 }
             }
         );
-    server_thread = std::jthread([this, port] { app.signal_clear().port(port).run(); });
+    server_thread = std::thread([this, port] { app.signal_clear().port(port).run(); });
 }
 
 void
@@ -112,6 +113,14 @@ CrowServer::add_pending_trader_(
 CrowServer::~CrowServer()
 {
     io_context_.stop();
+
+    if (timer_thread.joinable()) {
+        timer_thread.join();
+    }
+
+    if (server_thread.joinable()) {
+        server_thread.join();
+    }
 }
 
 void
