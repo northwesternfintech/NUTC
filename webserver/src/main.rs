@@ -1,7 +1,8 @@
 use actix_cors::Cors;
 use actix_web::{get, http::header, post, web, App, HttpResponse, HttpServer, Responder};
 use aws_config::{meta::region::RegionProviderChain, Region};
-use aws_sdk_s3::{config::endpoint::Endpoint, presigning::PresigningConfig};
+use aws_sdk_s3::presigning::PresigningConfig;
+use base64::encode;
 use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod};
 use reqwest::Client;
 use serde::Deserialize;
@@ -183,7 +184,8 @@ async fn request_sandbox(
         }
     };
 
-    let presigned_url = presigned_request.uri();
+    // TODO: we should not have to encode this. This is bad. Fix later
+    let presigned_url = encode(presigned_request.uri());
     let logfile_query = r#"
         INSERT INTO "log_files" ("s3Key", "createdAt", "updatedAt") VALUES ($1, NOW(), NOW())
     "#;
