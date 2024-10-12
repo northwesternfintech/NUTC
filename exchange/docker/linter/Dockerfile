@@ -33,4 +33,7 @@ ENV NUTC_CPP_TEMPLATE_PATH="/app/template.cpp"
 
 EXPOSE 18081
 
+# Numpy
+ENV OPENBLAS_NUM_THREADS=1
+
 CMD /app/exchange/build/LINTER
