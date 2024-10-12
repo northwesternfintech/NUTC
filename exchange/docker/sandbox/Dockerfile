@@ -33,6 +33,9 @@ ENV NUTC_WRAPPER_BINARY_PATH="/app/exchange/build/WRAPPER"
 ENV NUTC_CONFIG_FILE="/app/exchange/config.yml"
 ENV NUTC_CPP_TEMPLATE_PATH="/app/template.cpp"
 
+# Numpy
+ENV OPENBLAS_NUM_THREADS=1
+
 EXPOSE 4152 18080
 
 ENTRYPOINT ["/app/exchange/build/NUTC"]
