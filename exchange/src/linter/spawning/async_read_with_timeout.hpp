@@ -11,7 +11,7 @@ class AsyncReadWithTimeout {
 public:
     AsyncReadWithTimeout(
         ba::io_context& io_context, bp::async_pipe& pipe, ba::streambuf& buffer,
-        std::chrono::seconds timeout,
+        std::chrono::milliseconds timeout,
         std::function<void(const boost::system::error_code&, std::size_t)> handler
     );
 

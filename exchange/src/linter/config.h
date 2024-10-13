@@ -15,8 +15,8 @@
 
 // Logging
 
-#define LOG_FILE_SIZE      (1024 * 1024 / 2) // 512 KB
-#define LOG_BACKUP_COUNT   5
+#define LOG_FILE_SIZE    (1024 * 1024 / 2) // 512 KB
+#define LOG_BACKUP_COUNT 5
 
 #ifdef NUTC_LOCAL_DEV
 #  define S3_URL        "http://localhost:4566"
@@ -29,7 +29,7 @@
 #define S3_BUCKET "nutc"
 
 // Linting
-#define LINT_AUTO_TIMEOUT_SECONDS 4
+#define LINT_AUTO_TIMEOUT_MILLISECONDS 4000
 
 /**
  * If we are in debug mode.
