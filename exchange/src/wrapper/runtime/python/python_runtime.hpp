@@ -28,11 +28,11 @@ private:
     pybind11::scoped_interpreter guard_;
 
     void fire_on_trade_update(
-        Ticker ticker, Side side, decimal_price price, decimal_quantity quantity
+        Ticker ticker, Side side, decimal_quantity quantity, decimal_price price
     ) const override;
 
     void fire_on_orderbook_update(
-        Ticker ticker, Side side, decimal_price price, decimal_quantity quantity
+        Ticker ticker, Side side, decimal_quantity quantity, decimal_price price
     ) const override;
 
     void fire_on_account_update(
