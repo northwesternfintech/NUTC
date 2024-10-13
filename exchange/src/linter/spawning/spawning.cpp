@@ -2,7 +2,6 @@
 
 #include "async_read_with_timeout.hpp"
 #include "common/util.hpp"
-#include "linter/config.h"
 
 #include <fmt/core.h>
 #include <glaze/json/read.hpp>
@@ -94,7 +93,10 @@ spawn_algorithm(
 } // namespace
 
 lint_result
-spawn_client(const std::string& algo_code, common::AlgoLanguage language)
+spawn_client(
+    const std::string& algo_code, common::AlgoLanguage language,
+    std::chrono::milliseconds timeout
+)
 {
     boost::asio::io_context io_context;
     auto [process, pipe_from_algo] = spawn_algorithm(algo_code, language, io_context);
@@ -102,10 +104,8 @@ spawn_client(const std::string& algo_code, common::AlgoLanguage language)
     ba::streambuf buffer;
 
     auto async_read = std::make_unique<AsyncReadWithTimeout>(
-        io_context, *pipe_from_algo, buffer,
-        std::chrono::seconds{LINT_AUTO_TIMEOUT_SECONDS},
-        [&buffer, &res, &process,
-         &pipe_from_algo](const boost::system::error_code& err, std::size_t) {
+        io_context, *pipe_from_algo, buffer, timeout,
+        [&](const boost::system::error_code& err, std::size_t) {
             if (!err) {
                 std::istream stream(&buffer);
                 std::string message;
@@ -114,8 +114,8 @@ spawn_client(const std::string& algo_code, common::AlgoLanguage language)
                 auto error = glz::read_json<lint_result>(res, decoded_message);
                 if (error) {
                     res = {
-                        false, "Internal server error. Reach out to "
-                               "nuft@u.northwesten.edu for support"
+                        false, "Internal server error while attempting to read json. "
+                               "Reach out to nuft@u.northwesten.edu for support"
                     };
                 }
             }
@@ -123,11 +123,9 @@ spawn_client(const std::string& algo_code, common::AlgoLanguage language)
                 res.success = false;
                 res.message += fmt::format(
                     "[linter] FAILED to lint algo\n\nYour code did not execute within "
-                    "{} "
-                    "seconds. Check for infinite loops or recursion. If the issue "
-                    "persists, "
-                    "reach out on Piazza.\n",
-                    LINT_AUTO_TIMEOUT_SECONDS
+                    "{} seconds. Check for infinite loops or recursion. If the issue "
+                    "persists, reach out on Piazza.\n",
+                    timeout.count()
                 );
             }
             else {

@@ -3,6 +3,8 @@
 
 #include <gtest/gtest.h>
 
+// TODO: put these in files, similar to the normal integration tests
+// Then we can parameterize
 namespace {
 constexpr auto BASIC_ALGO = R"(class Strategy:
     def __init__(self) -> None:
@@ -27,7 +29,6 @@ constexpr auto BASIC_ALGO = R"(class Strategy:
         pass
 )";
 
-// TODO: fix/restore
 constexpr auto timeout_algo = R"(import time
 class Strategy:
     def __init__(self) -> None:
@@ -112,9 +113,8 @@ TEST(IntegrationLinterPyTest, basic)
 
 TEST(IntegrationLinterPyTest, timeout)
 {
-    // TODO: complete
-    return;
-    auto lint_result = spawn_client(timeout_algo, AlgoLanguage::python);
+    std::chrono::milliseconds timeout{100};
+    auto lint_result = spawn_client(timeout_algo, AlgoLanguage::python, timeout);
     ASSERT_FALSE(lint_result.success);
     EXPECT_TRUE(
         lint_result.message.find("Your code did not execute within")
