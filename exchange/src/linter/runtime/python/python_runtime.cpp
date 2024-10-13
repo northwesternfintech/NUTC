@@ -4,7 +4,7 @@
 #include <pybind11/embed.h>
 #include <pybind11/pybind11.h>
 
-namespace nutc::lint {
+namespace nutc::linter {
 
 namespace py = pybind11;
 
@@ -51,8 +51,7 @@ PyRuntime::fire_on_orderbook_update(
 
 void
 PyRuntime::fire_on_account_update(
-    common::Ticker ticker, common::Side side, float price, float quantity,
-    float capital
+    common::Ticker ticker, common::Side side, float price, float quantity, float capital
 ) const
 {
     py::globals()["strategy"].attr("on_account_update")(
@@ -158,4 +157,4 @@ PyRuntime::run_initialization_code(const std::string& py_code)
     return std::nullopt;
 }
 
-} // namespace nutc::lint
+} // namespace nutc::linter

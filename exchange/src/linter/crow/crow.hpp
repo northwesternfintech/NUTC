@@ -1,12 +1,8 @@
 #pragma once
 #include <crow/app.h>
 
-#include <thread>
+namespace nutc::linter {
 
-namespace nutc {
-namespace crow {
+::crow::SimpleApp get_crow_app();
 
-std::thread get_server_thread();
-
-}
-} // namespace nutc
+} // namespace nutc::linter

@@ -1,9 +1,10 @@
 #pragma once
 
+#include "common/util.hpp"
+
 #include <fmt/format.h>
 
 namespace nutc::common {
-enum class AlgoLanguage { python, cpp };
 enum class AlgoLocation { local, s3 };
 
 class BaseAlgorithm {

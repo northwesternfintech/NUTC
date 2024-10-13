@@ -1,18 +1,37 @@
 #include "spawning.hpp"
 
+#include "async_read_with_timeout.hpp"
 #include "common/util.hpp"
 #include "linter/config.h"
 
 #include <fmt/core.h>
 #include <glaze/json/read.hpp>
 
-namespace bp = boost::process;
+#include <filesystem>
 
 namespace nutc {
-namespace spawning {
+namespace linter {
+
+namespace {
+namespace bp = boost::process;
+namespace ba = boost::asio;
+
+struct algorithm_process {
+    std::unique_ptr<bp::child> process;
+    std::unique_ptr<bp::async_pipe> pipe_algorithm_to_linter;
+};
+
+static algorithm_process spawn_algorithm(
+    const std::string& algo_code, common::AlgoLanguage language,
+    ba::io_context& io_context
+);
+
+static const std::filesystem::path& spawner_binary_path();
+
+static std::string get_language_flag(common::AlgoLanguage language);
 
 const std::filesystem::path&
-LintProcessManager::spawner_binary_path()
+spawner_binary_path()
 {
     static constexpr auto LINTER_SPAWNER_BINARY_ENV_VAR =
         "NUTC_LINTER_SPAWNER_BINARY_PATH";
@@ -34,96 +53,101 @@ LintProcessManager::spawner_binary_path()
     return spawner_binary_path;
 }
 
-nutc::lint::lint_result
-LintProcessManager::spawn_client(const std::string& algo_code, AlgoLanguage language)
+std::string
+get_language_flag(common::AlgoLanguage language)
 {
-    static const std::string path{spawner_binary_path()};
-    auto in_pipe = std::make_shared<bp::async_pipe>(io_context);
-    bp::opstream out_pipe;
+    switch (language) {
+        case common::AlgoLanguage::python:
+            return "-python";
+        case common::AlgoLanguage::cpp:
+            return "-cpp";
+        default:
+            throw std::runtime_error("Unknown language");
+    }
+}
 
-    auto get_language_flag = [](AlgoLanguage language) {
-        switch (language) {
-            case nutc::spawning::AlgoLanguage::Python:
-                return "-python";
-            case nutc::spawning::AlgoLanguage::Cpp:
-                return "-cpp";
-            default:
-                throw std::runtime_error("Unknown language");
-        }
-    };
+algorithm_process
+spawn_algorithm(
+    const std::string& algo_code, common::AlgoLanguage language,
+    ba::io_context& io_context
+)
+{
+    const static std::string spawner_path = spawner_binary_path();
 
-    auto child = std::make_shared<bp::child>(
-        bp::exe(path), bp::args(get_language_flag(language)),
-        bp::std_in<out_pipe, bp::std_err> stderr, bp::std_out > *in_pipe, io_context
+    auto algo_to_linter_pipe = std::make_unique<bp::async_pipe>(io_context);
+
+    bp::opstream linter_to_algo_pipe;
+    auto algorithm_process = std::make_unique<bp::child>(
+        bp::exe(spawner_path), bp::args(get_language_flag(language)),
+        bp::std_in<linter_to_algo_pipe, bp::std_err> stderr,
+        bp::std_out > *algo_to_linter_pipe, io_context
     );
 
-    out_pipe << common::base64_encode(algo_code) << std::endl;
-    out_pipe.pipe().close();
+    if (!algorithm_process->valid()) {
+        throw std::runtime_error("Failed to create linter spawner process");
+    }
 
-    auto kill_timer = std::make_shared<ba::steady_timer>(io_context);
-    kill_timer->expires_after(ba::chrono::seconds(LINT_AUTO_TIMEOUT_SECONDS));
+    linter_to_algo_pipe << common::base64_encode(algo_code) << std::endl;
+    linter_to_algo_pipe.pipe().close();
+    return {std::move(algorithm_process), std::move(algo_to_linter_pipe)};
+}
+} // namespace
 
-    nutc::lint::lint_result res;
+lint_result
+spawn_client(const std::string& algo_code, common::AlgoLanguage language)
+{
+    boost::asio::io_context io_context;
+    auto [process, pipe_from_algo] = spawn_algorithm(algo_code, language, io_context);
+    lint_result res;
+    ba::streambuf buffer;
 
-    kill_timer->async_wait([child, in_pipe, &res](const auto& ec) {
-        if (!ec) {
-            in_pipe->close();
-            res.success = false;
-            res.message += fmt::format(
-                "[linter] FAILED to lint algo\n\nYour code did not execute within "
-                "{} "
-                "seconds. Check all "
-                "functions to see if you have an infinite loop or infinite "
-                "recursion. This could also be a result of a particularly nasty error "
-                "in your code.\n\nIf you continue to experience this error, "
-                "reach out on piazza.\n",
-                LINT_AUTO_TIMEOUT_SECONDS
-            );
-
-            if (child->running()) {
-                child->terminate();
-            }
-        }
-    });
-
-    auto buffer = std::make_shared<ba::streambuf>();
-    async_read_until(
-        *in_pipe, *buffer, '\n',
-        [buffer, kill_timer, child, in_pipe, &res](const auto& ec, auto) {
-            if (!ec) {
-                kill_timer->cancel();
-
-                std::istream stream(buffer.get());
-                std::string line;
+    auto async_read = std::make_unique<AsyncReadWithTimeout>(
+        io_context, *pipe_from_algo, buffer,
+        std::chrono::seconds{LINT_AUTO_TIMEOUT_SECONDS},
+        [&buffer, &res, &process,
+         &pipe_from_algo](const boost::system::error_code& err, std::size_t) {
+            if (!err) {
+                std::istream stream(&buffer);
                 std::string message;
-
-                while (std::getline(stream, line)) {
-                    message += line;
-                }
-                if (child->running()) {
-                    child->terminate();
-                }
+                std::getline(stream, message);
                 std::string decoded_message = common::base64_decode(message);
-
-                auto error =
-                    glz::read_json<nutc::lint::lint_result>(res, decoded_message);
+                auto error = glz::read_json<lint_result>(res, decoded_message);
                 if (error) {
                     res = {
                         false, "Internal server error. Reach out to "
-                               "nuft@u.northwesten.edu "
-                               "for support"
+                               "nuft@u.northwesten.edu for support"
                     };
-                };
-                in_pipe->cancel();
+                }
             }
+            else if (err == boost::asio::error::operation_aborted) {
+                res.success = false;
+                res.message += fmt::format(
+                    "[linter] FAILED to lint algo\n\nYour code did not execute within "
+                    "{} "
+                    "seconds. Check for infinite loops or recursion. If the issue "
+                    "persists, "
+                    "reach out on Piazza.\n",
+                    LINT_AUTO_TIMEOUT_SECONDS
+                );
+            }
+            else {
+                res = {
+                    false, "Internal server error. Reach out to nuft@u.northwesten.edu "
+                           "for support"
+                };
+            }
+
+            if (process->running()) {
+                process->terminate();
+            }
+            pipe_from_algo->cancel();
         }
     );
 
     io_context.run();
-    io_context.restart();
 
     return res;
 }
 
-} // namespace spawning
+} // namespace linter
 } // namespace nutc

@@ -8,8 +8,7 @@
 
 #include <string>
 
-namespace nutc {
-namespace lint {
+namespace nutc::linter {
 
 lint_result
 lint(Runtime& runtime)
@@ -100,5 +99,4 @@ lint(Runtime& runtime)
     return {true, out_message};
 }
 
-} // namespace lint
-} // namespace nutc
+} // namespace nutc::linter

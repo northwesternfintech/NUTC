@@ -9,7 +9,7 @@
 #include <optional>
 #include <string>
 
-namespace nutc::lint {
+namespace nutc::linter {
 
 using LimitOrderFunction = std::function<std::int64_t(
     common::Side side, common::Ticker ticker, float quantity, float price, bool ioc
