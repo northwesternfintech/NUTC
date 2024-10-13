@@ -5,15 +5,13 @@
 #include <pybind11/embed.h>
 #include <pybind11/pybind11.h>
 
-#include <iostream>
-
 namespace nutc::wrapper {
 
 namespace py = pybind11;
 
 void
 PyRuntime::fire_on_trade_update(
-    Ticker ticker, Side side, decimal_price price, decimal_quantity quantity
+    Ticker ticker, Side side, decimal_quantity quantity, decimal_price price
 ) const
 {
     try {
@@ -28,7 +26,7 @@ PyRuntime::fire_on_trade_update(
 
 void
 PyRuntime::fire_on_orderbook_update(
-    Ticker ticker, Side side, decimal_price price, decimal_quantity quantity
+    Ticker ticker, Side side, decimal_quantity quantity, decimal_price price
 ) const
 {
     try {
@@ -49,7 +47,7 @@ PyRuntime::fire_on_account_update(
 {
     try {
         py::globals()["strategy"].attr("on_account_update")(
-            ticker, side, static_cast<float>(quantity), static_cast<float>(price),
+            ticker, side, static_cast<float>(price), static_cast<float>(quantity),
             static_cast<float>(capital)
         );
     } catch (const py::error_already_set& err) {
