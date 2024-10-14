@@ -11,7 +11,8 @@ RetailBot::take_action(const shared_bot_state& state)
 {
     static std::uniform_real_distribution<> dis{0.0, 1};
 
-    auto p_trade = common::decimal_price{1.0} - get_portfolio().get_capital_utilization();
+    auto p_trade =
+        common::decimal_price{1.0} - get_portfolio().get_capital_utilization();
 
     double noise_factor = dis(gen_);
 
@@ -26,7 +27,7 @@ RetailBot::take_action(const shared_bot_state& state)
     common::decimal_price noised_theo = state.THEO + generate_gaussian_noise(0, .1);
     common::decimal_quantity quantity{
         (common::decimal_price{1.0} - get_portfolio().get_capital_utilization())
-        * get_portfolio().get_capital() / noised_theo
+        * get_portfolio().get_initial_capital() / noised_theo
     };
     quantity *= RETAIL_ORDER_SIZE;
 
