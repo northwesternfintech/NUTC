@@ -8,6 +8,6 @@
 
 namespace nutc::common {
 
-// TODO: shouldnt return filepath as string
+// TODO: shouldn't return filepath as string
 std::string compile_cpp(const std::filesystem::path& filepath);
 } // namespace nutc::common

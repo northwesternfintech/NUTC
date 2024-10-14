@@ -55,7 +55,7 @@ TestMatchingCycle::match_orders_(std::vector<exchange::OrderVariant> orders)
 // parameter, we should just return void or the object itself. However, I am lazy and
 // this is a test function. Peace
 //
-// Also todo: this doesnt work correctly when we have orders of the same type that need
+// Also todo: this doesn't work correctly when we have orders of the same type that need
 // to be processed. Rework this entire thing later
 template <typename OrderT>
 std::optional<common::order_id_t>
