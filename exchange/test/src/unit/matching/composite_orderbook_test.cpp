@@ -22,8 +22,8 @@ protected:
     void
     SetUp() override
     {
-        trader_1.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
-        trader_2.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+        trader_1.get_portfolio().modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+        trader_2.get_portfolio().modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
     }
 
     nutc::exchange::CompositeOrderBook container_{Ticker::ETH};

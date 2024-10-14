@@ -1,8 +1,8 @@
 #pragma once
 
+#include "common/messages_exchange_to_wrapper.hpp"
 #include "exchange/orders/ticker_container.hpp"
 #include "exchange/traders/trader_container.hpp"
-#include "common/messages_exchange_to_wrapper.hpp"
 
 #include <hash_table7.hpp>
 #include <prometheus/counter.h>
@@ -42,7 +42,7 @@ public:
     void report_matches(const std::vector<common::match>& orders);
 
 private:
-    Gauge create_gauge_(const std::string& gauge_name);
-    Counter create_counter_(const std::string& counter_name);
+    static Gauge create_gauge_(const std::string& gauge_name);
+    static Counter create_counter_(const std::string& counter_name);
 };
 } // namespace nutc::exchange

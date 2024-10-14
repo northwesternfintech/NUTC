@@ -22,9 +22,9 @@ protected:
     void
     SetUp() override
     {
-        trader1.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
-        trader2.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
-        trader3.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+        trader1.get_portfolio().modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+        trader2.get_portfolio().modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+        trader3.get_portfolio().modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
     }
 
     void
@@ -53,8 +53,8 @@ TEST_F(UnitOrderFeeMatching, SimpleMatch)
     ASSERT_EQ(matches.size(), 1);
     ASSERT_EQ_MATCH(matches[0], Ticker::ETH, "ABC", "DEF", sell, 1, 1);
 
-    ASSERT_EQ(trader1.get_capital_delta(), -1.5);
-    ASSERT_EQ(trader2.get_capital_delta(), .5);
+    ASSERT_EQ(trader1.get_portfolio().get_capital_delta(), -1.5);
+    ASSERT_EQ(trader2.get_portfolio().get_capital_delta(), .5);
 }
 
 TEST_F(UnitOrderFeeMatching, MultipleMatches)
@@ -78,15 +78,15 @@ TEST_F(UnitOrderFeeMatching, MultipleMatches)
     ASSERT_EQ(matches.size(), 1);
     ASSERT_EQ_MATCH(matches[0], Ticker::ETH, "ABC", "DEF", sell, 1, 4);
 
-    ASSERT_EQ(trader1.get_capital_delta(), -4 * 1.5);
-    ASSERT_EQ(trader2.get_capital_delta(), 4 * .5);
+    ASSERT_EQ(trader1.get_portfolio().get_capital_delta(), -4 * 1.5);
+    ASSERT_EQ(trader2.get_portfolio().get_capital_delta(), 4 * .5);
 
     matches = add_to_engine_(sell1);
     ASSERT_EQ(matches.size(), 1);
     ASSERT_EQ_MATCH(matches[0], Ticker::ETH, "ABC", "DEF", sell, 1, 3);
 
-    ASSERT_EQ(trader1.get_capital_delta(), -4 * 1.5 + -3 * 1.5);
-    ASSERT_EQ(trader2.get_capital_delta(), 4 * .5 + 3 * .5);
+    ASSERT_EQ(trader1.get_portfolio().get_capital_delta(), -4 * 1.5 + -3 * 1.5);
+    ASSERT_EQ(trader2.get_portfolio().get_capital_delta(), 4 * .5 + 3 * .5);
 }
 
 TEST_F(UnitOrderFeeMatching, NoMatchThenMatchBuy)
@@ -102,8 +102,8 @@ TEST_F(UnitOrderFeeMatching, NoMatchThenMatchBuy)
     ASSERT_EQ(matches.size(), 1);
     ASSERT_EQ_MATCH(matches[0], Ticker::ETH, "DEF", "ABC", buy, 1, 1);
 
-    ASSERT_EQ(trader1.get_capital_delta(), .5);
-    ASSERT_EQ(trader2.get_capital_delta(), -1.5);
+    ASSERT_EQ(trader1.get_portfolio().get_capital_delta(), .5);
+    ASSERT_EQ(trader2.get_portfolio().get_capital_delta(), -1.5);
 }
 
 TEST_F(UnitOrderFeeMatching, NoMatchThenMatchSell)
@@ -123,9 +123,9 @@ TEST_F(UnitOrderFeeMatching, NoMatchThenMatchSell)
     ASSERT_EQ_MATCH(matches[0], Ticker::ETH, "ABC", "GHI", sell, 1, 1);
     ASSERT_EQ_MATCH(matches[1], Ticker::ETH, "DEF", "GHI", sell, 1, 1);
 
-    ASSERT_EQ(trader1.get_capital_delta(), -1.5);
-    ASSERT_EQ(trader2.get_capital_delta(), -1.5);
-    ASSERT_EQ(trader3.get_capital_delta(), 1);
+    ASSERT_EQ(trader1.get_portfolio().get_capital_delta(), -1.5);
+    ASSERT_EQ(trader2.get_portfolio().get_capital_delta(), -1.5);
+    ASSERT_EQ(trader3.get_portfolio().get_capital_delta(), 1);
 }
 
 TEST_F(UnitOrderFeeMatching, PassivePriceMatchWithVolume)
@@ -139,8 +139,8 @@ TEST_F(UnitOrderFeeMatching, PassivePriceMatchWithVolume)
     ASSERT_EQ(matches.size(), 1);
     ASSERT_EQ_MATCH(matches[0], Ticker::ETH, "ABC", "DEF", sell, 2, 2);
 
-    ASSERT_EQ(trader1.get_capital_delta(), -2 * 2 * 1.5);
-    ASSERT_EQ(trader2.get_capital_delta(), 2 * 2 * .5);
+    ASSERT_EQ(trader1.get_portfolio().get_capital_delta(), -2 * 2 * 1.5);
+    ASSERT_EQ(trader2.get_portfolio().get_capital_delta(), 2 * 2 * .5);
 }
 
 TEST_F(UnitOrderFeeMatching, PartialFill)
@@ -154,8 +154,8 @@ TEST_F(UnitOrderFeeMatching, PartialFill)
     ASSERT_EQ(matches.size(), 1);
     ASSERT_EQ_MATCH(matches.at(0), Ticker::ETH, "ABC", "DEF", sell, 1, 1);
 
-    ASSERT_EQ(trader1.get_capital_delta(), -1 * 1.5);
-    ASSERT_EQ(trader2.get_capital_delta(), 1 * .5);
+    ASSERT_EQ(trader1.get_portfolio().get_capital_delta(), -1 * 1.5);
+    ASSERT_EQ(trader2.get_portfolio().get_capital_delta(), 1 * .5);
 }
 
 TEST_F(UnitOrderFeeMatching, MultipleFill)
@@ -174,8 +174,8 @@ TEST_F(UnitOrderFeeMatching, MultipleFill)
     ASSERT_EQ_MATCH(matches.at(0), Ticker::ETH, "ABC", "DEF", sell, 1, 1);
     ASSERT_EQ_MATCH(matches.at(1), Ticker::ETH, "ABC", "DEF", sell, 1, 1);
 
-    ASSERT_EQ(trader1.get_capital_delta(), -2 * 1 * 1.5);
-    ASSERT_EQ(trader2.get_capital_delta(), 2 * .5);
+    ASSERT_EQ(trader1.get_portfolio().get_capital_delta(), -2 * 1 * 1.5);
+    ASSERT_EQ(trader2.get_portfolio().get_capital_delta(), 2 * .5);
 }
 
 TEST_F(UnitOrderFeeMatching, MultiplePartialFill)
@@ -194,8 +194,8 @@ TEST_F(UnitOrderFeeMatching, MultiplePartialFill)
     ASSERT_EQ_MATCH(matches.at(0), Ticker::ETH, "ABC", "DEF", sell, 1, 1);
     ASSERT_EQ_MATCH(matches.at(1), Ticker::ETH, "ABC", "DEF", sell, 1, 1);
 
-    ASSERT_EQ(trader1.get_capital_delta(), -2 * 1 * 1.5);
-    ASSERT_EQ(trader2.get_capital_delta(), 2 * .5);
+    ASSERT_EQ(trader1.get_portfolio().get_capital_delta(), -2 * 1 * 1.5);
+    ASSERT_EQ(trader2.get_portfolio().get_capital_delta(), 2 * .5);
 }
 
 TEST_F(UnitOrderFeeMatching, SimpleMatchReversed)
@@ -208,8 +208,8 @@ TEST_F(UnitOrderFeeMatching, SimpleMatchReversed)
     ASSERT_EQ(matches.size(), 1);
     ASSERT_EQ_MATCH(matches.at(0), Ticker::ETH, "DEF", "ABC", buy, 1, 1);
 
-    ASSERT_EQ(trader2.get_capital_delta(), -1 * 1 * 1.5);
-    ASSERT_EQ(trader1.get_capital_delta(), 1 * .5);
+    ASSERT_EQ(trader2.get_portfolio().get_capital_delta(), -1 * 1 * 1.5);
+    ASSERT_EQ(trader1.get_portfolio().get_capital_delta(), 1 * .5);
 }
 
 TEST_F(UnitOrderFeeMatching, PassivePriceMatchReversed)
@@ -223,8 +223,8 @@ TEST_F(UnitOrderFeeMatching, PassivePriceMatchReversed)
     ASSERT_EQ(matches.size(), 1);
     ASSERT_EQ(matches.at(0).position.price, 1.0);
     ASSERT_EQ_MATCH(matches.at(0), Ticker::ETH, "DEF", "ABC", buy, 1, 1);
-    ASSERT_EQ(trader2.get_capital_delta(), -1 * 1 * 1.5);
-    ASSERT_EQ(trader1.get_capital_delta(), 1 * .5);
+    ASSERT_EQ(trader2.get_portfolio().get_capital_delta(), -1 * 1 * 1.5);
+    ASSERT_EQ(trader1.get_portfolio().get_capital_delta(), 1 * .5);
 }
 
 TEST_F(UnitOrderFeeMatching, PartialFillReversed)
@@ -236,8 +236,8 @@ TEST_F(UnitOrderFeeMatching, PartialFillReversed)
     matches = add_to_engine_(order2);
     ASSERT_EQ(matches.size(), 1);
     ASSERT_EQ_MATCH(matches.at(0), Ticker::ETH, "DEF", "ABC", buy, 1, 1);
-    ASSERT_EQ(trader2.get_capital_delta(), -1 * 1 * 1.5);
-    ASSERT_EQ(trader1.get_capital_delta(), 1 * .5);
+    ASSERT_EQ(trader2.get_portfolio().get_capital_delta(), -1 * 1 * 1.5);
+    ASSERT_EQ(trader1.get_portfolio().get_capital_delta(), 1 * .5);
 }
 
 TEST_F(UnitOrderFeeMatching, MultipleFillReversed)
@@ -256,8 +256,8 @@ TEST_F(UnitOrderFeeMatching, MultipleFillReversed)
     ASSERT_EQ_MATCH(matches.at(0), Ticker::ETH, "DEF", "ABC", buy, 1, 1);
     ASSERT_EQ_MATCH(matches.at(1), Ticker::ETH, "DEF", "ABC", buy, 1, 1);
 
-    ASSERT_EQ(trader2.get_capital_delta(), -2 * 1 * 1.5);
-    ASSERT_EQ(trader1.get_capital_delta(), 2 * .5);
+    ASSERT_EQ(trader2.get_portfolio().get_capital_delta(), -2 * 1 * 1.5);
+    ASSERT_EQ(trader1.get_portfolio().get_capital_delta(), 2 * .5);
 }
 
 TEST_F(UnitOrderFeeMatching, MultiplePartialFillReversed)
@@ -276,13 +276,13 @@ TEST_F(UnitOrderFeeMatching, MultiplePartialFillReversed)
     ASSERT_EQ_MATCH(matches.at(0), Ticker::ETH, "DEF", "ABC", buy, 1, 1);
     ASSERT_EQ_MATCH(matches.at(1), Ticker::ETH, "DEF", "ABC", buy, 1, 1);
 
-    ASSERT_EQ(trader2.get_capital_delta(), -2 * 1 * 1.5);
-    ASSERT_EQ(trader1.get_capital_delta(), 2 * .5);
+    ASSERT_EQ(trader2.get_portfolio().get_capital_delta(), -2 * 1 * 1.5);
+    ASSERT_EQ(trader1.get_portfolio().get_capital_delta(), 2 * .5);
 }
 
 TEST_F(UnitOrderFeeMatching, NotEnoughToEnough)
 {
-    trader1.modify_capital(-TEST_STARTING_CAPITAL + 1);
+    trader1.get_portfolio().modify_capital(-TEST_STARTING_CAPITAL + 1);
 
     tagged_limit_order order2{trader2, Ticker::ETH, sell, 1.0, 1.0, 0};
     tagged_limit_order order1{trader1, Ticker::ETH, buy, 1.0, 1.0, 0};
@@ -295,11 +295,10 @@ TEST_F(UnitOrderFeeMatching, NotEnoughToEnough)
     matches = add_to_engine_(order2);
     ASSERT_EQ(matches.size(), 0);
 
-    ASSERT_EQ(trader1.get_capital(), 1);
-    ASSERT_EQ(trader2.get_capital_delta(), 0);
+    ASSERT_EQ(trader1.get_portfolio().get_capital(), 1);
+    ASSERT_EQ(trader2.get_portfolio().get_capital_delta(), 0);
 
-    trader1.modify_capital(0.5);
-    ;
+    trader1.get_portfolio().modify_capital(0.5);
 
     // Kept, but not matched
     matches = add_to_engine_(order2);
@@ -310,13 +309,13 @@ TEST_F(UnitOrderFeeMatching, NotEnoughToEnough)
     ASSERT_EQ(matches.size(), 1);
     ASSERT_EQ_MATCH(matches[0], Ticker::ETH, "ABC", "DEF", buy, 1, 1);
 
-    ASSERT_EQ(trader1.get_capital(), 0);
-    ASSERT_EQ(trader2.get_capital_delta(), 1 * .5);
+    ASSERT_EQ(trader1.get_portfolio().get_capital(), 0);
+    ASSERT_EQ(trader2.get_portfolio().get_capital_delta(), 1 * .5);
 }
 
 TEST_F(UnitOrderFeeMatching, MatchingInvalidFunds)
 {
-    trader1.modify_capital(-TEST_STARTING_CAPITAL + 1);
+    trader1.get_portfolio().modify_capital(-TEST_STARTING_CAPITAL + 1);
 
     tagged_limit_order order1{trader1, Ticker::ETH, buy, 1.0, 1.0, 0};
     tagged_limit_order order2{trader2, Ticker::ETH, sell, 1.0, 1.0, 0};
@@ -329,8 +328,8 @@ TEST_F(UnitOrderFeeMatching, MatchingInvalidFunds)
     matches = add_to_engine_(order2);
     ASSERT_EQ(matches.size(), 0);
 
-    ASSERT_EQ(trader1.get_capital(), 1);
-    ASSERT_EQ(trader2.get_capital_delta(), 0);
+    ASSERT_EQ(trader1.get_portfolio().get_capital(), 1);
+    ASSERT_EQ(trader2.get_portfolio().get_capital_delta(), 0);
 }
 
 TEST_F(UnitOrderFeeMatching, SimpleManyInvalidOrder)
@@ -340,10 +339,10 @@ TEST_F(UnitOrderFeeMatching, SimpleManyInvalidOrder)
     TestTrader trader6{"C", TEST_STARTING_CAPITAL};
     TestTrader trader7{"D", TEST_STARTING_CAPITAL};
 
-    trader4.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
-    trader5.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
-    trader6.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
-    trader7.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+    trader4.get_portfolio().modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+    trader5.get_portfolio().modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+    trader6.get_portfolio().modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+    trader7.get_portfolio().modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
 
     tagged_limit_order order1{trader4, Ticker::ETH, buy, 1.0, 1.0, 0};
     tagged_limit_order order2{trader5, Ticker::ETH, buy, 1.0, 1.0, 0};
@@ -364,8 +363,8 @@ TEST_F(UnitOrderFeeMatching, SimpleManyInvalidOrder)
     ASSERT_EQ_MATCH(matches[0], Ticker::ETH, "A", "D", sell, 1, 1);
     ASSERT_EQ_MATCH(matches[1], Ticker::ETH, "C", "D", sell, 1, 1);
 
-    ASSERT_EQ(trader4.get_capital_delta(), -1.5);
-    ASSERT_EQ(trader5.get_capital_delta(), 0);
-    ASSERT_EQ(trader6.get_capital_delta(), -1 * 1 * 1.5);
-    ASSERT_EQ(trader7.get_capital_delta(), 2 * .5);
+    ASSERT_EQ(trader4.get_portfolio().get_capital_delta(), -1.5);
+    ASSERT_EQ(trader5.get_portfolio().get_capital_delta(), 0);
+    ASSERT_EQ(trader6.get_portfolio().get_capital_delta(), -1 * 1 * 1.5);
+    ASSERT_EQ(trader7.get_portfolio().get_capital_delta(), 2 * .5);
 }

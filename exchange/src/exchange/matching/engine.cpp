@@ -92,10 +92,10 @@ attempt_match_(OrderPairT& orders, common::decimal_price order_fee)
     GenericTrader* buyer = buy_order.trader;
     GenericTrader* seller = sell_order.trader;
 
-    if (!buyer->can_leverage() && buyer->get_capital() < total_price) [[unlikely]]
+    if (!buyer->can_leverage() && buyer->get_portfolio().get_capital() < total_price) [[unlikely]]
         return glz::unexpected(MatchFailure::buyer_failure);
     if (!seller->can_leverage()
-        && seller->get_holdings(buy_order.ticker) < match_quantity) [[unlikely]]
+        && seller->get_portfolio().get_holdings(buy_order.ticker) < match_quantity) [[unlikely]]
         return glz::unexpected(MatchFailure::seller_failure);
     if (buyer == seller) [[unlikely]] {
         return glz::unexpected(MatchFailure::buyer_failure);

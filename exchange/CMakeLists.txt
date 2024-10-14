@@ -56,8 +56,8 @@ add_library(
     src/exchange/matching_cycle/base/base_cycle.cpp
     src/exchange/matching_cycle/cycle_interface.cpp
     
-    src/exchange/traders/trader_types/generic_trader.cpp
     src/exchange/traders/trader_types/bot_trader.cpp
+    src/exchange/traders/portfolio/trader_portfolio.cpp
 
     src/exchange/theo/brownian.cpp
     

@@ -22,8 +22,8 @@ protected:
     void
     SetUp() override
     {
-        trader1.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
-        trader2.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+        trader1.get_portfolio().modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+        trader2.get_portfolio().modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
     }
 
     nutc::exchange::CompositeOrderBook orderbook_{Ticker::ETH};
@@ -177,7 +177,7 @@ TEST_F(UnitMatchIOC, MultipleIOCOrdersMatchingAtDifferentPriceLevels)
 TEST_F(UnitMatchIOC, IOCOrderWithInsufficientFunds)
 {
     tagged_limit_order order1{trader1, Ticker::ETH, buy, 1.0, 1.0, false};
-    trader2.modify_holdings(
+    trader2.get_portfolio().modify_holdings(
         Ticker::ETH, -DEFAULT_QUANTITY
     ); // Remove all ETH holdings from trader2
     tagged_limit_order order2{trader2, Ticker::ETH, sell, 1.0, 1.0, true};
@@ -200,7 +200,7 @@ TEST_F(UnitMatchIOC, IOCOrderWithNoCounterpartOrders)
 TEST_F(UnitMatchIOC, IOCOrderWithNoCounterpartOrdersAndInsufficientFunds)
 {
     tagged_limit_order order1{trader1, Ticker::ETH, buy, 1.0, 1.0, true};
-    trader1.modify_holdings(
+    trader1.get_portfolio().modify_holdings(
         Ticker::ETH, -DEFAULT_QUANTITY
     ); // Remove all ETH holdings from trader1
 
@@ -224,10 +224,10 @@ TEST_F(UnitMatchIOC, MultipleIOCOrdersWithNoCounterpartOrdersAndInsufficientFund
 {
     tagged_limit_order order1{trader1, Ticker::ETH, buy, 1.0, 1.0, true};
     tagged_limit_order order2{trader2, Ticker::ETH, sell, 1.0, 1.0, true};
-    trader1.modify_holdings(
+    trader1.get_portfolio().modify_holdings(
         Ticker::ETH, -DEFAULT_QUANTITY
     ); // Remove all ETH holdings from trader1
-    trader2.modify_holdings(
+    trader2.get_portfolio().modify_holdings(
         Ticker::ETH, -DEFAULT_QUANTITY
     ); // Remove all ETH holdings from trader2
 

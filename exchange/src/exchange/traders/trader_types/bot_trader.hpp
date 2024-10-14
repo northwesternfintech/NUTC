@@ -13,28 +13,23 @@ namespace nutc::exchange {
 
 class BotTrader : public GenericTrader {
     const common::Ticker TICKER;
-    const common::decimal_price INTEREST_LIMIT;
-    common::decimal_high_precision short_interest_;
-    common::decimal_high_precision long_interest_;
-
     IncomingMessageQueue orders_;
 
 public:
-    common::decimal_quantity
-    get_holdings() const
-    {
-        return GenericTrader::get_holdings(TICKER);
-    }
-
     BotTrader(common::Ticker ticker, common::decimal_price interest_limit) :
-        GenericTrader(generate_user_id(), interest_limit), TICKER(ticker),
-        INTEREST_LIMIT(interest_limit)
+        GenericTrader(generate_user_id(), interest_limit), TICKER(ticker)
     {}
 
     BotTrader(const BotTrader& other) = delete;
     BotTrader(BotTrader&& other) = default;
     BotTrader& operator=(const BotTrader& other) = delete;
     BotTrader& operator=(BotTrader&& other) = delete;
+
+    common::Ticker
+    get_ticker() const
+    {
+        return TICKER;
+    }
 
     bool
     can_leverage() const final
@@ -46,37 +41,7 @@ public:
     disable() final
     {}
 
-    [[nodiscard]] common::decimal_price
-    get_capital_utilization() const
-    {
-        common::decimal_price capital_util =
-            (get_long_interest() + get_short_interest()) / get_interest_limit();
-        assert(capital_util <= 1.0);
-        // assert(capital_util >= 0);
-        return capital_util;
-    }
-
-    [[nodiscard]] common::decimal_price
-    get_long_interest() const
-    {
-        return common::decimal_price{long_interest_};
-    }
-
-    [[nodiscard]] common::decimal_price
-    get_interest_limit() const
-    {
-        return INTEREST_LIMIT;
-    }
-
-    [[nodiscard]] common::decimal_price
-    get_short_interest() const
-    {
-        return common::decimal_price{short_interest_};
-    }
-
     ~BotTrader() override = default;
-
-    void notify_position_change(common::position order) final;
 
     /**
      * midprice, theo
@@ -97,7 +62,9 @@ protected:
     [[nodiscard]] common::decimal_price
     compute_net_exposure_() const
     {
-        return (get_long_interest() - get_short_interest());
+        return (
+            get_portfolio().get_long_interest() - get_portfolio().get_short_interest()
+        );
     }
 
     [[nodiscard]] common::order_id_t
@@ -123,41 +90,16 @@ protected:
         orders_.emplace_back(common::market_order{TICKER, side, quantity});
     }
 
-    common::decimal_price
-    compute_capital_tolerance_()
-    {
-        return (common::decimal_price{1.0} - get_capital_utilization())
-               * (get_interest_limit() / 2.0);
-    }
-
-    void
-    modify_short_capital(common::decimal_high_precision delta)
-    {
-        short_interest_ += delta;
-    }
-
-    void
-    modify_long_capital(common::decimal_high_precision delta)
-    {
-        long_interest_ += delta;
-    }
-
     void
     send_message(const std::string&) override
     {}
 
 private:
-    static inline uint64_t
-    get_and_increment_user_id()
-    {
-        static uint64_t user_id = 0;
-        return user_id++;
-    }
-
     static std::string
     generate_user_id()
     {
-        return "BOT_" + std::to_string(get_and_increment_user_id());
+        static uint64_t bot_id = 0;
+        return "BOT_" + std::to_string(bot_id++);
     }
 };
 

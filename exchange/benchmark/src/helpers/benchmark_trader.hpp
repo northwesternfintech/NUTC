@@ -1,7 +1,7 @@
 #pragma once
 
-#include "exchange/traders/trader_types/generic_trader.hpp"
 #include "common/types/decimal.hpp"
+#include "exchange/traders/trader_types/generic_trader.hpp"
 
 #include <benchmark/benchmark.h>
 #include <fmt/format.h>
@@ -21,12 +21,6 @@ public:
     send_message(const std::string& str) final
     {
         benchmark::DoNotOptimize(str.size());
-    }
-
-    void
-    notify_position_change(common::position change) final
-    {
-        benchmark::DoNotOptimize(change);
     }
 
     IncomingMessageQueue

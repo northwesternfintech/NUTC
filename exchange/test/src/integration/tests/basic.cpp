@@ -24,14 +24,18 @@ TEST_P(IntegrationBasicAlgo, ConfirmOrderReceived)
 {
     start_wrappers(traders_, GetParam(), "buy_tsla_at_100");
     auto trader2 = traders_.add_trader<TestTrader>(0);
-    trader2->modify_holdings(Ticker::ETH, 1000.0); // NOLINT
+    trader2->get_portfolio().modify_holdings(Ticker::ETH, 1000.0); // NOLINT
     trader2->add_order(limit_order{Ticker::ETH, sell, 100.0, 10.0});
 
     TestMatchingCycle cycle{traders_};
 
     cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
     ASSERT_EQ(
-        double{trader2->get_capital() - trader2->get_initial_capital()}, 100.0 * 10.0
+        double{
+            trader2->get_portfolio().get_capital()
+            - trader2->get_portfolio().get_initial_capital()
+        },
+        100.0 * 10.0
     );
 }
 
@@ -39,14 +43,17 @@ TEST_P(IntegrationBasicAlgo, ConfirmOrderFeeApplied)
 {
     start_wrappers(traders_, GetParam(), "buy_tsla_at_100");
     auto trader2 = traders_.add_trader<TestTrader>(0);
-    trader2->modify_holdings(Ticker::ETH, 1000.0); // NOLINT
+    trader2->get_portfolio().modify_holdings(Ticker::ETH, 1000.0); // NOLINT
     trader2->add_order(limit_order{Ticker::ETH, sell, 100.0, 10.0});
 
     TestMatchingCycle cycle{traders_, .5};
 
     cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
     ASSERT_EQ(
-        double{trader2->get_capital() - trader2->get_initial_capital()},
+        double{
+            trader2->get_portfolio().get_capital()
+            - trader2->get_portfolio().get_initial_capital()
+        },
         100.0 * 10.0 / 2
     );
 }
@@ -55,7 +62,7 @@ TEST_P(IntegrationBasicAlgo, RemoveIOCOrder)
 {
     auto& trader1 = start_wrappers(traders_, GetParam(), "buy_tsla_at_100");
     auto trader2 = traders_.add_trader<TestTrader>(0);
-    trader2->modify_holdings(Ticker::ETH, 1000.0); // NOLINT
+    trader2->get_portfolio().modify_holdings(Ticker::ETH, 1000.0); // NOLINT
     trader2->add_order({Ticker::ETH, sell, 100.0, 100.0});
 
     TestMatchingCycle cycle{traders_};
@@ -74,7 +81,7 @@ TEST_P(IntegrationBasicAlgo, MarketOrderBuy)
 {
     start_wrappers(traders_, GetParam(), "buy_market_order_1000");
     auto trader2 = traders_.add_trader<TestTrader>(0);
-    trader2->modify_holdings(Ticker::ETH, 1000.0);
+    trader2->get_portfolio().modify_holdings(Ticker::ETH, 1000.0);
     trader2->add_order({Ticker::ETH, sell, 100.0, 100.0});
 
     TestMatchingCycle cycle{traders_};
@@ -86,9 +93,9 @@ TEST_P(IntegrationBasicAlgo, MarketOrderSell)
 {
     auto& trader1 = start_wrappers(traders_, GetParam(), "sell_market_order_1000");
     auto trader2 = traders_.add_trader<TestTrader>(0);
-    trader1.modify_holdings(Ticker::ETH, 1000.0);
+    trader1.get_portfolio().modify_holdings(Ticker::ETH, 1000.0);
     trader2->add_order({Ticker::ETH, buy, 1.0, 100.0});
-    trader2->modify_capital(1000.0);
+    trader2->get_portfolio().modify_capital(1000.0);
 
     TestMatchingCycle cycle{traders_};
 
@@ -100,7 +107,7 @@ TEST_P(IntegrationBasicAlgo, ManyUpdates)
     start_wrappers(traders_, GetParam(), "confirm_1000");
     auto trader2 = traders_.add_trader<TestTrader>(0);
 
-    trader2->modify_holdings(Ticker::ETH, 100000.0); // NOLINT
+    trader2->get_portfolio().modify_holdings(Ticker::ETH, 100000.0); // NOLINT
 
     TestMatchingCycle cycle{traders_};
 
@@ -125,7 +132,7 @@ TEST_P(IntegrationBasicAlgo, OrderVolumeLimitsPreventGoingAboveLimit)
         cycle.on_tick(0);
     }
 
-    ASSERT_EQ(static_cast<double>(trader1.get_open_bids()), 10.0);
+    ASSERT_EQ(static_cast<double>(trader1.get_portfolio().get_open_bids()), 10.0);
 }
 
 TEST_P(IntegrationBasicAlgo, OnTradeUpdate)
@@ -133,7 +140,7 @@ TEST_P(IntegrationBasicAlgo, OnTradeUpdate)
     start_wrappers(traders_, GetParam(), "buy_tsla_on_trade");
 
     auto trader2 = traders_.add_trader<TestTrader>(0);
-    trader2->modify_holdings(Ticker::ETH, 10000.0); // NOLINT
+    trader2->get_portfolio().modify_holdings(Ticker::ETH, 10000.0); // NOLINT
 
     TestMatchingCycle cycle{traders_};
 
@@ -150,7 +157,7 @@ TEST_P(IntegrationBasicAlgo, MultipleLevelOrder)
     auto& trader1 = start_wrappers(traders_, GetParam(), "buy_tsla_at_100");
 
     auto trader2 = traders_.add_trader<TestTrader>(0);
-    trader2->modify_holdings(Ticker::ETH, 1000.0); // NOLINT
+    trader2->get_portfolio().modify_holdings(Ticker::ETH, 1000.0); // NOLINT
 
     TestMatchingCycle cycle{traders_};
 
@@ -158,13 +165,16 @@ TEST_P(IntegrationBasicAlgo, MultipleLevelOrder)
     trader2->add_order({Ticker::ETH, sell, 45.0, 1.0});
 
     cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
-    ASSERT_EQ(trader1.get_capital() - trader1.get_initial_capital(), -100.0);
+    ASSERT_EQ(
+        trader1.get_portfolio().get_capital() - trader1.get_portfolio().get_initial_capital(),
+        -100.0
+    );
 }
 
 TEST_P(IntegrationBasicAlgo, OnAccountUpdateSell)
 {
     auto& trader1 = start_wrappers(traders_, GetParam(), "sell_tsla_on_account");
-    trader1.modify_holdings(Ticker::ETH, 1000.0);
+    trader1.get_portfolio().modify_holdings(Ticker::ETH, 1000.0);
 
     auto trader2 = traders_.add_trader<TestTrader>(100000);
     trader2->add_order({Ticker::ETH, buy, 102.0, 102.0});
@@ -184,7 +194,7 @@ TEST_P(IntegrationBasicAlgo, OnAccountUpdateBuy)
     start_wrappers(traders_, GetParam(), "buy_tsla_on_account");
 
     auto trader2 = traders_.add_trader<TestTrader>(0);
-    trader2->modify_holdings(Ticker::ETH, 1000.0); // NOLINT
+    trader2->get_portfolio().modify_holdings(Ticker::ETH, 1000.0); // NOLINT
     trader2->add_order({Ticker::ETH, sell, 100.0, 100.0});
 
     TestMatchingCycle cycle{traders_};
@@ -206,7 +216,7 @@ TEST_P(IntegrationBasicAlgo, AlgoStartDelay)
     auto start = std::chrono::high_resolution_clock::now();
 
     auto trader2 = traders_.add_trader<TestTrader>(0);
-    trader2->modify_holdings(Ticker::ETH, 1000.0); // NOLINT
+    trader2->get_portfolio().modify_holdings(Ticker::ETH, 1000.0); // NOLINT
     trader2->add_order({Ticker::ETH, sell, 100.0, 100.0});
 
     TestMatchingCycle cycle{traders_};
@@ -227,7 +237,7 @@ TEST_P(IntegrationBasicAlgo, DisableTrader)
 {
     auto& trader1 = start_wrappers(traders_, GetParam(), "buy_tsla_at_100");
     auto trader2 = traders_.add_trader<TestTrader>(0);
-    trader2->modify_holdings(Ticker::ETH, 1000.0); // NOLINT
+    trader2->get_portfolio().modify_holdings(Ticker::ETH, 1000.0); // NOLINT
     trader2->add_order({Ticker::ETH, sell, 100.0, 100.0});
 
     trader1.disable();

@@ -41,19 +41,15 @@ MarketMakerBot::place_orders_(
 {
     // Approximation
     common::decimal_quantity total_quantity = {
-        compute_capital_tolerance_() / (theo + spread_offset)
+        get_portfolio().compute_capital_tolerance() / (theo + spread_offset)
     };
 
-    // Placing orders on both sides
-    total_quantity /= 2.0;
+    // Placing orders on both sides and divide by two
+    total_quantity /= 4.0;
 
     for (const auto& [price_delta, quantity_factor] : PRICE_LEVELS) {
         decimal_price price = (side == Side::buy) ? theo - price_delta - spread_offset
                                                   : theo + price_delta + spread_offset;
-
-        if (price <= 0.0) [[unlikely]]
-            return;
-
         auto order_id = add_limit_order(
             side, total_quantity * quantity_factor, price, /*ioc=*/false
         );
