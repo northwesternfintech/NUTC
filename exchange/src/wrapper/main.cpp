@@ -32,9 +32,10 @@ main(int argc, const char** argv)
 {
     using namespace nutc::wrapper;
 
+    auto [verbosity, trader_id, algo_type] = process_arguments(argc, argv);
+
     std::signal(SIGINT, catch_sigint);
     std::signal(SIGTERM, catch_sigterm);
-    auto [verbosity, trader_id, algo_type] = process_arguments(argc, argv);
 
     static constexpr std::uint32_t MAX_LOG_SIZE = 50'000;
     nutc::logging::init_file_only(

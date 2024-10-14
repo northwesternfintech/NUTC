@@ -32,7 +32,7 @@ get_base_order(const auto& order)
 
 } // namespace
 
-std::vector<common::match>
+std::vector<exchange::tagged_match>
 TestMatchingCycle::match_orders_(std::vector<exchange::OrderVariant> orders)
 {
     for (auto& order : orders) {

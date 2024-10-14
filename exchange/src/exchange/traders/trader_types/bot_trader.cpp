@@ -1,7 +1,5 @@
 #include "bot_trader.hpp"
 
-#include "common/types/decimal.hpp"
-
 #include <cassert>
 
 #include <random>

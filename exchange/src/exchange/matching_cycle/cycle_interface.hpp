@@ -30,10 +30,10 @@ protected:
 
     virtual std::vector<OrderVariant> collect_orders(uint64_t new_tick) = 0;
 
-    virtual std::vector<common::match> match_orders_(std::vector<OrderVariant> orders
+    virtual std::vector<tagged_match> match_orders_(std::vector<OrderVariant> orders
     ) = 0;
 
-    virtual void handle_matches_(std::vector<common::match> matches) = 0;
+    virtual void handle_matches_(std::vector<tagged_match> matches) = 0;
 
     virtual void post_cycle_(uint64_t new_tick) = 0;
 

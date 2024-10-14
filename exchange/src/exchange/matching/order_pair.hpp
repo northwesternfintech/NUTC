@@ -101,24 +101,13 @@ public:
     }
 
     template <common::Side AggressiveSide>
-    common::match
+    tagged_match
     create_match(common::decimal_quantity quantity, common::decimal_price price) const
     {
         auto& buyer = get_underlying_order<side::buy>();
         auto& seller = get_underlying_order<side::sell>();
         common::position position{buyer.ticker, AggressiveSide, quantity, price};
-        // TODO: match_type is pretty bad, we should have a better way of tracking this.
-        // It's only used for metrics
-        std::string match_type =
-            fmt::format("{}->{}", seller.trader->get_type(), buyer.trader->get_type());
-        // TODO: can just use TraderPortfolio instead of entire trader
-        common::match match{
-            position, buyer.trader->get_id(), seller.trader->get_id(),
-            buyer.trader->get_portfolio().get_capital(),
-            seller.trader->get_portfolio().get_capital()
-        };
-        match.match_type = match_type;
-        return match;
+        return {buyer.trader, seller.trader, position};
     }
 
     common::decimal_quantity
@@ -131,21 +120,21 @@ public:
 
     void
     handle_match(
-        const common::match& match, common::decimal_price order_fee,
+        const tagged_match& match, common::decimal_price order_fee,
         CompositeOrderBook& orderbook
     )
     {
         get_underlying_order<side::buy>().trader->get_portfolio().notify_match(
-            {match.position.ticker, common::Side::buy, match.position.quantity,
-             match.position.price * (common::decimal_price{1.0} + order_fee)}
+            {match.ticker, common::Side::buy, match.quantity,
+             match.price * (common::decimal_price{1.0} + order_fee)}
         );
         get_underlying_order<side::sell>().trader->get_portfolio().notify_match(
-            {match.position.ticker, common::Side::sell, match.position.quantity,
-             match.position.price * (common::decimal_price{1.0} - order_fee)}
+            {match.ticker, common::Side::sell, match.quantity,
+             match.price * (common::decimal_price{1.0} - order_fee)}
         );
 
-        change_order_quantity(seller, -match.position.quantity, orderbook);
-        change_order_quantity(buyer, -match.position.quantity, orderbook);
+        change_order_quantity(seller, -match.quantity, orderbook);
+        change_order_quantity(buyer, -match.quantity, orderbook);
     }
 
 private:

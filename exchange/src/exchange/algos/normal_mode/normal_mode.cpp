@@ -48,10 +48,11 @@ NormalModeAlgoInitializer::initialize_trader_container(
         }
     }
 
-    int64_t start_time = get_start_time(WAIT_SECS);
+    auto start_time = get_start_time(WAIT_SECS);
     std::for_each(traders.begin(), traders.end(), [start_time](auto& trader) {
         send_start_time(trader, start_time);
     });
+    std::this_thread::sleep_until(start_time);
 }
 
 glz::json_t::object_t
