@@ -6,11 +6,11 @@ Some of this is out of date - it will be updated soon
 ## TODOS
 - [x] Add proper handling for market orders
 - [x] Confirm no implicit conversions of price to double in order handling (+ quantity change to float)
-- [ ] Add full cpp support
-- [ ]  More integration tests (+ more coverage)
+- [x] Add full cpp support
+- [x]  More integration tests (+ more coverage)
 - [x]  Finish market maker bots
 - [ ]  Add more bots generally
-- [ ]  Clean up wrapper main
+- [x]  Clean up wrapper main
 
 ## Introduction
 
