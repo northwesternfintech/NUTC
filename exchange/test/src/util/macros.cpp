@@ -18,14 +18,14 @@ order_equality(const limit_order& order1, const limit_order& order2)
 
 bool
 validate_match(
-    const nutc::common::match& match, common::Ticker ticker,
+    const nutc::exchange::tagged_match& match, common::Ticker ticker,
     const std::string& buyer_id, const std::string& seller_id, common::Side side,
     double quantity, double price
 )
 {
-    return match.position.ticker == ticker && match.buyer_id == buyer_id
-           && match.seller_id == seller_id && match.position.side == side
-           && match.position.price == price && match.position.quantity == quantity;
+    return match.ticker == ticker && match.buyer->get_id() == buyer_id
+           && match.seller->get_id() == seller_id && match.side == side
+           && match.price == price && match.quantity == quantity;
 }
 
 bool

@@ -1,6 +1,5 @@
 #include "engine.hpp"
 
-#include "common/messages_exchange_to_wrapper.hpp"
 #include "common/types/decimal.hpp"
 #include "common/util.hpp"
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
@@ -9,10 +8,9 @@
 namespace nutc::exchange {
 
 enum class MatchFailure { buyer_failure, seller_failure, done_matching };
-using match = nutc::common::match;
 
 template <common::Side AggressiveSide, typename OrderPairT>
-glz::expected<match, bool>
+glz::expected<tagged_match, bool>
 match_orders_(
     OrderPairT& orders, CompositeOrderBook& orderbook, common::decimal_price order_fee
 )
@@ -38,7 +36,7 @@ match_orders_(
 }
 
 template <common::Side AggressiveSide, TaggedOrder OrderT>
-glz::expected<match, bool>
+glz::expected<tagged_match, bool>
 match_incoming_order_(
     OrderT& aggressive_order, LimitOrderBook::stored_limit_order passive_order,
     CompositeOrderBook& orderbook, common::decimal_price order_fee
@@ -73,7 +71,7 @@ total_order_cost_(
 }
 
 template <common::Side AggressiveSide, typename OrderPairT>
-glz::expected<match, MatchFailure>
+glz::expected<tagged_match, MatchFailure>
 attempt_match_(OrderPairT& orders, common::decimal_price order_fee)
 {
     auto price_opt = orders.potential_match_price();
@@ -92,10 +90,12 @@ attempt_match_(OrderPairT& orders, common::decimal_price order_fee)
     GenericTrader* buyer = buy_order.trader;
     GenericTrader* seller = sell_order.trader;
 
-    if (!buyer->can_leverage() && buyer->get_portfolio().get_capital() < total_price) [[unlikely]]
+    if (!buyer->can_leverage() && buyer->get_portfolio().get_capital() < total_price)
+        [[unlikely]]
         return glz::unexpected(MatchFailure::buyer_failure);
     if (!seller->can_leverage()
-        && seller->get_portfolio().get_holdings(buy_order.ticker) < match_quantity) [[unlikely]]
+        && seller->get_portfolio().get_holdings(buy_order.ticker) < match_quantity)
+        [[unlikely]]
         return glz::unexpected(MatchFailure::seller_failure);
     if (buyer == seller) [[unlikely]] {
         return glz::unexpected(MatchFailure::buyer_failure);
@@ -104,7 +104,7 @@ attempt_match_(OrderPairT& orders, common::decimal_price order_fee)
 }
 
 template <TaggedOrder OrderT>
-glz::expected<match, bool>
+glz::expected<tagged_match, bool>
 match_incoming_order_(
     OrderT& aggressive_order, CompositeOrderBook& orderbook,
     common::decimal_price order_fee
@@ -128,12 +128,12 @@ match_incoming_order_(
 }
 
 template <TaggedOrder OrderT>
-std::vector<match>
+std::vector<tagged_match>
 match_order(
     OrderT order, CompositeOrderBook& orderbook, common::decimal_price order_fee
 )
 {
-    std::vector<match> matches;
+    std::vector<tagged_match> matches;
 
     while (order.quantity != 0.0) {
         auto match_opt = match_incoming_order_(order, orderbook, order_fee);
@@ -152,9 +152,9 @@ match_order(
     return matches;
 }
 
-template std::vector<match>
+template std::vector<tagged_match>
 match_order<>(tagged_limit_order, CompositeOrderBook&, common::decimal_price);
 
-template std::vector<match>
+template std::vector<tagged_match>
 match_order<>(tagged_market_order, CompositeOrderBook&, common::decimal_price);
 } // namespace nutc::exchange

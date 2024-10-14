@@ -32,7 +32,7 @@ protected:
 
     nutc::exchange::CompositeOrderBook orderbook_{Ticker::ETH};
 
-    std::vector<nutc::common::match>
+    std::vector<nutc::exchange::tagged_match>
     add_to_engine_(const tagged_limit_order& order)
     {
         return nutc::exchange::match_order(order, orderbook_);

@@ -15,8 +15,6 @@
 
 namespace nutc::wrapper {
 
-using start_tick_variant_t = std::variant<start_time, tick_update>;
-
 void
 ExchangeCommunicator::publish_message(const std::string& message)
 {
@@ -29,16 +27,28 @@ ExchangeCommunicator::publish_message(const std::string& message)
 algorithm_content
 ExchangeCommunicator::consume_algorithm()
 {
-    auto algorithm = consume_message<algorithm_content>();
+    auto algorithm = wait_and_consume_message<algorithm_content>();
     algorithm.algorithm_content_str = base64_decode(algorithm.algorithm_content_str);
 
     return algorithm;
 }
 
-common::tick_update
-ExchangeCommunicator::consume_tick_update()
+std::variant<common::tick_update, common::account_update>
+ExchangeCommunicator::consume_market_update()
 {
-    return consume_message<common::tick_update>();
+    return consume_message<std::variant<common::tick_update, common::account_update>>();
+}
+
+template <typename T>
+T
+ExchangeCommunicator::wait_and_consume_message()
+{
+    using message_variant = std::variant<tick_update, account_update, T>;
+    message_variant data;
+    while (!std::holds_alternative<T>(data)) {
+        data = consume_message<message_variant>();
+    }
+    return std::get<T>(data);
 }
 
 template <typename T>
@@ -51,6 +61,7 @@ ExchangeCommunicator::consume_message()
         throw std::runtime_error("Wrapper received empty buffer from stdin");
 
     T data{};
+    // TODO(anyone): this disables NRVO. Change up?
     auto err = glz::read_json(data, buf);
     if (err) {
         std::string error = glz::format_error(err, buf);
@@ -61,6 +72,20 @@ ExchangeCommunicator::consume_message()
     return data;
 }
 
+template <typename T, typename... Args>
+requires std::is_constructible_v<T, Args...>
+T
+ExchangeCommunicator::publish_message(Args... args)
+{
+    T message{args...};
+    auto message_opt = glz::write_json(message);
+    if (!message_opt.has_value()) [[unlikely]]
+        throw std::runtime_error(glz::format_error(message_opt.error()));
+
+    publish_message(message_opt.value());
+    return message;
+}
+
 LimitOrderFunction
 ExchangeCommunicator::place_limit_order()
 {
@@ -68,10 +93,11 @@ ExchangeCommunicator::place_limit_order()
                common::Side side, common::Ticker ticker, double quantity, double price,
                bool ioc
            ) -> order_id_t {
-        limit_order order{ticker, side, quantity, price, ioc};
-        if (!publish_message(order))
+        if (limiter_.should_rate_limit()) {
             return -1;
-        return order.order_id;
+        }
+        return publish_message<limit_order>(ticker, side, quantity, price, ioc)
+            .order_id;
     };
 }
 
@@ -79,23 +105,27 @@ MarketOrderFunction
 ExchangeCommunicator::place_market_order()
 {
     return [this](common::Side side, common::Ticker ticker, double quantity) {
-        market_order order{ticker, side, quantity};
-        return publish_message(order);
+        if (limiter_.should_rate_limit()) {
+            return false;
+        }
+        publish_message<market_order>(ticker, side, quantity);
+        return true;
     };
 }
 
 CancelOrderFunction
 ExchangeCommunicator::cancel_order()
 {
-    return [this](common::Ticker ticker, order_id_t order_id) -> bool {
-        return publish_message(common::cancel_order{ticker, order_id});
+    return [](common::Ticker ticker, order_id_t order_id) {
+        publish_message<common::cancel_order>(ticker, order_id);
+        return true;
     };
 }
 
-bool
+void
 ExchangeCommunicator::report_startup_complete()
 {
-    return publish_message(common::init_message{});
+    publish_message<common::init_message>();
 }
 
 // If wait_blocking is disabled, we block until we *receive* the message, but not
@@ -105,14 +135,7 @@ ExchangeCommunicator::wait_for_start_time()
 {
     using nanoseconds = std::chrono::nanoseconds;
     using time_point = std::chrono::high_resolution_clock::time_point;
-    auto message = consume_message<start_tick_variant_t>();
-
-    // Sandbox may get ob updates before it's initialized
-    while (!std::holds_alternative<start_time>(message)) {
-        message = consume_message<start_tick_variant_t>();
-    }
-
-    start_time start = std::get<start_time>(message);
+    auto start = wait_and_consume_message<start_time>();
 
     time_point wait_until{nanoseconds{start.start_time_ns}};
     std::this_thread::sleep_until(wait_until);

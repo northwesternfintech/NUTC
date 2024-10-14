@@ -27,7 +27,7 @@ public:
     wait_for_order(const OrderT& order, std::function<bool(const OrderT&, const OrderT&)> equality_function = soft_equality<OrderT>);
 
 private:
-    std::vector<common::match> match_orders_(std::vector<exchange::OrderVariant> orders
+    std::vector<exchange::tagged_match> match_orders_(std::vector<exchange::OrderVariant> orders
     ) override;
 };
 
