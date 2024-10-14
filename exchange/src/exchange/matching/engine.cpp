@@ -46,7 +46,7 @@ match_incoming_order_(
 {
     // We can copy stored_limit_order because it's already pointing to the order. We
     // cannot copy OrderT by value because it will then point to something else
-    // This is a confusing micro optimization. Trust tho.
+    // This is a confusing micro optimization. Trust.
     if constexpr (AggressiveSide == common::Side::buy) {
         OrderPair<OrderT&, LimitOrderBook::stored_limit_order> pair{
             aggressive_order, passive_order
