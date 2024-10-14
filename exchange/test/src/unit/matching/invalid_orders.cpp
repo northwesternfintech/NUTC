@@ -22,8 +22,8 @@ protected:
     void
     SetUp() override
     {
-        trader1.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
-        trader2.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+        trader1.get_portfolio().modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+        trader2.get_portfolio().modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
     }
 
     nutc::exchange::CompositeOrderBook orderbook_{Ticker::ETH};
@@ -37,7 +37,7 @@ protected:
 
 TEST_F(UnitInvalidOrders, RemoveThenAddFunds)
 {
-    trader1.modify_capital(-TEST_STARTING_CAPITAL);
+    trader1.get_portfolio().modify_capital(-TEST_STARTING_CAPITAL);
 
     tagged_limit_order order2{trader2, Ticker::ETH, sell, 1.0, 1.0};
     tagged_limit_order order1{trader1, Ticker::ETH, buy, 1.0, 1.0};
@@ -50,7 +50,7 @@ TEST_F(UnitInvalidOrders, RemoveThenAddFunds)
     matches = add_to_engine_(order2);
     ASSERT_EQ(matches.size(), 0);
 
-    trader1.modify_capital(TEST_STARTING_CAPITAL);
+    trader1.get_portfolio().modify_capital(TEST_STARTING_CAPITAL);
 
     // Kept, but not matched
     matches = add_to_engine_(order2);
@@ -64,7 +64,7 @@ TEST_F(UnitInvalidOrders, RemoveThenAddFunds)
 
 TEST_F(UnitInvalidOrders, MatchingInvalidFunds)
 {
-    trader1.modify_capital(-TEST_STARTING_CAPITAL);
+    trader1.get_portfolio().modify_capital(-TEST_STARTING_CAPITAL);
 
     tagged_limit_order order1{trader1, Ticker::ETH, buy, 1.0, 1.0};
     tagged_limit_order order2{trader2, Ticker::ETH, sell, 1.0, 1.0};
@@ -85,10 +85,10 @@ TEST_F(UnitInvalidOrders, SimpleManyInvalidOrder)
     TestTrader t3{"C", TEST_STARTING_CAPITAL};
     TestTrader t4{"D", TEST_STARTING_CAPITAL};
 
-    t1.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
-    t2.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
-    t3.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
-    t4.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+    t1.get_portfolio().modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+    t2.get_portfolio().modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+    t3.get_portfolio().modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+    t4.get_portfolio().modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
 
     tagged_limit_order order1{t1, Ticker::ETH, buy, 1.0, 1.0};
     tagged_limit_order order2{t2, Ticker::ETH, buy, 1.0, 1.0};
@@ -115,8 +115,8 @@ TEST_F(UnitInvalidOrders, InvalidSellerHoldings)
     TestTrader t1{"A", TEST_STARTING_CAPITAL};
     TestTrader t2{"B", TEST_STARTING_CAPITAL};
 
-    t1.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
-    t2.modify_holdings(Ticker::ETH, -DEFAULT_QUANTITY);
+    t1.get_portfolio().modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+    t2.get_portfolio().modify_holdings(Ticker::ETH, -DEFAULT_QUANTITY);
 
     tagged_limit_order order1{t1, Ticker::ETH, buy, 1.0, 1.0};
     tagged_limit_order order2{t2, Ticker::ETH, sell, 1.0, 1.0};
@@ -127,7 +127,7 @@ TEST_F(UnitInvalidOrders, InvalidSellerHoldings)
     matches = add_to_engine_(order2);
     ASSERT_EQ(matches.size(), 0);
 
-    t2.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY * 2.0);
+    t2.get_portfolio().modify_holdings(Ticker::ETH, DEFAULT_QUANTITY * 2.0);
     matches = add_to_engine_(order2);
     ASSERT_EQ(matches.size(), 1);
 }
@@ -137,8 +137,8 @@ TEST_F(UnitInvalidOrders, InvalidBuyerHoldingsDoesntStopMatch)
     TestTrader t1{"A", TEST_STARTING_CAPITAL};
     TestTrader t2{"B", TEST_STARTING_CAPITAL};
 
-    t1.modify_holdings(Ticker::ETH, -DEFAULT_QUANTITY);
-    t2.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+    t1.get_portfolio().modify_holdings(Ticker::ETH, -DEFAULT_QUANTITY);
+    t2.get_portfolio().modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
 
     tagged_limit_order order1{t1, Ticker::ETH, buy, 1.0, 1.0};
     tagged_limit_order order2{t2, Ticker::ETH, sell, 1.0, 1.0};

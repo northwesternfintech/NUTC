@@ -32,7 +32,7 @@ TEST_P(IntegrationBasicCancellation, CancelMessagePreventsOrderFromExecuting)
 {
     auto& trader1 = start_wrappers(traders_, GetParam(), "cancel_limit_order");
     auto trader2 = traders_.add_trader<TestTrader>(0);
-    trader2->modify_holdings(Ticker::ETH, 100.0);
+    trader2->get_portfolio().modify_holdings(Ticker::ETH, 100.0);
     TestMatchingCycle cycle{traders_};
 
     auto order_id = cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
@@ -42,16 +42,16 @@ TEST_P(IntegrationBasicCancellation, CancelMessagePreventsOrderFromExecuting)
 
     cycle.on_tick(0);
 
-    EXPECT_EQ(trader1.get_capital_delta(), 0);
-    EXPECT_EQ(trader2->get_capital_delta(), 0);
-    EXPECT_EQ(trader1.get_holdings(Ticker::ETH), 0);
+    EXPECT_EQ(trader1.get_portfolio().get_capital_delta(), 0);
+    EXPECT_EQ(trader2->get_portfolio().get_capital_delta(), 0);
+    EXPECT_EQ(trader1.get_portfolio().get_holdings(Ticker::ETH), 0);
 }
 
 TEST_P(IntegrationBasicCancellation, OneOfTwoOrdersCancelledResultsInMatch)
 {
     auto& trader1 = start_wrappers(traders_, GetParam(), "partial_cancel_limit_order");
     auto trader2 = traders_.add_trader<TestTrader>(0);
-    trader2->modify_holdings(Ticker::ETH, 100.0);
+    trader2->get_portfolio().modify_holdings(Ticker::ETH, 100.0);
     TestMatchingCycle cycle{traders_};
 
     auto order_id = cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
@@ -62,9 +62,9 @@ TEST_P(IntegrationBasicCancellation, OneOfTwoOrdersCancelledResultsInMatch)
 
     cycle.on_tick(0);
 
-    EXPECT_EQ(double{trader1.get_capital_delta()}, -200);
-    EXPECT_EQ(double{trader2->get_capital_delta()}, 200);
-    EXPECT_EQ(double{trader1.get_holdings(Ticker::ETH)}, 10);
+    EXPECT_EQ(double{trader1.get_portfolio().get_capital_delta()}, -200);
+    EXPECT_EQ(double{trader2->get_portfolio().get_capital_delta()}, 200);
+    EXPECT_EQ(double{trader1.get_portfolio().get_holdings(Ticker::ETH)}, 10);
 }
 
 INSTANTIATE_TEST_SUITE_P(

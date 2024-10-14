@@ -23,9 +23,9 @@ protected:
     void
     SetUp() override
     {
-        trader1.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
-        trader2.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
-        trader3.modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+        trader1.get_portfolio().modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+        trader2.get_portfolio().modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
+        trader3.get_portfolio().modify_holdings(Ticker::ETH, DEFAULT_QUANTITY);
     }
 
     void

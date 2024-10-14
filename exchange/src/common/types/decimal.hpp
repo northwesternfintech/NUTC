@@ -13,7 +13,7 @@
 
 namespace nutc::common {
 
-namespace detail {
+namespace {
 template <typename T>
 consteval T
 pow10(int pow)
@@ -23,13 +23,13 @@ pow10(int pow)
     }
     return pow == 0 ? 1 : 10 * pow10<T>(pow - 1);
 }
-} // namespace detail
+} // namespace
 
 // THIS CLASS PRIORITIZES PRECISION OVER AVOIDING OVERFLOW
 template <std::uint8_t Scale>
 class Decimal {
     using decimal_type = std::int64_t;
-    static constexpr std::int64_t MULTIPLIER = detail::pow10<decimal_type>(Scale);
+    static constexpr std::int64_t MULTIPLIER = pow10<decimal_type>(Scale);
 
     decimal_type value_{};
 
@@ -41,6 +41,12 @@ public:
     // TODO: this should be more generic but I don't have time right now
     constexpr explicit Decimal(const Decimal<Scale + 2>& other) :
         value_(other.get_underlying() / 100)
+    {}
+
+    // TODO: this should be more generic but I don't have time right now
+    constexpr explicit Decimal(const Decimal<Scale - 2>& other)
+    requires(Scale >= 4)
+        : value_(other.get_underlying() * 100)
     {}
 
     Decimal operator-() const;

@@ -12,9 +12,9 @@ BM_ModifyHoldings(benchmark::State& state)
 
     for (auto _ : state) {
         for (uint32_t i = 0; i < adds; i++) {
-            trader.modify_holdings(common::Ticker::ETH, 1.0);
-            trader.modify_holdings(common::Ticker::BTC, 1.0);
-            trader.modify_holdings(common::Ticker::LTC, 1.0);
+            trader.get_portfolio().modify_holdings(common::Ticker::ETH, 1.0);
+            trader.get_portfolio().modify_holdings(common::Ticker::BTC, 1.0);
+            trader.get_portfolio().modify_holdings(common::Ticker::LTC, 1.0);
         }
     }
 }

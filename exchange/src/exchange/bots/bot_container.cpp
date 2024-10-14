@@ -18,12 +18,12 @@ BotContainer::generate_orders(
 {
     variance_calculator_.record_price(midprice);
 
-	common::decimal_price cumulative_interest_limit{};
+    common::decimal_price cumulative_interest_limit{};
     common::decimal_quantity cumulative_quantity_held{};
 
     for (const auto& bot : bots_) {
-        cumulative_interest_limit += bot->get_interest_limit();
-        cumulative_quantity_held += bot->get_holdings();
+        cumulative_interest_limit += bot->get_portfolio().get_capital();
+        cumulative_quantity_held += bot->get_portfolio().get_holdings(bot->get_ticker());
     }
 
     return generate_orders(

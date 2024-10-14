@@ -2,7 +2,6 @@
 
 #include "common/types/decimal.hpp"
 #include "common/util.hpp"
-#include "exchange/config/dynamic/config.hpp"
 #include "exchange/orders/storage/order_storage.hpp"
 
 namespace nutc::exchange {
@@ -36,7 +35,7 @@ LimitOrderBook::change_quantity(
     order_list::iterator order, common::decimal_quantity quantity_delta
 )
 {
-    order->trader->notify_position_change(
+    order->trader->get_portfolio().notify_position_change(
         {order->ticker, order->side, quantity_delta, order->price}
     );
 
@@ -47,7 +46,7 @@ LimitOrderBook::change_quantity(
 void
 LimitOrderBook::remove_order(order_list::iterator order)
 {
-    order->trader->notify_position_change(
+    order->trader->get_portfolio().notify_position_change(
         {order->ticker, order->side, -(order->quantity), order->price}
     );
     if (order->side == common::Side::buy)
@@ -72,7 +71,7 @@ LimitOrderBook::remove_order(
 LimitOrderBook::order_list::iterator
 LimitOrderBook::add_order(const tagged_limit_order& order)
 {
-    order.trader->notify_position_change(
+    order.trader->get_portfolio().notify_position_change(
         {order.ticker, order.side, order.quantity, order.price}
     );
 

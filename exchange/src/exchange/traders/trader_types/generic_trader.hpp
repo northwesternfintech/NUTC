@@ -3,6 +3,7 @@
 #include "common/messages_wrapper_to_exchange.hpp"
 #include "common/types/decimal.hpp"
 #include "common/types/position.hpp"
+#include "exchange/traders/portfolio/trader_portfolio.hpp"
 
 #include <absl/hash/hash.h>
 #include <boost/process.hpp>
@@ -13,15 +14,11 @@ namespace nutc::exchange {
 
 class GenericTrader {
     std::string user_id_;
-    common::decimal_price initial_capital_;
-    common::decimal_price capital_delta_;
-    common::decimal_quantity open_bids_;
-    common::decimal_quantity open_asks_;
-    std::array<common::decimal_quantity, common::TICKERS.size()> holdings_{};
+    TraderPortfolio state_;
 
 public:
-    explicit GenericTrader(std::string user_id, common::decimal_price capital) :
-        user_id_(std::move(user_id)), initial_capital_(capital)
+    explicit GenericTrader(std::string user_id, common::decimal_price initial_capital) :
+        user_id_(std::move(user_id)), state_{initial_capital}
     {}
 
     GenericTrader(GenericTrader&&) = default;
@@ -51,86 +48,21 @@ public:
         return user_id_;
     }
 
-    [[nodiscard]] common::decimal_quantity
-    get_open_bids() const
+    const TraderPortfolio&
+    get_portfolio() const
     {
-        return open_bids_;
+        return state_;
     }
 
-    [[nodiscard]] common::decimal_quantity
-    get_open_asks() const
+    TraderPortfolio&
+    get_portfolio()
     {
-        return open_asks_;
-    }
-
-    void
-    modify_open_bids(common::decimal_quantity delta)
-    {
-        open_bids_ += delta;
-    }
-
-    void
-    modify_open_asks(common::decimal_quantity delta)
-    {
-        open_asks_ += delta;
+        return state_;
     }
 
     // For metrics purposes
     virtual const std::string& get_type() const = 0;
 
-    virtual common::decimal_price
-    get_capital() const
-    {
-        return initial_capital_ + capital_delta_;
-    }
-
-    // TODO: improve with find
-    common::decimal_quantity
-    get_holdings(common::Ticker ticker) const
-    {
-        auto ticker_index = std::to_underlying(ticker);
-        assert(ticker_index < holdings_.size());
-        return holdings_[ticker_index];
-    }
-
-    common::decimal_quantity
-    modify_holdings(common::Ticker ticker, common::decimal_quantity change_in_holdings)
-    {
-        auto ticker_index = std::to_underlying(ticker);
-        assert(ticker_index < holdings_.size());
-        return holdings_[ticker_index] += change_in_holdings;
-    }
-
-    void
-    modify_capital(common::decimal_price change_in_capital)
-    {
-        capital_delta_ += change_in_capital;
-    }
-
-    common::decimal_price
-    get_capital_delta() const
-    {
-        return capital_delta_;
-    }
-
-    common::decimal_price
-    get_initial_capital() const
-    {
-        return initial_capital_;
-    }
-
-    virtual void
-    notify_position_change(common::position order)
-    {
-        if (order.side == common::Side::buy) {
-            open_bids_ += order.quantity;
-        }
-        else {
-            open_asks_ += order.quantity;
-        }
-    }
-
-    virtual void notify_match(common::position);
     virtual void send_message(const std::string&) = 0;
 
     using IncomingMessageQueue = std::vector<common::IncomingMessageVariant>;

@@ -111,12 +111,14 @@ public:
         // It's only used for metrics
         std::string match_type =
             fmt::format("{}->{}", seller.trader->get_type(), buyer.trader->get_type());
-        common::match m{
+        // TODO: can just use TraderPortfolio instead of entire trader
+        common::match match{
             position, buyer.trader->get_id(), seller.trader->get_id(),
-            buyer.trader->get_capital(), seller.trader->get_capital()
+            buyer.trader->get_portfolio().get_capital(),
+            seller.trader->get_portfolio().get_capital()
         };
-        m.match_type = match_type;
-        return m;
+        match.match_type = match_type;
+        return match;
     }
 
     common::decimal_quantity
@@ -133,11 +135,11 @@ public:
         CompositeOrderBook& orderbook
     )
     {
-        get_underlying_order<side::buy>().trader->notify_match(
+        get_underlying_order<side::buy>().trader->get_portfolio().notify_match(
             {match.position.ticker, common::Side::buy, match.position.quantity,
              match.position.price * (common::decimal_price{1.0} + order_fee)}
         );
-        get_underlying_order<side::sell>().trader->notify_match(
+        get_underlying_order<side::sell>().trader->get_portfolio().notify_match(
             {match.position.ticker, common::Side::sell, match.position.quantity,
              match.position.price * (common::decimal_price{1.0} - order_fee)}
         );

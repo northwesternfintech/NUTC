@@ -3,6 +3,7 @@
 #include "common/messages_wrapper_to_exchange.hpp"
 #include "exchange/metrics/prometheus.hpp"
 #include "exchange/orders/ticker_data.hpp"
+#include "exchange/traders/portfolio/trader_portfolio.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "prometheus.hpp"
 
@@ -17,9 +18,9 @@ TickerMetricsPusher::create_gauge_(const std::string& gauge_name)
 }
 
 Counter
-TickerMetricsPusher::create_counter_(const std::string& gauge_name)
+TickerMetricsPusher::create_counter_(const std::string& counter_name)
 {
-    return ps::BuildCounter().Name(gauge_name).Register(*Prometheus::get_registry());
+    return ps::BuildCounter().Name(counter_name).Register(*Prometheus::get_registry());
 }
 
 void
@@ -131,7 +132,7 @@ TickerMetricsPusher::report_trader_stats(const TickerContainer& tickers)
 {
     auto report_holdings = [&](const auto& trader) {
         for (auto [ticker, info] : tickers) {
-            double amount_held{trader.get_holdings(ticker)};
+            double amount_held{trader.get_portfolio().get_holdings(ticker)};
             per_trader_holdings_gauge
                 .Add({
                     {"ticker",      common::to_string(ticker)},
@@ -142,23 +143,25 @@ TickerMetricsPusher::report_trader_stats(const TickerContainer& tickers)
         }
     };
 
-    auto portfolio_value = [&](const auto& trader) {
+    auto portfolio_value = [&](const TraderPortfolio& portfolio) {
         double pnl = 0.0;
         for (auto [ticker, info] : tickers) {
-            double amount_held{trader.get_holdings(ticker)};
+            double amount_held{portfolio.get_holdings(ticker)};
             double midprice{info.get_orderbook().get_midprice()};
             pnl += amount_held * midprice;
         }
         return pnl;
     };
+
+    auto calculate_pnl = [&](const TraderPortfolio& portfolio) {
+        return portfolio.get_capital_delta() + portfolio_value(portfolio);
+    };
     auto track_trader = [&](GenericTrader& trader) {
         report_holdings(trader);
+        auto& portfolio = trader.get_portfolio();
 
-        double capital{trader.get_capital()};
-        double pnl{
-            trader.get_capital() + portfolio_value(trader)
-            - trader.get_initial_capital()
-        };
+        double capital{portfolio.get_capital()};
+        double pnl{calculate_pnl(portfolio)};
 
         per_trader_pnl_gauge
             .Add({
