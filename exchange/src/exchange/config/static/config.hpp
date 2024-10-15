@@ -4,7 +4,7 @@
 #define DEBUG_NUM_USERS     2
 
 // How many outgoing messages for one wrapper before we start dropping
-#define MAX_OUTGOING_MQ_SIZE 1000
+#define MAX_OUTGOING_MQ_SIZE 25000
 
 // Limit to 16kb
 #define MAX_PIPE_MSG_SIZE 16000

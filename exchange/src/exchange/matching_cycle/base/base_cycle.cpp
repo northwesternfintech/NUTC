@@ -107,6 +107,7 @@ BaseMatchingCycle::handle_matches_(std::vector<common::match> matches)
         traders_.begin(), traders_.end(),
         [&message = *update](GenericTrader& trader) { trader.send_message(message); }
     );
+	usleep(5000);
 }
 
 } // namespace nutc::exchange
