@@ -20,13 +20,6 @@ def place_market_order(side: Side, ticker: Ticker, quantity: float) -> bool:
         Ticker of order to place (Ticker.ETH, Ticker.BTC, or "LTC")
     quantity
         Volume of order to place
-
-    Returns
-    -------
-    True if order succeeded, False if order failed due to rate limiting
-
-    ((IMPORTANT))
-    You should handle the case where the order fails due to rate limiting (maybe wait and try again?)
     """
     return True
 
@@ -46,7 +39,7 @@ def place_limit_order(side: Side, ticker: Ticker, quantity: float, price: float,
 
     Returns
     -------
-    order_id if order succeeded, -1 if order failed due to rate limiting
+    order_id
     """
     return 0
 
@@ -58,10 +51,6 @@ def cancel_order(ticker: Ticker, order_id: int) -> bool:
         Ticker of order to place (Ticker.ETH, Ticker.BTC, or "LTC")
     order_id
         order_id returned by place_limit_order
-
-    Returns
-    -------
-    True if order succeeded, False if cancellation failed due to rate limiting
     """
     return True
 
