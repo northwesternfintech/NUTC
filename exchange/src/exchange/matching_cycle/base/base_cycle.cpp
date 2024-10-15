@@ -34,8 +34,11 @@ BaseMatchingCycle::collect_orders(uint64_t) -> std::vector<OrderVariant>
             else if constexpr (std::is_same_v<OrderT, common::cancel_order>) {
                 return order;
             }
-            else {
-                return tagged_order<OrderT>{trader, order};
+            else if constexpr (std::is_same_v<OrderT, common::limit_order>) {
+                return tagged_limit_order{trader, order};
+            }
+            else if constexpr (std::is_same_v<OrderT, common::market_order>) {
+                return tagged_market_order{trader, order};
             }
         };
 

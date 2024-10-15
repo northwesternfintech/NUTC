@@ -1,6 +1,38 @@
 #include "macros.hpp"
 
+#include "common/util.hpp"
+
 namespace nutc::test {
+
+limit_order
+make_limit_order(
+    common::Ticker ticker, common::Side side, common::decimal_quantity quantity,
+    common::decimal_price price, bool ioc
+)
+{
+    return {ticker,
+            side,
+            quantity,
+            price,
+            ioc,
+            common::get_time(),
+            common::generate_order_id()};
+}
+
+common::market_order
+make_market_order(
+    common::Ticker ticker, common::Side side, common::decimal_quantity quantity
+)
+{
+    return {ticker, side, quantity, common::get_time()};
+}
+
+common::cancel_order
+make_cancel_order(common::Ticker ticker, common::order_id_t order_id)
+{
+    return {ticker, order_id, common::get_time()};
+}
+
 bool
 order_equality(const common::market_order& order1, const common::market_order& order2)
 {

@@ -73,7 +73,13 @@ protected:
         common::decimal_price price, bool ioc
     )
     {
-        common::limit_order order{TICKER, side, quantity, price, ioc};
+        common::limit_order order{TICKER,
+                                  side,
+                                  quantity,
+                                  price,
+                                  ioc,
+                                  common::get_time(),
+                                  common::generate_order_id()};
         orders_.emplace_back(order);
         return order.order_id;
     }
@@ -81,13 +87,16 @@ protected:
     void
     cancel_order(common::order_id_t order_id)
     {
-        orders_.emplace_back(common::cancel_order{TICKER, order_id});
+        orders_.emplace_back(common::cancel_order{TICKER, order_id, common::get_time()}
+        );
     }
 
     void
     add_market_order(common::Side side, common::decimal_quantity quantity)
     {
-        orders_.emplace_back(common::market_order{TICKER, side, quantity});
+        orders_.emplace_back(
+            common::market_order{TICKER, side, quantity, common::get_time()}
+        );
     }
 
     void
