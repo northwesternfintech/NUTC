@@ -10,7 +10,7 @@
 #include <fmt/format.h>
 #include <x86intrin.h>
 
-#include <random>
+#include <atomic>
 
 namespace nutc::common {
 namespace bi = boost::archive::iterators;
@@ -52,9 +52,11 @@ find_project_file(const std::string& file_name)
 order_id_t
 generate_order_id()
 {
-    static std::mt19937_64 gen{std::random_device{}()};
-    static std::uniform_int_distribution<order_id_t> dis;
-    return dis(gen);
+    // static constexpr auto MAX_PID_BITS = 22;
+    static auto pid = static_cast<std::int64_t>(getpid());
+    // static std::atomic<std::int64_t> start_order_id{(pid << 46)};
+	static std::int64_t start_order_id{(pid<<46)};
+    return ++start_order_id;
 }
 
 uint64_t

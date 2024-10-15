@@ -2,6 +2,7 @@
 #include "common/messages_wrapper_to_exchange.hpp"
 #include "common/types/algorithm/base_algorithm.hpp"
 #include "common/types/ticker.hpp"
+#include "common/util.hpp"
 #include "exchange/orders/storage/order_storage.hpp"
 #include "exchange/traders/trader_container.hpp"
 
@@ -29,6 +30,18 @@ PrintTo(const AlgoLanguage& op, std::ostream* os)
 } // namespace nutc::common
 
 namespace nutc::test {
+
+limit_order make_limit_order(
+    common::Ticker ticker, common::Side side, common::decimal_quantity quantity,
+    common::decimal_price price, bool ioc = false
+);
+
+common::market_order make_market_order(
+    common::Ticker ticker, common::Side side, common::decimal_quantity quantity
+);
+
+common::cancel_order
+make_cancel_order(common::Ticker ticker, common::order_id_t order_id);
 
 bool validate_match(
     const nutc::common::match& match, common::Ticker ticker,

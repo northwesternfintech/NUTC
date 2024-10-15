@@ -65,11 +65,12 @@ TEST_F(UnitManyOrders, CorrectTimePriority)
 TEST_F(UnitManyOrders, OnlyMatchesOne)
 {
     tagged_limit_order order1{trader1, Ticker::ETH, buy, 1.0, 1.0};
+    tagged_limit_order order11{trader1, Ticker::ETH, buy, 1.0, 1.0};
     tagged_limit_order order2{trader2, Ticker::ETH, sell, 1.0, 1.0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
-    matches = add_to_engine_(order1);
+    matches = add_to_engine_(order11);
     ASSERT_EQ(matches.size(), 0);
 
     matches = add_to_engine_(order2);

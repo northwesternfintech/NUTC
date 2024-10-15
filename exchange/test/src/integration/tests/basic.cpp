@@ -25,11 +25,11 @@ TEST_P(IntegrationBasicAlgo, ConfirmOrderReceived)
     start_wrappers(traders_, GetParam(), "buy_tsla_at_100");
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->get_portfolio().modify_holdings(Ticker::ETH, 1000.0); // NOLINT
-    trader2->add_order(limit_order{Ticker::ETH, sell, 100.0, 10.0});
+    trader2->add_order(make_limit_order(Ticker::ETH, sell, 100.0, 10.0));
 
     TestMatchingCycle cycle{traders_};
 
-    cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
+    cycle.wait_for_order(make_limit_order(Ticker::ETH, buy, 100.0, 10.0));
     ASSERT_EQ(
         double{
             trader2->get_portfolio().get_capital()
@@ -44,11 +44,11 @@ TEST_P(IntegrationBasicAlgo, ConfirmOrderFeeApplied)
     start_wrappers(traders_, GetParam(), "buy_tsla_at_100");
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->get_portfolio().modify_holdings(Ticker::ETH, 1000.0); // NOLINT
-    trader2->add_order(limit_order{Ticker::ETH, sell, 100.0, 10.0});
+    trader2->add_order(make_limit_order(Ticker::ETH, sell, 100.0, 10.0));
 
     TestMatchingCycle cycle{traders_, .5};
 
-    cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
+    cycle.wait_for_order(make_limit_order(Ticker::ETH, buy, 100.0, 10.0));
     ASSERT_EQ(
         double{
             trader2->get_portfolio().get_capital()
@@ -63,7 +63,7 @@ TEST_P(IntegrationBasicAlgo, RemoveIOCOrder)
     auto& trader1 = start_wrappers(traders_, GetParam(), "buy_tsla_at_100");
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->get_portfolio().modify_holdings(Ticker::ETH, 1000.0); // NOLINT
-    trader2->add_order({Ticker::ETH, sell, 100.0, 100.0});
+    trader2->add_order(make_limit_order(Ticker::ETH, sell, 100.0, 100.0));
 
     TestMatchingCycle cycle{traders_};
 
@@ -82,11 +82,11 @@ TEST_P(IntegrationBasicAlgo, MarketOrderBuy)
     start_wrappers(traders_, GetParam(), "buy_market_order_1000");
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->get_portfolio().modify_holdings(Ticker::ETH, 1000.0);
-    trader2->add_order({Ticker::ETH, sell, 100.0, 100.0});
+    trader2->add_order(make_limit_order(Ticker::ETH, sell, 100.0, 100.0));
 
     TestMatchingCycle cycle{traders_};
 
-    cycle.wait_for_order(limit_order{Ticker::BTC, buy, 1.0, 100.0});
+    cycle.wait_for_order(make_limit_order(Ticker::BTC, buy, 1.0, 100.0));
 }
 
 TEST_P(IntegrationBasicAlgo, MarketOrderSell)
@@ -94,12 +94,12 @@ TEST_P(IntegrationBasicAlgo, MarketOrderSell)
     auto& trader1 = start_wrappers(traders_, GetParam(), "sell_market_order_1000");
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader1.get_portfolio().modify_holdings(Ticker::ETH, 1000.0);
-    trader2->add_order({Ticker::ETH, buy, 1.0, 100.0});
+    trader2->add_order(make_limit_order(Ticker::ETH, buy, 1.0, 100.0));
     trader2->get_portfolio().modify_capital(1000.0);
 
     TestMatchingCycle cycle{traders_};
 
-    cycle.wait_for_order(limit_order{Ticker::BTC, buy, 1.0, 100.0});
+    cycle.wait_for_order(make_limit_order(Ticker::BTC, buy, 1.0, 100.0));
 }
 
 TEST_P(IntegrationBasicAlgo, ManyUpdates)
@@ -112,12 +112,14 @@ TEST_P(IntegrationBasicAlgo, ManyUpdates)
     TestMatchingCycle cycle{traders_};
 
     for (int i = 0; i < 10000; i++) {
-        trader2->add_order({Ticker::ETH, sell, 1.0, static_cast<double>(i)});
+        trader2->add_order(
+            make_limit_order(Ticker::ETH, sell, 1.0, static_cast<double>(i))
+        );
     }
 
     cycle.on_tick(0);
 
-    cycle.wait_for_order(limit_order{Ticker::ETH, buy, 10.0, 100.0});
+    cycle.wait_for_order(make_limit_order(Ticker::ETH, buy, 10.0, 100.0));
 }
 
 TEST_P(IntegrationBasicAlgo, OrderVolumeLimitsPreventGoingAboveLimit)
@@ -127,7 +129,8 @@ TEST_P(IntegrationBasicAlgo, OrderVolumeLimitsPreventGoingAboveLimit)
     TestMatchingCycle cycle{traders_, 0.0, 10.0};
 
     for (int i = 1; i < 21; i++) {
-        cycle.wait_for_order(limit_order{Ticker::ETH, buy, 1.0, static_cast<double>(i)}
+        cycle.wait_for_order(
+            make_limit_order(Ticker::ETH, buy, 1.0, static_cast<double>(i))
         );
         cycle.on_tick(0);
     }
@@ -144,11 +147,11 @@ TEST_P(IntegrationBasicAlgo, OnTradeUpdate)
 
     TestMatchingCycle cycle{traders_};
 
-    trader2->add_order({Ticker::ETH, sell, 100.0, 100.0});
+    trader2->add_order(make_limit_order(Ticker::ETH, sell, 100.0, 100.0));
 
-    cycle.wait_for_order(limit_order{Ticker::ETH, buy, 10.0, 102.0});
+    cycle.wait_for_order(make_limit_order(Ticker::ETH, buy, 10.0, 102.0));
 
-    cycle.wait_for_order(limit_order{Ticker::BTC, buy, 1.0, 100.0});
+    cycle.wait_for_order(make_limit_order(Ticker::BTC, buy, 1.0, 100.0));
 }
 
 // Sanity check that it goes through the orderbook
@@ -161,10 +164,10 @@ TEST_P(IntegrationBasicAlgo, MultipleLevelOrder)
 
     TestMatchingCycle cycle{traders_};
 
-    trader2->add_order({Ticker::ETH, sell, 55.0, 1.0});
-    trader2->add_order({Ticker::ETH, sell, 45.0, 1.0});
+    trader2->add_order(make_limit_order(Ticker::ETH, sell, 55.0, 1.0));
+    trader2->add_order(make_limit_order(Ticker::ETH, sell, 45.0, 1.0));
 
-    cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
+    cycle.wait_for_order(make_limit_order(Ticker::ETH, buy, 100.0, 10.0));
     ASSERT_EQ(
         trader1.get_portfolio().get_capital()
             - trader1.get_portfolio().get_initial_capital(),
@@ -178,16 +181,16 @@ TEST_P(IntegrationBasicAlgo, OnAccountUpdateSell)
     trader1.get_portfolio().modify_holdings(Ticker::ETH, 1000.0);
 
     auto trader2 = traders_.add_trader<TestTrader>(100000);
-    trader2->add_order({Ticker::ETH, buy, 102.0, 102.0});
+    trader2->add_order(make_limit_order(Ticker::ETH, buy, 102.0, 102.0));
 
     TestMatchingCycle cycle{traders_};
 
     // obupdate triggers one user to place acommon::Side::buy order of 10 ABC at 102
-    cycle.wait_for_order(limit_order{Ticker::ETH, sell, 10.0, 100.0});
+    cycle.wait_for_order(make_limit_order(Ticker::ETH, sell, 10.0, 100.0));
 
     // on_trade_match triggers one user to place acommon::Side::buy order of 1 ABC
     // at 100
-    cycle.wait_for_order(limit_order{Ticker::BTC, buy, 1.0, 100.0});
+    cycle.wait_for_order(make_limit_order(Ticker::BTC, buy, 1.0, 100.0));
 }
 
 TEST_P(IntegrationBasicAlgo, OnAccountUpdateBuy)
@@ -196,15 +199,15 @@ TEST_P(IntegrationBasicAlgo, OnAccountUpdateBuy)
 
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->get_portfolio().modify_holdings(Ticker::ETH, 1000.0); // NOLINT
-    trader2->add_order({Ticker::ETH, sell, 100.0, 100.0});
+    trader2->add_order(make_limit_order(Ticker::ETH, sell, 100.0, 100.0));
 
     TestMatchingCycle cycle{traders_};
 
     // obupdate triggers one user to place acommon::Side::buy order of 10 ABC at 102
-    cycle.wait_for_order(limit_order{Ticker::ETH, buy, 10.0, 102.0});
+    cycle.wait_for_order(make_limit_order(Ticker::ETH, buy, 10.0, 102.0));
     // on_trade_match triggers one user to place acommon::Side::buy order of 1 ABC
     // at 100
-    cycle.wait_for_order(limit_order{Ticker::BTC, buy, 1.0, 100.0});
+    cycle.wait_for_order(make_limit_order(Ticker::BTC, buy, 1.0, 100.0));
 }
 
 TEST_P(IntegrationBasicAlgo, AlgoStartDelay)
@@ -218,11 +221,11 @@ TEST_P(IntegrationBasicAlgo, AlgoStartDelay)
 
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->get_portfolio().modify_holdings(Ticker::ETH, 1000.0); // NOLINT
-    trader2->add_order({Ticker::ETH, sell, 100.0, 100.0});
+    trader2->add_order(make_limit_order(Ticker::ETH, sell, 100.0, 100.0));
 
     TestMatchingCycle cycle{traders_};
 
-    cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
+    cycle.wait_for_order(make_limit_order(Ticker::ETH, buy, 100.0, 10.0));
 
     auto end = std::chrono::high_resolution_clock::now();
     const int64_t observed_duration_ms =
@@ -239,7 +242,7 @@ TEST_P(IntegrationBasicAlgo, DisableTrader)
     auto& trader1 = start_wrappers(traders_, GetParam(), "buy_tsla_at_100");
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->get_portfolio().modify_holdings(Ticker::ETH, 1000.0); // NOLINT
-    trader2->add_order({Ticker::ETH, sell, 100.0, 100.0});
+    trader2->add_order(make_limit_order(Ticker::ETH, sell, 100.0, 100.0));
 
     trader1.disable();
 

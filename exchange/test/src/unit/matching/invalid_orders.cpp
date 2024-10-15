@@ -39,8 +39,10 @@ TEST_F(UnitInvalidOrders, RemoveThenAddFunds)
 {
     trader1.get_portfolio().modify_capital(-TEST_STARTING_CAPITAL);
 
-    tagged_limit_order order2{trader2, Ticker::ETH, sell, 1.0, 1.0};
     tagged_limit_order order1{trader1, Ticker::ETH, buy, 1.0, 1.0};
+    tagged_limit_order order11{trader1, Ticker::ETH, buy, 1.0, 1.0};
+    tagged_limit_order order2{trader2, Ticker::ETH, sell, 1.0, 1.0};
+    tagged_limit_order order22{trader2, Ticker::ETH, sell, 1.0, 1.0};
 
     // Thrown out
     auto matches = add_to_engine_(order1);
@@ -53,11 +55,11 @@ TEST_F(UnitInvalidOrders, RemoveThenAddFunds)
     trader1.get_portfolio().modify_capital(TEST_STARTING_CAPITAL);
 
     // Kept, but not matched
-    matches = add_to_engine_(order2);
+    matches = add_to_engine_(order22);
     ASSERT_EQ(matches.size(), 0);
 
     // Kept and matched
-    matches = add_to_engine_(order1);
+    matches = add_to_engine_(order11);
     ASSERT_EQ(matches.size(), 1);
     ASSERT_EQ_MATCH(matches[0], Ticker::ETH, "ABC", "DEF", buy, 1, 1);
 }
