@@ -65,11 +65,11 @@ BaseMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
             if (order.quantity <= 0.0)
                 return;
             // TODO: delegate elsewhere
-            if (order.quantity + order.trader->get_portfolio().get_open_bids()
-                    + order.trader->get_portfolio().get_open_asks()
-                > max_cumulative_order_volume_) {
-                return;
-            }
+            // if (order.quantity + order.trader->get_portfolio().get_open_bids()
+            //         + order.trader->get_portfolio().get_open_asks()
+            //     > max_cumulative_order_volume_) {
+            //     return;
+            // }
             auto tmp = match_order(order, orderbook, order_fee_);
             std::copy(tmp.begin(), tmp.end(), std::back_inserter(matches));
         }

@@ -44,6 +44,7 @@ match_incoming_order_(
     CompositeOrderBook& orderbook, common::decimal_price order_fee
 )
 {
+	static_assert(!is_stored_limit_order_v<OrderT>);
     // We can copy stored_limit_order because it's already pointing to the order. We
     // cannot copy OrderT by value because it will then point to something else
     // This is a confusing micro optimization. Trust.
@@ -92,10 +93,12 @@ attempt_match_(OrderPairT& orders, common::decimal_price order_fee)
     GenericTrader* buyer = buy_order.trader;
     GenericTrader* seller = sell_order.trader;
 
-    if (!buyer->can_leverage() && buyer->get_portfolio().get_capital() < total_price) [[unlikely]]
+    if (!buyer->can_leverage() && buyer->get_portfolio().get_capital() < total_price)
+        [[unlikely]]
         return glz::unexpected(MatchFailure::buyer_failure);
     if (!seller->can_leverage()
-        && seller->get_portfolio().get_holdings(buy_order.ticker) < match_quantity) [[unlikely]]
+        && seller->get_portfolio().get_holdings(buy_order.ticker) < match_quantity)
+        [[unlikely]]
         return glz::unexpected(MatchFailure::seller_failure);
     if (buyer == seller) [[unlikely]] {
         return glz::unexpected(MatchFailure::buyer_failure);
@@ -118,13 +121,14 @@ match_incoming_order_(
             aggressive_order, passive_order.value(), orderbook, order_fee
         );
     }
-
-    auto passive_order = orderbook.get_top_order(common::Side::buy);
-    if (!passive_order.has_value())
-        return glz::unexpected(true);
-    return match_incoming_order_<common::Side::sell>(
-        aggressive_order, passive_order.value(), orderbook, order_fee
-    );
+    else {
+        auto passive_order = orderbook.get_top_order(common::Side::buy);
+        if (!passive_order.has_value())
+            return glz::unexpected(true);
+        return match_incoming_order_<common::Side::sell>(
+            aggressive_order, passive_order.value(), orderbook, order_fee
+        );
+    }
 }
 
 template <TaggedOrder OrderT>

@@ -4,9 +4,9 @@ vars:
   NAME: NUTC
   
   # BOTS, DEV, or NORMAL
-  MODE: "BOTS"
+  MODE: "DEV"
   
-  RELEASE_BUILD: "false"
+  RELEASE_BUILD: "true"
   RELEASE_PRESET: "ci-ubuntu"
 
 tasks:

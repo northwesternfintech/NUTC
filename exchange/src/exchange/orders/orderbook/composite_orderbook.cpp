@@ -41,7 +41,7 @@ CompositeOrderBook::change_quantity(
     order_list::iterator order, common::decimal_quantity quantity_delta
 )
 {
-    if (order->quantity + quantity_delta == 0.0) {
+    if (order->quantity + quantity_delta <= 0.0) {
         remove_order(order);
         return;
     }

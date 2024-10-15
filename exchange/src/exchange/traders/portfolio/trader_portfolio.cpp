@@ -1,5 +1,9 @@
 #include "trader_portfolio.hpp"
 
+#include <fmt/core.h>
+
+#include <iostream>
+
 namespace nutc::exchange {
 TraderPortfolio::TraderPortfolio(common::decimal_price initial_capital) :
     initial_capital_{initial_capital}
@@ -8,11 +12,12 @@ TraderPortfolio::TraderPortfolio(common::decimal_price initial_capital) :
 common::decimal_price
 TraderPortfolio::compute_capital_tolerance() const
 {
-	// TODO: FIX ULTRA HIGH PRIO
-    return (common::decimal_price{1.0} - .33)
+    // TODO: FIX ULTRA HIGH PRIO
+    return (common::decimal_price{1.0} - get_capital_utilization())
            * (get_initial_capital());
 }
 
+// todo: pass these by ref
 void
 TraderPortfolio::notify_match(common::position match)
 {
@@ -118,15 +123,4 @@ TraderPortfolio::get_open_asks() const
     return open_asks_;
 }
 
-void
-TraderPortfolio::modify_open_bids(common::decimal_quantity delta)
-{
-    open_bids_ += delta;
-}
-
-void
-TraderPortfolio::modify_open_asks(common::decimal_quantity delta)
-{
-    open_asks_ += delta;
-}
 } // namespace nutc::exchange

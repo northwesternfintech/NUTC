@@ -49,9 +49,5 @@ public:
     decimal_quantity get_open_bids() const;
 
     decimal_quantity get_open_asks() const;
-
-    void modify_open_bids(decimal_quantity delta);
-
-    void modify_open_asks(decimal_quantity delta);
 };
 } // namespace nutc::exchange

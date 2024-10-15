@@ -3,6 +3,7 @@
 #include "common/types/decimal.hpp"
 #include "common/util.hpp"
 #include "exchange/orders/storage/order_storage.hpp"
+#include <iostream>
 
 namespace nutc::exchange {
 
@@ -47,7 +48,7 @@ void
 LimitOrderBook::remove_order(order_list::iterator order)
 {
     order->trader->get_portfolio().notify_position_change(
-        {order->ticker, order->side, -(order->quantity), order->price}
+        {order->ticker, order->side, -order->quantity, order->price}
     );
     if (order->side == common::Side::buy)
         remove_order(order, bids_);
@@ -79,7 +80,7 @@ LimitOrderBook::add_order(const tagged_limit_order& order)
 
     auto& queue = map[order.price];
     queue.push_back(order);
-    return --queue.end();
+    return std::prev(queue.end());
 }
 
 } // namespace nutc::exchange

@@ -23,7 +23,6 @@ public:
 
     order_list::iterator add_order(const tagged_limit_order& order);
     void remove_order(order_list::iterator order);
-    static void remove_order(order_list::iterator order, order_map& map);
     static void change_quantity(
         order_list::iterator order, common::decimal_quantity quantity_delta
     );
@@ -31,6 +30,9 @@ public:
     common::decimal_price get_midprice() const;
 
     std::optional<LimitOrderBook::stored_limit_order> get_top_order(common::Side side);
+
+private:
+    static void remove_order(order_list::iterator order, order_map& map);
 };
 
 template <typename T>

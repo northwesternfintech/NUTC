@@ -18,7 +18,6 @@ concept IsOrder = std::is_same_v<T, LimitOrderBook::stored_limit_order>
 
 template <typename BuyerT, typename SellerT>
 class OrderPair {
-    using order_list = std::list<tagged_limit_order>;
     using side = common::Side;
 
     BuyerT buyer;

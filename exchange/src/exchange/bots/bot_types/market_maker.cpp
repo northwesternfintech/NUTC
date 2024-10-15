@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <array>
+#include <iostream>
 
 using nutc::common::Side;
 
@@ -84,6 +85,21 @@ MarketMakerBot::take_action(const shared_bot_state& state)
     decimal_price lean = calculate_lean_percent(state);
 
     decimal_price theo = state.THEO - (lean * 1.0) + generate_gaussian_noise(0, .05);
+
+    static int i = 0;
+    if (i++ % 100005 == 0) {
+        std::cout << fmt::format(
+            "long: {} - short: {}\n",
+            double{
+                get_portfolio().get_long_interest()
+                / get_portfolio().get_initial_capital()
+            },
+            double{
+                get_portfolio().get_short_interest()
+                / get_portfolio().get_initial_capital()
+            }
+        );
+    }
 
     place_orders_(Side::buy, theo, spread_offset);
     place_orders_(Side::sell, theo, spread_offset);
