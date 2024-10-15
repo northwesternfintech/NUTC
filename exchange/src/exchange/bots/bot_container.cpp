@@ -22,7 +22,7 @@ BotContainer::generate_orders(
     common::decimal_quantity cumulative_quantity_held{};
 
     for (const auto& bot : bots_) {
-        cumulative_interest_limit += bot->get_portfolio().get_capital();
+        cumulative_interest_limit += bot->get_portfolio().get_initial_capital();
         cumulative_quantity_held += bot->get_portfolio().get_holdings(bot->get_ticker());
     }
 
