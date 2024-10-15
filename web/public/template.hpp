@@ -8,24 +8,16 @@ enum class Ticker : std::uint8_t { ETH = 0, BTC = 1, LTC = 2 }; // NOLINT
 /**
  * Place a market order
  *
- * IMPORTANT:
- * You should handle the case where the order fails due to rate limiting
- * (maybe wait and try again?)
- *
  * @param side Side of the order to place ("BUY" or Side::sell)
  * @param ticker Ticker of the order to place ("ETH", "BTC", or "LTC")
  * @param quantity Volume of the order to place
  *
- * @return true if order succeeded, false if order failed due to rate limiting
+ * @return (ignore return value)
  */
 bool place_market_order(Side side, Ticker ticker, float quantity);
 
 /**
  * Place a limit order
- *
- * IMPORTANT:
- * You should handle the case where the order fails due to rate limiting
- * (maybe wait and try again?)
  *
  * @param side Side of the order to place ("BUY" or Side::sell)
  * @param ticker Ticker of the order to place ("ETH", "BTC", or "LTC")
@@ -33,10 +25,19 @@ bool place_market_order(Side side, Ticker ticker, float quantity);
  * @param price Price of the order to place
  * @param ioc Immediate or cancel
  *
- * @return true if order succeeded, false if order failed due to rate limiting
+ * @return order_id
  */
 std::int64_t place_limit_order(Side side, Ticker ticker, float quantity,
                                float price, bool ioc = false);
+
+/**
+ * Cancel an order
+ *
+ * @param ticker Ticker the original order was placed on
+ * @param order_id Order_id returned by place_limit_order
+ *
+ * @return (ignore return value)
+ */
 
 bool cancel_order(Ticker ticker, std::int64_t order_id);
 
