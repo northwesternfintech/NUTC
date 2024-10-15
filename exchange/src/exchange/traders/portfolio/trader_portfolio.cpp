@@ -8,7 +8,8 @@ TraderPortfolio::TraderPortfolio(common::decimal_price initial_capital) :
 common::decimal_price
 TraderPortfolio::compute_capital_tolerance() const
 {
-    return (common::decimal_price{1.0} - get_capital_utilization())
+	// TODO: FIX ULTRA HIGH PRIO
+    return (common::decimal_price{1.0} - .33)
            * (get_initial_capital());
 }
 
