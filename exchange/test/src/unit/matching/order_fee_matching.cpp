@@ -109,6 +109,7 @@ TEST_F(UnitOrderFeeMatching, NoMatchThenMatchBuy)
 TEST_F(UnitOrderFeeMatching, NoMatchThenMatchSell)
 {
     tagged_limit_order order1{trader1, Ticker::ETH, buy, 1.0, 1.0, 0};
+    tagged_limit_order order11{trader1, Ticker::ETH, buy, 1.0, 1.0, 0};
     tagged_limit_order order2{trader2, Ticker::ETH, buy, 1.0, 1.0, 0};
     tagged_limit_order order3{trader3, Ticker::ETH, sell, 2.0, 0.0, 0};
 
@@ -116,7 +117,7 @@ TEST_F(UnitOrderFeeMatching, NoMatchThenMatchSell)
     ASSERT_EQ(matches.size(), 0);
     matches = add_to_engine_(order2);
     ASSERT_EQ(matches.size(), 0);
-    matches = add_to_engine_(order1);
+    matches = add_to_engine_(order11);
     ASSERT_EQ(matches.size(), 0);
     matches = add_to_engine_(order3);
     ASSERT_EQ(matches.size(), 2);
@@ -284,8 +285,10 @@ TEST_F(UnitOrderFeeMatching, NotEnoughToEnough)
 {
     trader1.get_portfolio().modify_capital(-TEST_STARTING_CAPITAL + 1);
 
-    tagged_limit_order order2{trader2, Ticker::ETH, sell, 1.0, 1.0, 0};
     tagged_limit_order order1{trader1, Ticker::ETH, buy, 1.0, 1.0, 0};
+    tagged_limit_order order11{trader1, Ticker::ETH, buy, 1.0, 1.0, 0};
+    tagged_limit_order order2{trader2, Ticker::ETH, sell, 1.0, 1.0, 0};
+    tagged_limit_order order22{trader2, Ticker::ETH, sell, 1.0, 1.0, 0};
 
     // Thrown out
     auto matches = add_to_engine_(order1);
@@ -301,11 +304,11 @@ TEST_F(UnitOrderFeeMatching, NotEnoughToEnough)
     trader1.get_portfolio().modify_capital(0.5);
 
     // Kept, but not matched
-    matches = add_to_engine_(order2);
+    matches = add_to_engine_(order22);
     ASSERT_EQ(matches.size(), 0);
 
     // Kept and matched
-    matches = add_to_engine_(order1);
+    matches = add_to_engine_(order11);
     ASSERT_EQ(matches.size(), 1);
     ASSERT_EQ_MATCH(matches[0], Ticker::ETH, "ABC", "DEF", buy, 1, 1);
 
