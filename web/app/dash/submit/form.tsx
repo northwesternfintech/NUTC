@@ -61,6 +61,8 @@ export default function SubmissionForm(props: { user: any }) {
     });
 
   const onSubmit: SubmitHandler<Inputs> = async data => {
+    Swal.fire({title: "Under maintenance", text: "We are deploying a bugfix, please check back tomorrow morning"});
+    return;
     const responsePromise = fetch("/api/protected/db/user/createAlgo", {
       method: "POST",
       body: JSON.stringify(data),
