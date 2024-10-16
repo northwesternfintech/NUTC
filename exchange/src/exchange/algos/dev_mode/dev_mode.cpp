@@ -41,7 +41,7 @@ DevModeAlgoInitializer::initialize_files()
         throw std::runtime_error("Failed to create directory");
 
     for (const common::LocalAlgorithm& algo : algorithms_) {
-        if (fs::exists(algo.get_path()))
+        if (std::filesystem::exists(algo.get_path()))
             continue;
 
         std::ofstream file(algo.get_path());
