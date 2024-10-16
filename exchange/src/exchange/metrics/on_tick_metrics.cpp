@@ -7,6 +7,8 @@
 #include "exchange/traders/trader_container.hpp"
 #include "prometheus.hpp"
 
+#include <fmt/core.h>
+
 #include <algorithm>
 
 namespace nutc::exchange {
@@ -107,15 +109,17 @@ TickerMetricsPusher::report_ticker_stats(TickerContainer& tickers)
 }
 
 void
-TickerMetricsPusher::report_matches(const std::vector<common::match>& orders)
+TickerMetricsPusher::report_matches(const std::vector<tagged_match>& orders)
 {
-    auto log_match = [this](const common::match& match) {
+    auto log_match = [this](const tagged_match& match) {
+        std::string match_type =
+            fmt::format("{}->{}", match.seller->get_type(), match.buyer->get_type());
         matches_quantity_counter
             .Add({
-                {"ticker",     common::to_string(match.position.ticker)},
-                {"match_type", match.match_type                        }
+                {"ticker",     common::to_string(match.ticker)},
+                {"match_type", match_type                     }
         })
-            .Increment(double{match.position.quantity});
+            .Increment(double{match.quantity});
     };
 
     std::for_each(orders.begin(), orders.end(), log_match);

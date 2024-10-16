@@ -41,13 +41,22 @@ protected:
 
     std::vector<OrderVariant> collect_orders(uint64_t) override;
 
-    std::vector<common::match> match_orders_(std::vector<OrderVariant> orders) override;
+    std::vector<tagged_match> match_orders_(std::vector<OrderVariant> orders) override;
 
-    void handle_matches_(std::vector<common::match> matches) override;
+    void handle_matches_(std::vector<tagged_match> matches) override;
 
     void
     post_cycle_(uint64_t) override
     {}
+
+private:
+    std::vector<common::position> get_orderbook_updates_();
+
+    static std::vector<common::position>
+    tagged_matches_to_positions(const std::vector<tagged_match>& matches);
+
+    static void send_account_updates(const std::vector<tagged_match>& matches);
+    void send_market_updates_(const std::vector<tagged_match>& matches);
 };
 
 } // namespace nutc::exchange

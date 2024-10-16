@@ -39,7 +39,7 @@ public:
     void report_trader_stats(const TickerContainer& tickers);
     void report_ticker_stats(TickerContainer& tickers);
     void report_orders(const std::vector<OrderVariant>& orders);
-    void report_matches(const std::vector<common::match>& orders);
+    void report_matches(const std::vector<tagged_match>& orders);
 
 private:
     static Gauge create_gauge_(const std::string& gauge_name);

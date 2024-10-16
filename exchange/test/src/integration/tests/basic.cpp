@@ -166,7 +166,8 @@ TEST_P(IntegrationBasicAlgo, MultipleLevelOrder)
 
     cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
     ASSERT_EQ(
-        trader1.get_portfolio().get_capital() - trader1.get_portfolio().get_initial_capital(),
+        trader1.get_portfolio().get_capital()
+            - trader1.get_portfolio().get_initial_capital(),
         -100.0
     );
 }
@@ -208,12 +209,11 @@ TEST_P(IntegrationBasicAlgo, OnAccountUpdateBuy)
 
 TEST_P(IntegrationBasicAlgo, AlgoStartDelay)
 {
+    auto start = std::chrono::high_resolution_clock::now();
     start_wrappers(
         traders_, GetParam(), "buy_tsla_at_100", TEST_STARTING_CAPITAL,
         TEST_CLIENT_WAIT_SECS
     );
-
-    auto start = std::chrono::high_resolution_clock::now();
 
     auto trader2 = traders_.add_trader<TestTrader>(0);
     trader2->get_portfolio().modify_holdings(Ticker::ETH, 1000.0); // NOLINT

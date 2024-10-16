@@ -61,4 +61,4 @@ protected:
     {}
 };
 
-} // namespace nutc::lint
+} // namespace nutc::linter

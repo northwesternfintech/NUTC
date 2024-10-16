@@ -27,6 +27,22 @@ public:
 using tagged_limit_order = tagged_order<common::limit_order>;
 using tagged_market_order = tagged_order<common::market_order>;
 
+class tagged_match : public common::position {
+public:
+    GenericTrader* buyer;
+    GenericTrader* seller;
+
+    tagged_match(
+        GenericTrader& buyer, GenericTrader& seller, const common::position& match
+    ) : common::position(match), buyer(&buyer), seller(&seller)
+    {}
+
+    tagged_match(
+        GenericTrader* buyer, GenericTrader* seller, const common::position& match
+    ) : common::position(match), buyer(buyer), seller(seller)
+    {}
+};
+
 using OrderVariant =
     std::variant<common::cancel_order, tagged_limit_order, tagged_market_order>;
 

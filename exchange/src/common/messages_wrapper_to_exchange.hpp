@@ -20,6 +20,12 @@ struct cancel_order {
     order_id_t order_id;
     std::uint64_t timestamp = get_time();
 
+    cancel_order(Ticker ticker, order_id_t order_id) :
+        ticker{ticker}, order_id{order_id}
+    {}
+
+    cancel_order() = default;
+
     bool
     operator==(const cancel_order& other) const
     {

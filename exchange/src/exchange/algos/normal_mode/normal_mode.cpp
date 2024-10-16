@@ -1,8 +1,8 @@
 #include "normal_mode.hpp"
 
+#include "common/logging/logging.hpp"
 #include "common/util.hpp"
 #include "exchange/curl/curl.hpp"
-#include "common/logging/logging.hpp"
 #include "exchange/traders/trader_types/algo_trader.hpp"
 #include "exchange/wrappers/creation/rmq_wrapper_init.hpp"
 
@@ -40,7 +40,7 @@ NormalModeAlgoInitializer::initialize_trader_container(
         std::string algo_id = user["latestAlgoId"].get<std::string>();
 
         try {
-			// TODO: add back
+            // TODO: add back
             // traders.add_trader<AlgoTrader>(common::RemoteAlgorithm{}, start_capital);
             log_i(main, "Created user");
         } catch (const std::runtime_error& err) {
@@ -48,10 +48,11 @@ NormalModeAlgoInitializer::initialize_trader_container(
         }
     }
 
-    int64_t start_time = get_start_time(WAIT_SECS);
+    auto start_time = get_start_time(WAIT_SECS);
     std::for_each(traders.begin(), traders.end(), [start_time](auto& trader) {
         send_start_time(trader, start_time);
     });
+    std::this_thread::sleep_until(start_time);
 }
 
 glz::json_t::object_t
