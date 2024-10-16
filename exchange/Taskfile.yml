@@ -56,8 +56,6 @@ tasks:
       - cmake --build {{.CMAKE_SUFFIX}} -j 
       
   run-gdb:
-    env:
-      NUTC_WRAPPER_BINARY_PATH: '{{if eq .RELEASE_BUILD "true"}}./build/WRAPPER{{else}}./build/dev/WRAPPER{{end}}'
     vars:
       NUTC_PATH: '{{if eq .RELEASE_BUILD "true"}}build/{{.NAME}}{{else}}build/dev/{{.NAME}}{{end}}'
     cmds:
@@ -66,8 +64,6 @@ tasks:
       - gdb ./{{ .NUTC_PATH }}
 
   run-perf:
-    env:
-      NUTC_WRAPPER_BINARY_PATH: '{{if eq .RELEASE_BUILD "true"}}./build/WRAPPER{{else}}./build/dev/WRAPPER{{end}}'
     vars:
       NUTC_PATH: '{{if eq .RELEASE_BUILD "true"}}build/{{.NAME}}{{else}}build/dev/{{.NAME}}{{end}}'
       MODE_FLAG: '{{if eq .MODE "BOTS"}}--bots-only{{else if eq .MODE "DEV"}}--dev{{end}}'
@@ -78,8 +74,6 @@ tasks:
 
   run:
     env:
-      NUTC_CPP_TEMPLATE_PATH: 'template.cpp'
-      NUTC_WRAPPER_BINARY_PATH: '{{if eq .RELEASE_BUILD "true"}}./build/WRAPPER{{else}}./build/dev/WRAPPER{{end}}'
       NUTC_EXPOSE_METRICS: 1
     vars:
       NUTC_PATH: '{{if eq .RELEASE_BUILD "true"}}build/{{.NAME}}{{else}}build/dev/{{.NAME}}{{end}}'
@@ -120,7 +114,6 @@ tasks:
     cmds:
       - task: build
         # Don't want to check the mode
-      - echo $NUTC_WRAPPER_BINARY_PATH
       - cp -r -L test/src/integration/test_algos {{.TEST_DIR}}
       - task: run-itest
 
@@ -132,9 +125,5 @@ tasks:
       DEV_TEST_FLAGS: '--timeout 2 --preset=dev'
       RELEASE_TEST_FLAGS: '--output-on-failure --no-tests=error --timeout 10 -C Release'
       TEST_FLAGS: '{{if eq .RELEASE_BUILD "true"}}{{.RELEASE_TEST_FLAGS}}{{else}}{{.DEV_TEST_FLAGS}}{{end}}'
-    env:
-      NUTC_CPP_TEMPLATE_PATH: 'test_algos/cpp/template.cpp'
-      NUTC_WRAPPER_BINARY_PATH: '{{.PWD}}/{{.WRAPPER_RELATIVE_PATH}}'
-      NUTC_LINTER_SPAWNER_BINARY_PATH: '{{.PWD}}/{{.LINTER_SPAWNER_RELATIVE_PATH}}'
     cmds:
       - ctest -j 4 {{.TEST_FLAGS}} -R "Integration*" 

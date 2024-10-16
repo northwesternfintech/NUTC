@@ -25,33 +25,6 @@ static algorithm_process spawn_algorithm(
     ba::io_context& io_context
 );
 
-static const std::filesystem::path& spawner_binary_path();
-
-static std::string get_language_flag(common::AlgoLanguage language);
-
-const std::filesystem::path&
-spawner_binary_path()
-{
-    static constexpr auto LINTER_SPAWNER_BINARY_ENV_VAR =
-        "NUTC_LINTER_SPAWNER_BINARY_PATH";
-    static const char* spawner_binary_location =
-        std::getenv(LINTER_SPAWNER_BINARY_ENV_VAR); // NOLINT
-    if (spawner_binary_location == nullptr) [[unlikely]] {
-        throw std::runtime_error(fmt::format(
-            "{} environment variable not set", LINTER_SPAWNER_BINARY_ENV_VAR
-        ));
-    }
-
-    static const std::filesystem::path spawner_binary_path{spawner_binary_location};
-    if (!std::filesystem::exists(spawner_binary_path)) {
-        throw std::runtime_error(
-            fmt::format("File at {} does not exist", LINTER_SPAWNER_BINARY_ENV_VAR)
-        );
-    }
-
-    return spawner_binary_path;
-}
-
 std::string
 get_language_flag(common::AlgoLanguage language)
 {
@@ -71,13 +44,12 @@ spawn_algorithm(
     ba::io_context& io_context
 )
 {
-    const static std::string spawner_path = spawner_binary_path();
-
+    std::string linter_spawner_path = common::find_project_file("LINTER_spawner");
     auto algo_to_linter_pipe = std::make_unique<bp::async_pipe>(io_context);
 
     bp::opstream linter_to_algo_pipe;
     auto algorithm_process = std::make_unique<bp::child>(
-        bp::exe(spawner_path), bp::args(get_language_flag(language)),
+        bp::exe(linter_spawner_path), bp::args(get_language_flag(language)),
         bp::std_in<linter_to_algo_pipe, bp::std_err> stderr,
         bp::std_out > *algo_to_linter_pipe, io_context
     );

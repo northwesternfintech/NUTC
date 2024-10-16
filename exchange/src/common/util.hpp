@@ -19,6 +19,8 @@ std::string base64_encode(const std::string& data);
 
 std::string base64_decode(const std::string& data);
 
+std::string find_project_file(const std::string& file_name);
+
 // NOTE: this must be the same as Side in template.hpp
 enum class Side { buy = 0, sell = 1 };
 

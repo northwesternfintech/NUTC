@@ -19,29 +19,6 @@ quote_id(std::string user_id)
 
 namespace nutc::exchange {
 
-const fs::path&
-WrapperHandle::wrapper_binary_path()
-{
-    static constexpr auto WRAPPER_BINARY_PATH_ENV_VAR = "NUTC_WRAPPER_BINARY_PATH";
-    static const char* const wrapper_binary_location =
-        std::getenv(WRAPPER_BINARY_PATH_ENV_VAR);
-
-    if (wrapper_binary_location == nullptr) [[unlikely]] {
-        throw std::runtime_error(
-            fmt::format("{} environment variable not set", WRAPPER_BINARY_PATH_ENV_VAR)
-        );
-    }
-
-    static const fs::path wrapper_binary_path{wrapper_binary_location};
-    if (!fs::exists(wrapper_binary_path)) {
-        throw std::runtime_error(
-            fmt::format("File at {} does not exist", WRAPPER_BINARY_PATH_ENV_VAR)
-        );
-    }
-
-    return wrapper_binary_path;
-}
-
 WrapperHandle::~WrapperHandle()
 {
     if (wrapper_.running()) {
@@ -67,14 +44,12 @@ WrapperHandle::WrapperHandle(
     const std::vector<std::string>& args, const std::string& algo_string
 )
 {
-    static const std::string path{wrapper_binary_path()};
-
     auto& pipe_in_ptr = reader_.get_pipe();
     auto& pipe_out_ptr = writer_.get_pipe();
 
     wrapper_ = bp::child(
-        bp::exe(path), bp::args(args), bp::std_in<pipe_out_ptr, bp::std_err> stderr,
-        bp::std_out > pipe_in_ptr
+        bp::exe(common::find_project_file("WRAPPER")), bp::args(args),
+        bp::std_in<pipe_out_ptr, bp::std_err> stderr, bp::std_out > pipe_in_ptr
     );
 
     using algorithm_t = nutc::common::algorithm_content;

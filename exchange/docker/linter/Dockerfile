@@ -23,13 +23,10 @@ RUN cmake --preset=ci-docker
 
 RUN cmake --build build --config Release -j
 
-ENV NUTC_LINTER_SPAWNER_BINARY_PATH="/app/exchange/build/LINTER_spawner"
-
 RUN chmod +x /app/exchange/build/LINTER
 RUN chmod +x /app/exchange/build/LINTER_spawner
 
-COPY ./exchange/template.cpp /app/template.cpp
-ENV NUTC_CPP_TEMPLATE_PATH="/app/template.cpp"
+COPY ./exchange/template.cpp /app/exchange/template.cpp
 
 EXPOSE 18081
 
