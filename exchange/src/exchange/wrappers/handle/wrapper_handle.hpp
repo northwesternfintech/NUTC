@@ -20,7 +20,7 @@ class WrapperHandle {
     WrapperHandle(const std::vector<std::string>& args, const std::string& algo_string);
     void block_on_init();
 
-    const fs::path& wrapper_binary_path();
+    static std::string wrapper_binary_path();
 
 public:
     /* Both constructors will block on an init shared, ensuring proper construction
