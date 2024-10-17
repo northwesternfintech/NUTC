@@ -27,11 +27,7 @@ COPY ./exchange/config.yml /app/exchange/config.yml
 
 RUN chmod +x /app/exchange/build/NUTC /app/exchange/build/WRAPPER
 
-COPY ./exchange/template.cpp /app/template.cpp
-
-ENV NUTC_WRAPPER_BINARY_PATH="/app/exchange/build/WRAPPER"
-ENV NUTC_CONFIG_FILE="/app/exchange/config.yml"
-ENV NUTC_CPP_TEMPLATE_PATH="/app/template.cpp"
+COPY ./exchange/template.cpp /app/exchange/template.cpp
 
 # Numpy
 ENV OPENBLAS_NUM_THREADS=1

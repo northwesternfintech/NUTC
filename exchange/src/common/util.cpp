@@ -6,6 +6,7 @@
 #include <boost/archive/iterators/base64_from_binary.hpp>
 #include <boost/archive/iterators/binary_from_base64.hpp>
 #include <boost/archive/iterators/transform_width.hpp>
+#include <boost/dll/runtime_symbol_info.hpp>
 #include <fmt/format.h>
 
 #include <random>
@@ -18,6 +19,40 @@
 
 namespace nutc::common {
 namespace bi = boost::archive::iterators;
+
+namespace {
+std::string
+find_path_nocache(const std::string& file_name)
+{
+    boost::filesystem::path exe_path = boost::dll::program_location();
+
+    std::vector<boost::filesystem::path> possible_paths = {
+        exe_path.parent_path() / file_name,
+        exe_path.parent_path().parent_path() / file_name,
+        exe_path.parent_path().parent_path().parent_path() / file_name,
+        exe_path.parent_path().parent_path().parent_path().parent_path() / file_name,
+    };
+
+    auto path = std::ranges::find_if(possible_paths, [](auto& path) {
+        return boost::filesystem::exists(path);
+    });
+    if (path != possible_paths.end()) {
+        return path->string();
+    }
+
+    throw std::runtime_error(fmt::format("{} not found", file_name));
+}
+} // namespace
+
+std::string
+find_project_file(const std::string& file_name)
+{
+    static std::unordered_map<std::string, std::string> path_cache;
+    if (path_cache.contains(file_name)) {
+        return path_cache[file_name];
+    }
+    return path_cache[file_name] = find_path_nocache(file_name);
+}
 
 order_id_t
 generate_order_id()

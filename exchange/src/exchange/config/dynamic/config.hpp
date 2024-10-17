@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/types/decimal.hpp"
+#include "common/util.hpp"
 #include "exchange/config/static/config.hpp"
 #include "ticker_config.hpp"
 
@@ -33,7 +34,7 @@ public:
         static const char* effective_path =
             config_file_path ? config_file_path : DEFAULT_CONFIG_FILE;
 
-        static Config instance(effective_path);
+        static Config instance(common::find_project_file(effective_path));
         return instance;
     }
 
