@@ -22,12 +22,12 @@ Runtime::process_message(tick_update&& tick_update)
 
         if (m.buyer_id == trader_id_) [[unlikely]] {
             fire_on_account_update(
-                p.ticker, p.side, p.price, p.quantity, m.buyer_capital
+                p.ticker, Side::buy, p.price, p.quantity, m.buyer_capital
             );
         }
         if (m.seller_id == trader_id_) [[unlikely]] {
             fire_on_account_update(
-                p.ticker, p.side, p.price, p.quantity, m.seller_capital
+                p.ticker, Side::sell, p.price, p.quantity, m.seller_capital
             );
         }
     });
