@@ -20,35 +20,32 @@ NormalModeAlgoInitializer::initialize_trader_container(
     static int id = 0;
     auto firebase_users = get_remote_traders();
     for (const auto& user : firebase_users) {
+        if (!user.contains("language") || !user.contains("code")
+            || !user.contains("name")) {
+            throw std::runtime_error("Not contain field");
+        }
+        common::AlgoLanguage language = user["language"].get<std::string>() == "Python"
+                                            ? common::AlgoLanguage::python
+                                            : common::AlgoLanguage::cpp;
+        std::string code = user["code"].get<std::string>();
+        std::string name = user["name"].get<std::string>();
         try {
-            if (!user.contains("language") || !user.contains("code")
-                || !user.contains("name")) {
-                throw std::runtime_error("Not contain field");
-            }
-            if (!user["language"].is_string() || !user["code"].is_string()
-                || !user["name"].is_string()) {
-                throw std::runtime_error("not string");
-            }
-            common::AlgoLanguage language =
-                user["language"].get<std::string>() == "Python"
-                    ? common::AlgoLanguage::python
-                    : common::AlgoLanguage::cpp;
-            std::string code = user["code"].get<std::string>();
-            std::string name = user["name"].get<std::string>();
             traders.add_trader<AlgoTrader>(
                 common::RemoteAlgorithm(language, std::to_string(id++), code, name),
-                start_capital
+                start_capital, name
             );
             log_i(main, "Created user {}", name);
         } catch (const std::runtime_error& err) {
-            log_w(main, "Failed to create user: {}", err.what());
+            log_w(main, "Failed to create user {}: {}", name, err.what());
         }
     }
 
+    log_i(main, "Done creating users, sending start time");
     int64_t start_time = get_start_time(WAIT_SECS);
     std::for_each(traders.begin(), traders.end(), [start_time](auto& trader) {
         send_start_time(trader, start_time);
     });
+    log_i(main, "Starting exchange");
     std::this_thread::sleep_for(std::chrono::seconds(WAIT_SECS));
 }
 

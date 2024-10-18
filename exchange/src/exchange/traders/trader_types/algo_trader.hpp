@@ -15,9 +15,10 @@ class AlgoTrader : public GenericTrader {
 
 public:
     explicit AlgoTrader(
-        const common::algorithm_variant& algo_variant, common::decimal_price capital
+        const common::algorithm_variant& algo_variant, common::decimal_price capital,
+        std::string name = ""
     ) :
-        GenericTrader(common::get_id(algo_variant), capital),
+        GenericTrader(common::get_id(algo_variant), capital, std::move(name)),
         DISPLAY_NAME(common::get_id(algo_variant)),
         wrapper_handle_(std::make_optional<WrapperHandle>(algo_variant))
     {}
@@ -27,12 +28,6 @@ public:
     {
         static const std::string TYPE = "ALGO";
         return TYPE;
-    }
-
-    const std::string&
-    get_display_name() const override
-    {
-        return DISPLAY_NAME;
     }
 
     bool

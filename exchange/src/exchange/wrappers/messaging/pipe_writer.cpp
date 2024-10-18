@@ -2,6 +2,7 @@
 
 #include "async_pipe_runner.hpp"
 #include "exchange/config/static/config.hpp"
+
 #include <iostream>
 
 namespace nutc::exchange {
@@ -23,7 +24,7 @@ PipeWriter::send_message(const std::string& message)
     queued_shared_.push_back(message);
     if (queued_shared_.size() > MAX_OUTGOING_MQ_SIZE) [[unlikely]] {
         queued_shared_.pop_front();
-		std::cerr << "DROPPED MESSAGE\n";
+        // std::cerr << "DROPPED MESSAGE\n";
     }
 
     // It will enqueue these shared anyway
