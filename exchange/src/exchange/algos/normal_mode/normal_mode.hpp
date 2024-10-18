@@ -21,6 +21,6 @@ public:
     {}
 
 private:
-    static glz::json_t::object_t get_remote_traders();
+    static glz::json_t::array_t get_remote_traders();
 };
 } // namespace nutc::exchange

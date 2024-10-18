@@ -8,12 +8,15 @@ services:
     build:
       context: ../..
       dockerfile: exchange/docker/sandbox/Dockerfile
-      args:
-        firebase_emulator: "false"
     restart: unless-stopped
     environment:
       - NUTC_EXPOSE_METRICS=1
-    command: ["--sandbox"]
+      - NUTC_ALGO_ENDPOINT=http://webserver:16124/algorithms/HFT
+    depends_on:
+      - webserver
+      - localstack
+      - postgres
+    # command: ["--sandbox"]
 
     #port: 16124
   webserver:
@@ -29,8 +32,6 @@ services:
     build:
       context: ../..
       dockerfile: exchange/docker/linter/Dockerfile
-      args:
-        firebase_emulator: "false"
 
   # Exposed on port 9000
   prometheus:
