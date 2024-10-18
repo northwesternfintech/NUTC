@@ -137,7 +137,7 @@ TickerMetricsPusher::report_trader_stats(const TickerContainer& tickers)
                 .Add({
                     {"ticker",      common::to_string(ticker)},
                     {"trader_type", trader.get_type()        },
-                    {"id",          trader.get_id()          },
+                    {"name",        trader.get_display_name()},
             })
                 .Set(amount_held);
         }
@@ -165,14 +165,14 @@ TickerMetricsPusher::report_trader_stats(const TickerContainer& tickers)
 
         per_trader_pnl_gauge
             .Add({
-                {"id",          trader.get_id()  },
-                {"trader_type", trader.get_type()},
+                {"trader_type", trader.get_type()        },
+                {"name",        trader.get_display_name()},
         })
             .Set(pnl);
         per_trader_capital_gauge
             .Add({
-                {"id",          trader.get_id()  },
-                {"trader_type", trader.get_type()},
+                {"trader_type", trader.get_type()        },
+                {"name",        trader.get_display_name()},
         })
             .Set(capital);
     };

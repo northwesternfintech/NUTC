@@ -1,4 +1,5 @@
 #pragma once
+#include <sched.h>
 #include <cstdint>
 
 #ifdef __linux__
@@ -22,6 +23,19 @@ set_memory_limit(std::size_t limit_in_mb)
     limit.rlim_max = limit_in_mb * 1024 * 1024; // Set the hard limit.
 
     if (setrlimit(RLIMIT_AS, &limit) == -1) {
+        return false;
+    }
+    return true;
+}
+
+inline bool
+set_cpu_affinity(int cpu)
+{
+    cpu_set_t mask;
+    CPU_ZERO(&mask);
+    CPU_SET(cpu, &mask);
+
+    if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {
         return false;
     }
     return true;

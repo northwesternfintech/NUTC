@@ -3,7 +3,7 @@
 #include "wrapper/messaging/exchange_communicator.hpp"
 #include "wrapper/runtime/cpp/cpp_runtime.hpp"
 #include "wrapper/runtime/python/python_runtime.hpp"
-#include "wrapper/util/resource_limits.hpp"
+#include "common/resource_limits.hpp"
 
 #include <boost/algorithm/string/trim.hpp>
 #include <pybind11/embed.h>
@@ -34,7 +34,8 @@ main(int argc, const char** argv)
 
     std::signal(SIGINT, catch_sigint);
     std::signal(SIGTERM, catch_sigterm);
-    auto [verbosity, trader_id, algo_type] = process_arguments(argc, argv);
+    auto [verbosity, trader_id, algo_type, core_num] = process_arguments(argc, argv);
+	nutc::wrapper::set_cpu_affinity(core_num);
 
     static constexpr std::uint32_t MAX_LOG_SIZE = 50'000;
     nutc::logging::init_file_only(
@@ -43,7 +44,7 @@ main(int argc, const char** argv)
 
     ExchangeCommunicator communicator{trader_id};
 
-    if (!set_memory_limit(1024) || !kill_on_exchange_death()) {
+    if (!set_memory_limit(2048) || !kill_on_exchange_death()) {
         log_e(main, "Failed to set memory limit");
         communicator.report_startup_complete();
         return 1;

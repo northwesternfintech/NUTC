@@ -1,5 +1,6 @@
 #include "algos/algo_manager.hpp"
 #include "common/logging/logging.hpp"
+#include "common/resource_limits.hpp"
 #include "common/util.hpp"
 #include "exchange/algos/algo_manager.hpp"
 #include "exchange/config/dynamic/argparse.hpp"
@@ -11,6 +12,7 @@
 #include "exchange/traders/trader_container.hpp"
 
 #include <csignal>
+#include <cstdlib>
 
 #include <utility>
 
@@ -59,6 +61,8 @@ main_event_loop(std::unique_ptr<MatchingCycleInterface> cycle)
 int
 main(int argc, const char** argv)
 {
+    int env = std::stoi(std::getenv("NUTC_ID"));
+    nutc::wrapper::set_cpu_affinity(env / 2);
     nutc::logging::init("exchange.log", quill::LogLevel::Info);
     std::signal(SIGINT, [](auto) { std::exit(0); });
     std::signal(SIGPIPE, SIG_IGN);

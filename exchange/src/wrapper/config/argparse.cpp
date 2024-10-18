@@ -5,6 +5,8 @@
 #include <argparse/argparse.hpp>
 #include <fmt/format.h>
 
+#include <string>
+
 namespace nutc::wrapper {
 wrapper_args
 process_arguments(int argc, const char** argv)
@@ -41,6 +43,8 @@ process_arguments(int argc, const char** argv)
         .implicit_value(true)
         .nargs(0);
 
+    program.add_argument("--core_num").nargs(1).required();
+
     try {
         program.parse_args(argc, argv);
     } catch (const std::runtime_error& err) {
@@ -50,12 +54,13 @@ process_arguments(int argc, const char** argv)
     }
 
     auto trader_id = program.get<std::string>("--uid");
+    int core_num = std::stoi(program.get<std::string>("--core_num"));
 
     if (program.get<bool>("--cpp_algo")) {
-        return {verbosity, trader_id, common::AlgoLanguage::cpp};
+        return {verbosity, trader_id, common::AlgoLanguage::cpp, core_num};
     }
     if (program.get<bool>("--python_algo")) {
-        return {verbosity, trader_id, common::AlgoLanguage::python};
+        return {verbosity, trader_id, common::AlgoLanguage::python, core_num};
     }
 
     throw std::runtime_error("No language provided");

@@ -11,6 +11,7 @@ struct wrapper_args {
     const uint8_t VERBOSITY;
     const std::string TRADER_ID;
     const common::AlgoLanguage ALGO_TYPE;
+	const int CORE_NUM;
 };
 
 wrapper_args process_arguments(int argc, const char** argv);

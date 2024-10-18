@@ -14,11 +14,16 @@ namespace nutc::exchange {
 
 class GenericTrader {
     std::string user_id_;
+    std::string display_name_;
     TraderPortfolio state_;
 
 public:
-    explicit GenericTrader(std::string user_id, common::decimal_price initial_capital) :
-        user_id_(std::move(user_id)), state_{initial_capital}
+    explicit GenericTrader(
+        std::string user_id, common::decimal_price initial_capital,
+        std::string display_name = ""
+    ) :
+        user_id_(std::move(user_id)), display_name_{std::move(display_name)},
+        state_{initial_capital}
     {}
 
     GenericTrader(GenericTrader&&) = default;
@@ -39,7 +44,7 @@ public:
     virtual const std::string&
     get_display_name() const
     {
-        return user_id_;
+        return display_name_;
     }
 
     const std::string&

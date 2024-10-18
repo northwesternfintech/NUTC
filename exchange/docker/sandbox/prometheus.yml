@@ -4,4 +4,4 @@ global:
 scrape_configs:
   - job_name: 'exchange-sandbox'
     static_configs:
-      - targets: ['sandbox:4152']
+      - targets: ['sandbox1:4152', 'sandbox2:4152', 'sandbox3:4152', 'sandbox4:4152']
