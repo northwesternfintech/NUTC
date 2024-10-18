@@ -88,7 +88,8 @@ CrowServer::add_pending_trader_(
     static const auto STARTING_CAPITAL = Config::get().constants().STARTING_CAPITAL;
 
     auto trader = std::make_shared<AlgoTrader>(
-        common::RemoteAlgorithm{language, algo_id, algorithm_data}, STARTING_CAPITAL
+        common::RemoteAlgorithm{language, algo_id, algorithm_data, "SANDBOX"},
+        STARTING_CAPITAL
     );
 
     trader_lock.lock();

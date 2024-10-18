@@ -28,7 +28,7 @@ create_cycle(TraderContainer& traders, const auto& mode)
 
     switch (mode) {
         case Mode::normal:
-            return std::make_unique<BaseMatchingCycle>(
+            return std::make_unique<DevMatchingCycle>(
                 tickers, traders, order_fee, max_order_volume
             );
         case Mode::sandbox:

@@ -57,13 +57,13 @@ protected:
     static void
     log_text(const std::string& text)
     {
-        log_i(algo_print, "{}", text);
+        // log_i(algo_print, "{}", text);
     }
 
     static void
     log_error(const std::string& text)
     {
-        log_e(ALGO_ERROR, "{}", text);
+        // log_e(ALGO_ERROR, "{}", text);
     }
 };
 

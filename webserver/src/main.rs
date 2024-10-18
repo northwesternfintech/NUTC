@@ -247,28 +247,25 @@ async fn get_algorithms(
     };
 
     let query = r#"
-        WITH "MostRecentAlgos" AS (
-          WITH "FilteredAlgosByCase" AS (
-            SELECT a."uid", a."language", f."s3Key", f."createdAt" AS "timestamp"
-            FROM "algos" AS a
-            INNER JOIN "algo_file" AS f ON a."algoFileS3Key" = f."s3Key"
-            WHERE a."case" = $1
-            AND ($2::text IS NULL OR a."uid" = $2)
-          )
-          SELECT "uid", "language", MAX("timestamp") AS "timestamp"
-          FROM "FilteredAlgosByCase"
-          GROUP BY "uid", "language"
-        )
-        SELECT 
-          p."firstName" || ' ' || p."lastName" AS "name", 
-          a."s3Key",
-          a."language"
-        FROM "profiles" AS p
-        INNER JOIN (
-          SELECT u."uid", f."s3Key", u."language"
-          FROM "MostRecentAlgos" AS u
-          INNER JOIN "algo_file" AS f ON u."timestamp" = f."createdAt"
-        ) AS a ON p."uid" = a."uid";
+    WITH "FilteredAlgosByCase" AS (
+      SELECT
+        a."uid",
+        a."language",
+        f."s3Key",
+        f."createdAt" AS "timestamp",
+        ROW_NUMBER() OVER (PARTITION BY a."uid" ORDER BY f."createdAt" DESC) AS rn
+      FROM "algos" AS a
+      INNER JOIN "algo_file" AS f ON a."algoFileS3Key" = f."s3Key"
+      WHERE a."case" = $1
+        AND ($2::text IS NULL OR a."uid" = $2)
+    )
+    SELECT 
+      p."firstName" || ' ' || p."lastName" AS "name",
+      a."s3Key",
+      a."language"
+    FROM "profiles" AS p
+    INNER JOIN "FilteredAlgosByCase" AS a ON p."uid" = a."uid"
+    WHERE a.rn = 1;
     "#;
 
     let params: Vec<&(dyn tokio_postgres::types::ToSql + Sync)> = vec![&case, &uid];
