@@ -60,8 +60,8 @@ export default function SubmissionForm(props: { user: any }) {
     });
 
   const onSubmit: SubmitHandler<Inputs> = async data => {
-    Swal.fire({ title: "Submissions have closed", icon: 'warning' });
-    return;
+    // Swal.fire({ title: "Submissions have closed", icon: 'warning' });
+    // return;
     const responsePromise = fetch("/api/protected/db/user/createAlgo", {
       method: "POST",
       body: JSON.stringify(data),
