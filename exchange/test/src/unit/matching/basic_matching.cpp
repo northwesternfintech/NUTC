@@ -10,6 +10,7 @@
 using nutc::common::Ticker;
 using nutc::common::Side::buy;
 using nutc::common::Side::sell;
+using namespace nutc::test;
 
 class UnitBasicMatching : public ::testing::Test {
 protected:
@@ -99,12 +100,13 @@ TEST_F(UnitBasicMatching, NoMatchThenMatchSell)
     tagged_limit_order order1{trader1, Ticker::ETH, buy, 1.0, 1.0};
     tagged_limit_order order2{trader2, Ticker::ETH, buy, 1.0, 1.0};
     tagged_limit_order order3{trader3, Ticker::ETH, sell, 2.0, 0.0};
+    tagged_limit_order order4{trader1, Ticker::ETH, buy, 1.0, 1.0};
 
     auto matches = add_to_engine_(order1);
     ASSERT_EQ(matches.size(), 0);
     matches = add_to_engine_(order2);
     ASSERT_EQ(matches.size(), 0);
-    matches = add_to_engine_(order1);
+    matches = add_to_engine_(order4);
     ASSERT_EQ(matches.size(), 0);
     matches = add_to_engine_(order3);
     ASSERT_EQ(matches.size(), 2);
