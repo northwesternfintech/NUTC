@@ -59,9 +59,39 @@ export default function SubmissionForm(props: { user: any }) {
       },
     });
 
+  const validateInput = (data: Inputs) => {
+    if (!data.name) {
+      Swal.fire({
+        title: "Please enter a name for your algorithm",
+        icon: "error",
+      });
+      return false;
+    }
+
+    if (!data.description) {
+      Swal.fire({
+        title: "Please enter a description for your algorithm",
+        icon: "error",
+      });
+      return false;
+    }
+
+    if (!data.algoFileS3Key) {
+      Swal.fire({
+        title: "Please upload an algorithm file",
+        icon: "error",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
   const onSubmit: SubmitHandler<Inputs> = async data => {
-    // Swal.fire({ title: "Submissions have closed", icon: 'warning' });
-    // return;
+    if (!validateInput(data)) {
+      return;
+    }
+
     const responsePromise = fetch("/api/protected/db/user/createAlgo", {
       method: "POST",
       body: JSON.stringify(data),
@@ -78,7 +108,11 @@ export default function SubmissionForm(props: { user: any }) {
 
     const response = await responsePromise;
     if (!response.ok) {
-      Swal.fire({ title: "Error", icon: "error", text: "Server error. Please contact the nuft team in the piazza" });
+      Swal.fire({
+        title: "Error",
+        icon: "error",
+        text: "Server error. Please contact the nuft team in the piazza",
+      });
       return;
     }
     Swal.close();
@@ -104,7 +138,6 @@ export default function SubmissionForm(props: { user: any }) {
         },
       });
     }
-
   };
 
   const [caseValue, languageValue, algoFileS3Key] = watch([
@@ -398,8 +431,8 @@ export default function SubmissionForm(props: { user: any }) {
                   algoFileS3Key
                     ? "mt-2 flex justify-center rounded-lg border border-solid border-green-400 px-6 py-10"
                     : isDragOver
-                      ? "mt-2 flex justify-center rounded-lg border border-solid border-indigo-500 px-6 py-10"
-                      : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"
+                    ? "mt-2 flex justify-center rounded-lg border border-solid border-indigo-500 px-6 py-10"
+                    : "mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10"
                 }
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
