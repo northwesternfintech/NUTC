@@ -25,17 +25,10 @@ TEST_F(UnitTraderContainerTest, PointersUseSharedMemory)
     auto trader2 = traders.add_trader<test::TestTrader>("DEF", TEST_STARTING_CAPITAL);
     auto trader3 = traders.add_trader<test::TestTrader>("GHI", TEST_STARTING_CAPITAL);
 
-#ifdef __linux__
     std::ptrdiff_t distance1 =
         reinterpret_cast<char*>(trader2.get()) - reinterpret_cast<char*>(trader1.get());
     std::ptrdiff_t distance2 =
         reinterpret_cast<char*>(trader3.get()) - reinterpret_cast<char*>(trader2.get());
-#elifdef __APPLE__
-    std::ptrdiff_t distance1 =
-        reinterpret_cast<char*>(trader1.get()) - reinterpret_cast<char*>(trader2.get());
-    std::ptrdiff_t distance2 =
-        reinterpret_cast<char*>(trader2.get()) - reinterpret_cast<char*>(trader3.get());
-#endif
 
     static constexpr auto EXPECTED_SIZE =
         sizeof(test::TestTrader) + sizeof(control_block);

@@ -22,29 +22,12 @@ namespace {
 std::pair<int, std::filesystem::path>
 get_temp_file()
 {
-#ifdef __APPLE__
-    namespace fs = std::filesystem;
-    std::string template_path = (fs::temp_directory_path() / "algoXXXXXX").string();
-    std::vector<char> writable_template_path(
-        template_path.begin(), template_path.end()
-    );
-    writable_template_path.push_back('\0');
-    int fd = mkstemp(writable_template_path.data());
-    if (fd == -1) {
-        throw std::runtime_error("Failed to get file descriptor for temporary file");
-    }
-
-    return {fd, writable_template_path.data()};
-
-#else
     int memfd = memfd_create("algo", MFD_CLOEXEC);
     if (memfd == -1) {
         throw std::runtime_error("Failed to create memfd");
     }
 
     return {memfd, "/proc/self/fd/" + std::to_string(memfd)};
-
-#endif
 }
 
 } //   namespace

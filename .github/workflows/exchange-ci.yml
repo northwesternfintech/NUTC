@@ -124,73 +124,7 @@ jobs:
         UBSAN_OPTIONS: print_stacktrace=1
       run: ctest --output-on-failure --no-tests=error -j 2 -R "Unit*"
 
-  unit-test-darwin:
-    needs: [lint]
-
-    strategy:
-      matrix:
-        os: [macos-14]
-
-    runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        working-directory: exchange
-
-    env:
-      CC: /usr/bin/clang
-      CXX: /usr/bin/clang++
-
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: 'recursive'
-
-    - name: Verify Installation
-      run: |
-          ${{ env.CC }} --version
-          ${{ env.CXX }} --version
-
-    - name: Install static analyzers
-      if: matrix.os == 'macos-14'
-      run: brew install cppcheck
-
-    - name: Install Python
-      uses: actions/setup-python@v4
-      with: { python-version: "3.12" }
-          
-    - name: Install Python Dev
-      uses: actions/setup-python@v4
-      with: { python-version: "3.12-dev" }
-
-    - name: Install dependencies
-      shell: bash
-      run: |
-        pip3 install conan numpy
-        conan profile detect
-        python3 ../.github/scripts/write_config.py
-        conan install . -s build_type=Release -b missing
-
-    - name: Setup MultiToolTask
-      if: matrix.os == 'windows-2022'
-      run: |
-        Add-Content "$env:GITHUB_ENV" 'UseMultiToolTask=true'
-        Add-Content "$env:GITHUB_ENV" 'EnforceProcessCountAcrossBuilds=true'
-
-    - name: Configure
-      shell: pwsh
-      run: cmake "--preset=ci-$("${{ matrix.os }}".split("-")[0])"
-
-    - name: Build
-      run: cmake --build build --config Release -j
-
-    - name: Install
-      run: cmake --install build --config Release --prefix prefix
-
-    - name: Test
-      working-directory: exchange/build
-      run: ctest --output-on-failure --no-tests=error -C Release -j 2 -R "Unit*"
-
-  unit-test-linux:
+  unit-test:
     needs: [lint]
 
     strategy:

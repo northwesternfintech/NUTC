@@ -71,13 +71,6 @@
       }
     },
     {
-      "name": "flags-darwin",
-      "hidden": true,
-      "cacheVariables": {
-        "CMAKE_CXX_FLAGS": "-fstack-protector-strong -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Wcast-qual -Wformat=2 -Wundef  -Wcast-align -Wunused -Wnull-dereference -Wdouble-promotion -Wimplicit-fallthrough -Wextra-semi -Woverloaded-virtual -Wnon-virtual-dtor -Wold-style-cast"
-      }
-    },
-    {
       "name": "flags-windows",
       "description": "Note that all the flags after /W4 are required for MSVC to conform to the language standard",
       "hidden": true,
@@ -100,15 +93,6 @@
       "generator": "Unix Makefiles",
       "hidden": true,
       "inherits": ["flags-linux", "ci-std"],
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
-    },
-    {
-      "name": "ci-darwin",
-      "generator": "Unix Makefiles",
-      "hidden": true,
-      "inherits": ["flags-darwin", "ci-std"],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
@@ -163,10 +147,6 @@
       "hidden": true
     },
     {
-      "name": "ci-macos",
-      "inherits": ["ci-build", "ci-darwin", "dev-mode", "conan"]
-    },
-    {
       "name": "ci-ubuntu",
       "inherits": [
         "ci-build",
@@ -185,17 +165,6 @@
       "cacheVariables": {
         "USE_GIT_VERSION_TRACKING": "OFF"
       }
-    },
-    {
-      "name": "ci-sanitize-darwin",
-      "binaryDir": "${sourceDir}/build/sanitize",
-      "inherits": ["ci-darwin", "dev-mode", "conan"],
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Sanitize",
-        "CMAKE_CXX_FLAGS_SANITIZE": "-O2 -g -fsanitize=address,undefined -fno-omit-frame-pointer -fno-common",
-        "CMAKE_MAP_IMPORTED_CONFIG_SANITIZE": "Sanitize;RelWithDebInfo;Release;Debug;"
-      }
     }
-
   ]
 }

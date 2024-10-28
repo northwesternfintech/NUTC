@@ -8,14 +8,9 @@
 #include <boost/archive/iterators/transform_width.hpp>
 #include <boost/dll/runtime_symbol_info.hpp>
 #include <fmt/format.h>
+#include <x86intrin.h>
 
 #include <random>
-
-#ifdef __APPLE__
-#  include <mach/mach_time.h>
-#else
-#  include <x86intrin.h>
-#endif
 
 namespace nutc::common {
 namespace bi = boost::archive::iterators;
@@ -65,12 +60,7 @@ generate_order_id()
 uint64_t
 get_time()
 {
-#ifdef __APPLE__
-    static uint64_t min_time = 0;
-    return min_time = std::max(min_time + 1, mach_absolute_time());
-#else
     return __rdtsc();
-#endif
 }
 
 std::string
