@@ -14,7 +14,7 @@ class Recipe(ConanFile):
         self.requires("quill/3.7.0")
         self.requires("libcurl/8.6.0")
         self.requires("argparse/3.0")
-        self.requires("glaze/3.3.1")
+        self.requires("glaze/3.6.1")
         self.requires("yaml-cpp/0.8.0")
         self.requires("boost/1.83.0")
         self.requires("prometheus-cpp/1.1.0")
