@@ -1,7 +1,6 @@
-#include "exchange/orders/orderbook/composite_orderbook.hpp"
-
 #include "common/types/decimal.hpp"
 #include "config.h"
+#include "exchange/orders/orderbook/composite_orderbook.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
 

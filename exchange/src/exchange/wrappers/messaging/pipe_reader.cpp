@@ -1,8 +1,8 @@
 #include "pipe_reader.hpp"
 
 #include "async_pipe_runner.hpp"
-#include "common/messages_wrapper_to_exchange.hpp"
 #include "common/logging/logging.hpp"
+#include "common/messages_wrapper_to_exchange.hpp"
 
 #include <boost/asio.hpp>
 #include <glaze/glaze.hpp>

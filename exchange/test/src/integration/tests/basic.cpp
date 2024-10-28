@@ -166,7 +166,8 @@ TEST_P(IntegrationBasicAlgo, MultipleLevelOrder)
 
     cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
     ASSERT_EQ(
-        trader1.get_portfolio().get_capital() - trader1.get_portfolio().get_initial_capital(),
+        trader1.get_portfolio().get_capital()
+            - trader1.get_portfolio().get_initial_capital(),
         -100.0
     );
 }

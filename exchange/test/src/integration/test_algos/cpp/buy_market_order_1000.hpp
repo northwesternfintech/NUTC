@@ -88,8 +88,7 @@ public:
      */
     void
     on_account_update(
-        Ticker ticker, Side side, float price, float quantity,
-        float capital_remaining
+        Ticker ticker, Side side, float price, float quantity, float capital_remaining
     )
     {}
 };
