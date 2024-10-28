@@ -2,8 +2,8 @@
 
 // Common headers
 
-#include "linter/config.h"
 #include "common/logging/logging.hpp"
+#include "linter/config.h"
 
 #include <cassert>
 #include <cinttypes>

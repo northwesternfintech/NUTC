@@ -24,11 +24,11 @@ TEST(UnitDecimalPrice, TestCommutativity)
     decimal_price four = 4.0;
     decimal_price six = 6.0;
 
-	decimal_price twelve = three*four;
-	EXPECT_EQ(double{twelve/six}, 2.0);
+    decimal_price twelve = three * four;
+    EXPECT_EQ(double{twelve / six}, 2.0);
 
-	decimal_price point_five = three/six;
-	EXPECT_EQ(double{point_five*four}, 2.0);
+    decimal_price point_five = three / six;
+    EXPECT_EQ(double{point_five * four}, 2.0);
 }
 
 TEST(UnitDecimalPrice, UnaryNegate)
@@ -58,7 +58,7 @@ TEST(UnitDecimalPrice, DecimalDecimalDivision)
 {
     decimal_price first = 10.0;
     decimal_price second = 2.0;
-	decimal_price third = first/second;
+    decimal_price third = first / second;
     EXPECT_EQ(double{third}, 5.0);
 }
 

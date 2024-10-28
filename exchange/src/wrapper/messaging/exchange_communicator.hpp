@@ -32,7 +32,7 @@ public:
 
     algorithm_content consume_algorithm();
 
-	common::tick_update consume_tick_update();
+    common::tick_update consume_tick_update();
 
     static void publish_message(const std::string& message);
 
