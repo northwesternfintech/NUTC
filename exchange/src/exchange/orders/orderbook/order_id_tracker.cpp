@@ -16,8 +16,10 @@ OrderIdTracker::remove_order(common::order_id_t order_id)
 void
 OrderIdTracker::add_order(LimitOrderBook::stored_limit_order order)
 {
-    if (!order->ioc) {
-        order_map_.emplace(order->order_id, order);
-    }
+    if (order->ioc)
+        return;
+    if (order_map_.contains(order->order_id)) [[unlikely]]
+        throw std::runtime_error("Uhhhh");
+    order_map_.emplace(order->order_id, order);
 }
 } // namespace nutc::exchange

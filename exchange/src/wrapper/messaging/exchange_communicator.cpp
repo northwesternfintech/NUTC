@@ -68,7 +68,7 @@ ExchangeCommunicator::place_limit_order()
                common::Side side, common::Ticker ticker, double quantity, double price,
                bool ioc
            ) -> order_id_t {
-        limit_order order{ticker, side, quantity, price, ioc};
+        limit_order order{ticker, side, quantity, price, ioc, get_time(), generate_order_id()};
         if (!publish_message(order))
             return -1;
         return order.order_id;
@@ -79,7 +79,7 @@ MarketOrderFunction
 ExchangeCommunicator::place_market_order()
 {
     return [this](common::Side side, common::Ticker ticker, double quantity) {
-        market_order order{ticker, side, quantity};
+        market_order order{ticker, side, quantity, common::get_time()};
         return publish_message(order);
     };
 }
@@ -88,7 +88,7 @@ CancelOrderFunction
 ExchangeCommunicator::cancel_order()
 {
     return [this](common::Ticker ticker, order_id_t order_id) -> bool {
-        return publish_message(common::cancel_order{ticker, order_id});
+        return publish_message(common::cancel_order{ticker, order_id, common::get_time()});
     };
 }
 

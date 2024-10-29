@@ -1,3 +1,4 @@
+#include "common/util.hpp"
 #include "exchange/orders/orderbook/limit_orderbook.hpp"
 #include "helpers/benchmark_trader.hpp"
 

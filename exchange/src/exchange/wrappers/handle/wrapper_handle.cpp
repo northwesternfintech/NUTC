@@ -7,6 +7,8 @@
 #include <boost/asio.hpp>
 #include <fmt/format.h>
 
+#include <random>
+
 namespace {
 std::string
 quote_id(std::string user_id)
@@ -77,6 +79,16 @@ WrapperHandle::create_arguments(const common::algorithm_variant& algo_variant)
     }
     else if (language == common::AlgoLanguage::python) {
         args.emplace_back("--python_algo");
+    }
+    args.emplace_back("--core_num");
+    static int id = std::stoi(std::getenv("NUTC_ID"));
+    if (id <= 1) {
+        static int num = 32;
+        args.emplace_back(std::to_string(--num));
+    }
+    else {
+        static int num = 2;
+        args.emplace_back(std::to_string(++num));
     }
     return args;
 }

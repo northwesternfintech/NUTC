@@ -34,8 +34,11 @@ BaseMatchingCycle::collect_orders(uint64_t) -> std::vector<OrderVariant>
             else if constexpr (std::is_same_v<OrderT, common::cancel_order>) {
                 return order;
             }
-            else {
-                return tagged_order<OrderT>{trader, order};
+            else if constexpr (std::is_same_v<OrderT, common::limit_order>) {
+                return tagged_limit_order{trader, order};
+            }
+            else if constexpr (std::is_same_v<OrderT, common::market_order>) {
+                return tagged_market_order{trader, order};
             }
         };
 
@@ -82,6 +85,17 @@ BaseMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
 }
 
 void
+yield_for_3_ms()
+{
+    auto start = std::chrono::steady_clock::now();
+    auto end = start + std::chrono::milliseconds(3);
+
+    while (std::chrono::steady_clock::now() < end) {
+        sched_yield();
+    }
+}
+
+void
 BaseMatchingCycle::handle_matches_(std::vector<common::match> matches)
 {
     std::vector<common::position> ob_updates{};
@@ -104,6 +118,7 @@ BaseMatchingCycle::handle_matches_(std::vector<common::match> matches)
         traders_.begin(), traders_.end(),
         [&message = *update](GenericTrader& trader) { trader.send_message(message); }
     );
+    yield_for_3_ms();
 }
 
 } // namespace nutc::exchange

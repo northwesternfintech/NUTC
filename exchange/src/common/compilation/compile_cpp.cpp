@@ -1,5 +1,6 @@
 #include "compile_cpp.hpp"
 
+#include "common/file_operations/file_operations.hpp"
 #include "common/util.hpp"
 
 #include <optional>
@@ -43,8 +44,8 @@ compile_cpp(const std::filesystem::path& filepath)
 
     if (result) {
         throw std::runtime_error(fmt::format(
-            "Compilation of {} failed. Compiler output below:\n {}", filepath.string(),
-            result.value()
+            "Compilation of {} failed. Compiler output below:\n {}\n Code: {}",
+            filepath.string(), result.value(), read_file_content(filepath.string())
         ));
     }
     return binary_output;

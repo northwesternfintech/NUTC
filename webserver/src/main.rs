@@ -5,7 +5,7 @@ use aws_sdk_s3::presigning::PresigningConfig;
 use base64::encode;
 use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod};
 use reqwest::Client;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tokio_postgres::NoTls;
 
@@ -60,6 +60,7 @@ async fn set_linter_status(
 async fn handle_algo_submission(
     data: web::Path<(String, String)>,
     db_pool: web::Data<Pool>,
+    s3_client: web::Data<aws_sdk_s3::client::Client>,
 ) -> impl Responder {
     dotenv::dotenv().ok();
 
@@ -115,7 +116,7 @@ async fn handle_algo_submission(
     }
 
     // todo: this function shouldnt return a http request
-    return request_sandbox(algo_id, algo_url, language, &db_pool).await;
+    return request_sandbox(algo_id, algo_url, language, &db_pool, &s3_client).await;
 }
 
 async fn request_sandbox(
@@ -123,6 +124,7 @@ async fn request_sandbox(
     algo_url: String,
     language: String,
     pool: &Pool,
+    s3_client: &web::Data<aws_sdk_s3::client::Client>,
 ) -> HttpResponse {
     let mut postgres_client = if let Ok(client) = pool.get().await {
         client
@@ -143,23 +145,6 @@ async fn request_sandbox(
         .bytes()
         .await
         .unwrap();
-
-    let s3_region = std::env::var("AWS_REGION").expect("env variable `AWS_REGION` should be set");
-    let s3_endpoint =
-        std::env::var("S3_ENDPOINT").expect("env variable `S3_ENDPOINT` should be set");
-
-    let region_provider = RegionProviderChain::default_provider().or_else(Region::new(s3_region));
-    let mut sdk_config = aws_config::from_env()
-        .region(region_provider)
-        .endpoint_url(s3_endpoint)
-        .load()
-        .await;
-
-    let config = aws_sdk_s3::config::Builder::from(&sdk_config)
-        .force_path_style(true)
-        .build();
-
-    let s3_client = aws_sdk_s3::Client::from_conf(config);
 
     let expires_in = match PresigningConfig::expires_in(std::time::Duration::from_secs(60 * 10)) {
         Ok(expires_in) => expires_in,
@@ -247,7 +232,12 @@ async fn request_sandbox(
     }
 }
 
-async fn get_algorithms(case: String, uid: Option<String>, pool: &Pool) -> impl Responder {
+async fn get_algorithms(
+    case: String,
+    uid: Option<String>,
+    pool: &Pool,
+    s3_client: &web::Data<aws_sdk_s3::client::Client>,
+) -> impl Responder {
     let postgres_client = match pool.get().await {
         Ok(client) => client,
         Err(e) => {
@@ -257,27 +247,25 @@ async fn get_algorithms(case: String, uid: Option<String>, pool: &Pool) -> impl 
     };
 
     let query = r#"
-    WITH "MostRecentAlgos" AS (
-      WITH "FilteredAlgosByCase" AS (
-        SELECT a."uid", f."s3Key", f."createdAt" AS "timestamp"
-        FROM "algos" AS a
-        INNER JOIN "algo_file" AS f ON a."algoFileS3Key" = f."s3Key"
-        WHERE a."case" = $1
+    WITH "FilteredAlgosByCase" AS (
+      SELECT
+        a."uid",
+        a."language",
+        f."s3Key",
+        f."createdAt" AS "timestamp",
+        ROW_NUMBER() OVER (PARTITION BY a."uid" ORDER BY f."createdAt" DESC) AS rn
+      FROM "algos" AS a
+      INNER JOIN "algo_file" AS f ON a."algoFileS3Key" = f."s3Key"
+      WHERE a."case" = $1
         AND ($2::text IS NULL OR a."uid" = $2)
-      )
-      SELECT "uid", MAX("timestamp") AS "timestamp"
-      FROM "FilteredAlgosByCase"
-      GROUP BY "uid"
     )
     SELECT 
-      p."firstName" || ' ' || p."lastName" AS "name", 
-      a."s3Key" 
+      p."firstName" || ' ' || p."lastName" AS "name",
+      a."s3Key",
+      a."language"
     FROM "profiles" AS p
-    INNER JOIN (
-      SELECT u."uid", f."s3Key"
-      FROM "MostRecentAlgos" AS u
-      INNER JOIN "algo_file" AS f ON u."timestamp" = f."createdAt"
-    ) AS a ON p."uid" = a."uid";
+    INNER JOIN "FilteredAlgosByCase" AS a ON p."uid" = a."uid"
+    WHERE a.rn = 1;
     "#;
 
     let params: Vec<&(dyn tokio_postgres::types::ToSql + Sync)> = vec![&case, &uid];
@@ -303,7 +291,70 @@ async fn get_algorithms(case: String, uid: Option<String>, pool: &Pool) -> impl 
         })
         .collect();
 
-    HttpResponse::Ok().json(response_data)
+    #[derive(Serialize)]
+    struct Response {
+        name: String,
+        language: String,
+        code: String,
+    }
+
+    let mut out = Vec::new();
+
+    for algo_response in &response_data {
+        let algo_response = match algo_response.as_array() {
+            Some(algo_response) => algo_response,
+            None => continue,
+        };
+
+        let name = match algo_response.get(0) {
+            Some(name) => name,
+            None => continue,
+        };
+        let s3_key = match algo_response.get(1).map(serde_json::Value::as_str) {
+            Some(Some(s3_key)) => s3_key,
+            _ => continue,
+        };
+        let algo_language = match algo_response.get(2).map(serde_json::Value::as_str) {
+            Some(Some(lang)) => lang,
+            _ => continue,
+        };
+
+        let res = if let Ok(res) = s3_client
+            .get_object()
+            .bucket("nutc")
+            .key(s3_key)
+            .send()
+            .await
+        {
+            res
+        } else {
+            eprintln!("failed to fetch algo file. key: {s3_key}");
+            continue;
+        };
+
+        let file_content_bytes = res.body.collect().await.map(|x| x.to_vec());
+        let file_content_bytes = if let Ok(b) = file_content_bytes {
+            b
+        } else {
+            continue;
+        };
+
+        match String::from_utf8(file_content_bytes) {
+            Ok(file_content) => {
+                out.push(Response {
+                    name: name.to_string(),
+                    language: algo_language.to_string(),
+                    code: file_content,
+                });
+            }
+            Err(err) => {
+                eprintln!("fetched file was not utf8: {err}");
+                continue;
+            }
+        }
+    }
+
+    HttpResponse::Ok().json(json!(out))
 }
 
 #[tracing::instrument]
@@ -311,9 +362,10 @@ async fn get_algorithms(case: String, uid: Option<String>, pool: &Pool) -> impl 
 async fn get_single_user_algorithm(
     data: web::Path<(String, String)>,
     db_pool: web::Data<Pool>,
+    s3_client: web::Data<aws_sdk_s3::client::Client>,
 ) -> impl Responder {
     let (case, uid) = data.into_inner();
-    get_algorithms(case, Some(uid), &db_pool).await
+    get_algorithms(case, Some(uid), &db_pool, &s3_client).await
 }
 
 #[tracing::instrument]
@@ -321,9 +373,10 @@ async fn get_single_user_algorithm(
 async fn get_all_user_algorithms(
     data: web::Path<String>,
     db_pool: web::Data<Pool>,
+    s3_client: web::Data<aws_sdk_s3::client::Client>,
 ) -> impl Responder {
     let case = data.into_inner();
-    get_algorithms(case, None, &db_pool).await
+    get_algorithms(case, None, &db_pool, &s3_client).await
 }
 
 #[actix_web::main]
@@ -358,6 +411,23 @@ async fn main() -> std::io::Result<()> {
         )
         .init();
 
+    let s3_region = std::env::var("AWS_REGION").expect("env variable `AWS_REGION` should be set");
+    let s3_endpoint =
+        std::env::var("S3_ENDPOINT").expect("env variable `S3_ENDPOINT` should be set");
+
+    let region_provider = RegionProviderChain::default_provider().or_else(Region::new(s3_region));
+    let sdk_config = aws_config::from_env()
+        .region(region_provider)
+        .endpoint_url(s3_endpoint)
+        .load()
+        .await;
+
+    let config = aws_sdk_s3::config::Builder::from(&sdk_config)
+        .force_path_style(true)
+        .build();
+
+    let s3_client = aws_sdk_s3::Client::from_conf(config);
+
     tracing::info!("Starting server.");
 
     HttpServer::new(move || {
@@ -378,6 +448,7 @@ async fn main() -> std::io::Result<()> {
             .supports_credentials();
         App::new()
             .app_data(web::Data::new(pool.clone()))
+            .app_data(web::Data::new(s3_client.clone()))
             .service(handle_algo_submission)
             .service(get_single_user_algorithm)
             .service(get_all_user_algorithms)

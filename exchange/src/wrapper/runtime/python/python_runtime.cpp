@@ -5,6 +5,8 @@
 #include <pybind11/embed.h>
 #include <pybind11/pybind11.h>
 
+#include <iostream>
+
 namespace nutc::wrapper {
 
 namespace py = pybind11;
@@ -20,7 +22,7 @@ PyRuntime::fire_on_trade_update(
         );
     } catch (const py::error_already_set& err) {
         log_error(err.what());
-        // std::cerr << err.what() << "\n";
+        std::cerr << err.what() << "\n";
     }
 }
 
@@ -29,13 +31,17 @@ PyRuntime::fire_on_orderbook_update(
     Ticker ticker, Side side, decimal_quantity quantity, decimal_price price
 ) const
 {
+    static bool reported = false;
     try {
         py::globals()["strategy"].attr("on_orderbook_update")(
             ticker, side, static_cast<float>(quantity), static_cast<float>(price)
         );
     } catch (const py::error_already_set& err) {
         log_error(err.what());
-        // std::cerr << err.what() << "\n";
+        if (reported)
+            return;
+        std::cerr << err.what() << "\n";
+        reported = true;
     }
 }
 
@@ -52,7 +58,7 @@ PyRuntime::fire_on_account_update(
         );
     } catch (const py::error_already_set& err) {
         log_error(err.what());
-        // std::cerr << err.what() << "\n";
+        std::cerr << err.what() << "\n";
     }
 }
 

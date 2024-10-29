@@ -13,11 +13,15 @@ namespace nutc::common {
 class RemoteAlgorithm : public BaseAlgorithm {
     std::string id_;
     std::string algo_data_;
+    std::string display_name_;
 
 public:
-    RemoteAlgorithm(AlgoLanguage language, std::string algo_id, std::string algo_data) :
+    RemoteAlgorithm(
+        AlgoLanguage language, std::string algo_id, std::string algo_data,
+        std::string display_name
+    ) :
         BaseAlgorithm{language}, id_{std::move(algo_id)},
-        algo_data_{std::move(algo_data)}
+        algo_data_{std::move(algo_data)}, display_name_{std::move(display_name)}
     {}
 
     std::string
