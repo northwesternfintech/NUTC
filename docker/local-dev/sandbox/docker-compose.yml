@@ -6,7 +6,7 @@ services:
   sandbox:
     image: nutc-exchange
     build:
-      context: ../..
+      context: ../../..
       dockerfile: exchange/docker/sandbox/Dockerfile
       args:
         firebase_emulator: "false"
@@ -19,7 +19,7 @@ services:
   webserver:
     image: nutc-webserver
     build:
-      context: ../..
+      context: ../../..
       dockerfile: webserver/Dockerfile
     restart: unless-stopped
 
@@ -27,7 +27,7 @@ services:
     image: nutc-linter
     restart: unless-stopped
     build:
-      context: ../..
+      context: ../../..
       dockerfile: exchange/docker/linter/Dockerfile
       args:
         firebase_emulator: "false"
@@ -36,7 +36,7 @@ services:
   prometheus:
     image: prom/prometheus
     volumes:
-      - ../../exchange/docker/sandbox/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.retention.time=12h'
@@ -65,7 +65,7 @@ services:
     - GF_AUTH_ANONYMOUS_ORG_NAME=MAIN
     - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
     volumes:
-      - ../../exchange/docker/dev/grafana_data:/var/lib/grafana
+      - ./grafana_data:/var/lib/grafana
       # - /var/lib/grafana/grafana.db
       # - /var/lib/grafana/alerting
 

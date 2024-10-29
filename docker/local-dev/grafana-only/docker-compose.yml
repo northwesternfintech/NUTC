@@ -1,3 +1,6 @@
+# Used if you're running the exchange outside of docker (for quick dev cycles),
+# but still want to use grafana/prometheus
+
 services:
   # Exposed on port 9000
   prometheus:

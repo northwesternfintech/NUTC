@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 2s
+
+scrape_configs:
+  - job_name: 'exchange-sandbox'
+    static_configs:
+      - targets: ['nutc-exchange1:4152', 'nutc-exchange2:4152']
