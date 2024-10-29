@@ -1,0 +1,46 @@
+# Used if you're running the exchange outside of docker (for quick dev cycles),
+# but still want to use grafana/prometheus
+
+services:
+  # Exposed on port 9000
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+
+    # allow prometheus to access exchange on the host
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=12h'
+    networks:
+      - net
+
+  grafana:
+    image: grafana/grafana
+
+    # Ensure you have the following set in your .bashrc/.zshrc
+    #export UID=$(id -u)
+    #export GID=$(id -g)
+    user: "${UID}:${GID}"
+
+    ports:
+      - "3000:3000"
+    environment:
+    - GF_SECURITY_ALLOW_EMBEDDING=true
+    - GF_AUTH_ANONYMOUS_ENABLED=true
+    - GF_AUTH_ANONYMOUS_ORG_NAME=MAIN
+    - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+    volumes:
+      - ./grafana_data:/var/lib/grafana
+    networks:
+      - net
+
+networks:
+  net:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
