@@ -23,7 +23,7 @@ public:
 
     // Note: uses tick=0. If using something that relies on tick, it will not work
     template <typename OrderT>
-    std::optional<common::order_id_t>
+    const OrderT&
     wait_for_order(const OrderT& order, std::function<bool(const OrderT&, const OrderT&)> equality_function = soft_equality<OrderT>);
 
 private:

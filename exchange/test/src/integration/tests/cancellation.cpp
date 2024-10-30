@@ -23,9 +23,8 @@ TEST_P(IntegrationBasicCancellation, CancelMessageHasSameIdAsOrder)
     start_wrappers(traders_, GetParam(), "cancel_limit_order");
     TestMatchingCycle cycle{traders_};
 
-    auto order_id = cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
-    EXPECT_TRUE(order_id.has_value());
-    cycle.wait_for_order(common::cancel_order{common::Ticker::ETH, *order_id});
+    auto order = cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
+    cycle.wait_for_order(common::cancel_order{common::Ticker::ETH, order.order_id});
 }
 
 TEST_P(IntegrationBasicCancellation, CancelMessagePreventsOrderFromExecuting)
@@ -35,9 +34,8 @@ TEST_P(IntegrationBasicCancellation, CancelMessagePreventsOrderFromExecuting)
     trader2->get_portfolio().modify_holdings(Ticker::ETH, 100.0);
     TestMatchingCycle cycle{traders_};
 
-    auto order_id = cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
-    EXPECT_TRUE(order_id.has_value());
-    cycle.wait_for_order(common::cancel_order{common::Ticker::ETH, *order_id});
+    auto order = cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
+    cycle.wait_for_order(common::cancel_order{common::Ticker::ETH, order.order_id});
     trader2->add_order(common::market_order{Ticker::ETH, sell, 10.0});
 
     cycle.on_tick(0);
@@ -54,10 +52,9 @@ TEST_P(IntegrationBasicCancellation, OneOfTwoOrdersCancelledResultsInMatch)
     trader2->get_portfolio().modify_holdings(Ticker::ETH, 100.0);
     TestMatchingCycle cycle{traders_};
 
-    auto order_id = cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
+    auto order = cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
     // Assume non-cancelled order got through
-    EXPECT_TRUE(order_id.has_value());
-    cycle.wait_for_order(common::cancel_order{common::Ticker::ETH, *order_id});
+    cycle.wait_for_order(common::cancel_order{common::Ticker::ETH, order.order_id});
     trader2->add_order(common::market_order{Ticker::ETH, sell, 10.0});
 
     cycle.on_tick(0);

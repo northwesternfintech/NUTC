@@ -6,6 +6,9 @@
 #include "util/process.hpp"
 
 #include <gtest/gtest.h>
+#include <unistd.h>
+
+#include <chrono>
 
 namespace nutc::test {
 using namespace nutc::common;
@@ -24,13 +27,28 @@ TEST_P(IntegrationMessaging, ConfirmGeneratedOrderIdIsNotSamePID)
 
     TestMatchingCycle cycle{traders_};
 
-    auto order_id_opt =
-        cycle.wait_for_order(limit_order{Ticker::ETH, Side::buy, 100.0, 10.0});
-    ASSERT_TRUE(order_id_opt.has_value());
+    auto order = cycle.wait_for_order(limit_order{Ticker::ETH, Side::buy, 100.0, 10.0});
 
-    auto remote_pid = (order_id_opt.value() >> 46) & 0xF;
-    auto local_pid = (generate_order_id() >> 46) & 0xF;
+    auto remote_pid = (order.order_id >> 46) & 0xFF;
+    auto local_pid = (generate_order_id() >> 46) & 0xFF;
     EXPECT_NE(remote_pid, local_pid);
+}
+
+TEST_P(
+    IntegrationMessaging, ConfirmOrderTimestampIsNotOverwrittenByExchangeWhenReceived
+)
+{
+    start_wrappers(traders_, GetParam(), "buy_eth");
+
+    usleep(50000);
+
+    auto start = get_time();
+
+    TestMatchingCycle cycle{traders_};
+
+    auto order = cycle.wait_for_order(limit_order{Ticker::ETH, Side::buy, 100.0, 10.0});
+
+    EXPECT_LT(order.timestamp, start);
 }
 
 INSTANTIATE_TEST_SUITE_P(
