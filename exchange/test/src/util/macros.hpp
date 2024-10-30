@@ -1,5 +1,5 @@
-#include "common/messages_exchange_to_wrapper.hpp"
-#include "common/messages_wrapper_to_exchange.hpp"
+#include "common/types/messages/messages_exchange_to_wrapper.hpp"
+#include "common/types/messages/messages_wrapper_to_exchange.hpp"
 #include "common/types/algorithm/base_algorithm.hpp"
 #include "common/types/ticker.hpp"
 #include "exchange/orders/storage/order_storage.hpp"

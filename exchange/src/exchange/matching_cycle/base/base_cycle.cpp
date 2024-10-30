@@ -1,7 +1,8 @@
 #include "base_cycle.hpp"
 
-#include "common/messages_exchange_to_wrapper.hpp"
-#include "common/messages_wrapper_to_exchange.hpp"
+#include "common/types/messages/glz_messages_exchange_to_wrapper.hpp"
+#include "common/types/messages/messages_exchange_to_wrapper.hpp"
+#include "common/types/messages/messages_wrapper_to_exchange.hpp"
 #include "exchange/matching/engine.hpp"
 
 #include <variant>

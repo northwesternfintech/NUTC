@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/messages_exchange_to_wrapper.hpp"
+#include "common/types/messages/messages_exchange_to_wrapper.hpp"
 #include "common/types/decimal.hpp"
 #include "common/util.hpp"
 #include "exchange/orders/orderbook/composite_orderbook.hpp"

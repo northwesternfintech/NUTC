@@ -1,6 +1,6 @@
 #include "on_tick_metrics.hpp"
 
-#include "common/messages_wrapper_to_exchange.hpp"
+#include "common/types/messages/messages_wrapper_to_exchange.hpp"
 #include "exchange/metrics/prometheus.hpp"
 #include "exchange/orders/ticker_data.hpp"
 #include "exchange/traders/portfolio/trader_portfolio.hpp"

@@ -1,7 +1,8 @@
 #include "test_cycle.hpp"
 
 #include "common/logging/logging.hpp"
-#include "common/messages_wrapper_to_exchange.hpp"
+#include "common/types/messages/messages_wrapper_to_exchange.hpp"
+#include "common/types/messages/glz_messages_wrapper_to_exchange.hpp"
 #include "common/util.hpp"
 
 #include <glaze/glaze.hpp>

@@ -1,4 +1,4 @@
-#include "common/messages_wrapper_to_exchange.hpp"
+#include "common/types/messages/messages_wrapper_to_exchange.hpp"
 #include "common/util.hpp"
 #include "util/helpers/test_cycle.hpp"
 #include "util/helpers/test_trader.hpp"

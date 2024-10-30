@@ -1,6 +1,7 @@
 #include "rmq_wrapper_init.hpp"
 
-#include "common/messages_exchange_to_wrapper.hpp"
+#include "common/types/messages/messages_exchange_to_wrapper.hpp"
+#include "common/types/messages/glz_messages_exchange_to_wrapper.hpp"
 
 namespace nutc::exchange {
 
