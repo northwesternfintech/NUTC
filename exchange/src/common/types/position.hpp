@@ -4,8 +4,6 @@
 #include "common/types/ticker.hpp"
 #include "common/util.hpp"
 
-#include <glaze/glaze.hpp>
-
 namespace nutc::common {
 struct position {
     Ticker ticker;

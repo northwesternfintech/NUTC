@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/messages_exchange_to_wrapper.hpp"
+#include "common/types/messages/messages_exchange_to_wrapper.hpp"
 #include "exchange/orders/storage/order_storage.hpp"
 
 #include <vector>

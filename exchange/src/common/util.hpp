@@ -1,8 +1,7 @@
 #pragma once
 
-#include <glaze/glaze.hpp>
-
 #include <cassert>
+#include <cstdint>
 
 #include <string>
 

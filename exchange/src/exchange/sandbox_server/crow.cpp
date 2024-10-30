@@ -2,13 +2,14 @@
 
 #include "common/fetching/fetching.hpp"
 #include "common/logging/logging.hpp"
-#include "common/messages_exchange_to_wrapper.hpp"
+#include "common/types/messages/messages_exchange_to_wrapper.hpp"
 #include "exchange/config/dynamic/config.hpp"
 #include "exchange/config/static/config.hpp"
 #include "exchange/traders/trader_types/algo_trader.hpp"
 
 #include <boost/filesystem/operations.hpp>
 #include <crow/common.h>
+#include <glaze/json/write.hpp>
 #include <unistd.h>
 
 namespace nutc::exchange {

@@ -329,7 +329,6 @@ target_link_libraries(COMMON_lib PUBLIC quill::quill)
 target_link_libraries(COMMON_lib PUBLIC fmt::fmt)
 target_link_libraries(COMMON_lib PUBLIC glaze::glaze)
 target_link_libraries(COMMON_lib PUBLIC yaml-cpp::yaml-cpp)
-target_link_libraries(COMMON_lib PUBLIC glaze::glaze)
 target_link_libraries(COMMON_lib PUBLIC CURL::libcurl)
 target_link_libraries(COMMON_lib PRIVATE boost::boost)
 

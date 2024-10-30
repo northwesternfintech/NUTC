@@ -1,10 +1,10 @@
 #include "test_cycle.hpp"
 
 #include "common/logging/logging.hpp"
-#include "common/messages_wrapper_to_exchange.hpp"
-#include "common/util.hpp"
+#include "common/types/messages/messages_wrapper_to_exchange.hpp"
+#include "common/types/visitor.hpp"
 
-#include <glaze/glaze.hpp>
+#include <glaze/json/write.hpp>
 #include <hash_table7.hpp>
 
 #include <queue>
@@ -13,23 +13,23 @@
 namespace nutc::test {
 
 namespace {
-template <typename OrderT>
+
 auto
-get_base_order(const OrderT& order)
+get_base_order(const auto& order)
 {
-    if constexpr (std::is_same_v<exchange::tagged_limit_order, OrderT>) {
-        return static_cast<const common::limit_order&>(order);
-    }
-    else if constexpr (std::is_same_v<exchange::tagged_market_order, OrderT>) {
-        return static_cast<const common::market_order&>(order);
-    }
-    else if constexpr (std::is_same_v<common::cancel_order, OrderT>) {
-        return static_cast<const common::cancel_order&>(order);
-    }
-    else {
-        throw std::runtime_error("Unexpected order");
-    }
+    return common::make_visitor(
+        [](const exchange::tagged_limit_order& order) {
+            return static_cast<const common::limit_order&>(order);
+        },
+        [](const exchange::tagged_market_order& order) {
+            return static_cast<const common::market_order&>(order);
+        },
+        [](const common::cancel_order& order) {
+            return static_cast<const common::cancel_order&>(order);
+        }
+    )(order);
 }
+
 } // namespace
 
 std::vector<common::match>
@@ -51,14 +51,10 @@ TestMatchingCycle::match_orders_(std::vector<exchange::OrderVariant> orders)
     return BaseMatchingCycle::match_orders_(std::move(orders));
 }
 
-// This is kinda bad practice. We shouldn't return an optional based on a template
-// parameter, we should just return void or the object itself. However, I am lazy and
-// this is a test function. Peace
-//
-// Also todo: this doesn't work correctly when we have orders of the same type that need
+// TODO: this doesn't work correctly when we have orders of the same type that need
 // to be processed. Rework this entire thing later
 template <typename OrderT>
-std::optional<common::order_id_t>
+const OrderT&
 TestMatchingCycle::wait_for_order(
     const OrderT& order,
     std::function<bool(const OrderT&, const OrderT&)> equality_function
@@ -83,23 +79,20 @@ TestMatchingCycle::wait_for_order(
         on_tick(0);
     }
     log_i(testing, "Expected order received. Continuing...");
-    auto get_order_id = []<typename SecondOrderT>(const SecondOrderT& order
-                        ) -> std::optional<common::order_id_t> {
-        if constexpr (std::is_same_v<exchange::tagged_limit_order, SecondOrderT>) {
-            return order.order_id;
+    auto try_cast = [](const auto& order) -> const OrderT& {
+        if constexpr (std::is_constructible_v<const OrderT&, decltype(order)>) {
+            return static_cast<const OrderT&>(order);
         }
-        else {
-            return std::nullopt;
-        }
+        throw std::runtime_error("Unexpected order type - should be unreachable");
     };
-    return std::visit(get_order_id, incoming_orders_.front());
+    return std::visit(try_cast, incoming_orders_.front()); // NOLINT
 }
 
-template std::optional<common::order_id_t> TestMatchingCycle::
+template const common::limit_order& TestMatchingCycle::
     wait_for_order<>(const common::limit_order&, std::function<bool(const common::limit_order&, const common::limit_order&)>);
-template std::optional<common::order_id_t> TestMatchingCycle::
+template const common::market_order& TestMatchingCycle::
     wait_for_order<>(const common::market_order&, std::function<bool(const common::market_order&, const common::market_order&)>);
-template std::optional<common::order_id_t> TestMatchingCycle::
+template const common::cancel_order& TestMatchingCycle::
     wait_for_order<>(const common::cancel_order&, std::function<bool(const common::cancel_order&, const common::cancel_order&)>);
 
 } // namespace nutc::test

@@ -1,5 +1,6 @@
 #pragma once
-#include <glaze/glaze.hpp>
+
+#include <glaze/core/common.hpp>
 
 #include <cmath>
 #include <cstdint>
@@ -155,7 +156,6 @@ public:
 
 } // namespace std
 
-/// \cond
 template <std::uint8_t Scale>
 struct glz::meta<nutc::common::Decimal<Scale>> {
     using t = nutc::common::Decimal<Scale>;

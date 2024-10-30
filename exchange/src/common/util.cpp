@@ -37,6 +37,7 @@ find_path_nocache(const std::string& file_name)
 
     throw std::runtime_error(fmt::format("{} not found", file_name));
 }
+
 } // namespace
 
 std::string
@@ -49,12 +50,15 @@ find_project_file(const std::string& file_name)
     return path_cache[file_name] = find_path_nocache(file_name);
 }
 
+// We only want one thread per process generating orders (bots in exchange, individual
+// algos in other processes). That makes this thread safe
+
 order_id_t
 generate_order_id()
 {
-    static std::mt19937_64 gen{std::random_device{}()};
-    static std::uniform_int_distribution<order_id_t> dis;
-    return dis(gen);
+    static order_id_t pid = getpid();
+    static order_id_t start_order_count = pid << 46;
+    return ++start_order_count;
 }
 
 uint64_t

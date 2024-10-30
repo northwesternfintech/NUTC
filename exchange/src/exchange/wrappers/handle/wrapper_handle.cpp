@@ -1,11 +1,12 @@
 #include "wrapper_handle.hpp"
 
-#include "common/messages_exchange_to_wrapper.hpp"
 #include "common/types/algorithm/algorithm.hpp"
+#include "common/types/messages/messages_exchange_to_wrapper.hpp"
 #include "common/util.hpp"
 
 #include <boost/asio.hpp>
 #include <fmt/format.h>
+#include <glaze/json/write.hpp>
 
 namespace {
 std::string

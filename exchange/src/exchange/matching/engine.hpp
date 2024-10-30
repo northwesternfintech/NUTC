@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/messages_exchange_to_wrapper.hpp"
+#include "common/types/messages/messages_exchange_to_wrapper.hpp"
 #include "exchange/orders/orderbook/composite_orderbook.hpp"
 
 #include <glaze/util/expected.hpp>

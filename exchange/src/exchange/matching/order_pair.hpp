@@ -1,7 +1,7 @@
 #pragma once
 
-#include "common/messages_exchange_to_wrapper.hpp"
 #include "common/types/decimal.hpp"
+#include "common/types/messages/messages_exchange_to_wrapper.hpp"
 #include "common/util.hpp"
 #include "exchange/orders/orderbook/composite_orderbook.hpp"
 #include "exchange/orders/orderbook/limit_orderbook.hpp"

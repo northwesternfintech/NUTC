@@ -1,5 +1,5 @@
 #pragma once
-#include "common/messages_wrapper_to_exchange.hpp"
+#include "common/types/messages/messages_wrapper_to_exchange.hpp"
 #include "exchange/traders/trader_types/generic_trader.hpp"
 
 #include <fmt/format.h>
