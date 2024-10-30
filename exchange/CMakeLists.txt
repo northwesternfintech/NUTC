@@ -19,7 +19,32 @@ if(LOCAL_DEV)
   add_definitions(-DNUTC_LOCAL_DEV)
 endif()
 
-# ---- EXCHANGE ----------
+# ---- Dependencies ----------
+find_package(argparse REQUIRED)
+find_package(yaml-cpp REQUIRED)
+find_package(prometheus-cpp REQUIRED)
+find_package(Crow REQUIRED)
+find_package(fmt REQUIRED)
+find_package(CURL REQUIRED)
+find_package(glaze REQUIRED)
+find_package(Boost REQUIRED)
+find_package(emhash REQUIRED)
+find_package(Python3 3.12 COMPONENTS Interpreter Development EXACT REQUIRED)
+find_package(quill REQUIRED)
+find_package(absl REQUIRED)
+
+# ---- Enable AVX2 for Glaze if supported ----
+
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag("-mavx2" COMPILER_SUPPORTS_AVX2)
+if (COMPILER_SUPPORTS_AVX2)
+    set(glaze_ENABLE_AVX2 ON CACHE BOOL "Enable AVX2 SIMD instructions")
+    add_compile_options(-mavx2)
+    message(STATUS "AVX2 is supported and enabled.")
+else()
+    set(glaze_ENABLE_AVX2 OFF CACHE BOOL "Disable AVX2 SIMD instructions")
+    message(STATUS "AVX2 not supported on this platform.")
+endif()
 
 # ---- Declare library ----
 
@@ -76,45 +101,37 @@ target_include_directories(
 
 target_compile_features(EXCHANGE_lib PUBLIC cxx_std_23)
 
-# argparse
-find_package(argparse REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC argparse::argparse)
 
-# yaml-cpp
-find_package(yaml-cpp REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC yaml-cpp::yaml-cpp)
 
-# Prometheus
-find_package(prometheus-cpp REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC prometheus-cpp::prometheus-cpp)
 
-# Crow 
-find_package(Crow REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC Crow::Crow)
 
-# Fmt
-find_package(fmt REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC fmt::fmt)
 
-# libcurl
-find_package(CURL REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC CURL::libcurl)
 
-# glaze
-find_package(glaze REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC glaze::glaze)
 
-# boost
-find_package(Boost REQUIRED)
+target_link_libraries(EXCHANGE_lib PUBLIC abseil::abseil)
+
+# Enable AVX2 if supported
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag("-mavx2" COMPILER_SUPPORTS_AVX2)
+if (COMPILER_SUPPORTS_AVX2)
+    set(glaze_ENABLE_AVX2 ON CACHE BOOL "Enable AVX2 SIMD instructions")
+    add_compile_options(-mavx2)
+    message(STATUS "AVX2 is supported and enabled.")
+else()
+    set(glaze_ENABLE_AVX2 OFF CACHE BOOL "Disable AVX2 SIMD instructions")
+    message(STATUS "AVX2 not supported on this platform.")
+endif()
+
 target_link_libraries(EXCHANGE_lib PUBLIC boost::boost)
 
-# emhash
-find_package(emhash REQUIRED)
 target_link_libraries(EXCHANGE_lib PUBLIC emhash::emhash)
-
-# abseil
-find_package(absl REQUIRED)
-target_link_libraries(EXCHANGE_lib PUBLIC abseil::abseil)
 
 add_executable(EXCHANGE_exe src/exchange/main.cpp)
 add_executable(EXCHANGE::exe ALIAS EXCHANGE_exe)
@@ -125,38 +142,24 @@ target_compile_features(EXCHANGE_exe PRIVATE cxx_std_23)
 
 target_link_libraries(EXCHANGE_exe PRIVATE EXCHANGE_lib)
 
-# quill
 target_link_libraries(EXCHANGE_exe PRIVATE quill::quill)
 
-
-# fmt
 target_link_libraries(EXCHANGE_exe PRIVATE fmt::fmt)
 
 target_link_libraries(EXCHANGE_exe PRIVATE emhash::emhash)
 
-target_link_libraries(EXCHANGE_exe PRIVATE abseil::abseil)
-
-# yaml-cpp
-find_package(yaml-cpp REQUIRED)
 target_link_libraries(EXCHANGE_exe PRIVATE yaml-cpp::yaml-cpp)
 
-
-# curl
-find_package(CURL REQUIRED)
 target_link_libraries(EXCHANGE_exe PRIVATE CURL::libcurl)
 
 target_link_libraries(EXCHANGE_exe PRIVATE argparse::argparse)
 
-# glaze
-find_package(glaze REQUIRED)
 target_link_libraries(EXCHANGE_exe PRIVATE glaze::glaze)
 
 target_link_libraries(EXCHANGE_exe PRIVATE boost::boost)
 
 target_link_libraries(EXCHANGE_exe PRIVATE Crow::Crow)
 
-# Prometheus
-find_package(prometheus-cpp REQUIRED)
 target_link_libraries(EXCHANGE_exe PRIVATE prometheus-cpp::prometheus-cpp)
 
 # ---- Declare executable ----
@@ -173,7 +176,6 @@ add_library(
     src/wrapper/messaging/exchange_communicator.cpp
     src/wrapper/messaging/rate_limiter.cpp
 
-    # Utils
     src/wrapper/config/argparse.cpp
 )
 
@@ -183,7 +185,6 @@ target_include_directories(
     "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
 )
 
-find_package(Python3 3.12 COMPONENTS Interpreter Development EXACT REQUIRED)
 find_package(pybind11 REQUIRED)
 
 target_link_libraries(WRAPPER_lib PUBLIC fmt::fmt)
@@ -225,7 +226,6 @@ add_library(
     src/linter/spawning/spawning.cpp
 	src/linter/spawning/async_read_with_timeout.cpp
     src/linter/crow/crow.cpp
-    # Utils
 )
 
 add_library(
@@ -322,8 +322,6 @@ target_include_directories(
     "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
 )
 
-# quill
-find_package(quill REQUIRED)
 target_link_libraries(COMMON_lib PUBLIC quill::quill)
 
 target_link_libraries(COMMON_lib PUBLIC fmt::fmt)
@@ -346,7 +344,7 @@ target_link_libraries(WRAPPER_exe PRIVATE COMMON_lib)
 
 target_compile_features(COMMON_lib PUBLIC cxx_std_23)
 
-# Enable lto for release builds
+# ---- Enable lto for release builds ----
 include(CheckIPOSupported)
 check_ipo_supported(RESULT lto_supported OUTPUT error)
 if(lto_supported)
