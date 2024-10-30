@@ -1,12 +1,11 @@
 #include "pipe_reader.hpp"
 
 #include "async_pipe_runner.hpp"
-#include "common/types/messages/glz_messages_wrapper_to_exchange.hpp"
 #include "common/logging/logging.hpp"
 #include "common/types/messages/messages_wrapper_to_exchange.hpp"
 
 #include <boost/asio.hpp>
-#include <glaze/glaze.hpp>
+#include <glaze/json/read.hpp>
 
 namespace nutc::exchange {
 

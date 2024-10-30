@@ -1,7 +1,7 @@
 #pragma once
 
 #include <curl/curl.h>
-#include <glaze/glaze.hpp>
+#include <glaze/json/json_t.hpp>
 
 #include <optional>
 #include <string>

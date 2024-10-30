@@ -1,11 +1,10 @@
 #include "test_cycle.hpp"
 
 #include "common/logging/logging.hpp"
-#include "common/types/messages/glz_messages_wrapper_to_exchange.hpp"
 #include "common/types/messages/messages_wrapper_to_exchange.hpp"
-#include "common/util.hpp"
+#include "common/types/visitor.hpp"
 
-#include <glaze/glaze.hpp>
+#include <glaze/json/write.hpp>
 #include <hash_table7.hpp>
 
 #include <queue>
@@ -14,24 +13,11 @@
 namespace nutc::test {
 
 namespace {
-template <typename... Callables>
-struct visitor : Callables... {
-    using Callables::operator()...;
-
-    explicit visitor(Callables... callables) : Callables(callables)... {}
-};
-
-template <typename... Callables>
-visitor<Callables...>
-make_visitor(Callables... callables)
-{
-    return visitor<Callables...>(callables...);
-}
 
 auto
 get_base_order(const auto& order)
 {
-    return make_visitor(
+    return common::make_visitor(
         [](const exchange::tagged_limit_order& order) {
             return static_cast<const common::limit_order&>(order);
         },

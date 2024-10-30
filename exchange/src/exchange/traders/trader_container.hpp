@@ -2,8 +2,6 @@
 
 #include "exchange/traders/trader_types/generic_trader.hpp"
 
-#include <glaze/glaze.hpp>
-
 #include <cassert>
 
 #include <memory>

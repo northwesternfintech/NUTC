@@ -5,6 +5,8 @@
 #include "common/util.hpp"
 
 #include <fmt/format.h>
+#include <glaze/core/common.hpp>
+#include <glaze/core/meta.hpp>
 
 namespace nutc::common {
 
@@ -79,3 +81,32 @@ using IncomingMessageVariant =
     std::variant<init_message, cancel_order, limit_order, market_order>;
 
 } // namespace nutc::common
+
+template <>
+struct glz::meta<nutc::common::cancel_order> {
+    using t = nutc::common::cancel_order;
+    static constexpr auto value =
+        object("cancel", &t::ticker, &t::order_id, &t::timestamp);
+};
+
+template <>
+struct glz::meta<nutc::common::limit_order> {
+    using t = nutc::common::limit_order;
+    static constexpr auto value = object(
+        "limit", &t::ticker, &t::side, &t::quantity, &t::timestamp, &t::price, &t::ioc,
+        &t::order_id
+    );
+};
+
+template <>
+struct glz::meta<nutc::common::market_order> {
+    using t = nutc::common::market_order;
+    static constexpr auto value =
+        object("market", &t::timestamp, &t::ticker, &t::side, &t::quantity);
+};
+
+template <>
+struct glz::meta<nutc::common::init_message> {
+    using t = nutc::common::init_message;
+    static constexpr auto value = object(&t::name);
+};

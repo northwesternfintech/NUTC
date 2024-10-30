@@ -1,7 +1,6 @@
 #include "crow.hpp"
 
 #include "common/fetching/fetching.hpp"
-#include "common/types/messages/glz_messages_exchange_to_wrapper.hpp"
 #include "common/logging/logging.hpp"
 #include "linter/spawning/spawning.hpp"
 

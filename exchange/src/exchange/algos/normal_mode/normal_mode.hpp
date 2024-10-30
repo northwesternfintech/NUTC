@@ -3,6 +3,8 @@
 #include "common/types/decimal.hpp"
 #include "exchange/algos/algo_manager.hpp"
 
+#include <glaze/json/json_t.hpp>
+
 namespace nutc::exchange {
 
 class NormalModeAlgoInitializer : public AlgoInitializer {

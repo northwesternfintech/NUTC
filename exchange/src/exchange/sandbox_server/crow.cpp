@@ -1,7 +1,6 @@
 #include "crow.hpp"
 
 #include "common/fetching/fetching.hpp"
-#include "common/types/messages/glz_messages_exchange_to_wrapper.hpp"
 #include "common/logging/logging.hpp"
 #include "common/types/messages/messages_exchange_to_wrapper.hpp"
 #include "exchange/config/dynamic/config.hpp"
@@ -10,6 +9,7 @@
 
 #include <boost/filesystem/operations.hpp>
 #include <crow/common.h>
+#include <glaze/json/write.hpp>
 #include <unistd.h>
 
 namespace nutc::exchange {
