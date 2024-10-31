@@ -172,6 +172,10 @@ add_library(
     src/wrapper/runtime/runtime.cpp
     src/wrapper/runtime/python/python_runtime.cpp
     src/wrapper/runtime/cpp/cpp_runtime.cpp
+
+    src/wrapper/startup/system.cpp
+
+    src/wrapper/util/resource_limits.cpp
     
     src/wrapper/messaging/exchange_communicator.cpp
     src/wrapper/messaging/rate_limiter.cpp

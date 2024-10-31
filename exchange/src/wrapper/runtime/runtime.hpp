@@ -20,11 +20,9 @@ public:
     Runtime& operator=(const Runtime&) = default;
     Runtime& operator=(Runtime&&) noexcept = default;
 
-    Runtime(
-        std::string algo, std::string trader_id, ExchangeCommunicator communicator
-    ) :
-        algo_(std::move(algo)), trader_id_(std::move(trader_id)),
-        communicator_(std::move(communicator))
+    Runtime(std::string algo, std::string trader_id) :
+        algo_(std::move(algo)), trader_id_(trader_id),
+        communicator_{std::move(trader_id)}
     {}
 
     virtual void fire_on_trade_update(

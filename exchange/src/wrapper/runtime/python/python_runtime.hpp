@@ -13,9 +13,8 @@ namespace nutc::wrapper {
 
 class PyRuntime : public Runtime {
 public:
-    PyRuntime(
-        std::string algo, std::string trader_id, ExchangeCommunicator communicator
-    ) : Runtime(std::move(algo), std::move(trader_id), std::move(communicator))
+    PyRuntime(std::string algo, std::string trader_id) :
+        Runtime(std::move(algo), std::move(trader_id))
     {
         create_api_module(
             communicator_.place_limit_order(), communicator_.place_market_order(),
