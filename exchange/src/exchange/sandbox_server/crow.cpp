@@ -12,6 +12,8 @@
 #include <glaze/json/write.hpp>
 #include <unistd.h>
 
+#include <chrono>
+
 namespace nutc::exchange {
 
 CrowServer::CrowServer(std::uint16_t port) :
@@ -100,7 +102,9 @@ CrowServer::add_pending_trader_(
     start_remove_timer_(trial_secs, trader, algo_id, logfile_url);
 
     auto get_start_message = []() {
-        static auto start_message = glz::write_json(common::start_time{0});
+        static auto start_message =
+            glz::write_json(common::start_time{std::chrono::high_resolution_clock::now()
+            });
         if (!start_message.has_value()) [[unlikely]]
             throw std::runtime_error(glz::format_error(start_message.error()));
         return start_message.value();

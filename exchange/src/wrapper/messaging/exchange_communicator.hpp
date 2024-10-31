@@ -20,44 +20,41 @@ using MarketOrderFunction =
 using CancelOrderFunction =
     std::function<bool(common::Ticker ticker, order_id_t order_id)>;
 
+// TODO: this class handles low-level communication (encoding, decoding, etc) and higher
+// level abstractions like the messages themselves, waiting for algo, etc
+// We should split this into two classes
 class ExchangeCommunicator {
-    RateLimiter limiter_{};
+    RateLimiter limiter_;
     std::string trader_id_;
 
 public:
     ExchangeCommunicator(std::string trader_id) : trader_id_(std::move(trader_id)) {}
 
-    bool report_startup_complete();
+    static void report_startup_complete();
 
-    void wait_for_start_time();
+    static void wait_for_start_time();
 
-    algorithm_content consume_algorithm();
-
-    common::tick_update consume_tick_update();
-
-    static void publish_message(const std::string& message);
-
-    [[nodiscard]] bool
-    publish_message(const auto& message)
-    {
-        if (limiter_.should_rate_limit()) {
-            return false;
-        }
-        auto message_opt = glz::write_json(message);
-        if (!message_opt.has_value()) [[unlikely]]
-            throw std::runtime_error(glz::format_error(message_opt.error()));
-
-        publish_message(message_opt.value());
-        return true;
-    }
+    static algorithm_content consume_algorithm();
+    static std::variant<common::tick_update, common::account_update>
+    consume_market_update();
 
     LimitOrderFunction place_limit_order();
     MarketOrderFunction place_market_order();
-    CancelOrderFunction cancel_order();
+    static CancelOrderFunction cancel_order();
 
 private:
     template <typename T>
-    T consume_message();
+    static T consume_message();
+
+    template <typename T>
+    static T wait_and_consume_message();
+
+    // TODO: glaze concepts maybe?
+    template <typename T, typename... Args>
+    requires std::is_constructible_v<T, Args...>
+    static T publish_message(Args... args);
+
+    static void publish_message(const std::string& message);
 };
 
 } // namespace nutc::wrapper

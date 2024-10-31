@@ -31,7 +31,7 @@ PrintTo(const AlgoLanguage& op, std::ostream* os)
 namespace nutc::test {
 
 bool validate_match(
-    const nutc::common::match& match, common::Ticker ticker,
+    const nutc::exchange::tagged_match& match, common::Ticker ticker,
     const std::string& buyer_id, const std::string& seller_id, common::Side side,
     double quantity, double price
 );
@@ -66,13 +66,13 @@ order_equality(const common::market_order& order1, const common::market_order& o
             << "Expected match with ticker = " << (nutc::common::to_string(ticker_))   \
             << ", buyer_id = " << (buyer_id_) << ", seller_id = " << (seller_id_)      \
             << ", side = " << static_cast<int>(side_) << ", price = " << (price_)      \
-            << ", quantity = " << (quantity_) << ". Actual match: ticker = "           \
-            << nutc::common::to_string((match).position.ticker)                        \
-            << ", buyer_id = " << (match).buyer_id                                     \
-            << ", seller_id = " << (match).seller_id                                   \
-            << ", side = " << static_cast<int>((match).position.side)                  \
-            << ", price = " << double{(match).position.price}                          \
-            << ", quantity = " << double{(match).position.quantity};                   \
+            << ", quantity = " << (quantity_)                                          \
+            << ". Actual match: ticker = " << nutc::common::to_string((match).ticker)  \
+            << ", buyer_id = " << (match).buyer->get_id()                              \
+            << ", seller_id = " << (match).seller->get_id()                            \
+            << ", side = " << static_cast<int>((match).side)                           \
+            << ", price = " << double{(match).price}                                   \
+            << ", quantity = " << double{(match).quantity};                            \
     } while (0)
 
 #define ASSERT_EQ_OB_UPDATE(/* NOLINT(cppcoreguidelines-macro-usage) */                \

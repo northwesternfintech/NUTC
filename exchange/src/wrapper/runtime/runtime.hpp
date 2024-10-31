@@ -38,10 +38,10 @@ public:
         decimal_price buyer_capital
     ) const = 0;
 
-    void main_event_loop();
+    void main_event_loop() const;
 
-    template <typename T>
-    void process_message(T&& message);
+    void process_tick_update(const tick_update& update) const;
+    void process_account_update(const account_update& update) const;
 
     const std::string&
     get_trader_id() const

@@ -7,43 +7,33 @@
 #include <glaze/core/common.hpp>
 #include <glaze/core/meta.hpp>
 
+#include <chrono>
+
 namespace nutc::common {
 
 struct start_time {
-    int64_t start_time_ns;
+    std::int64_t start_time_ns;
 
     start_time() = default;
 
-    explicit start_time(int64_t stns) : start_time_ns(stns) {}
+    explicit start_time(std::chrono::high_resolution_clock::time_point stns) :
+        start_time_ns(stns.time_since_epoch().count())
+    {}
 };
 
-struct match {
-    common::position position;
-    std::string buyer_id;
-    std::string seller_id;
-    common::decimal_price buyer_capital;
-    common::decimal_price seller_capital;
-    std::string match_type{};
-
-    match() = default;
-
-    match(
-        const common::position& position, std::string bid, std::string sid,
-        common::decimal_price bcap, common::decimal_price scap
-    ) :
-        position(position), buyer_id(std::move(bid)), seller_id(std::move(sid)),
-        buyer_capital(bcap), seller_capital(scap)
-    {}
+struct account_update {
+    common::position trade;
+    common::decimal_price available_capital;
 };
 
 struct tick_update {
     std::vector<common::position> ob_updates;
-    std::vector<match> matches;
+    std::vector<common::position> matches;
 
     tick_update() = default;
 
     explicit tick_update(
-        std::vector<common::position> ob_updates, std::vector<match> matches
+        std::vector<common::position> ob_updates, std::vector<common::position> matches
     ) : ob_updates(std::move(ob_updates)), matches(std::move(matches))
     {}
 };
@@ -67,12 +57,10 @@ struct glz::meta<nutc::common::tick_update> {
 };
 
 template <>
-struct glz::meta<nutc::common::match> {
-    using t = nutc::common::match;
-    static constexpr auto value = object(
-        "match", &t::position, &t::buyer_id, &t::seller_id, &t::buyer_capital,
-        &t::seller_capital
-    );
+struct glz::meta<nutc::common::account_update> {
+    using t = nutc::common::account_update;
+    static constexpr auto value =
+        object("account_update", &t::trade, &t::available_capital);
 };
 
 template <>

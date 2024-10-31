@@ -4,20 +4,21 @@
 
 #include <glaze/json/write.hpp>
 
+#include <chrono>
+
 namespace nutc::exchange {
 
-int64_t
+std::chrono::high_resolution_clock::time_point
 get_start_time(size_t wait_seconds)
 {
     using hrq = std::chrono::high_resolution_clock;
-    hrq::time_point time = hrq::now() + std::chrono::seconds(wait_seconds);
-    return std::chrono::time_point_cast<std::chrono::nanoseconds>(time)
-        .time_since_epoch()
-        .count();
+    return hrq::now() + std::chrono::seconds(wait_seconds);
 }
 
 void
-send_start_time(GenericTrader& trader, int64_t start_time)
+send_start_time(
+    GenericTrader& trader, std::chrono::high_resolution_clock::time_point start_time
+)
 {
     static auto mess = glz::write_json(common::start_time{start_time});
     if (!mess.has_value()) [[unlikely]]

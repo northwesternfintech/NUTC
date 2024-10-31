@@ -37,7 +37,7 @@ protected:
 
     nutc::exchange::CompositeOrderBook orderbook_{Ticker::ETH};
 
-    std::vector<nutc::common::match>
+    std::vector<nutc::exchange::tagged_match>
     add_to_engine_(const tagged_limit_order& order)
     {
         return nutc::exchange::match_order(order, orderbook_);
@@ -197,7 +197,7 @@ TEST_F(UnitBasicMatching, PassivePriceMatchReversed)
 
     matches = add_to_engine_(order2);
     ASSERT_EQ(matches.size(), 1);
-    ASSERT_EQ(matches.at(0).position.price, 1.0);
+    ASSERT_EQ(matches.at(0).price, 1.0);
     ASSERT_EQ_MATCH(matches.at(0), Ticker::ETH, "DEF", "ABC", buy, 1, 1);
 }
 
