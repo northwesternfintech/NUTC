@@ -59,7 +59,7 @@ main_event_loop(std::unique_ptr<MatchingCycleInterface> cycle)
 int
 main(int argc, const char** argv)
 {
-    nutc::logging::init("exchange.log", quill::LogLevel::Info);
+    nutc::common::logging_init("exchange.log", quill::LogLevel::Info);
     std::signal(SIGINT, [](auto) { std::exit(0); });
     std::signal(SIGPIPE, SIG_IGN);
 

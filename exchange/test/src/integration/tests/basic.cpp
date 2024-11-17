@@ -1,5 +1,5 @@
 #include "common/util.hpp"
-#include "config.h"
+#include "config.hpp"
 #include "util/helpers/test_cycle.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
@@ -8,12 +8,11 @@
 #include <gtest/gtest.h>
 
 namespace nutc::test {
+using common::AlgoLanguage;
 using common::limit_order;
-using nutc::common::AlgoLanguage;
-using nutc::common::Ticker;
-using nutc::common::Side::buy;
-using nutc::common::Side::sell;
-using nutc::test::start_wrappers;
+using common::Ticker;
+using common::Side::buy;
+using common::Side::sell;
 
 class IntegrationBasicAlgo : public ::testing::TestWithParam<AlgoLanguage> {
 protected:

@@ -41,7 +41,7 @@ start_wrappers(
 {
     using exchange::DevModeAlgoInitializer;
 
-    logging::init("integration_tests.log", quill::LogLevel::Info);
+    common::logging_init("integration_tests.log", quill::LogLevel::Info);
 
     DevModeAlgoInitializer algo_manager{start_delay, algos};
     algo_manager.initialize_trader_container(users, starting_capital);

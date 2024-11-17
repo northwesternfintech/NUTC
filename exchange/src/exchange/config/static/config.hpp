@@ -1,28 +1,27 @@
 #pragma once
 
-#define DEFAULT_CONFIG_FILE "config.yml"
-#define DEBUG_NUM_USERS     2
+#include <cstdint>
+
+#include <string>
+#include <string_view>
+
+namespace nutc {
+
+constexpr std::string DEFAULT_CONFIG_FILE = "config.yml";
+constexpr uint8_t DEBUG_NUM_USERS = 2;
 
 // How many outgoing messages for one wrapper before we start dropping
-#define MAX_OUTGOING_MQ_SIZE 10000
+constexpr uint32_t MAX_OUTGOING_MQ_SIZE = 10000;
 
 // Limit to 16kb
-#define MAX_PIPE_MSG_SIZE 16000
+constexpr uint32_t MAX_PIPE_MSG_SIZE = 16000;
 
-// logging
-#define LOG_BACKTRACE_SIZE 10
+constexpr std::string ALGO_DIR = "algos";
 
-#define LOG_DIR            "logs"
-#define LOG_FILE           (LOG_DIR "/app.log")
-#define JSON_LOG_FILE      (LOG_DIR "/structured.log")
+constexpr float RETAIL_ORDER_OFFSET = .02f;
+// How much retail orders are offset from theo price. Ex. .02 means buy order is
+// theo+.02 to ensure it gets filled
 
-#define LOG_FILE_SIZE      (1024 * 1024 / 2) // 512 KB
-#define LOG_BACKUP_COUNT   5
-
-//
-#define ALGO_DIR "algos"
-
-#define RETAIL_ORDER_OFFSET                                                            \
-    .02 // How much retail orders are offset from theo price. Ex. .02 means buy order is
-        // theo+.02 to ensure it gets filled
-#define RETAIL_ORDER_SIZE .05 // How much of the interest limit to use for retail orders
+constexpr float RETAIL_ORDER_SIZE = .05f;
+// How much of the interest limit to use for retail orders
+} // namespace nutc

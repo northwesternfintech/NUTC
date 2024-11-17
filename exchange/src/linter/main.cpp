@@ -1,9 +1,8 @@
-#include "linter/spawning/spawning.hpp"
+#include "common/config/config.hpp"
 
 #include <quill/LogLevel.h>
 #define CROW_MAIN
 #include "common/logging/logging.hpp"
-#include "linter/config.h"
 #include "linter/crow/crow.hpp"
 
 #include <argparse/argparse.hpp>
@@ -15,6 +14,8 @@
 static void
 process_arguments(int argc, const char** argv)
 {
+    using nutc::common::NUTC_VERSION;
+
     argparse::ArgumentParser program(
         "NUTC Linter", NUTC_VERSION, argparse::default_arguments::help
     );
@@ -44,7 +45,7 @@ main(int argc, const char** argv)
     process_arguments(argc, argv);
 
     // Start logging and print the build info
-    nutc::logging::init("linter.log", quill::LogLevel::Info);
+    nutc::common::logging_init("linter.log", quill::LogLevel::Info);
     log_i(main, "Starting NUTC Linter");
 
     nutc::linter::get_crow_app().port(18081).run();

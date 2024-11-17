@@ -105,6 +105,7 @@ using nutc::common::AlgoLanguage;
 using nutc::linter::spawn_client;
 } // namespace
 
+namespace nutc::test {
 TEST(IntegrationLinterPyTest, basic)
 {
     auto lint_result = spawn_client(BASIC_ALGO, AlgoLanguage::python);
@@ -174,3 +175,4 @@ TEST(IntegrationLinterPyTest, MissingOnAccountUpdatefunction)
         != std::string::npos
     );
 }
+} // namespace nutc::test

@@ -103,6 +103,7 @@ using nutc::common::AlgoLanguage;
 using nutc::linter::spawn_client;
 } // namespace
 
+namespace nutc::test {
 TEST(IntegrationLinterCppTest, basic)
 {
     auto lint_result = spawn_client(BASIC_ALGO, AlgoLanguage::cpp);
@@ -135,3 +136,4 @@ TEST(IntegrationLinterCppTest, RuntimeError)
     EXPECT_TRUE(lint_result.message.contains("Failed to run on_orderbook_update"));
     EXPECT_TRUE(lint_result.message.contains("This is an error"));
 }
+} // namespace nutc::test

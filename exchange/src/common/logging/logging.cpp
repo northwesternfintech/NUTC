@@ -24,13 +24,13 @@
 #define SHORT_LOGLINE_FORMAT "%(logger_name:<8): %(message)"
 
 namespace nutc {
-namespace logging {
+namespace common {
 
 using namespace quill; // NOLINT(*-using-namespace)
 using cc = quill::ConsoleColours;
 
 void
-init(const std::string& log_file, quill::LogLevel log_level)
+logging_init(const std::string& log_file, quill::LogLevel log_level)
 {
     detail::application_log_level = log_level;
 
@@ -156,5 +156,5 @@ init_file_only(
     LOG_INFO(main_logger, "Logging initialized!");
 }
 
-} // namespace logging
+} // namespace common
 } // namespace nutc

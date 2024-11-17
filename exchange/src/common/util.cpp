@@ -1,6 +1,6 @@
 #include "util.hpp"
 
-#include "common/config/config.h"
+#include "common/config/config.hpp"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/archive/iterators/base64_from_binary.hpp>
@@ -65,16 +65,6 @@ uint64_t
 get_time()
 {
     return __rdtsc();
-}
-
-std::string
-get_firebase_endpoint(const std::string& params)
-{
-#ifdef NUTC_LOCAL_DEV
-    return FIREBASE_URL + params + "?ns=nutc-web-default-rtdb";
-#else
-    return FIREBASE_URL + params;
-#endif
 }
 
 std::string

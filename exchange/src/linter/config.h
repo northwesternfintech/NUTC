@@ -8,15 +8,10 @@
 #define VERSION_MAJOR @NUTC-client_VERSION_MAJOR@
 #define VERSION_MINOR @NUTC-client_VERSION_MINOR@
 #define VERSION_PATCH @NUTC-client_VERSION_PATCH@
-
-#define NUTC_VERSION "@NUTC-client_VERSION@"
 /* clang-format on */
 /* NOLINTEND */
 
 // Logging
-
-#define LOG_FILE_SIZE    (1024 * 1024 / 2) // 512 KB
-#define LOG_BACKUP_COUNT 5
 
 #ifdef NUTC_LOCAL_DEV
 #  define S3_URL        "http://localhost:4566"

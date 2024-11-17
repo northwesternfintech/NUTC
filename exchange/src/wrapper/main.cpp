@@ -38,7 +38,7 @@ main(int argc, const char** argv)
     std::signal(SIGTERM, catch_sigterm);
 
     static constexpr std::uint32_t MAX_LOG_SIZE = 50'000;
-    nutc::logging::init_file_only(
+    nutc::common::init_file_only(
         fmt::format("{}.log", trader_id), MAX_LOG_SIZE, quill::LogLevel::Info
     );
 

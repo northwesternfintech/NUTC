@@ -2,7 +2,7 @@
 
 #include "common/types/algorithm/local_algorithm.hpp"
 #include "common/types/decimal.hpp"
-#include "config.h"
+#include "config.hpp"
 #include "exchange/traders/trader_container.hpp"
 
 namespace nutc::test {

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/types/decimal.hpp"
 #include "common/types/messages/messages_wrapper_to_exchange.hpp"
 #include "exchange/traders/trader_types/generic_trader.hpp"
 
@@ -12,9 +13,9 @@ class TestTrader final : public exchange::GenericTrader {
     IncomingMessageQueue pending_orders_;
 
 public:
-    TestTrader(double capital) : TestTrader("TEST", capital) {}
+    explicit TestTrader(common::decimal_price capital) : TestTrader("TEST", capital) {}
 
-    TestTrader(std::string trader_id, double capital) :
+    TestTrader(std::string trader_id, common::decimal_price capital) :
         GenericTrader(std::move(trader_id), capital)
     {}
 

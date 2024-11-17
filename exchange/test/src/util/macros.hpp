@@ -1,5 +1,3 @@
-#include "common/types/algorithm/base_algorithm.hpp"
-#include "common/types/messages/messages_exchange_to_wrapper.hpp"
 #include "common/types/messages/messages_wrapper_to_exchange.hpp"
 #include "common/types/ticker.hpp"
 #include "exchange/orders/storage/order_storage.hpp"
@@ -10,22 +8,10 @@ using tagged_limit_order = nutc::exchange::tagged_limit_order;
 using tagged_market_order = nutc::exchange::tagged_market_order;
 using TraderContainer = nutc::exchange::TraderContainer;
 
+// This is used by GTest to print the value
+// DO NOT DELETE OR CHANGE
 namespace nutc::common {
-inline void
-PrintTo(const AlgoLanguage& op, std::ostream* os)
-{
-    switch (op) {
-        case AlgoLanguage::cpp:
-            *os << "CPP";
-            break;
-        case AlgoLanguage::python:
-            *os << "PYTHON";
-            break;
-        default:
-            *os << "UNKNOWN_LANGUAGE";
-            break;
-    }
-}
+void PrintTo(const AlgoLanguage& op, std::ostream* os);
 } // namespace nutc::common
 
 namespace nutc::test {

@@ -1,6 +1,25 @@
 #include "macros.hpp"
 
+namespace nutc::common {
+void
+PrintTo(const AlgoLanguage& op, std::ostream* os)
+{
+    switch (op) {
+        case AlgoLanguage::cpp:
+            *os << "CPP";
+            break;
+        case AlgoLanguage::python:
+            *os << "PYTHON";
+            break;
+        default:
+            *os << "UNKNOWN_LANGUAGE";
+            break;
+    }
+}
+} // namespace nutc::common
+
 namespace nutc::test {
+
 bool
 order_equality(const common::market_order& order1, const common::market_order& order2)
 {

@@ -1,5 +1,5 @@
 #include "common/types/decimal.hpp"
-#include "config.h"
+#include "config.hpp"
 #include "exchange/orders/orderbook/composite_orderbook.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
@@ -10,9 +10,10 @@ using nutc::common::Ticker;
 using nutc::common::Side::buy;
 using nutc::common::Side::sell;
 
+namespace nutc::test {
+
 class UnitCompositeOrderBookTest : public ::testing::Test {
 protected:
-    using TestTrader = nutc::test::TestTrader;
     static constexpr nutc::common::decimal_quantity DEFAULT_QUANTITY = 1000.0;
 
     TestTrader trader_1{"ABC", TEST_STARTING_CAPITAL};
@@ -156,3 +157,4 @@ TEST_F(UnitCompositeOrderBookTest, GetTopOrder)
     ASSERT_TRUE(top_order.has_value());
     EXPECT_EQ((*top_order)->quantity, 1.0);
 }
+} // namespace nutc::test
