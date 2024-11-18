@@ -1,12 +1,14 @@
 #include "argparse.hpp"
 
-#include "common/config/config.h"
+#include "common/config/config.hpp"
 
 namespace nutc::exchange {
 
 mode
 process_arguments(int argc, const char** argv)
 {
+    using nutc::common::NUTC_VERSION;
+
     argparse::ArgumentParser program(
         "NUTC", NUTC_VERSION, argparse::default_arguments::help
     );

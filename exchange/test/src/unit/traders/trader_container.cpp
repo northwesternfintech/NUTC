@@ -1,12 +1,11 @@
 #include "exchange/traders/trader_container.hpp"
 
-#include "config.h"
+#include "config.hpp"
 #include "util/helpers/test_trader.hpp"
 
 #include <gtest/gtest.h>
 
-using namespace nutc;
-
+namespace nutc::test {
 struct control_block {
     std::atomic<size_t> strong_ref_count;
     std::atomic<size_t> weak_ref_count;
@@ -35,3 +34,4 @@ TEST_F(UnitTraderContainerTest, PointersUseSharedMemory)
     EXPECT_LE(distance1, EXPECTED_SIZE);
     EXPECT_LE(distance2, EXPECTED_SIZE);
 }
+} // namespace nutc::test

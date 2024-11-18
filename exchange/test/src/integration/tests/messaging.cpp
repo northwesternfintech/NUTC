@@ -1,5 +1,4 @@
 #include "common/util.hpp"
-#include "config.h"
 #include "util/helpers/test_cycle.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
@@ -7,8 +6,6 @@
 
 #include <gtest/gtest.h>
 #include <unistd.h>
-
-#include <chrono>
 
 namespace nutc::test {
 using namespace nutc::common;

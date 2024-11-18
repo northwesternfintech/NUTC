@@ -12,8 +12,6 @@ order_id_t generate_order_id();
 std::uint64_t get_time();
 std::string trader_id(const std::string& user_id, const std::string& algo_id);
 
-std::string get_firebase_endpoint(const std::string& params);
-
 std::string base64_encode(const std::string& data);
 
 std::string base64_decode(const std::string& data);

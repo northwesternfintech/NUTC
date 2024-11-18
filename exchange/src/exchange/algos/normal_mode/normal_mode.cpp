@@ -58,9 +58,10 @@ NormalModeAlgoInitializer::initialize_trader_container(
 glz::json_t::object_t
 NormalModeAlgoInitializer::get_remote_traders()
 {
-    const std::string endpoint = common::get_firebase_endpoint("users.json");
-    glz::json_t res = request_to_json("GET", endpoint);
-    return res.get<glz::json_t::object_t>();
+    throw std::runtime_error("Unimpl");
+    // const std::string endpoint = common::get_firebase_endpoint("users.json");
+    // glz::json_t res = request_to_json("GET", endpoint);
+    // return res.get<glz::json_t::object_t>();
 }
 
 } // namespace nutc::exchange

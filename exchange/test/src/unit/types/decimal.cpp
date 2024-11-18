@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 
+namespace nutc::test {
 using nutc::common::decimal_price;
 
 TEST(UnitDecimalPrice, ImplicitConversion)
@@ -111,3 +112,4 @@ TEST(UnitDecimalPrice, OutOfBoundsPriceThrowsException)
     EXPECT_THROW(decimal_price{out_of_max_bound}, std::invalid_argument);
     EXPECT_THROW(decimal_price{out_of_min_bound}, std::invalid_argument);
 }
+} // namespace nutc::test

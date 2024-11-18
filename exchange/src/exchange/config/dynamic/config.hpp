@@ -31,8 +31,8 @@ public:
     get()
     {
         static const char* config_file_path = std::getenv("NUTC_CONFIG_FILE");
-        static const char* effective_path =
-            config_file_path ? config_file_path : DEFAULT_CONFIG_FILE;
+        static const std::string effective_path =
+            config_file_path != nullptr ? config_file_path : DEFAULT_CONFIG_FILE;
 
         static Config instance(common::find_project_file(effective_path));
         return instance;

@@ -1,6 +1,5 @@
 #include "common/util.hpp"
-#include "config.h"
-#include "exchange/orders/level_tracking/level_update_generator.hpp"
+#include "config.hpp"
 #include "exchange/orders/orderbook/composite_orderbook.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
@@ -9,15 +8,13 @@
 
 #include <algorithm>
 
-using nutc::common::Ticker;
-using nutc::common::Side::buy;
-using nutc::common::Side::sell;
-using nutc::exchange::LevelUpdateGenerator;
+namespace nutc::test {
+using common::Ticker;
+using common::Side::buy;
+using common::Side::sell;
 
 class UnitGetUpdate : public ::testing::Test {
 protected:
-    using TestTrader = nutc::test::TestTrader;
-
     TestTrader trader1{"ABC", TEST_STARTING_CAPITAL};
     TestTrader trader2{"DEF", TEST_STARTING_CAPITAL};
     TestTrader trader3{"GHI", TEST_STARTING_CAPITAL};
@@ -194,3 +191,4 @@ TEST_F(UnitGetUpdate, ChangesAddsAndDeletes)
     ASSERT_EQ_OB_UPDATE(updates[1], Ticker::ETH, buy, 10, 3);
     ASSERT_EQ_OB_UPDATE(updates[2], Ticker::ETH, buy, 5, 5);
 }
+} // namespace nutc::test

@@ -1,14 +1,13 @@
 #pragma once
 
+#include "common/config/config.hpp"
+
 #include <quill/Quill.h>
 
 #include <string>
 
-#define LOG_DIR            "logs"
-#define LOG_BACKTRACE_SIZE 10
-
 namespace nutc {
-namespace logging {
+namespace common {
 
 #ifdef NDEBUG // Release mode
 static constexpr quill::LogLevel DEFAULT_LOG_LEVEL = quill::LogLevel::Info;
@@ -51,7 +50,9 @@ set_thread_name(const std::string& name)
 /**
  * Set up logging.
  */
-void init(const std::string& log_file, quill::LogLevel log_level = DEFAULT_LOG_LEVEL);
+void logging_init(
+    const std::string& log_file, quill::LogLevel log_level = DEFAULT_LOG_LEVEL
+);
 void init_file_only(
     const std::string& log_file, std::uint32_t max_size_bytes,
     quill::LogLevel log_level = DEFAULT_LOG_LEVEL
@@ -89,34 +90,34 @@ CREATE_LOG_CATEGORY(testing);
 #undef CREATE_LOG_CATEGORY
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
 
-} // namespace logging
+} // namespace common
 } // namespace nutc
 
 // NOLINTBEGIN
 #define log_bt(category, ...)                                                          \
-    LOG_BACKTRACE(nutc::logging::get_##category##_logger(), __VA_ARGS__)
+    LOG_BACKTRACE(nutc::common::get_##category##_logger(), __VA_ARGS__)
 
 #define log_t3(category, ...)                                                          \
-    LOG_TRACE_L3(nutc::logging::get_##category##_logger(), __VA_ARGS__)
+    LOG_TRACE_L3(nutc::common::get_##category##_logger(), __VA_ARGS__)
 
 #define log_t2(category, ...)                                                          \
-    LOG_TRACE_L2(nutc::logging::get_##category##_logger(), __VA_ARGS__)
+    LOG_TRACE_L2(nutc::common::get_##category##_logger(), __VA_ARGS__)
 
 #define log_t1(category, ...)                                                          \
-    LOG_TRACE_L1(nutc::logging::get_##category##_logger(), __VA_ARGS__)
+    LOG_TRACE_L1(nutc::common::get_##category##_logger(), __VA_ARGS__)
 
 #define log_d(category, ...)                                                           \
-    LOG_DEBUG(nutc::logging::get_##category##_logger(), __VA_ARGS__)
+    LOG_DEBUG(nutc::common::get_##category##_logger(), __VA_ARGS__)
 
 #define log_i(category, ...)                                                           \
-    LOG_INFO(nutc::logging::get_##category##_logger(), __VA_ARGS__)
+    LOG_INFO(nutc::common::get_##category##_logger(), __VA_ARGS__)
 
 #define log_w(category, ...)                                                           \
-    LOG_WARNING(nutc::logging::get_##category##_logger(), __VA_ARGS__)
+    LOG_WARNING(nutc::common::get_##category##_logger(), __VA_ARGS__)
 
 #define log_e(category, ...)                                                           \
-    LOG_ERROR(nutc::logging::get_##category##_logger(), __VA_ARGS__)
+    LOG_ERROR(nutc::common::get_##category##_logger(), __VA_ARGS__)
 
 #define log_c(category, ...)                                                           \
-    LOG_CRITICAL(nutc::logging::get_##category##_logger(), __VA_ARGS__)
+    LOG_CRITICAL(nutc::common::get_##category##_logger(), __VA_ARGS__)
 // NOLINTEND

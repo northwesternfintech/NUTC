@@ -1,5 +1,6 @@
 #include "crow.hpp"
 
+#include "common/config/config.hpp"
 #include "common/fetching/fetching.hpp"
 #include "common/logging/logging.hpp"
 #include "common/types/messages/messages_exchange_to_wrapper.hpp"
@@ -152,7 +153,8 @@ CrowServer::start_remove_timer_(
             trader->disable();
         }
 
-        std::ifstream log_file(fmt::format("{}/{}.log", LOG_DIR, algo_id));
+        std::ifstream log_file(fmt::format("{}/{}.log", nutc::common::LOG_DIR, algo_id)
+        );
         if (!log_file.is_open()) {
             log_e(
                 sandbox_server, "Unable to open log file for trader {}",

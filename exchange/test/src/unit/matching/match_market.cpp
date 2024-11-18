@@ -1,5 +1,5 @@
 #include "common/types/decimal.hpp"
-#include "config.h"
+#include "config.hpp"
 #include "exchange/matching/engine.hpp"
 #include "exchange/orders/orderbook/composite_orderbook.hpp"
 #include "util/helpers/test_trader.hpp"
@@ -7,13 +7,13 @@
 
 #include <gtest/gtest.h>
 
-using nutc::common::Ticker;
-using nutc::common::Side::buy;
-using nutc::common::Side::sell;
+namespace nutc::test {
+using common::Ticker;
+using common::Side::buy;
+using common::Side::sell;
 
 class UnitMatchMarket : public ::testing::Test {
 protected:
-    using TestTrader = nutc::test::TestTrader;
     static constexpr nutc::common::decimal_quantity DEFAULT_QUANTITY = 1000.0;
 
     TestTrader trader1{"ABC", TEST_STARTING_CAPITAL};
@@ -141,3 +141,4 @@ TEST_F(UnitMatchMarket, VerifyMarketDoesNotMatchWithMarket)
     matches = add_to_engine_(order2);
     ASSERT_TRUE(matches.empty());
 }
+} // namespace nutc::test

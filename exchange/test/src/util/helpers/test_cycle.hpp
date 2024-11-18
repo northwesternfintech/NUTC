@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/types/decimal.hpp"
-#include "common/util.hpp"
 #include "exchange/matching_cycle/base/base_cycle.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "soft_equality.hpp"

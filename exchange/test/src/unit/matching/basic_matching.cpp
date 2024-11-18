@@ -1,5 +1,5 @@
 #include "common/types/decimal.hpp"
-#include "config.h"
+#include "config.hpp"
 #include "exchange/matching/engine.hpp"
 #include "exchange/orders/orderbook/composite_orderbook.hpp"
 #include "util/helpers/test_trader.hpp"
@@ -10,11 +10,11 @@
 using nutc::common::Ticker;
 using nutc::common::Side::buy;
 using nutc::common::Side::sell;
-using namespace nutc::test;
+
+namespace nutc::test {
 
 class UnitBasicMatching : public ::testing::Test {
 protected:
-    using TestTrader = nutc::test::TestTrader;
     static constexpr nutc::common::decimal_quantity DEFAULT_QUANTITY = 1000.0;
 
     TestTrader trader1{"ABC", TEST_STARTING_CAPITAL};
@@ -312,3 +312,4 @@ TEST_F(UnitBasicMatching, VerifyOrderbookAfterPartialMatch)
     auto sell_orders = orderbook_.get_top_order(sell);
     ASSERT_FALSE(sell_orders.has_value());
 }
+} // namespace nutc::test
