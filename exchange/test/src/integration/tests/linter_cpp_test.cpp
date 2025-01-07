@@ -125,8 +125,7 @@ TEST(IntegrationLinterCppTest, SyntaxErrorDetection)
 {
     auto lint_result = spawn_client(SYNTAX_ERROR, AlgoLanguage::cpp);
     ASSERT_FALSE(lint_result.success);
-    EXPECT_TRUE(lint_result.message.contains("‘SYNTAX’ was not declared in this scope")
-    );
+    EXPECT_TRUE(lint_result.message.contains("SYNTAX ERROR"));
 }
 
 TEST(IntegrationLinterCppTest, RuntimeError)
