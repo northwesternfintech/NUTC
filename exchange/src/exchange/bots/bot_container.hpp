@@ -25,12 +25,6 @@ public:
     ) : bots_(create_bots(trader_container, ticker, bots))
     {}
 
-    double
-    get_variance() const
-    {
-        return variance_calculator_.calculate_volatility();
-    }
-
 private:
     void generate_orders(const shared_bot_state& shared_state);
 
