@@ -116,10 +116,11 @@ TickerContainer::create_tickers(
     // this is really bad. fix soon
     std::unordered_map<std::size_t, TickerData> ticker_map;
     for (const auto& config : configs) {
+        auto bots = create_bot_containers(traders, config.TICKER, config.BOTS);
         ticker_map.emplace(
             std::piecewise_construct,
             std::forward_as_tuple(std::to_underlying(config.TICKER)),
-            std::forward_as_tuple(traders, config)
+            std::forward_as_tuple(config.TICKER, config.STARTING_PRICE, std::move(bots))
         );
     }
     for (std::size_t ticker = 0; ticker < common::TICKERS.size(); ticker++) {

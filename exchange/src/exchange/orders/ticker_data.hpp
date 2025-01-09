@@ -21,11 +21,15 @@ class TickerData {
     std::vector<BotContainer> bot_containers_;
 
 public:
-    explicit TickerData(TraderContainer& traders, const ticker_config& config) :
-        limit_orderbook_{config.TICKER}, theo_generator_{config.STARTING_PRICE},
-        bot_containers_{create_bot_containers(traders, config.TICKER, config.BOTS)}
+    explicit TickerData(
+        common::Ticker ticker, common::decimal_price starting_price,
+        std::vector<BotContainer> bots
+    ) :
+        limit_orderbook_{ticker}, theo_generator_{starting_price},
+        bot_containers_{std::move(bots)}
     {}
 
+    // TODO: check where this is used and if we can get rid of it
     explicit TickerData(common::Ticker ticker) : limit_orderbook_{ticker} {}
 
     CompositeOrderBook&
@@ -54,21 +58,6 @@ public:
     get_theo() const
     {
         return theo_generator_.get_magnitude();
-    }
-
-private:
-    static std::vector<BotContainer>
-    create_bot_containers(
-        TraderContainer& trader_container, common::Ticker ticker,
-        const std::vector<bot_config>& configs
-    )
-    {
-        std::vector<BotContainer> bot_containers;
-        bot_containers.reserve(configs.size());
-        for (const bot_config& bot_config : configs) {
-            bot_containers.emplace_back(ticker, trader_container, bot_config);
-        }
-        return bot_containers;
     }
 };
 
