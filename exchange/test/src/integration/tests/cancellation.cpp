@@ -1,5 +1,6 @@
 #include "common/types/messages/messages_wrapper_to_exchange.hpp"
 #include "common/util.hpp"
+#include "exchange/exchange_state.hpp"
 #include "util/helpers/test_cycle.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
@@ -15,13 +16,13 @@ protected:
     using Ticker = nutc::common::Ticker;
     using nutc::common::Side::buy;
     using nutc::common::Side::sell;
-    exchange::TraderContainer traders_;
+    exchange::exchange_state state_;
 };
 
 TEST_P(IntegrationBasicCancellation, CancelMessageHasSameIdAsOrder)
 {
-    start_wrappers(traders_, GetParam(), "cancel_limit_order");
-    TestMatchingCycle cycle{traders_};
+    start_wrappers(state_.traders, GetParam(), "cancel_limit_order");
+    TestMatchingCycle cycle{state_};
 
     auto order = cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
     cycle.wait_for_order(common::cancel_order{common::Ticker::ETH, order.order_id});
@@ -29,10 +30,10 @@ TEST_P(IntegrationBasicCancellation, CancelMessageHasSameIdAsOrder)
 
 TEST_P(IntegrationBasicCancellation, CancelMessagePreventsOrderFromExecuting)
 {
-    auto& trader1 = start_wrappers(traders_, GetParam(), "cancel_limit_order");
-    auto trader2 = traders_.add_trader<TestTrader>(0);
+    auto& trader1 = start_wrappers(state_.traders, GetParam(), "cancel_limit_order");
+    auto trader2 = state_.traders.add_trader<TestTrader>(0);
     trader2->get_portfolio().modify_holdings(Ticker::ETH, 100.0);
-    TestMatchingCycle cycle{traders_};
+    TestMatchingCycle cycle{state_};
 
     auto order = cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
     cycle.wait_for_order(common::cancel_order{common::Ticker::ETH, order.order_id});
@@ -47,10 +48,11 @@ TEST_P(IntegrationBasicCancellation, CancelMessagePreventsOrderFromExecuting)
 
 TEST_P(IntegrationBasicCancellation, OneOfTwoOrdersCancelledResultsInMatch)
 {
-    auto& trader1 = start_wrappers(traders_, GetParam(), "partial_cancel_limit_order");
-    auto trader2 = traders_.add_trader<TestTrader>(0);
+    auto& trader1 =
+        start_wrappers(state_.traders, GetParam(), "partial_cancel_limit_order");
+    auto trader2 = state_.traders.add_trader<TestTrader>(0);
     trader2->get_portfolio().modify_holdings(Ticker::ETH, 100.0);
-    TestMatchingCycle cycle{traders_};
+    TestMatchingCycle cycle{state_};
 
     auto order = cycle.wait_for_order(limit_order{Ticker::ETH, buy, 100.0, 10.0});
     // Assume non-cancelled order got through

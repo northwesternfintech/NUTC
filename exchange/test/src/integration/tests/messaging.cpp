@@ -1,4 +1,5 @@
 #include "common/util.hpp"
+#include "exchange/exchange_state.hpp"
 #include "util/helpers/test_cycle.hpp"
 #include "util/helpers/test_trader.hpp"
 #include "util/macros.hpp"
@@ -12,17 +13,17 @@ using namespace nutc::common;
 
 class IntegrationMessaging : public ::testing::TestWithParam<AlgoLanguage> {
 protected:
-    TraderContainer traders_;
+    exchange::exchange_state state_;
 };
 
 TEST_P(IntegrationMessaging, ConfirmGeneratedOrderIdIsNotSamePID)
 {
-    start_wrappers(traders_, GetParam(), "buy_tsla_at_100");
-    auto trader2 = traders_.add_trader<TestTrader>(0);
+    start_wrappers(state_.traders, GetParam(), "buy_tsla_at_100");
+    auto trader2 = state_.traders.add_trader<TestTrader>(0);
     trader2->get_portfolio().modify_holdings(Ticker::ETH, 1000.0); // NOLINT
     trader2->add_order(limit_order{Ticker::ETH, Side::sell, 100.0, 10.0});
 
-    TestMatchingCycle cycle{traders_};
+    TestMatchingCycle cycle{state_};
 
     auto order = cycle.wait_for_order(limit_order{Ticker::ETH, Side::buy, 100.0, 10.0});
 
@@ -35,13 +36,13 @@ TEST_P(
     IntegrationMessaging, ConfirmOrderTimestampIsNotOverwrittenByExchangeWhenReceived
 )
 {
-    start_wrappers(traders_, GetParam(), "buy_eth");
+    start_wrappers(state_.traders, GetParam(), "buy_eth");
 
     usleep(50000);
 
     auto start = get_time();
 
-    TestMatchingCycle cycle{traders_};
+    TestMatchingCycle cycle{state_};
 
     auto order = cycle.wait_for_order(limit_order{Ticker::ETH, Side::buy, 100.0, 10.0});
 

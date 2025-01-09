@@ -1,8 +1,8 @@
 #pragma once
 
+#include "exchange/exchange_state.hpp"
 #include "exchange/matching_cycle/base/base_cycle.hpp"
 #include "exchange/metrics/on_tick_metrics.hpp"
-#include "exchange/traders/trader_container.hpp"
 
 #include <prometheus/counter.h>
 #include <prometheus/gauge.h>
@@ -14,11 +14,9 @@ class DevMatchingCycle : public BaseMatchingCycle {
 
 public:
     DevMatchingCycle(
-        TickerContainer tickers, TraderContainer& traders,
-        common::decimal_price order_fee, common::decimal_quantity max_order_volume
-    ) :
-        BaseMatchingCycle(std::move(tickers), traders, order_fee, max_order_volume),
-        pusher(traders)
+        exchange_state& state, common::decimal_price order_fee,
+        common::decimal_quantity max_order_volume
+    ) : BaseMatchingCycle(state, order_fee, max_order_volume), pusher(state.traders)
     {}
 
 protected:

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "exchange/exchange_state.hpp"
 #include "exchange/matching_cycle/dev/dev_cycle.hpp"
 #include "exchange/sandbox_server/crow.hpp"
 #include "exchange/traders/trader_container.hpp"
@@ -13,9 +14,9 @@ class SandboxMatchingCycle : public DevMatchingCycle {
 
 public:
     SandboxMatchingCycle(
-        TickerContainer tickers, TraderContainer& traders,
-        common::decimal_price order_fee, common::decimal_quantity max_order_volume
-    ) : DevMatchingCycle(std::move(tickers), traders, order_fee, max_order_volume)
+        exchange_state& state, common::decimal_price order_fee,
+        common::decimal_quantity max_order_volume
+    ) : DevMatchingCycle(state, order_fee, max_order_volume)
     {}
 
 private:
