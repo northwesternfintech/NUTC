@@ -101,6 +101,7 @@ std::vector<TickerData>
 TickerContainer::create_tickers()
 {
     std::vector<TickerData> result;
+	result.reserve(common::TICKERS.size());
     for (std::size_t ticker = 0; ticker < common::TICKERS.size(); ticker++) {
         result.emplace_back(static_cast<common::Ticker>(ticker));
     }

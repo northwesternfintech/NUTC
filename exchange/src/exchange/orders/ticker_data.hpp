@@ -2,12 +2,8 @@
 #include "common/types/decimal.hpp"
 #include "common/types/ticker.hpp"
 #include "exchange/bots/bot_container.hpp"
-#include "exchange/config/dynamic/ticker_config.hpp"
 #include "exchange/orders/orderbook/composite_orderbook.hpp"
 #include "exchange/theo/brownian.hpp"
-#include "exchange/traders/trader_container.hpp"
-
-#include <absl/hash/hash.h>
 
 namespace nutc::exchange {
 

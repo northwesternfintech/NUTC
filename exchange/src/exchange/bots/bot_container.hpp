@@ -4,7 +4,6 @@
 #include "exchange/traders/trader_container.hpp"
 #include "exchange/traders/trader_types/bot_trader.hpp"
 #include "shared_bot_state.hpp"
-#include "variance.hpp"
 
 namespace nutc::exchange {
 
@@ -13,7 +12,6 @@ namespace nutc::exchange {
  */
 class BotContainer {
     using BotVector = std::vector<std::shared_ptr<BotTrader>>;
-    VarianceCalculator variance_calculator_;
 
     BotVector bots_{};
 
