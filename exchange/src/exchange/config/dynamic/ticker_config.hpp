@@ -7,7 +7,7 @@
 
 namespace nutc::exchange {
 
-enum class BotType { market_maker = 0, retail = 1 };
+enum class BotType : std::uint8_t { market_maker = 0, retail = 1 };
 
 struct bot_config {
     const BotType TYPE;

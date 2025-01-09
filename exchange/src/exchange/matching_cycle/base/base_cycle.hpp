@@ -1,6 +1,6 @@
 #pragma once
+#include "exchange/exchange_state.hpp"
 #include "exchange/matching_cycle/cycle_interface.hpp"
-#include "exchange/orders/ticker_container.hpp"
 #include "exchange/traders/trader_container.hpp"
 
 namespace nutc::exchange {
@@ -9,18 +9,16 @@ namespace nutc::exchange {
  * @brief Barebones matching cycle. Likely to be overridden for more logging
  */
 class BaseMatchingCycle : public MatchingCycleInterface {
-    TickerContainer tickers_;
-    TraderContainer& traders_;
+    exchange_state& state_;
     common::decimal_price order_fee_;
     common::decimal_quantity max_cumulative_order_volume_;
 
 public:
-    // Require transfer of ownership
     BaseMatchingCycle(
-        TickerContainer tickers, TraderContainer& traders,
-        common::decimal_price order_fee, common::decimal_quantity max_order_volume
+        exchange_state& state, common::decimal_price order_fee,
+        common::decimal_quantity max_order_volume
     ) :
-        tickers_(std::move(tickers)), traders_(traders), order_fee_(order_fee),
+        state_(state), order_fee_(order_fee),
         max_cumulative_order_volume_{max_order_volume}
     {}
 
@@ -28,13 +26,13 @@ protected:
     auto&
     get_tickers()
     {
-        return tickers_;
+        return state_.tickers;
     }
 
     TraderContainer&
     get_traders()
     {
-        return traders_;
+        return state_.traders;
     }
 
     void before_cycle_(uint64_t) override;

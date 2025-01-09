@@ -32,14 +32,14 @@
  */
 template <class T, class M>
 static inline constexpr ptrdiff_t
-offset_of_impl(const M T::*member)
+offset_of_impl(const M T::* member)
 {
     return reinterpret_cast<ptrdiff_t>(&(reinterpret_cast<T*>(0)->*member));
 }
 
 template <class T, class M>
 static inline constexpr T*
-container_of_impl(M* ptr, const M T::*member)
+container_of_impl(M* ptr, const M T::* member)
 {
     return reinterpret_cast<T*>(
         reinterpret_cast<intptr_t>(ptr) - offset_of_impl(member)

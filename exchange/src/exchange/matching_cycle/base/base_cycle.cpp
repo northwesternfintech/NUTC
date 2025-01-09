@@ -13,7 +13,7 @@ namespace nutc::exchange {
 void
 BaseMatchingCycle::before_cycle_(uint64_t)
 {
-    for (auto [symbol, ticker_data] : tickers_) {
+    for (auto [symbol, ticker_data] : state_.tickers) {
         ticker_data.generate_bot_orders();
     }
 }
@@ -47,7 +47,7 @@ BaseMatchingCycle::collect_orders(uint64_t) -> std::vector<OrderVariant>
         );
     };
 
-    std::for_each(traders_.begin(), traders_.end(), collect_orders);
+    std::for_each(state_.traders.begin(), state_.traders.end(), collect_orders);
 
     return orders;
 }
@@ -58,7 +58,7 @@ BaseMatchingCycle::match_orders_(std::vector<OrderVariant> orders)
     std::vector<tagged_match> matches;
 
     auto match_incoming_order = [&]<typename OrderT>(OrderT& order) {
-        auto& ticker_data = tickers_[order.ticker];
+        auto& ticker_data = state_.tickers[order.ticker];
         auto& orderbook = ticker_data.get_orderbook();
         if constexpr (std::is_same_v<OrderT, common::cancel_order>) {
             orderbook.remove_order(order.order_id);
@@ -88,7 +88,7 @@ BaseMatchingCycle::get_orderbook_updates_()
 {
     std::vector<common::position> ob_updates;
 
-    for (auto [symbol, info] : tickers_) {
+    for (auto [symbol, info] : state_.tickers) {
         auto tmp = info.get_orderbook().get_and_reset_updates();
         std::ranges::copy(tmp, std::back_inserter(ob_updates));
     }
@@ -146,7 +146,7 @@ BaseMatchingCycle::send_market_updates_(const std::vector<tagged_match>& matches
     }
 
     std::for_each(
-        traders_.begin(), traders_.end(),
+        state_.traders.begin(), state_.traders.end(),
         [&message = *update](GenericTrader& trader) { trader.send_message(message); }
     );
 }

@@ -70,6 +70,20 @@ private:
     static std::vector<TickerData> create_tickers();
     static std::vector<TickerData>
     create_tickers(const std::vector<ticker_config>& configs, TraderContainer& traders);
+
+    static std::vector<BotContainer>
+    create_bot_containers(
+        TraderContainer& trader_container, common::Ticker ticker,
+        const std::vector<bot_config>& configs
+    )
+    {
+        std::vector<BotContainer> bot_containers;
+        bot_containers.reserve(configs.size());
+        for (const bot_config& bot_config : configs) {
+            bot_containers.emplace_back(ticker, trader_container, bot_config);
+        }
+        return bot_containers;
+    }
 };
 
 } // namespace nutc::exchange
