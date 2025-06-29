@@ -4,7 +4,6 @@
 #include "exchange/traders/trader_container.hpp"
 #include "exchange/traders/trader_types/bot_trader.hpp"
 #include "shared_bot_state.hpp"
-#include "variance.hpp"
 
 namespace nutc::exchange {
 
@@ -13,7 +12,6 @@ namespace nutc::exchange {
  */
 class BotContainer {
     using BotVector = std::vector<std::shared_ptr<BotTrader>>;
-    VarianceCalculator variance_calculator_;
 
     BotVector bots_{};
 
@@ -24,12 +22,6 @@ public:
         common::Ticker ticker, TraderContainer& trader_container, bot_config bots
     ) : bots_(create_bots(trader_container, ticker, bots))
     {}
-
-    double
-    get_variance() const
-    {
-        return variance_calculator_.calculate_volatility();
-    }
 
 private:
     void generate_orders(const shared_bot_state& shared_state);

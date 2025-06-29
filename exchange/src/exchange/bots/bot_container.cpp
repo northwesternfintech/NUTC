@@ -3,6 +3,7 @@
 #include "common/types/decimal.hpp"
 #include "exchange/bots/bot_types/market_maker.hpp"
 #include "exchange/bots/bot_types/retail.hpp"
+#include "exchange/bots/shared_bot_state.hpp"
 #include "exchange/traders/trader_container.hpp"
 
 #include <cmath>
@@ -16,8 +17,6 @@ BotContainer::generate_orders(
     common::decimal_price midprice, common::decimal_price theo
 )
 {
-    variance_calculator_.record_price(midprice);
-
     common::decimal_price cumulative_interest_limit{};
     common::decimal_quantity cumulative_quantity_held{};
 
@@ -27,10 +26,12 @@ BotContainer::generate_orders(
             bot->get_portfolio().get_holdings(bot->get_ticker());
     }
 
-    return generate_orders(
-        {midprice, theo, variance_calculator_.calculate_volatility(),
-         cumulative_interest_limit, cumulative_quantity_held}
-    );
+    generate_orders(shared_bot_state{
+        .MIDPRICE = midprice,
+        .THEO = theo,
+        .CUMULATIVE_INTEREST_LIMIT = cumulative_interest_limit,
+        .CUMULATIVE_QUANTITY_HELD = cumulative_quantity_held
+    });
 }
 
 template <class BotType>
