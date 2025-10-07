@@ -19,7 +19,9 @@ match_orders_(
 {
     auto match_result = attempt_match_<AggressiveSide>(orders, order_fee);
     if (match_result.has_value()) [[likely]] {
-        orders.handle_match(*match_result, order_fee, orderbook);
+        auto [buyer_capital, seller_capital] = orders.handle_match(*match_result, order_fee, orderbook);
+        match_result->buyer_capital = buyer_capital;
+        match_result->seller_capital = seller_capital;
         return match_result.value();
     }
     if (match_result.error() == MatchFailure::seller_failure) {

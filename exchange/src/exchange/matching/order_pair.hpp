@@ -129,23 +129,28 @@ public:
         return std::min(buyer.quantity, seller.quantity);
     }
 
-    void
+    std::pair<common::decimal_price, common::decimal_price>
     handle_match(
         const common::match& match, common::decimal_price order_fee,
         CompositeOrderBook& orderbook
     )
     {
-        get_underlying_order<side::buy>().trader->get_portfolio().notify_match(
+        GenericTrader* buy_trader = get_underlying_order<side::buy>().trader;
+        GenericTrader* sell_trader = get_underlying_order<side::sell>().trader;
+
+        buy_trader->get_portfolio().notify_match(
             {match.position.ticker, common::Side::buy, match.position.quantity,
              match.position.price * (common::decimal_price{1.0} + order_fee)}
         );
-        get_underlying_order<side::sell>().trader->get_portfolio().notify_match(
+        sell_trader->get_portfolio().notify_match(
             {match.position.ticker, common::Side::sell, match.position.quantity,
              match.position.price * (common::decimal_price{1.0} - order_fee)}
         );
 
         change_order_quantity(seller, -match.position.quantity, orderbook);
         change_order_quantity(buyer, -match.position.quantity, orderbook);
+
+        return {buy_trader->get_portfolio().get_capital(), sell_trader->get_portfolio().get_capital()};
     }
 
 private:
