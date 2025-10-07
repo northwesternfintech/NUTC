@@ -66,9 +66,11 @@ async fn handle_algo_submission(
 
     let (algo_id, language) = data.into_inner();
 
+    tracing::info!("Searching S3 for algo with id: {}", algo_id);
+
     let s3_endpoint =
-        std::env::var("S3_ENDPOINT").expect("env variable `S3_ENDPOINT` should be set");
-    let algo_url = format!("{}/nutc/{}", s3_endpoint, algo_id);
+        std::env::var("PUBLIC_S3_ENDPOINT").expect("env variable `PUBLIC_S3_ENDPOINT` should be set");
+    let algo_url = format!("{}/{}", s3_endpoint, algo_id);
 
     let linter_url = format!(
         "{}/?algo_url={}&language={}",

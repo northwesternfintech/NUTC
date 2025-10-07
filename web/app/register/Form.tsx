@@ -123,8 +123,8 @@ export default function RegistrationForm(props: { user: any }) {
 
   // TODO: sanitize better
   const createNewUserHandler = async () => {
-    Swal.fire({ icon: 'info', title: 'Applications closed for Fall 2024.' });
-    return;
+    // Swal.fire({ icon: 'info', title: 'Applications closed for Fall 2024.' });
+    // return;
     if (!confirmEntriesAdded()) return;
 
     const response = await fetch("/api/protected/db/user/createUser", {

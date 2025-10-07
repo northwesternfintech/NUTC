@@ -12,5 +12,6 @@
 sleep 1
 aws --endpoint-url=http://localstack:4566 s3 mb s3://nutc
 sleep 1
-aws --endpoint-url=http://localstack:4566 s3api put-bucket-cors --bucket nutc --cors-configuration file:///home/cors.json
+aws --endpoint-url=http://localstack:4566 s3api put-bucket-cors --bucket nutc --cors-configuration file://$(pwd)/dev/cors.json
+# aws --endpoint-url=http://localstack:4566 s3api put-bucket-cors --bucket nutc --cors-configuration file:///home/cors.json
 

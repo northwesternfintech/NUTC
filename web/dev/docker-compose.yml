@@ -9,8 +9,58 @@ services:
     command: ["npm", "run", "dev"]
     ports:
       - "3000:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
-      - postgres
+      db-migrator:
+        condition: service_completed_successfully
+      s3-setup:
+        condition: service_completed_successfully
+
+  prisma-studio:
+    image: node:latest
+    working_dir: /app
+    volumes:
+      - ..:/app
+    command: ["npx", "prisma", "studio"]
+    ports:
+      - "5555:5555"
+    depends_on:
+      db-migrator:
+        condition: service_completed_successfully
+
+  db-migrator:
+    image: node:latest
+    working_dir: /app
+    volumes:
+      - ..:/app
+    env_file:
+      - ../.env
+    command: ["npx", "prisma", "migrate", "dev", "--name", "init"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  s3-setup:
+    image: amazon/aws-cli:latest
+    volumes:
+      - ..:/aws/
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+    depends_on:
+      localstack:
+        condition: service_healthy 
+    entrypoint: ""
+    command: >
+      sh -c "
+        echo 'Localstack is healthy, creating S3 bucket...'
+        aws --endpoint-url=http://localstack:4566 s3 mb s3://nutc
+        echo 'Applying CORS policy...'
+        aws --endpoint-url=http://localstack:4566 s3api put-bucket-cors --bucket nutc --cors-configuration file:///aws/dev/cors.json
+        echo 'S3 setup complete!'
+      "
 
   localstack:
     image: localstack/localstack
@@ -26,7 +76,12 @@ services:
       - AWS_SECRET_ACCESS_KEY=test
       - S3_FORCE_PATH_STYLE=true
     volumes:
-     - localstack:/var/lib/localstack
+      - localstack:/var/lib/localstack
+    healthcheck:
+      test: ["CMD", "awslocal", "s3", "ls"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
 
   postgres:
     image: postgres:13
@@ -39,17 +94,11 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
-  prisma-studio:
-    image: node:latest
-    working_dir: /app
-    volumes:
-      - ..:/app
-    command: ["npx", "prisma", "studio"]
-    ports:
-      - "5555:5555"  # You can customize this port if needed
-    depends_on:
-      - postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d nutc"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 volumes:
   postgres_data:

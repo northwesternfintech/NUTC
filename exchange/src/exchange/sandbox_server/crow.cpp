@@ -6,6 +6,7 @@
 #include "exchange/config/dynamic/config.hpp"
 #include "exchange/config/static/config.hpp"
 #include "exchange/traders/trader_types/algo_trader.hpp"
+#include <iostream>
 
 #include <boost/filesystem/operations.hpp>
 #include <crow/common.h>
@@ -85,11 +86,12 @@ CrowServer::add_pending_trader_(
     const std::string& algorithm_data, const std::string& logfile_url
 )
 {
+    std::cout << "Adding trader to the sandbox: \n" << algorithm_data << '\n';
     static const auto STARTING_CAPITAL = Config::get().constants().STARTING_CAPITAL;
 
     auto trader = std::make_shared<AlgoTrader>(
         common::RemoteAlgorithm{language, algo_id, algorithm_data, "SANDBOX"},
-        STARTING_CAPITAL
+        STARTING_CAPITAL, algo_id
     );
 
     trader_lock.lock();

@@ -10,7 +10,6 @@
 namespace nutc::exchange {
 
 class AlgoTrader : public GenericTrader {
-    const std::string DISPLAY_NAME;
     std::optional<WrapperHandle> wrapper_handle_;
 
 public:
@@ -19,7 +18,6 @@ public:
         std::string name = ""
     ) :
         GenericTrader(common::get_id(algo_variant), capital, std::move(name)),
-        DISPLAY_NAME(common::get_id(algo_variant)),
         wrapper_handle_(std::make_optional<WrapperHandle>(algo_variant))
     {}
 

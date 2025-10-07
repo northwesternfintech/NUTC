@@ -306,7 +306,6 @@ target_link_libraries(LINTER_spawner_exe PRIVATE Python3::Python)
 # ---- COMMON ----------
 
 add_library(COMMON_lib OBJECT     
-    src/common/firebase/firebase.cpp
     src/common/file_operations/file_operations.cpp
     src/common/util.cpp
     src/common/types/decimal.cpp

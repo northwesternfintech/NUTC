@@ -13,15 +13,26 @@ services:
     restart: unless-stopped
     environment:
       - NUTC_EXPOSE_METRICS=1
+      - NUTC_ID=0
     command: ["--sandbox"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
     #port: 16124
   webserver:
     image: nutc-webserver
+    ports:
+      - "16124:16124"
     build:
       context: ../..
       dockerfile: webserver/Dockerfile
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    links:
+      - sandbox
+    depends_on:
+      - sandbox
 
   linter:
     image: nutc-linter
@@ -31,12 +42,18 @@ services:
       dockerfile: exchange/docker/linter/Dockerfile
       args:
         firebase_emulator: "false"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   # Exposed on port 9000
   prometheus:
     image: prom/prometheus
     volumes:
       - ../../exchange/docker/sandbox/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+      - "9000:9000"
+      - "9091:9091"
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.retention.time=12h'
@@ -58,7 +75,7 @@ services:
     restart: unless-stopped
     user: "${UID}:${GID}"
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
     - GF_SECURITY_ALLOW_EMBEDDING=true
     - GF_AUTH_ANONYMOUS_ENABLED=true

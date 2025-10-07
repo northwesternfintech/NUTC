@@ -6,6 +6,7 @@
 #include "exchange/traders/portfolio/trader_portfolio.hpp"
 #include "exchange/traders/trader_container.hpp"
 #include "prometheus.hpp"
+#include <iostream>
 
 #include <algorithm>
 

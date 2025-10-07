@@ -19,11 +19,15 @@
 #define LOG_BACKUP_COUNT 5
 
 #ifdef NUTC_LOCAL_DEV
-#  define S3_URL        "http://localhost:4566"
-#  define WEBSERVER_URL "http://localhost:16124"
+// #  define S3_URL        "http://localhost:4566"
+// #  define WEBSERVER_URL "http://localhost:16124"
+#  define S3_URL        "https://5ae8160d6aff40cf276784df536e6dfc.r2.cloudflarestorage.com"
+#  define WEBSERVER_URL "http://webserver:16124"
 #else
-#  define S3_URL        "https://nutc.s3.us-east-2.amazonaws.com"
-#  define WEBSERVER_URL "http://localhost:16124"
+#  define S3_URL        "https://5ae8160d6aff40cf276784df536e6dfc.r2.cloudflarestorage.com"
+#  define WEBSERVER_URL "http://webserver:16124"
+// #  define S3_URL        "https://nutc.s3.us-east-2.amazonaws.com"
+// #  define WEBSERVER_URL "http://localhost:16124"
 #endif
 
 #define S3_BUCKET "nutc"

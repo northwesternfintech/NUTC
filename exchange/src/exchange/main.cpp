@@ -61,7 +61,9 @@ main_event_loop(std::unique_ptr<MatchingCycleInterface> cycle)
 int
 main(int argc, const char** argv)
 {
+    std::cout << "made it here1\n";
     int env = std::stoi(std::getenv("NUTC_ID"));
+    std::cout << "made it her2\n";
     nutc::wrapper::set_cpu_affinity(env / 2);
     nutc::logging::init("exchange.log", quill::LogLevel::Info);
     std::signal(SIGINT, [](auto) { std::exit(0); });
@@ -70,6 +72,7 @@ main(int argc, const char** argv)
     auto mode = process_arguments(argc, argv);
     TraderContainer traders{};
     AlgoInitializer::get_algo_initializer(mode)->initialize_algo_management(traders);
+    std::cout << "made it her3\n";
 
     main_event_loop(create_cycle(traders, mode));
 
