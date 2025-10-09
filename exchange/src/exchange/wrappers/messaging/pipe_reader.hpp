@@ -13,6 +13,7 @@ namespace ba = boost::asio;
 class PipeReader {
     std::mutex message_lock_;
     std::vector<common::IncomingMessageVariant> shared;
+    std::vector<std::string> shared_logs;
     std::shared_ptr<ba::io_context> pipe_context_;
     bp::async_pipe pipe_in_;
 
@@ -56,6 +57,15 @@ public:
         std::lock_guard<std::mutex> lock{message_lock_};
         std::vector<common::IncomingMessageVariant> result;
         result.swap(shared);
+        return result;
+    }
+
+    std::vector<std::string>
+    get_logs()
+    {
+        std::lock_guard<std::mutex> lock{message_lock_};
+        std::vector<std::string> result;
+        result.swap(shared_logs);
         return result;
     }
 };

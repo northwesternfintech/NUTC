@@ -18,6 +18,7 @@ using MarketOrderFunction =
     std::function<bool(common::Side side, common::Ticker ticker, float quantity)>;
 using CancelOrderFunction =
     std::function<bool(common::Ticker ticker, order_id_t order_id)>;
+using LogFunction = std::function<void(const std::string& message)>;
 
 class ExchangeCommunicator {
     RateLimiter limiter_{};
@@ -50,6 +51,7 @@ public:
         return true;
     }
 
+    LogFunction send_log_message();
     LimitOrderFunction place_limit_order();
     MarketOrderFunction place_market_order();
     CancelOrderFunction cancel_order();

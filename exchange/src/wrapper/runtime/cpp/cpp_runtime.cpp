@@ -71,7 +71,7 @@ CppRuntime::CppRuntime(
     }
     strategy_object_ = init_func(
         communicator_.place_market_order(), communicator_.place_limit_order(),
-        communicator_.cancel_order(), log_text
+        communicator_.cancel_order(), communicator_.send_log_message()
     );
 }
 

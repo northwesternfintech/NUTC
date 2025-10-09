@@ -15,6 +15,10 @@ struct init_message {
     std::string_view name = "init_message";
 };
 
+struct log_message {
+    std::string message;
+};
+
 struct cancel_order {
     Ticker ticker;
     order_id_t order_id;
@@ -115,4 +119,10 @@ template <>
 struct glz::meta<nutc::common::init_message> {
     using t = nutc::common::init_message;
     static constexpr auto value = object(&t::name);
+};
+
+template <>
+struct glz::meta<nutc::common::log_message> {
+    using t = nutc::common::log_message;
+    static constexpr auto value = object("log_message", &t::message);
 };

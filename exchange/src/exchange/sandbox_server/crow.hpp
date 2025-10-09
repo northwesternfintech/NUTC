@@ -25,6 +25,13 @@ class CrowServer {
     mutable std::mutex trader_lock;
     std::vector<std::shared_ptr<AlgoTrader>> traders_to_add;
 
+    std::mutex log_ws_mutex;
+    std::unordered_map<std::string, crow::websocket::connection*>
+        log_connection_by_algo_id;
+    std::unordered_map<crow::websocket::connection*, std::string>
+        algo_id_by_log_connection;
+    std::vector<std::string> unmapped_algo_ids;
+
 public:
     std::vector<std::shared_ptr<AlgoTrader>>
     get_and_clear_pending_traders()
@@ -35,6 +42,10 @@ public:
         traders_to_add.clear();
         return pending_traders;
     }
+
+    bool is_receiving_logs(const std::string& algo_id);
+
+    void send_log(const std::string& algo_id, const std::string& log_message);
 
     explicit CrowServer(std::uint16_t port);
 

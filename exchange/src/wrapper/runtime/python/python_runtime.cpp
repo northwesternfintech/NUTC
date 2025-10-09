@@ -65,7 +65,7 @@ PyRuntime::fire_on_account_update(
 void
 PyRuntime::create_api_module(
     LimitOrderFunction publish_limit_order, MarketOrderFunction publish_market_order,
-    CancelOrderFunction cancel_order
+    CancelOrderFunction cancel_order, LogFunction send_log_message
 )
 {
     py::module_ sys = py::module_::import("sys");
@@ -97,7 +97,7 @@ PyRuntime::create_api_module(
     module.def("publish_market_order", publish_market_order);
     module.def("publish_limit_order", publish_limit_order);
     module.def("cancel_order", cancel_order);
-    module.def("print", log_text);
+    module.def("print", send_log_message);
 
     auto sys_modules = sys.attr("modules").cast<py::dict>();
     sys_modules["nutc_api"] = module;

@@ -32,7 +32,10 @@ PipeReader::PipeReader() :
 void
 PipeReader::store_message_(const std::string& message)
 {
-    common::IncomingMessageVariant data;
+    std::variant<
+        common::init_message, common::cancel_order, common::limit_order,
+        common::market_order, common::log_message>
+        data;
     auto err = glz::read_json(data, message);
 
     // TODO: handle better
@@ -45,7 +48,19 @@ PipeReader::store_message_(const std::string& message)
     }
 
     std::lock_guard<std::mutex> lock{message_lock_};
-    shared.push_back(data);
+    std::visit(
+        [&](auto&& msg) {
+            using T = std::decay_t<decltype(msg)>;
+
+            if constexpr (std::is_same_v<T, common::log_message>) {
+                shared_logs.push_back(std::move(msg.message));
+            }
+            else {
+                shared.push_back(msg);
+            }
+        },
+        data
+    );
 }
 
 void

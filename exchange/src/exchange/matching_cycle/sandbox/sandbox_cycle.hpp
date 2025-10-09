@@ -28,7 +28,35 @@ private:
             get_traders().add_trader(trader);
         });
 
+        dispatch_logs_();
+
         DevMatchingCycle::before_cycle_(tick);
+    }
+
+    void
+    dispatch_logs_()
+    {
+        auto& traders = get_traders();
+
+        std::for_each(traders.begin(), traders.end(), [this](GenericTrader& trader) {
+            auto* algo_trader = dynamic_cast<AlgoTrader*>(&trader);
+            if (!algo_trader
+                || !http_server_.is_receiving_logs(algo_trader->get_id())) {
+                return;
+            }
+
+            auto logs = algo_trader->read_logs();
+            if (logs.empty()) {
+                return;
+            }
+
+            // all this log stuff is pretty bad
+            // one(of many) issue is that we are constantly acquiring and unacquiring a
+            // lock here...
+            for (const auto& log : logs) {
+                http_server_.send_log(algo_trader->get_id(), log);
+            }
+        });
     }
 };
 } // namespace nutc::exchange

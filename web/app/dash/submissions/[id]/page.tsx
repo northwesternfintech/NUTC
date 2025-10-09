@@ -5,6 +5,7 @@ import { ArrowDownTrayIcon } from "@heroicons/react/16/solid";
 import { notFound, redirect } from "next/navigation";
 import React from "react";
 import { AlgoGraphs } from "./graphs";
+import LogViewer from "./log-viewer";
 
 export default async function SubmissionPage(props: {
   params: { id: string };
@@ -61,6 +62,7 @@ export default async function SubmissionPage(props: {
         </a>
 
         <AlgoGraphs
+          id={props.params.id}
           algo={algo}
           userId={session.user.sub}
           // This is a crazy hack to let us have the "internal" s3 endpoint that is within the docker

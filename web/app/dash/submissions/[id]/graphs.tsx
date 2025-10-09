@@ -3,15 +3,19 @@
 import { ArrowDownTrayIcon } from "@heroicons/react/16/solid";
 import { Algo, AlgoFile } from "@prisma/client";
 import React, { useEffect, useState } from "react";
+import LogViewer from "./log-viewer";
+import { propagateServerField } from "next/dist/server/lib/render-server";
 
 export function AlgoGraphs({
   algo,
   userId,
   s3Endpoint,
+  id
 }: {
   algo: Algo & { algoFile: AlgoFile };
   userId: string;
   s3Endpoint: string;
+  id: string
 }) {
   const [showLogs, setShowLogs] = useState(false);
   const upTime = new Date(algo?.algoFile?.createdAt).getTime() + 1000;
@@ -43,7 +47,7 @@ export function AlgoGraphs({
           Download Logs
           <ArrowDownTrayIcon className="-mr-0.5 h-5 w-5" aria-hidden="true" />
         </a>
-      ) : null}
+      ) : <LogViewer id={id}/>}
 
       <div className="my-8">
         <h2 className="text-xl font-semibold mb-2">Profit and Loss</h2>

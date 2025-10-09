@@ -19,7 +19,7 @@ public:
     {
         create_api_module(
             communicator_.place_limit_order(), communicator_.place_market_order(),
-            communicator_.cancel_order()
+            communicator_.cancel_order(), communicator_.send_log_message()
         );
         run_initialization_code(algo_);
     }
@@ -42,7 +42,8 @@ private:
 
     static void create_api_module(
         LimitOrderFunction publish_limit_order,
-        MarketOrderFunction publish_market_order, CancelOrderFunction cancel_order
+        MarketOrderFunction publish_market_order, CancelOrderFunction cancel_order,
+        LogFunction send_log_message
     );
     static void run_initialization_code(const std::string& py_code);
 };

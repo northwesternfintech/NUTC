@@ -6,11 +6,13 @@
 #include "exchange/config/dynamic/config.hpp"
 #include "exchange/config/static/config.hpp"
 #include "exchange/traders/trader_types/algo_trader.hpp"
-#include <iostream>
 
 #include <boost/filesystem/operations.hpp>
 #include <crow/common.h>
+#include <crow/websocket.h>
 #include <unistd.h>
+
+#include <iostream>
 
 namespace nutc::exchange {
 
@@ -77,6 +79,48 @@ CrowServer::CrowServer(std::uint16_t port) :
                 }
             }
         );
+
+    CROW_WEBSOCKET_ROUTE(app, "/ws")
+        .onaccept([&](const crow::request& conn, void** data) {
+            const char* algo_id_param = conn.url_params.get("algo_id");
+            if (algo_id_param == nullptr) {
+                return false;
+            }
+            std::string algo_id{algo_id_param};
+
+            std::lock_guard<std::mutex> lock{log_ws_mutex};
+            unmapped_algo_ids.push_back(algo_id);
+            *data = &unmapped_algo_ids.back();
+
+            return true;
+        })
+        .onclose([&](crow::websocket::connection& conn, const std::string&) {
+            std::lock_guard<std::mutex> lock(log_ws_mutex);
+
+            auto it = algo_id_by_log_connection.find(&conn);
+            if (it != algo_id_by_log_connection.end()) {
+                const std::string& algo_id = it->second;
+                log_connection_by_algo_id.erase(algo_id);
+                algo_id_by_log_connection.erase(it);
+            }
+        })
+        .onmessage([&](crow::websocket::connection& conn, const std::string& m, bool) {
+            void* user_data = conn.userdata();
+            auto algo_id = *static_cast<std::string*>(user_data);
+
+            log_i(
+                sandbox_server, "Received log websocket connection from algo_id {}",
+                algo_id
+            );
+
+            std::lock_guard<std::mutex> lock{log_ws_mutex};
+            algo_id_by_log_connection[&conn] = algo_id;
+            log_connection_by_algo_id[algo_id] = &conn;
+            std::ranges::remove_if(unmapped_algo_ids, [&](const std::string& id) {
+                return id == algo_id;
+            });
+        });
+
     server_thread = std::thread([this, port] { app.signal_clear().port(port).run(); });
 }
 
@@ -110,6 +154,23 @@ CrowServer::add_pending_trader_(
 
     static auto start_message = get_start_message();
     trader->send_message(start_message);
+}
+
+bool
+CrowServer::is_receiving_logs(const std::string& algo_id)
+{
+    return log_connection_by_algo_id.contains(algo_id);
+}
+
+void
+CrowServer::send_log(const std::string& algo_id, const std::string& log_message)
+{
+    std::lock_guard<std::mutex> lock{log_ws_mutex};
+
+    auto it = log_connection_by_algo_id.find(algo_id);
+    if (it != log_connection_by_algo_id.end()) {
+        it->second->send_text(log_message);
+    }
 }
 
 CrowServer::~CrowServer()

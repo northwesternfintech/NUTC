@@ -32,6 +32,12 @@ public:
         return reader_.get_shared();
     }
 
+    std::vector<std::string>
+    read_logs()
+    {
+        return reader_.get_logs();
+    }
+
     void
     send_message(const std::string& message)
     {

@@ -55,6 +55,15 @@ public:
 
         return wrapper_handle_->read_shared();
     }
+
+    std::vector<std::string>
+    read_logs()
+    {
+        if (!wrapper_handle_.has_value()) [[unlikely]]
+            return {};
+
+        return wrapper_handle_->read_logs();
+    }
 };
 
 } // namespace nutc::exchange

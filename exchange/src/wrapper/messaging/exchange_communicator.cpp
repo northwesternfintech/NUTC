@@ -1,5 +1,6 @@
 #include "exchange_communicator.hpp"
 
+#include "common/logging/logging.hpp"
 #include "common/messages_exchange_to_wrapper.hpp"
 #include "common/messages_wrapper_to_exchange.hpp"
 #include "common/util.hpp"
@@ -61,6 +62,16 @@ ExchangeCommunicator::consume_message()
     return data;
 }
 
+LogFunction
+ExchangeCommunicator::send_log_message()
+{
+    return [this](const std::string& message) {
+        log_i(algo_print, "{}", message);
+        log_message msg{std::move(message)};
+        (void)publish_message(msg);
+    };
+}
+
 LimitOrderFunction
 ExchangeCommunicator::place_limit_order()
 {
@@ -68,7 +79,8 @@ ExchangeCommunicator::place_limit_order()
                common::Side side, common::Ticker ticker, double quantity, double price,
                bool ioc
            ) -> order_id_t {
-        limit_order order{ticker, side, quantity, price, ioc, get_time(), generate_order_id()};
+        limit_order order{ticker, side,       quantity,           price,
+                          ioc,    get_time(), generate_order_id()};
         if (!publish_message(order))
             return -1;
         return order.order_id;
@@ -88,7 +100,9 @@ CancelOrderFunction
 ExchangeCommunicator::cancel_order()
 {
     return [this](common::Ticker ticker, order_id_t order_id) -> bool {
-        return publish_message(common::cancel_order{ticker, order_id, common::get_time()});
+        return publish_message(
+            common::cancel_order{ticker, order_id, common::get_time()}
+        );
     };
 }
 

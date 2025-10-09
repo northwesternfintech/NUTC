@@ -11,6 +11,8 @@ services:
       args:
         firebase_emulator: "false"
     restart: unless-stopped
+    ports:
+      - "18080:18080"
     environment:
       - NUTC_EXPOSE_METRICS=1
       - NUTC_ID=0

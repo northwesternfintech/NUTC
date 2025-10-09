@@ -1,10 +1,9 @@
 #pragma once
 
+#include "wrapper/messaging/exchange_communicator.hpp"
 #include "wrapper/runtime/runtime.hpp"
 
 namespace nutc::wrapper {
-using PrintLn = std::function<void(const std::string&)>;
-
 class CppRuntime : public Runtime {
 public:
     CppRuntime(
@@ -29,7 +28,7 @@ private:
 
     using Strategy = void;
     using InitFunc = Strategy* (*)(MarketOrderFunction, LimitOrderFunction,
-                                   CancelOrderFunction, PrintLn);
+                                   CancelOrderFunction, LogFunction);
     using on_trade_update_func = void (*)(Strategy*, Ticker, Side, float, float);
     using on_orderbook_update_func = void (*)(Strategy*, Ticker, Side, float, float);
     using on_account_update_func =
