@@ -96,7 +96,7 @@ spawn_client(
                 res.message += fmt::format(
                     "[linter] FAILED to lint algo\n\nYour code did not execute within "
                     "{} seconds. Check for infinite loops or recursion. If the issue "
-                    "persists, reach out on Piazza.\n",
+                    "persists, reach out on Discord.\n",
                     timeout.count()
                 );
             }

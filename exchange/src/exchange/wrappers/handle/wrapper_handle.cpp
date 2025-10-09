@@ -81,7 +81,14 @@ WrapperHandle::create_arguments(const common::algorithm_variant& algo_variant)
         args.emplace_back("--python_algo");
     }
     args.emplace_back("--core_num");
-    static int id = std::stoi(std::getenv("NUTC_ID"));
+    static int id = [] {
+        const char* id = std::getenv("NUTC_ID");
+        if (id == nullptr) {
+            return 0;
+        }
+
+        return std::stoi(id);
+    }();
     if (id <= 1) {
         static int num = 32;
         args.emplace_back(std::to_string(--num));

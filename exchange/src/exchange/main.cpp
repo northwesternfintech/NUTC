@@ -62,9 +62,16 @@ int
 main(int argc, const char** argv)
 {
     std::cout << "made it here1\n";
-    int env = std::stoi(std::getenv("NUTC_ID"));
+    const int nutc_id = [] {
+        const char* id = std::getenv("NUTC_ID");
+        if (id == nullptr) {
+            return 0;
+        }
+
+        return std::stoi(id);
+    }();
     std::cout << "made it her2\n";
-    nutc::wrapper::set_cpu_affinity(env / 2);
+    nutc::wrapper::set_cpu_affinity(nutc_id / 2);
     nutc::logging::init("exchange.log", quill::LogLevel::Info);
     std::signal(SIGINT, [](auto) { std::exit(0); });
     std::signal(SIGPIPE, SIG_IGN);
