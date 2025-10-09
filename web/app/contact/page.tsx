@@ -89,7 +89,6 @@ export default function Contact() {
                 Get in touch
               </h2>
               <p className="mt-6 text-lg leading-8 text-gray-300">
-                We&apos;re currently accepting new sponsors for NUTC Fall 2024.
                 If you&apos;re interested in sponsoring the event, or if you
                 have any questions, please fill out the form below and
                 we&apos;ll get back to you as soon as possible.

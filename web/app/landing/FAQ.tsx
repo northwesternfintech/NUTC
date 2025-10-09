@@ -20,19 +20,19 @@ const faqs = [
   {
     id: 4,
     question: "Are teams allowed?",
-    answer: "Yes, we require teams of 2-4 during application.",
+    answer: "Yes, we allow teams of up to 2 during application.",
   },
   {
     id: 5,
     question: "When and where is the competition?",
     answer:
-      "The competition will be on October 19th in the Northwestern Technological Institute.",
+      "The competition will be on October 18th in the Northwestern Ford Design Center.",
   },
   {
     id: 6,
     question: "What resources are provided to participants?",
     answer:
-      "Participants are given access to market/case information, historical data, and an online backtester.",
+      "Participants are given access to market/case information and an online backtester.",
   },
 ];
 

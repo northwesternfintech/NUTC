@@ -9,6 +9,10 @@ const faqs = [
       "NUTC is a competition to design a trading algorithm that maximizes a metric, usually PnL (net profit and loss) against other algorithms in the competition. In other words, you want your algorithm to buy and sell securities in a way that maximizes the amount of money you end up with.",
   },
   {
+    question: "How do teams work?",
+    answer: "Go to the partner settings tab to enter a team name. If 2 people enter the same team name, they are on the same team. The last submitted algorithm from any person on your team will be the one to compete in that case."
+  },
+  {
     question: "How can I get started?",
     answer:
       "Download the template, read the instructions carefully, and modify the Strategy class. Feel free to add new functions to the class, but DO NOT change the signatures of the provided functions.",
@@ -16,7 +20,7 @@ const faqs = [
   {
     question: "What are the functions in the algorithm template?",
     answer:
-      "There are four main functions that allow you to interact with the exchange. place_market_order allows you to place orders for the exchange at a given price/quantity, and you can call this in any function (including __init__). on_orderbook_update is called when a new order is placed by another algorithm (BUY or SELL). on_trade_update is called when two orders match (one BUY, one SELL). This could be your order or two other orders. on_account_update is called when one of *your* orders matches with another order. Together, all of these functions are sufficient for you to maintain a complete copy of the local orderbook - this is highly recommended.",
+      "There are five main functions that allow you to interact with the exchange. place_market_order and place_limit_order allow you to place orders, and you can call these in any function (including __init__). on_orderbook_update is called when a new order is placed by another algorithm (BUY or SELL). on_trade_update is called when two orders match (one BUY, one SELL). This could be your order or two other orders. on_account_update is called when one of *your* orders matches with another order. Together, all of these functions are sufficient for you to maintain a complete copy of the local orderbook - this is highly recommended.",
   },
   {
     question: "What does a zero-quantity order mean?",
@@ -26,7 +30,7 @@ const faqs = [
   {
     question: "How does place_market_order work?",
     answer:
-      "You can place an order (BUY or SELL) at a given price/quantity for a given stock ticker. Importantly, it returns True if the order was placed, or False if it was not placed (due to you placing more than 30 orders in a minute). You may want to handle the case where you aren't able to place an order due to the rate limit.",
+      "You can place an order (BUY or SELL) at a given price/quantity for a given stock ticker. Importantly, it returns True if the order was placed, or False if it was not placed (due to you exceeding the rate limit). You may want to handle the case where you aren't able to place an order due to the rate limit.",
   },
   { question: "How much starting capital do I have?", answer: "100,000" },
   {
@@ -56,7 +60,7 @@ const faqs = [
   },
   {
     question: "When is the deadline to submit algorithms?",
-    answer: "11:59pm on 5/3.",
+    answer: "11:59pm on 10/17.",
   },
   {
     question: "How are algorithms evaluated?",
@@ -70,7 +74,7 @@ const faqs = [
   },
   {
     question: "What if I have other questions or have issues with the website?",
-    answer: "Please reach out in the piazza",
+    answer: "Please reach out in the Discord",
   },
 ];
 

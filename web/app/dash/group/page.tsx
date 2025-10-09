@@ -51,7 +51,7 @@ export default function Groups() {
               </h1>
               <div className="mt-2">
                 <p className="text-base text-gray-500">
-                  To form a team, create a team name and have your teammates enter the same on their computers.
+                  To form a team, create a team name and have your teammate enter the same on their computer.
                 </p>
               </div>
             </div>

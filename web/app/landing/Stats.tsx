@@ -1,7 +1,7 @@
 const stats = [
-  { id: 1, name: "Participants", value: "65+" },
+  { id: 1, name: "Participants", value: "100+" },
   { id: 2, name: "Cash Prizes", value: "$5,000+" },
-  { id: 3, name: "Cases", value: "4+" },
+  { id: 3, name: "Cases", value: "3+" },
 ];
 
 export default function Stats() {

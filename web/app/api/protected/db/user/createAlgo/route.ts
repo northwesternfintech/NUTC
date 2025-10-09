@@ -57,7 +57,10 @@ export async function POST(req: Request) {
       },
     );
     if (!submission_response.ok) {
+      const text = await submission_response.text();
+      console.error(text);
       console.log("Failed to lint/sandbox");
+      return NextResponse.json({ message: text }, { status: 500 });
     }
     const { success, message } = await submission_response.json();
     console.log("Success state: " + success);

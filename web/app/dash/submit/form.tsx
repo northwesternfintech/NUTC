@@ -111,7 +111,7 @@ export default function SubmissionForm(props: { user: any }) {
       Swal.fire({
         title: "Error",
         icon: "error",
-        text: "Server error. Please contact the nuft team in the piazza",
+        text: "Server error. Please contact the nuft team in the discord",
       });
       return;
     }
