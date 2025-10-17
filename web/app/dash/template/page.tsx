@@ -2,42 +2,66 @@ import { ArrowDownOnSquareIcon } from "@heroicons/react/20/solid";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import dark from "react-syntax-highlighter/dist/esm/styles/prism/coldark-dark";
 
-const pythonCodeString = `def place_market_order(side: str, ticker: str, quantity: float, price: float) -> bool:
- """Place a market order - DO NOT MODIFY"""
+const pythonCodeString = `from enum import Enum
+class Side(Enum):
+    BUY = 0
+    SELL = 1
 
+class Ticker(Enum):
+    ETH = 0
+    BTC = 1
+    LTC = 2
+
+def place_market_order(side: Side, ticker: Ticker, quantity: float) -> bool:
+    return True
+
+def place_limit_order(side: Side, ticker: Ticker, quantity: float, price: float, ioc: bool = False) -> int:
+    return 0
+
+def cancel_order(ticker: Ticker, order_id: int) -> bool:
+    return True
+
+# You can use print() and view the logs after sandbox run has completed
 class Strategy:
- """Template for a strategy."""
-
- def __init__(self) -> None:
- """Your initialization code goes here."""
-
- def on_trade_update(self, ticker: str, side: str, price: float, quantity: float) -> None:
- print(f"Python Trade update: {ticker} {side} {price} {quantity}")
-
- def on_orderbook_update(self, ticker: str, side: str, price: float, quantity: float) -> None:
- print(f"Python Orderbook update: {ticker} {side} {price} {quantity}")
-
- def on_account_update(self, ticker: str, side: str, price: float, quantity: float, capital_remaining: float) -> None:
- print(f"Python Account update: {ticker} {side} {price} {quantity} {capital_remaining}")
+    def __init__(self) -> None:
+        pass
+    def on_trade_update(self, ticker: Ticker, side: Side, quantity: float, price: float) -> None:
+        pass
+    def on_orderbook_update(
+        self, ticker: Ticker, side: Side, quantity: float, price: float
+    ) -> None:
+        pass
+    def on_account_update(
+        self,
+        ticker: Ticker,
+        side: Side,
+        price: float,
+        quantity: float,
+        capital_remaining: float,
+    ) -> None:
+      pass
 `;
 
-const cppCodeString = `// Place a market order - DO NOT MODIFY
-bool place_market_order(std::string const& side, std::string const& ticker, double quantity);
+const cppCodeString = `#include <cstdint>
+#include <string>
+enum class Side { buy = 0, sell = 1 };
+enum class Ticker : std::uint8_t { ETH = 0, BTC = 1, LTC = 2 };
+bool place_market_order(Side side, Ticker ticker, float quantity);
+std::int64_t place_limit_order(Side side, Ticker ticker, float quantity,
+                               float price, bool ioc = false);
 
-// Template for a strategy
+bool cancel_order(Ticker ticker, std::int64_t order_id);
+void println(const std::string &text);
+
 class Strategy {
 public:
-  Strategy() { // Your initialization code goes here }
-
-  // Called whenever two orders match. Could be one of your orders, or two other people's orders.
-  void on_trade_update(std::string ticker, std::string side, double quantity, double price) { }
-
-  // Called whenever the orderbook changes. This could be because of a trade, or because of a new order, or both.
-  void on_orderbook_update(std::string ticker, std::string side, double quantity, double price) { }
-
-  // Called whenever one of your orders is filled.
-  void on_account_update(std::string ticker, std::string side, double price, double quantity, double capital_remaining) { }
-}
+  Strategy() {}
+  void on_trade_update(Ticker ticker, Side side, float quantity, float price) {}
+  void on_orderbook_update(Ticker ticker, Side side, float quantity,
+                           float price) {}
+  void on_account_update(Ticker ticker, Side side, float price, float quantity,
+                         float capital_remaining) {}
+};
 `;
 
 const PythonCodeBlock = () => {
@@ -78,7 +102,7 @@ export default function Template() {
         className="mt-4 inline-flex items-center justify-center gap-x-2 rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500 focus-visible:ring-opacity-50"
       >
         <ArrowDownOnSquareIcon className="h-5 w-5" aria-hidden="true" />
-        Download Python Template
+        Download Full Python Template 
       </a>
     </div>
 
@@ -99,7 +123,7 @@ export default function Template() {
         className="mt-4 inline-flex items-center justify-center gap-x-2 rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus:outline-none focus-visible:ring focus-visible:ring-indigo-500 focus-visible:ring-opacity-50"
       >
         <ArrowDownOnSquareIcon className="h-5 w-5" aria-hidden="true" />
-        Download C++ Template
+        Download Full C++ Template
       </a>
     </div>
   </div>

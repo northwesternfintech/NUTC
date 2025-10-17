@@ -18,7 +18,7 @@ export function AlgoGraphs({
   id: string
 }) {
   const [showLogs, setShowLogs] = useState(false);
-  const upTime = new Date(algo?.algoFile?.createdAt).getTime() + 1000;
+  const upTime = new Date(algo?.uploadedAt).getTime() + 1000;
   const sandboxTimeMs = 300000;
   const baseEndpoint = `${process.env.NEXT_PUBLIC_NGINX_ENDPOINT}/d-solo/cdk4teh4zl534a/nutc-dev?orgId=1&var-traderid=${algo.algoFileS3Key}&from=${upTime}&theme=dark`;
   const [url, setUrl] = useState(baseEndpoint + `&refresh=5s`);
@@ -47,7 +47,7 @@ export function AlgoGraphs({
           Download Logs
           <ArrowDownTrayIcon className="-mr-0.5 h-5 w-5" aria-hidden="true" />
         </a>
-      ) : <LogViewer id={id}/>}
+      ) : <LogViewer id={id} />}
 
       <div className="my-8">
         <h2 className="text-xl font-semibold mb-2">Profit and Loss</h2>

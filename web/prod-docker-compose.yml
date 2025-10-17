@@ -1,0 +1,69 @@
+version: '3.8'
+
+# This is a Docker Compose file optimized for a production environment.
+# Key differences from the development setup:
+# 1. No source code volumes: The application code is baked into the Docker image for consistency.
+# 2. Production build: The web service is built using a multi-stage Dockerfile.
+# 3. Production commands: Uses 'npm start' instead of 'npm run dev'.
+# 4. No development tools: Services like 'prisma-studio' and 'localstack' are removed.
+# 5. Production migrations: A dedicated 'migrator' service runs 'prisma migrate deploy' and exits.
+# 6. Security: The database port is not exposed to the host machine.
+
+services:
+  web:
+    # Builds the Docker image from the Dockerfile in the current directory.
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nutc-website # Give the built image a name
+    restart: always
+    ports:
+      # Expose the application port to the host machine.
+      - "3000:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      # Load production environment variables from a .env.prod file.
+      - .env
+    depends_on:
+      # Wait for the database migration to complete successfully before starting.
+      migrator:
+        condition: service_completed_successfully
+
+  migrator:
+    # Uses the same image as the web service to run migrations.
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # This command applies pending production migrations.
+    command: ["npx", "prisma", "migrate", "deploy"]
+    restart: "no" # The service should run once and exit.
+    env_file:
+      - .env
+    depends_on:
+      # Wait for the database to be healthy before attempting to migrate.
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:13
+    restart: always
+    env_file:
+      # Load database credentials from a .env.prod file.
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # The database port is not exposed externally for security.
+    # The 'web' and 'migrator' services can connect to it using the service name 'postgres'.
+    healthcheck:
+      # Note the '$$' which escapes the variable for the container's shell.
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  # Persist database data across container restarts.
+  postgres_data:

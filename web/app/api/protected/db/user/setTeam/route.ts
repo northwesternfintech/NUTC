@@ -12,12 +12,25 @@ export async function POST(req: Request) {
 
     const { newTeam } = await req.json();
 
-    console.log(`Updated team to be ${newTeam}`);
-    await prisma.team.upsert({ where: { name: newTeam }, update: {}, create: { name: newTeam } });
+    // Set team to null if newTeam is an empty string or null
+    const teamNameToSet = newTeam || null;
 
+    // Only create/upsert the team if a valid name is provided
+    if (teamNameToSet) {
+      console.log(`Updated team to be ${teamNameToSet}`);
+      await prisma.team.upsert({
+        where: { name: teamNameToSet },
+        update: {},
+        create: { name: teamNameToSet },
+      });
+    } else {
+      console.log(`Removing user from team.`);
+    }
+
+    // Update the user with either the new team name or null
     await prisma.user.update({
       where: { uid: session.user.sub },
-      data: { teamName: newTeam }
+      data: { teamName: teamNameToSet },
     });
 
     return NextResponse.json({ message: "success", status: 200 });

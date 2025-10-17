@@ -76,7 +76,7 @@ class Strategy:
         quantity
             Volume traded
         """
-        print(f"Python Trade update: {ticker} {side} {price} {quantity}")
+        
 
     def on_orderbook_update(
         self, ticker: Ticker, side: Side, quantity: float, price: float
@@ -94,7 +94,7 @@ class Strategy:
         quantity
             Volume placed into orderbook
         """
-        print(f"Python Orderbook update: {ticker} {side} {price} {quantity}")
+        
 
     def on_account_update(
         self,
@@ -119,6 +119,4 @@ class Strategy:
         capital_remaining
             Amount of capital after fulfilling order
         """
-        print(
-            f"Python Account update: {ticker} {side} {price} {quantity} {capital_remaining}"
-        )
+        

@@ -29,7 +29,7 @@ export async function POST(req: Request) {
         uid: user.uid,
       },
       data: {
-        participantState: ParticipantState.WAITING,
+        participantState: ParticipantState.ACCEPTED,
       },
     });
 
@@ -37,13 +37,13 @@ export async function POST(req: Request) {
       data: profile,
     });
 
-    await SendEmail(
-      "info@nutc.io",
-      session?.user.email,
-      "Application Submitted",
-      "Your NUTC application was submitted. You will hear back in the next 72 hours.",
-    );
-    await GenerateApplicationEmail(user, profile);
+    // await SendEmail(
+    //   "info@nutc.io",
+    //   session?.user.email,
+    //   "Application Submitted",
+    //   "Your NUTC application was submitted. You will hear back in the next 72 hours.",
+    // );
+    // await GenerateApplicationEmail(user, profile);
 
     return NextResponse.json({ status: 200 });
   } catch (error) {

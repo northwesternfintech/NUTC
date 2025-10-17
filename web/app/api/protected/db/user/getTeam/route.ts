@@ -19,7 +19,7 @@ export async function GET() {
 
     var teamMemberNames: String[] = [];
     for (const teamMember of teamMembers || []) {
-      if (teamMember.uid == user?.uid) continue;
+      // if (teamMember.uid == user?.uid) continue;
       teamMemberNames.push(`${teamMember.profile?.firstName} ${teamMember.profile?.lastName}`);
     }
 

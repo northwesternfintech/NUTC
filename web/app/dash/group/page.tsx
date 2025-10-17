@@ -32,7 +32,11 @@ export default function Groups() {
     });
 
     if (response.ok) {
-      await Swal.fire({ icon: 'success', title: 'Team Updated', text: `Team is now ${newTeamName}` });
+      if (newTeamName == null || newTeamName == "") {
+        await Swal.fire({ icon: 'success', title: 'Team Updated', text: `Left team` });  
+      } else {
+        await Swal.fire({ icon: 'success', title: 'Team Updated', text: `Team is now ${newTeamName}` });
+      }
     } else {
       await Swal.fire({ icon: 'error', title: 'Setting team failed', text: 'Please contact nuft@u.northwestern.edu' });
     }
